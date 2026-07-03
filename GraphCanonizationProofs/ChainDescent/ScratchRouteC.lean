@@ -832,6 +832,175 @@ theorem halfSpin_reduction
           (ChainDescent.affineScheme (multiFormAdapter Qs hjoint).G₀ (multiFormAdapter Qs hjoint).neg_mem) :=
   (multiFormAdapter Qs hjoint).reachesRigidOrCameron
 
+/-! ### The concrete half-spin instance — the 10 D₅ spinor quadrics + the sealed adapter
+
+The 10 quadratic equations of the pure-spinor cone (`= 0` on the spinor variety `S₅`) were found and validated
+by `route_c_halfspin_probe.py` (2026-07-03): generate genuine pure spinors via the char-free big-cell Pfaffian
+formula and fit the degree-2 vanishing ideal — **dim `= 10`** exactly (q=3,5,7,11), **EXACT `𝔽₂` zero-locus count
+`= 2296 = 1+(q−1)∏₁⁴(qⁱ+1)`** (the forms cut *precisely* the cone), **joint polar radical `= 0`** (this `hjoint`),
+and it holds already from the 5 "quadruple" forms `S0..S4`. Index the 16 half-spin coords (even subsets of
+`{1..5}`) as `Fin 16`: `0:∅`; pairs `1:12 2:13 3:23 4:14 5:24 6:34 7:15 8:25 9:35 10:45`; quadruples
+`11:1234 12:1235 13:1245 14:1345 15:2345`. Each form is a 4-term `linMulLin` sum (like the Plücker `Pf`); the
+signs below are the probe's forms negated (irrelevant: `O(Q)=O(−Q)`, and the cone/radical are sign-blind), chosen
+so each starts with a `+` term. `S0..S4` are the quadruple relations `x_∅·x_{ijkl} = Pf(pairs)`; `S5..S9` the
+pair×quadruple relations (needed so the joint cone models the graph, not for `hjoint`). All axiom-clean. -/
+
+open QuadraticMap
+
+/-- The `i`-th half-spin coordinate projection on `𝔽_p^16`. -/
+noncomputable def sc (i : Fin 16) : (Fin 16 → ZMod p) →ₗ[ZMod p] ZMod p := LinearMap.proj i
+
+/-- Quadruple form for `1234` (`x_∅x_{1234} = Pf`). -/
+noncomputable def S0 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 0) (sc 11) - linMulLin (sc 1) (sc 6) + linMulLin (sc 2) (sc 5) - linMulLin (sc 3) (sc 4)
+/-- Quadruple form for `1235`. -/
+noncomputable def S1 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 0) (sc 12) - linMulLin (sc 1) (sc 9) + linMulLin (sc 2) (sc 8) - linMulLin (sc 3) (sc 7)
+/-- Quadruple form for `1245`. -/
+noncomputable def S2 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 0) (sc 13) - linMulLin (sc 1) (sc 10) + linMulLin (sc 4) (sc 8) - linMulLin (sc 5) (sc 7)
+/-- Quadruple form for `1345`. -/
+noncomputable def S3 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 0) (sc 14) - linMulLin (sc 2) (sc 10) + linMulLin (sc 4) (sc 9) - linMulLin (sc 6) (sc 7)
+/-- Quadruple form for `2345`. -/
+noncomputable def S4 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 0) (sc 15) - linMulLin (sc 3) (sc 10) + linMulLin (sc 5) (sc 9) - linMulLin (sc 6) (sc 8)
+/-- Pair×quadruple form 5. -/
+noncomputable def S5 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 1) (sc 14) - linMulLin (sc 2) (sc 13) + linMulLin (sc 4) (sc 12) - linMulLin (sc 7) (sc 11)
+/-- Pair×quadruple form 6. -/
+noncomputable def S6 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 1) (sc 15) - linMulLin (sc 3) (sc 13) + linMulLin (sc 5) (sc 12) - linMulLin (sc 8) (sc 11)
+/-- Pair×quadruple form 7. -/
+noncomputable def S7 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 2) (sc 15) - linMulLin (sc 3) (sc 14) + linMulLin (sc 6) (sc 12) - linMulLin (sc 9) (sc 11)
+/-- Pair×quadruple form 8. -/
+noncomputable def S8 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 4) (sc 15) - linMulLin (sc 5) (sc 14) + linMulLin (sc 6) (sc 13) - linMulLin (sc 10) (sc 11)
+/-- Pair×quadruple form 9. -/
+noncomputable def S9 : QuadraticForm (ZMod p) (Fin 16 → ZMod p) :=
+  linMulLin (sc 7) (sc 15) - linMulLin (sc 8) (sc 14) + linMulLin (sc 9) (sc 13) - linMulLin (sc 10) (sc 12)
+
+/-- The family of 10 D₅ spinor quadrics (their joint cone = the pure-spinor cone = the half-spin connection set). -/
+noncomputable def spinorForms : Fin 10 → QuadraticForm (ZMod p) (Fin 16 → ZMod p)
+  | 0 => S0 | 1 => S1 | 2 => S2 | 3 => S3 | 4 => S4
+  | 5 => S5 | 6 => S6 | 7 => S7 | 8 => S8 | 9 => S9
+
+theorem S0_polar (x y : Fin 16 → ZMod p) : polar S0 x y =
+    x 0 * y 11 + y 0 * x 11 - (x 1 * y 6 + y 1 * x 6) + (x 2 * y 5 + y 2 * x 5) - (x 3 * y 4 + y 3 * x 4) := by
+  simp only [polar, S0, QuadraticMap.add_apply, QuadraticMap.sub_apply, linMulLin_apply, sc,
+    LinearMap.proj_apply, Pi.add_apply]; ring
+theorem S1_polar (x y : Fin 16 → ZMod p) : polar S1 x y =
+    x 0 * y 12 + y 0 * x 12 - (x 1 * y 9 + y 1 * x 9) + (x 2 * y 8 + y 2 * x 8) - (x 3 * y 7 + y 3 * x 7) := by
+  simp only [polar, S1, QuadraticMap.add_apply, QuadraticMap.sub_apply, linMulLin_apply, sc,
+    LinearMap.proj_apply, Pi.add_apply]; ring
+theorem S2_polar (x y : Fin 16 → ZMod p) : polar S2 x y =
+    x 0 * y 13 + y 0 * x 13 - (x 1 * y 10 + y 1 * x 10) + (x 4 * y 8 + y 4 * x 8) - (x 5 * y 7 + y 5 * x 7) := by
+  simp only [polar, S2, QuadraticMap.add_apply, QuadraticMap.sub_apply, linMulLin_apply, sc,
+    LinearMap.proj_apply, Pi.add_apply]; ring
+theorem S3_polar (x y : Fin 16 → ZMod p) : polar S3 x y =
+    x 0 * y 14 + y 0 * x 14 - (x 2 * y 10 + y 2 * x 10) + (x 4 * y 9 + y 4 * x 9) - (x 6 * y 7 + y 6 * x 7) := by
+  simp only [polar, S3, QuadraticMap.add_apply, QuadraticMap.sub_apply, linMulLin_apply, sc,
+    LinearMap.proj_apply, Pi.add_apply]; ring
+theorem S4_polar (x y : Fin 16 → ZMod p) : polar S4 x y =
+    x 0 * y 15 + y 0 * x 15 - (x 3 * y 10 + y 3 * x 10) + (x 5 * y 9 + y 5 * x 9) - (x 6 * y 8 + y 6 * x 8) := by
+  simp only [polar, S4, QuadraticMap.add_apply, QuadraticMap.sub_apply, linMulLin_apply, sc,
+    LinearMap.proj_apply, Pi.add_apply]; ring
+
+/-- **The 10 spinor quadrics are jointly nondegenerate** (trivial common polar radical) — the `hjoint` the
+half-spin adapter needs. Provable from the 5 quadruple forms `S0..S4` alone (probe-confirmed: their polar radical
+is already `0`): each `S_a` isolates coord `∅` (via `e_{quad}`), its own quadruple (via `e_∅`), and 6 pair coords,
+and the 5 together cover all 16. Mirrors `plucker_hjoint`. Axiom-clean. -/
+theorem spinor_hjoint (w : Fin 16 → ZMod p)
+    (h : ∀ k, (spinorForms k).polarBilin w = 0) : w = 0 := by
+  have h0 : S0.polarBilin w = 0 := h 0
+  have h1 : S1.polarBilin w = 0 := h 1
+  have h2 : S2.polarBilin w = 0 := h 2
+  have h3 : S3.polarBilin w = 0 := h 3
+  have h4 : S4.polarBilin w = 0 := h 4
+  have w0 : w 0 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (11 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w1 : w 1 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (6 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w2 : w 2 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (5 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w3 : w 3 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (4 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w4 : w 4 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (3 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w5 : w 5 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (2 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w6 : w 6 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (1 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w7 : w 7 = 0 := by
+    have e := LinearMap.congr_fun h1 (Pi.single (3 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S1_polar, LinearMap.zero_apply] at e; simpa using e
+  have w8 : w 8 = 0 := by
+    have e := LinearMap.congr_fun h1 (Pi.single (2 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S1_polar, LinearMap.zero_apply] at e; simpa using e
+  have w9 : w 9 = 0 := by
+    have e := LinearMap.congr_fun h1 (Pi.single (1 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S1_polar, LinearMap.zero_apply] at e; simpa using e
+  have w10 : w 10 = 0 := by
+    have e := LinearMap.congr_fun h2 (Pi.single (1 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S2_polar, LinearMap.zero_apply] at e; simpa using e
+  have w11 : w 11 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (0 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w12 : w 12 = 0 := by
+    have e := LinearMap.congr_fun h1 (Pi.single (0 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S1_polar, LinearMap.zero_apply] at e; simpa using e
+  have w13 : w 13 = 0 := by
+    have e := LinearMap.congr_fun h2 (Pi.single (0 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S2_polar, LinearMap.zero_apply] at e; simpa using e
+  have w14 : w 14 = 0 := by
+    have e := LinearMap.congr_fun h3 (Pi.single (0 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S3_polar, LinearMap.zero_apply] at e; simpa using e
+  have w15 : w 15 = 0 := by
+    have e := LinearMap.congr_fun h4 (Pi.single (0 : Fin 16) 1)
+    rw [polarBilin_apply_apply, S4_polar, LinearMap.zero_apply] at e; simpa using e
+  funext c; fin_cases c <;> assumption
+
+/-- **The D₅ half-spin family as a sealed `FormAdapter`.** Assembles the 10 spinor quadrics via
+`multiFormAdapter`; `G₀ = ⨅ₖ O(S_k)` is their joint isometry group. -/
+noncomputable def spinAdapter : FormAdapter (p := p) (d := 16) (16 + 1) :=
+  multiFormAdapter spinorForms spinor_hjoint
+
+/-- **Half-spin reaches the rigid-or-Cameron disjunction** — instance 3 SEALED, via the shared engine. The whole
+chain (10 validated spinor quadrics → `spinor_hjoint` → `multiFormAdapter` → `FormAdapter.reachesRigidOrCameron`)
+is axiom-clean. With the generic multi-quadric bridges (`multiIsometryScheme_refines_coneScheme`,
+`recoveredFamily_colouring_equivariant`), half-spin is at full instance-1 parity. -/
+theorem reachesRigidOrCameron_halfSpin
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} :
+    ((SchemeBlockRecovered (p ^ 16)
+          (ChainDescent.affineScheme spinAdapter.G₀ spinAdapter.neg_mem)
+        ∨ AbelianConsumed (p ^ 16)
+          (ChainDescent.affineScheme spinAdapter.G₀ spinAdapter.neg_mem))
+        ∨ SchemeRecoveredByDepth (p ^ 16)
+          (ChainDescent.affineScheme spinAdapter.G₀ spinAdapter.neg_mem) (16 + 1))
+      ∨ IsCameronScheme (p ^ 16)
+          (ChainDescent.affineScheme spinAdapter.G₀ spinAdapter.neg_mem) :=
+  spinAdapter.reachesRigidOrCameron
+
+/-- **Half-spin brick-1 (concrete)** — the recovered joint-isometry scheme refines the graph-intrinsic
+cone-stabilizer scheme of the spinor forms. The generic `multiIsometryScheme_refines_coneScheme` on the real
+`spinorForms` family, giving half-spin the refinement leg (parity with alternating / affine-polar). Axiom-clean. -/
+theorem halfSpin_refines_coneScheme {x y x' y' : Fin (p ^ 16)}
+    (h : (ChainDescent.affineScheme spinAdapter.G₀ spinAdapter.neg_mem).relOfPair x y
+        = (ChainDescent.affineScheme spinAdapter.G₀ spinAdapter.neg_mem).relOfPair x' y') :
+    (ChainDescent.affineScheme (jointConeStab spinorForms)
+          (neg_mem_jointConeStab spinorForms)).relOfPair x y
+      = (ChainDescent.affineScheme (jointConeStab spinorForms)
+          (neg_mem_jointConeStab spinorForms)).relOfPair x' y' :=
+  multiIsometryScheme_refines_coneScheme spinorForms spinAdapter.neg_mem h
+
 end HalfSpin
 
 end ChainDescent.RouteC

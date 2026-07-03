@@ -7,3 +7,4 @@ obj/
 **/.lake/build/
 **/.lake/packages/
 .claude/scheduled_tasks.lock
+GraphCanonizationProofs/__pycache__/route_c_halfspin_probe.cpython-311.pyc

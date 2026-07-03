@@ -28,8 +28,10 @@
 - **F3 the engine interface (`IFormStructure`):** `FormAdapter` + `FormAdapter.reachesRigidOrCameron` (any adapter ⟹
   the seal). **Instance 1 (affine-polar) `affinePolarAdapter` ✅. Instance 2 (alternating `Alt(5,q)`) ✅ SEALED**
   (`reachesRigidOrCameron_alternating`, via the multi-quadric engine `multiFormAdapter`/`coords_determine_multi` +
-  the concrete Plücker sub-Pfaffians `plucker_hjoint`) — first non-quadratic family. **Instance 3 (half-spin)
-  SCOPED + reduction landed** (`halfSpin_reduction`); **Instance 4 (Suzuki) not started.**
+  the concrete Plücker sub-Pfaffians `plucker_hjoint`) — first non-quadratic family. **Instance 3 (half-spin) ✅
+  SEALED** (`reachesRigidOrCameron_halfSpin`, via the 10 validated D₅ spinor quadrics `S0..S9` + `spinor_hjoint` +
+  `multiFormAdapter`; brick-1 `halfSpin_refines_coneScheme`; full instance-1 parity); **Instance 4 (Suzuki) not
+  started.**
 - **Multi-quadric bridges (NEW 2026-07-03, axiom-clean) — brings the multi-form families to full instance-1
   parity.** Previously the `multiFormAdapter` families (alternating, half-spin) carried only the *seal* leg, not
   the *refinement* + *iso-invariance* legs the single-quadratic instance has. Both now supplied GENERICALLY over
@@ -41,8 +43,8 @@
   is the multi-form replacement for the single-form scalar `μ`; rests on the carried scoped citation
   `JointVarietyDeterminesFamily`, the multi-form sibling of `NondegQuadricDeterminesForm`). Factored the generic
   `affineScheme_refines_of_le` (`H ≤ G ⟹` finer; `isometryScheme_refines_similitudeScheme` is now its corollary);
-  concrete `alternating_refines_coneScheme` confirms the bridge fires on the real Plücker family. **⟹ alternating
-  is now at full instance-1 parity; half-spin inherits both bridges the moment its spinor quadrics land.**
+  concrete `alternating_refines_coneScheme` / `halfSpin_refines_coneScheme` confirm the bridge fires on the real
+  Plücker / spinor families. **⟹ alternating AND half-spin both at full instance-1 parity.**
 - **Both review-flagged items resolved:** the classical carry is **discharged as an exact scoped citation**
   (`NondegQuadricDeterminesForm`); the **meta-poly bootstrapping is assessed sound** (§7a — global coordinatization,
   not the node-4 wall in disguise).
@@ -50,13 +52,10 @@
 **▶ PICK UP HERE (next actionable steps, in rough priority):**
 0. ✅ **Multi-quadric bridges — DONE 2026-07-03** (brick-1-multi + F4-multi, generic; alternating at full
    instance-1 parity, half-spin pre-equipped). See STATUS "Multi-quadric bridges".
-1. **Half-spin instance — DE-RISK FIRST, then build.** The engine + reduction + both bridges are all landed; only
-   the concrete **10 D₅ spinor quadrics** on `𝔽_p^16` (even-subset/Clifford model) + their `hjoint` remain. This is
-   the one research-y, vacuity-trap-prone step (a wrong quadric family gives a wrong `G₀` / unprovable-or-vacuous
-   `hjoint`). **Run a de-risking pass first** — get the 10 equations from a reliable source (Chevalley, *Algebraic
-   Theory of Spinors*, or the even-Clifford moment map `s ↦ s·Γ_i·s`), cross-check against a small-field probe
-   (analog of `route_c_reconstruct_probe.py`: the 10 quadrics should cut exactly the pure-spinor cone, and their
-   joint polar radical should be trivial) before committing to Lean. §6 "Half-spin".
+1. ✅ **Half-spin instance — DONE 2026-07-03** (`reachesRigidOrCameron_halfSpin`, axiom-clean). The 10 validated D₅
+   spinor quadrics `S0..S9` are transcribed (`ScratchRouteC.lean §HalfSpin`), `spinor_hjoint` proved from `S0..S4`
+   by coordinate isolation, sealed via `multiFormAdapter` + the shared engine; brick-1 `halfSpin_refines_coneScheme`
+   landed; F4 generic. Full instance-1 parity. **⟹ 3 of 4 form families sealed; only Suzuki remains.**
 2. **Suzuki–Tits instance (last):** char-2, σ-twisted ovoid, needs the char-2 substrate first (§11.5); not a
    multi-quadric family — the outlier. §6 "Instances 2–4".
 3. **The two carried citations** (optional, to remove them from the spine): a full Lean proof of
@@ -278,7 +277,8 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.multiIsometryScheme_refines_coneScheme` | `ScratchRouteC.lean` (**brick-1-multi, NEW, axiom-clean**) | the recovered joint-isometry scheme `⨅ₖ O(Q_k)` refines the cone-stabilizer scheme — the multi-form refinement leg (analog of `isometryScheme_refines_similitudeScheme`), tied to the actual graph via `jointConeStab`. `alternating_refines_coneScheme` = the concrete `Alt(5,q)` application |
 | `RouteC.multiSimilitude_colouring_equivariant`, `RouteC.JointVarietyDeterminesFamily`, `RouteC.recoveredFamily_colouring_equivariant`, `RouteC.recoveredFamily_partition_isoInvariant` | `ScratchRouteC.lean` (**F4-multi, NEW, axiom-clean**) | the multi-form iso-invariance leg: provable equivariance brick (colouring transports by global `Φ`) + the scoped carried citation `JointVarietyDeterminesFamily` (joint variety determines the family up to invertible `Φ`; multi-form sibling of `NondegQuadricDeterminesForm`) + capstone (injective `Φ`) + partition-invariance payoff (`Φ` cancels in comparisons) |
 | `RouteC.polar_linMulLin` | `ScratchRouteC.lean` (**reusable primitive, NEW, axiom-clean**) | `polar (linMulLin f g) x y = f x·g y + f y·g x` — the polar of a Clifford-term-sum quadric (Plücker / spinor forms) |
-| `RouteC.HalfSpin.halfSpin_reduction` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3 target, NEW, axiom-clean**) | D₅ half-spin (`𝔽_p^16`, 10 spinor quadrics): supply `Qs`+`hjoint` ⟹ sealed via `multiFormAdapter`. Commits the reduction; remaining = the concrete spinor quadrics |
+| `RouteC.HalfSpin.{S0..S9, spinorForms, S0_polar..S4_polar, spinor_hjoint}` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3, NEW, axiom-clean**) | the 10 concrete D₅ spinor quadrics on `𝔽_p^16` (validated by `route_c_halfspin_probe.py`: dim=10, exact 𝔽₂ count 2296, radical 0) + their joint nondegeneracy `spinor_hjoint` (from the 5 quadruple forms by coordinate isolation) |
+| `RouteC.HalfSpin.{halfSpin_reduction, spinAdapter, reachesRigidOrCameron_halfSpin, halfSpin_refines_coneScheme}` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3 CAPSTONE, NEW, axiom-clean**) | half-spin as a sealed `FormAdapter` (`spinAdapter`) + the rigid-or-Cameron seal (`reachesRigidOrCameron_halfSpin`) + brick-1 (`halfSpin_refines_coneScheme`) — instance 3 DONE, full instance-1 parity |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -326,6 +326,12 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
   translation group equals `T` **exactly** (ground-truth), regular + elementary-abelian, and (III)
   `QuadraticFormRecovery.RecoverForm`'s `Q` + those coordinates **reconstruct the entire graph** (`Q(coords[x]−coords[y])
   =0 ⟺ x~y`, 0 mismatches). **All pass** (q=2,3 fast, both types; q=5 `LongRunning`). Confirms the harness↔F1↔A1 chain.
+- **`route_c_halfspin_probe.py` — the D₅ half-spin spinor-quadric de-risking (2026-07-03).** Generates genuine
+  pure spinors via the char-free big-cell Pfaffian formula and empirically fits the degree-2 vanishing ideal, then
+  validates: dim `= 10` (q=3,5,7,11), **exact 𝔽₂ zero-locus count `= 2296` = the spinor-variety target** (`1+(q−1)∏₁⁴(qⁱ+1)`),
+  𝔽₃ Monte-Carlo match (z=0.10), and **joint polar radical `= 0`** (= the Lean `hjoint`, provable from the 5 quadruple
+  forms). Prints the 10 explicit forms (§6). Caught that the naive moment map gave the wrong forms — the reason to
+  de-risk empirically, not template. The port reference for instance 3.
 - **`route_c_bootstrap_probe.py` — the meta-poly bootstrapping crux (§7a).** Confirms the isotropic-line geometry through
   `o` is recoverable from **adjacency alone** (no `Aut`): the local invariant `|N(o)∩N(x)∩N(y)|` **perfectly separates**
   collinear from non-collinear isotropic triangles (all VO^± `d=4,6` `q=3,5`), and the recovered lines' directions **span
@@ -382,21 +388,32 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     instance-1 parity** (all three legs: seal + brick-1-multi `alternating_refines_coneScheme` +
     F4-multi `recoveredFamily_colouring_equivariant`, the last resting on the carried `JointVarietyDeterminesFamily`).
     *Was Medium — landed.*
-- **Half-spin (e) — SCOPED + reduction LANDED (2026-07-03).** The **D₅ half-spin** action: `Spin₁₀(q)` on the
-  16-dim half-spin module `𝔽_q^16`, rank 3. Connection set = the **pure-spinor cone** (spinor variety `S₅ ⊂ P^15`),
-  cut out by **10 quadratic equations** (the D₅ vector rep). So half-spin is **another MULTI-QUADRIC family** —
-  reuses `multiFormAdapter` + `coords_determine_multi` (**no new engine**). **`halfSpin_reduction`** (axiom-clean,
-  `ScratchRouteC.lean §HalfSpin`) commits the dimensions (module `Fin 16`, family `Fin 10`) and shows: supply the 10
-  spinor quadrics `Qs` + `hjoint` ⟹ sealed. **The refinement + iso-invariance legs are already supplied** (the
-  generic `multiIsometryScheme_refines_coneScheme` / `recoveredFamily_colouring_equivariant` apply to *any* `Qs`),
-  so once the spinor quadrics land half-spin is at full instance-1 parity immediately. **Remaining = the 10 D₅
-  spinor quadrics on `𝔽_p^16` (even-subset /
-  Clifford model — a careful rep-theoretic derivation, do NOT template blindly) + `hjoint`.** Polar via
-  `polar_linMulLin`; `hjoint` via the `plucker_hjoint` coordinate-isolation pattern. **Reference for the 10
-  equations:** Chevalley, *The Algebraic Theory of Spinors* (the pure-spinor quadratic relations); or the even-Clifford
-  moment map `s ↦ s·Γ_i·s` into the 10-dim vector rep (its components vanish on pure spinors) — index the 16 coords by
-  even subsets of `[5]` (∅, the 10 pairs, the 5 quadruples), analogous to Plücker's `Fin 10`. Verify non-vacuity/validity
-  of the recovered `Qs` before building. *Medium–high (the spinor quadrics are the research-y part; downstream is landed).*
+- **Half-spin (e) — SCOPED + reduction LANDED + ✅ SPINOR QUADRICS DE-RISKED & VALIDATED (2026-07-03).** The
+  **D₅ half-spin** action: `Spin₁₀(q)` on the 16-dim half-spin module `𝔽_q^16`, rank 3. Connection set = the
+  **pure-spinor cone** (spinor variety `S₅ ⊂ P^15`), cut out by **10 quadratic equations** (the D₅ vector rep = the
+  Berkovits SO(10) pure-spinor constraint `λΓ^aλ=0`). Another MULTI-QUADRIC family — reuses `multiFormAdapter` +
+  `coords_determine_multi` + the just-landed generic bridges (**no new engine, no new bridges**). `halfSpin_reduction`
+  (axiom-clean, `§HalfSpin`) commits the dimensions and reduces to: supply the 10 spinor quadrics `Qs` + `hjoint`.
+  **✅ DE-RISKING PASS DONE — the 10 equations are FOUND, EXPLICIT, and VALIDATED (`route_c_halfspin_probe.py`).**
+  Method: generate genuine pure spinors by the char-free big-cell Pfaffian formula (`ω(b)_∅=1`, `ω(b)_{ij}=b_{ij}`,
+  `ω(b)_{ijkl}=Pf(b|_{ijkl})`) and empirically fit the degree-2 vanishing ideal (bulletproof — the naive moment map
+  `(ω∧Γ^aω)_top` gave WRONG forms, caught by the probe). **Validation (all pass):** dim of vanishing ideal `= 10`
+  exactly (q=3,5,7,11); **EXACT 𝔽₂ point count of the joint zero locus `= 2296 = 1+(q−1)∏₁⁴(qⁱ+1)`** (the forms cut
+  *precisely* the spinor cone, nothing bigger); 𝔽₃ Monte-Carlo count matches target (z=0.10); **joint polar radical
+  `= 0` (the Lean `hjoint`)**, and it holds already from just the 5 "quadruple" forms — so `hjoint` is provable by the
+  `plucker_hjoint` coordinate-isolation pattern (each `Q_a` isolates ∅, its own quadruple, and 6 pairs). **The 10
+  forms, in port-ready `Fin 16` indexing** (`0:∅`; pairs `1:12 2:13 3:23 4:14 5:24 6:34 7:15 8:25 9:35 10:45`;
+  quadruples `11:1234 12:1235 13:1245 14:1345 15:2345`), each a 4-term `linMulLin` sum like the Plücker `Pf`:
+  - **quadruple forms** (`x_∅·x_{ijkl} = Pf`): `Q₀=-x₀x₁₁+x₁x₆-x₂x₅+x₃x₄`, `Q₁=-x₀x₁₂+x₁x₉-x₂x₈+x₃x₇`,
+    `Q₂=-x₀x₁₃+x₁x₁₀-x₄x₈+x₅x₇`, `Q₃=-x₀x₁₄+x₂x₁₀-x₄x₉+x₆x₇`, `Q₄=-x₀x₁₅+x₃x₁₀-x₅x₉+x₆x₈`  ← these 5 give `hjoint`.
+  - **pair×quadruple forms**: `Q₅=-x₁x₁₄+x₂x₁₃-x₄x₁₂+x₇x₁₁`, `Q₆=-x₁x₁₅+x₃x₁₃-x₅x₁₂+x₈x₁₁`,
+    `Q₇=-x₂x₁₅+x₃x₁₄-x₆x₁₂+x₉x₁₁`, `Q₈=-x₄x₁₅+x₅x₁₄-x₆x₁₃+x₁₀x₁₁`, `Q₉=-x₇x₁₅+x₈x₁₄-x₉x₁₃+x₁₀x₁₂`  ← needed to model
+    the graph (cone = joint zero of all 10), not for `hjoint`.
+  **✅ PORTED & SEALED (2026-07-03, axiom-clean, `ScratchRouteC.lean §HalfSpin`):** the 10 forms `S0..S9` transcribed
+  via `linMulLin`+`LinearMap.proj`; polars `S0_polar..S4_polar`; `spinor_hjoint` proved from `S0..S4` by the
+  `plucker_hjoint` coordinate-isolation pattern; assembled by `multiFormAdapter` into `spinAdapter`, sealed by
+  `reachesRigidOrCameron_halfSpin`; brick-1 `halfSpin_refines_coneScheme` (F4 generic). **Instance 3 DONE, full
+  instance-1 parity.** *Was Medium–high — de-risked then landed.*
 - **Suzuki–Tits (f):** the outlier — σ-twisted ovoid polynomial (char-2), `AutGens = Sz(q)`. Same `FormAdapter`
   interface, mostly-new internals; folds into the char-2 track. *Hardest; do last.*
 
