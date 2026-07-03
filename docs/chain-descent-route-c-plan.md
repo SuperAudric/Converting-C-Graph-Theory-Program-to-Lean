@@ -30,10 +30,16 @@
     VO^ε₄(3), VO^ε₄(5) (both types).
 - **The back-half is already LANDED and axiom-clean** — `coords_determine` (nondeg form-coords determine the vector) and
   `reachesRigidOrCameron_viaOrthogonalForm` (the isometry scheme discretizes at the `d+1` frame). See §4.
-- **The genuinely-new Lean content is narrow** — the *refinement bridge* (recovered `Q` upgrades the similitude graph
-  to the isometry scheme) + the iso-invariance of the recovered structure. See §2c and F5/A3 in §6.
-- **Next concrete step:** either the C# F1 build (host `O_p` + coordinatization on `PermutationGroup.cs`) or spike the
-  A3 refinement bridge in Lean. See §6 "Sequencing".
+- **✅ FIRST LEAN BRICK LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`, NOT in `build.sh`):** the **spanning-base
+  generalization** of the back-half — `coords_determine_spanning` (`Q`-values at any *spanning* base determine the
+  vertex) and `reachesRigidOrCameron_viaOrthogonalForm_spanning` (the isometry scheme discretizes at any base whose
+  difference-vectors span, not just the literal frame `{0,e₁,…,e_d}`). **Necessary** because Route C works from an
+  abstract graph with *no canonical standard coordinates* — it must individualize an iso-invariantly chosen base.
+  Proofs mirror `coords_determine`/`viaOrthogonalForm` (swap `Pi.basisFun.ext` → `LinearMap.ext_on hspan`). See §4, §6.
+- **The genuinely-new Lean content that remains is narrow** — the *refinement bridge* A3 (recovered `Q` upgrades the
+  similitude graph to the isometry scheme) + F4 (iso-invariance of the recovered structure). See §2c and A3/F4 in §6.
+- **Next concrete step:** either the C# F1 build (host `O_p` + coordinatization on `PermutationGroup.cs`) or the A3
+  refinement bridge in Lean (now that the spanning back-half it feeds is landed). See §6 "Sequencing".
 
 **Quality bar (project-wide):** every Lean theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; no `sorry`,
 no fresh `axiom`; `native_decide` banned; full build green when ported. "Poly time" stays a **meta-argument** (the
@@ -161,6 +167,8 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `neg_mem_isometryGroup` | `CascadeAffine.lean:2678` | `−1 ∈ O(Q)` (the `hneg` for `affineScheme`) |
 | `frameBase`, `frameBase_card_le` | `CascadeAffine.lean:2684`,`:2688` (idx 1215-6) | the `{0,e₁,…,e_d}` base and `card ≤ d+1` |
 | `reachesRigidOrCameron_viaOrthogonalForm` | `CascadeAffine.lean:2704` (idx 1217) | **the back-half** — `O(Q)` (nondeg) discretizes at `frameBase` and seals via `viaSpielman`. NB: **isometry** scheme, not the given similitude graph (§2c) |
+| `RouteC.coords_determine_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `coords_determine`: `Q`-values at any *spanning* base `S` (`span S = ⊤`) determine the vertex |
+| `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `viaOrthogonalForm`: `O(Q)` discretizes at any base `T∋o` whose differences `{t̄−ō}` span — the iso-invariantly-chosen base Route C needs |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -223,6 +231,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 |---|---|---|
 | **A1** | `RecoverForm` = solve the degree-2 vanishing system on the cone | **probe ✓** (`vanishDim=1`); Lean = a finite-geometry nondegeneracy lemma (`⟨Q⟩` = the vanishing space) |
 | **A2** | `Separates` = `coords_determine` / `spanning_sameExactGram_determines` | **LANDED, axiom-clean** |
+| **A2⁺** | the spanning back-half — `RouteC.coords_determine_spanning` + `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` (isometry scheme discretizes at any iso-invariantly-chosen spanning base) | **✅ LANDED 2026-07-03, axiom-clean** (`ScratchRouteC.lean`, NOT in `build.sh`) |
 | **A3** | **the refinement bridge** — recovered `Q` colours pairs by `Q(z−t)` (global scalar cancels) ⟹ isometry-scheme separation ⟹ `discrete_affineScheme_of_jointSeparates` | **new — the genuine Route-C Lean content** (§2c) |
 | **A4** | `AutGens` = `GO(Q)` generators (reflections) → existing `PermutationGroup` (only for the \|Aut\| side) | Schreier–Sims exists; generator list is standard classical-group data |
 
