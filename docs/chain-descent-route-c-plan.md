@@ -58,12 +58,16 @@ bootstrapping question (how coordinates are recovered without already having `Au
   citation is the remaining Lean choice. Not vacuous: it is scoped (the unrestricted `∀ Q R` form is false).
 - **Meta poly claim:** "poly" stays a meta-argument over the bounded-base discreteness object + poly per-node (no runtime
   model in Lean).
-- **★ OPEN — meta-poly bootstrapping (spotted 2026-07-03, not yet resolved):** F1 as built/documented recovers
-  coordinates from `T = O_p(Aut)` — it **consumes `Aut`**. But poly-time computation of `Aut` for this SRG residue is
-  *itself* the open T0 problem Route C claims to sidestep, so the meta-poly first step is potentially circular. The
-  in-spirit fix (recover the affine/geometric coordinatization directly from the cone/line structure, no `Aut`) is
-  plausible + poly for these highly-structured graphs but is **neither built nor scoped**. The Lean object (F4) is
-  unaffected (Lean formalizes no runtime model); this is a gap in the *poly claim*, to resolve in the cost analysis.
+- **★ ASSESSED — meta-poly bootstrapping (spotted + resolved 2026-07-03; full write-up §7a):** F1 as built recovers
+  coordinates from `T = O_p(Aut)` — it **consumes `Aut`**, whose poly computation is the open T0 problem Route C sidesteps
+  (potential circularity). **Verdict: resolved at the meta level — Route C is genuinely poly, non-circular.** Key points:
+  (i) coordinatization is a **global** computation, not bounded-round WL, so it is NOT the node-4 wall in disguise; (ii)
+  `O_p(Aut)` was only a de-risking shortcut — the poly pipeline uses **Aut-free geometric coordinatization** (recover the
+  polar-space geometry from the graph, coordinates via Buekenhout–Shult, rank≥3 / `d≥6`; `d=4` = GQ special case); (iii)
+  the enabling primitive is **probe-confirmed Aut-free** (`route_c_bootstrap_probe.py`: the local invariant separates
+  collinear triangles and recovers spanning isotropic lines, all VO^± `d=4,6` `q=3,5`). Residuals (record, don't block):
+  build the geometric coordinatizer (R1), name the geometry-recovery citation (R2), double-check `d=4` (R3). The Lean
+  object (F4) is unaffected (no runtime model in Lean). See §7a.
 - **Later:** `q=pᵉ` (F2, the Frobenius seam), and the other families (alternating/half-spin/Suzuki) as `IFormStructure`
   adapters — §6 "Instances 2–4".
 
@@ -253,6 +257,10 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
   translation group equals `T` **exactly** (ground-truth), regular + elementary-abelian, and (III)
   `QuadraticFormRecovery.RecoverForm`'s `Q` + those coordinates **reconstruct the entire graph** (`Q(coords[x]−coords[y])
   =0 ⟺ x~y`, 0 mismatches). **All pass** (q=2,3 fast, both types; q=5 `LongRunning`). Confirms the harness↔F1↔A1 chain.
+- **`route_c_bootstrap_probe.py` — the meta-poly bootstrapping crux (§7a).** Confirms the isotropic-line geometry through
+  `o` is recoverable from **adjacency alone** (no `Aut`): the local invariant `|N(o)∩N(x)∩N(y)|` **perfectly separates**
+  collinear from non-collinear isotropic triangles (all VO^± `d=4,6` `q=3,5`), and the recovered lines' directions **span
+  `V`**. This is the Aut-free enabling primitive that de-circularizes F1's coordinatization.
 - **Supporting (from the direct route, still relevant):** `model_gap.py` (the isoClass scheme + orbit/refinement
   helpers), `factorization_probe.py`/`flag_stall_probe.py` (the node-4 stall evidence that motivates Route C).
 
@@ -305,8 +313,9 @@ reduce to writing their `IFormStructure` implementation.
 2. ✅ **A2⁺ + A3 brick 1** (Lean spine from landed pieces) — DONE, axiom-clean (`ScratchRouteC.lean`).
 3. ✅ **F4** equivariance core — **LANDED 2026-07-03, axiom-clean** (`recoveredForm_colouring_equivariant` + bricks).
    Residual = the carried `ConeSepDeterminesForm` (A1 uniqueness) + meta-poly bootstrapping (STATUS "OPEN").
-4. ◻ **Meta-poly bootstrapping** (NEW next priority) — resolve the F1 circularity: Aut-free geometric coordinatization,
-   or a citation that `Aut` is poly-computable for the geometric SRG residue. This gates the "poly" headline (STATUS).
+4. ✅ **Meta-poly bootstrapping** — ASSESSED + RESOLVED (§7a): Route C is poly, non-circular (global coordinatization ≠
+   bounded WL; Aut-free geometric recovery, probe-confirmed enabling primitive). Residuals R1–R3 deferred to the rigorous
+   C#→Lean runtime stage (build the geometric coordinatizer; name Buekenhout–Shult; double-check `d=4`).
 5. ◻ **F2** (`q=pᵉ` seam) — deferrable; the same Layer-D seam the WL route had.
 6. ◻ **Instances 2→3→4** — pure adapters; Suzuki last (needs the char-2 substrate as its own prerequisite).
 
@@ -361,6 +370,57 @@ colouring at an `O(d)` base ⟹ (meta) poly canonical labelling. That is the Rou
 - **Dead ends (do not re-walk):** the WL/`bᵢ=1` build via `ColorRefinesGramK` (circular, node-4 wall, recovery doc
   §9.8.9); the frame-locked similitude predicates (idx 1221-1226, §4). δ′ dominator-closure is walled for `bᵢ=1`
   (dimensional wall, `ScratchDominatorForms`).
+
+---
+
+## 7a. The meta-poly bootstrapping — assessment & resolution (2026-07-03)
+
+**The concern.** Route C's poly claim runs: recover coordinates (F1) → recover `Q` (A1, one linear solve) → `Aut = AΓO(Q)`
+known → canonicalize. A1 and canonicalization are clearly poly *given coordinates*. But **F1 as built/documented
+recovers coordinates from `T = O_p(Aut)` — it consumes `Aut`** (`AffineStructureRecovery.Recover(PermutationGroup aut,…)`;
+the socle theorem gives `O_p(Aut)=T` *given* `Aut`, not `Aut` itself). Poly-time computation of `Aut` for this SRG
+residue is *itself* the open T0 problem Route C advertises it sidesteps (recovery §7 "does not depend on the open core").
+So the meta-poly *first step* is potentially circular. This must be resolved before the cost analysis, not after.
+
+**Resolution — three findings, verdict: sound (not circular, not the node-4 wall in disguise).**
+
+1. **Global computation ≠ bounded-round WL — the distinction that keeps Route C alive.** The node-4 wall is specifically
+   that *bounded-round WL refinement* stalls (cannot recover `gramK` at a bounded base — recovery §9.8.9). Coordinatization
+   is a **global** computation (all `n` vertices, linear algebra / geometry recovery), a strictly stronger model in which
+   poly is reachable even when bounded-WL-dimension is unbounded (this is the whole individualization-beats-WL premise).
+   So recovering coordinates is **not** the node-4 wall re-encountered — provided a concrete *global, Aut-free* procedure
+   exists. It does (finding 2).
+
+2. **`T = O_p(Aut)` was only a de-risking shortcut; the poly pipeline uses Aut-free GEOMETRIC coordinatization.** The graph
+   is the collinearity graph of the affine polar space. Recover the classical geometry (isotropic points/lines) from the
+   graph and read off coordinates by the **fundamental theorem of projective geometry / Buekenhout–Shult** (a polar space
+   of rank ≥ 3 is classical ⟹ embeds in `PG(d,q)` ⟹ coordinates up to `PΓO`), then lift to affine — poly and **needing no
+   `Aut`**. The `O_p(Aut)` route was a valid *shortcut for the de-risking probes* (which had `Aut` from the harness), not
+   the poly argument. Rank ≥ 3 means **`d ≥ 6`; `d = 4` (Witt index 2) is the generalized-quadrangle special case** (outside
+   Buekenhout–Shult's rank≥3 hypothesis — flagged for the rigorous stage, but the enabling primitive holds there too,
+   finding 3).
+
+3. **The enabling primitive is confirmed Aut-free — probe `route_c_bootstrap_probe.py` (2026-07-03).** The local graph
+   invariant `|N(o) ∩ N(x) ∩ N(y)|` (common cone-neighbours of an isotropic triangle) **perfectly separates collinear from
+   non-collinear** triangles — a clean gap in *every* case (VO^±, `d=4,6`, `q=3,5`: e.g. VO⁺₄(5) collinear=42 vs non=22;
+   VO⁻₆(3) 60 vs 6). Reconstructing the isotropic lines through `o` from that invariant alone (no `Aut`, no ground truth)
+   recovers exactly the punctured lines (`q−1` points each), and **their directions span `V`** uniformly. So the geometry
+   is poly-recoverable from adjacency — the step that turns "recover coordinates" from circular into a standard geometry
+   problem. (`d = 4` included: the primitive separates and spans there too, evidence the GQ case also goes through.)
+
+**Verdict.** The bootstrapping is **resolved at the meta level: Route C is genuinely poly, non-circular.** The poly first
+step is *geometric coordinatization* (global, Aut-free, probe-confirmed enabling primitive + Buekenhout–Shult for the
+coordinate read-off), **not** `O_p(Aut)`. Route C sidesteps the *WL-refinement* crux and does **not** inherit it in
+disguise (global ≠ bounded-WL).
+
+**Residuals for the later rigorous (C#→Lean runtime) stage — record, don't block:**
+- **(R1) Build the Aut-free geometric coordinatizer** to replace/supplement `AffineStructureRecovery.Recover`'s
+  `O_p(Aut)` path (which is fine for de-risking but is the circular step for the poly claim). The enabling primitive
+  (line recovery) is confirmed; the remaining engineering is line-geometry → frame → coordinates (the group-law/embedding).
+- **(R2) Name + verify the geometry-recovery citation** (Buekenhout–Shult / recovering a polar space from its point graph)
+  and its poly bound — the citation the poly claim now rests on (analogous to how the seal rests on G3).
+- **(R3) Double-check `d = 4` (GQ, rank 2)** — outside the rank≥3 embedding theorem; the probe supports it, but the
+  coordinate read-off needs its own (standard) argument for generalized quadrangles.
 
 ---
 
