@@ -18,12 +18,17 @@ the seal from the standard frame to **any base whose difference-vectors span `V`
   `reachesRigidOrCameron_viaOrthogonalForm`: for any base `T ∋ o` whose difference-vectors `{t̄ − ō : t ∈ T}` span
   `V`, the affine isometry scheme discretizes at `T` and seals via `reachesRigidOrCameron_viaSpielman`. Carries NO
   `hSmallAutThin`. The standard-frame theorem is the special case `T = frameBase`, `o = 0`.
+* `isometryScheme_refines_similitudeScheme` (**A3, brick 1**) — since `O(Q) ≤ GO(Q)` (`isometry_le_similitude`), the
+  isometry scheme (exact-`Q` relations) refines the given **similitude** graph (isotropy-only relations): equal isometry
+  relation ⟹ equal similitude relation. The consistency half of the refinement bridge — the recovered form gives
+  relations finer than, and consistent with, the given graph. Pure `H ≤ G ⟹` finer orbitals (no Witt / orbit-structure).
 
-**Scope / place in the plan.** This is the **isometry-scheme** discretization at an arbitrary spanning base — the
-back-half Route C rides on once `Q` is recovered (`route_c_reconstruct_probe.py`, `vanishDim = 1`) and coordinates are
-recovered (`route_c_f1_probe.py`, `T = O_p(Aut)`). The remaining Route-C Lean content (A3 refinement bridge:
-the *given* similitude graph refined by the recovered `Q` equals this isometry scheme; F4 iso-invariance of the
-recovery) is separate. See `docs/chain-descent-route-c-plan.md` §4/§6.
+**Scope / place in the plan.** The two spanning theorems are the **isometry-scheme** discretization at an arbitrary
+spanning base — the back-half Route C rides on once `Q` is recovered (F1 `route_c_f1_probe.py` / `AffineStructureRecovery`
++ A1 `route_c_reconstruct_probe.py` / `QuadraticFormRecovery`, both DONE + confirmed in C#). `isometryScheme_refines_
+similitudeScheme` is A3's brick 1. **The one remaining Route-C Lean piece is F4** — iso-invariance of the recovered form
+(a graph iso carries the cone to the cone ⟹ `Q` to a scalar multiple; the `forcedNode_relabel` analog). Full pickup:
+`docs/chain-descent-route-c-plan.md` STATUS + §6a. See §4 for the exact preexisting-lemma names.
 -/
 import ChainDescent.CascadeAffine
 

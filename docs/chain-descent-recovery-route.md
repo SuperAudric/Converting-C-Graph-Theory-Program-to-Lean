@@ -26,14 +26,15 @@
 > executed and closed (§9.8.5-RESULT, §9.8.9). Pieces 1+2 are correct and banked, gated on the un-dischargeable
 > `ColorRefinesGramK`. The banked quasipoly seal is unaffected. █████**
 >
-> **█████ 2026-07-03 — ROUTE C IS NOW SCOPED + DE-RISKED IN A DEDICATED STAGING DOC:
-> [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md). READ THAT FIRST to work forward on Route C.** Both
-> correctness hypotheses are probe-validated: **A1 form recovery** (`route_c_reconstruct_probe.py`: cone determines `Q`
-> up to scalar, `vanishDim=1` across all ε/d/q) and **F1 additive recovery** (`route_c_f1_probe.py`: `O_p(Aut)` recovers
-> the `(𝔽_p)^d` translations, scramble-invariant, coordinatizes the cone). Back-half LANDED (`coords_determine`,
-> `reachesRigidOrCameron_viaOrthogonalForm`); architecture = 1 generic engine + `IFormStructure` × 4 families; the genuine
-> new Lean content is the *refinement bridge* (recovered `Q` upgrades the similitude graph to the isometry scheme) + its
-> iso-invariance. Full plan, exact preexisting-lemma names, and build order are in that doc. §7 below is the original
+> **█████ 2026-07-03 — ROUTE C IS THE LIVE BUILD; DEDICATED STAGING DOC:
+> [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md). READ THAT FIRST (STATUS + §6a) to work forward.**
+> **The recovery front is BUILT + confirmed vs the real harness:** A1 form recovery (`QuadraticFormRecovery.RecoverForm`;
+> `route_c_reconstruct_probe.py` `vanishDim=1`) + F1 additive recovery (`AffineStructureRecovery.Recover` /
+> `PermutationGroup.RegularNormalPSubgroup`; `route_c_f1_probe.py`) — the recovered `Q`+coords **reconstruct the whole
+> graph, 0 mismatches** (`RouteCF1Probe.cs`). **Lean spine assembled** (`ChainDescent/ScratchRouteC.lean`, axiom-clean:
+> `coords_determine_spanning`, `reachesRigidOrCameron_viaOrthogonalForm_spanning`, `isometryScheme_refines_similitudeScheme`
+> = A3 brick 1). **Only F4 (iso-invariance of the recovered form) remains.** Architecture = 1 generic engine +
+> `IFormStructure` × 4. Full plan + exact preexisting-lemma names + F4 pickup are in that doc. §7 below is the original
 > sketch; the staging doc supersedes it. █████**
 
 > **════════ PICK-UP (2026-06-30, v2 — RETARGETED to the weakest predicate) — READ THIS FIRST ════════**
