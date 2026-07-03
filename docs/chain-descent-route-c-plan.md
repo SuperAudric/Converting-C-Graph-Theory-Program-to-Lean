@@ -226,6 +226,7 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.recoveredForm_colouring_equivariant_semilinear` | `ScratchRouteC.lean` §F2 (**Route C F2 capstone, NEW, axiom-clean**) | q=pᵉ: the recovered form is iso-invariant up to scalar **and** field auto σ — F4 for the semilinear (ΓL) case; `q=p` = the `σ=id` specialization |
 | `RouteC.FormAdapter`, `RouteC.FormAdapter.reachesRigidOrCameron` | `ScratchRouteC.lean` §F3 (**Route C engine interface, NEW, axiom-clean**) | the `IFormStructure` interface (`G₀` + `−1∈G₀` + bounded base + `separates`) + the shared engine theorem (any adapter ⟹ the seal). 1 engine, N family adapters |
 | `RouteC.affinePolarAdapter` | `ScratchRouteC.lean` §F3 (**Route C instance 1, NEW, axiom-clean**) | affine-polar `VO^ε` as a `FormAdapter` (`G₀=O(Q)`, frame base, `coords_determine` certificate) — validates the interface, reproduces `viaOrthogonalForm` |
+| `RouteC.coords_determine_multi`, `RouteC.coords_determine_multi_spanning` | `ScratchRouteC.lean` (**Route C alternating-family `separates` core, NEW, axiom-clean**) | a *family* `{Q_k}` with trivial common polar-radical determines the vertex from the joint value-profile (frame / spanning base) — the multi-quadric `separates` for `Alt(n≥5,q)` (Plücker quadrics), generalizes `coords_determine` |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -311,9 +312,17 @@ reduce to writing their `IFormStructure` implementation.
 **The Lean interface `FormAdapter` (F3) is now LANDED** — each family reduces to **one `FormAdapter` instance**, i.e.
 supplying its `G₀`, base, and `separates` certificate; `FormAdapter.reachesRigidOrCameron` then seals it for free.
 The genuine per-family content is exactly `separates` (+ identifying `G₀`):
-- **Alternating (d):** the form object is an **alternating bilinear** `B` (the family is the rank-2 alternating-forms
-  graph — `Sp` is transitive on nonzero vectors, so it's the matrix/rank object, NOT `Q(x−y)=0`); `separates` = the
-  rank/radical certificate. Non-quadratic ⟹ genuinely new combinatorics (do not template blindly off `Q`). *Medium.*
+- **Alternating (d) — SCOPED + build STARTED (2026-07-03).** `Alt(n,q)`: vertices `Λ²(𝔽_q^n)` (alternating
+  matrices), adjacency `rank(A−B)=2`. **Two regimes:**
+  - **`n=4` is affine-polar in disguise:** `Λ²(𝔽_q^4)≅𝔽_q^6`, `rank<4 ⟺ Pf=0`, and the Pfaffian `Pf=A₁₂A₃₄−A₁₃A₂₄
+    +A₁₄A₂₃` is a single **nondegenerate quadratic form** ⟹ `Alt(4,q)=VO⁺₆(q)`, already covered by `affinePolarAdapter`
+    (`Q:=Pf`). **Not a new family.** (Buildable now: define `Pf`, prove nondeg, instantiate — deferred, low value.)
+  - **`n≥5` is the genuinely-new family — MULTI-QUADRIC:** `rank≤2` is cut out by the **Plücker quadrics** (4×4
+    sub-Pfaffians; 5 for `n=5`), so the connection set is their **joint cone** (Grassmann `G(2,n)`). Each Plücker form
+    is individually degenerate; only *jointly* do their polar forms separate. **`separates` core LANDED:**
+    `coords_determine_multi` / `…_multi_spanning` (a family `{Q_k}` with trivial *common* polar-radical determines the
+    vertex). **Remaining:** identify `G₀=Λ²(SL_n)` + wire the rank-2 graph relations to the Plücker value-profile
+    (recovery/refinement), then assemble the `FormAdapter`. *Medium.*
 - **Half-spin (e):** form-adjacent spinor incidence; `separates` expected closer to affine-polar. *Medium–high.*
 - **Suzuki–Tits (f):** the outlier — σ-twisted ovoid polynomial (char-2), `AutGens = Sz(q)`. Same `FormAdapter`
   interface, mostly-new internals; folds into the char-2 track. *Hardest; do last.*

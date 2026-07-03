@@ -405,4 +405,61 @@ noncomputable def affinePolarAdapter (Q : QuadraticForm (ZMod p) (Fin d → ZMod
       exact hval
     exact ChainDescent.affineE.symm.injective (ChainDescent.coords_determine Q hQ h0 hi)
 
+/-! ## Alternating forms family (instance 2) — the multi-quadric `separates` core
+
+The alternating forms graph `Alt(n,q)` has vertices `Λ²(𝔽_q^n)` (alternating matrices) and adjacency
+`rank(A−B) = 2`. **`n = 4` is affine-polar in disguise:** `Λ²(𝔽_q^4) ≅ 𝔽_q^6` and `rank < 4 ⟺ Pfaffian = 0`, so
+`Alt(4,q) = VO⁺₆(q)` with `Q = Pf` (a single nondegenerate quadratic form) — already covered by
+`affinePolarAdapter`. **The genuinely-new family is `n ≥ 5`:** `rank ≤ 2` is cut out by a *family* of quadratic
+forms (the Plücker / 4×4-sub-Pfaffian relations — 5 of them for `n = 5`), so the connection set is their **joint
+cone** (the Grassmann `G(2,n)` cone). Each single Plücker form is degenerate; only *jointly* do their polar forms
+separate. So the `separates` certificate for the alternating `FormAdapter` needs the **multi-form** generalization
+of `coords_determine`: a family `{Q_k}` whose polar forms have trivial *common* radical determines the vertex from
+the joint value-profile. That reusable core is built here (standard frame + spanning base); the remaining
+per-family work is identifying `G₀ = Λ²(SL_n)` and wiring the rank-2 graph relations to the Plücker value-profile
+(the recovery/refinement step). -/
+
+/-- **Multi-form `coords_determine` (the alternating family's `separates` core).** A *family* of quadratic forms
+`Qs : ι → QuadraticForm` whose polar forms **jointly** separate (trivial common radical: `(∀ k, polar_{Q_k} w = 0)
+⟹ w = 0`) determines the vector from the joint value-profile at the standard frame: if `Q_k v = Q_k v'` and
+`Q_k (v − e_i) = Q_k (v' − e_i)` for all `k` and `i`, then `v = v'`. Generalizes `coords_determine` (`ι = Unit`
+case) — each `Q_k` gives `polar_{Q_k}(v−v') = 0`, and joint nondegeneracy across `k` finishes. The Plücker quadrics
+of `Alt(n,q)` are individually degenerate but jointly separating, which is exactly this hypothesis. -/
+theorem coords_determine_multi {ι : Type*} (Qs : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hjoint : ∀ w : Fin d → ZMod p, (∀ k, (Qs k).polarBilin w = 0) → w = 0)
+    {v v' : Fin d → ZMod p}
+    (h0 : ∀ k, Qs k v = Qs k v')
+    (hi : ∀ (k : ι) (i : Fin d), Qs k (v - Pi.single i 1) = Qs k (v' - Pi.single i 1)) :
+    v = v' := by
+  have hzero : ∀ k, (Qs k).polarBilin (v - v') = 0 := by
+    intro k
+    apply (Pi.basisFun (ZMod p) (Fin d)).ext
+    intro i
+    have hk : (Qs k).polarBilin v (Pi.single i 1) = (Qs k).polarBilin v' (Pi.single i 1) := by
+      rw [polarBilin_apply_apply, polarBilin_apply_apply, ChainDescent.polar_eq_of_sub,
+        ChainDescent.polar_eq_of_sub, h0 k, hi k i]
+    rw [LinearMap.zero_apply, map_sub, LinearMap.sub_apply, Pi.basisFun_apply, hk, sub_self]
+  exact sub_eq_zero.mp (hjoint (v - v') hzero)
+
+/-- **Multi-form `coords_determine` at a spanning base** (the alternating family's `separates` core, Route-C
+form). Same as `coords_determine_multi` but the value-profile is taken over any base `S` that **spans** `V`
+(Route C individualizes an iso-invariantly chosen spanning base, not the literal frame). Combines the spanning
+argument of `coords_determine_spanning` with the joint-radical argument of `coords_determine_multi`. -/
+theorem coords_determine_multi_spanning {ι : Type*} (Qs : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hjoint : ∀ w : Fin d → ZMod p, (∀ k, (Qs k).polarBilin w = 0) → w = 0)
+    {S : Set (Fin d → ZMod p)} (hspan : Submodule.span (ZMod p) S = ⊤)
+    {v v' : Fin d → ZMod p}
+    (h0 : ∀ k, Qs k v = Qs k v')
+    (hs : ∀ (k : ι), ∀ s ∈ S, Qs k (v - s) = Qs k (v' - s)) :
+    v = v' := by
+  have hzero : ∀ k, (Qs k).polarBilin (v - v') = 0 := by
+    intro k
+    apply LinearMap.ext_on hspan
+    intro x hx
+    have hk : (Qs k).polarBilin v x = (Qs k).polarBilin v' x := by
+      rw [polarBilin_apply_apply, polarBilin_apply_apply, ChainDescent.polar_eq_of_sub,
+        ChainDescent.polar_eq_of_sub, h0 k, hs k x hx]
+    rw [LinearMap.zero_apply, map_sub, LinearMap.sub_apply, hk, sub_self]
+  exact sub_eq_zero.mp (hjoint (v - v') hzero)
+
 end ChainDescent.RouteC
