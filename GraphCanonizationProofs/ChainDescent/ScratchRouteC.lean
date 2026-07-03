@@ -136,12 +136,31 @@ and works with the **isometry** scheme `affineScheme (isometryGroup Q)`, whose r
 this brick (the isometry scheme *refines* the given graph — so using the recovered form is consistent, not
 fabricated) and F4 (the recovered form is iso-invariant — separate). -/
 
+/-- **The generic refinement bridge — a smaller linear group gives a finer affine scheme.** For any two
+subgroups `H ≤ G` of `GL(V)` (both containing `−1`), the affine orbital scheme of `H` is FINER than that of
+`G`: whenever the `H`-scheme assigns two pairs the same relation, so does the `G`-scheme. Pure `H ≤ G ⟹`
+finer orbitals — the `H`-orbit of a difference is contained in its `G`-orbit. This is the reusable core of
+every Route-C refinement brick (single-form `isometryScheme_refines_similitudeScheme`, multi-form
+`multiIsometryScheme_refines_coneScheme`): recovering a *smaller* group refines, never fabricates. Axiom-clean. -/
+theorem affineScheme_refines_of_le
+    {H G : Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))} (hHG : H ≤ G)
+    (hnegH : LinearEquiv.neg (ZMod p) ∈ H) (hnegG : LinearEquiv.neg (ZMod p) ∈ G)
+    {x y x' y' : Fin (p ^ d)}
+    (h : (ChainDescent.affineScheme H hnegH).relOfPair x y
+        = (ChainDescent.affineScheme H hnegH).relOfPair x' y') :
+    (ChainDescent.affineScheme G hnegG).relOfPair x y
+      = (ChainDescent.affineScheme G hnegG).relOfPair x' y' := by
+  rw [ChainDescent.affineScheme_relOfPair_eq_iff H hnegH, ChainDescent.orbMk_affine_eq_iff] at h
+  rw [ChainDescent.affineScheme_relOfPair_eq_iff G hnegG, ChainDescent.orbMk_affine_eq_iff]
+  obtain ⟨g₀, hg₀, hg⟩ := h
+  exact ⟨g₀, hHG hg₀, hg⟩
+
 /-- **A3, brick 1 — the isometry scheme refines the similitude scheme.** Since `O(Q) ≤ GO(Q)`
 (`isometry_le_similitude`), the affine orbital scheme of the isometry group is FINER than that of the
 similitude group: whenever the isometry scheme assigns two pairs the same relation, so does the similitude
 scheme. This is the formal sense in which the recovered form `Q` (whose exact-value-of-difference data IS the
 isometry relation) *refines* the given similitude graph (isotropy-only) rather than fabricating structure —
-the consistency half of the Route-C bridge. Pure `H ≤ G ⟹` finer orbitals; no Witt / orbit-structure needed.
+the consistency half of the Route-C bridge. A one-line corollary of the generic `affineScheme_refines_of_le`.
 Axiom-clean. -/
 theorem isometryScheme_refines_similitudeScheme
     (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) {x y x' y' : Fin (p ^ d)}
@@ -152,15 +171,9 @@ theorem isometryScheme_refines_similitudeScheme
     (ChainDescent.affineScheme (ChainDescent.similitudeGroup Q)
           (ChainDescent.neg_mem_similitudeGroup Q)).relOfPair x y
       = (ChainDescent.affineScheme (ChainDescent.similitudeGroup Q)
-          (ChainDescent.neg_mem_similitudeGroup Q)).relOfPair x' y' := by
-  rw [ChainDescent.affineScheme_relOfPair_eq_iff (ChainDescent.isometryGroup Q)
-        (ChainDescent.neg_mem_isometryGroup Q),
-    ChainDescent.orbMk_affine_eq_iff] at h
-  rw [ChainDescent.affineScheme_relOfPair_eq_iff (ChainDescent.similitudeGroup Q)
-        (ChainDescent.neg_mem_similitudeGroup Q),
-    ChainDescent.orbMk_affine_eq_iff]
-  obtain ⟨g₀, hg₀, hg⟩ := h
-  exact ⟨g₀, ChainDescent.isometry_le_similitude Q hg₀, hg⟩
+          (ChainDescent.neg_mem_similitudeGroup Q)).relOfPair x' y' :=
+  affineScheme_refines_of_le (ChainDescent.isometry_le_similitude Q)
+    (ChainDescent.neg_mem_isometryGroup Q) (ChainDescent.neg_mem_similitudeGroup Q) h
 
 /-! ## F4 — iso-invariance of the recovered form (the recovered-`Q` colouring is relabeling-equivariant)
 
@@ -497,6 +510,159 @@ noncomputable def multiFormAdapter {ι : Type*} (Qs : ι → QuadraticForm (ZMod
       exact hval
     exact ChainDescent.affineE.symm.injective (coords_determine_multi Qs hjoint h0 hi)
 
+/-! ## Multi-quadric bridges — brick-1 (refinement) and F4 (iso-invariance) for the multi-form families
+
+The single-quadratic affine-polar instance carries THREE legs: the seal (`…viaOrthogonalForm_spanning` /
+`affinePolarAdapter`, discretizes at a bounded base), **A3 brick 1** (`isometryScheme_refines_similitudeScheme`,
+the recovered scheme refines the actual graph) and **F4** (`recoveredForm_colouring_equivariant`, the recovered
+colouring is iso-invariant). The multi-quadric families (`multiFormAdapter`: alternating, half-spin) previously
+carried only the seal leg. This section supplies the multi-form analogs of the other two, GENERICALLY over the
+form family `Qs`, so every multi-quadric family gets all three legs at once (alternating retroactively, half-spin
+the moment its spinor quadrics land).
+
+* **brick-1-multi** (`multiIsometryScheme_refines_coneScheme`): the joint-isometry scheme `⨅ₖ O(Q_k)` refines
+  the **cone-stabilizer** scheme `jointConeStab Qs` — and the cone stabilizer is a *graph-intrinsic* object
+  (the setwise stabilizer of the connection set `{v | ∀k, Q_k v = 0}`, definable from the graph alone), so this
+  is genuinely "recovered scheme refines the given graph", cleaner than the single-form case (which refines the
+  *form*-defined similitude group). A corollary of the generic `affineScheme_refines_of_le`.
+* **F4-multi** (`recoveredFamily_colouring_equivariant`): a graph iso's linear part `g` carries the joint cone
+  to the joint cone, hence (via the carried multi-form citation `JointVarietyDeterminesFamily`) transports the
+  recovered value-tuple colouring `v ↦ (Q_k v)_k` by a single global INJECTIVE map `Φ` — so the induced
+  colour partition is iso-invariant (`recoveredFamily_partition_isoInvariant`). The `Φ` replaces the single-form
+  global scalar `μ`; injectivity is the multi-form analog of `μ` being a unit (it "cancels in comparisons"). -/
+
+/-- **The cone stabilizer — the graph-intrinsic linear group of a multi-quadric forms graph.** The setwise
+stabilizer of the joint isotropic cone `{v | ∀ k, Q_k v = 0}` (= the connection set / adjacency of the graph):
+the linear maps `g` with `(∀ k, Q_k (g v) = 0) ↔ (∀ k, Q_k v = 0)` for all `v`. Definable from the graph alone
+(the cone IS the connection set), so its affine scheme is a graph-intrinsic refinement target — the multi-form
+analog of `similitudeGroup` (which is *form*-defined). Every joint isometry preserves the cone, so
+`⨅ₖ O(Q_k) ≤ jointConeStab` (`iInf_isometryGroup_le_jointConeStab`). -/
+def jointConeStab {ι : Type*} (Qs : ι → QuadraticForm (ZMod p) (Fin d → ZMod p)) :
+    Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) where
+  carrier := {g | ∀ v, (∀ k, Qs k (g v) = 0) ↔ (∀ k, Qs k v = 0)}
+  one_mem' := by intro v; rfl
+  mul_mem' := by
+    intro a b ha hb v
+    rw [LinearEquiv.mul_apply, ha (b v), hb v]
+  inv_mem' := by
+    intro a ha v
+    have hav : a (a⁻¹ v) = v := by
+      have h := LinearEquiv.mul_apply a a⁻¹ v
+      rw [mul_inv_cancel] at h; simpa using h.symm
+    have := ha (a⁻¹ v)
+    rw [hav] at this
+    exact this.symm
+
+/-- `−1 ∈ jointConeStab Qs` — the `hneg` input for the cone-stabilizer scheme. `Q_k (−v) = Q_k v`, so the cone
+condition is literally unchanged. -/
+theorem neg_mem_jointConeStab {ι : Type*} (Qs : ι → QuadraticForm (ZMod p) (Fin d → ZMod p)) :
+    LinearEquiv.neg (ZMod p) ∈ jointConeStab Qs := by
+  intro v
+  constructor <;> intro h k <;> [skip; skip]
+  · have := h k; rwa [LinearEquiv.neg_apply, QuadraticMap.map_neg] at this
+  · rw [LinearEquiv.neg_apply, QuadraticMap.map_neg]; exact h k
+
+/-- **The joint isometry group is contained in the cone stabilizer.** A `g` preserving every `Q_k`-value
+exactly (`g ∈ ⨅ₖ O(Q_k)`) certainly preserves the joint cone setwise, so `⨅ₖ O(Q_k) ≤ jointConeStab Qs`.
+This is what lets `affineScheme_refines_of_le` fire: the recovered joint-isometry scheme refines the
+graph-intrinsic cone-stabilizer scheme. -/
+theorem iInf_isometryGroup_le_jointConeStab {ι : Type*}
+    (Qs : ι → QuadraticForm (ZMod p) (Fin d → ZMod p)) :
+    (⨅ k, ChainDescent.isometryGroup (Qs k)) ≤ jointConeStab Qs := by
+  intro g hg v
+  have hval : ∀ k, Qs k (g v) = Qs k v := fun k => (Subgroup.mem_iInf.mp hg k) v
+  constructor <;> intro h k
+  · rw [← hval k]; exact h k
+  · rw [hval k]; exact h k
+
+/-- **brick-1-multi — the joint-isometry scheme refines the cone-stabilizer (graph-intrinsic) scheme.** The
+multi-form analog of `isometryScheme_refines_similitudeScheme`: the recovered joint-isometry scheme
+`affineScheme (⨅ₖ O(Q_k))` is finer than the scheme of the cone stabilizer `jointConeStab Qs` — and the latter
+is defined from the connection set alone, so this says the recovered structure refines the *actual graph*, not a
+form-defined artefact. A corollary of `affineScheme_refines_of_le` via `iInf_isometryGroup_le_jointConeStab`.
+Axiom-clean. -/
+theorem multiIsometryScheme_refines_coneScheme {ι : Type*}
+    (Qs : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hneg₀ : LinearEquiv.neg (ZMod p) ∈ ⨅ k, ChainDescent.isometryGroup (Qs k))
+    {x y x' y' : Fin (p ^ d)}
+    (h : (ChainDescent.affineScheme (⨅ k, ChainDescent.isometryGroup (Qs k)) hneg₀).relOfPair x y
+        = (ChainDescent.affineScheme (⨅ k, ChainDescent.isometryGroup (Qs k)) hneg₀).relOfPair x' y') :
+    (ChainDescent.affineScheme (jointConeStab Qs) (neg_mem_jointConeStab Qs)).relOfPair x y
+      = (ChainDescent.affineScheme (jointConeStab Qs) (neg_mem_jointConeStab Qs)).relOfPair x' y' :=
+  affineScheme_refines_of_le (iInf_isometryGroup_le_jointConeStab Qs) hneg₀
+    (neg_mem_jointConeStab Qs) h
+
+/-- **F4-multi brick — a family semi-similitude carries the value-tuple colouring (equivariance, provable).**
+If a graph iso's linear part `g` transports the recovered value-tuple colouring by a global map `Φ`
+(`(Q'_k (g v))_k = Φ ((Q_k v)_k)` for all `v`), then it transports the **difference** colouring by the same
+`Φ`: `(Q'_k (g u − g t))_k = Φ ((Q_k (u − t))_k)`. Pure linearity — `g u − g t = g (u − t)` — with `Φ`
+completely arbitrary. The multi-form analog of `similitude_colouring_equivariant` (there `Φ = (μ · ·)`). -/
+theorem multiSimilitude_colouring_equivariant {ι : Type*}
+    (Qs Qs' : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) (Φ : (ι → ZMod p) → (ι → ZMod p))
+    (hsim : ∀ v, (fun k => Qs' k (g v)) = Φ (fun k => Qs k v)) (u t : Fin d → ZMod p) :
+    (fun k => Qs' k (g u - g t)) = Φ (fun k => Qs k (u - t)) := by
+  have h := hsim (u - t)
+  simp only [map_sub] at h
+  exact h
+
+/-- **F4-multi's cited classical fact — the joint variety determines its quadric family up to an invertible
+recombination (scoped, carried).** For a jointly-nondegenerate family `Qs` (trivial common polar radical) and a
+graph iso's linear part `g` preserving the joint cone (`(∀ k, Q_k v = 0) ↔ (∀ k, Q'_k (g v) = 0)`), the pulled-
+back family `{Q'_k ∘ g}` and `{Q_k}` span the same space of degree-2 forms (the degree-2 part of the vanishing
+ideal of the cone), so the value-tuple transports by a global **injective** linear map `Φ`. This is the
+multi-form analog of `NondegQuadricDeterminesForm`: there the vanishing space is `⟨Q⟩` (`Φ = ` scalar); here it
+is `span {Q_k}` (`Φ = ` the change-of-basis, injective because the family is independent — true for the Plücker
+quadrics of `Alt(5,q)` and the D₅ spinor quadrics). Classical projective algebraic geometry (the ideal of the
+Grassmann / spinor variety is generated by the Plücker / spinor quadrics — projective normality); carried as a
+premise like `Theorem41Statement`. NOT proved here. -/
+def JointVarietyDeterminesFamily (p d : ℕ) (ι : Type*) [Fact p.Prime] : Prop :=
+  ∀ (Qs Qs' : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)),
+    (∀ w : Fin d → ZMod p, (∀ k, (Qs k).polarBilin w = 0) → w = 0) →
+    (∀ v, (∀ k, Qs k v = 0) ↔ (∀ k, Qs' k (g v) = 0)) →
+      ∃ Φ : (ι → ZMod p) → (ι → ZMod p),
+        Function.Injective Φ ∧ ∀ v, (fun k => Qs' k (g v)) = Φ (fun k => Qs k v)
+
+/-- **F4-multi — the recovered family colouring is iso-invariant (equivariant under a graph iso's linear
+part).** Given the linear part `g` of a graph iso between two multi-quadric forms graphs (joint-cone-preserving),
+joint nondegeneracy, and the cited `JointVarietyDeterminesFamily` (`hcite`), the recovered value-tuple
+**difference** colouring transports by a single global injective `Φ`:
+`(Q'_k (g u − g t))_k = Φ ((Q_k (u − t))_k)`. So canonicalizing via the recovered family produces a canonical
+(iso-invariant) colouring — the multi-form completion of F4, previously present only for the single-quadratic
+affine-polar instance. Composes with `multiIsometryScheme_refines_coneScheme` and `FormAdapter.reachesRigidOrCameron`
+to give: iso-invariant discrete colouring at a bounded base ⟹ (meta) poly canonical labelling, for every
+multi-quadric family. Axiom-clean; the only non-elementary input is `hcite`. -/
+theorem recoveredFamily_colouring_equivariant {ι : Type*}
+    (hcite : JointVarietyDeterminesFamily p d ι)
+    (Qs Qs' : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+    (hjoint : ∀ w : Fin d → ZMod p, (∀ k, (Qs k).polarBilin w = 0) → w = 0)
+    (hcone : ∀ v, (∀ k, Qs k v = 0) ↔ (∀ k, Qs' k (g v) = 0)) :
+    ∃ Φ : (ι → ZMod p) → (ι → ZMod p), Function.Injective Φ ∧
+      ∀ u t : Fin d → ZMod p, (fun k => Qs' k (g u - g t)) = Φ (fun k => Qs k (u - t)) := by
+  obtain ⟨Φ, hΦinj, hΦ⟩ := hcite Qs Qs' g hjoint hcone
+  exact ⟨Φ, hΦinj, fun u t => multiSimilitude_colouring_equivariant Qs Qs' g Φ hΦ u t⟩
+
+/-- **F4-multi payoff — the recovered colour partition is iso-invariant.** From the equivariance
+(`recoveredFamily_colouring_equivariant`) with an INJECTIVE `Φ`: two pairs get the same recovered colour in the
+source graph **iff** their `g`-images get the same recovered colour in the target — the exact "the global
+ambiguity cancels in comparisons" statement (here injectivity of `Φ` plays the role the single-form scalar `μ`
+being a unit played). This is what makes the recovered-form colouring usable as an iso-invariant refinement.
+Axiom-clean. -/
+theorem recoveredFamily_partition_isoInvariant {ι : Type*}
+    {Φ : (ι → ZMod p) → (ι → ZMod p)} (hΦinj : Function.Injective Φ)
+    {Qs Qs' : ι → QuadraticForm (ZMod p) (Fin d → ZMod p)}
+    {g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)}
+    (hΦ : ∀ u t : Fin d → ZMod p, (fun k => Qs' k (g u - g t)) = Φ (fun k => Qs k (u - t)))
+    (u t u' t' : Fin d → ZMod p) :
+    ((fun k => Qs k (u - t)) = fun k => Qs k (u' - t')) ↔
+      ((fun k => Qs' k (g u - g t)) = fun k => Qs' k (g u' - g t')) := by
+  rw [hΦ u t, hΦ u' t']
+  constructor
+  · intro h; rw [h]
+  · intro h; exact hΦinj h
+
 /-! ### The concrete alternating instance `Alt(5,q)` — the Plücker quadrics + the sealed adapter
 
 `Alt(5,q)` has vertex space `Λ²(𝔽_q^5) ≅ 𝔽_q^10`. Index the 10 Plücker coordinates (pairs `{i<j} ⊆ Fin 5`) as
@@ -612,6 +778,20 @@ theorem reachesRigidOrCameron_alternating
       ∨ IsCameronScheme (p ^ 10)
           (ChainDescent.affineScheme alternatingAdapter.G₀ alternatingAdapter.neg_mem) :=
   alternatingAdapter.reachesRigidOrCameron
+
+/-- **`Alt(5,q)` brick-1 (concrete) — the recovered joint-isometry scheme refines the cone-stabilizer scheme.**
+The generic `multiIsometryScheme_refines_coneScheme` fired on the actual Plücker family: the recovered scheme
+`affineScheme alternatingAdapter.G₀` (= `⨅ₖ O(Pf_k)`) refines the graph-intrinsic cone-stabilizer scheme of
+`pluckerForms`. Confirms the multi-quadric refinement bridge is applicable to `Alt(5,q)`, giving it the same
+refinement leg the affine-polar instance has. Axiom-clean. -/
+theorem alternating_refines_coneScheme {x y x' y' : Fin (p ^ 10)}
+    (h : (ChainDescent.affineScheme alternatingAdapter.G₀ alternatingAdapter.neg_mem).relOfPair x y
+        = (ChainDescent.affineScheme alternatingAdapter.G₀ alternatingAdapter.neg_mem).relOfPair x' y') :
+    (ChainDescent.affineScheme (jointConeStab pluckerForms)
+          (neg_mem_jointConeStab pluckerForms)).relOfPair x y
+      = (ChainDescent.affineScheme (jointConeStab pluckerForms)
+          (neg_mem_jointConeStab pluckerForms)).relOfPair x' y' :=
+  multiIsometryScheme_refines_coneScheme pluckerForms alternatingAdapter.neg_mem h
 
 end Plucker
 
