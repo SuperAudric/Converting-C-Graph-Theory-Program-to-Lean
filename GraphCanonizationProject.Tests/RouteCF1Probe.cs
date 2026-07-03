@@ -5,22 +5,17 @@ using Xunit;
 using Xunit.Abstractions;
 using Canonizer;
 
-// ROUTE C — F1 CONFIRMATION PROBE (2026-07-03).
+// ROUTE C — F1 + A1 CONFIRMATION PROBE (2026-07-03).
 //
-// F1 (docs/chain-descent-route-c-plan.md §6) recovers the additive/affine (F_p)^d structure from the
-// ABSTRACT graph so that "z - t" (and later Q(z-t)) is defined. The family-agnostic recovery: the
-// translation group is the SOCLE of Aut — for these affine-primitive graphs, T = O_p(Aut), the regular
-// elementary-abelian translation group.
-//
-// This exercises the PRODUCTION path — AffineStructureRecovery.Recover / PermutationGroup.
-// RegularNormalPSubgroup — against the REAL harness output (CanonResult.ResidualGroup), the interface
-// F1 depends on in the larger build. Per VO^eps_4(q):
+// F1 (docs/chain-descent-route-c-plan.md §6) recovers the additive/affine (F_p)^d structure; A1 recovers
+// the quadratic form Q from the coordinatized cone. Exercises the PRODUCTION path — AffineStructure
+// Recovery.Recover (F1) + QuadraticFormRecovery.RecoverForm (A1) + PermutationGroup.RegularNormalP
+// Subgroup — against the REAL harness output (CanonResult.ResidualGroup). Per VO^eps_4(q):
 //   (I)  INTERFACE — ResidualGroup contains the translations and has full |Aut| (ground truth = the
 //        known translations in the vector encoding).
-//   (II) RECOVERY  — AffineStructureRecovery.Recover's translation group equals T exactly; regular +
-//        elementary-abelian of order q^d.
-//   (III) COORDS   — the recovered coordinates make the connection set a quadric cone (degree-2
-//        vanishing dim = 1), the F1 -> A1 hand-off. (Odd q; char-2 skips this.)
+//   (II) F1 RECOVERY — the recovered translation group equals T exactly; regular + elementary-abelian.
+//   (III) A1 RECOVERY — the recovered Q + F1 coords RECONSTRUCT THE ENTIRE GRAPH:
+//        Q(coords[x]-coords[y]) == 0  <=>  x ~ y  (Route C's core claim). Odd q; char-2 = separate track.
 public class RouteCF1Probe
 {
     private readonly ITestOutputHelper _out;
@@ -90,31 +85,6 @@ public class RouteCF1Probe
         public int GetHashCode(int[] a) { int h = 17; foreach (int x in a) h = h * 31 + x; return h; }
     }
 
-    // rank over F_q (Gaussian elimination) for the cone / degree-2 vanishing check
-    static int RankModQ(List<int[]> rows, int q)
-    {
-        if (rows.Count == 0) return 0;
-        int ncols = rows[0].Length, r = 0;
-        for (int c = 0; c < ncols && r < rows.Count; c++)
-        {
-            int piv = -1;
-            for (int i = r; i < rows.Count; i++) if (rows[i][c] % q != 0) { piv = i; break; }
-            if (piv < 0) continue;
-            (rows[r], rows[piv]) = (rows[piv], rows[r]);
-            int inv = ModInv(((rows[r][c] % q) + q) % q, q);
-            for (int c2 = 0; c2 < ncols; c2++) rows[r][c2] = rows[r][c2] * inv % q;
-            for (int i = 0; i < rows.Count; i++)
-                if (i != r && rows[i][c] % q != 0)
-                {
-                    int f = rows[i][c];
-                    for (int c2 = 0; c2 < ncols; c2++) rows[i][c2] = (((rows[i][c2] - f * rows[r][c2]) % q) + q * q) % q;
-                }
-            r++;
-        }
-        return r;
-    }
-    static int ModInv(int a, int q) { int r = 1; for (int i = 0; i < q - 2; i++) r = r * a % q; return r; }  // q prime
-
     // Fast confirmation (n ≤ 81): char-2 (Clebsch) + odd-q, both types.
     [Theory]
     [InlineData(2, -1)]  // VO^-_4(2) = Clebsch, n=16, p=2 (T-recovery only; cone check is char-2, skipped)
@@ -165,24 +135,29 @@ public class RouteCF1Probe
         Assert.True(s.Translations.IsAbelian && s.Translations.HasExponentDividing(p), $"{nm}: T not elementary-abelian exponent {p}");
         foreach (var t in Trec) if (!Perm.IsIdentity(t)) Assert.True(Enumerable.Range(0, n).All(i => t[i] != i), $"{nm}: T not regular");
 
-        // (III) COORDS — the recovered coordinates make the connection set a quadric cone (odd q)
+        Assert.True(s.Coords[s.Origin].All(x => x == 0), $"{nm}: origin coord not zero");
+
+        // (III) A1 — recover Q from F1's coordinatized cone, and check it RECONSTRUCTS THE GRAPH.
+        // (Odd q; char-2 is a separate Arf track, and RecoverForm returns null there.)
         if (q % 2 == 1)
         {
-            int o0 = s.Origin;
-            Assert.True(s.Coords[o0].All(x => x == 0), $"{nm}: origin coord not zero");
-            var monos = new List<(int, int)>();
-            for (int i = 0; i < dim; i++) for (int j = i; j < dim; j++) monos.Add((i, j));
-            var rows = new List<int[]>();
-            int neigh = 0;
+            var qf = QuadraticFormRecovery.RecoverForm(adj, n, s);
+            Assert.True(qf is not null, $"{nm}: A1 RecoverForm returned null (cone did not pin Q up to scalar)");
+            Assert.True(qf!.Coeffs.Any(a => a % p != 0), $"{nm}: recovered Q is identically zero");
+
+            // Route C's core claim: recovered Q + F1 coords reproduce the ENTIRE adjacency —
+            // Q(coords[x] - coords[y]) == 0  <=>  x ~ y.
+            int mism = 0;
+            var diff = new int[dim];
             for (int x = 0; x < n; x++)
-                if (x != o0 && adj[o0 * n + x] == 1)
+                for (int y = x + 1; y < n; y++)
                 {
-                    neigh++;
-                    rows.Add(monos.Select(mm => s.Coords[x][mm.Item1] * s.Coords[x][mm.Item2] % q).ToArray());
+                    for (int i = 0; i < dim; i++) diff[i] = ((s.Coords[x][i] - s.Coords[y][i]) % q + q) % q;
+                    bool iso = qf.Evaluate(diff) == 0;
+                    if (iso != (adj[x * n + y] == 1)) mism++;
                 }
-            int vanish = monos.Count - RankModQ(rows, q);
-            _out.WriteLine($"    coords: |neigh|={neigh} coneVanishDim={vanish} (expect 1)");
-            Assert.True(vanish == 1, $"{nm}: cone vanishing dim = {vanish} != 1 (Q not uniquely recoverable in recovered coords)");
+            _out.WriteLine($"    A1: recovered Q (#coeffs={qf.Coeffs.Length}) reconstructs graph, mismatches={mism}/{n * (n - 1) / 2}");
+            Assert.True(mism == 0, $"{nm}: recovered Q + coords do NOT reconstruct the graph ({mism} mismatches)");
         }
         _out.WriteLine($"    OK");
     }

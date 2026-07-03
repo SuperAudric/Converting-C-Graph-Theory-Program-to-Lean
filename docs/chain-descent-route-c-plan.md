@@ -38,11 +38,13 @@
   Proofs mirror `coords_determine`/`viaOrthogonalForm` (swap `Pi.basisFun.ext` → `LinearMap.ext_on hspan`). See §4, §6.
 - **The genuinely-new Lean content that remains is narrow** — the *refinement bridge* A3 (recovered `Q` upgrades the
   similitude graph to the isometry scheme) + F4 (iso-invariance of the recovered structure). See §2c and A3/F4 in §6.
-- **✅ F1 PRODUCTIONIZED + confirmed against the real harness (2026-07-03)** — `PermutationGroup.RegularNormalPSubgroup`
-  + `AffineStructureRecovery.Recover`, validated by `RouteCF1Probe.cs` (all pass; existing group tests green). See §4/§6.
-- **Next concrete step: A1 in C#** — recover `Q` from F1's coordinatized cone by the one degree-2 linear solve
-  (`route_c_reconstruct_probe.py` already validated `vanishDim=1`; now emit the actual form). Then A3 (Lean refinement
-  bridge) + F4 (iso-invariance). See §6 "Sequencing".
+- **✅ F1 + A1 PRODUCTIONIZED + confirmed against the real harness (2026-07-03).** F1: `PermutationGroup.
+  RegularNormalPSubgroup` + `AffineStructureRecovery.Recover`. A1: `QuadraticFormRecovery.RecoverForm`. Validated
+  end-to-end by `RouteCF1Probe.cs` — the recovered `Q` + coords **reconstruct the whole graph, 0 mismatches**
+  (VO^±₄(3)); existing group tests green. So the C# recovery front (abstract graph → coordinates → form) works. See §4/§6.
+- **Next concrete step: the Lean side — A3 refinement bridge** (recovered `Q` refines the similitude graph to the
+  isometry scheme `reachesRigidOrCameron_viaOrthogonalForm_spanning` discretizes) + **F4 iso-invariance**. The C# front
+  (F1+A1) is done; what remains is the durable Lean deliverable. See §6 "Sequencing".
 
 **Quality bar (project-wide):** every Lean theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; no `sorry`,
 no fresh `axiom`; `native_decide` banned; full build green when ported. "Poly time" stays a **meta-argument** (the
@@ -190,6 +192,7 @@ In `GraphCanonizationProject/`.
 |---|---|
 | `PermutationGroup.cs` | **full Schreier–Sims** — stabilizer chain, `AddGenerator`, `Order`, `Contains`, `Orbit`, `BasePoints`, `IsAbelian`, `IsElementaryAbelian`. **+ Route-C F1 ops (NEW 2026-07-03):** `RegularNormalPSubgroup(p)` (the socle/translations), `NormalClosure`, `Elements`, `HasExponentDividing`, `Perm.Order`/`Pow` |
 | `AffineStructureRecovery.cs` | **Route C, NEW 2026-07-03** — `Recover(aut, p, origin)` = F1's entry point: socle `T` + `Dim` + vertex→`(𝔽_p)^Dim` coordinate map (via `T`'s regular action). Confirmed by `RouteCF1Probe.cs` |
+| `QuadraticFormRecovery.cs` | **Route C, NEW 2026-07-03 (A1)** — `RecoverForm(adj, n, aff)`: recovers `Q` up to scalar by the degree-2 kernel solve on the cone; `RecoveredForm.Evaluate`. The quadratic family's `RecoverForm`. Odd-q; confirmed to reconstruct the whole graph |
 | `ITransversalOracle.cs` | the T-C seam (`Classify(n, adj, targetCell, path, knownGroup) → representatives`) — where a Route-C oracle plugs in |
 | `CascadeOracle.cs` | the all-reps oracle (returns the whole cell; harvest prunes a-posteriori) — the current default |
 | `ChainDescent.cs` | the harness: cross-branch harvest + prune (`CoveredByPathFixingAut`, ~`:589`), deferral selector (~`:251-281`) |
@@ -212,12 +215,12 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
   recovered coordinates give `coneVanishDim = 1`** ⟹ recovery is method-correct, scramble-invariant, and hands A1 a
   valid coordinatization. (Odd `q`: `−1` is a `p'`-element so `G₀` is a `p'`-group and `O_p(G)=T` is clean; char-2
   recovers `T` the same way but needs Aut's `p'`-part, e.g. `S₅` for Clebsch.)
-- **`RouteCF1Probe.cs` — F1 against the REAL harness (C#, `GraphCanonizationProject.Tests/`).** Builds `VO^ε₄(q)`,
-  runs the actual chain-descent canonizer, and confirms end-to-end that (I) `CanonResult.ResidualGroup` contains the
-  translations and has full `|Aut|`, (II) `O_p(ResidualGroup)` (the production F1 algorithm — normal-closure join)
-  equals the translation group `T` **exactly** (ground-truth checked), regular + elementary-abelian, and (III) a basis
-  of the recovered `T` coordinatizes so the connection set is a quadric cone (`vanishDim=1`). **All pass** (q=2,3, both
-  types; q=5 extension). Confirms the harness↔F1 interface the larger build depends on.
+- **`RouteCF1Probe.cs` — F1 + A1 against the REAL harness (C#, `GraphCanonizationProject.Tests/`).** Builds `VO^ε₄(q)`,
+  runs the actual chain-descent canonizer, and confirms end-to-end (via the **production** methods) that (I)
+  `CanonResult.ResidualGroup` contains the translations and has full `|Aut|`, (II) `AffineStructureRecovery.Recover`'s
+  translation group equals `T` **exactly** (ground-truth), regular + elementary-abelian, and (III)
+  `QuadraticFormRecovery.RecoverForm`'s `Q` + those coordinates **reconstruct the entire graph** (`Q(coords[x]−coords[y])
+  =0 ⟺ x~y`, 0 mismatches). **All pass** (q=2,3 fast, both types; q=5 `LongRunning`). Confirms the harness↔F1↔A1 chain.
 - **Supporting (from the direct route, still relevant):** `model_gap.py` (the isoClass scheme + orbit/refinement
   helpers), `factorization_probe.py`/`flag_stall_probe.py` (the node-4 stall evidence that motivates Route C).
 
@@ -239,7 +242,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 
 | # | piece | status |
 |---|---|---|
-| **A1** | `RecoverForm` = solve the degree-2 vanishing system on the cone | **probe ✓** (`vanishDim=1`); Lean = a finite-geometry nondegeneracy lemma (`⟨Q⟩` = the vanishing space) |
+| **A1** | `RecoverForm` = solve the degree-2 vanishing system on the cone | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03, `QuadraticFormRecovery.RecoverForm`):** recovers `Q` up to scalar by one kernel solve on F1's coordinates; the recovered `Q` + coords **reconstruct the entire graph** (`Q(coords[x]−coords[y])=0 ⟺ x~y`, **0 mismatches**, VO^±₄(3)). Odd-q (returns null in char-2). Lean side = a finite-geometry nondegeneracy lemma (`⟨Q⟩` = the vanishing space) |
 | **A2** | `Separates` = `coords_determine` / `spanning_sameExactGram_determines` | **LANDED, axiom-clean** |
 | **A2⁺** | the spanning back-half — `RouteC.coords_determine_spanning` + `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` (isometry scheme discretizes at any iso-invariantly-chosen spanning base) | **✅ LANDED 2026-07-03, axiom-clean** (`ScratchRouteC.lean`, NOT in `build.sh`) |
 | **A3** | **the refinement bridge** — recovered `Q` colours pairs by `Q(z−t)` (global scalar cancels) ⟹ isometry-scheme separation ⟹ `discrete_affineScheme_of_jointSeparates` | **new — the genuine Route-C Lean content** (§2c) |
