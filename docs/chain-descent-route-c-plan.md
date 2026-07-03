@@ -76,7 +76,11 @@ assessed sound** (§7a — global coordinatization, not the node-4 wall in disgu
   `recoveredForm_colouring_equivariant_semilinear` — the recovered form is iso-invariant up to scalar **and** a field
   automorphism σ (a graph iso over 𝔽_q is 𝔽_p-semilinear, `g = M∘σ̂`). `q=p` is the `σ=id` case. Remaining F2 = the C#
   field-recovery side, which folds into R1 (geometric coordinatization recovers PG over 𝔽_q, field included).
-- **Later:** the other families (alternating/half-spin/Suzuki) as `IFormStructure` adapters — §6 "Instances 2–4".
+- **◑ F3 (`IFormStructure` engine interface) — Lean interface LANDED (2026-07-03, axiom-clean):** `FormAdapter` +
+  `FormAdapter.reachesRigidOrCameron` (any adapter ⟹ seal) + `affinePolarAdapter` (instance 1, validates it). Each
+  remaining family reduces to one `FormAdapter` (supply `G₀` + `separates`).
+- **Later:** the alternating/half-spin/Suzuki `FormAdapter` instances (their `separates` = the per-family combinatorics,
+  §11.4 — alternating is the non-quadratic rank-2 matrix object) + the C# side of the engine.
 
 **▶ VERIFY what's landed (fresh-reader commands):**
 - Lean: `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRouteC.lean` (exit 0, clean). Axiom-check by
@@ -220,6 +224,8 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.frobVec`, `RouteC.frobVec_sub`, `RouteC.semisimilitude_colouring_equivariant` | `ScratchRouteC.lean` §F2 (**Route C F2 bricks, NEW, axiom-clean**) | coordinate-wise Frobenius σ̂ + its additivity + the semilinear equivariance identity `Q'(M(σ̂u)−M(σ̂t))=μ·σ(Q(u−t))` |
 | `RouteC.ConePreservingCollineationIsSemiSimilitude` | `ScratchRouteC.lean` §F2 (**Route C F2 cited premise, NEW**) | scoped (`(2:K)≠0`, `4≤d`): cone-preserving collineation `g` ⟹ `g=M∘σ̂` semi-similitude (fundamental thm of projective geometry + `NondegQuadricDeterminesForm`; carried) |
 | `RouteC.recoveredForm_colouring_equivariant_semilinear` | `ScratchRouteC.lean` §F2 (**Route C F2 capstone, NEW, axiom-clean**) | q=pᵉ: the recovered form is iso-invariant up to scalar **and** field auto σ — F4 for the semilinear (ΓL) case; `q=p` = the `σ=id` specialization |
+| `RouteC.FormAdapter`, `RouteC.FormAdapter.reachesRigidOrCameron` | `ScratchRouteC.lean` §F3 (**Route C engine interface, NEW, axiom-clean**) | the `IFormStructure` interface (`G₀` + `−1∈G₀` + bounded base + `separates`) + the shared engine theorem (any adapter ⟹ the seal). 1 engine, N family adapters |
+| `RouteC.affinePolarAdapter` | `ScratchRouteC.lean` §F3 (**Route C instance 1, NEW, axiom-clean**) | affine-polar `VO^ε` as a `FormAdapter` (`G₀=O(Q)`, frame base, `coords_determine` certificate) — validates the interface, reproduces `viaOrthogonalForm` |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -284,7 +290,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 |---|---|---|---|
 | **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03).** Confirmed against the REAL harness (`RouteCF1Probe.cs`): recovers `T` exactly (ground-truth), regular + elementary-abelian, coordinatizes the cone (`vanishDim=1`) — VO^ε₄(q), q=2,3,5, both types; char-agnostic (full `Aut` delivered). **Production code landed:** general group ops on `PermutationGroup.cs` (`RegularNormalPSubgroup(p)`, `NormalClosure`, `Elements`, `HasExponentDividing`, `Perm.Order`/`Pow`) + `AffineStructureRecovery.Recover` (coordinatization); the probe now exercises the production path (all pass; 26 existing `PermutationGroup` tests green). "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite). Remaining: the Lean side (F4 iso-invariance) + `q=pᵉ` (F2). |
 | **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **◑ SEMILINEAR CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean` §F2):** `recoveredForm_colouring_equivariant_semilinear` — a graph iso over 𝔽_q is 𝔽_p-**semilinear** (`g = M∘σ̂`), so the recovered form transports up to scalar **and** field auto σ: `Q'(gu−gt)=μ·σ(Q(u−t))`. Bricks `frobVec`/`frobVec_sub`/`semisimilitude_colouring_equivariant` (provable) + cited `ConePreservingCollineationIsSemiSimilitude` (fundamental thm of proj. geometry, carried). The `q=p` case = the `σ=id` specialization. **𝔽_q-structure RECOVERY** (getting the field) is subsumed by geometric coordinatization (§7a/R1: Buekenhout–Shult recovers PG over 𝔽_q). Remaining: C# field recovery (with R1) |
-| **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C# | new, thin; the merge point |
+| **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C#+Lean | **◑ LEAN INTERFACE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `FormAdapter` (bundles `G₀` + `−1∈G₀` + a bounded base + the `separates` certificate) + `FormAdapter.reachesRigidOrCameron` (the shared engine theorem: any adapter ⟹ the seal, family-agnostic) + `affinePolarAdapter` (instance 1, validates non-vacuity, reproduces `viaOrthogonalForm`). Each family now = **one `FormAdapter`** (supply only `separates`). C# side (thin merge point) still to build |
 | **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **✅ EQUIVARIANCE CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `recoveredForm_colouring_equivariant` (+ bricks `similitude_colouring_equivariant`/`similitude_conePreserving`). Rests only on `NondegQuadricDeterminesForm` — **discharged as an exact scoped citation** (= A1's finite-geometry uniqueness; F4 and A1-Lean unify). Not vacuous (scoped `p≠2`/`d≥4`, exactly the true range) |
 | **F5** | **Generic seal→poly spine** — `RecoverForm ⟹ refined scheme ⟹ discrete_affineScheme_of_jointSeparates ⟹ viaSpielman` | Lean | **downstream all landed & generic**; only the A3 refinement bridge is new |
 
@@ -302,11 +308,15 @@ Instance 1 forces F1/F3/F4/F5 into existence, so it is **most of the total work*
 reduce to writing their `IFormStructure` implementation.
 
 ### Instances 2–4 — reuse the engine, write only the adapter (plan §11.4/§11.5)
-- **Alternating (d):** `RecoverForm` recovers an alternating bilinear `B`; `Separates` = the symplectic analog of
-  `coords_determine` (radical-nondegeneracy). ~90% shared. *Medium.*
-- **Half-spin (e):** form-adjacent spinor incidence; expect `RecoverForm`/`Separates` close to affine-polar. *Medium–high.*
-- **Suzuki–Tits (f):** the outlier — `RecoverForm` recovers the σ-twisted ovoid polynomial (char-2), `AutGens = Sz(q)`.
-  Same interface, mostly-new internals; folds into the char-2 track. *Hardest; do last.*
+**The Lean interface `FormAdapter` (F3) is now LANDED** — each family reduces to **one `FormAdapter` instance**, i.e.
+supplying its `G₀`, base, and `separates` certificate; `FormAdapter.reachesRigidOrCameron` then seals it for free.
+The genuine per-family content is exactly `separates` (+ identifying `G₀`):
+- **Alternating (d):** the form object is an **alternating bilinear** `B` (the family is the rank-2 alternating-forms
+  graph — `Sp` is transitive on nonzero vectors, so it's the matrix/rank object, NOT `Q(x−y)=0`); `separates` = the
+  rank/radical certificate. Non-quadratic ⟹ genuinely new combinatorics (do not template blindly off `Q`). *Medium.*
+- **Half-spin (e):** form-adjacent spinor incidence; `separates` expected closer to affine-polar. *Medium–high.*
+- **Suzuki–Tits (f):** the outlier — σ-twisted ovoid polynomial (char-2), `AutGens = Sz(q)`. Same `FormAdapter`
+  interface, mostly-new internals; folds into the char-2 track. *Hardest; do last.*
 
 ### C# / Lean split, and the reuse to exploit
 - **The C# engine is the symmetric mirror of Option 2's Layer D** (IR doc §11.10, built through D-M4 as a Phase-2
@@ -329,7 +339,9 @@ reduce to writing their `IFormStructure` implementation.
 5. ◑ **F2** (`q=pᵉ` semilinear seam) — **Lean core LANDED** (`…_semilinear`, axiom-clean): the recovered form is
    iso-invariant up to scalar **and** Frobenius σ. Remaining: the C# field-recovery side (folds into R1's geometric
    coordinatizer — Buekenhout–Shult recovers PG over 𝔽_q, field included).
-6. ◻ **Instances 2→3→4** — pure adapters; Suzuki last (needs the char-2 substrate as its own prerequisite).
+6. ◑ **Instances 2→3→4** — the Lean `FormAdapter` interface (F3) is **LANDED** (affine-polar = instance 1);
+   each remaining family = one `FormAdapter` (supply `G₀` + `separates`). Alternating next (non-quadratic `separates`,
+   genuinely new combinatorics), then half-spin, then Suzuki (char-2 substrate prerequisite).
 
 **Definition of done (Route C, affine-polar):** F1 recovers coordinates iso-invariantly (F4 ✅ equivariance core); A1
 recovers `Q` (C# ✅; Lean uniqueness = the carried `NondegQuadricDeterminesForm`); A3 refines to the isometry scheme (brick 1

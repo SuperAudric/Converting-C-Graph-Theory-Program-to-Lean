@@ -335,4 +335,74 @@ theorem recoveredForm_colouring_equivariant_semilinear
 
 end F2
 
+/-! ## F3 — the generic engine interface (`IFormStructure`): 1 engine, N family adapters
+
+The Route-C engine (`affineScheme` + `discrete_affineScheme_of_jointSeparates` + `viaSpielman`) is already
+**generic in the linear group `G₀`**. What is family-specific is exactly: (a) the group `G₀ ≤ GL(V)` whose affine
+scheme is the (isometry-refined) graph, (b) a bounded base `T`, and (c) the `Separates` certificate — the family's
+`coords_determine` analog. `FormAdapter` bundles precisely (a)–(c); `FormAdapter.reachesRigidOrCameron` is the shared
+engine theorem. Each family (affine-polar / alternating / half-spin / Suzuki) becomes **one `FormAdapter` instance** —
+the Lean realization of the plan's "1 engine + `IFormStructure`×4" (§3 / F3). The affine-polar instance
+`affinePolarAdapter` below validates the interface end-to-end and reproduces `reachesRigidOrCameron_viaOrthogonalForm`;
+the other families supply only their own `separates` (their `Separates` certificate — the genuine per-family content,
+`docs/chain-descent-formsgraph-wldim-plan.md` §11.4: the alternating/half-spin/Suzuki form objects are non-quadratic,
+so `separates` is re-instantiated per form, same shape). -/
+
+/-- **The generic Route-C adapter (`IFormStructure`).** A family plugs in its linear group `G₀` (with `−1 ∈ G₀`),
+a base `base` of size `≤ bound`, and the `Separates` certificate: the `G₀`-orbit-of-difference profile at `base`
+determines the vertex. This is the whole family-specific interface; everything downstream is shared. -/
+structure FormAdapter (bound : ℕ) where
+  /-- The family's linear group (`O(Q)` for affine-polar; `Sp(B)`-style for alternating; …). -/
+  G₀ : Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+  /-- `−1 ∈ G₀` — the `hneg` input for `affineScheme`. -/
+  neg_mem : LinearEquiv.neg (ZMod p) ∈ G₀
+  /-- The individualized base (size `≤ bound`). -/
+  base : Finset (Fin (p ^ d))
+  base_card_le : base.card ≤ bound
+  /-- The `Separates` certificate: the `G₀`-orbit-of-difference profile at `base` determines the vertex. -/
+  separates : ∀ u u' : Fin (p ^ d),
+    (∀ t ∈ base, ∃ g₀ ∈ G₀, g₀ (ChainDescent.affineE.symm u' - ChainDescent.affineE.symm t)
+        = ChainDescent.affineE.symm u - ChainDescent.affineE.symm t) → u = u'
+
+/-- **The shared engine theorem — any `FormAdapter` seals.** Its affine scheme individualizes to discrete at the
+base and reaches the rigid-or-Cameron disjunction via `viaSpielman`. Family-agnostic: the ONLY input is the adapter,
+so writing a new family reduces to constructing its `FormAdapter` (i.e. proving its `separates`). -/
+theorem FormAdapter.reachesRigidOrCameron {bound : ℕ}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} (A : FormAdapter (p := p) (d := d) bound) :
+    ((SchemeBlockRecovered (p ^ d) (ChainDescent.affineScheme A.G₀ A.neg_mem)
+        ∨ AbelianConsumed (p ^ d) (ChainDescent.affineScheme A.G₀ A.neg_mem))
+        ∨ SchemeRecoveredByDepth (p ^ d) (ChainDescent.affineScheme A.G₀ A.neg_mem) bound)
+      ∨ IsCameronScheme (p ^ d) (ChainDescent.affineScheme A.G₀ A.neg_mem) :=
+  ChainDescent.reachesRigidOrCameron_viaSpielman _
+    ⟨A.base, A.base_card_le,
+      ChainDescent.discrete_affineScheme_of_jointSeparates A.G₀ A.neg_mem A.separates⟩
+
+/-- **Instance 1 — affine-polar `VO^ε` (validates the interface).** `G₀ = O(Q)`, `base` = the standard frame
+`{0, e₁, …, e_d}`, and `separates` = the `coords_determine` certificate. Shows `FormAdapter` is non-vacuous, and
+`affinePolarAdapter Q hQ |>.reachesRigidOrCameron` reproduces `reachesRigidOrCameron_viaOrthogonalForm`. -/
+noncomputable def affinePolarAdapter (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hQ : (Q.polarBilin).Nondegenerate) : FormAdapter (p := p) (d := d) (d + 1) where
+  G₀ := ChainDescent.isometryGroup Q
+  neg_mem := ChainDescent.neg_mem_isometryGroup Q
+  base := ChainDescent.frameBase
+  base_card_le := ChainDescent.frameBase_card_le
+  separates := by
+    intro u u' hh
+    have h0 : Q (ChainDescent.affineE.symm u) = Q (ChainDescent.affineE.symm u') := by
+      obtain ⟨g₀, hg, hgeq⟩ := hh (ChainDescent.affineE 0) (Finset.mem_insert_self _ _)
+      rw [Equiv.symm_apply_apply, sub_zero, sub_zero] at hgeq
+      have hval := hg (ChainDescent.affineE.symm u')
+      rw [hgeq] at hval
+      exact hval
+    have hi : ∀ i : Fin d, Q (ChainDescent.affineE.symm u - Pi.single i 1)
+        = Q (ChainDescent.affineE.symm u' - Pi.single i 1) := by
+      intro i
+      obtain ⟨g₀, hg, hgeq⟩ := hh (ChainDescent.affineE (Pi.single i 1))
+        (Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ (Finset.mem_univ i)))
+      rw [Equiv.symm_apply_apply] at hgeq
+      have hval := hg (ChainDescent.affineE.symm u' - Pi.single i 1)
+      rw [hgeq] at hval
+      exact hval
+    exact ChainDescent.affineE.symm.injective (ChainDescent.coords_determine Q hQ h0 hi)
+
 end ChainDescent.RouteC
