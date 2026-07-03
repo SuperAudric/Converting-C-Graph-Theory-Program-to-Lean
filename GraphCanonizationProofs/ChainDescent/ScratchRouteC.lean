@@ -26,9 +26,15 @@ the seal from the standard frame to **any base whose difference-vectors span `V`
 **Scope / place in the plan.** The two spanning theorems are the **isometry-scheme** discretization at an arbitrary
 spanning base — the back-half Route C rides on once `Q` is recovered (F1 `route_c_f1_probe.py` / `AffineStructureRecovery`
 + A1 `route_c_reconstruct_probe.py` / `QuadraticFormRecovery`, both DONE + confirmed in C#). `isometryScheme_refines_
-similitudeScheme` is A3's brick 1. **The one remaining Route-C Lean piece is F4** — iso-invariance of the recovered form
-(a graph iso carries the cone to the cone ⟹ `Q` to a scalar multiple; the `forcedNode_relabel` analog). Full pickup:
-`docs/chain-descent-route-c-plan.md` STATUS + §6a. See §4 for the exact preexisting-lemma names.
+similitudeScheme` is A3's brick 1.
+
+**F4 (iso-invariance of the recovered form) — equivariance core now LANDED (F4 section below):**
+`recoveredForm_colouring_equivariant` + bricks `similitude_colouring_equivariant` / `similitude_conePreserving`. The one
+non-elementary link is `ConeSepDeterminesForm` (same isotropic cone ⟹ scalar-multiple form = A1's `vanishDim=1`
+uniqueness), named + carried as a classical citation — so **F4 and A1's Lean side unify into one carried fact**, the
+equivariance proved around it. Remaining Route-C open items: that classical carry + the meta-poly bootstrapping (F1
+consumes `Aut`, whose poly recovery for this residue is the open T0 problem — see the plan's STATUS "OPEN — meta-poly
+bootstrapping"). Full pickup: `docs/chain-descent-route-c-plan.md` STATUS + §6a. See §4 for the preexisting-lemma names.
 -/
 import ChainDescent.CascadeAffine
 
@@ -154,5 +160,83 @@ theorem isometryScheme_refines_similitudeScheme
     ChainDescent.orbMk_affine_eq_iff]
   obtain ⟨g₀, hg₀, hg⟩ := h
   exact ⟨g₀, ChainDescent.isometry_le_similitude Q hg₀, hg⟩
+
+/-! ## F4 — iso-invariance of the recovered form (the recovered-`Q` colouring is relabeling-equivariant)
+
+The Route-C spine (recover `Q` → isometry scheme refines the graph (A3 brick 1) → discretizes at a
+spanning base (`viaOrthogonalForm_spanning`)) yields an iso-invariant discrete colouring **only if** the
+recovered `Q` is itself iso-invariant. Concretely: a graph isomorphism between two affine-polar graphs is,
+after F1 coordinatization, a linear map `g` carrying the isotropic cone of `Q` onto the cone of `Q'`
+(`Q v = 0 ↔ Q' (g v) = 0`) — and F4 must conclude that the recovered-`Q` **difference colouring** is then
+carried correspondingly (`Q' (g u − g t) = μ · Q (u − t)`), the `forcedNode_relabel` analog for the form.
+
+**The honest split (this resolves the plan's "only F4 remains" — F4 and A1's Lean side are two faces of
+one classical fact).** The chain *graph iso → linear `g` with cone-preservation → `g` is a form similitude
+→ colouring equivariant* has exactly one non-elementary link: **cone-preservation ⟹ similitude**, i.e.
+"a nondegenerate quadric determines its quadratic form up to a nonzero scalar". That is precisely A1's
+finite-geometry content (probe-confirmed `vanishDim = 1`, `route_c_reconstruct_probe.py`) and is carried
+here as the scoped named predicate `ConeSepDeterminesForm` — a classical citation, same discipline as
+Witt/G3. Everything else (the similitude ⟹ equivariant-colouring identity, and similitude ⟹ cone-preserving)
+is elementary linear algebra, proved below axiom-clean. So F4 lands its genuine content (the equivariance)
+and names — rather than hides — the one classical carry it shares with A1. -/
+
+/-- **A1 / F4's shared classical carry — a nondegenerate quadric determines its form up to a scalar.**
+If `Q` and `R` have the same isotropic cone (`Q v = 0 ↔ R v = 0` for all `v`), then `R` is a nonzero
+scalar multiple of `Q`. This is the finite-geometry uniqueness behind A1 (the degree-2 forms vanishing
+on the cone are exactly `⟨Q⟩`, `vanishDim = 1`, probe-confirmed for nondegenerate `Q`, `d ≥ 4`); carried
+as a citation (it is a classical fact, not re-proved here). Scoped to the two forms in question so it is
+**true** (the unrestricted `∀ Q R` form is false for degenerate/low-dim forms — cf. the vacuity trap). -/
+def ConeSepDeterminesForm (Q R : QuadraticForm (ZMod p) (Fin d → ZMod p)) : Prop :=
+  (∀ v, Q v = 0 ↔ R v = 0) → ∃ μ : (ZMod p)ˣ, ∀ v, R v = (μ : ZMod p) * Q v
+
+/-- **F4 brick 1 — a form similitude carries the difference colouring (equivariance, provable).** If `g`
+is a similitude from `Q` to `Q'` (`Q' (g v) = μ · Q v`), then the recovered-`Q` **difference** colouring
+transports by the same scalar: `Q' (g u − g t) = μ · Q (u − t)`. This is the exact sense in which the
+isometry-scheme colouring (a pair `(u,t)` coloured by `Q`-value-of-difference) is *equivariant* under the
+linear part of a graph iso — the load-bearing content of F4. Pure linearity: `g u − g t = g (u − t)`. -/
+theorem similitude_colouring_equivariant
+    (Q Q' : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)} {μ : ZMod p}
+    (hsim : ∀ v, Q' (g v) = μ * Q v) (u t : Fin d → ZMod p) :
+    Q' (g u - g t) = μ * Q (u - t) := by
+  rw [← map_sub]
+  exact hsim (u - t)
+
+/-- **F4 brick 1b — a form similitude preserves the cone (consistency, provable).** If `g` is a
+similitude from `Q` to `Q'` with unit factor `μ`, then `g` carries the `Q`-cone to the `Q'`-cone
+(`Q' (g v) = 0 ↔ Q v = 0`). The converse (cone-preservation ⟹ similitude) is the carried
+`ConeSepDeterminesForm`. Together they say: for nondegenerate forms, "similitude" and "cone-preserving"
+coincide — which is why recovering `Q` up to scalar (A1) is well-defined. -/
+theorem similitude_conePreserving
+    (Q Q' : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)} {μ : (ZMod p)ˣ}
+    (hsim : ∀ v, Q' (g v) = (μ : ZMod p) * Q v) (v : Fin d → ZMod p) :
+    Q' (g v) = 0 ↔ Q v = 0 := by
+  rw [hsim v, mul_eq_zero]
+  constructor
+  · rintro (h | h)
+    · exact absurd h (Units.ne_zero μ)
+    · exact h
+  · exact fun h => Or.inr h
+
+/-- **F4 — the recovered-`Q` difference colouring is iso-invariant (equivariant under a graph iso's
+linear part).** Given the linear part `g` of a graph isomorphism (which carries the `Q`-cone to the
+`Q'`-cone: `Q v = 0 ↔ Q' (g v) = 0`) and the classical uniqueness `ConeSepDeterminesForm` (A1's carried
+fact), the recovered difference colouring transports with a single global scalar `μ`:
+`Q' (g u − g t) = μ · Q (u − t)` for all `u, t`. So canonicalizing via the recovered form produces a
+*canonical* (iso-invariant) colouring — the property the poly canonicalization claim needs, and the one
+the banked seal does **not** supply (discreteness does not transfer to the coarser similitude scheme).
+Composes with A3 brick 1 (`isometryScheme_refines_similitudeScheme`) and `viaOrthogonalForm_spanning` to
+give: iso-invariant discrete colouring at a spanning base ⟹ (meta) poly canonical labelling. Axiom-clean;
+the only non-elementary input is the named classical carry `ConeSepDeterminesForm`. -/
+theorem recoveredForm_colouring_equivariant
+    (Q Q' : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)}
+    (hcone : ∀ v, Q v = 0 ↔ Q' (g v) = 0)
+    (hclassical : ConeSepDeterminesForm Q
+      (Q'.comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p)))) :
+    ∃ μ : (ZMod p)ˣ, ∀ u t : Fin d → ZMod p, Q' (g u - g t) = (μ : ZMod p) * Q (u - t) := by
+  obtain ⟨μ, hμ⟩ := hclassical hcone
+  exact ⟨μ, fun u t => similitude_colouring_equivariant Q Q' (fun v => hμ v) u t⟩
 
 end ChainDescent.RouteC

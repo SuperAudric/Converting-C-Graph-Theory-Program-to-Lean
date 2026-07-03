@@ -19,7 +19,9 @@
 ## STATUS (read first)
 
 **Where Route C stands (2026-07-03).** The **recovery front is built and confirmed**; the Route-C spine is assembled
-from landed pieces; **F4 (iso-invariance) is the one remaining load-bearing piece.**
+from landed pieces; **F4's equivariance core is now LANDED (axiom-clean)** — the residual reduces to A1's finite-geometry
+uniqueness (`ConeSepDeterminesForm`, now named + carried as a classical citation) + the meta poly claim + the
+bootstrapping question (how coordinates are recovered without already having `Aut`; see the "OPEN — meta-poly" note).
 
 **✅ DONE — the C# recovery front (abstract graph → coordinates → form → graph), confirmed against the REAL harness.**
 - **F1 — additive-structure recovery** (`PermutationGroup.RegularNormalPSubgroup` + `AffineStructureRecovery.Recover`):
@@ -38,18 +40,30 @@ from landed pieces; **F4 (iso-invariance) is the one remaining load-bearing piec
   differences span (Route C individualizes an iso-invariantly chosen base, not the literal standard frame).
 - `isometryScheme_refines_similitudeScheme` (**A3 brick 1**) — `O(Q)≤GO(Q)` ⟹ the isometry scheme (exact-`Q` relations)
   refines the given similitude graph (isotropy-only). The consistency half of the bridge.
+- **F4 equivariance core (NEW 2026-07-03, axiom-clean):** `recoveredForm_colouring_equivariant` — the linear part `g` of
+  a graph iso carries the `Q`-cone to the `Q'`-cone, hence (via the carried `ConeSepDeterminesForm`) the recovered
+  **difference colouring** transports by one global scalar: `Q'(g u − g t) = μ · Q(u − t)`. Provable bricks
+  `similitude_colouring_equivariant` (the equivariance identity) + `similitude_conePreserving` (cone consistency); the
+  one non-elementary link is `ConeSepDeterminesForm` (below).
 - **The assembled spine:** recover `Q` (F1+A1, C# done) → work on the finer isometry scheme (refines the given graph,
-  brick 1) → discretize at a spanning base (`viaOrthogonalForm_spanning`, landed). **Discreteness does NOT transfer down
-  to the similitude scheme** (that's the node-4 stall) — so Route C is a *distinct canonicalization object*, and once
-  brick 1 is in place A3's remaining "discreteness transfer" collapses onto **F4**.
+  brick 1) → discretize at a spanning base (`viaOrthogonalForm_spanning`, landed) → the whole thing is iso-invariant
+  (F4). **Discreteness does NOT transfer down to the similitude scheme** (that's the node-4 stall) — so Route C is a
+  *distinct canonicalization object*, and F4 supplies exactly the iso-invariance that makes "discrete ⟹ canonical".
 
-**◻ REMAINING — F4 + the meta claim.**
-- **F4 (the next step, the last load-bearing Lean piece):** the recovered `Q` is **iso-invariant** — a graph iso carries
-  the cone to the cone, hence `Q` to a scalar multiple; so the recovered-`Q` colouring is relabeling-equivariant. The
-  `forcedNode_relabel` analog. **Vacuity-trap-prone** (get the equivariant predicate right — cf. `SchemeReproduced`).
-  Scoping + the landed `forcedNode`/`forcedNode_relabel` template it mirrors: **§6a (F4 pickup)**.
+**◻ REMAINING — the classical carry, the meta claim, and the bootstrapping question.**
+- **`ConeSepDeterminesForm` (A1's Lean side = F4's one non-elementary link):** "a nondegenerate quadric determines its
+  quadratic form up to a nonzero scalar" (the `vanishDim=1` fact, probe-confirmed). **Correction to the earlier "only F4
+  remains":** F4 and A1's Lean lemma are *two faces of this one classical fact* — F4 now names + carries it (Witt/G3
+  discipline) and proves the equivariance around it; discharging it (a finite-geometry development) or accepting it as a
+  citation is the remaining Lean choice. Not vacuous: it is scoped (the unrestricted `∀ Q R` form is false).
 - **Meta poly claim:** "poly" stays a meta-argument over the bounded-base discreteness object + poly per-node (no runtime
   model in Lean).
+- **★ OPEN — meta-poly bootstrapping (spotted 2026-07-03, not yet resolved):** F1 as built/documented recovers
+  coordinates from `T = O_p(Aut)` — it **consumes `Aut`**. But poly-time computation of `Aut` for this SRG residue is
+  *itself* the open T0 problem Route C claims to sidestep, so the meta-poly first step is potentially circular. The
+  in-spirit fix (recover the affine/geometric coordinatization directly from the cone/line structure, no `Aut`) is
+  plausible + poly for these highly-structured graphs but is **neither built nor scoped**. The Lean object (F4) is
+  unaffected (Lean formalizes no runtime model); this is a gap in the *poly claim*, to resolve in the cost analysis.
 - **Later:** `q=pᵉ` (F2, the Frobenius seam), and the other families (alternating/half-spin/Suzuki) as `IFormStructure`
   adapters — §6 "Instances 2–4".
 
@@ -189,6 +203,9 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.coords_determine_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `coords_determine`: `Q`-values at any *spanning* base `S` (`span S = ⊤`) determine the vertex |
 | `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `viaOrthogonalForm`: `O(Q)` discretizes at any base `T∋o` whose differences `{t̄−ō}` span — the iso-invariantly-chosen base Route C needs |
 | `RouteC.isometryScheme_refines_similitudeScheme` | `ScratchRouteC.lean` (**Route C A3 brick 1, NEW, axiom-clean**) | `O(Q)≤GO(Q)` ⟹ the isometry scheme refines the given similitude graph (finer `relOfPair`) — the recovered form is consistent, not fabricated |
+| `RouteC.ConeSepDeterminesForm` | `ScratchRouteC.lean` (**Route C, NEW — the carried classical fact**) | scoped predicate: same isotropic cone ⟹ scalar-multiple form (A1's `vanishDim=1` uniqueness; carried as citation, Witt/G3 discipline) |
+| `RouteC.similitude_colouring_equivariant`, `RouteC.similitude_conePreserving` | `ScratchRouteC.lean` (**Route C F4 bricks, NEW, axiom-clean**) | a form similitude carries the difference colouring by one scalar (`Q'(gu−gt)=μ·Q(u−t)`) + preserves the cone — pure linearity |
+| `RouteC.recoveredForm_colouring_equivariant` | `ScratchRouteC.lean` (**Route C F4 capstone, NEW, axiom-clean**) | graph-iso cone-preservation + `ConeSepDeterminesForm` ⟹ the recovered difference colouring is equivariant (iso-invariant up to global scalar) — the "discrete ⟹ canonical" link |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -250,7 +267,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 | **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03).** Confirmed against the REAL harness (`RouteCF1Probe.cs`): recovers `T` exactly (ground-truth), regular + elementary-abelian, coordinatizes the cone (`vanishDim=1`) — VO^ε₄(q), q=2,3,5, both types; char-agnostic (full `Aut` delivered). **Production code landed:** general group ops on `PermutationGroup.cs` (`RegularNormalPSubgroup(p)`, `NormalClosure`, `Elements`, `HasExponentDividing`, `Perm.Order`/`Pow`) + `AffineStructureRecovery.Recover` (coordinatization); the probe now exercises the production path (all pass; 26 existing `PermutationGroup` tests green). "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite). Remaining: the Lean side (F4 iso-invariance) + `q=pᵉ` (F2). |
 | **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **new; deferrable.** `q=p` needs nothing (additive = 𝔽_p-linear automatically). `FieldGeneric`/`efield` = the template; same seam the WL route had (plan Layer D) |
 | **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C# | new, thin; the merge point |
-| **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **new; vacuity-trap-prone** (cf. `SchemeReproduced` — get the equivariant predicate right). Mirrors landed `forcedNode`/`forcedNode_relabel` |
+| **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **✅ EQUIVARIANCE CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `recoveredForm_colouring_equivariant` (+ bricks `similitude_colouring_equivariant`/`similitude_conePreserving`). Residual = the carried classical `ConeSepDeterminesForm` (= A1's finite-geometry uniqueness — F4 and A1-Lean unify) + the meta-poly bootstrapping (STATUS "OPEN"). Not vacuous (predicate scoped) |
 | **F5** | **Generic seal→poly spine** — `RecoverForm ⟹ refined scheme ⟹ discrete_affineScheme_of_jointSeparates ⟹ viaSpielman` | Lean | **downstream all landed & generic**; only the A3 refinement bridge is new |
 
 ### Instance 1 — affine-polar `VO^ε` (proves the whole spine)
@@ -260,7 +277,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 | **A1** | `RecoverForm` = solve the degree-2 vanishing system on the cone | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03, `QuadraticFormRecovery.RecoverForm`):** recovers `Q` up to scalar by one kernel solve on F1's coordinates; the recovered `Q` + coords **reconstruct the entire graph** (`Q(coords[x]−coords[y])=0 ⟺ x~y`, **0 mismatches**, VO^±₄(3)). Odd-q (returns null in char-2). Lean side = a finite-geometry nondegeneracy lemma (`⟨Q⟩` = the vanishing space) |
 | **A2** | `Separates` = `coords_determine` / `spanning_sameExactGram_determines` | **LANDED, axiom-clean** |
 | **A2⁺** | the spanning back-half — `RouteC.coords_determine_spanning` + `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` (isometry scheme discretizes at any iso-invariantly-chosen spanning base) | **✅ LANDED 2026-07-03, axiom-clean** (`ScratchRouteC.lean`, NOT in `build.sh`) |
-| **A3** | **the refinement bridge** — recovered `Q` upgrades the similitude graph to the isometry scheme, which `viaOrthogonalForm_spanning` discretizes | **◑ brick 1 LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `isometryScheme_refines_similitudeScheme` — `O(Q)≤GO(Q)` ⟹ the isometry scheme (exact-`Q` relations) refines the given similitude graph (isotropy-only). The consistency half. Remaining A3 content = the discreteness-transfer, which reduces to **F4** (iso-invariance) + the meta poly claim |
+| **A3** | **the refinement bridge** — recovered `Q` upgrades the similitude graph to the isometry scheme, which `viaOrthogonalForm_spanning` discretizes | **◑ brick 1 LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `isometryScheme_refines_similitudeScheme` — `O(Q)≤GO(Q)` ⟹ the isometry scheme (exact-`Q` relations) refines the given similitude graph (isotropy-only). The consistency half. Remaining A3 content = the discreteness-transfer, now discharged by **F4** (`recoveredForm_colouring_equivariant`, ✅ landed 2026-07-03) — the iso-invariance that makes "discrete ⟹ canonical" |
 | **A4** | `AutGens` = `GO(Q)` generators (reflections) → existing `PermutationGroup` (only for the \|Aut\| side) | Schreier–Sims exists; generator list is standard classical-group data |
 
 Instance 1 forces F1/F3/F4/F5 into existence, so it is **most of the total work**; the other three families then
@@ -286,14 +303,19 @@ reduce to writing their `IFormStructure` implementation.
 1. ✅ **F1 + A1** (C# recovery front) — DONE + confirmed against the real harness (`AffineStructureRecovery`,
    `QuadraticFormRecovery`, `RouteCF1Probe.cs`).
 2. ✅ **A2⁺ + A3 brick 1** (Lean spine from landed pieces) — DONE, axiom-clean (`ScratchRouteC.lean`).
-3. ◻ **F4** iso-invariance — **the next step**, the vacuity-trap-prone piece; get the equivariant predicate right. §6a.
-4. ◻ **F2** (`q=pᵉ` seam) — deferrable; the same Layer-D seam the WL route had.
-5. ◻ **Instances 2→3→4** — pure adapters; Suzuki last (needs the char-2 substrate as its own prerequisite).
+3. ✅ **F4** equivariance core — **LANDED 2026-07-03, axiom-clean** (`recoveredForm_colouring_equivariant` + bricks).
+   Residual = the carried `ConeSepDeterminesForm` (A1 uniqueness) + meta-poly bootstrapping (STATUS "OPEN").
+4. ◻ **Meta-poly bootstrapping** (NEW next priority) — resolve the F1 circularity: Aut-free geometric coordinatization,
+   or a citation that `Aut` is poly-computable for the geometric SRG residue. This gates the "poly" headline (STATUS).
+5. ◻ **F2** (`q=pᵉ` seam) — deferrable; the same Layer-D seam the WL route had.
+6. ◻ **Instances 2→3→4** — pure adapters; Suzuki last (needs the char-2 substrate as its own prerequisite).
 
-**Definition of done (Route C, affine-polar):** F1 recovers coordinates iso-invariantly (F4); A1 recovers `Q`; A3 refines
-to the isometry scheme (brick 1 ✅); `viaOrthogonalForm_spanning` discretizes at the `O(d)` base and seals via
-`viaSpielman` (✅) — the structural bounded-base discreteness object complete, "poly" the meta-claim over it. The C#
-engine reproduces `|Aut|` via `PermutationGroup`. **Only F4 remains** before the object is assembled.
+**Definition of done (Route C, affine-polar):** F1 recovers coordinates iso-invariantly (F4 ✅ equivariance core); A1
+recovers `Q` (C# ✅; Lean uniqueness = the carried `ConeSepDeterminesForm`); A3 refines to the isometry scheme (brick 1
+✅); `viaOrthogonalForm_spanning` discretizes at the `O(d)` base and seals via `viaSpielman` (✅) — the structural
+bounded-base discreteness object complete, "poly" the meta-claim over it **modulo the bootstrapping question**. The C#
+engine reproduces `|Aut|` via `PermutationGroup`. **The Lean spine is now assembled;** the open items are the classical
+carry + the meta-poly bootstrapping.
 
 ### 6a. F4 — iso-invariance of the recovered form (the next concrete step, for a fresh reader)
 
