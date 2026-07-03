@@ -208,6 +208,12 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
   recovered coordinates give `coneVanishDim = 1`** ⟹ recovery is method-correct, scramble-invariant, and hands A1 a
   valid coordinatization. (Odd `q`: `−1` is a `p'`-element so `G₀` is a `p'`-group and `O_p(G)=T` is clean; char-2
   recovers `T` the same way but needs Aut's `p'`-part, e.g. `S₅` for Clebsch.)
+- **`RouteCF1Probe.cs` — F1 against the REAL harness (C#, `GraphCanonizationProject.Tests/`).** Builds `VO^ε₄(q)`,
+  runs the actual chain-descent canonizer, and confirms end-to-end that (I) `CanonResult.ResidualGroup` contains the
+  translations and has full `|Aut|`, (II) `O_p(ResidualGroup)` (the production F1 algorithm — normal-closure join)
+  equals the translation group `T` **exactly** (ground-truth checked), regular + elementary-abelian, and (III) a basis
+  of the recovered `T` coordinatizes so the connection set is a quadric cone (`vanishDim=1`). **All pass** (q=2,3, both
+  types; q=5 extension). Confirms the harness↔F1 interface the larger build depends on.
 - **Supporting (from the direct route, still relevant):** `model_gap.py` (the isoClass scheme + orbit/refinement
   helpers), `factorization_probe.py`/`flag_stall_probe.py` (the node-4 stall evidence that motivates Route C).
 
@@ -219,7 +225,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 
 | # | piece | side | status / notes |
 |---|---|---|---|
-| **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **algorithm probe-validated** (`route_c_f1_probe.py`). Build = host `O_p`/normal-closure on `PermutationGroup.cs`, consuming harvested-Aut generators; emit basis + origin. "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite) |
+| **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **✅ CONFIRMED against the REAL harness (2026-07-03, `RouteCF1Probe.cs`):** `O_p(CanonResult.ResidualGroup)` recovers `T` exactly (ground-truth verified), regular + elementary-abelian, and coordinatizes the cone (`vanishDim=1`) — VO^ε₄(q), q=2,3(,5), both types; works char-agnostically since the harness delivers the *full* `Aut`. Remaining build = productionize `O_p` onto `PermutationGroup.cs` + the coordinatization emitter. "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite) |
 | **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **new; deferrable.** `q=p` needs nothing (additive = 𝔽_p-linear automatically). `FieldGeneric`/`efield` = the template; same seam the WL route had (plan Layer D) |
 | **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C# | new, thin; the merge point |
 | **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **new; vacuity-trap-prone** (cf. `SchemeReproduced` — get the equivariant predicate right). Mirrors landed `forcedNode`/`forcedNode_relabel` |
