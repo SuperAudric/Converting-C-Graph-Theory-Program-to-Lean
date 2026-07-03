@@ -230,6 +230,8 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.multiFormAdapter` | `ScratchRouteC.lean` (**Route C alternating engine hookup, NEW, axiom-clean**) | a form family `{Q_k}` with joint nondegeneracy ⟹ a `FormAdapter` (`G₀ = ⨅ₖ O(Q_k)` the joint isometry group, frame base, `coords_determine_multi` certificate). `affinePolarAdapter` = the `ι=Unit` case |
 | `RouteC.Plucker.{Pf0..Pf4, pluckerForms, plucker_hjoint}` | `ScratchRouteC.lean §Plucker` (**Route C alternating instance, NEW, axiom-clean**) | the concrete 5 sub-Pfaffian quadrics on `𝔽_p^10` (via `linMulLin`) + their joint nondegeneracy `plucker_hjoint` (the sole geometric input) |
 | `RouteC.Plucker.alternatingAdapter`, `RouteC.Plucker.reachesRigidOrCameron_alternating` | `ScratchRouteC.lean §Plucker` (**Route C instance 2 CAPSTONE, NEW, axiom-clean**) | `Alt(5,q)` as a sealed `FormAdapter` + the rigid-or-Cameron seal — the **first concrete non-quadratic (multi-form) Route-C family, end to end** |
+| `RouteC.polar_linMulLin` | `ScratchRouteC.lean` (**reusable primitive, NEW, axiom-clean**) | `polar (linMulLin f g) x y = f x·g y + f y·g x` — the polar of a Clifford-term-sum quadric (Plücker / spinor forms) |
+| `RouteC.HalfSpin.halfSpin_reduction` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3 target, NEW, axiom-clean**) | D₅ half-spin (`𝔽_p^16`, 10 spinor quadrics): supply `Qs`+`hjoint` ⟹ sealed via `multiFormAdapter`. Commits the reduction; remaining = the concrete spinor quadrics |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -330,7 +332,15 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     end. (Honest scope: the seal is for `affineScheme(⨅ₖ O(Pf_k))`; that this scheme *is* `Alt(5,q)` is the modeling
     claim, same status as `affinePolarAdapter` modeling `VO^ε`.) The rank-3 alternating forms graph is exactly
     `Alt(4,q)` [=affine-polar] + `Alt(5,q)` [sealed], so **instance 2 (alternating) is DONE.** *Was Medium — landed.*
-- **Half-spin (e):** form-adjacent spinor incidence; `separates` expected closer to affine-polar. *Medium–high.*
+- **Half-spin (e) — SCOPED + reduction LANDED (2026-07-03).** The **D₅ half-spin** action: `Spin₁₀(q)` on the
+  16-dim half-spin module `𝔽_q^16`, rank 3. Connection set = the **pure-spinor cone** (spinor variety `S₅ ⊂ P^15`),
+  cut out by **10 quadratic equations** (the D₅ vector rep). So half-spin is **another MULTI-QUADRIC family** —
+  reuses `multiFormAdapter` + `coords_determine_multi` (**no new engine**). **`halfSpin_reduction`** (axiom-clean,
+  `ScratchRouteC.lean §HalfSpin`) commits the dimensions (module `Fin 16`, family `Fin 10`) and shows: supply the 10
+  spinor quadrics `Qs` + `hjoint` ⟹ sealed. **Remaining = the 10 D₅ spinor quadrics on `𝔽_p^16` (even-subset /
+  Clifford model — a careful rep-theoretic derivation, do NOT template blindly) + `hjoint`.** Polar via
+  `polar_linMulLin`; `hjoint` via the `plucker_hjoint` coordinate-isolation pattern. *Medium–high (the spinor
+  quadrics are the research-y part).*
 - **Suzuki–Tits (f):** the outlier — σ-twisted ovoid polynomial (char-2), `AutGens = Sz(q)`. Same `FormAdapter`
   interface, mostly-new internals; folds into the char-2 track. *Hardest; do last.*
 
@@ -355,8 +365,9 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
 5. ◑ **F2** (`q=pᵉ` semilinear seam) — **Lean core LANDED** (`…_semilinear`, axiom-clean): the recovered form is
    iso-invariant up to scalar **and** Frobenius σ. Remaining: the C# field-recovery side (folds into R1's geometric
    coordinatizer — Buekenhout–Shult recovers PG over 𝔽_q, field included).
-6. ◑ **Instances 2→3→4** — F3 interface LANDED; **instance 1 (affine-polar) + instance 2 (alternating `Alt(5,q)`,
-   `reachesRigidOrCameron_alternating`) both SEALED axiom-clean.** Remaining: half-spin (e) + Suzuki (f, char-2 last).
+6. ◑ **Instances 2→3→4** — F3 interface LANDED; **instance 1 (affine-polar) + instance 2 (alternating `Alt(5,q)`)
+   both SEALED axiom-clean; instance 3 (half-spin) SCOPED + reduction landed (`halfSpin_reduction`)** — a multi-quadric
+   family, reuses the engine; remaining = the 10 D₅ spinor quadrics + `hjoint`. Then Suzuki (f, char-2 last).
 
 **Definition of done (Route C, affine-polar):** F1 recovers coordinates iso-invariantly (F4 ✅ equivariance core); A1
 recovers `Q` (C# ✅; Lean uniqueness = the carried `NondegQuadricDeterminesForm`); A3 refines to the isometry scheme (brick 1

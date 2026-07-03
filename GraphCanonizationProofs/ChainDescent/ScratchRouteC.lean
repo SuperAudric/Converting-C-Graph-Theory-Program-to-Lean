@@ -506,6 +506,13 @@ noncomputable def multiFormAdapter {ι : Type*} (Qs : ι → QuadraticForm (ZMod
 coords `4..9 = 0`, `Pf₁` forces `1,2,3`, `Pf₂` forces `0`), so `multiFormAdapter` assembles them into a sealed
 `FormAdapter` — the first concrete non-quadratic (multi-form) Route-C family. All axiom-clean. -/
 
+/-- **Reusable primitive — the polar of a product-of-linear-forms.** `polar (linMulLin f g) x y =
+f x · g y + f y · g x`. The building block for the polar of any "Clifford-term-sum" quadric (Plücker
+sub-Pfaffians, D₅ spinor quadrics): each such form is a sum of `linMulLin (proj a) (proj b)` terms. -/
+theorem polar_linMulLin (f g : (Fin d → ZMod p) →ₗ[ZMod p] ZMod p) (x y : Fin d → ZMod p) :
+    QuadraticMap.polar (QuadraticMap.linMulLin f g) x y = f x * g y + f y * g x := by
+  simp only [QuadraticMap.polar, QuadraticMap.linMulLin_apply, map_add]; ring
+
 namespace Plucker
 open QuadraticMap
 
@@ -607,5 +614,44 @@ theorem reachesRigidOrCameron_alternating
   alternatingAdapter.reachesRigidOrCameron
 
 end Plucker
+
+/-! ## Half-spin family (instance 3) — scoping + the reduction target
+
+The half-spin graph is the **D₅ half-spin** action: `Spin₁₀(q)` on the 16-dimensional half-spin (spinor)
+module `V = 𝔽_q^16`, a rank-3 group. The connection set is the cone of **pure spinors** (the highest-weight
+orbit = the spinor variety `S₅ ⊂ P^15`), cut out by **10 quadratic equations** (matching the 10-dim vector
+representation of D₅). So half-spin is — like alternating — a **MULTI-QUADRIC family**, and reuses the SAME
+engine: `multiFormAdapter` + `coords_determine_multi` (both landed, axiom-clean). **No new engine is needed.**
+
+`halfSpin_reduction` below makes the target concrete: it commits the D₅ dimensions (module `Fin 16`, family
+`Fin 10`) and shows that supplying the 10 spinor quadrics `Qs` with joint nondegeneracy `hjoint` **seals the
+family** via the shared engine. So the entire remaining half-spin work is exactly: **define the 10 D₅ spinor
+quadrics on `𝔽_p^16` (the even-subset / Clifford model — a careful representation-theoretic derivation, do NOT
+template blindly) and prove their `hjoint`.** The polar of each (a sum of `linMulLin` terms) is computed via
+`polar_linMulLin` + the `simp only [polar, add_apply, sub_apply, linMulLin_apply, proj_apply]; ring` pattern
+(as in `§Plucker`), and `hjoint` by the coordinate-isolation pattern of `plucker_hjoint`. -/
+
+namespace HalfSpin
+
+/-- **Half-spin reduction (instance 3 target).** Committing the D₅ dimensions: any family of 10 quadratic
+forms `Qs` on `𝔽_p^16` (the half-spin module) with joint nondegeneracy `hjoint` is **sealed** — its affine
+scheme (`G₀ = ⨅ₖ O(Q_k)`) reaches the rigid-or-Cameron disjunction, via `multiFormAdapter` + the shared engine.
+So the only remaining half-spin content is constructing the 10 D₅ spinor quadrics and proving `hjoint`. -/
+theorem halfSpin_reduction
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (Qs : Fin 10 → QuadraticForm (ZMod p) (Fin 16 → ZMod p))
+    (hjoint : ∀ w : Fin 16 → ZMod p, (∀ k, (Qs k).polarBilin w = 0) → w = 0) :
+    ((SchemeBlockRecovered (p ^ 16)
+          (ChainDescent.affineScheme (multiFormAdapter Qs hjoint).G₀ (multiFormAdapter Qs hjoint).neg_mem)
+        ∨ AbelianConsumed (p ^ 16)
+          (ChainDescent.affineScheme (multiFormAdapter Qs hjoint).G₀ (multiFormAdapter Qs hjoint).neg_mem))
+        ∨ SchemeRecoveredByDepth (p ^ 16)
+          (ChainDescent.affineScheme (multiFormAdapter Qs hjoint).G₀ (multiFormAdapter Qs hjoint).neg_mem)
+          (16 + 1))
+      ∨ IsCameronScheme (p ^ 16)
+          (ChainDescent.affineScheme (multiFormAdapter Qs hjoint).G₀ (multiFormAdapter Qs hjoint).neg_mem) :=
+  (multiFormAdapter Qs hjoint).reachesRigidOrCameron
+
+end HalfSpin
 
 end ChainDescent.RouteC
