@@ -70,6 +70,32 @@ namespace Canonizer
                 if (p[i] != i) return i;
             return -1;
         }
+
+        // The order of `p` — the lcm of its cycle lengths.
+        public static long Order(int[] p)
+        {
+            var seen = new bool[p.Length];
+            long ord = 1;
+            for (int i = 0; i < p.Length; i++)
+                if (!seen[i])
+                {
+                    int len = 0, j = i;
+                    while (!seen[j]) { seen[j] = true; j = p[j]; len++; }
+                    ord = ord / Gcd(ord, len) * len;
+                }
+            return ord;
+        }
+
+        // p^e (e ≥ 0) by fast exponentiation.
+        public static int[] Pow(int[] p, long e)
+        {
+            var r = Identity(p.Length);
+            var b = (int[])p.Clone();
+            while (e > 0) { if ((e & 1) == 1) r = Compose(r, b); b = Compose(b, b); e >>= 1; }
+            return r;
+        }
+
+        static long Gcd(long a, long b) { while (b != 0) { (a, b) = (b, a % b); } return a; }
     }
 
     // ── Permutation group via a stabilizer chain ────────────────────────────
@@ -235,6 +261,104 @@ namespace Canonizer
             }
             orbit.Sort();
             return orbit.ToArray();
+        }
+
+        // ── Route-C F1 substrate: normal closure + the regular normal p-subgroup (socle) ──
+        //
+        // F1 (docs/chain-descent-route-c-plan.md §6) recovers the additive (F_p)^d
+        // structure from an abstract affine-polar graph as the SOCLE of its automorphism
+        // group. These are the general group-theoretic operations that recovery needs.
+
+        // Enumerate all elements of the group (BFS closure of the generators). |result|
+        // = Order. Use only when the group is small enough to materialise (F1 calls this
+        // on the translation group T, whose order is the graph's vertex count).
+        public IEnumerable<int[]> Elements()
+        {
+            var set = new HashSet<int[]>(PermComparer.Instance) { Perm.Identity(N) };
+            var queue = new Queue<int[]>();
+            queue.Enqueue(Perm.Identity(N));
+            while (queue.Count > 0)
+            {
+                var x = queue.Dequeue();
+                foreach (var g in _generators)
+                {
+                    var y = Perm.Compose(g, x);
+                    if (set.Add(y)) queue.Enqueue(y);
+                }
+            }
+            return set;
+        }
+
+        // The normal closure ⟨g^G⟩ — the smallest normal subgroup of G containing `g`.
+        // Standard fixed-point algorithm: close `g` under conjugation by the group's
+        // generators until the subgroup stops growing (membership via the chain).
+        public PermutationGroup NormalClosure(int[] g)
+        {
+            if (g.Length != N) throw new ArgumentException("degree mismatch", nameof(g));
+            var nc = new PermutationGroup(N);
+            nc.AddGenerator(g);
+            bool changed = true;
+            while (changed)
+            {
+                changed = false;
+                foreach (var x in nc.Generators.ToArray())
+                    foreach (var s in _generators)
+                    {
+                        var c = Perm.Compose(s, Perm.Compose(x, Perm.Inverse(s)));  // s x s⁻¹
+                        if (!nc.Contains(c)) { nc.AddGenerator(c); changed = true; }
+                    }
+            }
+            return nc;
+        }
+
+        // Whether every generator's order divides `p`. For an ABELIAN group this
+        // certifies exponent dividing `p` on the whole group — the general-`p`
+        // counterpart of the exponent-2 test baked into `IsElementaryAbelian`.
+        public bool HasExponentDividing(int p)
+        {
+            foreach (var g in _generators)
+                if (!Perm.IsIdentity(Perm.Pow(g, p))) return false;
+            return true;
+        }
+
+        // The unique regular normal elementary-abelian p-subgroup, if one exists, else
+        // null. For an affine-primitive permutation group this is the SOCLE = the
+        // regular translation group T ≅ (F_p)^d — the additive structure Route-C's F1
+        // recovers. Found as the normal closure of a p-element whose closure is a
+        // regular elementary-abelian p-group of order = the degree (unique by socle
+        // minimality). 'Regular' = order equal to the degree AND transitive (⟹ the
+        // point stabiliser is trivial). Seeds: p-parts of generators, then of pairwise
+        // products (lazy — generators alone suffice for the harvested affine Aut).
+        public PermutationGroup? RegularNormalPSubgroup(int p)
+        {
+            if (N == 0) return null;
+            bool IsTarget(PermutationGroup nc) =>
+                nc.Order == N && nc.IsAbelian && nc.HasExponentDividing(p) && nc.Orbit(0).Length == N;
+
+            foreach (var c in PElementSeeds(p))
+            {
+                if (Perm.IsIdentity(c)) continue;
+                var nc = NormalClosure(c);
+                if (IsTarget(nc)) return nc;
+            }
+            return null;
+        }
+
+        // p-parts (g^{p'-part of order}) of generators, then of pairwise products — the
+        // lazy seed stream for `RegularNormalPSubgroup`.
+        private IEnumerable<int[]> PElementSeeds(int p)
+        {
+            static int[] PPart(int[] g, int p)
+            {
+                long m = Perm.Order(g);
+                while (m % p == 0) m /= p;   // m := p'-part of the order
+                return Perm.Pow(g, m);
+            }
+            var gens = _generators;
+            foreach (var g in gens) yield return PPart(g, p);
+            for (int i = 0; i < gens.Count; i++)
+                for (int j = 0; j < gens.Count; j++)
+                    if (i != j) yield return PPart(Perm.Compose(gens[i], gens[j]), p);
         }
 
         // ── Schreier–Sims ────────────────────────────────────────────────────

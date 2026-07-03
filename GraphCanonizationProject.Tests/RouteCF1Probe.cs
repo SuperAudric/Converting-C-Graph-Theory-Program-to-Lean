@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using Xunit;
 using Xunit.Abstractions;
 using Canonizer;
@@ -11,17 +10,17 @@ using Canonizer;
 // F1 (docs/chain-descent-route-c-plan.md §6) recovers the additive/affine (F_p)^d structure from the
 // ABSTRACT graph so that "z - t" (and later Q(z-t)) is defined. The family-agnostic recovery: the
 // translation group is the SOCLE of Aut — for these affine-primitive graphs, T = O_p(Aut), the regular
-// elementary-abelian translation group. route_c_f1_probe.py validated the O_p algorithm from *given*
-// generators; THIS confirms it works against the REAL harness output (CanonResult.ResidualGroup), the
-// interface F1 depends on in the larger build.
+// elementary-abelian translation group.
 //
-// What it checks, per VO^eps_4(q):
-//   (I)  INTERFACE — the harness's ResidualGroup contains the translations and has full |Aut| (so O_p
-//        can recover them). Ground truth = the known translations in the vector encoding.
-//   (II) RECOVERY  — O_p(ResidualGroup), computed by normal closures (the production F1 algorithm),
-//        equals the translation group T exactly; T is regular + elementary-abelian of order q^d.
-//   (III) COORDS   — a basis of the recovered T coordinatizes the vertices so the connection set is a
-//        quadric cone (degree-2 vanishing dim = 1), the F1 -> A1 hand-off. (Odd q; char-2 skips this.)
+// This exercises the PRODUCTION path — AffineStructureRecovery.Recover / PermutationGroup.
+// RegularNormalPSubgroup — against the REAL harness output (CanonResult.ResidualGroup), the interface
+// F1 depends on in the larger build. Per VO^eps_4(q):
+//   (I)  INTERFACE — ResidualGroup contains the translations and has full |Aut| (ground truth = the
+//        known translations in the vector encoding).
+//   (II) RECOVERY  — AffineStructureRecovery.Recover's translation group equals T exactly; regular +
+//        elementary-abelian of order q^d.
+//   (III) COORDS   — the recovered coordinates make the connection set a quadric cone (degree-2
+//        vanishing dim = 1), the F1 -> A1 hand-off. (Odd q; char-2 skips this.)
 public class RouteCF1Probe
 {
     private readonly ITestOutputHelper _out;
@@ -30,7 +29,7 @@ public class RouteCF1Probe
     static int IPow(int b, int e) { int r = 1; for (int i = 0; i < e; i++) r *= b; return r; }
 
     // ── VO^eps_4(q) as flat adjacency, vertex v <-> Vec(v) (digit i = coeff of q^i). Vertex 0 = zero. ──
-    static (int[] adj, Func<int, int[]> vec, Func<int[], int> enc, Func<int[], int> qform) AffinePolar4(int q, int eps)
+    static (int[] adj, Func<int, int[]> vec, Func<int[], int> enc) AffinePolar4(int q, int eps)
     {
         const int dim = 4, m = 2;
         int n = IPow(q, dim);
@@ -75,10 +74,9 @@ public class RouteCF1Probe
                 for (int i = 0; i < dim; i++) d[i] = ((vecs[u][i] - vecs[v][i]) % q + q) % q;
                 if (Q(d) == 0) { adj[u * n + v] = 1; adj[v * n + u] = 1; }
             }
-        return (adj, Vec, Enc, Q);
+        return (adj, Vec, Enc);
     }
 
-    // ── permutation helpers (perms are int[]; Perm.Compose(p,q)[i]=p[q[i]] = apply q then p) ──
     sealed class PermEq : IEqualityComparer<int[]>
     {
         public static readonly PermEq I = new();
@@ -91,95 +89,8 @@ public class RouteCF1Probe
         }
         public int GetHashCode(int[] a) { int h = 17; foreach (int x in a) h = h * 31 + x; return h; }
     }
-    static long Gcd(long a, long b) { while (b != 0) { (a, b) = (b, a % b); } return a; }
-    static long Ord(int[] p)
-    {
-        int n = p.Length; var seen = new bool[n]; long o = 1;
-        for (int i = 0; i < n; i++)
-            if (!seen[i]) { int c = 0, j = i; while (!seen[j]) { seen[j] = true; j = p[j]; c++; } o = o / Gcd(o, c) * c; }
-        return o;
-    }
-    static int[] Pow(int[] g, long e)
-    {
-        var r = Perm.Identity(g.Length); var b = (int[])g.Clone();
-        while (e > 0) { if ((e & 1) == 1) r = Perm.Compose(r, b); b = Perm.Compose(b, b); e >>= 1; }
-        return r;
-    }
-    static int[] PPart(int[] g, int p)   // g^(p'-part of its order): a p-element
-    {
-        long m = Ord(g); while (m % p == 0) m /= p;   // m := p'-part of the order
-        return Pow(g, m);
-    }
-    static bool IsPPower(long m, int p) { while (m % p == 0) m /= p; return m == 1; }
-    static int[] Conj(int[] c, int[] g) => Perm.Compose(Perm.Compose(g, c), Perm.Inverse(g));
 
-    // <c^G> as a subgroup; null if it exceeds cap (=> not a small p-subgroup we want)
-    static HashSet<int[]>? NormalClosure(int[] c, IReadOnlyList<int[]> gens, int cap)
-    {
-        var cl = new HashSet<int[]>(PermEq.I) { c };
-        var fr = new Queue<int[]>(); fr.Enqueue(c);
-        while (fr.Count > 0)
-        {
-            var x = fr.Dequeue();
-            foreach (var s in gens)
-                foreach (var y in new[] { Conj(x, s), Conj(x, Perm.Inverse(s)) })
-                    if (cl.Add(y)) { fr.Enqueue(y); if (cl.Count > cap) return null; }
-        }
-        var basis = cl.ToArray();
-        var K = new HashSet<int[]>(PermEq.I) { Perm.Identity(c.Length) };
-        foreach (var b in basis) K.Add(b);
-        var q = new Queue<int[]>(K);
-        while (q.Count > 0)
-        {
-            var x = q.Dequeue();
-            foreach (var b in basis) { var y = Perm.Compose(x, b); if (K.Add(y)) { q.Enqueue(y); if (K.Count > cap) return null; } }
-        }
-        return K;
-    }
-    static bool IsPGroup(IEnumerable<int[]> K, int p) => K.All(g => IsPPower(Ord(g), p));
-
-    // O_p(G) = the largest normal p-subgroup, via the join of the p-group normal closures of the p-parts
-    // of generators (and pairwise products, to guarantee a translation is seeded). Each such closure lies
-    // in O_p; their join IS O_p. Cap at |T| = n (a translation's normal closure is exactly T, size n).
-    static HashSet<int[]> ComputePCore(PermutationGroup g, int p, int n)
-    {
-        var gens = g.Generators;
-        // seed from generators first; only if that undershoots, fall back to pairwise products.
-        var core = PCoreFromSeeds(gens, gens, p, n);
-        if (core.Count < n)
-        {
-            var seeds = new List<int[]>(gens);
-            for (int i = 0; i < gens.Count; i++)
-                for (int j = 0; j < gens.Count; j++)
-                    if (i != j) seeds.Add(Perm.Compose(gens[i], gens[j]));
-            core = PCoreFromSeeds(seeds, gens, p, n);
-        }
-        return core;
-    }
-
-    // join of the p-group normal closures of the p-parts of `seeds` (closed as a subgroup)
-    static HashSet<int[]> PCoreFromSeeds(IReadOnlyList<int[]> seeds, IReadOnlyList<int[]> gens, int p, int n)
-    {
-        var all = new HashSet<int[]>(PermEq.I) { Perm.Identity(n) };
-        var seenSeed = new HashSet<int[]>(PermEq.I);
-        foreach (var s in seeds)
-        {
-            var c = PPart(s, p);
-            if (Perm.IsIdentity(c) || !seenSeed.Add(c)) continue;
-            var K = NormalClosure(c, gens, n);
-            if (K != null && IsPGroup(K, p)) foreach (var x in K) all.Add(x);
-        }
-        var basis = all.ToArray();
-        var q = new Queue<int[]>(all);
-        while (q.Count > 0)
-        {
-            var x = q.Dequeue();
-            foreach (var b in basis) { var y = Perm.Compose(x, b); if (all.Add(y)) q.Enqueue(y); }
-        }
-        return all;
-    }
-
-    // ── rank over F_q (Gaussian elimination) for the cone / degree-2 vanishing check ──
+    // rank over F_q (Gaussian elimination) for the cone / degree-2 vanishing check
     static int RankModQ(List<int[]> rows, int q)
     {
         if (rows.Count == 0) return 0;
@@ -224,7 +135,7 @@ public class RouteCF1Probe
     {
         const int dim = 4;
         int n = IPow(q, dim), p = q;   // q prime
-        var (adj, Vec, Enc, Q) = AffinePolar4(q, eps);
+        var (adj, Vec, Enc) = AffinePolar4(q, eps);
         string nm = $"VO^{(eps < 0 ? "-" : "+")}_{dim}({q}) n={n}";
 
         // ground truth: the translations in the vector encoding
@@ -242,80 +153,37 @@ public class RouteCF1Probe
         // (I) INTERFACE — the harness delivers the translations
         Assert.False(res.Flagged, $"{nm}: canonizer flagged");
         foreach (var t in Ttrue) Assert.True(G.Contains(t), $"{nm}: a translation is NOT in ResidualGroup");
-        Assert.True(G.Order >= n, $"{nm}: |Aut| < n (group too small to be full Aut)");
 
-        // (II) RECOVERY — O_p(ResidualGroup) == T
-        var Trec = ComputePCore(G, p, n);
-        _out.WriteLine($"    O_p recovered |Trec|={Trec.Count} (expect n={n})");
-        Assert.True(Trec.SetEquals(Ttrue), $"{nm}: O_p(ResidualGroup) != translation group (|Trec|={Trec.Count})");
-        Assert.True(Trec.Count == n, $"{nm}: |O_p| != n");
-        // regular: every non-identity element fixed-point-free
-        foreach (var t in Trec) if (!Perm.IsIdentity(t)) Assert.True(Enumerable.Range(0, n).All(i => t[i] != i), $"{nm}: O_p not regular");
-        // elementary abelian: exponent p and abelian
-        foreach (var t in Trec) Assert.True(IsPPower(Ord(t), p) && Ord(t) <= p, $"{nm}: O_p not exponent p");
-        var Tl = Trec.ToArray();
-        for (int i = 0; i < Tl.Length; i++) for (int j = i + 1; j < Tl.Length; j++)
-            Assert.True(PermEq.I.Equals(Perm.Compose(Tl[i], Tl[j]), Perm.Compose(Tl[j], Tl[i])), $"{nm}: O_p not abelian");
+        // (II) RECOVERY — the PRODUCTION F1 path recovers exactly the translation group
+        var s = AffineStructureRecovery.Recover(G, p, origin: 0);
+        Assert.True(s is not null, $"{nm}: AffineStructureRecovery.Recover returned null");
+        Assert.True(s!.Dim == dim, $"{nm}: recovered Dim {s.Dim} != {dim}");
+        var Trec = new HashSet<int[]>(s.Translations.Elements(), PermEq.I);
+        _out.WriteLine($"    recovered |T|={Trec.Count} (expect n={n})  Dim={s.Dim}");
+        Assert.True(Trec.SetEquals(Ttrue), $"{nm}: recovered translation group != true translations (|T|={Trec.Count})");
+        Assert.True((int)s.Translations.Order == n, $"{nm}: |T| != n");
+        Assert.True(s.Translations.IsAbelian && s.Translations.HasExponentDividing(p), $"{nm}: T not elementary-abelian exponent {p}");
+        foreach (var t in Trec) if (!Perm.IsIdentity(t)) Assert.True(Enumerable.Range(0, n).All(i => t[i] != i), $"{nm}: T not regular");
 
-        // (III) COORDS — basis of recovered T coordinatizes; connection set is a quadric cone (odd q)
+        // (III) COORDS — the recovered coordinates make the connection set a quadric cone (odd q)
         if (q % 2 == 1)
         {
-            const int o0 = 0;   // origin = vertex 0
-            // greedy F_p-basis of Trec (subgroup grows by factor p each add)
-            var basis = new List<int[]>();
-            var span = new HashSet<int[]>(PermEq.I) { Perm.Identity(n) };
-            foreach (var t in Trec)
-            {
-                if (Perm.IsIdentity(t)) continue;
-                var trial = SubgroupClosure(basis.Append(t), n);
-                if (trial.Count > span.Count) { basis.Add(t); span = trial; }
-                if (span.Count == n) break;
-            }
-            Assert.True(basis.Count == dim, $"{nm}: recovered basis size {basis.Count} != {dim}");
-            // coordinate of each vertex via the regular action: (c_1..c_d) -> (prod b_k^{c_k})[o0]
-            var vcoord = new int[n][];
-            foreach (var c in AllTuples(p, dim))
-            {
-                var e = Perm.Identity(n);
-                for (int k = 0; k < dim; k++) e = Perm.Compose(e, Pow(basis[k], c[k]));
-                vcoord[e[o0]] = c;
-            }
-            // connection set = neighbours of o0; degree-2 vanishing dim on their coords
+            int o0 = s.Origin;
+            Assert.True(s.Coords[o0].All(x => x == 0), $"{nm}: origin coord not zero");
             var monos = new List<(int, int)>();
             for (int i = 0; i < dim; i++) for (int j = i; j < dim; j++) monos.Add((i, j));
-            var rowsList = new List<int[]>();
+            var rows = new List<int[]>();
             int neigh = 0;
             for (int x = 0; x < n; x++)
                 if (x != o0 && adj[o0 * n + x] == 1)
                 {
                     neigh++;
-                    var row = monos.Select(m => vcoord[x][m.Item1] * vcoord[x][m.Item2] % q).ToArray();
-                    rowsList.Add(row);
+                    rows.Add(monos.Select(mm => s.Coords[x][mm.Item1] * s.Coords[x][mm.Item2] % q).ToArray());
                 }
-            int vanish = monos.Count - RankModQ(rowsList, q);
+            int vanish = monos.Count - RankModQ(rows, q);
             _out.WriteLine($"    coords: |neigh|={neigh} coneVanishDim={vanish} (expect 1)");
             Assert.True(vanish == 1, $"{nm}: cone vanishing dim = {vanish} != 1 (Q not uniquely recoverable in recovered coords)");
         }
         _out.WriteLine($"    OK");
-    }
-
-    static HashSet<int[]> SubgroupClosure(IEnumerable<int[]> gens, int n)
-    {
-        var g = gens.ToArray();
-        var K = new HashSet<int[]>(PermEq.I) { Perm.Identity(n) };
-        foreach (var x in g) K.Add(x);
-        var q = new Queue<int[]>(K);
-        while (q.Count > 0) { var x = q.Dequeue(); foreach (var b in g) { var y = Perm.Compose(x, b); if (K.Add(y)) q.Enqueue(y); } }
-        return K;
-    }
-    static IEnumerable<int[]> AllTuples(int p, int d)
-    {
-        var c = new int[d];
-        while (true)
-        {
-            yield return (int[])c.Clone();
-            int i = 0; for (; i < d; i++) { if (++c[i] < p) break; c[i] = 0; }
-            if (i == d) yield break;
-        }
     }
 }

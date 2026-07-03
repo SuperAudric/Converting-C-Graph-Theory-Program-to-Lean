@@ -38,8 +38,11 @@
   Proofs mirror `coords_determine`/`viaOrthogonalForm` (swap `Pi.basisFun.ext` → `LinearMap.ext_on hspan`). See §4, §6.
 - **The genuinely-new Lean content that remains is narrow** — the *refinement bridge* A3 (recovered `Q` upgrades the
   similitude graph to the isometry scheme) + F4 (iso-invariance of the recovered structure). See §2c and A3/F4 in §6.
-- **Next concrete step:** either the C# F1 build (host `O_p` + coordinatization on `PermutationGroup.cs`) or the A3
-  refinement bridge in Lean (now that the spanning back-half it feeds is landed). See §6 "Sequencing".
+- **✅ F1 PRODUCTIONIZED + confirmed against the real harness (2026-07-03)** — `PermutationGroup.RegularNormalPSubgroup`
+  + `AffineStructureRecovery.Recover`, validated by `RouteCF1Probe.cs` (all pass; existing group tests green). See §4/§6.
+- **Next concrete step: A1 in C#** — recover `Q` from F1's coordinatized cone by the one degree-2 linear solve
+  (`route_c_reconstruct_probe.py` already validated `vanishDim=1`; now emit the actual form). Then A3 (Lean refinement
+  bridge) + F4 (iso-invariance). See §6 "Sequencing".
 
 **Quality bar (project-wide):** every Lean theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; no `sorry`,
 no fresh `axiom`; `native_decide` banned; full build green when ported. "Poly time" stays a **meta-argument** (the
@@ -185,7 +188,8 @@ In `GraphCanonizationProject/`.
 
 | file | what it gives Route C |
 |---|---|
-| `PermutationGroup.cs` | **full Schreier–Sims** — stabilizer chain, `AddGenerator`, `Order`, `Contains`, `Orbit`, `BasePoints`, `IsAbelian`, `IsElementaryAbelian`. Route C's group back-end is a **call, not a build**; F1's `O_p`/normal-closure hosts here |
+| `PermutationGroup.cs` | **full Schreier–Sims** — stabilizer chain, `AddGenerator`, `Order`, `Contains`, `Orbit`, `BasePoints`, `IsAbelian`, `IsElementaryAbelian`. **+ Route-C F1 ops (NEW 2026-07-03):** `RegularNormalPSubgroup(p)` (the socle/translations), `NormalClosure`, `Elements`, `HasExponentDividing`, `Perm.Order`/`Pow` |
+| `AffineStructureRecovery.cs` | **Route C, NEW 2026-07-03** — `Recover(aut, p, origin)` = F1's entry point: socle `T` + `Dim` + vertex→`(𝔽_p)^Dim` coordinate map (via `T`'s regular action). Confirmed by `RouteCF1Probe.cs` |
 | `ITransversalOracle.cs` | the T-C seam (`Classify(n, adj, targetCell, path, knownGroup) → representatives`) — where a Route-C oracle plugs in |
 | `CascadeOracle.cs` | the all-reps oracle (returns the whole cell; harvest prunes a-posteriori) — the current default |
 | `ChainDescent.cs` | the harness: cross-branch harvest + prune (`CoveredByPathFixingAut`, ~`:589`), deferral selector (~`:251-281`) |
@@ -225,7 +229,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 
 | # | piece | side | status / notes |
 |---|---|---|---|
-| **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **✅ CONFIRMED against the REAL harness (2026-07-03, `RouteCF1Probe.cs`):** `O_p(CanonResult.ResidualGroup)` recovers `T` exactly (ground-truth verified), regular + elementary-abelian, and coordinatizes the cone (`vanishDim=1`) — VO^ε₄(q), q=2,3(,5), both types; works char-agnostically since the harness delivers the *full* `Aut`. Remaining build = productionize `O_p` onto `PermutationGroup.cs` + the coordinatization emitter. "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite) |
+| **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03).** Confirmed against the REAL harness (`RouteCF1Probe.cs`): recovers `T` exactly (ground-truth), regular + elementary-abelian, coordinatizes the cone (`vanishDim=1`) — VO^ε₄(q), q=2,3,5, both types; char-agnostic (full `Aut` delivered). **Production code landed:** general group ops on `PermutationGroup.cs` (`RegularNormalPSubgroup(p)`, `NormalClosure`, `Elements`, `HasExponentDividing`, `Perm.Order`/`Pow`) + `AffineStructureRecovery.Recover` (coordinatization); the probe now exercises the production path (all pass; 26 existing `PermutationGroup` tests green). "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite). Remaining: the Lean side (F4 iso-invariance) + `q=pᵉ` (F2). |
 | **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **new; deferrable.** `q=p` needs nothing (additive = 𝔽_p-linear automatically). `FieldGeneric`/`efield` = the template; same seam the WL route had (plan Layer D) |
 | **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C# | new, thin; the merge point |
 | **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **new; vacuity-trap-prone** (cf. `SchemeReproduced` — get the equivariant predicate right). Mirrors landed `forcedNode`/`forcedNode_relabel` |
