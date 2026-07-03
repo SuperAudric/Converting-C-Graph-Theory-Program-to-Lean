@@ -58,9 +58,13 @@
    landed; F4 generic. Full instance-1 parity. **⟹ 3 of 4 form families sealed; only Suzuki remains.**
 2. **Suzuki–Tits instance (last):** char-2, σ-twisted ovoid, needs the char-2 substrate first (§11.5); not a
    multi-quadric family — the outlier. §6 "Instances 2–4".
-3. **The two carried citations** (optional, to remove them from the spine): a full Lean proof of
+3. **After the four seals — the combined correctness object + the C# runtime: see §9 (FORWARD PLAN).** The four
+   adapters combine into ONE clean seal via a single cited classification premise + one iso-invariance lemma (L1,
+   the load-bearing new piece — spot-check it first); the C# canonizer still lacks *all* family handlers (C1–C4).
+   §9.0 explains why "4 seals + finite exceptions" collapses to "1 citation + 1 lemma" (Route C is threshold-free).
+4. **The two carried citations** (optional, to remove them from the spine): a full Lean proof of
    `NondegQuadricDeterminesForm` and `ConePreservingCollineationIsSemiSimilitude` (finite-geometry developments).
-4. **The C# / meta-poly side (later rigorous stage):** residuals R1–R3 (§7a) — build the Aut-free geometric
+5. **The meta-poly rigor side (last):** residuals R1–R3 (§7a) — build the Aut-free geometric
    coordinatizer (also delivers F2's field recovery), name Buekenhout–Shult (R2), double-check `d=4` (R3).
 
 **✅ DONE — the C# recovery front (abstract graph → coordinates → form → graph), confirmed against the REAL harness.**
@@ -562,5 +566,109 @@ disguise (global ≠ bounded-WL).
 
 ---
 
+## 9. After the four seals — the combined correctness object + the C# runtime (FORWARD PLAN, build later)
+
+**Status when this section applies:** the four per-family adapters are sealed (affine-polar ✅, alternating ✅,
+half-spin ✅; Suzuki = the last). Each gives `reachesRigidOrCameron (affineScheme A.G₀)` for a *concrete* group
+`A.G₀` built from recovered forms. This section records how those four combine into ONE correctness object, and
+how the C# canonizer gets the family handlers it currently lacks. **Neither is built yet; this is the roadmap.**
+
+### 9.0 The key structural fact that keeps it clean (read first)
+
+Route C's `FormAdapter.reachesRigidOrCameron` is **threshold-free**: it is `viaSpielman ∘
+discrete_affineScheme_of_jointSeparates`, needing only *nondegeneracy* + *a bounded base* — **no `q ≥ 256` /
+`q ≳ 32d` floor** (those were the pair-route/quasipoly seal's Gauss-sum thresholds, which Route C does not touch),
+and the `hjoint` lemmas (`plucker_hjoint`, `spinor_hjoint`) are proved for **all primes `p`** (coordinate
+isolation, ±1 coeffs, no division — not even `p≠2`). Consequence: **the small-`q`/small-`d`/sporadic cases do NOT
+pile up as Route-C exceptions.** Route C only ever engages the *unbounded-WL-dimension* residue (the infinite
+families); any finite/sporadic small graph has bounded `|V|` ⟹ bounded base ⟹ it is already sealed by the
+*generic* bounded-base machinery (`viaSpielman` on a trivial base) and never reaches the forms-graph residue. So
+the combined object carries **no finite exception pile** — the only systematic split is **char 2** (→ the
+Suzuki / Arf branch, one branch, not scattered exceptions). This is why "4 seals + finitely many exceptions"
+collapses to "1 classification citation + 1 iso-invariance lemma".
+
+### 9.1 The Lean correctness object — one dispatch theorem over one cited premise
+
+Target shape (the clean "reaches rigid or Cameron via Route C"):
+```
+theorem reachesRigidOrCameron_formsGraphResidue
+    (hclass : FormsGraphResidueClassification)      -- the ONE cited premise that combines the 4
+    (X) (hX : «X = the unbounded-WL rank-3 primitive schurian affine residue») :
+    reachesRigidOrCameron X := by
+  rcases hclass X hX with ⟨Q, hiso⟩ | ⟨Qs, hiso⟩ | ⟨Qs, hiso⟩ | ⟨ov, hiso⟩   -- affine-polar / alt / half-spin / Suzuki
+  -- each case: transport the matching adapter's concrete seal along hiso
+```
+Beyond the four adapters this needs exactly two things:
+
+- **(L1) Scheme-level iso-invariance of `reachesRigidOrCameron`** — `X ≅ Y → (reachesRigidOrCameron X ↔
+  reachesRigidOrCameron Y)`, so each adapter's *concrete* `affineScheme(G₀)` seal transports onto the abstract
+  `X`. **This is the one genuinely load-bearing NEW lemma.** Requires each disjunct (`SchemeBlockRecovered`,
+  `AbelianConsumed`, `SchemeRecoveredByDepth`, `IsCameronScheme`) to be iso-invariant. *NB: distinct from F4 —
+  F4 is iso-invariance of the recovered form (for the runtime canonicalization); L1 is iso-invariance of the
+  seal predicate (for the correctness statement). Both needed, different halves.* **De-risk first:** spot-check
+  whether the four disjuncts are already iso-invariant before committing (cheap, and it validates the whole plan).
+- **(L2) The dispatch theorem** above, gated on **(L3) `FormsGraphResidueClassification`** = the cited premise
+  (Skresanov's rank-3 2-closure classification: the unbounded-WL rank-3 primitive schurian affine residue is
+  *exactly* affine-polar / alternating / half-spin / Suzuki, and it *hands over the concrete structure*
+  `Q`/`Qs`/ovoid so the adapter can be built). Carried like `Theorem41Statement`/`G3` — **one named premise, not
+  a finite pile**. This premise IS the "combination".
+- **(L4) Wire into the existing residue seam** `reachesRigidOrCameron_viaAffineFormScheme` (idx 1207, the node-4
+  hook), retiring its quasipoly `hFormCert` in favour of this poly seal.
+
+Sizing: L1 medium (the real work), L2 small once L1 exists, L3 a citation/scoping task, L4 small–medium.
+
+### 9.2 The C# runtime — the family handlers the canonizer currently lacks
+
+The harness (`ChainDescent.cs`) has **none** of the Route-C family handlers wired. Built so far: F1
+(`AffineStructureRecovery`) + A1 (`QuadraticFormRecovery`, quadratic only), confirmed vs the real harness
+(`RouteCF1Probe.cs`); the Lean `FormAdapter` interface exists but has **no C# engine**. Remaining:
+
+- **(C1) `RecoverForm` for the multi-quadric families** (Plücker, spinor) + Suzuki — generalize
+  `QuadraticFormRecovery` from a single quadratic to a form *family* (solve the degree-2 vanishing system on the
+  cone → the span of quadrics; §2b). The quadratic case is the `ι = Unit` instance already built.
+- **(C2) The dispatch** — from an abstract rank-3 SRG residue, detect *which* family it is (SRG parameters /
+  cone-geometry signature) and select the adapter. This is the C# analog of L3's classification.
+- **(C3) Wire recovered-`Aut` canonicalization into the harness** at the residue seam (`ChainDescent.cs`
+  `target == −1`, near `CoveredByPathFixingAut ~:589`): once the form is recovered, `Aut = AΓO(Q)` is known →
+  hand its generators to the existing `PermutationGroup` Schreier–Sims for the canonical labelling.
+- **(C4) F2 field recovery / the Aut-free geometric coordinatizer** (= §7a R1) for `q = pᵉ` — Buekenhout–Shult
+  recovers `PG(d,q)` including the field; also de-circularizes F1 (replaces the `O_p(Aut)` shortcut). Delivers
+  both F2's field side and the non-circular poly first step in one build.
+
+C1–C4 are independent of the Lean seal (L1–L4) and can proceed in parallel. The C# engine is the **symmetric
+mirror of Option 2's Layer D** (§6 / [[project_recovery_corecovery_duality_2026-07-03]]) — clone that
+architecture, swapping `IFormStructure` for the F₂ extractor.
+
+### 9.3 Later — the meta-poly rigor stage
+
+The §7a residuals R1–R3 (build the geometric coordinatizer, name Buekenhout–Shult + its poly bound, double-check
+`d=4` GQ) and, at the far end, the C#-design-into-Lean runtime model that makes "poly" (nearly) rigorous rather
+than a meta-argument. This is the project's planned final stage; nothing above blocks on it.
+
+### 9.4 Suggested ordering
+1. Finish Suzuki (all four sealed).
+2. **L1 spot-check** (are the four `reachesRigidOrCameron` disjuncts iso-invariant?) — cheap, de-risks the whole
+   combination; do before L2.
+3. L1 → L2/L3 → L4 (the clean Lean object), in parallel with C1–C3 (the runtime).
+4. C4 + the R1–R3 / meta-poly rigor stage last.
+
+---
+
+## 8. Pointers  <!-- (kept below §9 for git-history stability; §9 is the forward plan) -->
+- **Live route it replaces:** [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md) (STATUS + §7 Route
+  C sketch + §9.8.9 stall verdict).
+- **Per-family analysis:** [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §11.4
+  (alternating/half-spin/Suzuki), §11.5 (char-2), §1 item 1 (the Route A/B/C fork).
+- **The rigid mirror (same meta-strategy):** [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md)
+  §11 (Option 2, Layer D) + [[project_option2_f2_gap_2026-06-20]].
+- **The seal it upgrades:** `AffinePolarSeal.reachesRigidOrCameron_affinePolar` (banked, in `build.sh`);
+  `GraphCanonizationProofs/PublicTheoremIndex.md` idx 1207-1237 (Stage A/B decl map).
+- **What's-left map:** [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) §3a.1, §4.
+- **Cross-session memory:** [[project_recovery_corecovery_duality_2026-07-03]],
+  [[project_formsgraph_wldim_viability_2026-06-28]].
+
+---
+
 *Maintenance: update STATUS as F1–F5 / A1–A4 land; keep the exact-name table (§4) in sync with source line numbers
-(they drift — verify before citing); this doc is the Route-C staging point, the recovery doc §9.8.9 is the reason it exists.*
+(they drift — verify before citing); this doc is the Route-C staging point, the recovery doc §9.8.9 is the reason it exists.
+§9 = the forward plan for combining the four seals (Lean L1–L4) + wiring the C# runtime (C1–C4), to build after Suzuki.*
