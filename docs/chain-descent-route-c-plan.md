@@ -418,8 +418,38 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
   `plucker_hjoint` coordinate-isolation pattern; assembled by `multiFormAdapter` into `spinAdapter`, sealed by
   `reachesRigidOrCameron_halfSpin`; brick-1 `halfSpin_refines_coneScheme` (F4 generic). **Instance 3 DONE, full
   instance-1 parity.** *Was Medium–high — de-risked then landed.*
-- **Suzuki–Tits (f):** the outlier — σ-twisted ovoid polynomial (char-2), `AutGens = Sz(q)`. Same `FormAdapter`
-  interface, mostly-new internals; folds into the char-2 track. *Hardest; do last.*
+- **Suzuki–Tits (f) — SCOPED (2026-07-03). The outlier, but much cleaner under Route C than the old pair-route
+  framing.** `VSz(q)` = the Cayley graph on `GF(q)^4` (`q=2^{2e+1}`), connection set = the cone over the **Tits ovoid**
+  `O={(1,a,b,ab+a^{σ+2}+b^σ)}∪{(0,0,0,1)}`, `σ` = the Tits endomorphism (`σ²=Frob`; `q=8⟹σ(x)=x⁴`); small-Aut
+  (`Sz(q)⊂Aut`, `|Aut|~q⁴`), **cospectral with `VO⁻₄(q)`** (separated only by `Sz(q)`).
+  - **Route-C shape: a PLAIN `FormAdapter`, NOT a `multiFormAdapter`** (there is no quadratic-form family; the ovoid
+    polynomial is σ-twisted, non-quadratic). `G₀` = the ovoid-cone stabilizer linear group (`⊇ Sz(q)`), viewed over
+    `𝔽₂` after restricting scalars from `GF(q)` (module `Fin d → ZMod 2`, `d=4(2e+1)`). `base` = an `O(1)` base (an
+    old probe shatters at base 9 ≪ √4096). `separates` = the **only** bespoke content.
+  - **★ THE BIG WIN — Route C sidesteps Suzuki's worst risk.** The old plan's Handle 2 (σ-twisted exponential-sum
+    *count*, "the highest analytic risk of any family", Weil/Deligne territory — formsgraph-plan §11.4) is a
+    WL-refinement/counting artefact. Route C never counts; it only needs **discreteness at a bounded base** =
+    **Handle 1** (direct geometric individualization on the explicit Tits coordinates: individualize `O(1)` reference
+    vertices, read off σ-twisted incidences ⟹ pin `(a,b,c)` combinatorially). So the Weil risk is OFF THE TABLE, and
+    no char-2 `χ`/Gauss/Arf substrate is needed for the ENGINE (that was a pair-route requirement).
+  - **✅ VERIFIED — the shared engine is char-2-ready (Lean-checked 2026-07-03).** `FormAdapter.reachesRigidOrCameron`
+    elaborates and seals at `p=2`, and **`neg_mem` is FREE** in char 2 (`LinearEquiv.neg (ZMod 2)` *is* the identity,
+    so it lies in any `G₀`). So the entire engine + seal wiring + F1 translation-recovery are shared/free; **`separates`
+    is the sole bespoke piece.**
+  - **Discharging `separates` (= the ovoid-stabilizer discretizes at a bounded base):** neither `Sz(q)` nor the Tits
+    ovoid nor `σ` (`σ²=Frob` over `GF(2^{2e+1})`) is in Mathlib, so a full proof is a major standalone build.
+    **Recommended = carry it as a scoped citation** `SuzukiOvoidStabilizerSeparatesAtBase` (the geometric
+    individualization / `Sz(q)` 2-transitivity + short stabilizer chain), same discipline as
+    `NondegQuadricDeterminesForm` — but a *bigger* carry (the other families PROVE `separates`; only Suzuki cites it),
+    reflecting the outlier status. Fixed-`q` `decide` is infeasible (`n=4096`, `native_decide` banned).
+  - **De-risk FIRST (before Lean):** a probe (analog of `route_c_halfspin_probe.py`) over `q=8`(,`32`): (i) confirm
+    the connection set = the ovoid cone (validate the ovoid polynomial + `σ`); (ii) find the MINIMAL base `b` at which
+    the ovoid-stabilizer orbit-of-difference profile pins every vertex (grounds the `separates` citation + fixes the
+    adapter's `bound`); (iii) confirm individualization is purely combinatorial (Handle 1) — no count needed.
+  - **Lean skeleton (post-derisk):** define `σ` + `ovoidStab` (`Subgroup (Fin d → ZMod 2 ≃ₗ …)`) → carry `separates`
+    as the premise → `suzukiAdapter` (`neg_mem` free) → `reachesRigidOrCameron_suzuki := suzukiAdapter.reachesRigidOrCameron`.
+    Bespoke Lean = `σ`/`ovoidStab` defs + threading the premise; engine/`neg_mem`/seal free.
+  *Single family, no engine work, no Weil, no char-2 χ-substrate. Hardest `separates`, but a clean scoped-citation path.*
 
 ### C# / Lean split, and the reuse to exploit
 - **The C# engine is the symmetric mirror of Option 2's Layer D** (IR doc §11.10, built through D-M4 as a Phase-2
