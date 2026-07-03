@@ -42,9 +42,12 @@
   RegularNormalPSubgroup` + `AffineStructureRecovery.Recover`. A1: `QuadraticFormRecovery.RecoverForm`. Validated
   end-to-end by `RouteCF1Probe.cs` — the recovered `Q` + coords **reconstruct the whole graph, 0 mismatches**
   (VO^±₄(3)); existing group tests green. So the C# recovery front (abstract graph → coordinates → form) works. See §4/§6.
-- **Next concrete step: the Lean side — A3 refinement bridge** (recovered `Q` refines the similitude graph to the
-  isometry scheme `reachesRigidOrCameron_viaOrthogonalForm_spanning` discretizes) + **F4 iso-invariance**. The C# front
-  (F1+A1) is done; what remains is the durable Lean deliverable. See §6 "Sequencing".
+- **◑ A3 brick 1 LANDED (2026-07-03, axiom-clean)** — `RouteC.isometryScheme_refines_similitudeScheme` (the isometry
+  scheme refines the given similitude graph). With `viaOrthogonalForm_spanning` (isometry discreteness, landed), the
+  Route-C spine is: recover `Q` (F1+A1, C# done) → work on the finer isometry scheme (refines the graph, brick 1) →
+  discretize at a spanning base (landed). **Remaining Lean content = F4** (iso-invariance of the recovered form — the
+  `forcedNode_relabel` analog) + the meta poly claim; A3's discreteness-transfer reduces to F4.
+- **Next concrete step: F4** (iso-invariance of the recovered `Q`) — the last load-bearing Lean piece. See §6.
 
 **Quality bar (project-wide):** every Lean theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; no `sorry`,
 no fresh `axiom`; `native_decide` banned; full build green when ported. "Poly time" stays a **meta-argument** (the
@@ -174,6 +177,7 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `reachesRigidOrCameron_viaOrthogonalForm` | `CascadeAffine.lean:2704` (idx 1217) | **the back-half** — `O(Q)` (nondeg) discretizes at `frameBase` and seals via `viaSpielman`. NB: **isometry** scheme, not the given similitude graph (§2c) |
 | `RouteC.coords_determine_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `coords_determine`: `Q`-values at any *spanning* base `S` (`span S = ⊤`) determine the vertex |
 | `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `viaOrthogonalForm`: `O(Q)` discretizes at any base `T∋o` whose differences `{t̄−ō}` span — the iso-invariantly-chosen base Route C needs |
+| `RouteC.isometryScheme_refines_similitudeScheme` | `ScratchRouteC.lean` (**Route C A3 brick 1, NEW, axiom-clean**) | `O(Q)≤GO(Q)` ⟹ the isometry scheme refines the given similitude graph (finer `relOfPair`) — the recovered form is consistent, not fabricated |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -245,7 +249,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 | **A1** | `RecoverForm` = solve the degree-2 vanishing system on the cone | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03, `QuadraticFormRecovery.RecoverForm`):** recovers `Q` up to scalar by one kernel solve on F1's coordinates; the recovered `Q` + coords **reconstruct the entire graph** (`Q(coords[x]−coords[y])=0 ⟺ x~y`, **0 mismatches**, VO^±₄(3)). Odd-q (returns null in char-2). Lean side = a finite-geometry nondegeneracy lemma (`⟨Q⟩` = the vanishing space) |
 | **A2** | `Separates` = `coords_determine` / `spanning_sameExactGram_determines` | **LANDED, axiom-clean** |
 | **A2⁺** | the spanning back-half — `RouteC.coords_determine_spanning` + `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` (isometry scheme discretizes at any iso-invariantly-chosen spanning base) | **✅ LANDED 2026-07-03, axiom-clean** (`ScratchRouteC.lean`, NOT in `build.sh`) |
-| **A3** | **the refinement bridge** — recovered `Q` colours pairs by `Q(z−t)` (global scalar cancels) ⟹ isometry-scheme separation ⟹ `discrete_affineScheme_of_jointSeparates` | **new — the genuine Route-C Lean content** (§2c) |
+| **A3** | **the refinement bridge** — recovered `Q` upgrades the similitude graph to the isometry scheme, which `viaOrthogonalForm_spanning` discretizes | **◑ brick 1 LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `isometryScheme_refines_similitudeScheme` — `O(Q)≤GO(Q)` ⟹ the isometry scheme (exact-`Q` relations) refines the given similitude graph (isotropy-only). The consistency half. Remaining A3 content = the discreteness-transfer, which reduces to **F4** (iso-invariance) + the meta poly claim |
 | **A4** | `AutGens` = `GO(Q)` generators (reflections) → existing `PermutationGroup` (only for the \|Aut\| side) | Schreier–Sims exists; generator list is standard classical-group data |
 
 Instance 1 forces F1/F3/F4/F5 into existence, so it is **most of the total work**; the other three families then

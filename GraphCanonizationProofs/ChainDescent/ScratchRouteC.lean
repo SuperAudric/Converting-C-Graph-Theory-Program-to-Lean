@@ -114,4 +114,40 @@ theorem reachesRigidOrCameron_viaOrthogonalForm_spanning
       ChainDescent.discrete_affineScheme_of_jointSeparates
         (ChainDescent.isometryGroup Q) (ChainDescent.neg_mem_isometryGroup Q) hsep⟩
 
+/-! ## A3 — the refinement bridge (recovered `Q` upgrades the similitude graph to the isometry scheme)
+
+The GIVEN forms graph is the **similitude** scheme `affineScheme (similitudeGroup Q)` — its relation records
+only the isotropy class of a difference (the `GO(Q)`-orbit). Route C recovers `Q` (F1 + A1, confirmed in C#)
+and works with the **isometry** scheme `affineScheme (isometryGroup Q)`, whose relation is the *exact*
+`Q`-value of the difference (the `O(Q)`-orbit) — and which the landed
+`reachesRigidOrCameron_viaOrthogonalForm_spanning` discretizes at a spanning base. The bridge has two halves:
+this brick (the isometry scheme *refines* the given graph — so using the recovered form is consistent, not
+fabricated) and F4 (the recovered form is iso-invariant — separate). -/
+
+/-- **A3, brick 1 — the isometry scheme refines the similitude scheme.** Since `O(Q) ≤ GO(Q)`
+(`isometry_le_similitude`), the affine orbital scheme of the isometry group is FINER than that of the
+similitude group: whenever the isometry scheme assigns two pairs the same relation, so does the similitude
+scheme. This is the formal sense in which the recovered form `Q` (whose exact-value-of-difference data IS the
+isometry relation) *refines* the given similitude graph (isotropy-only) rather than fabricating structure —
+the consistency half of the Route-C bridge. Pure `H ≤ G ⟹` finer orbitals; no Witt / orbit-structure needed.
+Axiom-clean. -/
+theorem isometryScheme_refines_similitudeScheme
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) {x y x' y' : Fin (p ^ d)}
+    (h : (ChainDescent.affineScheme (ChainDescent.isometryGroup Q)
+            (ChainDescent.neg_mem_isometryGroup Q)).relOfPair x y
+        = (ChainDescent.affineScheme (ChainDescent.isometryGroup Q)
+            (ChainDescent.neg_mem_isometryGroup Q)).relOfPair x' y') :
+    (ChainDescent.affineScheme (ChainDescent.similitudeGroup Q)
+          (ChainDescent.neg_mem_similitudeGroup Q)).relOfPair x y
+      = (ChainDescent.affineScheme (ChainDescent.similitudeGroup Q)
+          (ChainDescent.neg_mem_similitudeGroup Q)).relOfPair x' y' := by
+  rw [ChainDescent.affineScheme_relOfPair_eq_iff (ChainDescent.isometryGroup Q)
+        (ChainDescent.neg_mem_isometryGroup Q),
+    ChainDescent.orbMk_affine_eq_iff] at h
+  rw [ChainDescent.affineScheme_relOfPair_eq_iff (ChainDescent.similitudeGroup Q)
+        (ChainDescent.neg_mem_similitudeGroup Q),
+    ChainDescent.orbMk_affine_eq_iff]
+  obtain ⟨g₀, hg₀, hg⟩ := h
+  exact ⟨g₀, ChainDescent.isometry_le_similitude Q hg₀, hg⟩
+
 end ChainDescent.RouteC
