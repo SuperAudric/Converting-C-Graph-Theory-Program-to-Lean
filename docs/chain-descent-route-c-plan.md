@@ -72,8 +72,11 @@ assessed sound** (§7a — global coordinatization, not the node-4 wall in disgu
   collinear triangles and recovers spanning isotropic lines, all VO^± `d=4,6` `q=3,5`). Residuals (record, don't block):
   build the geometric coordinatizer (R1), name the geometry-recovery citation (R2), double-check `d=4` (R3). The Lean
   object (F4) is unaffected (no runtime model in Lean). See §7a.
-- **Later:** `q=pᵉ` (F2, the Frobenius seam), and the other families (alternating/half-spin/Suzuki) as `IFormStructure`
-  adapters — §6 "Instances 2–4".
+- **◑ F2 (`q=pᵉ` Frobenius seam) — Lean core LANDED (2026-07-03, axiom-clean):**
+  `recoveredForm_colouring_equivariant_semilinear` — the recovered form is iso-invariant up to scalar **and** a field
+  automorphism σ (a graph iso over 𝔽_q is 𝔽_p-semilinear, `g = M∘σ̂`). `q=p` is the `σ=id` case. Remaining F2 = the C#
+  field-recovery side, which folds into R1 (geometric coordinatization recovers PG over 𝔽_q, field included).
+- **Later:** the other families (alternating/half-spin/Suzuki) as `IFormStructure` adapters — §6 "Instances 2–4".
 
 **▶ VERIFY what's landed (fresh-reader commands):**
 - Lean: `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRouteC.lean` (exit 0, clean). Axiom-check by
@@ -214,6 +217,9 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.NondegQuadricDeterminesForm` | `ScratchRouteC.lean` (**Route C — the exact carried classical citation, NEW**) | scoped premise (`p≠2`, `4≤d`, `Q` nondeg): same isotropic cone ⟹ scalar-multiple form (A1's `vanishDim=1` uniqueness). The EXACT true statement (unrestricted form false at `d=3,q=3`); Hirschfeld / projective Nullstellensatz; carried like `Theorem41Statement` |
 | `RouteC.similitude_colouring_equivariant`, `RouteC.similitude_conePreserving` | `ScratchRouteC.lean` (**Route C F4 bricks, NEW, axiom-clean**) | a form similitude carries the difference colouring by one scalar (`Q'(gu−gt)=μ·Q(u−t)`) + preserves the cone — pure linearity |
 | `RouteC.recoveredForm_colouring_equivariant` | `ScratchRouteC.lean` (**Route C F4 capstone, NEW, axiom-clean**) | graph-iso cone-preservation + `NondegQuadricDeterminesForm` ⟹ the recovered difference colouring is equivariant (iso-invariant up to global scalar) — the "discrete ⟹ canonical" link |
+| `RouteC.frobVec`, `RouteC.frobVec_sub`, `RouteC.semisimilitude_colouring_equivariant` | `ScratchRouteC.lean` §F2 (**Route C F2 bricks, NEW, axiom-clean**) | coordinate-wise Frobenius σ̂ + its additivity + the semilinear equivariance identity `Q'(M(σ̂u)−M(σ̂t))=μ·σ(Q(u−t))` |
+| `RouteC.ConePreservingCollineationIsSemiSimilitude` | `ScratchRouteC.lean` §F2 (**Route C F2 cited premise, NEW**) | scoped (`(2:K)≠0`, `4≤d`): cone-preserving collineation `g` ⟹ `g=M∘σ̂` semi-similitude (fundamental thm of projective geometry + `NondegQuadricDeterminesForm`; carried) |
+| `RouteC.recoveredForm_colouring_equivariant_semilinear` | `ScratchRouteC.lean` §F2 (**Route C F2 capstone, NEW, axiom-clean**) | q=pᵉ: the recovered form is iso-invariant up to scalar **and** field auto σ — F4 for the semilinear (ΓL) case; `q=p` = the `σ=id` specialization |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -277,7 +283,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 | # | piece | side | status / notes |
 |---|---|---|---|
 | **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03).** Confirmed against the REAL harness (`RouteCF1Probe.cs`): recovers `T` exactly (ground-truth), regular + elementary-abelian, coordinatizes the cone (`vanishDim=1`) — VO^ε₄(q), q=2,3,5, both types; char-agnostic (full `Aut` delivered). **Production code landed:** general group ops on `PermutationGroup.cs` (`RegularNormalPSubgroup(p)`, `NormalClosure`, `Elements`, `HasExponentDividing`, `Perm.Order`/`Pow`) + `AffineStructureRecovery.Recover` (coordinatization); the probe now exercises the production path (all pass; 26 existing `PermutationGroup` tests green). "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite). Remaining: the Lean side (F4 iso-invariance) + `q=pᵉ` (F2). |
-| **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **new; deferrable.** `q=p` needs nothing (additive = 𝔽_p-linear automatically). `FieldGeneric`/`efield` = the template; same seam the WL route had (plan Layer D) |
+| **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **◑ SEMILINEAR CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean` §F2):** `recoveredForm_colouring_equivariant_semilinear` — a graph iso over 𝔽_q is 𝔽_p-**semilinear** (`g = M∘σ̂`), so the recovered form transports up to scalar **and** field auto σ: `Q'(gu−gt)=μ·σ(Q(u−t))`. Bricks `frobVec`/`frobVec_sub`/`semisimilitude_colouring_equivariant` (provable) + cited `ConePreservingCollineationIsSemiSimilitude` (fundamental thm of proj. geometry, carried). The `q=p` case = the `σ=id` specialization. **𝔽_q-structure RECOVERY** (getting the field) is subsumed by geometric coordinatization (§7a/R1: Buekenhout–Shult recovers PG over 𝔽_q). Remaining: C# field recovery (with R1) |
 | **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C# | new, thin; the merge point |
 | **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **✅ EQUIVARIANCE CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `recoveredForm_colouring_equivariant` (+ bricks `similitude_colouring_equivariant`/`similitude_conePreserving`). Rests only on `NondegQuadricDeterminesForm` — **discharged as an exact scoped citation** (= A1's finite-geometry uniqueness; F4 and A1-Lean unify). Not vacuous (scoped `p≠2`/`d≥4`, exactly the true range) |
 | **F5** | **Generic seal→poly spine** — `RecoverForm ⟹ refined scheme ⟹ discrete_affineScheme_of_jointSeparates ⟹ viaSpielman` | Lean | **downstream all landed & generic**; only the A3 refinement bridge is new |
@@ -320,7 +326,9 @@ reduce to writing their `IFormStructure` implementation.
 4. ✅ **Meta-poly bootstrapping** — ASSESSED + RESOLVED (§7a): Route C is poly, non-circular (global coordinatization ≠
    bounded WL; Aut-free geometric recovery, probe-confirmed enabling primitive). Residuals R1–R3 deferred to the rigorous
    C#→Lean runtime stage (build the geometric coordinatizer; name Buekenhout–Shult; double-check `d=4`).
-5. ◻ **F2** (`q=pᵉ` seam) — deferrable; the same Layer-D seam the WL route had.
+5. ◑ **F2** (`q=pᵉ` semilinear seam) — **Lean core LANDED** (`…_semilinear`, axiom-clean): the recovered form is
+   iso-invariant up to scalar **and** Frobenius σ. Remaining: the C# field-recovery side (folds into R1's geometric
+   coordinatizer — Buekenhout–Shult recovers PG over 𝔽_q, field included).
 6. ◻ **Instances 2→3→4** — pure adapters; Suzuki last (needs the char-2 substrate as its own prerequisite).
 
 **Definition of done (Route C, affine-polar):** F1 recovers coordinates iso-invariantly (F4 ✅ equivariance core); A1

@@ -258,4 +258,81 @@ theorem recoveredForm_colouring_equivariant
     (Q'.comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) hQ hcone
   exact ⟨μ, fun u t => similitude_colouring_equivariant Q Q' (fun v => hμ v) u t⟩
 
+/-! ## F2 — the `q = pᵉ` semilinear (Frobenius / ΓL) seam
+
+For `q = p` (prime) the whole spine above works over `ZMod p` because the additive structure F1 recovers
+*is* the `𝔽_p`-vector space. For `q = pᵉ` (`e > 1`) the vertex set is `𝔽_q^d`, and the crucial new fact is
+that a graph isomorphism between two `𝔽_q`-affine-polar graphs is only `𝔽_p`-**semilinear**: by the
+fundamental theorem of projective geometry its linear part is `g = M ∘ σ̂`, where `M` is `𝔽_q`-linear and
+`σ̂` is the coordinate-wise action of a field automorphism `σ ∈ Gal(𝔽_q/𝔽_p)` (the "Γ" in `AΓO`). So the
+recovered form transports up to a scalar **and** a field automorphism: `Q'(g u − g t) = μ · σ(Q(u − t))`.
+This section proves that equivariance identity (the semilinear analog of F4), field-generically over `K`.
+The recovery of the `𝔽_q`-structure itself is subsumed by the geometric coordinatization (§7a / R1 —
+Buekenhout–Shult recovers the projective space *over `𝔽_q`*, field included). -/
+
+section F2
+variable {K : Type*} [Field K] [Fintype K] {d : ℕ}
+open QuadraticMap
+
+/-- The coordinate-wise action of a field endomorphism `σ` on `V = Fin d → K` — the semilinear part
+of a collineation of `AG(d, q)` (`x ↦ σ(x)` in each coordinate). -/
+def frobVec (σ : K →+* K) (x : Fin d → K) : Fin d → K := fun i => σ (x i)
+
+omit [Fintype K] in
+/-- `σ̂` is additive (it is a ring hom applied coordinate-wise): `σ̂(u − t) = σ̂ u − σ̂ t`. This is what
+makes the semilinear equivariance identity go through. -/
+theorem frobVec_sub (σ : K →+* K) (u t : Fin d → K) :
+    frobVec σ (u - t) = frobVec σ u - frobVec σ t := by
+  funext i; simp only [frobVec, Pi.sub_apply, map_sub]
+
+omit [Fintype K] in
+/-- **F2 brick 1 — a semi-similitude carries the difference colouring (equivariance, provable).** If
+`g = M ∘ σ̂` is a semi-similitude from `Q` to `Q'` (`Q'(M(σ̂ v)) = μ · σ(Q v)`), then the recovered
+difference colouring transports by the scalar `μ` **and** the field automorphism `σ`:
+`Q'(M(σ̂ u) − M(σ̂ t)) = μ · σ(Q(u − t))`. Pure structure: `M` linear + `σ̂` additive ⟹
+`M(σ̂ u) − M(σ̂ t) = M(σ̂(u − t))`. The semilinear analog of `similitude_colouring_equivariant`. -/
+theorem semisimilitude_colouring_equivariant
+    (Q Q' : QuadraticForm K (Fin d → K))
+    (M : (Fin d → K) ≃ₗ[K] (Fin d → K)) (σ : K →+* K) {μ : K}
+    (hss : ∀ v, Q' (M (frobVec σ v)) = μ * σ (Q v)) (u t : Fin d → K) :
+    Q' (M (frobVec σ u) - M (frobVec σ t)) = μ * σ (Q (u - t)) := by
+  rw [← map_sub, ← frobVec_sub]
+  exact hss (u - t)
+
+/-- **F2's cited classical fact — a cone-preserving collineation is a semi-similitude (scoped, carried).**
+For `p` odd (`(2:K) ≠ 0`) and `d ≥ 4`: a bijective, cone-preserving linear-part-of-a-collineation `g`
+between two affine-polar graphs (`Q` nondegenerate) decomposes as `g = M ∘ σ̂` (`M` `K`-linear, `σ` a
+field endomorphism) and is a **semi-similitude** `Q'(g v) = μ · σ(Q v)` (`μ ≠ 0`). This is the
+**fundamental theorem of projective geometry** (a collineation of `PG(d,q)`, `d ≥ 2`, is a semilinear
+map) composed with the semilinear form of the quadric-determines-form uniqueness (§ `NondegQuadric
+DeterminesForm`). Classical (Hirschfeld; Artin, *Geometric Algebra*); carried as a premise like
+`Theorem41Statement`. The `p ≠ 2`, `d ≥ 4` scope is exactly where it is TRUE (the linear `q = p` case is
+the `σ = id` specialization of this). -/
+def ConePreservingCollineationIsSemiSimilitude (K : Type*) [Field K] [Fintype K] (d : ℕ) : Prop :=
+  (2 : K) ≠ 0 → 4 ≤ d → ∀ (Q Q' : QuadraticForm K (Fin d → K)) (g : (Fin d → K) → (Fin d → K)),
+    (Q.polarBilin).Nondegenerate → Function.Bijective g → (∀ v, Q v = 0 ↔ Q' (g v) = 0) →
+      ∃ (M : (Fin d → K) ≃ₗ[K] (Fin d → K)) (σ : K →+* K) (μ : K),
+        μ ≠ 0 ∧ (∀ v, g v = M (frobVec σ v)) ∧ (∀ v, Q' (g v) = μ * σ (Q v))
+
+/-- **F2 — the recovered form is iso-invariant over `𝔽_q` (equivariant under a graph iso, including the
+Frobenius twist).** Given the linear part `g` of a graph isomorphism between two `𝔽_q`-affine-polar
+graphs (bijective, cone-preserving), nondegenerate `Q`, and the cited fundamental-theorem fact `hcite`,
+the recovered difference colouring transports with a global scalar `μ` **and** a field automorphism `σ`:
+`Q'(g u − g t) = μ · σ(Q(u − t))`. This is F4 for `q = pᵉ`: canonicalizing via the recovered form is
+iso-invariant even in the presence of field twists (`AΓO` vs `AGO`). The `q = p` prime case
+(`recoveredForm_colouring_equivariant`) is the `σ = id` specialization. Axiom-clean; the only
+non-elementary input is `hcite`, threaded like `Theorem41Statement`. -/
+theorem recoveredForm_colouring_equivariant_semilinear
+    (hcite : ConePreservingCollineationIsSemiSimilitude K d) (h2 : (2 : K) ≠ 0) (hd : 4 ≤ d)
+    (Q Q' : QuadraticForm K (Fin d → K)) (hQ : (Q.polarBilin).Nondegenerate)
+    (g : (Fin d → K) → (Fin d → K)) (hg : Function.Bijective g)
+    (hcone : ∀ v, Q v = 0 ↔ Q' (g v) = 0) :
+    ∃ (σ : K →+* K) (μ : K), ∀ u t : Fin d → K, Q' (g u - g t) = μ * σ (Q (u - t)) := by
+  obtain ⟨M, σ, μ, _hμ, hgM, hss⟩ := hcite h2 hd Q Q' g hQ hg hcone
+  refine ⟨σ, μ, fun u t => ?_⟩
+  rw [hgM u, hgM t]
+  exact semisimilitude_colouring_equivariant Q Q' M σ (fun v => by rw [← hgM v]; exact hss v) u t
+
+end F2
+
 end ChainDescent.RouteC
