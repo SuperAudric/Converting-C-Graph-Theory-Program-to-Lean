@@ -18,11 +18,32 @@
 
 ## STATUS (read first)
 
-**Where Route C stands (2026-07-03).** The **recovery front is built and confirmed**; the Route-C Lean spine is assembled
-and axiom-clean; **F4 (iso-invariance) is LANDED**, and the two items my review flagged are resolved: the classical carry
-is **discharged as an exact scoped citation** (`NondegQuadricDeterminesForm`), and the **meta-poly bootstrapping is
-assessed sound** (§7a — global coordinatization, not the node-4 wall in disguise). What remains is downstream engineering
-(F2, the other-family adapters) + the residuals R1–R3 for the later rigorous C#→Lean runtime stage.
+**Where Route C stands (2026-07-03) — handoff snapshot.** The Route-C **Lean spine is assembled and fully axiom-clean**
+(`ScratchRouteC.lean`, 34 decls, all `[propext, Classical.choice, Quot.sound]`, NOT in `build.sh`). Landed:
+- **The single-form spine (affine-polar):** F1+A1 (C#, confirmed vs the real harness) → A3 brick 1 (isometry scheme
+  refines the graph) → discretize at a spanning base (`viaOrthogonalForm_spanning`) → **F4** iso-invariance
+  (`recoveredForm_colouring_equivariant`). Rests on ONE exact scoped citation, `NondegQuadricDeterminesForm` (below).
+- **F2 (`q=pᵉ` Frobenius/ΓL seam):** semilinear iso-invariance (`recoveredForm_colouring_equivariant_semilinear`),
+  rests on the cited `ConePreservingCollineationIsSemiSimilitude` (fundamental thm of projective geometry).
+- **F3 the engine interface (`IFormStructure`):** `FormAdapter` + `FormAdapter.reachesRigidOrCameron` (any adapter ⟹
+  the seal). **Instance 1 (affine-polar) `affinePolarAdapter` ✅. Instance 2 (alternating `Alt(5,q)`) ✅ SEALED**
+  (`reachesRigidOrCameron_alternating`, via the multi-quadric engine `multiFormAdapter`/`coords_determine_multi` +
+  the concrete Plücker sub-Pfaffians `plucker_hjoint`) — first non-quadratic family. **Instance 3 (half-spin)
+  SCOPED + reduction landed** (`halfSpin_reduction`); **Instance 4 (Suzuki) not started.**
+- **Both review-flagged items resolved:** the classical carry is **discharged as an exact scoped citation**
+  (`NondegQuadricDeterminesForm`); the **meta-poly bootstrapping is assessed sound** (§7a — global coordinatization,
+  not the node-4 wall in disguise).
+
+**▶ PICK UP HERE (next actionable steps, in rough priority):**
+1. **Half-spin instance (complete it):** define the **10 D₅ spinor quadrics** on `𝔽_p^16` (even-subset/Clifford
+   model — needs a reliable reference for the 10 equations; double check they're valid and nonvacuous) + prove their `hjoint`, then feed
+   `halfSpin_reduction`. All engine + reduction is landed; only the concrete forms remain. §6 "Half-spin".
+2. **Suzuki–Tits instance (last):** char-2, σ-twisted ovoid, needs the char-2 substrate first (§11.5); not a
+   multi-quadric family — the outlier. §6 "Instances 2–4".
+3. **The two carried citations** (optional, to remove them from the spine): a full Lean proof of
+   `NondegQuadricDeterminesForm` and `ConePreservingCollineationIsSemiSimilitude` (finite-geometry developments).
+4. **The C# / meta-poly side (later rigorous stage):** residuals R1–R3 (§7a) — build the Aut-free geometric
+   coordinatizer (also delivers F2's field recovery), name Buekenhout–Shult (R2), double-check `d=4` (R3).
 
 **✅ DONE — the C# recovery front (abstract graph → coordinates → form → graph), confirmed against the REAL harness.**
 - **F1 — additive-structure recovery** (`PermutationGroup.RegularNormalPSubgroup` + `AffineStructureRecovery.Recover`):
@@ -76,11 +97,14 @@ assessed sound** (§7a — global coordinatization, not the node-4 wall in disgu
   `recoveredForm_colouring_equivariant_semilinear` — the recovered form is iso-invariant up to scalar **and** a field
   automorphism σ (a graph iso over 𝔽_q is 𝔽_p-semilinear, `g = M∘σ̂`). `q=p` is the `σ=id` case. Remaining F2 = the C#
   field-recovery side, which folds into R1 (geometric coordinatization recovers PG over 𝔽_q, field included).
-- **◑ F3 (`IFormStructure` engine interface) — Lean interface LANDED (2026-07-03, axiom-clean):** `FormAdapter` +
-  `FormAdapter.reachesRigidOrCameron` (any adapter ⟹ seal) + `affinePolarAdapter` (instance 1, validates it). Each
-  remaining family reduces to one `FormAdapter` (supply `G₀` + `separates`).
-- **Later:** the alternating/half-spin/Suzuki `FormAdapter` instances (their `separates` = the per-family combinatorics,
-  §11.4 — alternating is the non-quadratic rank-2 matrix object) + the C# side of the engine.
+- **◑ F3 (`IFormStructure` engine interface) — Lean interface LANDED + 2 instances SEALED (2026-07-03, axiom-clean):**
+  `FormAdapter` + `FormAdapter.reachesRigidOrCameron` (any adapter ⟹ seal); **instance 1 affine-polar**
+  (`affinePolarAdapter`) + **instance 2 alternating `Alt(5,q)`** (`reachesRigidOrCameron_alternating`, via
+  `multiFormAdapter` + the Plücker forms) both sealed; **instance 3 half-spin** scoped + `halfSpin_reduction` landed.
+  Each family reduces to one `FormAdapter` (supply `G₀` + `separates`); the multi-quadric families (alternating,
+  half-spin) reduce further to just `Qs` + `hjoint` via `multiFormAdapter`.
+- **Remaining instances:** **half-spin** (the 10 D₅ spinor quadrics + `hjoint` — §6 "Half-spin"; engine + reduction
+  already landed) and **Suzuki** (char-2 outlier, last) + the C# side of the engine.
 
 **▶ VERIFY what's landed (fresh-reader commands):**
 - Lean: `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRouteC.lean` (exit 0, clean). Axiom-check by
@@ -339,8 +363,11 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
   `ScratchRouteC.lean §HalfSpin`) commits the dimensions (module `Fin 16`, family `Fin 10`) and shows: supply the 10
   spinor quadrics `Qs` + `hjoint` ⟹ sealed. **Remaining = the 10 D₅ spinor quadrics on `𝔽_p^16` (even-subset /
   Clifford model — a careful rep-theoretic derivation, do NOT template blindly) + `hjoint`.** Polar via
-  `polar_linMulLin`; `hjoint` via the `plucker_hjoint` coordinate-isolation pattern. *Medium–high (the spinor
-  quadrics are the research-y part).*
+  `polar_linMulLin`; `hjoint` via the `plucker_hjoint` coordinate-isolation pattern. **Reference for the 10
+  equations:** Chevalley, *The Algebraic Theory of Spinors* (the pure-spinor quadratic relations); or the even-Clifford
+  moment map `s ↦ s·Γ_i·s` into the 10-dim vector rep (its components vanish on pure spinors) — index the 16 coords by
+  even subsets of `[5]` (∅, the 10 pairs, the 5 quadruples), analogous to Plücker's `Fin 10`. Verify non-vacuity/validity
+  of the recovered `Qs` before building. *Medium–high (the spinor quadrics are the research-y part; downstream is landed).*
 - **Suzuki–Tits (f):** the outlier — σ-twisted ovoid polynomial (char-2), `AutGens = Sz(q)`. Same `FormAdapter`
   interface, mostly-new internals; folds into the char-2 track. *Hardest; do last.*
 
@@ -376,7 +403,7 @@ bounded-base discreteness object complete, "poly" the meta-claim over it **modul
 engine reproduces `|Aut|` via `PermutationGroup`. **The Lean spine is now assembled;** the open items are the classical
 carry + the meta-poly bootstrapping.
 
-### 6a. F4 — iso-invariance of the recovered form (the next concrete step, for a fresh reader)
+### 6a. F4 — iso-invariance of the recovered form (✅ LANDED 2026-07-03; kept as the design record)
 
 **What F4 is.** The recovered `Q` (and hence F1's coordinates and the isometry-scheme colouring) must be a *canonical
 function of the graph*: a graph isomorphism `σ` must carry the recovered structure of `G` to the recovered structure of

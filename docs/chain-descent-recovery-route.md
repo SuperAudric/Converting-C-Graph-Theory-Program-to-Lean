@@ -27,15 +27,14 @@
 > `ColorRefinesGramK`. The banked quasipoly seal is unaffected. █████**
 >
 > **█████ 2026-07-03 — ROUTE C IS THE LIVE BUILD; DEDICATED STAGING DOC:
-> [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md). READ THAT FIRST (STATUS + §6a) to work forward.**
-> **The recovery front is BUILT + confirmed vs the real harness:** A1 form recovery (`QuadraticFormRecovery.RecoverForm`;
-> `route_c_reconstruct_probe.py` `vanishDim=1`) + F1 additive recovery (`AffineStructureRecovery.Recover` /
-> `PermutationGroup.RegularNormalPSubgroup`; `route_c_f1_probe.py`) — the recovered `Q`+coords **reconstruct the whole
-> graph, 0 mismatches** (`RouteCF1Probe.cs`). **Lean spine assembled** (`ChainDescent/ScratchRouteC.lean`, axiom-clean:
-> `coords_determine_spanning`, `reachesRigidOrCameron_viaOrthogonalForm_spanning`, `isometryScheme_refines_similitudeScheme`
-> = A3 brick 1). **Only F4 (iso-invariance of the recovered form) remains.** Architecture = 1 generic engine +
-> `IFormStructure` × 4. Full plan + exact preexisting-lemma names + F4 pickup are in that doc. §7 below is the original
-> sketch; the staging doc supersedes it. █████**
+> [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md). READ THAT FIRST (STATUS + "▶ PICK UP HERE").**
+> **State: the Lean spine is assembled + fully axiom-clean** (`ScratchRouteC.lean`, 34 decls) — F1+A1 (C#, confirmed vs
+> the real harness) → A3 refinement → spanning-base discretization → **F4** iso-invariance; **F2** (`q=pᵉ` semilinear)
+> + **F3** the `IFormStructure` engine interface (`FormAdapter`); **instances 1 (affine-polar) + 2 (alternating
+> `Alt(5,q)`) SEALED**, instance 3 (half-spin) scoped. The classical carry is discharged as an exact scoped citation;
+> the meta-poly bootstrapping is assessed sound (plan §7a). **Next: half-spin spinor quadrics, then Suzuki.** Architecture
+> = 1 generic engine + `IFormStructure` × 4. Full plan + exact lemma names + pickup are in that doc; §7 below is the
+> original sketch, superseded by it. █████**
 
 > **════════ PICK-UP (2026-06-30, v2 — RETARGETED to the weakest predicate) — READ THIS FIRST ════════**
 >
