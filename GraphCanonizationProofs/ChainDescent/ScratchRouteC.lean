@@ -462,4 +462,39 @@ theorem coords_determine_multi_spanning {ι : Type*} (Qs : ι → QuadraticForm 
     rw [LinearMap.zero_apply, map_sub, LinearMap.sub_apply, hk, sub_self]
   exact sub_eq_zero.mp (hjoint (v - v') hzero)
 
+/-- **The general multi-quadric `FormAdapter`** — the alternating family's engine hookup. Given a family of
+quadratic forms `Qs : ι → QuadraticForm` whose polar forms **jointly** separate (trivial common radical), the
+**joint isometry group** `G₀ = ⨅ₖ O(Q_k)` (the maps preserving every `Q_k`) forms a `FormAdapter` at the standard
+frame: a `G₀`-element preserves every `Q_k`-value, so the orbit-of-difference profile at the frame gives the joint
+`Q_k`-profile, which `coords_determine_multi` inverts. `affinePolarAdapter` is the `ι = Unit` case (a single
+nondegenerate `Q`); the alternating `Alt(n≥5,q)` family is this with `Qs =` the Plücker quadrics (individually
+degenerate, jointly separating). So the remaining alternating work is exactly: supply the Plücker `Qs` and prove
+their joint nondegeneracy `hjoint`. Axiom-clean. -/
+noncomputable def multiFormAdapter {ι : Type*} (Qs : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hjoint : ∀ w : Fin d → ZMod p, (∀ k, (Qs k).polarBilin w = 0) → w = 0) :
+    FormAdapter (p := p) (d := d) (d + 1) where
+  G₀ := ⨅ k, ChainDescent.isometryGroup (Qs k)
+  neg_mem := Subgroup.mem_iInf.mpr (fun k => ChainDescent.neg_mem_isometryGroup (Qs k))
+  base := ChainDescent.frameBase
+  base_card_le := ChainDescent.frameBase_card_le
+  separates := by
+    intro u u' hh
+    have h0 : ∀ k, Qs k (ChainDescent.affineE.symm u) = Qs k (ChainDescent.affineE.symm u') := by
+      intro k
+      obtain ⟨g₀, hg, hgeq⟩ := hh (ChainDescent.affineE 0) (Finset.mem_insert_self _ _)
+      rw [Equiv.symm_apply_apply, sub_zero, sub_zero] at hgeq
+      have hval := (Subgroup.mem_iInf.mp hg k) (ChainDescent.affineE.symm u')
+      rw [hgeq] at hval
+      exact hval
+    have hi : ∀ (k : ι) (i : Fin d), Qs k (ChainDescent.affineE.symm u - Pi.single i 1)
+        = Qs k (ChainDescent.affineE.symm u' - Pi.single i 1) := by
+      intro k i
+      obtain ⟨g₀, hg, hgeq⟩ := hh (ChainDescent.affineE (Pi.single i 1))
+        (Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ (Finset.mem_univ i)))
+      rw [Equiv.symm_apply_apply] at hgeq
+      have hval := (Subgroup.mem_iInf.mp hg k) (ChainDescent.affineE.symm u' - Pi.single i 1)
+      rw [hgeq] at hval
+      exact hval
+    exact ChainDescent.affineE.symm.injective (coords_determine_multi Qs hjoint h0 hi)
+
 end ChainDescent.RouteC
