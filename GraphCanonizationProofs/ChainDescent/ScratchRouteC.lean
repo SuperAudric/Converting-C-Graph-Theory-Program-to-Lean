@@ -497,4 +497,115 @@ noncomputable def multiFormAdapter {ι : Type*} (Qs : ι → QuadraticForm (ZMod
       exact hval
     exact ChainDescent.affineE.symm.injective (coords_determine_multi Qs hjoint h0 hi)
 
+/-! ### The concrete alternating instance `Alt(5,q)` — the Plücker quadrics + the sealed adapter
+
+`Alt(5,q)` has vertex space `Λ²(𝔽_q^5) ≅ 𝔽_q^10`. Index the 10 Plücker coordinates (pairs `{i<j} ⊆ Fin 5`) as
+`Fin 10`: `0:(0,1) 1:(0,2) 2:(0,3) 3:(0,4) 4:(1,2) 5:(1,3) 6:(1,4) 7:(2,3) 8:(2,4) 9:(3,4)`. The rank `≤ 2`
+(decomposable) locus is cut out by the **5 sub-Pfaffians** `Pf_k` (delete index `k`), each a quadratic form on
+`𝔽_q^10`. They are individually degenerate but **jointly nondegenerate** (`plucker_hjoint`: `Pf₀` forces
+coords `4..9 = 0`, `Pf₁` forces `1,2,3`, `Pf₂` forces `0`), so `multiFormAdapter` assembles them into a sealed
+`FormAdapter` — the first concrete non-quadratic (multi-form) Route-C family. All axiom-clean. -/
+
+namespace Plucker
+open QuadraticMap
+
+/-- The `i`-th Plücker coordinate projection on `𝔽_p^10`. -/
+noncomputable def pc (i : Fin 10) : (Fin 10 → ZMod p) →ₗ[ZMod p] ZMod p := LinearMap.proj i
+
+/-- Sub-Pfaffian deleting index 0 (`= x₄x₉ − x₅x₈ + x₆x₇`). -/
+noncomputable def Pf0 : QuadraticForm (ZMod p) (Fin 10 → ZMod p) :=
+  linMulLin (pc 4) (pc 9) - linMulLin (pc 5) (pc 8) + linMulLin (pc 6) (pc 7)
+/-- Sub-Pfaffian deleting index 1 (`= x₁x₉ − x₂x₈ + x₃x₇`). -/
+noncomputable def Pf1 : QuadraticForm (ZMod p) (Fin 10 → ZMod p) :=
+  linMulLin (pc 1) (pc 9) - linMulLin (pc 2) (pc 8) + linMulLin (pc 3) (pc 7)
+/-- Sub-Pfaffian deleting index 2 (`= x₀x₉ − x₂x₆ + x₃x₅`). -/
+noncomputable def Pf2 : QuadraticForm (ZMod p) (Fin 10 → ZMod p) :=
+  linMulLin (pc 0) (pc 9) - linMulLin (pc 2) (pc 6) + linMulLin (pc 3) (pc 5)
+/-- Sub-Pfaffian deleting index 3 (`= x₀x₈ − x₁x₆ + x₃x₄`). -/
+noncomputable def Pf3 : QuadraticForm (ZMod p) (Fin 10 → ZMod p) :=
+  linMulLin (pc 0) (pc 8) - linMulLin (pc 1) (pc 6) + linMulLin (pc 3) (pc 4)
+/-- Sub-Pfaffian deleting index 4 (`= x₀x₇ − x₁x₅ + x₂x₄`). -/
+noncomputable def Pf4 : QuadraticForm (ZMod p) (Fin 10 → ZMod p) :=
+  linMulLin (pc 0) (pc 7) - linMulLin (pc 1) (pc 5) + linMulLin (pc 2) (pc 4)
+
+/-- The family of 5 Plücker quadrics (the connection set of `Alt(5,q)` is their joint cone). -/
+noncomputable def pluckerForms : Fin 5 → QuadraticForm (ZMod p) (Fin 10 → ZMod p)
+  | 0 => Pf0 | 1 => Pf1 | 2 => Pf2 | 3 => Pf3 | 4 => Pf4
+
+theorem Pf0_polar (x y : Fin 10 → ZMod p) : polar Pf0 x y =
+    x 4 * y 9 + y 4 * x 9 - (x 5 * y 8 + y 5 * x 8) + (x 6 * y 7 + y 6 * x 7) := by
+  simp only [polar, Pf0, QuadraticMap.add_apply, QuadraticMap.sub_apply, linMulLin_apply, pc,
+    LinearMap.proj_apply, Pi.add_apply]; ring
+theorem Pf1_polar (x y : Fin 10 → ZMod p) : polar Pf1 x y =
+    x 1 * y 9 + y 1 * x 9 - (x 2 * y 8 + y 2 * x 8) + (x 3 * y 7 + y 3 * x 7) := by
+  simp only [polar, Pf1, QuadraticMap.add_apply, QuadraticMap.sub_apply, linMulLin_apply, pc,
+    LinearMap.proj_apply, Pi.add_apply]; ring
+theorem Pf2_polar (x y : Fin 10 → ZMod p) : polar Pf2 x y =
+    x 0 * y 9 + y 0 * x 9 - (x 2 * y 6 + y 2 * x 6) + (x 3 * y 5 + y 3 * x 5) := by
+  simp only [polar, Pf2, QuadraticMap.add_apply, QuadraticMap.sub_apply, linMulLin_apply, pc,
+    LinearMap.proj_apply, Pi.add_apply]; ring
+
+/-- **The Plücker quadrics are jointly nondegenerate** (their polar forms have trivial common radical): if
+`polar_{Pf_k} w = 0` for every `k`, then `w = 0`. Only `Pf₀,Pf₁,Pf₂` are needed — `Pf₀` isolates coords `4..9`,
+`Pf₁` isolates `1,2,3`, `Pf₂` isolates `0` — but all 5 are in the family (extra forms only shrink the radical).
+This `hjoint` is the sole geometric input the alternating adapter needs. -/
+theorem plucker_hjoint (w : Fin 10 → ZMod p)
+    (h : ∀ k, (pluckerForms k).polarBilin w = 0) : w = 0 := by
+  have h0 : Pf0.polarBilin w = 0 := h 0
+  have h1 : Pf1.polarBilin w = 0 := h 1
+  have h2 : Pf2.polarBilin w = 0 := h 2
+  have w0 : w 0 = 0 := by
+    have e := LinearMap.congr_fun h2 (Pi.single (9 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf2_polar, LinearMap.zero_apply] at e; simpa using e
+  have w1 : w 1 = 0 := by
+    have e := LinearMap.congr_fun h1 (Pi.single (9 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf1_polar, LinearMap.zero_apply] at e; simpa using e
+  have w2 : w 2 = 0 := by
+    have e := LinearMap.congr_fun h1 (Pi.single (8 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf1_polar, LinearMap.zero_apply] at e; simpa using e
+  have w3 : w 3 = 0 := by
+    have e := LinearMap.congr_fun h1 (Pi.single (7 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf1_polar, LinearMap.zero_apply] at e; simpa using e
+  have w4 : w 4 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (9 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w5 : w 5 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (8 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w6 : w 6 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (7 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w7 : w 7 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (6 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w8 : w 8 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (5 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf0_polar, LinearMap.zero_apply] at e; simpa using e
+  have w9 : w 9 = 0 := by
+    have e := LinearMap.congr_fun h0 (Pi.single (4 : Fin 10) 1)
+    rw [polarBilin_apply_apply, Pf0_polar, LinearMap.zero_apply] at e; simpa using e
+  funext c; fin_cases c <;> assumption
+
+/-- **`Alt(5,q)` as a sealed `FormAdapter`** — the first concrete non-quadratic Route-C family. Assembles the
+Plücker quadrics via `multiFormAdapter`; `G₀ = ⨅ₖ O(Pf_k)` is the joint isometry group. -/
+noncomputable def alternatingAdapter : FormAdapter (p := p) (d := 10) (10 + 1) :=
+  multiFormAdapter pluckerForms plucker_hjoint
+
+/-- **`Alt(5,q)` reaches the rigid-or-Cameron disjunction** — the alternating family sealed, via the shared
+engine. The whole chain (Plücker forms → `hjoint` → `multiFormAdapter` → `FormAdapter.reachesRigidOrCameron`)
+is axiom-clean. -/
+theorem reachesRigidOrCameron_alternating
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} :
+    ((SchemeBlockRecovered (p ^ 10)
+          (ChainDescent.affineScheme alternatingAdapter.G₀ alternatingAdapter.neg_mem)
+        ∨ AbelianConsumed (p ^ 10)
+          (ChainDescent.affineScheme alternatingAdapter.G₀ alternatingAdapter.neg_mem))
+        ∨ SchemeRecoveredByDepth (p ^ 10)
+          (ChainDescent.affineScheme alternatingAdapter.G₀ alternatingAdapter.neg_mem) (10 + 1))
+      ∨ IsCameronScheme (p ^ 10)
+          (ChainDescent.affineScheme alternatingAdapter.G₀ alternatingAdapter.neg_mem) :=
+  alternatingAdapter.reachesRigidOrCameron
+
+end Plucker
+
 end ChainDescent.RouteC

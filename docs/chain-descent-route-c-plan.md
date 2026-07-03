@@ -227,7 +227,9 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.FormAdapter`, `RouteC.FormAdapter.reachesRigidOrCameron` | `ScratchRouteC.lean` §F3 (**Route C engine interface, NEW, axiom-clean**) | the `IFormStructure` interface (`G₀` + `−1∈G₀` + bounded base + `separates`) + the shared engine theorem (any adapter ⟹ the seal). 1 engine, N family adapters |
 | `RouteC.affinePolarAdapter` | `ScratchRouteC.lean` §F3 (**Route C instance 1, NEW, axiom-clean**) | affine-polar `VO^ε` as a `FormAdapter` (`G₀=O(Q)`, frame base, `coords_determine` certificate) — validates the interface, reproduces `viaOrthogonalForm` |
 | `RouteC.coords_determine_multi`, `RouteC.coords_determine_multi_spanning` | `ScratchRouteC.lean` (**Route C alternating-family `separates` core, NEW, axiom-clean**) | a *family* `{Q_k}` with trivial common polar-radical determines the vertex from the joint value-profile (frame / spanning base) — the multi-quadric `separates` for `Alt(n≥5,q)` (Plücker quadrics), generalizes `coords_determine` |
-| `RouteC.multiFormAdapter` | `ScratchRouteC.lean` (**Route C alternating engine hookup, NEW, axiom-clean**) | a form family `{Q_k}` with joint nondegeneracy ⟹ a `FormAdapter` (`G₀ = ⨅ₖ O(Q_k)` the joint isometry group, frame base, `coords_determine_multi` certificate). `affinePolarAdapter` = the `ι=Unit` case. **Reduces the whole alternating family to: supply Plücker `Qs` + prove `hjoint`** |
+| `RouteC.multiFormAdapter` | `ScratchRouteC.lean` (**Route C alternating engine hookup, NEW, axiom-clean**) | a form family `{Q_k}` with joint nondegeneracy ⟹ a `FormAdapter` (`G₀ = ⨅ₖ O(Q_k)` the joint isometry group, frame base, `coords_determine_multi` certificate). `affinePolarAdapter` = the `ι=Unit` case |
+| `RouteC.Plucker.{Pf0..Pf4, pluckerForms, plucker_hjoint}` | `ScratchRouteC.lean §Plucker` (**Route C alternating instance, NEW, axiom-clean**) | the concrete 5 sub-Pfaffian quadrics on `𝔽_p^10` (via `linMulLin`) + their joint nondegeneracy `plucker_hjoint` (the sole geometric input) |
+| `RouteC.Plucker.alternatingAdapter`, `RouteC.Plucker.reachesRigidOrCameron_alternating` | `ScratchRouteC.lean §Plucker` (**Route C instance 2 CAPSTONE, NEW, axiom-clean**) | `Alt(5,q)` as a sealed `FormAdapter` + the rigid-or-Cameron seal — the **first concrete non-quadratic (multi-form) Route-C family, end to end** |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -320,14 +322,14 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     (`Q:=Pf`). **Not a new family.** (Buildable now: define `Pf`, prove nondeg, instantiate — deferred, low value.)
   - **`n≥5` is the genuinely-new family — MULTI-QUADRIC:** `rank≤2` is cut out by the **Plücker quadrics** (4×4
     sub-Pfaffians; 5 for `n=5`), so the connection set is their **joint cone** (Grassmann `G(2,n)`). Each Plücker form
-    is individually degenerate; only *jointly* do their polar forms separate. **The engine hookup is now COMPLETE
-    (axiom-clean):** `coords_determine_multi`(+spanning) (the multi-quadric `separates`) + **`multiFormAdapter`** (a
-    form family with joint nondegeneracy `hjoint` ⟹ a `FormAdapter` with `G₀ = ⨅ₖ O(Q_k)`, sealed by
-    `FormAdapter.reachesRigidOrCameron`). **The whole family is reduced to ONE concrete input:** supply the 5 Plücker
-    quadrics `Qs : Fin 5 → QuadraticForm` on `𝔽_q^10` + prove `hjoint : (∀k, polar_{Q_k} w = 0) → w = 0` (jointly
-    nondeg — TRUE, `G(2,5)` spans; a finite linear-algebra fact, odd `q`); then `(multiFormAdapter Qs hjoint)
-    .reachesRigidOrCameron` seals `Alt(5,q)`. **That `Qs`+`hjoint` build is the remaining alternating work.**
-    *Medium (concrete but heavy — explicit Pfaffian forms + the joint-radical computation).*
+    is individually degenerate; only *jointly* do their polar forms separate. **✅ `Alt(5,q)` FULLY SEALED
+    (2026-07-03, axiom-clean, `ScratchRouteC.lean §Plucker`):** the concrete 5 sub-Pfaffians `Pf₀..Pf₄` on `𝔽_p^10`
+    (built via `linMulLin`), their joint nondegeneracy `plucker_hjoint` (`Pf₀` isolates coords `4..9`, `Pf₁` isolates
+    `1,2,3`, `Pf₂` isolates `0`), assembled by `multiFormAdapter` into `alternatingAdapter`, sealed by the capstone
+    **`reachesRigidOrCameron_alternating`** — the first concrete **non-quadratic (multi-form)** Route-C family, end to
+    end. (Honest scope: the seal is for `affineScheme(⨅ₖ O(Pf_k))`; that this scheme *is* `Alt(5,q)` is the modeling
+    claim, same status as `affinePolarAdapter` modeling `VO^ε`.) The rank-3 alternating forms graph is exactly
+    `Alt(4,q)` [=affine-polar] + `Alt(5,q)` [sealed], so **instance 2 (alternating) is DONE.** *Was Medium — landed.*
 - **Half-spin (e):** form-adjacent spinor incidence; `separates` expected closer to affine-polar. *Medium–high.*
 - **Suzuki–Tits (f):** the outlier — σ-twisted ovoid polynomial (char-2), `AutGens = Sz(q)`. Same `FormAdapter`
   interface, mostly-new internals; folds into the char-2 track. *Hardest; do last.*
@@ -353,9 +355,8 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
 5. ◑ **F2** (`q=pᵉ` semilinear seam) — **Lean core LANDED** (`…_semilinear`, axiom-clean): the recovered form is
    iso-invariant up to scalar **and** Frobenius σ. Remaining: the C# field-recovery side (folds into R1's geometric
    coordinatizer — Buekenhout–Shult recovers PG over 𝔽_q, field included).
-6. ◑ **Instances 2→3→4** — the Lean `FormAdapter` interface (F3) is **LANDED** (affine-polar = instance 1);
-   each remaining family = one `FormAdapter` (supply `G₀` + `separates`). Alternating next (non-quadratic `separates`,
-   genuinely new combinatorics), then half-spin, then Suzuki (char-2 substrate prerequisite).
+6. ◑ **Instances 2→3→4** — F3 interface LANDED; **instance 1 (affine-polar) + instance 2 (alternating `Alt(5,q)`,
+   `reachesRigidOrCameron_alternating`) both SEALED axiom-clean.** Remaining: half-spin (e) + Suzuki (f, char-2 last).
 
 **Definition of done (Route C, affine-polar):** F1 recovers coordinates iso-invariantly (F4 ✅ equivariance core); A1
 recovers `Q` (C# ✅; Lean uniqueness = the carried `NondegQuadricDeterminesForm`); A3 refines to the isometry scheme (brick 1
