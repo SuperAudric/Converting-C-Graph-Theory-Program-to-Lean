@@ -1125,6 +1125,41 @@ diff => …)`** builder (used by `StandardVO`, referenced in every stub's `Stand
 char-2-affine-polar branch — each completed by filling fingerprint + `StandardGraph` (via the shared builder) + `AutOrder`
 (+ char-2 `Confirm` for the two char-2 slots).
 
+#### 9.2.8 The C4 hard core — conceptual analysis + ruled-out approaches (2026-07-04)
+
+**The crux, precisely.** Harvest-free coordinatization for `p ≥ 5` requires recovering the AFFINE/ADDITIVE structure of
+`V = F_p^d` from the graph. This is genuinely the fundamental theorem of projective/affine geometry (Von Staudt's algebra
+of throws), and the reason is **CONE-BLINDNESS**: every constraint readable from the graph lives *on the cone* `{Q=0}`,
+where `Q` vanishes — so `Q` (and, for larger `p`, all low-degree polynomials) satisfy every graph constraint and are
+indistinguishable from `0`/linear. Formally: `Σᵢ f(x₀+id) = 0` automatically whenever `deg f < p−1`, so the line-sum
+solution space `S = {linear} ⊕ {degree 2..p−2 polynomials}`; the ambiguity `= dim S − d` is **1 at p=3 (just `Q`) but 45
+at p=5** (all quadratics + cubics).
+
+**The Heisenberg picture (why it's structural).** The `S`-lift `φ(x) = (ℓ₁(x),…,ℓ_d(x), Q(x), …)` embeds `V`, and the
+true addition lifts to a *twisted* law `(a,α)⊕(b,β) = (a+b, α+β+B(a,b))` — a Heisenberg/nilpotent group whose center is the
+cone-blind part and whose **abelianization is the linear coords `L`**. Computing `L` needs the twist `B(a,b)` = the polar
+form's off-cone values — exactly the cone-blind information. So there is **no bootstrap-free shortcut**: isolating `L`
+needs the additive structure, which needs `B`, which is cone-blind.
+
+**Ruled-out combinatorial shortcuts (probed, negative — do NOT re-walk):**
+- **Recover addition `x+y` via the induced 4-cycle `o–x–z–y`** (`RouteCSumRecoveryProbe`): `x+y` is always a common
+  neighbour of `x,y` avoiding `o`, but there are **~20 such candidates** at q=5 (5 at q=3) — not unique; pinning it needs
+  the parallelogram/translation structure = the additive structure (circular).
+- **Recover 2-flats via isotropic-line closure** (`RouteCPlaneRecoveryProbe`): the closure of `{o,x,y}` **stalls**
+  (5 points at p=3, 9 at p=5, vs. the p² plane) — the isotropic lines *within* a plane are too sparse (non-adjacent
+  in-plane pairs aren't on isotropic lines) to fill it. So planes are not recoverable by line-completion.
+- **Parallelism by edge-count / perfect-matching**: aliases on perpendicular directions; distinguishing a *translation*
+  matching from an *affine* one needs the line ordering = the scalar structure (cone-blind).
+
+**Net.** `p=3` is genuinely special (2 non-origin points per line ⟹ scalar structure forced) and is DONE (harvest-free,
+provably poly). `p ≥ 5` is the classical polar-space coordinatization (Von Staudt), a substantial correct-but-intricate
+algorithm — **not** a missing clever trick. **Recommended next options** (scope before committing): (a) implement Von
+Staudt's algebra of throws for the polar space (multi-session, the general solution); or (b) a *lighter sound* harvest-free
+certificate that rules out parameter-mates without full coords (e.g. verifying the isotropic-line geometry is exactly the
+polar-space incidence structure — sound-but-not-complete is acceptable since a wrong *fail* just falls back to the
+descent); or (c) accept the harvest-based confirmation for `p ≥ 5` (the *answer* is already harvest-free; only the mate-
+ruling-out confirmation uses the harvest) and treat general-p Aut-free confirmation as cited/deferred.
+
 ### 9.3 Later — the meta-poly rigor stage
 
 The §7a residuals R1–R3 (build the geometric coordinatizer, name Buekenhout–Shult + its poly bound, double-check
