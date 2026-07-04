@@ -1109,6 +1109,64 @@ theorem suzukiForms_homog (l x0 x1 x2 x3 : K) (k : Fin 5) :
   fin_cases k <;>
     simp only [suzukiForms, SF0, SF1, SF2, SF3, SF4, map_mul] <;> ring
 
+/-! ### The σ-twisted `separates` (instance 4) — the value-profile determiner + the reduction
+
+`separates` for Suzuki is the σ-twisted analog of `coords_determine_multi`: the joint `F_k`-value profile at the
+frame determines the vertex. **It is a scoped CITATION, not provable over abstract `K`** — it is FALSE for small
+`K` (e.g. `K = 𝔽₂`: `σ = id`, `q = 2` is not a Suzuki parameter and the ovoid degenerates) and holds exactly for
+`GF(2^{2e+1})`, `e ≥ 1` (de-risk `route_c_suzuki_probe.py`, q=8: the joint profile is injective at base `4 ≤ d+1`).
+This is the *same discipline* as `NondegQuadricDeterminesForm` (false at `d=3,q=3`, true in range): carried as a
+named premise, scope documented, discharged externally. **Classical source:** the 2-transitivity of `Sz(q)` on the
+Tits ovoid + the short point-stabilizer chain (Suzuki 1962; Tits 1962; Lüneburg, *Translation Planes*, the Suzuki
+groups; Hirschfeld–Thas, *General Galois Geometries*, ovoid coordinatization). What IS proved here (axiom-clean):
+the **reduction** — a joint-isometry orbit-profile at the frame ⟹ equal `F_k`-values ⟹ (by the citation) equal
+vertex, exactly mirroring the multi-quadric `separates` proof (`affinePolarAdapter`/`multiFormAdapter`). -/
+
+/-- The Suzuki form family as a function of a vector `v : Fin 4 → K`. -/
+def SFv (v : Fin 4 → K) (k : Fin 5) : K := suzukiForms σ (v 0) (v 1) (v 2) (v 3) k
+
+/-- A map preserves the σ-twisted Suzuki forms (the joint-isometry condition): `F_k(g w) = F_k(w)` for all
+`w, k`. The joint σ-form isometry group is `{g : PreservesForms σ g}`; its orbit-of-difference relation is the
+Route-C isometry-scheme colouring. -/
+def PreservesForms (g : (Fin 4 → K) → (Fin 4 → K)) : Prop := ∀ w k, SFv σ (g w) k = SFv σ w k
+
+/-- **CITATION (scoped) — the Suzuki σ-forms separate at the frame.** For the Tits setting (`σ∘σ = (·)²`), the
+joint `F_k`-value profile at the frame `{0, e₀, e₁, e₂, e₃}` determines the vector: if `F_k v = F_k v'` and
+`F_k (v − eⱼ) = F_k (v' − eⱼ)` for all `k, j`, then `v = v'`. The σ-twisted analog of `coords_determine` /
+`coords_determine_multi`. **NOT provable over abstract `K`** (false for small `K`, e.g. `𝔽₂`); holds for
+`GF(2^{2e+1})` (`e ≥ 1`), de-risk-validated (base `4 ≤ d+1`). Carried like `NondegQuadricDeterminesForm`; source =
+`Sz(q)` 2-transitivity on the Tits ovoid + short stabilizer chain (see the section note). -/
+def SuzukiFormsDetermine (K : Type*) [CommRing K] [CharP K 2] (σ : K →+* K) : Prop :=
+  (∀ x : K, σ (σ x) = x ^ 2) →
+    ∀ v v' : Fin 4 → K,
+      (∀ k, SFv σ v k = SFv σ v' k) →
+      (∀ (j : Fin 4) (k : Fin 5), SFv σ (v - Pi.single j 1) k = SFv σ (v' - Pi.single j 1) k) →
+        v = v'
+
+omit [CharP K 2] in
+/-- A form-preserving map that carries `b` to `a` equalizes the form-values: `F_k a = F_k b`. The provable
+"orbit ⟹ equal-values" half (the σ-twisted analog of "an isometry preserves the `Q`-value of a difference"). -/
+theorem preservesForms_eq {g : (Fin 4 → K) → (Fin 4 → K)} (hg : PreservesForms σ g)
+    {a b : Fin 4 → K} (hgab : g b = a) (k : Fin 5) : SFv σ a k = SFv σ b k := by
+  rw [← hgab]; exact hg b k
+
+/-- **The σ-twisted `separates` reduction (instance 4).** Given the carried determiner `hcite` and the Tits
+property `hσ`: if for the base point `0` and each unit vector `eⱼ` there is a joint-isometry `g` (a
+`PreservesForms` map) carrying `v' − t` to `v − t`, then `v = v'`. Proof: each orbit witness equalizes the
+`F_k`-values at that base point (`preservesForms_eq`), giving the value-profile hypotheses of the determiner,
+which concludes `v = v'`. This is the exact σ-twisted analog of the `separates` field of `affinePolarAdapter` /
+`multiFormAdapter`; the only non-elementary input is `hcite` (threaded like `Theorem41Statement`). Axiom-clean. -/
+theorem suzuki_separates (hcite : SuzukiFormsDetermine K σ) (hσ : ∀ x : K, σ (σ x) = x ^ 2)
+    {v v' : Fin 4 → K}
+    (h0 : ∃ g, PreservesForms σ g ∧ g v' = v)
+    (hj : ∀ j : Fin 4, ∃ g, PreservesForms σ g ∧ g (v' - Pi.single j 1) = v - Pi.single j 1) :
+    v = v' := by
+  refine hcite hσ v v' (fun k => ?_) (fun j k => ?_)
+  · obtain ⟨g, hg, hgv⟩ := h0
+    exact preservesForms_eq σ hg hgv k
+  · obtain ⟨g, hg, hgv⟩ := hj j
+    exact preservesForms_eq σ hg hgv k
+
 end Suzuki
 
 end ChainDescent.RouteC

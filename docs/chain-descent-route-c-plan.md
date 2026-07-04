@@ -283,7 +283,8 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.polar_linMulLin` | `ScratchRouteC.lean` (**reusable primitive, NEW, axiom-clean**) | `polar (linMulLin f g) x y = f x·g y + f y·g x` — the polar of a Clifford-term-sum quadric (Plücker / spinor forms) |
 | `RouteC.HalfSpin.{S0..S9, spinorForms, S0_polar..S4_polar, spinor_hjoint}` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3, NEW, axiom-clean**) | the 10 concrete D₅ spinor quadrics on `𝔽_p^16` (validated by `route_c_halfspin_probe.py`: dim=10, exact 𝔽₂ count 2296, radical 0) + their joint nondegeneracy `spinor_hjoint` (from the 5 quadruple forms by coordinate isolation) |
 | `RouteC.HalfSpin.{halfSpin_reduction, spinAdapter, reachesRigidOrCameron_halfSpin, halfSpin_refines_coneScheme}` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3 CAPSTONE, NEW, axiom-clean**) | half-spin as a sealed `FormAdapter` (`spinAdapter`) + the rigid-or-Cameron seal (`reachesRigidOrCameron_halfSpin`) + brick-1 (`halfSpin_refines_coneScheme`) — instance 3 DONE, full instance-1 parity |
-| `RouteC.Suzuki.{ovoidC, SF0..SF4, suzukiForms, four_eq_zero, suzukiForms_ovoid, suzukiForms_infty, suzukiForms_homog}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 — the σ-twisted forms rederived, NEW, axiom-clean**) | over a char-2 `CommRing K` with a Tits endo `σ` (`σ∘σ=(·)²`): the 5 σ-twisted Suzuki forms + proofs they cut the cone (vanish on the ovoid + at infinity + σ-twisted homogeneous). De-risk-validated (`route_c_suzuki_probe.py`, joint zero=cone exact). Remaining Suzuki = the σ-twisted `separates` + module bridge |
+| `RouteC.Suzuki.{ovoidC, SF0..SF4, suzukiForms, four_eq_zero, suzukiForms_ovoid, suzukiForms_infty, suzukiForms_homog}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 — the σ-twisted forms rederived, NEW, axiom-clean**) | over a char-2 `CommRing K` with a Tits endo `σ` (`σ∘σ=(·)²`): the 5 σ-twisted Suzuki forms + proofs they cut the cone (vanish on the ovoid + at infinity + σ-twisted homogeneous). De-risk-validated (`route_c_suzuki_probe.py`, joint zero=cone exact) |
+| `RouteC.Suzuki.{SFv, PreservesForms, SuzukiFormsDetermine, preservesForms_eq, suzuki_separates}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 — the σ-twisted `separates`, NEW, axiom-clean**) | the σ-twisted analog of `coords_determine_multi`'s `separates`: the joint-isometry orbit-profile at the frame ⟹ (via `preservesForms_eq` + the scoped citation `SuzukiFormsDetermine`) `v=v'`. `SuzukiFormsDetermine` is carried (false for small `K`, true for `GF(2^{2e+1})`; `Sz(q)` 2-transitivity). Remaining Suzuki = the `GF(q)^4↔𝔽₂^d` module bridge + adapter wiring |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -479,10 +480,20 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     ovoid `(1,a,b,ovoidC a b)` — via `σ` a ring hom + `σ∘σ=(·)²`, char-2 cancellation), `suzukiForms_infty` (vanish
     at `(0,0,0,1)`), `suzukiForms_homog` (σ-twisted homogeneous `SF_k(λx)=σλ·λ²·SF_k(x)`, so `{SF_k=0}` is a cone).
     `SF0` = the single derived form; `SF1..SF4` trim its spurious zeros. Representation-independent (all-unit coeffs).
-  - **Remaining (next):** the σ-twisted **`coords_determine_multi`** (`separates` — the joint-value determiner) + the
-    `GF(q)^4 ↔ 𝔽₂^d` module bridge to the char-2-ready engine → `suzukiAdapter` → `reachesRigidOrCameron_suzuki`.
-  *Single family, no Weil, no char-2 χ-substrate, no engine work. Forms rederived + proven to model the connection
-  set; a multi-σ-form adapter with a confirmed O(d) poly base — genuinely "the same shape" as alternating/half-spin.*
+  - **✅ `separates` REDUCTION LANDED (2026-07-04, axiom-clean `[propext]`, `§Suzuki`):** the σ-twisted analog of the
+    multi-quadric `separates`. `SFv`/`PreservesForms` (the joint σ-form-isometry condition), `preservesForms_eq` (the
+    provable **orbit ⟹ equal-values** half), and `suzuki_separates` (the reduction: a joint-isometry orbit-profile at
+    the frame `{0,eⱼ}` ⟹ equal `F_k`-values ⟹, by the citation, `v = v'`). The determiner itself is carried as the
+    **scoped citation `SuzukiFormsDetermine`** — *genuinely* a citation (not lazy deferral): it is FALSE over small
+    `K` (e.g. `𝔽₂`, `σ=id`, `q=2` not a Suzuki parameter) and holds exactly for `GF(2^{2e+1})`, `e≥1`
+    (de-risk-validated, base `4≤d+1`), same discipline as `NondegQuadricDeterminesForm` (false at `d=3,q=3`). Source =
+    `Sz(q)` 2-transitivity on the Tits ovoid + short stabilizer chain (Suzuki/Tits 1962; Lüneburg; Hirschfeld–Thas).
+  - **Remaining (next):** the `GF(q)^4 ↔ 𝔽₂^d` module bridge (restrict scalars; transport `PreservesForms` group +
+    `suzuki_separates` into the `Fin (2^d)→ZMod 2` engine) → `suzukiAdapter` (`FormAdapter`, `neg_mem` free) →
+    `reachesRigidOrCameron_suzuki`. Pure plumbing on the char-2-ready engine; the math (`separates`) is done modulo
+    the scoped citation.
+  *Single family, no Weil, no char-2 χ-substrate, no engine work. Forms + `separates` both landed; a multi-σ-form
+  adapter with a confirmed O(d) poly base — genuinely "the same shape" as alternating/half-spin.*
 
 ### C# / Lean split, and the reuse to exploit
 - **The C# engine is the symmetric mirror of Option 2's Layer D** (IR doc §11.10, built through D-M4 as a Phase-2
