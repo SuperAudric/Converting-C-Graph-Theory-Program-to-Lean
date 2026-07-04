@@ -75,6 +75,21 @@ O, CONE = build()
 N = 4096
 NBR = sorted(CONE)                         # neighbor-difference set (as an ordered list)
 
+# ---------------- the sigma-twisted ovoid FORM F (cone = {F=0}) ----------------
+# F(x0,x1,x2,x3) = x3*x0^{sigma+1} + x1*x2*x0^sigma + x1^{sigma+2} + x2^sigma*x0^2
+# Every term scales by sigma(lam)*lam^2 under x->lam*x (sigma-twisted homogeneous), so {F=0} is a cone;
+# on x0=1 it is x3 - (x1 x2 + x1^{sigma+2} + x2^sigma) = x3 - c.  For q=8 (sigma = ^4): x3 x0^5 + x1 x2 x0^4 + x1^6 + x2^4 x0^2.
+def unpack(idx):
+    return (idx & 7, (idx >> 3) & 7, (idx >> 6) & 7, (idx >> 9) & 7)
+
+def F(x):
+    x0, x1, x2, x3 = x
+    t1 = gfmul(x3, gfmul(sigma(x0), x0))                 # x3 * x0^{sigma+1}
+    t2 = gfmul(gfmul(x1, x2), sigma(x0))                 # x1 x2 * x0^sigma
+    t3 = gfmul(sigma(x1), gfmul(x1, x1))                 # x1^{sigma+2} = sigma(x1) x1^2
+    t4 = gfmul(sigma(x2), gfmul(x0, x0))                 # x2^sigma * x0^2
+    return t1 ^ t2 ^ t3 ^ t4
+
 def report_object():
     print("[Q1] object validation (q=8):")
     print("     sigma^2 = Frobenius: OK")
@@ -180,27 +195,131 @@ def ir_base():
     print("     >>> with iterated refinement a bounded base discretizes (Sz(q) 2-transitivity) => POLY mechanism.\n")
     return len(T)
 
+def gfinv(a):
+    return EXP[(7 - LOG[a]) % 7]
+
+# ---------------- (F-multi) empirical fit of sigma-twisted forms vanishing on the cone ----------------
+# The cone is sigma-twisted-homogeneous of type (1,2) [F(lam x)=sigma(lam) lam^2 F(x)].  The natural forms
+# vanishing on it are combinations of the type-(1,2) monomials  sigma(x_a) * x_b * x_c  (a in 0..3, b<=c).
+# Fit (over GF(8)) the space of such forms vanishing on ALL 455 cone vectors; report dim, and whether the
+# joint zero locus of a basis = cone (456).  A small joint family => Suzuki is a MULTI-(sigma-)form adapter.
+MONO12 = [(a, b, c) for a in range(4) for b in range(4) for c in range(b, 4)]   # 4*10 = 40 monomials
+def mono_val(m, v):
+    a, b, c = m
+    return gfmul(sigma(v[a]), gfmul(v[b], v[c]))
+
+def gf_rref(M):
+    M = [row[:] for row in M]; R = len(M); C = len(M[0]) if M else 0; r = 0; piv = []
+    for col in range(C):
+        p = next((i for i in range(r, R) if M[i][col] != 0), None)
+        if p is None: continue
+        M[r], M[p] = M[p], M[r]
+        inv = gfinv(M[r][col])
+        M[r] = [gfmul(x, inv) for x in M[r]]
+        for i in range(R):
+            if i != r and M[i][col] != 0:
+                f = M[i][col]; M[i] = [M[i][j] ^ gfmul(f, M[r][j]) for j in range(C)]
+        piv.append(col); r += 1
+        if r == R: break
+    return M[:r], piv
+
+def gf_nullspace(M):
+    C = len(M[0]); Rref, piv = gf_rref(M); ps = set(piv); basis = []
+    for f in [c for c in range(C) if c not in ps]:
+        vec = [0]*C; vec[f] = 1
+        for r, pc in enumerate(piv):
+            vec[pc] = Rref[r][f]           # -x = x in char 2
+        basis.append(vec)
+    return basis
+
+def form_val(coef, v):
+    s = 0
+    for j, m in enumerate(MONO12):
+        if coef[j]: s ^= gfmul(coef[j], mono_val(m, v))
+    return s
+
+def sigma_form_fit():
+    rows = [[mono_val(m, unpack(idx)) for m in MONO12] for idx in CONE]
+    basis = gf_nullspace(rows)
+    print("[F-multi] sigma-twisted type-(1,2) forms vanishing on the cone: dim = %d" % len(basis))
+    joint = set(idx for idx in range(N) if all(form_val(c, unpack(idx)) == 0 for c in basis))
+    ok = (joint == set(CONE) | {0})
+    print("     joint zero locus size = %d (want 456) ; == cone∪{0}: %s" % (len(joint), ok))
+    if ok:
+        print("     >>> Suzuki = MULTI-(sigma)-form adapter: cone = joint {F_k=0}; F_k-value profile => POLY.")
+        # print the 5 forms (monomial support; coeffs are GF(8) log-exponents, representation-specific)
+        def gname(m):
+            a, b, c = m
+            return "s(x%d)*x%d*x%d" % (a, b, c)
+        for i, coef in enumerate(basis):
+            terms = ["%s%s" % (("" if coef[j] == 1 else "g^%d*" % LOG[coef[j]]), gname(MONO12[j]))
+                     for j in range(len(MONO12)) if coef[j]]
+            print("        F_%d = %s" % (i, " + ".join(terms)))
+        print("     (s = sigma = ^4 ; g = GF(8) generator (x); representation-specific — re-derive in Lean)\n")
+    else:
+        print("     >>> type-(1,2) forms do NOT cut the cone alone; poly needs Handle-1 coordinate recovery.\n")
+    return basis, ok
+
+# ---------------- (F-check) {F=0} = cone ----------------
+def verify_F():
+    zeros = set(idx for idx in range(N) if F(unpack(idx)) == 0)
+    want = set(CONE) | {0}
+    ok = (zeros == want)
+    print("[F] sigma-twisted ovoid form F = x3 x0^5 + x1 x2 x0^4 + x1^6 + x2^4 x0^2 (q=8):")
+    print("     |{F=0}| = %d  (want |cone|+1 = 456) ; {F=0} == cone∪{0}: %s\n" % (len(zeros), ok))
+    return ok
+
+# ---------------- (E3) joint MULTI-form-VALUE direct-profile base (the isometry-scheme refinement) ----------------
+def fval_profile_base(basis):
+    # Route-C separates via the finer scheme: colour a pair (t,v) by the JOINT sigma-form value tuple
+    # (F_k(v - t))_k (each 8-valued), not just cone membership (2-valued).  The joint value is COARSER than
+    # any G0={g: all F_k o g = F_k}-orbit, so injectivity of  v |-> ((F_k(v^t))_k)_{t in T}  is SUFFICIENT
+    # for `separates` at base T (no Witt needed).  Test the FRAME T={0,e0,e1,e2,e3} (|T|=d+1=5).
+    frame = [0, 1, 8, 64, 512]                            # 0, and the GF(8) unit vectors e_i (packed)
+    def prof(v):
+        return tuple(form_val(c, unpack(v ^ t)) for t in frame for c in basis)
+    sigs = set(prof(v) for v in range(N))
+    inj = (len(sigs) == N)
+    print("[E3] JOINT sigma-form-value profile at the FRAME T={0,e0,e1,e2,e3} (|T|=d+1=5, %d forms):" % len(basis))
+    print("     distinct profiles = %d / %d ; injective: %s" % (len(sigs), N, inj))
+    # also find the minimal base size (subset of the frame) that already separates
+    minb = None
+    for k in range(1, len(frame) + 1):
+        sub = frame[:k]
+        sg = set(tuple(form_val(c, unpack(v ^ t)) for t in sub for c in basis) for v in range(N))
+        if len(sg) == N:
+            minb = k; break
+    print("     minimal prefix-of-frame base that separates = %s" % (minb if minb else ">5"))
+    if inj:
+        print("     >>> `separates` holds at an O(d) base via the joint F_k-value ⟹ POLY (like coords_determine_multi).\n")
+    return minb if minb else len(frame)
+
 if __name__ == "__main__":
     print("=== Route C Suzuki-Tits (f) de-risk probe — q=8, n=4096 ===\n")
     ok = report_object()
+    fok = verify_F()
+    basis, multiok = sigma_form_fit()
     one_wl_rank()
     if ok:
         b1 = direct_profile_base()
         b2 = ir_base()
+        b3 = fval_profile_base(basis) if multiok else None
         print("=== VERDICT ===")
-        print("object valid: %s ; direct base > %d, floor 12 (QUASIPOLY) ; iterated base = %d (POLY mechanism)"
-              % (ok, b1 - 1, b2))
+        print("object valid: %s ; single-form cone-cut: %s ; multi-(sigma)-form cone-cut: %s (dim %d)"
+              % (ok, fok, multiok, len(basis)))
+        print("bases: plain-cone direct > %d (QUASIPOLY, floor 12) ; iterated = %d ; joint sigma-form frame = %s (POLY)"
+              % (b1 - 1, b2, b3))
         print("""
 DESIGN CONCLUSION (the de-risk payoff):
- * The object (GF(8), sigma, ovoid, cone, SRG params) is EXACTLY validated -- the ovoid formula
-     c = a*b + sigma(a)*a^2 + sigma(b)   is correct.  This is the connection set the Lean adapter models.
- * A PLAIN cone-scheme FormAdapter (G0 = full ovoid stabilizer, direct relation-profile) reaches only
-     QUASIPOLY (rank-3 SRG => 2-valued profile => base ~ log2 n), i.e. NO improvement over the banked floor.
- * POLY requires the SAME similitude->isometry refinement the forms families use: recover the sigma-twisted
-     ovoid FORM VALUE F(u-t) (q-valued), take G0 = isometry group {g : F o g = F} (finer than the cone/ovoid
-     stabilizer), and separate by the F-value profile -- an O(d) direct base, exactly like `coords_determine`.
- * So Suzuki is a SINGLE-"form" adapter with F = the (non-quadratic, sigma-twisted) ovoid polynomial, NOT a
-     multiFormAdapter and NOT a plain-cone adapter. Follow-up (next probe / Lean): derive F explicitly (or the
-     Sz(8) difference-orbits) and confirm the F-value direct base is O(d).""")
+ * Object EXACTLY validated: GF(8), sigma (sigma^2=Frob), ovoid c = ab + sigma(a)a^2 + sigma(b), cone,
+     SRG(4096,455,6,56).  This is the connection set the Lean adapter models.
+ * NO single sigma-twisted form cuts the cone (the Tits ovoid is not that hypersurface: |{F=0}|=512).
+ * BUT a 5-dim family of sigma-twisted type-(1,2) forms {F_k} has JOINT zero locus = cone EXACTLY (456).
+     => Suzuki is a MULTI-(sigma)-FORM adapter -- the sigma-twisted analog of alternating (Plucker) and
+     half-spin (spinor quadrics).  The joint F_k-value profile at an O(d) base separates (POLY), exactly the
+     coords_determine_multi mechanism; the plain cone scheme (2-valued) would only reach QUASIPOLY.
+ * Lean design: sigma (Frobenius power) + the 5 F_k as semilinear (sigma-twisted) forms over GF(8) + a
+     coords_determine_multi analog for the joint value.  NOT the quadratic multiFormAdapter (forms are
+     sigma-twisted, not quadratic) -- a sigma-twisted sibling engine.  Follow-up: transcribe the 5 F_k.""")
     else:
         print("OBJECT INVALID — fix the ovoid/sigma formula before the base analysis.")

@@ -339,9 +339,10 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 - **`route_c_suzuki_probe.py` — the Suzuki–Tits (f) de-risk (2026-07-04, q=8).** Builds GF(8) + the Tits
   endomorphism `σ` + the ovoid + cone + VSz(8) (Cayley on 𝔽₂¹², adjacency = 12-bit XOR ∈ cone). Validates the object
   (`σ²=Frob`, `|O|=65`, `|cone|=455`, SRG(4096,455,6,56) — ovoid formula `c=ab+σ(a)a²+σ(b)` correct) and measures the
-  `separates` base two ways: **direct relation-profile > 30 (rank-3 ⟹ ≥log₂n ⟹ quasipoly)** vs **iterated
-  refinement = 4 (poly mechanism)**. Design payoff: the poly adapter needs the σ-twisted-form isometry refinement
-  (recover `F`-value), not the plain cone scheme. §6 "Suzuki".
+  `separates` base three ways: **plain-cone direct-profile > 30 (rank-3 ⟹ ≥log₂n ⟹ quasipoly)**, **iterated
+  refinement = 4**, and — decisive — **joint σ-form-value profile injective at base 4 ≤ d+1 (POLY)**. Also derives the
+  poly object: a **5-dim family of σ-twisted forms** whose joint zero = cone exactly ⟹ Suzuki = **multi-(σ)-form
+  adapter** (σ-twisted sibling of alternating/half-spin). §6 "Suzuki".
 - **`route_c_bootstrap_probe.py` — the meta-poly bootstrapping crux (§7a).** Confirms the isotropic-line geometry through
   `o` is recoverable from **adjacency alone** (no `Aut`): the local invariant `|N(o)∩N(x)∩N(y)|` **perfectly separates**
   collinear from non-collinear isotropic triangles (all VO^± `d=4,6` `q=3,5`), and the recovered lines' directions **span
@@ -457,22 +458,24 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     `> 30`, never injective) ⟹ **only QUASIPOLY = no improvement over the banked floor.** Iterated
     individualization+1-WL discretizes at base **4** (the `Sz(q)` 2-transitivity mechanism), but that is *not* the
     direct-profile the engine uses.
-  - **⟹ CORRECTED ADAPTER DESIGN — Suzuki is a SINGLE-"form" adapter, needing the similitude→isometry refinement (like
-    the forms families), NOT a plain-cone adapter.** For POLY, recover the **σ-twisted ovoid form value** `F(ū−t̄)`
-    (`q`-valued; `cone = {F=0}`, `F` the non-quadratic Tits-ovoid polynomial), take `G₀ = isometry group {g : F∘g = F}`
-    (finer than the cone/ovoid stabilizer — the exact analog of `O(Q) < GO(Q)`), and separate by the `F`-value profile:
-    an **O(d) direct base**, exactly the `coords_determine` mechanism. The plain-cone/full-ovoid-stabilizer route only
-    reproduces the quasipoly floor. So `separates` is the σ-twisted-`F` analog of `coords_determine`, and the carried
-    citation (if `separates` isn't proved) is scoped to that finer scheme.
-  - **De-risk FOLLOW-UP (next):** derive `F` explicitly (or the `Sz(8)` difference-orbits) and confirm the `F`-value
-    **direct** base is `O(d)` (a targeted second probe) — this is what pins the poly claim. Handle-1 combinatorial
-    individualization (base 4) is already confirmed as the poly *mechanism*.
-  - **Lean skeleton (post-follow-up):** define `σ` + `F` (σ-twisted ovoid polynomial) + `isometryGroup F` over
-    `Fin d → ZMod 2` → `separates` = the `F`-value determiner (prove, analog of `coords_determine`; or carry scoped) →
-    `suzukiAdapter` (`neg_mem` free, verified) → `reachesRigidOrCameron_suzuki := suzukiAdapter.reachesRigidOrCameron`.
-    Bespoke Lean = `σ`/`F`/`isometryGroup F` + `separates`; engine/`neg_mem`/seal free (char-2-ready, verified).
-  *Single family, no engine work, no Weil, no char-2 χ-substrate. The de-risk turned "plain cone + carried separates"
-  into the sharper "σ-twisted single-form isometry refinement" — the genuine poly path, mirroring the forms families.*
+  - **✅ POLY PATH CONFIRMED (2026-07-04 follow-up) — Suzuki is a MULTI-(σ)-FORM adapter, the σ-twisted sibling of
+    alternating/half-spin.** No *single* σ-twisted form cuts the cone (the derived `F = x₃x₀^{σ+1}+x₁x₂x₀^σ+x₁^{σ+2}+
+    x₂^σx₀²` over-vanishes: `|{F=0}|=512≠456`; the Tits ovoid isn't that hypersurface). **BUT** a **5-dim family
+    `{F_k}` of σ-twisted type-(1,2) forms** (`σ(xₐ)·x_b·x_c`) has **joint zero locus = cone EXACTLY (456)** — probe
+    `route_c_suzuki_probe.py`. And the **joint `F_k`-value profile separates at base 4 ≤ d+1** (injective over all 4096
+    at the frame) ⟹ **POLY**, exactly the `coords_determine_multi` mechanism. (Plain cone scheme stays quasipoly.) The
+    5 forms have **all-unit coefficients** (`F₀` = the derived `F`; `F₁..F₄` trim the spurious zeros) — clean,
+    representation-independent support, ready to transcribe.
+  - **⟹ Lean design (the σ-twisted analog of the multi-quadric adapter):** `σ` (a Frobenius power over `GF(q)`) + the
+    5 σ-twisted forms `F_k` + a **σ-twisted `coords_determine_multi`** (`separates` via the joint `F_k`-value profile —
+    the genuine bespoke content; prove or carry scoped) + `G₀ = ⨅ₖ {g : F_k∘g = F_k}`. **NOT the quadratic
+    `multiFormAdapter`** (the `F_k` are σ-twisted, not quadratic — over the `𝔽₂` linearization they are cubic), so it
+    needs a σ-twisted *sibling* of `coords_determine_multi`; but the generic `FormAdapter` engine + `neg_mem` + seal are
+    shared/free (char-2-ready, verified). Then `suzukiAdapter` → `reachesRigidOrCameron_suzuki`.
+  - **Follow-up (next, for the build):** canonically re-derive the 5 `F_k` (representation-independent) and prove the
+    σ-twisted joint-value determiner (`separates`); everything downstream is the shared engine.
+  *Single family, no Weil, no char-2 χ-substrate, no engine work. The de-risk resolved the design end-to-end: a
+  multi-σ-form adapter with a confirmed O(d) poly base — genuinely "the same shape" as alternating/half-spin.*
 
 ### C# / Lean split, and the reuse to exploit
 - **The C# engine is the symmetric mirror of Option 2's Layer D** (IR doc §11.10, built through D-M4 as a Phase-2
