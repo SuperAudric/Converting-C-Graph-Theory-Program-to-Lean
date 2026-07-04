@@ -60,6 +60,54 @@ remaining scoped citations to full Lean proofs. Landed:
   (`NondegQuadricDeterminesForm`); the **meta-poly bootstrapping is assessed sound** (§7a — global coordinatization,
   not the node-4 wall in disguise).
 
+**▶ C# BUILD IN PROGRESS (2026-07-04) — C1a + C1b LANDED, all tests green.**
+- **C1a `RecoverFormFamily`** (added to `QuadraticFormRecovery.cs`): generalizes A1 from `kernel[0]` (one quadratic) to
+  the whole degree-2 **vanishing-space basis** (`RecoveredFormFamily{Basis[][], EvaluateAll, OnCone}`). Test
+  `RouteCFormFamilyProbe.cs` (6/6): multi-quadric Cayley graphs (F₃⁴/F₅⁴/F₃⁶, VanishDim 2–4) reconstruct with **0
+  mismatches** (valid because S := joint zero of chosen quadrics ⟹ `Z(V)=S∪{0}` exactly), + single-quadric consistency
+  with A1 on VO±₄.
+- **C1b `ClassicalGroupGenerators` + `ClassicalSimilitude` (the load-bearing piece)** (new files): builds
+  `affineG(similitudeGroup Q)` generators = translations + orthogonal reflections `x↦x−(B(x,a)/Q(a))a` (Cartan–Dieudonné)
+  + scalar scalings + **the non-square-factor similitude** (via congruence-diagonalization → factor-ν block map). Test
+  `RouteCGroupProbe.cs`: **order-check EXACT at n=81 both types** — `built.Order == harvested |Aut|` (VO⁺₄(3)=186624,
+  VO⁻₄(3)=233280), the executable form of `schemeAutGroup_coarse_eq_affineG`. **KEY FINDING (predicted):** without the
+  non-square similitude the built group is the index-2 subgroup (ratio exactly 2 = [F_p*:squares]); the similitude
+  closes it. **SIFTING LIMITATION:** the order-check is exact at n=81 but Schreier–Sims *without sifting* does not scale
+  the `Order` computation past ~n=81 with the full reflection set (~120 gens at n=625) — a `PermutationGroup` deferred
+  concern, NOT a C1b-correctness issue; the *construction* scales fine (n=2401, 356 gens, all stabilise, fast). Closed
+  form `|affineG^ε₄(q)| = q⁴·2q²(q²−ε)(q²−1)(q−1)` validated == harvested at n=81.
+- **C2 `FormsGraphClassifier`** (new file): strong-regularity gate + **constructive** affine-polar detection
+  (valency = VO^ε isotropic count `(qᵐ−ε)(qᵐ⁻¹+ε)`, confirmed by the recovered quadric reconstructing the graph) +
+  Suzuki SRG(4096,455,6,56) fingerprint. Test `RouteCClassifyProbe.cs` (6/6): classifies VO±₄(3,5) with correct
+  `(p,m,ε)`; non-SR / empty graphs → Unknown (misclassification is SAFE by design). Returns `Unknown` for
+  alternating/half-spin (recovery = future multi-form track).
+- **C3 `RouteCCanonicalizer` + the option-ii orderer wire** (new file + `CanonGraphOrdererChainDescent.EnableRouteC`,
+  default OFF): canonicalizes a forms-graph residue via the **recovered algebraic invariant** `(q,m,ε)` (the form's
+  iso-type is a complete invariant ⟹ canonical graph = standard VO^ε, `|Aut|` = closed form). Wire reuses the single
+  descent's harvested group (`RecognizeFromResult`, no double-descent), returns the standard graph when recognized else
+  the descent's lex-min. Test `RouteCCanonicalizeProbe.cs`: **END-TO-END ISO-STABILITY** — VO±₄(3) and 3 random
+  scrambles recover the SAME `(q,m,ε)`, `|Aut|`, and canonical adjacency, both via the canonicalizer directly AND via
+  the public orderer `Run` API. **KEY FINDING:** the wire's *d-scaling* payoff is gated on **C4** — recognition still
+  needs the descent's harvest to coordinatize (F1's `O_p(Aut)`), so at large `d` (where the plain descent stalls)
+  recognition stalls too; C4 (Aut-free coordinatization) is what makes the certified path independent of the harvest.
+  No regressions (129/129 core canon + Route C + PermutationGroup; default-off preserves behaviour).
+- **C4 `GeometricCoordinatizer` (Aut-free) — ENABLING STEP LANDED** (new file). Recovers the isotropic **lines**
+  through `o` from **adjacency alone** (no Aut harvest) via the local invariant `|N(o)∩N(x)∩N(y)|` + largest-gap
+  thresholding + union-find. Test `RouteCGeometryProbe.cs` (4/4): VO±₄(3,5) recover 10/16/26/36 lines, each of size
+  `q−1`, **all genuinely collinear** (checked vs ground truth), directions **span dim 4** — the enabling property for
+  coordinatization, validating `route_c_bootstrap_probe.py` in production C#. **REMAINING (scoped, not built):** the
+  full coordinate assignment — scalar labelling of each line (Von Staudt cross-ratio / fundamental thm of projective
+  geometry) + reading a vertex's coords off the parallel-line grid (Buekenhout–Shult; poly + citable for rank ≥ 3, i.e.
+  `d ≥ 6`; `d=4` = special GQ). Until it lands, C3's wire uses F1's harvest at small `d`; this step is what makes the
+  certified path harvest-free (hence d-scalable).
+
+**▶ C# BUILD SUMMARY (2026-07-04): C1a, C1b, C2, C3, C4-enabling ALL LANDED, 31/31 Route-C tests green, 0 regressions.**
+The runtime spine (recover form family → build the answer group → classify → canonicalize by iso-type → Aut-free line
+recovery) is in place and validated end-to-end (order-check exact vs harvested |Aut| at n=81; scramble-invariant
+canonicalization through the public orderer). **Two precisely-scoped remainders:** (a) **C4 full coordinatization**
+(Von Staudt scalar recovery + Buekenhout–Shult grid) — unblocks d-scaling; (b) **PermutationGroup sifting** — unblocks
+the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki) recovery are the other future tracks.
+
 **▶ PICK UP HERE (next actionable steps, in rough priority):**
 0. ✅ **Multi-quadric bridges — DONE 2026-07-03** (brick-1-multi + F4-multi, generic; alternating at full
    instance-1 parity, half-spin pre-equipped). See STATUS "Multi-quadric bridges".
@@ -847,6 +895,19 @@ Sizing: L1 medium (the real work), L2 small once L1 exists, L3 a citation/scopin
 **Goal:** for a residue the canonizer flags as a forms-graph family, recover the defining form, compute `|Aut|` and a
 canonical labelling in poly time, and return them through the existing harness — instead of the (stalled) WL descent.
 
+**★ HONEST VALUE PROPOSITION (2026-07-04, grounded against `RouteCF1Probe.cs`) — read before building.** The existing
+harness (`ChainDescent` + `CascadeOracle`, deferral on) **already canonizes the probed forms graphs with no flag and
+full `|Aut|` recovered**: `RouteCF1Probe.cs` asserts `res.Flagged == false` on VO±₄(3) and VO±₄(5) via the generic
+cross-branch harvest. So at small `d`, **nothing is broken**, and the acceptance bar is NOT "no longer flags" (already
+true). Route C's C# payoff is the **two things the generic harvest does not give**:
+1. **A provably-poly, *certified* path** — orbits read off a *known, reconstructed* classical group `AΓO(Q)`, not
+   harvested empirically. This is the runtime image of the Lean seal (correctness by construction, not "the harvest
+   happened to complete").
+2. **`d`-scalability** — the generic harvest's cost has an open `d`-factor (2026-06-28 finding: poly-vs-superpoly in `d`
+   unresolved, infeasible to run at `d=8`); building the group from the recovered form is `poly(d,q)` by construction.
+So the test strategy (§9.2.4) targets **"the built group equals the recovered classical group, and the labelling is
+iso-invariant"**, NOT "flags → no-flag".
+
 **The reframe that drives the design (this session):** the Lean group-pinning `schemeAutGroup_coarse_eq_affineG`
 (`ScratchRecoveredFormTransfer.lean`, mod the Skresanov citation `AffineSchemeTwoClosed`) proves the answer group is
 **exactly `affineG(similitudeGroup Q) = translations ⋊ AΓO(Q)`** — a *known* classical group. So the C# runtime does
@@ -883,16 +944,20 @@ generator producer. The Lean `FormAdapter` interface has **no C# counterpart**. 
   (dim 10), `route_c_reconstruct_probe.py` (`vanishDim=1` for the single-quadratic case). *Odd-q.*
 - **(C1b) `ClassicalGroupGenerators` — THE new load-bearing piece.** Given the recovered form (family) + `AffineStructure`,
   produce a generating set for `AΓO(Q)` (resp. `⨅ₖ O(Q_k)`, Suzuki cone-stab) as **`int[]` permutations of the `p^d`
-  vertices**, ready for `PermutationGroup.AddGenerator`. Contents: the **translations** (already have — `AffineStructure.Translations.Generators`), the **linear isometries/reflections** of `Q` (standard classical-group generator list — orthogonal reflections `x ↦ x − (B(x,a)/Q(a))a` realized as vertex permutations via `Coords`), and the **similitude scalings** (`x ↦ c·x` and one non-square-factor similitude — the `AΓO ⊋ AO` part, §9.0a). This is the C# realization of the Lean `similitudeGroup Q` / `affineG`. Dep: C1a. **Lean contract:** the produced group must equal `affineG(similitudeGroup Q)` — i.e. `PermutationGroup.Order` == `p^d · |AΓO^ε_d(q)|` (closed-form check) **and** `Contains(AffineStructure.Translations generators)`.
+  vertices**, ready for `PermutationGroup.AddGenerator`. Contents: the **translations** (already have — `AffineStructure.Translations.Generators`), the **linear isometries/reflections** of `Q` (standard classical-group generator list — orthogonal reflections `x ↦ x − (B(x,a)/Q(a))a` realized as vertex permutations via `Coords`), and the **similitude scalings** (`x ↦ c·x` and one non-square-factor similitude — the `AΓO ⊋ AO` part, §9.0a). This is the C# realization of the Lean `similitudeGroup Q` / `affineG`. Dep: C1a. **Lean contract:** the produced group must equal `affineG(similitudeGroup Q)` — i.e. `PermutationGroup.Order` == `p^d · |AΓO^ε_d(q)|` **and** `Contains(AffineStructure.Translations generators)`. **★ ORDER-CHECK DESIGN (2026-07-04, corrected — do NOT hand-derive the closed form as the primary gate):** deriving `|AΓO^ε_d(q)|` by hand is error-prone (the `O^+`/`O^-` parity factor, the `(q−1)` similitude factor, the Frobenius `e` factor). **Bootstrap the check against the harness's OWN harvested `|Aut|`:** at small `d` the generic harvest recovers the *true* `|Aut|` (`RouteCF1Probe.cs` proves this), so C1b's order-check compares `built.Order` against `res.ResidualGroup.Order` for VO±₄(3,5), and only *extrapolates* to the hand-derived closed form once it is validated equal at small `d`. This removes the "checking against a wrong constant" risk and is the acceptance gate = the executable form of the group-pinning theorem `schemeAutGroup_coarse_eq_affineG`. Anchor the closed form on `|O^ε_{2m}(q)| = 2·q^{m(m−1)}·(q^m−ε)·∏_{i=1}^{m−1}(q^{2i}−1)` (q odd), with the similitude `×~(q−1)` and Frobenius `×e` (q=pᵉ; e=1 for the sealed q=p case) factors pinned against Kleidman–Liebeck AND the harvested order at `d=4`.
 - **(C2) `FormsGraphClassifier.Detect(n,adj,aff) → FamilyTag`** — decide which family (affine-polar / alternating /
   half-spin / Suzuki) from SRG parameters `(n,k,λ,μ)` + cone-geometry signature (e.g. VSz(8)=SRG(4096,455,6,56) is the
   Suzuki fingerprint — `route_c_suzuki_probe.py`), select the C1a/C1b variant. C# analog of L3's classification.
-- **(C3) `RouteCOracle : ITransversalOracle`** (+ harness wire) — at the residue (`ChainDescent.cs target == −1`): run
-  C2→C1a→C1b, seed the generated group into `knownGroup`, and return **certified** `Representatives` (one per orbit of
-  the target cell under the *known* group — computed by `PermutationGroup.Orbit`, not harvested). Reuses the existing
-  `CoveredByPathFixingAut` prune. This replaces "harvest from the coarse descent" with "read orbits off the known group".
-  **The honest scope note:** the descent still runs on the coarse graph; C3 *supplies the known group so the branching
-  collapses*, which is the runtime form of "recovered form ⟹ poly".
+- **(C3) residue-seam handler (integration decision (ii), 2026-07-04).** Two integration levels were scoped:
+  **(i)** a `RouteCOracle : ITransversalOracle` returning short certified rep-lists (minimal harness change, but the
+  reported `|Aut|` still comes from the harness harvest — so it does NOT deliver the `d`-scaling payoff, only fewer
+  branches); **(ii)** a handler at the residue seam (`ChainDescent.cs target == −1`, `RecoveryOnly` currently returns
+  `StuckResidual`) that runs C2→C1a→C1b, **verifies** (order-check + every generator stabilises `adj`), and if verified
+  **adopts the built group** to report `|Aut|` and generate the canonical labelling — instead of flagging/stalling.
+  **DECISION: (ii)** — the residue seam is exactly where the generic harvest stalls at large `d`, so it is the honest
+  place for the certified path; (i) is the lighter fallback. Soundness: if the build fails to verify (misclassification,
+  char-2 gap), the handler declines and the harness falls back to its existing flag — never a wrong answer. The C1b
+  order-check is a **unit test independent of this choice**, so C1b can be built and validated before C3 is wired.
 - **(C4) `GeometricCoordinatizer` (= §7a R1, the Aut-free path)** — replace `AffineStructureRecovery`'s `O_p(Aut)`
   shortcut (which consumes `Aut`, the potential circularity) with **adjacency-only** recovery: recover the isotropic
   lines through `o` via the local invariant `|N(o)∩N(x)∩N(y)|` (validated Aut-free by `route_c_bootstrap_probe.py`),
@@ -947,6 +1012,28 @@ colouring-injection is the fallback / cross-check.
 first to build; everything else is plumbing or already exists. The engine is the **symmetric mirror of Option 2's Layer
 D** (clone `Option2ExtractionProbe.cs`/`TwistConstruction.cs`, swapping the F₂ extractor for `RecoverFormFamily`).
 [[project_recovery_corecovery_duality_2026-07-03]].
+
+#### 9.2.6 Lean adherence — what's backed vs. new territory (be explicit)
+
+The C# splits into **Lean-backed** pieces (a faithful runtime of a proved theorem) and **new-territory** pieces
+(correct + useful, but *not* backed by a Lean theorem — fine, as long as it is labelled). The build is applicable to
+the Lean where it counts (the `|Aut|` answer is certified by a proved theorem) and honestly new everywhere the Lean was
+never going to reach.
+
+| C# piece | Status | Lean anchor / why not |
+|---|---|---|
+| **C1b built group == answer group** | **HARD contract (Lean-backed, tightest)** | `schemeAutGroup_coarse_eq_affineG` — answer group is *exactly* `affineG(similitudeGroup Q)` mod the Skresanov citation. A proper subgroup (forgetting the similitude scalings = AO not AΓO) or supergroup (spurious gens) both fail the order-check. **The order-check IS the executable form of the group-pinning theorem.** |
+| **C1a null-when-kernel≠1** | Lean-backed (soft) | `NondegQuadricDeterminesForm` — `RecoverForm` returning null on kernel-dim≠1 is the runtime check of the citation's `vanishDim=1` hypothesis. |
+| **C3 orbit reps + labelling** | Lean-backed (soft) | oracle soundness (reps one-per-orbit) + F4 `recoveredForm_colouring_equivariant` + brick-1 `isometryScheme_refines_similitudeScheme` (iso-invariance of the labelling). |
+| **F1 / C4 coordinatization** | **NEW territory — NOT Lean-backed** | the Lean *starts* from the already-coordinatized `affineScheme`; recovering `(F_p)^d` from the abstract graph (socle / geometric) has no Lean model. A computation the proof assumes done. |
+| **The "poly" claim** | **NEW / META — cannot be Lean-backed** | per the §9.0a vacuity correction, poly is inherently a meta-claim (any coarse-scheme predicate is vacuous-or-false). The C# runtime is the closest evidence; it discharges no Lean obligation. |
+| **C2 classifier** | NEW (safe) | C# analog of the L3 classification citation; a runtime heuristic. Misclassification is *safe* (wrong family → wrong group → order mismatch → handler declines → harness flags), just not complete. |
+| **Char-2 / Suzuki recovery** | NEW (separate track) | `suzukiAdapter` is sealed in Lean, but the C# char-2 form recovery (Arf, not the degree-2 kernel solve) is unbuilt; `RecoverForm` already returns null for `p==2`. |
+
+**One-line takeaway:** rigid Lean↔C# coupling at exactly one point (C1b = group-pinning, checked by the order gate);
+soft coupling at C1a + C3; everything else (coordinatization, poly, classification, char-2) is legitimately outside the
+Lean. That is the *expected* shape — the Lean proves *correctness of the group answer*, and leaves *"recover the
+structure"* and *"poly runtime"* as the meta/engineering layer.
 
 ### 9.3 Later — the meta-poly rigor stage
 

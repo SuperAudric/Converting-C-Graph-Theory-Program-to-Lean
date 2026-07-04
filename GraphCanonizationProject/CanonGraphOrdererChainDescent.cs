@@ -79,6 +79,19 @@ namespace Canonizer
         // uses ChainDescent.DefaultBudget(n).
         public long? BudgetOverride { get; set; }
 
+        // Route C — option-ii wire (docs/chain-descent-route-c-plan.md §9.2.2 C3): when enabled, a
+        // connected component that the (single) descent harvest recognizes as a forms-graph family is
+        // canonicalized by RECOVERING its defining form and emitting the STANDARD graph of its
+        // iso-type — instead of the descent's lex-min. Iso-invariant (recognition + the standard graph
+        // are both iso-invariant); SOUND (unrecognized ⟹ keep the descent's result); no extra descent
+        // (recognition reuses the harvested group). Default OFF (changes the canonical form for forms
+        // graphs). NOTE: at small d the descent already canonizes, so this only adds the CERTIFIED
+        // path; its d-scaling payoff needs C4 (Aut-free coordinatization) — the harvest still gates it.
+        public bool EnableRouteC { get; set; } = false;
+
+        // The recovered classical |Aut| when the last RunConnected took the Route-C path; else null.
+        public BigInteger? LastRouteCAutOrder { get; private set; }
+
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
         {
             if (vertexTypes.Length != G.VertexCount)
@@ -141,6 +154,23 @@ namespace Canonizer
             if (result.Flagged)
                 throw new CanonizationFlaggedException(
                     result.FlagReason ?? "flagged", result.ResidualGroup);
+
+            // Route-C wire (opt-in): if the descent's harvest recognizes a forms-graph family,
+            // emit the standard graph of its iso-type (no extra descent — reuse result).
+            LastRouteCAutOrder = null;
+            if (EnableRouteC)
+            {
+                var rc = RouteCCanonicalizer.RecognizeFromResult(adj, n, result);
+                if (rc is not null)
+                {
+                    LastRouteCAutOrder = rc.AutOrder;
+                    var rcCanon = new EdgeType[n, n];
+                    for (int i = 0; i < n; i++)
+                        for (int j = 0; j < n; j++)
+                            rcCanon[i, j] = rc.CanonicalAdjacency[i * n + j];
+                    return new AdjMatrix(rcCanon);
+                }
+            }
 
             int[] best = result.Matrix!;
             var canonical = new EdgeType[n, n];

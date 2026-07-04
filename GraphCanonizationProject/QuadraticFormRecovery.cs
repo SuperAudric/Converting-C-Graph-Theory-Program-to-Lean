@@ -36,6 +36,75 @@ namespace Canonizer
             }
         }
 
+        // ── Route C — C1a: form-FAMILY recovery (multi-quadric) ──────────────────
+        //
+        // Generalizes RecoverForm from ONE quadratic to a form FAMILY. Where a single
+        // nondegenerate quadric's cone pins Q up to scalar (vanishing space dim 1), the
+        // Plücker (alternating) and spinor (half-spin) varieties are cut by SEVERAL
+        // independent quadrics jointly — the degree-2 forms vanishing on the connection
+        // set span a space of dim > 1. RecoverFormFamily returns a BASIS of that whole
+        // vanishing space (each row = one quadric), so the joint zero set = the cone.
+        // The single-quadratic RecoverForm is the dim-1 special case. Odd q only (char-2
+        // = separate Arf track); returns null there or when the cone is empty.
+        internal sealed class RecoveredFormFamily
+        {
+            public required int P { get; init; }
+            public required int Dim { get; init; }
+            public required (int i, int j)[] Monomials { get; init; }
+            public required int[][] Basis { get; init; }   // Basis[k] = coeffs of the k-th quadric; span = vanishing space
+
+            public int VanishDim => Basis.Length;
+
+            // The value tuple (Q_0(v), …, Q_{r-1}(v)) mod p. v is on the joint cone iff all zero.
+            public int[] EvaluateAll(int[] v)
+            {
+                var outp = new int[Basis.Length];
+                for (int k = 0; k < Basis.Length; k++)
+                {
+                    long s = 0;
+                    var c = Basis[k];
+                    for (int t = 0; t < Monomials.Length; t++)
+                        s += (long)c[t] * v[Monomials[t].i] * v[Monomials[t].j];
+                    outp[k] = (int)(((s % P) + P) % P);
+                }
+                return outp;
+            }
+
+            // v is on the joint cone { all Q_k = 0 }.
+            public bool OnCone(int[] v)
+            {
+                foreach (int val in EvaluateAll(v)) if (val != 0) return false;
+                return true;
+            }
+        }
+
+        // Recover the form family (a basis of the degree-2 vanishing space of the cone)
+        // from `adj` using F1 coords `aff`. Returns null if q is even (char-2 track) or
+        // no non-trivial quadric vanishes on the cone (empty basis).
+        public static RecoveredFormFamily? RecoverFormFamily(int[] adj, int n, AffineStructureRecovery.AffineStructure aff)
+        {
+            int p = aff.P, dim = aff.Dim, origin = aff.Origin;
+            if (p == 2) return null;   // char-2 is a separate (Arf) track
+
+            var monos = MonomialsOf(dim);
+            int M = monos.Length;
+
+            var rows = new List<int[]>();
+            for (int x = 0; x < n; x++)
+                if (x != origin && adj[origin * n + x] == 1)
+                {
+                    var v = aff.Coords[x];
+                    var row = new int[M];
+                    for (int k = 0; k < M; k++) row[k] = v[monos[k].i] * v[monos[k].j] % p;
+                    rows.Add(row);
+                }
+
+            var kernel = NullSpaceModP(rows, M, p);
+            if (kernel.Count == 0) return null;                       // no quadric cuts the cone
+
+            return new RecoveredFormFamily { P = p, Dim = dim, Monomials = monos, Basis = kernel.ToArray() };
+        }
+
         // The monomials x_i x_j (i <= j) in a fixed order.
         static (int i, int j)[] MonomialsOf(int dim)
         {
