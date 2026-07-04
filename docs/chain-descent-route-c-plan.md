@@ -767,12 +767,24 @@ deliverable is bundled in **`routeC_polySupport`**: given the citation + the fin
 fine`, it returns the triple `(i)` coarse Aut `= affineG(similitude)` `∧` `(ii)` fine harvest (genuine) `∧` `(iii)`
 fine `≤` coarse (only refines) — the full structural support for the meta poly-canonization (+ F4 for iso-invariance).
 
-**Remaining follow-ups:** (T3) the multi-form instantiation is **already covered** by the generic lemma (plug in
+**✅ T4 (cyclotomic dispatch) LANDED (2026-07-04, axiom-clean,
+[`ScratchSeamDispatch.lean`](../GraphCanonizationProofs/ChainDescent/ScratchSeamDispatch.lean)).** The four-case
+sketch dropped the **cyclotomic** branch (the affine residue is `{1-dim cyclotomic} ∪ {forms-graphs (c)–(f)}` — 5
+cases). Fixed by generalizing the ScratchSeam dispatch: `reachesRigidOrCameron_seamDispatch` routes `S` that is
+"Cameron, **or realized by *some* already-sealed scheme `Y`** (`SchemeRealizes f S Y ∧ SealDisj Y`)". Because the
+cyclotomic seal `reachesRigidOrCameron_affineSlice` and every forms-graph seal conclude the **same `SealDisj` shape**,
+both are instances of the single "sealed realized `Y`" disjunct — one theorem dispatches all of them. `cyclotomic_sealDisj`
+supplies the cyclotomic `Y` (via `affineSlice`, mod its cited `TwinsAreSemilinear`/`PrimitiveCCClassification`);
+`reachesRigidOrCameron_affineResidue` is the named combined seam. Carries the `htransport` (= L1) obligation, exactly
+as ScratchSeam. **⟹ the cyclotomic branch is now first-class, and the dispatch is uniform over the whole affine residue.**
+
+**Remaining follow-ups:** (T3) the multi-form instantiation is **already covered** by the generic pinning lemma (plug in
 `jointConeStab Qs`); a concrete instance can wait for the ScratchRouteC port; (T2) the C# |Aut| runtime uses
-`schemeAutGroup_coarse_eq_affineG` to hand `AΓO(Q)` to Schreier–Sims; (T4) the **cyclotomic** dispatch branch (routed
-to `…affineSlice` — §9.1 omits it, 5 cases not 4). The classification premise §9.1/L3 is unchanged and sound (Cameron
-+ Liebeck 1987 + Skresanov 2020/22 + Ponomarenko). Register the new citation `AffineSchemeTwoClosed` (= Skresanov
-rank-3 2-closure) in `chain-descent-citation-discharge.md` alongside the other Route-C carries.
+`schemeAutGroup_coarse_eq_affineG` to hand `AΓO(Q)` to Schreier–Sims. The classification premise §9.1/L3 is unchanged
+and sound (Cameron + Liebeck 1987 + Skresanov 2020/22 + Ponomarenko). `AffineSchemeTwoClosed` (= Skresanov rank-3
+2-closure) is registered in `chain-descent-citation-discharge.md`. The one carried Lean obligation across the seam is
+still `htransport` (L1 — the `SealDisj`-transport along a realizing permutation; scoped positive, `ScratchSeam` /
+§9.0a).
 
 > **▶ §9.1 below is SUPERSEDED for the multi-form families by §9.0a** (its "transport the adapter seal along hiso"
 > mis-types the fine/coarse schemes). It stays correct for affine-polar's *quasipoly* pair-route seal (ScratchSeam),
