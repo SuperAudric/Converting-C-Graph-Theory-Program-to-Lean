@@ -110,12 +110,24 @@ remaining scoped citations to full Lean proofs. Landed:
   without coordinatization**; `RecognizeFromResult` now computes the invariant harvest-free and uses the harvest **only
   for the safety confirmation** (does the recovered form reconstruct the graph — rules out a parameter-mate SRG). **What
   full coordinatization is still needed for:** making that *confirmation* harvest-free (distinguishing a genuine VO graph
-  from a hypothetical cospectral parameter-mate). That is the **fundamental theorem of projective geometry** (Von Staudt
-  scalar recovery + Buekenhout–Shult / parallelogram completion) — a large sub-project. The enabling geometry (isotropic
-  line recovery) is landed; the next rung (affine-**parallelism** detection) was probed and found to need more than the
-  edge-count signature (perpendicular directions alias; recovered lines exclude the origin) — a genuine open sub-problem,
-  not a quick win. **Honest state: C4 = harvest-free invariant DONE (answer is harvest-free) + full coordinatization for
-  harvest-free confirmation = scoped, large, deferred.**
+  from a hypothetical cospectral parameter-mate).
+- **★★ C4 FULL COORDINATIZATION — HARVEST-FREE for VO±₄(3), + the obstruction CHARACTERIZED (2026-07-04).** The
+  parallelism/orientation wall was dissolved by a **linear** method: an isotropic line is an arithmetic progression, so
+  `Σ coord(line points) = 0` (odd p) — a constraint with NO ordering/orientation. `CoordinatizeByLineSums` (+
+  `RecoverAllIsotropicLines`) solves the line-sum system over `F_p` and recovers coords **from adjacency alone**.
+  **KEY OBSTRUCTION, now crisp — CONE-BLINDNESS:** the solution space is `{linear functionals} ⊕ {cone-blind functions}`;
+  the quadratic form `Q` itself satisfies every isotropic-line-sum (`ΣQ = 2Q(d) = 0` since `Q(d)=0`), so the graph
+  determines coords only **up to adding multiples of `Q`**. Measured ambiguity `A = nullDim − d`: **`A=1` at q=3, `A=45`
+  at q=5** (d=4). The linear part is isolated by a **shear search** over the ambiguity (the unique complement that
+  *reconstructs* the form), feasible when `p^{d·A}` is small (`A=1 ⟹ 81` for p=3). **RESULT: VO±₄(3) is coordinatized
+  HARVEST-FREE and reconstructs (0 mismatches, `RouteCGeometryProbe`), now WIRED into the confirmation
+  (`ConfirmByMultiQuadricReconstruction` tries harvest-free first) ⟹ the WHOLE Route-C pipeline is harvest-free for
+  VO±₄(3) = provably poly for that case, no descent/T0 dependence.** For `p≥5` the coordinatizer honestly DECLINES
+  (ambiguity search infeasible) — the general case is the remaining hard core: **isolating the linear part past the
+  cone-blind `Q`-ambiguity, whose dimension grows with `p`** (this IS the fundamental-theorem-of-geometry difficulty, now
+  precisely located — NOT parallelism-detection, which the line-sum method sidesteps). **Honest state: C4 = harvest-free
+  invariant DONE + harvest-free full coordinatization DONE for small-ambiguity (p=3, pipeline provably poly there) +
+  large-ambiguity (p≥5) isolation = the precisely-characterized open core.**
 
 - **FAMILY-DISPATCH SCAFFOLD (2026-07-04, §9.2.7).** Refactored the hardwired affine-polar pipeline into an
   **`IFormFamilyHandler` registry** (C# mirror of the Lean `FormAdapter`). `AffinePolarHandler` real; `Alternating` /
@@ -1101,6 +1113,17 @@ never reached — the graph falls back to the descent. Activating `RecognizeInva
 **Note — C1b (`ClassicalGroupGenerators`) is odd-q single-quadratic only; the multi-form / char-2 group generators are
 NOT needed for the runtime** (|Aut| comes from the closed-form `AutOrder`), only for an optional order-check verification
 test — so they are off the completion critical path for each family.
+
+**★ SLOT AUDIT (2026-07-04) — the 4-hook interface is COMPLETE for all four families; no missing slot.** Suzuki is an
+outlier only in *implementation* (char-2/Arf inside its `Confirm`, and the `GF(q)⁴↔𝔽₂^d` module bridge inside
+recovery/construction) — not in *interface shape*; even char-2 coordinatization is the shared `Coordinatize` (F1 works
+for p=2). Two audit-driven refinements landed: (a) **`AffinePolarHandler` is now explicitly odd-q scoped** (declines
+`q==2` at recognition) so **char-2 affine-polar** (Clebsch = VO⁻₄(2)) is a *clean separate slot*, exactly like Suzuki —
+rather than a "recognized-but-always-declines" oddity; (b) a shared **`FormsGraphBuilder.StandardCayleyGraph(q, dim,
+diff => …)`** builder (used by `StandardVO`, referenced in every stub's `StandardGraph` TODO) makes each family's
+`StandardGraph` a near one-liner once its standard forms are known. Net: **five clean slots** — the four families plus a
+char-2-affine-polar branch — each completed by filling fingerprint + `StandardGraph` (via the shared builder) + `AutOrder`
+(+ char-2 `Confirm` for the two char-2 slots).
 
 ### 9.3 Later — the meta-poly rigor stage
 

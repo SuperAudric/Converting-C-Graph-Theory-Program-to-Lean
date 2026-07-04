@@ -72,6 +72,53 @@ public class RouteCGeometryProbe
         Assert.Equal(eps, reps);
     }
 
+    // FULL Aut-free coordinatization via line-sum constraints (small cone-blind ambiguity, p=3):
+    // recover coords from ADJACENCY ALONE (no harvest), then confirm they reconstruct the quadratic
+    // form (0 mismatches) — i.e. the graph IS a quadric Cayley graph in the recovered coords. This is
+    // the C4 payoff for VO±₄(3): harvest-free confirmation ⟹ the Route-C pipeline is harvest-free
+    // (the provable-poly leg) for this case.
+    [Theory]
+    [InlineData(3, -1)]
+    [InlineData(3, +1)]
+    public void CoordinatizeByLineSums_ReconstructsForm_HarvestFree(int q, int eps)
+    {
+        const int dim = 4;
+        int n = IPow(q, dim);
+        var (adj, _, _) = RouteCVO4.Build(q, eps);
+
+        var aff = GeometricCoordinatizer.CoordinatizeByLineSums(adj, n);
+        Assert.True(aff is not null, $"VO^{eps}_4({q}): line-sum coordinatization returned null");
+        Assert.Equal(dim, aff!.Dim);
+
+        var Q = QuadraticFormRecovery.RecoverForm(adj, n, aff);
+        Assert.True(Q is not null, $"VO^{eps}_4({q}): RecoverForm null on line-sum coords");
+        int mism = 0;
+        var d = new int[dim];
+        for (int x = 0; x < n; x++)
+            for (int y = x + 1; y < n; y++)
+            {
+                for (int i = 0; i < dim; i++) d[i] = ((aff.Coords[x][i] - aff.Coords[y][i]) % q + q) % q;
+                if ((Q!.Evaluate(d) == 0) != (adj[x * n + y] == 1)) mism++;
+            }
+        _out.WriteLine($"VO^{(eps < 0 ? "-" : "+")}_4({q}) n={n}: HARVEST-FREE coords reconstruct graph, mismatches={mism}/{n * (n - 1) / 2}");
+        Assert.Equal(0, mism);
+    }
+
+    // The documented boundary: for p ≥ 5 the cone-blind ambiguity (nullDim − d) is large (45 at q=5,d=4),
+    // so the shear search is infeasible and the coordinatizer HONESTLY DECLINES (returns null) — it does
+    // NOT emit wrong coords. This bounds where the line-sum method delivers harvest-free coordinatization.
+    [Theory]
+    [InlineData(5, -1)]
+    [InlineData(5, +1)]
+    public void CoordinatizeByLineSums_DeclinesWhenAmbiguityLarge(int q, int eps)
+    {
+        int n = IPow(q, 4);
+        var (adj, _, _) = RouteCVO4.Build(q, eps);
+        var aff = GeometricCoordinatizer.CoordinatizeByLineSums(adj, n);
+        _out.WriteLine($"VO^{(eps < 0 ? "-" : "+")}_4({q}): coordinatizer declined (null) as expected (large cone-blind ambiguity)");
+        Assert.Null(aff);
+    }
+
     static bool Dependent(int[] x, int[] y, int q, int d)
     {
         for (int c = 0; c < q; c++) if (Enumerable.Range(0, d).All(k => (c * x[k]) % q == ((y[k] % q) + q) % q)) return true;

@@ -62,11 +62,10 @@ namespace Canonizer
         // form Q = sum_{i<m-?} x_{2i}x_{2i+1} (+ anisotropic binary tail y^2+by z+c z^2 for eps=-1).
         public static int[] StandardVO(int q, int m, int eps)
         {
-            int dim = 2 * m, n = IPow(q, dim);
+            int dim = 2 * m;
             int bb = 0, cc = 0;
             if (eps == -1) AnisotropicBinary(q, out bb, out cc);
 
-            int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
             int Qf(int[] x)
             {
                 int s = 0, hyp = eps == -1 ? m - 1 : m;
@@ -78,16 +77,7 @@ namespace Canonizer
                 }
                 return ((s % q) + q) % q;
             }
-            var vecs = new int[n][]; for (int v = 0; v < n; v++) vecs[v] = Vec(v);
-            var adj = new int[n * n];
-            var d = new int[dim];
-            for (int u = 0; u < n; u++)
-                for (int v = u + 1; v < n; v++)
-                {
-                    for (int i = 0; i < dim; i++) d[i] = ((vecs[u][i] - vecs[v][i]) % q + q) % q;
-                    if (Qf(d) == 0) { adj[u * n + v] = 1; adj[v * n + u] = 1; }
-                }
-            return adj;
+            return FormsGraphBuilder.StandardCayleyGraph(q, dim, d => Qf(d) == 0);
         }
 
         static void AnisotropicBinary(int q, out int bb, out int cc)

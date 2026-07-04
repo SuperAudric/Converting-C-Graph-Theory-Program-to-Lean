@@ -40,8 +40,10 @@ namespace Canonizer
         // STUB (char-2 recovery not built): declines safely ⟹ falls back to the descent. TODO 2.
         protected override bool Confirm(int[] adj, int n, CanonResult harvest, Inv inv) => false;
 
+        // TODO 3: FormsGraphBuilder.StandardCayleyGraph(inv.Q, 4, diff => onSuzukiOvoidCone(diff)) — the
+        // connection set is the Sz(q) ovoid cone (char-2, over GF(q) not F_2; needs the module bridge).
         protected override int[] StandardGraph(Inv inv) =>
-            throw new NotImplementedException("SuzukiHandler.StandardGraph — canonical Sz(q) ovoid graph (TODO 3).");
+            throw new NotImplementedException("SuzukiHandler.StandardGraph — canonical Sz(q) ovoid graph via FormsGraphBuilder.StandardCayleyGraph (TODO 3).");
 
         protected override BigInteger AutOrder(Inv inv) =>
             throw new NotImplementedException("SuzukiHandler.AutOrder — closed-form |affineG(Sz(q))| (TODO 4).");

@@ -34,8 +34,10 @@ namespace Canonizer
         protected override bool Confirm(int[] adj, int n, CanonResult harvest, Inv inv) =>
             ConfirmByMultiQuadricReconstruction(adj, n, harvest);
 
+        // TODO 2: with the 10 standard spinor quadrics S0..S9, a one-liner:
+        //   FormsGraphBuilder.StandardCayleyGraph(inv.Q, inv.D, diff => S0(diff)==0 && ... && S9(diff)==0);
         protected override int[] StandardGraph(Inv inv) =>
-            throw new NotImplementedException("HalfSpinHandler.StandardGraph — build the canonical half-spin graph from the spinor quadrics (TODO 2).");
+            throw new NotImplementedException("HalfSpinHandler.StandardGraph — via FormsGraphBuilder.StandardCayleyGraph with the spinor quadrics S0..S9 (TODO 2).");
 
         protected override BigInteger AutOrder(Inv inv) =>
             throw new NotImplementedException("HalfSpinHandler.AutOrder — closed-form |Aut| of the half-spin similitude group (TODO 3).");

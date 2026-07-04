@@ -84,9 +84,14 @@ namespace Canonizer
         // Shared multi-quadric confirmation (affine-polar / alternating / half-spin): the recovered
         // degree-2 vanishing space's JOINT CONE must reconstruct the whole adjacency. Odd q. This is the
         // C1a machinery (RecoverFormFamily), already validated on single- and multi-quadric Cayley graphs.
+        //
+        // Coordinatization tries HARVEST-FREE first (C4 line-sum, works where the cone-blind ambiguity is
+        // small — VO±₄(3)); only falls back to the descent harvest when that declines. So for the
+        // harvest-free regime the WHOLE confirmation (hence the Route-C pipeline) is harvest-free — the
+        // provable-poly leg, no dependence on the descent / T0.
         protected static bool ConfirmByMultiQuadricReconstruction(int[] adj, int n, CanonResult harvest)
         {
-            var aff = Coordinatize(harvest, n);
+            var aff = GeometricCoordinatizer.CoordinatizeByLineSums(adj, n) ?? Coordinatize(harvest, n);
             if (aff is null) return false;
             var fam = QuadraticFormRecovery.RecoverFormFamily(adj, n, aff);
             if (fam is null) return false;

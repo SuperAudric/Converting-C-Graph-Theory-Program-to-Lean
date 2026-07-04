@@ -40,8 +40,10 @@ namespace Canonizer
         protected override bool Confirm(int[] adj, int n, CanonResult harvest, Inv inv) =>
             ConfirmByMultiQuadricReconstruction(adj, n, harvest);
 
+        // TODO 2: with the standard Plücker quadrics Q_0..Q_r, this is a one-liner:
+        //   FormsGraphBuilder.StandardCayleyGraph(inv.Q, inv.D, diff => Q_0(diff)==0 && ... && Q_r(diff)==0);
         protected override int[] StandardGraph(Inv inv) =>
-            throw new NotImplementedException("AlternatingHandler.StandardGraph — build the canonical alternating forms graph (TODO 2).");
+            throw new NotImplementedException("AlternatingHandler.StandardGraph — via FormsGraphBuilder.StandardCayleyGraph with the standard Plücker quadrics (TODO 2).");
 
         protected override BigInteger AutOrder(Inv inv) =>
             throw new NotImplementedException("AlternatingHandler.AutOrder — closed-form |Aut| of the alternating similitude group (TODO 3).");

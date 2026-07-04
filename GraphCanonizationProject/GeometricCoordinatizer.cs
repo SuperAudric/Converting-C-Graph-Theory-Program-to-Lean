@@ -47,6 +47,207 @@ namespace Canonizer
             return false;
         }
 
+        // ── FULL Aut-free coordinatization (odd p) via line-sum constraints ──────────────────────────
+        //
+        // KEY: an isotropic line of a Cayley forms-graph over F_p is an arithmetic progression
+        // {x, x+d, …, x+(p-1)d}; the sum of its p points is p·x + d·p(p-1)/2 ≡ 0 (odd p). So each
+        // recovered line gives the LINEAR constraint Σ_{v∈line} coord(v) = 0 — with NO ordering or
+        // orientation (the wall that stalled the parallelism approach). The valid coordinate functions
+        // are exactly the linear functionals ξ↦⟨ξ,·⟩ (each kills the line-sum since Σ points = 0), so the
+        // solution space of {f(o)=0, Σ_line f = 0} is (for a rich enough line system) exactly d-dimensional,
+        // and ANY basis f_1..f_d gives a valid coordinatization coord(w) = (f_1(w),…,f_d(w)) — HARVEST-FREE.
+        //
+        // The line-sum solution space is {linear functionals} ⊕ {cone-blind functions}: the quadratic
+        // form Q itself satisfies every isotropic-line-sum (Σ Q over a line = 2Q(d) = 0 since Q(d)=0), and
+        // for larger p so do more functions (nullDim = d + A, A the cone-blind ambiguity; measured A=1 for
+        // p=3, A=45 for p=5 at d=4). So the linear part is not immediately isolated — the CONE-BLINDNESS
+        // obstruction (the graph is blind to Q's off-cone values). We isolate the linear part by a SHEAR
+        // SEARCH over the ambiguity: the true coordinatization is the unique complement (mod the cone-blind
+        // subspace) that RECONSTRUCTS the form (only linear coords make adjacency a clean Cayley quadric).
+        // Feasible only when the search p^{d·A} is small (A=1 ⟹ p^d, e.g. 81 for p=3) — so this delivers
+        // harvest-free coordinatization for the small-ambiguity regime (VO±₄(3)) and DECLINES otherwise.
+        //
+        // Returns an AffineStructure (coords) from adjacency ALONE, or null if p even / under-determined /
+        // the ambiguity search is infeasible / no shear reconstructs.
+        public static AffineStructureRecovery.AffineStructure? CoordinatizeByLineSums(int[] adj, int n)
+        {
+            if (!PrimePower(n, out int p, out int dim) || p == 2) return null;
+
+            var lines = RecoverAllIsotropicLines(adj, n, p);
+            if (lines.Count == 0) return null;
+
+            // S = solution space of {f(0)=0, Σ_{v∈line} f = 0}.
+            var rows = new List<int[]>();
+            var origin = new int[n]; origin[0] = 1; rows.Add(origin);
+            foreach (var line in lines) { var r = new int[n]; foreach (int v in line) r[v] = 1; rows.Add(r); }
+            var S = NullSpaceModP(rows, n, p);
+            if (S.Count < dim) return null;
+
+            int amb = S.Count - dim;                       // cone-blind ambiguity dimension
+            long search = 1;
+            for (int i = 0; i < dim * amb && search <= 200000; i++) search *= p;
+            if (search > 200000) return null;              // infeasible (large-p cone-blind ambiguity)
+
+            // A = the cone-blind subspace = solutions vanishing on the whole cone N(o) (contains Q).
+            var coneRows = new List<int[]>(rows);
+            for (int w = 0; w < n; w++) if (adj[0 * n + w] == 1) { var r = new int[n]; r[w] = 1; coneRows.Add(r); }
+            var A = NullSpaceModP(coneRows, n, p);
+            if (A.Count != amb) return null;
+
+            // C = a complement of A in S (dim = dim). Greedily take S-vectors independent of A ∪ chosen.
+            var C = new List<int[]>();
+            var span = new List<int[]>(A);
+            foreach (var s in S) { if (C.Count == dim) break; if (Independent(span, s, p)) { C.Add(s); span.Add(s); } }
+            if (C.Count != dim) return null;
+
+            // shear search: coords_φ(w) = C_i(w) + Σ_j φ[i,j]·A_j(w); the reconstructing φ is the linear part.
+            var phi = new int[dim * amb];
+            while (true)
+            {
+                var coords = new int[n][];
+                var seen = new HashSet<string>();
+                bool injective = true;
+                for (int w = 0; w < n; w++)
+                {
+                    var c = new int[dim];
+                    for (int i = 0; i < dim; i++)
+                    {
+                        long v = C[i][w];
+                        for (int j = 0; j < amb; j++) v += (long)phi[i * amb + j] * A[j][w];
+                        c[i] = (int)(((v % p) + p) % p);
+                    }
+                    coords[w] = c;
+                    if (!seen.Add(string.Join(",", c))) { injective = false; break; }
+                }
+                if (injective)
+                {
+                    var aff = new AffineStructureRecovery.AffineStructure
+                    { Translations = new PermutationGroup(n), Origin = 0, P = p, Dim = dim, Coords = coords };
+                    if (Reconstructs(adj, n, aff)) return aff;
+                }
+                // increment φ (base-p odometer)
+                int k = 0;
+                for (; k < phi.Length; k++) { if (++phi[k] < p) break; phi[k] = 0; }
+                if (k == phi.Length) break;
+            }
+            return null;
+        }
+
+        // The recovered coords make the graph a quadric Cayley graph: RecoverForm + full reconstruction.
+        static bool Reconstructs(int[] adj, int n, AffineStructureRecovery.AffineStructure aff)
+        {
+            var Q = QuadraticFormRecovery.RecoverForm(adj, n, aff);
+            if (Q is null) return false;
+            int p = aff.P, dim = aff.Dim; var d = new int[dim];
+            for (int x = 0; x < n; x++)
+                for (int y = x + 1; y < n; y++)
+                {
+                    for (int i = 0; i < dim; i++) d[i] = ((aff.Coords[x][i] - aff.Coords[y][i]) % p + p) % p;
+                    if ((Q.Evaluate(d) == 0) != (adj[x * n + y] == 1)) return false;
+                }
+            return true;
+        }
+
+        // whether `v` is linearly independent of `basis` over F_p (append-and-rank).
+        static bool Independent(List<int[]> basis, int[] v, int p)
+        {
+            var test = new List<int[]>(basis) { v };
+            return Rank(test, p) == basis.Count + 1;
+        }
+
+        static int Rank(List<int[]> vs, int p)
+        {
+            if (vs.Count == 0) return 0;
+            int ncols = vs[0].Length;
+            var A = vs.Select(r => (int[])r.Clone()).ToList();
+            int rank = 0;
+            for (int c = 0; c < ncols && rank < A.Count; c++)
+            {
+                int piv = -1;
+                for (int i = rank; i < A.Count; i++) if (A[i][c] % p != 0) { piv = i; break; }
+                if (piv < 0) continue;
+                (A[rank], A[piv]) = (A[piv], A[rank]);
+                int inv = ModInv(((A[rank][c] % p) + p) % p, p);
+                for (int cc = 0; cc < ncols; cc++) A[rank][cc] = ((A[rank][cc] * inv) % p + p) % p;
+                for (int i = 0; i < A.Count; i++)
+                    if (i != rank && A[i][c] % p != 0)
+                    {
+                        int f = A[i][c];
+                        for (int cc = 0; cc < ncols; cc++)
+                            A[i][cc] = (int)((((long)A[i][cc] - (long)f * A[rank][cc]) % p + (long)p * p) % p);
+                    }
+                rank++;
+            }
+            return rank;
+        }
+
+        // Diagnostic: (number of recovered lines, null-space dimension of the line-sum system).
+        public static (int lines, int nullDim) LineSumDiagnostic(int[] adj, int n)
+        {
+            if (!PrimePower(n, out int p, out _)) return (0, -1);
+            var lines = RecoverAllIsotropicLines(adj, n, p);
+            var rows = new List<int[]>();
+            var origin = new int[n]; origin[0] = 1; rows.Add(origin);
+            foreach (var line in lines) { var r = new int[n]; foreach (int v in line) r[v] = 1; rows.Add(r); }
+            return (lines.Count, NullSpaceModP(rows, n, p).Count);
+        }
+
+        // All isotropic lines of the graph (each a full p-point line, vertex-index list), recovered from
+        // adjacency alone by grouping every vertex's cone into lines and deduping.
+        public static List<List<int>> RecoverAllIsotropicLines(int[] adj, int n, int p)
+        {
+            var seen = new HashSet<string>();
+            var all = new List<List<int>>();
+            for (int o = 0; o < n; o++)
+                foreach (var grp in RecoverIsotropicLines(adj, n, o))
+                {
+                    var line = new List<int>(grp) { o };
+                    line.Sort();
+                    var key = string.Join(",", line);
+                    if (seen.Add(key)) all.Add(line);
+                }
+            return all;
+        }
+
+        // Null space basis of the F_p system with rows `rows` over `ncols` variables.
+        static List<int[]> NullSpaceModP(List<int[]> rows, int ncols, int p)
+        {
+            var A = rows.Select(r => (int[])r.Clone()).ToList();
+            int nrows = A.Count;
+            var pivotCol = new List<int>();
+            var isPivot = new bool[ncols];
+            int rr = 0;
+            for (int c = 0; c < ncols && rr < nrows; c++)
+            {
+                int piv = -1;
+                for (int i = rr; i < nrows; i++) if (A[i][c] % p != 0) { piv = i; break; }
+                if (piv < 0) continue;
+                (A[rr], A[piv]) = (A[piv], A[rr]);
+                int inv = ModInv(((A[rr][c] % p) + p) % p, p);
+                for (int cc = 0; cc < ncols; cc++) A[rr][cc] = ((A[rr][cc] * inv) % p + p) % p;
+                for (int i = 0; i < nrows; i++)
+                    if (i != rr && A[i][c] % p != 0)
+                    {
+                        int f = A[i][c];
+                        for (int cc = 0; cc < ncols; cc++)
+                            A[i][cc] = (int)((((long)A[i][cc] - (long)f * A[rr][cc]) % p + (long)p * p) % p);
+                    }
+                isPivot[c] = true; pivotCol.Add(c); rr++;
+            }
+            var basis = new List<int[]>();
+            for (int c = 0; c < ncols; c++)
+            {
+                if (isPivot[c]) continue;
+                var vec = new int[ncols];
+                vec[c] = 1;
+                for (int i = 0; i < pivotCol.Count; i++) vec[pivotCol[i]] = ((-A[i][c]) % p + p) % p;
+                basis.Add(vec);
+            }
+            return basis;
+        }
+
+        static int ModInv(int a, int p) { a = ((a % p) + p) % p; int r = 1; for (int i = 0; i < p - 2; i++) r = r * a % p; return r; }
+
         // The isotropic lines through vertex `o`, recovered from `adj` alone (no Aut). Each returned
         // line is the list of the OTHER p-1 vertices on it (all in N(o)); o itself is excluded. A line
         // through o is a maximal set of cone points that are pairwise "collinear per the invariant".
