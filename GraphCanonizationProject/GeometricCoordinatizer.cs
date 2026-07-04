@@ -21,6 +21,32 @@ namespace Canonizer
     // geometry into an AffineStructure; until it lands, C3's wire uses F1's harvest at small d.
     internal static class GeometricCoordinatizer
     {
+        // ── Harvest-free canonical INVARIANT recovery ────────────────────────────
+        //
+        // KEY (2026-07-04): the affine-polar iso-type (q, m, eps) — hence C3's whole answer (the
+        // standard canonical graph + closed-form |Aut|) — needs NO coordinatization: it is fixed by
+        // (n, valency, strong-regularity) alone. n = q^{2m} pins q,m; the valency
+        // k = (q^m - eps)(q^{m-1} + eps) pins eps. So the d-scaling concern for the ANSWER is
+        // resolved WITHOUT the Aut harvest / full geometric coordinatization. (Coordinatization is
+        // still needed only for the safety CONFIRMATION — distinguishing a genuine VO graph from a
+        // hypothetical parameter-mate SRG; that is the remaining C4 work.)
+        //
+        // Returns false if `adj` is not strongly regular, or n is not q^{2m} with a valency matching
+        // some VO^eps. Uses adjacency ALONE (no PermutationGroup, no AffineStructure).
+        public static bool RecoverAffinePolarInvariant(int[] adj, int n, out int q, out int m, out int eps)
+        {
+            q = m = 0; eps = 0;
+            if (!FormsGraphClassifier.StronglyRegular(adj, n, out int k, out _, out _)) return false;
+            if (!PrimePower(n, out int p, out int d) || d % 2 != 0 || d < 4) return false;
+            int mm = d / 2, qq = p;
+            foreach (int e in new[] { +1, -1 })
+            {
+                long val = (long)(IntPow(qq, mm) - e) * (IntPow(qq, mm - 1) + e);
+                if (val == k) { q = qq; m = mm; eps = e; return true; }
+            }
+            return false;
+        }
+
         // The isotropic lines through vertex `o`, recovered from `adj` alone (no Aut). Each returned
         // line is the list of the OTHER p-1 vertices on it (all in N(o)); o itself is excluded. A line
         // through o is a maximal set of cone points that are pairwise "collinear per the invariant".
@@ -86,5 +112,19 @@ namespace Canonizer
             }
             return splitAt;   // collinear ⟺ inv ≥ splitAt (top cluster)
         }
+
+        static bool PrimePower(int n, out int p, out int d)
+        {
+            p = 0; d = 0;
+            if (n < 2) return false;
+            int cand = 2;
+            while (n % cand != 0) cand++;
+            int m = n, e = 0;
+            while (m % cand == 0) { m /= cand; e++; }
+            if (m != 1) return false;
+            p = cand; d = e; return true;
+        }
+
+        static int IntPow(int b, int e) { int r = 1; for (int i = 0; i < e; i++) r *= b; return r; }
     }
 }

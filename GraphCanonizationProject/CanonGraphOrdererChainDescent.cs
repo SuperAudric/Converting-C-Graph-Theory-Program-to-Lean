@@ -84,10 +84,13 @@ namespace Canonizer
         // canonicalized by RECOVERING its defining form and emitting the STANDARD graph of its
         // iso-type — instead of the descent's lex-min. Iso-invariant (recognition + the standard graph
         // are both iso-invariant); SOUND (unrecognized ⟹ keep the descent's result); no extra descent
-        // (recognition reuses the harvested group). Default OFF (changes the canonical form for forms
-        // graphs). NOTE: at small d the descent already canonizes, so this only adds the CERTIFIED
-        // path; its d-scaling payoff needs C4 (Aut-free coordinatization) — the harvest still gates it.
-        public bool EnableRouteC { get; set; } = false;
+        // (recognition reuses the harvested group). Default ON — for a recognized odd-q affine-polar
+        // component it returns the certified standard-graph canonical form + closed-form |Aut|
+        // (iso-invariant, complete: (q,m,ε) is a full iso-invariant). Only odd-q affine-polar graphs
+        // are ever recognized (RecoverForm is odd-q; char-2 / non-forms fall straight back to the
+        // descent). At small d the descent already canonizes, so this adds the CERTIFIED path today;
+        // the d-scaling payoff needs C4 (Aut-free coordinatization).
+        public bool EnableRouteC { get; set; } = true;
 
         // The recovered classical |Aut| when the last RunConnected took the Route-C path; else null.
         public BigInteger? LastRouteCAutOrder { get; private set; }

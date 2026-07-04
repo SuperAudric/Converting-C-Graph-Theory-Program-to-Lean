@@ -52,6 +52,26 @@ public class RouteCGeometryProbe
         _out.WriteLine($"    directions span dim {dim} ✓ ({lines.Count} lines, all collinear, all size {q - 1})");
     }
 
+    // Harvest-free invariant recovery: (q,m,eps) from adjacency ALONE (no AffineStructure, no Aut),
+    // matching the coord-based classifier. This is C3's canonical answer without coordinatization.
+    [Theory]
+    [InlineData(3, -1)]
+    [InlineData(3, +1)]
+    [InlineData(5, -1)]
+    [InlineData(5, +1)]
+    public void RecoverInvariant_HarvestFree(int q, int eps)
+    {
+        const int dim = 4;
+        int n = IPow(q, dim);
+        var (adj, _, _) = RouteCVO4.Build(q, eps);
+        bool ok = GeometricCoordinatizer.RecoverAffinePolarInvariant(adj, n, out int rq, out int rm, out int reps);
+        _out.WriteLine($"VO^{(eps < 0 ? "-" : "+")}_4({q}): harvest-free ⇒ q={rq} m={rm} eps={reps}");
+        Assert.True(ok);
+        Assert.Equal(q, rq);
+        Assert.Equal(2, rm);
+        Assert.Equal(eps, reps);
+    }
+
     static bool Dependent(int[] x, int[] y, int q, int d)
     {
         for (int c = 0; c < q; c++) if (Enumerable.Range(0, d).All(k => (c * x[k]) % q == ((y[k] % q) + q) % q)) return true;

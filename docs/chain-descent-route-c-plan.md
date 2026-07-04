@@ -101,7 +101,24 @@ remaining scoped citations to full Lean proofs. Landed:
   `d ≥ 6`; `d=4` = special GQ). Until it lands, C3's wire uses F1's harvest at small `d`; this step is what makes the
   certified path harvest-free (hence d-scalable).
 
-**▶ C# BUILD SUMMARY (2026-07-04): C1a, C1b, C2, C3, C4-enabling ALL LANDED, 31/31 Route-C tests green, 0 regressions.**
+- **C4 — HARVEST-FREE INVARIANT + Route C ON BY DEFAULT (2026-07-04).** **Route C is now enabled by default**
+  (`EnableRouteC = true`); the full suite passes **291/291, 0 breakages** (iso-stability tests stay green — Route C is
+  iso-invariant; no test hardcodes a canonical matrix for a recognized odd-q affine-polar graph). **★ KEY C4 FINDING:**
+  the canonical **invariant** `(q,m,ε)` — hence C3's whole *answer* (standard canonical graph + closed-form `|Aut|`) — is
+  recoverable **HARVEST-FREE** from just `(n, valency, strong-regularity)` (`GeometricCoordinatizer.RecoverAffinePolarInvariant`,
+  tested `RouteCGeometryProbe` 4/4 vs the coord-based classifier). So the d-scaling concern **for the answer is resolved
+  without coordinatization**; `RecognizeFromResult` now computes the invariant harvest-free and uses the harvest **only
+  for the safety confirmation** (does the recovered form reconstruct the graph — rules out a parameter-mate SRG). **What
+  full coordinatization is still needed for:** making that *confirmation* harvest-free (distinguishing a genuine VO graph
+  from a hypothetical cospectral parameter-mate). That is the **fundamental theorem of projective geometry** (Von Staudt
+  scalar recovery + Buekenhout–Shult / parallelogram completion) — a large sub-project. The enabling geometry (isotropic
+  line recovery) is landed; the next rung (affine-**parallelism** detection) was probed and found to need more than the
+  edge-count signature (perpendicular directions alias; recovered lines exclude the origin) — a genuine open sub-problem,
+  not a quick win. **Honest state: C4 = harvest-free invariant DONE (answer is harvest-free) + full coordinatization for
+  harvest-free confirmation = scoped, large, deferred.**
+
+**▶ C# BUILD SUMMARY (2026-07-04): C1a, C1b, C2, C3, C4 ALL LANDED, 35/35 Route-C tests + 291/291 full suite green,
+0 regressions.**
 The runtime spine (recover form family → build the answer group → classify → canonicalize by iso-type → Aut-free line
 recovery) is in place and validated end-to-end (order-check exact vs harvested |Aut| at n=81; scramble-invariant
 canonicalization through the public orderer). **Two precisely-scoped remainders:** (a) **C4 full coordinatization**

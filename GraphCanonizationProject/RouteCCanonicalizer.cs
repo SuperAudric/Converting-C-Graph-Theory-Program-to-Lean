@@ -44,15 +44,21 @@ namespace Canonizer
             if (res.Flagged) return null;
             if (!TryPrimeBase(n, out int p, out _)) return null;    // affine-polar needs n = p^d for F1
 
+            // (1) the canonical INVARIANT (q, m, eps) is recovered HARVEST-FREE (n + valency +
+            // strong-regularity); it fixes the canonical graph + closed-form |Aut| with no coordinates.
+            if (!GeometricCoordinatizer.RecoverAffinePolarInvariant(adj, n, out int q, out int m, out int eps))
+                return null;
+
+            // (2) SAFETY CONFIRMATION: recover the form and check it reconstructs the graph — this rules
+            // out a parameter-mate SRG (misclassification-safe). Uses F1's harvest to coordinatize; C4's
+            // full geometric coordinatization would make even this confirmation harvest-free (d-scaling).
             var aff = AffineStructureRecovery.Recover(res.ResidualGroup, p, origin: 0);
             if (aff is null) return null;
-
             var cls = FormsGraphClassifier.Detect(adj, n, aff);
-            if (cls.Family != FormFamily.AffinePolar) return null;   // only affine-polar recovery is built
+            if (cls.Family != FormFamily.AffinePolar || cls.P != q || cls.M != m || cls.Eps != eps) return null;
 
-            // the iso-type (q, m, eps) determines the canonical graph + |Aut| (closed form)
-            var canonAdj = StandardVO(cls.P, cls.M, cls.Eps);
-            var autOrder = AffinePolarAutOrder(cls.P, cls.M, cls.Eps);
+            var canonAdj = StandardVO(q, m, eps);
+            var autOrder = AffinePolarAutOrder(q, m, eps);
             return new RouteCCanonicalResult { Classification = cls, AutOrder = autOrder, CanonicalAdjacency = canonAdj };
         }
 
