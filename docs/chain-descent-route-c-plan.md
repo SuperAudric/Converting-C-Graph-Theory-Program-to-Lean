@@ -30,8 +30,9 @@
   (`reachesRigidOrCameron_alternating`, via the multi-quadric engine `multiFormAdapter`/`coords_determine_multi` +
   the concrete Plücker sub-Pfaffians `plucker_hjoint`) — first non-quadratic family. **Instance 3 (half-spin) ✅
   SEALED** (`reachesRigidOrCameron_halfSpin`, via the 10 validated D₅ spinor quadrics `S0..S9` + `spinor_hjoint` +
-  `multiFormAdapter`; brick-1 `halfSpin_refines_coneScheme`; full instance-1 parity); **Instance 4 (Suzuki) not
-  started.**
+  `multiFormAdapter`; brick-1 `halfSpin_refines_coneScheme`; full instance-1 parity). **Instance 4 (Suzuki) ✅ SEALED
+  (2026-07-04, modulo the scoped citation `SuzukiFormsDetermine`)** — `reachesRigidOrCameron_suzuki` via the 5
+  σ-twisted ovoid forms + the `GF(q)^4↔𝔽₂^d` module bridge (`suzukiAdapter`). **⟹ ALL FOUR FORM FAMILIES SEALED.**
 - **Multi-quadric bridges (NEW 2026-07-03, axiom-clean) — brings the multi-form families to full instance-1
   parity.** Previously the `multiFormAdapter` families (alternating, half-spin) carried only the *seal* leg, not
   the *refinement* + *iso-invariance* legs the single-quadratic instance has. Both now supplied GENERICALLY over
@@ -56,9 +57,11 @@
    spinor quadrics `S0..S9` are transcribed (`ScratchRouteC.lean §HalfSpin`), `spinor_hjoint` proved from `S0..S4`
    by coordinate isolation, sealed via `multiFormAdapter` + the shared engine; brick-1 `halfSpin_refines_coneScheme`
    landed; F4 generic. Full instance-1 parity. **⟹ 3 of 4 form families sealed; only Suzuki remains.**
-2. **Suzuki–Tits instance (last):** char-2, σ-twisted ovoid, needs the char-2 substrate first (§11.5); not a
-   multi-quadric family — the outlier. §6 "Instances 2–4".
-3. **After the four seals — the combined correctness object + the C# runtime: see §9 (FORWARD PLAN).** The four
+2. ✅ **Suzuki–Tits instance — DONE 2026-07-04** (`reachesRigidOrCameron_suzuki`, axiom-clean, modulo the scoped
+   citation `SuzukiFormsDetermine`). De-risked (5 σ-twisted forms, joint zero=cone exact, O(d) poly base), forms +
+   `separates` rederived, and the `GF(q)^4↔𝔽₂^d` module bridge + `suzukiAdapter` landed. **⟹ ALL FOUR FAMILIES
+   SEALED (each modulo its scoped citation).** §6 "Suzuki".
+3. **★ NEXT — After the four seals: the combined correctness object + the C# runtime: see §9 (FORWARD PLAN).** The four
    adapters combine into ONE clean seal via a single cited classification premise + one iso-invariance lemma (L1,
    the load-bearing new piece — spot-check it first); the C# canonizer still lacks *all* family handlers (C1–C4).
    §9.0 explains why "4 seals + finite exceptions" collapses to "1 citation + 1 lemma" (Route C is threshold-free).
@@ -284,7 +287,8 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.HalfSpin.{S0..S9, spinorForms, S0_polar..S4_polar, spinor_hjoint}` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3, NEW, axiom-clean**) | the 10 concrete D₅ spinor quadrics on `𝔽_p^16` (validated by `route_c_halfspin_probe.py`: dim=10, exact 𝔽₂ count 2296, radical 0) + their joint nondegeneracy `spinor_hjoint` (from the 5 quadruple forms by coordinate isolation) |
 | `RouteC.HalfSpin.{halfSpin_reduction, spinAdapter, reachesRigidOrCameron_halfSpin, halfSpin_refines_coneScheme}` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3 CAPSTONE, NEW, axiom-clean**) | half-spin as a sealed `FormAdapter` (`spinAdapter`) + the rigid-or-Cameron seal (`reachesRigidOrCameron_halfSpin`) + brick-1 (`halfSpin_refines_coneScheme`) — instance 3 DONE, full instance-1 parity |
 | `RouteC.Suzuki.{ovoidC, SF0..SF4, suzukiForms, four_eq_zero, suzukiForms_ovoid, suzukiForms_infty, suzukiForms_homog}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 — the σ-twisted forms rederived, NEW, axiom-clean**) | over a char-2 `CommRing K` with a Tits endo `σ` (`σ∘σ=(·)²`): the 5 σ-twisted Suzuki forms + proofs they cut the cone (vanish on the ovoid + at infinity + σ-twisted homogeneous). De-risk-validated (`route_c_suzuki_probe.py`, joint zero=cone exact) |
-| `RouteC.Suzuki.{SFv, PreservesForms, SuzukiFormsDetermine, preservesForms_eq, suzuki_separates}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 — the σ-twisted `separates`, NEW, axiom-clean**) | the σ-twisted analog of `coords_determine_multi`'s `separates`: the joint-isometry orbit-profile at the frame ⟹ (via `preservesForms_eq` + the scoped citation `SuzukiFormsDetermine`) `v=v'`. `SuzukiFormsDetermine` is carried (false for small `K`, true for `GF(2^{2e+1})`; `Sz(q)` 2-transitivity). Remaining Suzuki = the `GF(q)^4↔𝔽₂^d` module bridge + adapter wiring |
+| `RouteC.Suzuki.{SFv, PreservesForms, SuzukiFormsDetermine, preservesForms_eq, suzuki_separates}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 — the σ-twisted `separates`, NEW, axiom-clean**) | the σ-twisted analog of `coords_determine_multi`'s `separates`: the joint-isometry orbit-profile at the frame ⟹ (via `preservesForms_eq` + the scoped citation `SuzukiFormsDetermine`) `v=v'`. `SuzukiFormsDetermine` is carried (false for small `K`, true for `GF(2^{2e+1})`; `Sz(q)` 2-transitivity) |
+| `RouteC.Suzuki.{SFbar, suzukiG₀, preservesForms_of_mem_G₀, neg_mem_suzukiG₀, suzukiBase, suzukiBase_card_le, suzukiAdapter, reachesRigidOrCameron_suzuki}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 CAPSTONE — module bridge + seal, NEW, axiom-clean**) | the `GF(q)^4↔𝔽₂^d` bridge via an additive iso `Ψ` (no `ZMod 2`-module on `K` needed) → `suzukiG₀` (joint isometry, subgroup of `Fin D→ZMod 2 ≃ₗ …`) + `neg_mem` free (char 2) + `suzukiBase` (`≤5`) + `separates` transported to `suzuki_separates` ⟹ `suzukiAdapter` + the seal `reachesRigidOrCameron_suzuki`. **Instance 4 SEALED (modulo `SuzukiFormsDetermine`); all 4 families done** |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -488,12 +492,15 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     `K` (e.g. `𝔽₂`, `σ=id`, `q=2` not a Suzuki parameter) and holds exactly for `GF(2^{2e+1})`, `e≥1`
     (de-risk-validated, base `4≤d+1`), same discipline as `NondegQuadricDeterminesForm` (false at `d=3,q=3`). Source =
     `Sz(q)` 2-transitivity on the Tits ovoid + short stabilizer chain (Suzuki/Tits 1962; Lüneburg; Hirschfeld–Thas).
-  - **Remaining (next):** the `GF(q)^4 ↔ 𝔽₂^d` module bridge (restrict scalars; transport `PreservesForms` group +
-    `suzuki_separates` into the `Fin (2^d)→ZMod 2` engine) → `suzukiAdapter` (`FormAdapter`, `neg_mem` free) →
-    `reachesRigidOrCameron_suzuki`. Pure plumbing on the char-2-ready engine; the math (`separates`) is done modulo
-    the scoped citation.
-  *Single family, no Weil, no char-2 χ-substrate, no engine work. Forms + `separates` both landed; a multi-σ-form
-  adapter with a confirmed O(d) poly base — genuinely "the same shape" as alternating/half-spin.*
+  - **✅ MODULE BRIDGE + SEAL LANDED (2026-07-04, axiom-clean, `§Suzuki`):** the `GF(q)^4 ↔ 𝔽₂^d` bridge via an
+    **additive** iso `Ψ : (Fin D → ZMod 2) ≃+ (Fin 4 → K)` (no `ZMod 2`-module on `K` needed — `PreservesForms` is a
+    function condition; `Ψ` additive suffices for difference-transport). `SFbar` (forms in 𝔽₂-coords), `suzukiG₀`
+    (clean joint-isometry subgroup), `neg_mem_suzukiG₀` (free in char 2), `suzukiBase` (frame images, `≤5`),
+    `suzukiAdapter` (`FormAdapter (p:=2)(d:=D) 5`, `separates` = the engine orbit-profile transported to
+    `suzuki_separates`), and the capstone **`reachesRigidOrCameron_suzuki`**. Seals via the shared engine.
+  *Single family, no Weil, no char-2 χ-substrate, no engine work. **Instance 4 SEALED end-to-end** (modulo the scoped
+  citation `SuzukiFormsDetermine`); a multi-σ-form adapter with an O(d) poly base — the σ-twisted sibling of
+  alternating/half-spin.*
 
 ### C# / Lean split, and the reuse to exploit
 - **The C# engine is the symmetric mirror of Option 2's Layer D** (IR doc §11.10, built through D-M4 as a Phase-2

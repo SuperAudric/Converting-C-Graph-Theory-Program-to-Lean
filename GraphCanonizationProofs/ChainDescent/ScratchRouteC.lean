@@ -1167,6 +1167,113 @@ theorem suzuki_separates (hcite : SuzukiFormsDetermine K σ) (hσ : ∀ x : K, �
   · obtain ⟨g, hg, hgv⟩ := hj j
     exact preservesForms_eq σ hg hgv k
 
+/-! ### The module bridge + the Suzuki adapter (instance 4 seal)
+
+The engine works over the standard `𝔽₂`-space `Fin D → ZMod 2` (`D = 4·dim_{𝔽₂} K`). Bridge the Suzuki data over
+`GF(q)^4 = Fin 4 → K` to it via an **additive** iso `Ψ : (Fin D → ZMod 2) ≃+ (Fin 4 → K)` (no `ZMod 2`-module
+structure on `K` needed — `PreservesForms` is a function condition, and `Ψ` additive is all the difference-transport
+uses). Define the forms in `𝔽₂`-coordinates (`SFbar := SFv ∘ Ψ`), so the joint-isometry group `suzukiG₀` is a clean
+subgroup of `(Fin D → ZMod 2) ≃ₗ[ZMod 2] …`. `neg_mem` is free (char 2). `separates` transports the engine's
+orbit-profile at the frame (`{Ψ.symm 0, Ψ.symm eⱼ}`) back through `Ψ` to `suzuki_separates`. The result is a
+`FormAdapter`, sealed by the shared engine → `reachesRigidOrCameron_suzuki` (rests on the scoped citation via
+`suzuki_separates`). -/
+
+variable {D : ℕ} (Ψ : (Fin D → ZMod 2) ≃+ (Fin 4 → K))
+
+/-- The Suzuki forms in `𝔽₂`-coordinates via `Ψ`. -/
+def SFbar (w : Fin D → ZMod 2) (k : Fin 5) : K := SFv σ (Ψ w) k
+
+/-- **The transported Suzuki joint-isometry group** — the `𝔽₂`-linear autos of `Fin D → ZMod 2` preserving every
+`SFbar`. A clean subgroup (the `SFbar`-preservation composes directly; no conjugation gymnastics). -/
+def suzukiG₀ : Subgroup ((Fin D → ZMod 2) ≃ₗ[ZMod 2] (Fin D → ZMod 2)) where
+  carrier := {g | ∀ w k, SFbar σ Ψ (g w) k = SFbar σ Ψ w k}
+  one_mem' := by intro w k; rfl
+  mul_mem' := by
+    intro a b ha hb w k
+    rw [LinearEquiv.mul_apply, ha (b w) k, hb w k]
+  inv_mem' := by
+    intro a ha w k
+    have hx : a (a⁻¹ w) = w := by
+      have h := LinearEquiv.mul_apply a a⁻¹ w
+      rw [mul_inv_cancel] at h; simpa using h.symm
+    have := ha (a⁻¹ w) k
+    rw [hx] at this
+    exact this.symm
+
+omit [CharP K 2] in
+/-- `g ∈ suzukiG₀` ⟹ the `Ψ`-conjugate `w ↦ Ψ(g(Ψ.symm w))` preserves the `K`-forms (`PreservesForms`). The
+link from the standard-space isometry to the `K`-side `suzuki_separates`. -/
+theorem preservesForms_of_mem_G₀ {g : (Fin D → ZMod 2) ≃ₗ[ZMod 2] (Fin D → ZMod 2)}
+    (hg : g ∈ suzukiG₀ σ Ψ) : PreservesForms σ (fun v => Ψ (g (Ψ.symm v))) := by
+  intro v k
+  have := hg (Ψ.symm v) k
+  simp only [SFbar, Ψ.apply_symm_apply] at this
+  exact this
+
+/-- `-1 ∈ suzukiG₀` — free in char 2 (`Ψ(-w) = -Ψw = Ψw`, so `neg` preserves every `SFbar`). -/
+theorem neg_mem_suzukiG₀ : LinearEquiv.neg (ZMod 2) ∈ suzukiG₀ σ Ψ := by
+  intro w k
+  have h : Ψ (LinearEquiv.neg (ZMod 2) w) = Ψ w := by
+    rw [LinearEquiv.neg_apply, map_neg]
+    funext i; rw [Pi.neg_apply]; exact CharTwo.neg_eq _
+  simp only [SFbar, h]
+
+/-- The individualized base — `Ψ`-images of the frame `{0, e₀, e₁, e₂, e₃}`, transported to `Fin (2^D)`. -/
+noncomputable def suzukiBase : Finset (Fin (2 ^ D)) :=
+  insert (ChainDescent.affineE (Ψ.symm 0))
+    (Finset.univ.image (fun j : Fin 4 => ChainDescent.affineE (Ψ.symm (Pi.single j 1))))
+
+omit [CharP K 2] in
+theorem suzukiBase_card_le : (suzukiBase Ψ).card ≤ 4 + 1 := by
+  refine (Finset.card_insert_le _ _).trans ?_
+  have h := Finset.card_image_le (s := (Finset.univ : Finset (Fin 4)))
+    (f := fun j => ChainDescent.affineE (Ψ.symm (Pi.single j (1 : K))))
+  rw [Finset.card_univ, Fintype.card_fin] at h
+  omega
+
+/-- **The Suzuki family as a `FormAdapter`** (instance 4). `G₀ = suzukiG₀`, base = the frame images (`≤ 5`),
+`separates` = the transport of the engine orbit-profile to `suzuki_separates` (via the scoped citation `hcite`). -/
+noncomputable def suzukiAdapter (hcite : SuzukiFormsDetermine K σ) (hσ : ∀ x : K, σ (σ x) = x ^ 2) :
+    FormAdapter (p := 2) (d := D) (4 + 1) where
+  G₀ := suzukiG₀ σ Ψ
+  neg_mem := neg_mem_suzukiG₀ σ Ψ
+  base := suzukiBase Ψ
+  base_card_le := suzukiBase_card_le Ψ
+  separates := by
+    intro u u' hh
+    have hvv' : Ψ (ChainDescent.affineE.symm u) = Ψ (ChainDescent.affineE.symm u') := by
+      refine suzuki_separates σ hcite hσ ?_ ?_
+      · obtain ⟨g, hg, hgeq⟩ := hh (ChainDescent.affineE (Ψ.symm 0)) (Finset.mem_insert_self _ _)
+        rw [Equiv.symm_apply_apply, map_zero, sub_zero, sub_zero] at hgeq
+        refine ⟨fun w => Ψ (g (Ψ.symm w)), preservesForms_of_mem_G₀ σ Ψ hg, ?_⟩
+        show Ψ (g (Ψ.symm (Ψ (ChainDescent.affineE.symm u')))) = Ψ (ChainDescent.affineE.symm u)
+        rw [Ψ.symm_apply_apply, hgeq]
+      · intro j
+        obtain ⟨g, hg, hgeq⟩ := hh (ChainDescent.affineE (Ψ.symm (Pi.single j 1)))
+          (Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ (Finset.mem_univ j)))
+        rw [Equiv.symm_apply_apply] at hgeq
+        refine ⟨fun w => Ψ (g (Ψ.symm w)), preservesForms_of_mem_G₀ σ Ψ hg, ?_⟩
+        show Ψ (g (Ψ.symm (Ψ (ChainDescent.affineE.symm u') - Pi.single j 1)))
+            = Ψ (ChainDescent.affineE.symm u) - Pi.single j 1
+        rw [map_sub, Ψ.symm_apply_apply, hgeq, map_sub, Ψ.apply_symm_apply]
+    exact ChainDescent.affineE.symm.injective (Ψ.injective hvv')
+
+/-- **Suzuki reaches the rigid-or-Cameron disjunction** (instance 4 SEALED, modulo the scoped citation
+`SuzukiFormsDetermine`). The σ-twisted multi-form family, bridged to the char-2-ready engine and sealed by the
+shared `FormAdapter.reachesRigidOrCameron`. -/
+theorem reachesRigidOrCameron_suzuki
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hcite : SuzukiFormsDetermine K σ) (hσ : ∀ x : K, σ (σ x) = x ^ 2) :
+    ((SchemeBlockRecovered (2 ^ D)
+          (ChainDescent.affineScheme (suzukiAdapter σ Ψ hcite hσ).G₀ (suzukiAdapter σ Ψ hcite hσ).neg_mem)
+        ∨ AbelianConsumed (2 ^ D)
+          (ChainDescent.affineScheme (suzukiAdapter σ Ψ hcite hσ).G₀ (suzukiAdapter σ Ψ hcite hσ).neg_mem))
+        ∨ SchemeRecoveredByDepth (2 ^ D)
+          (ChainDescent.affineScheme (suzukiAdapter σ Ψ hcite hσ).G₀ (suzukiAdapter σ Ψ hcite hσ).neg_mem) (4 + 1))
+      ∨ IsCameronScheme (2 ^ D)
+          (ChainDescent.affineScheme (suzukiAdapter σ Ψ hcite hσ).G₀ (suzukiAdapter σ Ψ hcite hσ).neg_mem) :=
+  (suzukiAdapter σ Ψ hcite hσ).reachesRigidOrCameron
+
 end Suzuki
 
 end ChainDescent.RouteC
