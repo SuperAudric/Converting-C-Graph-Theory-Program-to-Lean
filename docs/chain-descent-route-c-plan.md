@@ -336,6 +336,12 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
   𝔽₃ Monte-Carlo match (z=0.10), and **joint polar radical `= 0`** (= the Lean `hjoint`, provable from the 5 quadruple
   forms). Prints the 10 explicit forms (§6). Caught that the naive moment map gave the wrong forms — the reason to
   de-risk empirically, not template. The port reference for instance 3.
+- **`route_c_suzuki_probe.py` — the Suzuki–Tits (f) de-risk (2026-07-04, q=8).** Builds GF(8) + the Tits
+  endomorphism `σ` + the ovoid + cone + VSz(8) (Cayley on 𝔽₂¹², adjacency = 12-bit XOR ∈ cone). Validates the object
+  (`σ²=Frob`, `|O|=65`, `|cone|=455`, SRG(4096,455,6,56) — ovoid formula `c=ab+σ(a)a²+σ(b)` correct) and measures the
+  `separates` base two ways: **direct relation-profile > 30 (rank-3 ⟹ ≥log₂n ⟹ quasipoly)** vs **iterated
+  refinement = 4 (poly mechanism)**. Design payoff: the poly adapter needs the σ-twisted-form isometry refinement
+  (recover `F`-value), not the plain cone scheme. §6 "Suzuki".
 - **`route_c_bootstrap_probe.py` — the meta-poly bootstrapping crux (§7a).** Confirms the isotropic-line geometry through
   `o` is recoverable from **adjacency alone** (no `Aut`): the local invariant `|N(o)∩N(x)∩N(y)|` **perfectly separates**
   collinear from non-collinear isotropic triangles (all VO^± `d=4,6` `q=3,5`), and the recovered lines' directions **span
@@ -442,14 +448,31 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     individualization / `Sz(q)` 2-transitivity + short stabilizer chain), same discipline as
     `NondegQuadricDeterminesForm` — but a *bigger* carry (the other families PROVE `separates`; only Suzuki cites it),
     reflecting the outlier status. Fixed-`q` `decide` is infeasible (`n=4096`, `native_decide` banned).
-  - **De-risk FIRST (before Lean):** a probe (analog of `route_c_halfspin_probe.py`) over `q=8`(,`32`): (i) confirm
-    the connection set = the ovoid cone (validate the ovoid polynomial + `σ`); (ii) find the MINIMAL base `b` at which
-    the ovoid-stabilizer orbit-of-difference profile pins every vertex (grounds the `separates` citation + fixes the
-    adapter's `bound`); (iii) confirm individualization is purely combinatorial (Handle 1) — no count needed.
-  - **Lean skeleton (post-derisk):** define `σ` + `ovoidStab` (`Subgroup (Fin d → ZMod 2 ≃ₗ …)`) → carry `separates`
-    as the premise → `suzukiAdapter` (`neg_mem` free) → `reachesRigidOrCameron_suzuki := suzukiAdapter.reachesRigidOrCameron`.
-    Bespoke Lean = `σ`/`ovoidStab` defs + threading the premise; engine/`neg_mem`/seal free.
-  *Single family, no engine work, no Weil, no char-2 χ-substrate. Hardest `separates`, but a clean scoped-citation path.*
+  - **✅ DE-RISK PROBE DONE (2026-07-04, `route_c_suzuki_probe.py`, q=8) — object validated + a design-changing
+    finding.** (i) **Object EXACTLY validated:** `σ²=Frob`; `|O|=q²+1=65`; `|cone|=(q²+1)(q−1)=455`; VSz(8) =
+    **SRG(4096,455,6,56)** — the ovoid formula `c = a·b + σ(a)·a² + σ(b)` is correct (the connection set the Lean
+    adapter models). (ii) **★ Poly-vs-quasipoly finding:** VSz is a **rank-3 SRG** (1-WL stable at 1 colour;
+    per-base-point relation is only 2-valued). So Route C's **direct** orbit-profile `separates`
+    (`discrete_affineScheme_of_jointSeparates`) on the **plain cone scheme** needs a base `≥ log₂n = 12` (probe: greedy
+    `> 30`, never injective) ⟹ **only QUASIPOLY = no improvement over the banked floor.** Iterated
+    individualization+1-WL discretizes at base **4** (the `Sz(q)` 2-transitivity mechanism), but that is *not* the
+    direct-profile the engine uses.
+  - **⟹ CORRECTED ADAPTER DESIGN — Suzuki is a SINGLE-"form" adapter, needing the similitude→isometry refinement (like
+    the forms families), NOT a plain-cone adapter.** For POLY, recover the **σ-twisted ovoid form value** `F(ū−t̄)`
+    (`q`-valued; `cone = {F=0}`, `F` the non-quadratic Tits-ovoid polynomial), take `G₀ = isometry group {g : F∘g = F}`
+    (finer than the cone/ovoid stabilizer — the exact analog of `O(Q) < GO(Q)`), and separate by the `F`-value profile:
+    an **O(d) direct base**, exactly the `coords_determine` mechanism. The plain-cone/full-ovoid-stabilizer route only
+    reproduces the quasipoly floor. So `separates` is the σ-twisted-`F` analog of `coords_determine`, and the carried
+    citation (if `separates` isn't proved) is scoped to that finer scheme.
+  - **De-risk FOLLOW-UP (next):** derive `F` explicitly (or the `Sz(8)` difference-orbits) and confirm the `F`-value
+    **direct** base is `O(d)` (a targeted second probe) — this is what pins the poly claim. Handle-1 combinatorial
+    individualization (base 4) is already confirmed as the poly *mechanism*.
+  - **Lean skeleton (post-follow-up):** define `σ` + `F` (σ-twisted ovoid polynomial) + `isometryGroup F` over
+    `Fin d → ZMod 2` → `separates` = the `F`-value determiner (prove, analog of `coords_determine`; or carry scoped) →
+    `suzukiAdapter` (`neg_mem` free, verified) → `reachesRigidOrCameron_suzuki := suzukiAdapter.reachesRigidOrCameron`.
+    Bespoke Lean = `σ`/`F`/`isometryGroup F` + `separates`; engine/`neg_mem`/seal free (char-2-ready, verified).
+  *Single family, no engine work, no Weil, no char-2 χ-substrate. The de-risk turned "plain cone + carried separates"
+  into the sharper "σ-twisted single-form isometry refinement" — the genuine poly path, mirroring the forms families.*
 
 ### C# / Lean split, and the reuse to exploit
 - **The C# engine is the symmetric mirror of Option 2's Layer D** (IR doc §11.10, built through D-M4 as a Phase-2
