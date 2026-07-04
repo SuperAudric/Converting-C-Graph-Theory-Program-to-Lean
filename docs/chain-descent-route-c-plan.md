@@ -74,16 +74,25 @@ remaining scoped citations to full Lean proofs. Landed:
    2; base 8, still O(d²) poly). Probes `route_c_suzuki_determine_probe.py` (frame injective for q=8/32; forms cut the
    cone exactly) + `route_c_suzuki_symbolic.py` (the polarization). **⟹ ALL FOUR FAMILIES SEALED** (three modulo one
    scoped citation each, Suzuki modulo none). §6 "Suzuki".
-3. **★ NEXT — After the four seals: the combined correctness object + the C# runtime: see §9 (FORWARD PLAN).** The four
-   adapters combine into ONE clean seal via a single cited classification premise + one iso-invariance lemma (L1,
-   the load-bearing new piece — spot-check it first); the C# canonizer still lacks *all* family handlers (C1–C4).
+3. **★ Lean-side seam — DONE (2026-07-04).** The combine is landed at the honest level (§9.0a): the finer→coarser
+   transfer reframed after a **vacuity correction** (`GroupReproduced` was a tautology; non-vacuous coarse-reaches-rigid
+   is false = node-4), yielding the *genuine* non-vacuous content — group-pinning
+   `schemeAutGroup_affineScheme_eq_affineG` (all 4 families, mod the named Skresanov citation `AffineSchemeTwoClosed`) +
+   `routeC_polySupport` certificate (`ScratchRecoveredFormTransfer.lean`), and the **cyclotomic dispatch branch**
+   `reachesRigidOrCameron_seamDispatch`/`cyclotomic_sealDisj` (`ScratchSeamDispatch.lean`, the dropped 5th case). All
+   axiom-clean. The one carried Lean atom across the seam is `htransport` (L1 — tractable, `forcedNode_relabel`-backed).
+4. **★ NEXT — the C# runtime: see §9.2 (grounded build spec).** The canonizer still lacks all family handlers. **The
+   load-bearing new piece is C1b `ClassicalGroupGenerators`** (build `AΓO(Q)` generators from the recovered form → hand
+   to the existing Schreier–Sims), enabled by the group-pinning above. §9.2 names every existing method to build on, every
+   new piece + its interface, the pipeline, the per-piece verification, and the Lean contracts. Order: C1a→C1b→C2→C3→C4.
    §9.0 explains why "4 seals + finite exceptions" collapses to "1 citation + 1 lemma" (Route C is threshold-free).
-4. **The remaining carried scoped citations** (optional, to remove them from the spine): full Lean proofs of
+5. **The remaining carried scoped citations** (optional, to remove them from the spine): full Lean proofs of
    `NondegQuadricDeterminesForm` (single-quadric uniqueness), `JointVarietyDeterminesFamily` (multi-quadric — alt /
-   half-spin), `ConePreservingCollineationIsSemiSimilitude` (F2 semilinear seam). *(Suzuki's `SuzukiFormsDetermine` is
-   already discharged — item 2 — so it is no longer on this list.)* All are exact, correctly-scoped classical statements (finite-geometry / classical-group
-   developments) — carried like `Theorem41Statement`/`G3`, discharged externally.
-5. **The meta-poly rigor side (last):** residuals R1–R3 (§7a) — build the Aut-free geometric
+   half-spin), `ConePreservingCollineationIsSemiSimilitude` (F2 semilinear seam), and `AffineSchemeTwoClosed` (the
+   Skresanov rank-3 2-closure — new this session). *(Suzuki's `SuzukiFormsDetermine` is already discharged — item 2 —
+   so it is no longer on this list.)* All are exact, correctly-scoped classical statements (finite-geometry /
+   classical-group developments) — carried like `Theorem41Statement`/`G3`, discharged externally.
+6. **The meta-poly rigor side (last):** residuals R1–R3 (§7a) — build the Aut-free geometric
    coordinatizer (also delivers F2's field recovery), name Buekenhout–Shult (R2), double-check `d=4` (R3).
 
 **✅ DONE — the C# recovery front (abstract graph → coordinates → form → graph), confirmed against the REAL harness.**
@@ -820,27 +829,117 @@ Beyond the four adapters this needs exactly two things:
 
 Sizing: L1 medium (the real work), L2 small once L1 exists, L3 a citation/scoping task, L4 small–medium.
 
-### 9.2 The C# runtime — the family handlers the canonizer currently lacks
+### 9.2 The C# runtime — build spec (grounded handoff for the next builder)
 
-The harness (`ChainDescent.cs`) has **none** of the Route-C family handlers wired. Built so far: F1
-(`AffineStructureRecovery`) + A1 (`QuadraticFormRecovery`, quadratic only), confirmed vs the real harness
-(`RouteCF1Probe.cs`); the Lean `FormAdapter` interface exists but has **no C# engine**. Remaining:
+> **Read this before starting the C# build.** It names every existing piece to build on (exact file/method), every
+> new piece to write (with its interface + dependencies), the pipeline, the Lean contract each piece must satisfy,
+> and the probes/tests that validate it. Verified against the source 2026-07-04.
 
-- **(C1) `RecoverForm` for the multi-quadric families** (Plücker, spinor) + Suzuki — generalize
-  `QuadraticFormRecovery` from a single quadratic to a form *family* (solve the degree-2 vanishing system on the
-  cone → the span of quadrics; §2b). The quadratic case is the `ι = Unit` instance already built.
-- **(C2) The dispatch** — from an abstract rank-3 SRG residue, detect *which* family it is (SRG parameters /
-  cone-geometry signature) and select the adapter. This is the C# analog of L3's classification.
-- **(C3) Wire recovered-`Aut` canonicalization into the harness** at the residue seam (`ChainDescent.cs`
-  `target == −1`, near `CoveredByPathFixingAut ~:589`): once the form is recovered, `Aut = AΓO(Q)` is known →
-  hand its generators to the existing `PermutationGroup` Schreier–Sims for the canonical labelling.
-- **(C4) F2 field recovery / the Aut-free geometric coordinatizer** (= §7a R1) for `q = pᵉ` — Buekenhout–Shult
-  recovers `PG(d,q)` including the field; also de-circularizes F1 (replaces the `O_p(Aut)` shortcut). Delivers
-  both F2's field side and the non-circular poly first step in one build.
+#### 9.2.0 The goal + the key reframe (what this session's Lean work changed)
 
-C1–C4 are independent of the Lean seal (L1–L4) and can proceed in parallel. The C# engine is the **symmetric
-mirror of Option 2's Layer D** (§6 / [[project_recovery_corecovery_duality_2026-07-03]]) — clone that
-architecture, swapping `IFormStructure` for the F₂ extractor.
+**Goal:** for a residue the canonizer flags as a forms-graph family, recover the defining form, compute `|Aut|` and a
+canonical labelling in poly time, and return them through the existing harness — instead of the (stalled) WL descent.
+
+**The reframe that drives the design (this session):** the Lean group-pinning `schemeAutGroup_coarse_eq_affineG`
+(`ScratchRecoveredFormTransfer.lean`, mod the Skresanov citation `AffineSchemeTwoClosed`) proves the answer group is
+**exactly `affineG(similitudeGroup Q) = translations ⋊ AΓO(Q)`** — a *known* classical group. So the C# runtime does
+**not** need to *harvest* `Aut` from the descent on the coarse graph (that's the node-4 stall). It **recovers `Q`,
+constructs a generating set for `AΓO(Q)` directly, and hands it to the existing Schreier–Sims** (`PermutationGroup`),
+which returns `|Aut|` and the base/labelling. Correctness is then *verified by reconstruction* (the generated group
+stabilises the graph; `Q`+coords reproduce adjacency — `RouteCF1Probe.cs` already does the reconstruction half).
+This is why the new load-bearing C# piece below is **the generator-list producer (C1b)**, which the old C1–C4 sketch
+omitted.
+
+#### 9.2.1 Existing C# infra to build on (exact names, all verified present)
+
+| Piece | File · API | Gives the build |
+|---|---|---|
+| Schreier–Sims back-end | `PermutationGroup.cs` — `AddGenerator(int[])`, `Order:BigInteger`, `Contains`, `Orbit(pt)`, `BasePoints`, `Generators`, `Elements()` | **the |Aut| + base engine** — seed generators, read `Order` = `|Aut|`, `BasePoints` = the base. |
+| Route-C group ops | `PermutationGroup.cs` — `RegularNormalPSubgroup(p)`, `NormalClosure(g)`, `HasExponentDividing(p)`; `Perm.Order/Pow/Compose/Inverse/FromCycles` | F1 socle recovery + perm arithmetic for building generators. |
+| **F1** additive recovery | `AffineStructureRecovery.cs` — `Recover(PermutationGroup aut,int p,int origin) → AffineStructure{Translations,Origin,P,Dim,Coords[vertex]→(Z_p)^Dim}` | coordinates (mod the `O_p(Aut)` shortcut — see C4). |
+| **A1** single-quadratic recovery | `QuadraticFormRecovery.cs` — `RecoverForm(int[] adj,int n,AffineStructure aff) → RecoveredForm{P,Dim,Monomials,Coeffs,Evaluate(v)}` (odd-q; null in char 2) | the `ι=Unit` case of C1. |
+| Oracle seam | `ITransversalOracle.cs` — `Classify(n,adj,targetCell,path,PermutationGroup knownGroup) → TransversalDecision{Representatives}` | **where a Route-C oracle plugs in** (soundness: reps cover every orbit of the target cell). |
+| Harness / residue seam | `ChainDescent.cs` — target-cell selection + `target == −1` (~L287), `CoveredByPathFixingAut` prune, deferral (~L274–287), `ResidualGroup` | where C3 wires the recovered-`Aut` canonicalisation. |
+| Refinement | `WarmPartition.cs`, `RefinementFootprint.cs` | where the recovered-`Q` colouring is injected (the "fine scheme", §9.2.3). |
+| Pre-processor template to clone | Tests: `Option2ExtractionProbe.cs`, `TwistConstruction.cs` (Option 2 Layer D — the F₂/rigid mirror) | the architecture to mirror (recover structure → build group → plug the seam). |
+| End-to-end validation | Tests: `RouteCF1Probe.cs` (F1+A1 vs the REAL harness: `ResidualGroup` has full `|Aut|`; `Recover`'s `T` exact; `Q`+coords reconstruct the graph, 0 mismatches) | the harness↔F1↔A1 chain, already green. |
+
+**Confirmed absent:** no `ITransversalOracle` implementation for Route C, no family dispatch, no classical-group
+generator producer. The Lean `FormAdapter` interface has **no C# counterpart**. This is the whole build.
+
+#### 9.2.2 Pieces to build (named, with interfaces + dependencies)
+
+- **(C1a) `RecoverFormFamily`** — generalize `QuadraticFormRecovery` from one quadratic to a form **family**. New type
+  `RecoveredFormFamily{Monomials, Coeffs[][] (one row per basis quadric)}`; `RecoverFormFamily(adj,n,aff)` solves the
+  degree-2 vanishing system on the cone and returns a **basis of the vanishing space** (span of quadrics), not just
+  `kernel[0]`. Covers Plücker (alt) + spinor (half-spin). Dep: F1 coords. Probe refs: `route_c_halfspin_probe.py`
+  (dim 10), `route_c_reconstruct_probe.py` (`vanishDim=1` for the single-quadratic case). *Odd-q.*
+- **(C1b) `ClassicalGroupGenerators` — THE new load-bearing piece.** Given the recovered form (family) + `AffineStructure`,
+  produce a generating set for `AΓO(Q)` (resp. `⨅ₖ O(Q_k)`, Suzuki cone-stab) as **`int[]` permutations of the `p^d`
+  vertices**, ready for `PermutationGroup.AddGenerator`. Contents: the **translations** (already have — `AffineStructure.Translations.Generators`), the **linear isometries/reflections** of `Q` (standard classical-group generator list — orthogonal reflections `x ↦ x − (B(x,a)/Q(a))a` realized as vertex permutations via `Coords`), and the **similitude scalings** (`x ↦ c·x` and one non-square-factor similitude — the `AΓO ⊋ AO` part, §9.0a). This is the C# realization of the Lean `similitudeGroup Q` / `affineG`. Dep: C1a. **Lean contract:** the produced group must equal `affineG(similitudeGroup Q)` — i.e. `PermutationGroup.Order` == `p^d · |AΓO^ε_d(q)|` (closed-form check) **and** `Contains(AffineStructure.Translations generators)`.
+- **(C2) `FormsGraphClassifier.Detect(n,adj,aff) → FamilyTag`** — decide which family (affine-polar / alternating /
+  half-spin / Suzuki) from SRG parameters `(n,k,λ,μ)` + cone-geometry signature (e.g. VSz(8)=SRG(4096,455,6,56) is the
+  Suzuki fingerprint — `route_c_suzuki_probe.py`), select the C1a/C1b variant. C# analog of L3's classification.
+- **(C3) `RouteCOracle : ITransversalOracle`** (+ harness wire) — at the residue (`ChainDescent.cs target == −1`): run
+  C2→C1a→C1b, seed the generated group into `knownGroup`, and return **certified** `Representatives` (one per orbit of
+  the target cell under the *known* group — computed by `PermutationGroup.Orbit`, not harvested). Reuses the existing
+  `CoveredByPathFixingAut` prune. This replaces "harvest from the coarse descent" with "read orbits off the known group".
+  **The honest scope note:** the descent still runs on the coarse graph; C3 *supplies the known group so the branching
+  collapses*, which is the runtime form of "recovered form ⟹ poly".
+- **(C4) `GeometricCoordinatizer` (= §7a R1, the Aut-free path)** — replace `AffineStructureRecovery`'s `O_p(Aut)`
+  shortcut (which consumes `Aut`, the potential circularity) with **adjacency-only** recovery: recover the isotropic
+  lines through `o` via the local invariant `|N(o)∩N(x)∩N(y)|` (validated Aut-free by `route_c_bootstrap_probe.py`),
+  build the polar-space geometry, read coordinates by Buekenhout–Shult; also recovers the field (F2, `q=pᵉ`). Biggest;
+  can be last (F1's `O_p(Aut)` path is fine for de-risking/tests). Cite Buekenhout–Shult.
+
+**Suzuki / char-2** is a separate track for C1a/C1b (σ-twisted forms, Arf; `route_c_suzuki_probe.py` has the 5 σ-forms);
+the harness wiring (C3) and the classifier (C2) are char-agnostic.
+
+#### 9.2.3 The pipeline + the "augment with recovered `Q`" step
+
+```
+abstract graph (residue, target==−1)
+  → C2 Detect family
+  → C4 GeometricCoordinatizer (or F1 Recover, de-risk path)   → AffineStructure (coords)
+  → C1a RecoverFormFamily                                     → RecoveredFormFamily (Q up to scalar)
+  → C1b ClassicalGroupGenerators                              → int[] gens of AΓO(Q)
+  → PermutationGroup.AddGenerator×… ; .Order = |Aut| ; .BasePoints = base
+  → C3 return certified Representatives (Orbit off the known group) + canonical labelling
+```
+
+**The "fine scheme" in C# = inject the recovered-`Q` colouring as an extra refinement colour** (colour each pair by
+`RecoveredForm.Evaluate(Coords[x]−Coords[y])`, well-defined up to the global scalar) into `WarmPartition` before the
+residue branches. This is the runtime realisation of "refine the coarse graph to the fine isometry scheme"; it is the
+step that makes the descent discretize (the Lean `SchemeRecoveredByDepth fine`). Optional if C3 supplies the full
+known group directly (then orbits are read off the group, not the refined WL) — **prefer C3's group route**; the
+colouring-injection is the fallback / cross-check.
+
+#### 9.2.4 Verification (how the builder confirms each piece — no Lean runtime model, so C# is the check)
+
+- **C1a:** recovered family's joint cone == connection set (`Evaluate` all-zero ⟺ adjacent), 0 mismatches (extend
+  `RouteCF1Probe.cs`'s reconstruction check to families).
+- **C1b (the critical check):** `PermutationGroup` built from the generators has `Order` == the closed-form
+  `p^d · |ΓO^ε_d(q)|`, `Contains` the translations, and every generator stabilises the graph (`adj` invariant). This is
+  the empirical stand-in for the Skresanov citation — if the *generated* group already has the full order and stabilises
+  the graph, the |Aut| answer is correct regardless of the 2-closure proof.
+- **C3:** end-to-end — the canonizer returns the same labelling for isomorphic copies (extend the iso-stability bed) and
+  `|Aut|` matches the closed form, on VO^±₄(3,5), Alt(5,q), VSz(8).
+- Probes already validating inputs: `route_c_reconstruct_probe.py`, `route_c_f1_probe.py`, `route_c_halfspin_probe.py`,
+  `route_c_suzuki_probe.py`, `route_c_bootstrap_probe.py` (C4).
+
+#### 9.2.5 Lean contracts the C# must honour (the spec is not free-floating)
+
+- `ScratchRecoveredFormTransfer.schemeAutGroup_coarse_eq_affineG` — **the group C1b builds IS `affineG(similitudeGroup Q)`**;
+  its `Order` is `|AΓO(Q)|·p^d`. This is the correctness target for C1b.
+- `ScratchRecoveredFormTransfer.routeC_polySupport` — the triple (coarse Aut = known group ∧ fine harvest ∧ fine refines
+  coarse); C1b delivers (i), the colouring-injection (§9.2.3) delivers (ii)/(iii).
+- The `FormAdapter` instances (`affinePolarAdapter`, `…_alternating`, `…_halfSpin`, `…_suzuki`) — each family's
+  `separates` certificate; C1a/C1b are their runtime mirror (the form + its group).
+
+**Ordering:** C1a → C1b (+ its order-check) → C2 → C3 (end-to-end) → C4 last. C1b is the load-bearing new piece and the
+first to build; everything else is plumbing or already exists. The engine is the **symmetric mirror of Option 2's Layer
+D** (clone `Option2ExtractionProbe.cs`/`TwistConstruction.cs`, swapping the F₂ extractor for `RecoverFormFamily`).
+[[project_recovery_corecovery_duality_2026-07-03]].
 
 ### 9.3 Later — the meta-poly rigor stage
 
