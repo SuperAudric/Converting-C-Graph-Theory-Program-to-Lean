@@ -19,11 +19,15 @@
 ## STATUS (read first)
 
 **Where Route C stands (2026-07-04) — handoff snapshot.** **★ ALL FOUR FORM FAMILIES ARE NOW SEALED** (affine-polar,
-alternating `Alt(5,q)`, half-spin, Suzuki–Tits), each modulo one exact **scoped citation** (below). The Route-C
-**Lean spine is fully assembled and axiom-clean** (`ScratchRouteC.lean`, 94 decls, all
-`[propext, Classical.choice, Quot.sound]`, NOT in `build.sh` — verify: `lake env lean ChainDescent/ScratchRouteC.lean`,
-exit 0). The remaining work is **not another family** — it is the **§9 post-four-seals combine** (four seals → one
-correctness object) + the **C# runtime** + optionally promoting the scoped citations to full Lean proofs. Landed:
+alternating `Alt(5,q)`, half-spin, Suzuki–Tits). **★ SUZUKI IS NOW CITATION-FREE (2026-07-04):** the old scoped
+citation `SuzukiFormsDetermine` is **discharged** — `separates` is proved outright by second-derivative recovery on
+an enlarged base (see "Suzuki" below), so `reachesRigidOrCameron_suzuki` carries **no citation and no `hσ`**. So
+three families rest on one exact scoped citation each (`NondegQuadricDeterminesForm` / `JointVarietyDeterminesFamily`),
+and Suzuki rests on none. The Route-C **Lean spine is fully assembled and axiom-clean** (`ScratchRouteC.lean`, ~100
+decls, all `[propext, Classical.choice, Quot.sound]`, NOT in `build.sh` — verify: `lake env lean
+ChainDescent/ScratchRouteC.lean`, exit 0). The remaining work is **not another family** — it is the **§9
+post-four-seals combine** (four seals → one correctness object) + the **C# runtime** + optionally promoting the
+remaining scoped citations to full Lean proofs. Landed:
 - **The single-form spine (affine-polar):** F1+A1 (C#, confirmed vs the real harness) → A3 brick 1 (isometry scheme
   refines the graph) → discretize at a spanning base (`viaOrthogonalForm_spanning`) → **F4** iso-invariance
   (`recoveredForm_colouring_equivariant`). Rests on ONE exact scoped citation, `NondegQuadricDeterminesForm` (below).
@@ -35,8 +39,10 @@ correctness object) + the **C# runtime** + optionally promoting the scoped citat
   the concrete Plücker sub-Pfaffians `plucker_hjoint`) — first non-quadratic family. **Instance 3 (half-spin) ✅
   SEALED** (`reachesRigidOrCameron_halfSpin`, via the 10 validated D₅ spinor quadrics `S0..S9` + `spinor_hjoint` +
   `multiFormAdapter`; brick-1 `halfSpin_refines_coneScheme`; full instance-1 parity). **Instance 4 (Suzuki) ✅ SEALED
-  (2026-07-04, modulo the scoped citation `SuzukiFormsDetermine`)** — `reachesRigidOrCameron_suzuki` via the 5
-  σ-twisted ovoid forms + the `GF(q)^4↔𝔽₂^d` module bridge (`suzukiAdapter`). **⟹ ALL FOUR FORM FAMILIES SEALED.**
+  + CITATION-FREE (2026-07-04)** — `reachesRigidOrCameron_suzuki` via the 5 σ-twisted ovoid forms + the
+  `GF(q)^4↔𝔽₂^d` module bridge (`suzukiAdapter`); `separates` PROVED by the second-derivative recovery identities
+  (`SF0_recover` etc. + `suzukiForms_determine`) on the enlarged base `{0,eᵢ,eⱼ,eᵢ+eⱼ}` (8 pts) — **no citation, no
+  `hσ`**. **⟹ ALL FOUR FORM FAMILIES SEALED** (three modulo one scoped citation, Suzuki modulo none).
 - **Multi-quadric bridges (NEW 2026-07-03, axiom-clean) — brings the multi-form families to full instance-1
   parity.** Previously the `multiFormAdapter` families (alternating, half-spin) carried only the *seal* leg, not
   the *refinement* + *iso-invariance* legs the single-quadratic instance has. Both now supplied GENERICALLY over
@@ -61,18 +67,21 @@ correctness object) + the **C# runtime** + optionally promoting the scoped citat
    spinor quadrics `S0..S9` are transcribed (`ScratchRouteC.lean §HalfSpin`), `spinor_hjoint` proved from `S0..S4`
    by coordinate isolation, sealed via `multiFormAdapter` + the shared engine; brick-1 `halfSpin_refines_coneScheme`
    landed; F4 generic. Full instance-1 parity. (This was the 3rd of 4 seals; Suzuki, item 2, followed.)
-2. ✅ **Suzuki–Tits instance — DONE 2026-07-04** (`reachesRigidOrCameron_suzuki`, axiom-clean, modulo the scoped
-   citation `SuzukiFormsDetermine`). De-risked (5 σ-twisted forms, joint zero=cone exact, O(d) poly base), forms +
-   `separates` rederived, and the `GF(q)^4↔𝔽₂^d` module bridge + `suzukiAdapter` landed. **⟹ ALL FOUR FAMILIES
-   SEALED (each modulo its scoped citation).** §6 "Suzuki".
+2. ✅ **Suzuki–Tits instance — DONE + CITATION-FREE 2026-07-04** (`reachesRigidOrCameron_suzuki`, axiom-clean, **no
+   citation, no `hσ`**). De-risked (5 σ-twisted forms, joint zero=cone exact), forms rederived, the `GF(q)^4↔𝔽₂^d`
+   module bridge + `suzukiAdapter` landed, and — the citation discharge — `separates` PROVED by the second-derivative
+   recovery identities on the enlarged base `{0,eᵢ,eⱼ,eᵢ+eⱼ}` (each coordinate = `DᵢDⱼ SF_k`, σ-terms cancel in char
+   2; base 8, still O(d²) poly). Probes `route_c_suzuki_determine_probe.py` (frame injective for q=8/32; forms cut the
+   cone exactly) + `route_c_suzuki_symbolic.py` (the polarization). **⟹ ALL FOUR FAMILIES SEALED** (three modulo one
+   scoped citation each, Suzuki modulo none). §6 "Suzuki".
 3. **★ NEXT — After the four seals: the combined correctness object + the C# runtime: see §9 (FORWARD PLAN).** The four
    adapters combine into ONE clean seal via a single cited classification premise + one iso-invariance lemma (L1,
    the load-bearing new piece — spot-check it first); the C# canonizer still lacks *all* family handlers (C1–C4).
    §9.0 explains why "4 seals + finite exceptions" collapses to "1 citation + 1 lemma" (Route C is threshold-free).
-4. **The four carried scoped citations** (optional, to remove them from the spine): full Lean proofs of
+4. **The remaining carried scoped citations** (optional, to remove them from the spine): full Lean proofs of
    `NondegQuadricDeterminesForm` (single-quadric uniqueness), `JointVarietyDeterminesFamily` (multi-quadric — alt /
-   half-spin), `ConePreservingCollineationIsSemiSimilitude` (F2 semilinear seam), `SuzukiFormsDetermine` (the σ-twisted
-   Suzuki determiner). All are exact, correctly-scoped classical statements (finite-geometry / classical-group
+   half-spin), `ConePreservingCollineationIsSemiSimilitude` (F2 semilinear seam). *(Suzuki's `SuzukiFormsDetermine` is
+   already discharged — item 2 — so it is no longer on this list.)* All are exact, correctly-scoped classical statements (finite-geometry / classical-group
    developments) — carried like `Theorem41Statement`/`G3`, discharged externally.
 5. **The meta-poly rigor side (last):** residuals R1–R3 (§7a) — build the Aut-free geometric
    coordinatizer (also delivers F2's field recovery), name Buekenhout–Shult (R2), double-check `d=4` (R3).
@@ -499,22 +508,29 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     ovoid `(1,a,b,ovoidC a b)` — via `σ` a ring hom + `σ∘σ=(·)²`, char-2 cancellation), `suzukiForms_infty` (vanish
     at `(0,0,0,1)`), `suzukiForms_homog` (σ-twisted homogeneous `SF_k(λx)=σλ·λ²·SF_k(x)`, so `{SF_k=0}` is a cone).
     `SF0` = the single derived form; `SF1..SF4` trim its spurious zeros. Representation-independent (all-unit coeffs).
-  - **✅ `separates` REDUCTION LANDED (2026-07-04, axiom-clean `[propext]`, `§Suzuki`):** the σ-twisted analog of the
-    multi-quadric `separates`. `SFv`/`PreservesForms` (the joint σ-form-isometry condition), `preservesForms_eq` (the
-    provable **orbit ⟹ equal-values** half), and `suzuki_separates` (the reduction: a joint-isometry orbit-profile at
-    the frame `{0,eⱼ}` ⟹ equal `F_k`-values ⟹, by the citation, `v = v'`). The determiner itself is carried as the
-    **scoped citation `SuzukiFormsDetermine`** — *genuinely* a citation (not lazy deferral): it is FALSE over small
-    `K` (e.g. `𝔽₂`, `σ=id`, `q=2` not a Suzuki parameter) and holds exactly for `GF(2^{2e+1})`, `e≥1`
-    (de-risk-validated, base `4≤d+1`), same discipline as `NondegQuadricDeterminesForm` (false at `d=3,q=3`). Source =
-    `Sz(q)` 2-transitivity on the Tits ovoid + short stabilizer chain (Suzuki/Tits 1962; Lüneburg; Hirschfeld–Thas).
+  - **✅✅ `separates` PROVED CITATION-FREE (2026-07-04, axiom-clean, `§Suzuki`) — the citation discharge.** The
+    earlier draft carried `separates` via the scoped citation `SuzukiFormsDetermine` (the first-order frame `{0,eⱼ}`
+    value-profile determines the vertex — true for `GF(2^{2e+1})`, verified injective for q=8/32 by
+    `route_c_suzuki_determine_probe.py`, but its only known proof needs `Sz(q)` 2-transitivity: first-order data ⟹
+    nonlinear, large-`q`-only recovery). **The discharge:** enlarge the base to include **pairwise sums**
+    `{0, eᵢ, eⱼ, eᵢ+eⱼ}` — then each coordinate is a **second discrete derivative** of one σ-form,
+    `DᵢDⱼ SF_k(v) := SF_k(v)+SF_k(v−eᵢ)+SF_k(v−eⱼ)+SF_k(v−eᵢ−eⱼ)`, and in char 2 the σ-terms and constants **cancel**,
+    collapsing it to a bare coordinate: `x₂=D₀D₁ SF0`, `x₃=D₀D₁ SF1`, `x₀=D₁D₃ SF1`, `x₁=D₂D₃ SF4` (verified by hand
+    + over GF(8) all-4096 + GF(32); found via `route_c_suzuki_symbolic.py`). So `separates` is **elementary char-2
+    algebra**, valid over ANY `CharP K 2` ring — no citation, no `hσ`, no field-size hypothesis. Decls: the scalar
+    identities `SF0_recover`/`SF1_recover_x3`/`SF1_recover_x0`/`SF4_recover_x1` (`simp`+`ring_nf`+char-2 close), their
+    `SFv`-lifts `recover_x0..x3`, and the PROVED determiner `suzukiForms_determine` (funext over `Fin 4`, one recovery
+    per coordinate). Base grows `4+1 → 8` (`suzukiBaseVecs`, still `O(d²)` poly). `SuzukiFormsDetermine` and the old
+    `suzuki_separates` are **removed**.
   - **✅ MODULE BRIDGE + SEAL LANDED (2026-07-04, axiom-clean, `§Suzuki`):** the `GF(q)^4 ↔ 𝔽₂^d` bridge via an
     **additive** iso `Ψ : (Fin D → ZMod 2) ≃+ (Fin 4 → K)` (no `ZMod 2`-module on `K` needed — `PreservesForms` is a
     function condition; `Ψ` additive suffices for difference-transport). `SFbar` (forms in 𝔽₂-coords), `suzukiG₀`
-    (clean joint-isometry subgroup), `neg_mem_suzukiG₀` (free in char 2), `suzukiBase` (frame images, `≤5`),
-    `suzukiAdapter` (`FormAdapter (p:=2)(d:=D) 5`, `separates` = the engine orbit-profile transported to
-    `suzuki_separates`), and the capstone **`reachesRigidOrCameron_suzuki`**. Seals via the shared engine.
-  *Single family, no Weil, no char-2 χ-substrate, no engine work. **Instance 4 SEALED end-to-end** (modulo the scoped
-  citation `SuzukiFormsDetermine`); a multi-σ-form adapter with an O(d) poly base — the σ-twisted sibling of
+    (clean joint-isometry subgroup), `neg_mem_suzukiG₀` (free in char 2), `suzukiBase` (`suzukiBaseVecs` images, `≤8`),
+    `base_sfv_eq` (per-base-vector transport), `suzukiAdapter` (`FormAdapter (p:=2)(d:=D) 8`, `separates` = the engine
+    orbit-profile transported to `suzukiForms_determine`), and the capstone **`reachesRigidOrCameron_suzuki`**. Seals
+    via the shared engine.
+  *Single family, no Weil, no char-2 χ-substrate, no engine work. **Instance 4 SEALED end-to-end, CITATION-FREE**
+  (no `SuzukiFormsDetermine`, no `hσ`); a multi-σ-form adapter with an O(d²) poly base — the σ-twisted sibling of
   alternating/half-spin.*
 
 ### C# / Lean split, and the reuse to exploit

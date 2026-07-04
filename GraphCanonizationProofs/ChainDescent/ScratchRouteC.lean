@@ -1109,18 +1109,18 @@ theorem suzukiForms_homog (l x0 x1 x2 x3 : K) (k : Fin 5) :
   fin_cases k <;>
     simp only [suzukiForms, SF0, SF1, SF2, SF3, SF4, map_mul] <;> ring
 
-/-! ### The σ-twisted `separates` (instance 4) — the value-profile determiner + the reduction
+/-! ### The σ-twisted `separates` (instance 4) — the value-profile determiner, PROVED citation-free
 
-`separates` for Suzuki is the σ-twisted analog of `coords_determine_multi`: the joint `F_k`-value profile at the
-frame determines the vertex. **It is a scoped CITATION, not provable over abstract `K`** — it is FALSE for small
-`K` (e.g. `K = 𝔽₂`: `σ = id`, `q = 2` is not a Suzuki parameter and the ovoid degenerates) and holds exactly for
-`GF(2^{2e+1})`, `e ≥ 1` (de-risk `route_c_suzuki_probe.py`, q=8: the joint profile is injective at base `4 ≤ d+1`).
-This is the *same discipline* as `NondegQuadricDeterminesForm` (false at `d=3,q=3`, true in range): carried as a
-named premise, scope documented, discharged externally. **Classical source:** the 2-transitivity of `Sz(q)` on the
-Tits ovoid + the short point-stabilizer chain (Suzuki 1962; Tits 1962; Lüneburg, *Translation Planes*, the Suzuki
-groups; Hirschfeld–Thas, *General Galois Geometries*, ovoid coordinatization). What IS proved here (axiom-clean):
-the **reduction** — a joint-isometry orbit-profile at the frame ⟹ equal `F_k`-values ⟹ (by the citation) equal
-vertex, exactly mirroring the multi-quadric `separates` proof (`affinePolarAdapter`/`multiFormAdapter`). -/
+`separates` for Suzuki is the σ-twisted analog of `coords_determine_multi`: the joint `F_k`-value profile
+determines the vertex. **It is PROVED outright (no citation, no `hσ`, no field-size hypothesis).** The earlier
+draft carried it as a scoped citation `SuzukiFormsDetermine` — true for `GF(2^{2e+1})` but requiring the deep
+`Sz(q)` 2-transitivity, because the *first-order* frame `{0, eⱼ}` gives only nonlinear, large-`q`-only recovery
+(that frame IS injective for q=8/q=32 — verified `route_c_suzuki_determine_probe.py` — so the citation was
+correct, just heavy). The discharge (§ recovery identities above) instead uses the enlarged base
+`{0, eᵢ, eⱼ, eᵢ+eⱼ}`: each coordinate is a **second discrete derivative** of one σ-form, which in char 2 collapses
+to a bare coordinate (`Dᵢ Dⱼ SF_k = x_·`, σ-terms and constants cancel). So the determiner is elementary char-2
+algebra, valid over ANY `CharP K 2` ring. Base grows `4+1 → 8` (still `O(d²)`, poly). This makes instance 4 a
+fully unconditional seal, on par with `affinePolarAdapter` (which still carries `NondegQuadricDeterminesForm`). -/
 
 /-- The Suzuki form family as a function of a vector `v : Fin 4 → K`. -/
 def SFv (v : Fin 4 → K) (k : Fin 5) : K := suzukiForms σ (v 0) (v 1) (v 2) (v 3) k
@@ -1130,18 +1130,51 @@ def SFv (v : Fin 4 → K) (k : Fin 5) : K := suzukiForms σ (v 0) (v 1) (v 2) (v
 Route-C isometry-scheme colouring. -/
 def PreservesForms (g : (Fin 4 → K) → (Fin 4 → K)) : Prop := ∀ w k, SFv σ (g w) k = SFv σ w k
 
-/-- **CITATION (scoped) — the Suzuki σ-forms separate at the frame.** For the Tits setting (`σ∘σ = (·)²`), the
-joint `F_k`-value profile at the frame `{0, e₀, e₁, e₂, e₃}` determines the vector: if `F_k v = F_k v'` and
-`F_k (v − eⱼ) = F_k (v' − eⱼ)` for all `k, j`, then `v = v'`. The σ-twisted analog of `coords_determine` /
-`coords_determine_multi`. **NOT provable over abstract `K`** (false for small `K`, e.g. `𝔽₂`); holds for
-`GF(2^{2e+1})` (`e ≥ 1`), de-risk-validated (base `4 ≤ d+1`). Carried like `NondegQuadricDeterminesForm`; source =
-`Sz(q)` 2-transitivity on the Tits ovoid + short stabilizer chain (see the section note). -/
-def SuzukiFormsDetermine (K : Type*) [CommRing K] [CharP K 2] (σ : K →+* K) : Prop :=
-  (∀ x : K, σ (σ x) = x ^ 2) →
-    ∀ v v' : Fin 4 → K,
-      (∀ k, SFv σ v k = SFv σ v' k) →
-      (∀ (j : Fin 4) (k : Fin 5), SFv σ (v - Pi.single j 1) k = SFv σ (v' - Pi.single j 1) k) →
-        v = v'
+/-! #### The recovery identities — a citation-free discharge of `separates`
+
+The joint-value determiner is **provable outright** (no `Sz(q)` citation, no `hσ`, no field-size hypothesis) once
+the base is enlarged from the first-order frame `{0, eⱼ}` to include **pairwise sums** `{0, eᵢ, eⱼ, eᵢ+eⱼ}`. The
+reason: each coordinate is a **second discrete derivative** of one σ-form, `Dᵢ Dⱼ SF_k(v) := SF_k(v) + SF_k(v−eᵢ)
++ SF_k(v−eⱼ) + SF_k(v−eᵢ−eⱼ)`, and in char 2 the σ-terms and constants of that alternating sum **cancel**,
+collapsing it to a bare coordinate. E.g. `D₀ D₁ SF0 = x₂` (verified by hand and over `GF(8)`/`GF(32)`,
+`route_c_suzuki_determine_probe.py`). So `separates` follows from **formal char-2 ring identities**, valid over any
+`CharP K 2` ring with `σ` a ring hom — replacing the old scoped citation `SuzukiFormsDetermine` (which was true but
+required the deep `Sz(q)` 2-transitivity because the first-order frame gives only nonlinear, large-`q`-only
+recovery). The base grows `4+1 → 8` (still `O(d²)`, poly). The four identities, one per coordinate:
+
+* `x₂ = D₀D₁ SF0`,  `x₃ = D₀D₁ SF1`,  `x₀ = D₁D₃ SF1`,  `x₁ = D₂D₃ SF4`.  -/
+
+/-- Recovery of `x₂` — the 2nd discrete derivative `D₀D₁ SF0` collapses to `x₂` (σ-terms cancel in char 2). -/
+theorem SF0_recover (x0 x1 x2 x3 : K) :
+    SF0 σ x0 x1 x2 x3 + SF0 σ (x0 - 1) x1 x2 x3 + SF0 σ x0 (x1 - 1) x2 x3
+      + SF0 σ (x0 - 1) (x1 - 1) x2 x3 = x2 := by
+  simp only [SF0, map_sub, map_one]; ring_nf
+  simp only [CharTwo.two_eq_zero, four_eq_zero, mul_zero, sub_zero]
+  abel
+
+/-- Recovery of `x₃` — `D₀D₁ SF1 = x₃`. -/
+theorem SF1_recover_x3 (x0 x1 x2 x3 : K) :
+    SF1 σ x0 x1 x2 x3 + SF1 σ (x0 - 1) x1 x2 x3 + SF1 σ x0 (x1 - 1) x2 x3
+      + SF1 σ (x0 - 1) (x1 - 1) x2 x3 = x3 := by
+  simp only [SF1, map_sub, map_one]; ring_nf
+  simp only [CharTwo.two_eq_zero, four_eq_zero, mul_zero, sub_zero]
+  abel
+
+/-- Recovery of `x₀` — `D₁D₃ SF1 = x₀`. -/
+theorem SF1_recover_x0 (x0 x1 x2 x3 : K) :
+    SF1 σ x0 x1 x2 x3 + SF1 σ x0 (x1 - 1) x2 x3 + SF1 σ x0 x1 x2 (x3 - 1)
+      + SF1 σ x0 (x1 - 1) x2 (x3 - 1) = x0 := by
+  simp only [SF1, map_sub, map_one]; ring_nf
+  simp only [CharTwo.two_eq_zero, four_eq_zero, mul_zero, sub_zero]
+  abel
+
+/-- Recovery of `x₁` — `D₂D₃ SF4 = x₁`. -/
+theorem SF4_recover_x1 (x0 x1 x2 x3 : K) :
+    SF4 σ x0 x1 x2 x3 + SF4 σ x0 x1 (x2 - 1) x3 + SF4 σ x0 x1 x2 (x3 - 1)
+      + SF4 σ x0 x1 (x2 - 1) (x3 - 1) = x1 := by
+  simp only [SF4, map_sub, map_one]; ring_nf
+  simp only [CharTwo.two_eq_zero, four_eq_zero, mul_zero, sub_zero]
+  abel
 
 omit [CharP K 2] in
 /-- A form-preserving map that carries `b` to `a` equalizes the form-values: `F_k a = F_k b`. The provable
@@ -1150,22 +1183,62 @@ theorem preservesForms_eq {g : (Fin 4 → K) → (Fin 4 → K)} (hg : PreservesF
     {a b : Fin 4 → K} (hgab : g b = a) (k : Fin 5) : SFv σ a k = SFv σ b k := by
   rw [← hgab]; exact hg b k
 
-/-- **The σ-twisted `separates` reduction (instance 4).** Given the carried determiner `hcite` and the Tits
-property `hσ`: if for the base point `0` and each unit vector `eⱼ` there is a joint-isometry `g` (a
-`PreservesForms` map) carrying `v' − t` to `v − t`, then `v = v'`. Proof: each orbit witness equalizes the
-`F_k`-values at that base point (`preservesForms_eq`), giving the value-profile hypotheses of the determiner,
-which concludes `v = v'`. This is the exact σ-twisted analog of the `separates` field of `affinePolarAdapter` /
-`multiFormAdapter`; the only non-elementary input is `hcite` (threaded like `Theorem41Statement`). Axiom-clean. -/
-theorem suzuki_separates (hcite : SuzukiFormsDetermine K σ) (hσ : ∀ x : K, σ (σ x) = x ^ 2)
-    {v v' : Fin 4 → K}
-    (h0 : ∃ g, PreservesForms σ g ∧ g v' = v)
-    (hj : ∀ j : Fin 4, ∃ g, PreservesForms σ g ∧ g (v' - Pi.single j 1) = v - Pi.single j 1) :
+/-- `SFv`-level recovery of `x₂` (`D₀D₁ SF0`), lifting `SF0_recover` through the coordinate evaluation. -/
+theorem recover_x2 (v : Fin 4 → K) :
+    SFv σ v 0 + SFv σ (v - Pi.single 0 1) 0 + SFv σ (v - Pi.single 1 1) 0
+      + SFv σ (v - Pi.single 0 1 - Pi.single 1 1) 0 = v 2 := by
+  simp only [SFv, suzukiForms, Pi.sub_apply, Pi.single_apply, Fin.reduceEq, if_true, if_false, sub_zero]
+  exact SF0_recover σ (v 0) (v 1) (v 2) (v 3)
+
+/-- `SFv`-level recovery of `x₃` (`D₀D₁ SF1`). -/
+theorem recover_x3 (v : Fin 4 → K) :
+    SFv σ v 1 + SFv σ (v - Pi.single 0 1) 1 + SFv σ (v - Pi.single 1 1) 1
+      + SFv σ (v - Pi.single 0 1 - Pi.single 1 1) 1 = v 3 := by
+  simp only [SFv, suzukiForms, Pi.sub_apply, Pi.single_apply, Fin.reduceEq, if_true, if_false, sub_zero]
+  exact SF1_recover_x3 σ (v 0) (v 1) (v 2) (v 3)
+
+/-- `SFv`-level recovery of `x₀` (`D₁D₃ SF1`). -/
+theorem recover_x0 (v : Fin 4 → K) :
+    SFv σ v 1 + SFv σ (v - Pi.single 1 1) 1 + SFv σ (v - Pi.single 3 1) 1
+      + SFv σ (v - Pi.single 1 1 - Pi.single 3 1) 1 = v 0 := by
+  simp only [SFv, suzukiForms, Pi.sub_apply, Pi.single_apply, Fin.reduceEq, if_true, if_false, sub_zero]
+  exact SF1_recover_x0 σ (v 0) (v 1) (v 2) (v 3)
+
+/-- `SFv`-level recovery of `x₁` (`D₂D₃ SF4`). -/
+theorem recover_x1 (v : Fin 4 → K) :
+    SFv σ v 4 + SFv σ (v - Pi.single 2 1) 4 + SFv σ (v - Pi.single 3 1) 4
+      + SFv σ (v - Pi.single 2 1 - Pi.single 3 1) 4 = v 1 := by
+  simp only [SFv, suzukiForms, Pi.sub_apply, Pi.single_apply, Fin.reduceEq, if_true, if_false, sub_zero]
+  exact SF4_recover_x1 σ (v 0) (v 1) (v 2) (v 3)
+
+/-- **The σ-twisted `separates` determiner (instance 4) — PROVED, no citation.** If `v` and `v'` have equal
+joint `F_k`-values at the enlarged base `{0, e₀, e₁, e₂, e₃, e₀+e₁, e₁+e₃, e₂+e₃}`, then `v = v'`. Each coordinate
+is read off by one recovery identity (a 2nd discrete derivative), so this is elementary char-2 algebra — the
+σ-twisted analog of `coords_determine_multi`, but with **no** scoped citation, **no** `hσ`, and **no** field-size
+hypothesis (it holds over any `CharP K 2` ring). Replaces the old carried `SuzukiFormsDetermine`. -/
+theorem suzukiForms_determine {v v' : Fin 4 → K}
+    (h0 : ∀ k, SFv σ v k = SFv σ v' k)
+    (he0 : ∀ k, SFv σ (v - Pi.single 0 1) k = SFv σ (v' - Pi.single 0 1) k)
+    (he1 : ∀ k, SFv σ (v - Pi.single 1 1) k = SFv σ (v' - Pi.single 1 1) k)
+    (he2 : ∀ k, SFv σ (v - Pi.single 2 1) k = SFv σ (v' - Pi.single 2 1) k)
+    (he3 : ∀ k, SFv σ (v - Pi.single 3 1) k = SFv σ (v' - Pi.single 3 1) k)
+    (he01 : ∀ k, SFv σ (v - Pi.single 0 1 - Pi.single 1 1) k
+        = SFv σ (v' - Pi.single 0 1 - Pi.single 1 1) k)
+    (he13 : ∀ k, SFv σ (v - Pi.single 1 1 - Pi.single 3 1) k
+        = SFv σ (v' - Pi.single 1 1 - Pi.single 3 1) k)
+    (he23 : ∀ k, SFv σ (v - Pi.single 2 1 - Pi.single 3 1) k
+        = SFv σ (v' - Pi.single 2 1 - Pi.single 3 1) k) :
     v = v' := by
-  refine hcite hσ v v' (fun k => ?_) (fun j k => ?_)
-  · obtain ⟨g, hg, hgv⟩ := h0
-    exact preservesForms_eq σ hg hgv k
-  · obtain ⟨g, hg, hgv⟩ := hj j
-    exact preservesForms_eq σ hg hgv k
+  funext i
+  fin_cases i
+  · show v 0 = v' 0
+    rw [← recover_x0 σ v, h0 1, he1 1, he3 1, he13 1]; exact recover_x0 σ v'
+  · show v 1 = v' 1
+    rw [← recover_x1 σ v, h0 4, he2 4, he3 4, he23 4]; exact recover_x1 σ v'
+  · show v 2 = v' 2
+    rw [← recover_x2 σ v, h0 0, he0 0, he1 0, he01 0]; exact recover_x2 σ v'
+  · show v 3 = v' 3
+    rw [← recover_x3 σ v, h0 1, he0 1, he1 1, he01 1]; exact recover_x3 σ v'
 
 /-! ### The module bridge + the Suzuki adapter (instance 4 seal)
 
@@ -1174,9 +1247,9 @@ The engine works over the standard `𝔽₂`-space `Fin D → ZMod 2` (`D = 4·d
 structure on `K` needed — `PreservesForms` is a function condition, and `Ψ` additive is all the difference-transport
 uses). Define the forms in `𝔽₂`-coordinates (`SFbar := SFv ∘ Ψ`), so the joint-isometry group `suzukiG₀` is a clean
 subgroup of `(Fin D → ZMod 2) ≃ₗ[ZMod 2] …`. `neg_mem` is free (char 2). `separates` transports the engine's
-orbit-profile at the frame (`{Ψ.symm 0, Ψ.symm eⱼ}`) back through `Ψ` to `suzuki_separates`. The result is a
-`FormAdapter`, sealed by the shared engine → `reachesRigidOrCameron_suzuki` (rests on the scoped citation via
-`suzuki_separates`). -/
+orbit-profile at the enlarged base (`Ψ`-images of `suzukiBaseVecs`) back through `Ψ` to the PROVED determiner
+`suzukiForms_determine`. The result is a `FormAdapter`, sealed by the shared engine →
+`reachesRigidOrCameron_suzuki` (citation-free). -/
 
 variable {D : ℕ} (Ψ : (Fin D → ZMod 2) ≃+ (Fin 4 → K))
 
@@ -1202,7 +1275,7 @@ def suzukiG₀ : Subgroup ((Fin D → ZMod 2) ≃ₗ[ZMod 2] (Fin D → ZMod 2))
 
 omit [CharP K 2] in
 /-- `g ∈ suzukiG₀` ⟹ the `Ψ`-conjugate `w ↦ Ψ(g(Ψ.symm w))` preserves the `K`-forms (`PreservesForms`). The
-link from the standard-space isometry to the `K`-side `suzuki_separates`. -/
+link from the standard-space isometry to the `K`-side determiner (`base_sfv_eq` / `suzukiForms_determine`). -/
 theorem preservesForms_of_mem_G₀ {g : (Fin D → ZMod 2) ≃ₗ[ZMod 2] (Fin D → ZMod 2)}
     (hg : g ∈ suzukiG₀ σ Ψ) : PreservesForms σ (fun v => Ψ (g (Ψ.symm v))) := by
   intro v k
@@ -1218,61 +1291,84 @@ theorem neg_mem_suzukiG₀ : LinearEquiv.neg (ZMod 2) ∈ suzukiG₀ σ Ψ := by
     funext i; rw [Pi.neg_apply]; exact CharTwo.neg_eq _
   simp only [SFbar, h]
 
-/-- The individualized base — `Ψ`-images of the frame `{0, e₀, e₁, e₂, e₃}`, transported to `Fin (2^D)`. -/
+/-- The base vectors on the `K`-side — the enlarged base `{0, e₀, e₁, e₂, e₃, e₀+e₁, e₁+e₃, e₂+e₃}` (8 points)
+whose pairwise sums power the second-derivative recovery. -/
+def suzukiBaseVecs : List (Fin 4 → K) :=
+  [0, Pi.single 0 1, Pi.single 1 1, Pi.single 2 1, Pi.single 3 1,
+   Pi.single 0 1 + Pi.single 1 1, Pi.single 1 1 + Pi.single 3 1, Pi.single 2 1 + Pi.single 3 1]
+
+/-- The individualized base — `Ψ`-images of `suzukiBaseVecs`, transported to `Fin (2^D)` (`≤ 8` points). -/
 noncomputable def suzukiBase : Finset (Fin (2 ^ D)) :=
-  insert (ChainDescent.affineE (Ψ.symm 0))
-    (Finset.univ.image (fun j : Fin 4 => ChainDescent.affineE (Ψ.symm (Pi.single j 1))))
+  (suzukiBaseVecs.map (fun b => ChainDescent.affineE (Ψ.symm b))).toFinset
 
 omit [CharP K 2] in
-theorem suzukiBase_card_le : (suzukiBase Ψ).card ≤ 4 + 1 := by
-  refine (Finset.card_insert_le _ _).trans ?_
-  have h := Finset.card_image_le (s := (Finset.univ : Finset (Fin 4)))
-    (f := fun j => ChainDescent.affineE (Ψ.symm (Pi.single j (1 : K))))
-  rw [Finset.card_univ, Fintype.card_fin] at h
-  omega
+theorem suzukiBase_card_le : (suzukiBase Ψ).card ≤ 8 := by
+  unfold suzukiBase
+  refine le_trans (List.toFinset_card_le _) ?_
+  simp [suzukiBaseVecs]
 
-/-- **The Suzuki family as a `FormAdapter`** (instance 4). `G₀ = suzukiG₀`, base = the frame images (`≤ 5`),
-`separates` = the transport of the engine orbit-profile to `suzuki_separates` (via the scoped citation `hcite`). -/
-noncomputable def suzukiAdapter (hcite : SuzukiFormsDetermine K σ) (hσ : ∀ x : K, σ (σ x) = x ^ 2) :
-    FormAdapter (p := 2) (d := D) (4 + 1) where
+omit [CharP K 2] in
+/-- **The per-base-vector transport.** A `G₀`-orbit witness at the base point `Ψ`-image of `b` gives equality of
+the σ-form values of the two vertices' differences by `b` (via `preservesForms_of_mem_G₀` + `preservesForms_eq`). -/
+theorem base_sfv_eq {u u' : Fin (2 ^ D)} (b : Fin 4 → K)
+    (hb : ∃ g₀ ∈ suzukiG₀ σ Ψ,
+       g₀ (ChainDescent.affineE.symm u' - Ψ.symm b) = ChainDescent.affineE.symm u - Ψ.symm b) (k) :
+    SFv σ (Ψ (ChainDescent.affineE.symm u) - b) k = SFv σ (Ψ (ChainDescent.affineE.symm u') - b) k := by
+  obtain ⟨g, hg, hgeq⟩ := hb
+  apply preservesForms_eq σ (preservesForms_of_mem_G₀ σ Ψ hg)
+  show Ψ (g (Ψ.symm (Ψ (ChainDescent.affineE.symm u') - b))) = Ψ (ChainDescent.affineE.symm u) - b
+  rw [map_sub, Ψ.symm_apply_apply, hgeq, map_sub, Ψ.apply_symm_apply]
+
+/-- **The Suzuki family as a `FormAdapter`** (instance 4). `G₀ = suzukiG₀`, base = the enlarged frame images
+(`≤ 8`), `separates` = the transport of the engine orbit-profile to the PROVED determiner `suzukiForms_determine`
+(the second-derivative recovery). **No citation, no `hσ`, no field-size hypothesis.** -/
+noncomputable def suzukiAdapter :
+    FormAdapter (p := 2) (d := D) 8 where
   G₀ := suzukiG₀ σ Ψ
   neg_mem := neg_mem_suzukiG₀ σ Ψ
   base := suzukiBase Ψ
   base_card_le := suzukiBase_card_le Ψ
   separates := by
     intro u u' hh
+    have key : ∀ b : Fin 4 → K, b ∈ suzukiBaseVecs → ∀ k,
+        SFv σ (Ψ (ChainDescent.affineE.symm u) - b) k = SFv σ (Ψ (ChainDescent.affineE.symm u') - b) k := by
+      intro b hb k
+      apply base_sfv_eq σ Ψ b _ k
+      obtain ⟨g, hg, hgeq⟩ := hh (ChainDescent.affineE (Ψ.symm b))
+        (List.mem_toFinset.mpr (List.mem_map_of_mem hb))
+      rw [Equiv.symm_apply_apply] at hgeq
+      exact ⟨g, hg, hgeq⟩
     have hvv' : Ψ (ChainDescent.affineE.symm u) = Ψ (ChainDescent.affineE.symm u') := by
-      refine suzuki_separates σ hcite hσ ?_ ?_
-      · obtain ⟨g, hg, hgeq⟩ := hh (ChainDescent.affineE (Ψ.symm 0)) (Finset.mem_insert_self _ _)
-        rw [Equiv.symm_apply_apply, map_zero, sub_zero, sub_zero] at hgeq
-        refine ⟨fun w => Ψ (g (Ψ.symm w)), preservesForms_of_mem_G₀ σ Ψ hg, ?_⟩
-        show Ψ (g (Ψ.symm (Ψ (ChainDescent.affineE.symm u')))) = Ψ (ChainDescent.affineE.symm u)
-        rw [Ψ.symm_apply_apply, hgeq]
-      · intro j
-        obtain ⟨g, hg, hgeq⟩ := hh (ChainDescent.affineE (Ψ.symm (Pi.single j 1)))
-          (Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ (Finset.mem_univ j)))
-        rw [Equiv.symm_apply_apply] at hgeq
-        refine ⟨fun w => Ψ (g (Ψ.symm w)), preservesForms_of_mem_G₀ σ Ψ hg, ?_⟩
-        show Ψ (g (Ψ.symm (Ψ (ChainDescent.affineE.symm u') - Pi.single j 1)))
-            = Ψ (ChainDescent.affineE.symm u) - Pi.single j 1
-        rw [map_sub, Ψ.symm_apply_apply, hgeq, map_sub, Ψ.apply_symm_apply]
+      refine suzukiForms_determine σ
+        (fun k => by have h := key 0 (by simp [suzukiBaseVecs]) k; rwa [sub_zero, sub_zero] at h)
+        (fun k => key (Pi.single 0 1) (by simp [suzukiBaseVecs]) k)
+        (fun k => key (Pi.single 1 1) (by simp [suzukiBaseVecs]) k)
+        (fun k => key (Pi.single 2 1) (by simp [suzukiBaseVecs]) k)
+        (fun k => key (Pi.single 3 1) (by simp [suzukiBaseVecs]) k)
+        (fun k => ?_) (fun k => ?_) (fun k => ?_)
+      · have h := key (Pi.single 0 1 + Pi.single 1 1) (by simp [suzukiBaseVecs]) k
+        rwa [sub_add_eq_sub_sub, sub_add_eq_sub_sub] at h
+      · have h := key (Pi.single 1 1 + Pi.single 3 1) (by simp [suzukiBaseVecs]) k
+        rwa [sub_add_eq_sub_sub, sub_add_eq_sub_sub] at h
+      · have h := key (Pi.single 2 1 + Pi.single 3 1) (by simp [suzukiBaseVecs]) k
+        rwa [sub_add_eq_sub_sub, sub_add_eq_sub_sub] at h
     exact ChainDescent.affineE.symm.injective (Ψ.injective hvv')
 
-/-- **Suzuki reaches the rigid-or-Cameron disjunction** (instance 4 SEALED, modulo the scoped citation
-`SuzukiFormsDetermine`). The σ-twisted multi-form family, bridged to the char-2-ready engine and sealed by the
-shared `FormAdapter.reachesRigidOrCameron`. -/
+/-- **Suzuki reaches the rigid-or-Cameron disjunction** (instance 4 SEALED, **citation-free**). The σ-twisted
+multi-form family, bridged to the char-2-ready engine and sealed by the shared `FormAdapter.reachesRigidOrCameron`.
+The determiner `suzukiForms_determine` is proved outright (second-derivative recovery), so — unlike the earlier
+draft — this carries **no `SuzukiFormsDetermine` citation and no `hσ`**. -/
 theorem reachesRigidOrCameron_suzuki
-    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
-    (hcite : SuzukiFormsDetermine K σ) (hσ : ∀ x : K, σ (σ x) = x ^ 2) :
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} :
     ((SchemeBlockRecovered (2 ^ D)
-          (ChainDescent.affineScheme (suzukiAdapter σ Ψ hcite hσ).G₀ (suzukiAdapter σ Ψ hcite hσ).neg_mem)
+          (ChainDescent.affineScheme (suzukiAdapter σ Ψ).G₀ (suzukiAdapter σ Ψ).neg_mem)
         ∨ AbelianConsumed (2 ^ D)
-          (ChainDescent.affineScheme (suzukiAdapter σ Ψ hcite hσ).G₀ (suzukiAdapter σ Ψ hcite hσ).neg_mem))
+          (ChainDescent.affineScheme (suzukiAdapter σ Ψ).G₀ (suzukiAdapter σ Ψ).neg_mem))
         ∨ SchemeRecoveredByDepth (2 ^ D)
-          (ChainDescent.affineScheme (suzukiAdapter σ Ψ hcite hσ).G₀ (suzukiAdapter σ Ψ hcite hσ).neg_mem) (4 + 1))
+          (ChainDescent.affineScheme (suzukiAdapter σ Ψ).G₀ (suzukiAdapter σ Ψ).neg_mem) 8)
       ∨ IsCameronScheme (2 ^ D)
-          (ChainDescent.affineScheme (suzukiAdapter σ Ψ hcite hσ).G₀ (suzukiAdapter σ Ψ hcite hσ).neg_mem) :=
-  (suzukiAdapter σ Ψ hcite hσ).reachesRigidOrCameron
+          (ChainDescent.affineScheme (suzukiAdapter σ Ψ).G₀ (suzukiAdapter σ Ψ).neg_mem) :=
+  (suzukiAdapter σ Ψ).reachesRigidOrCameron
 
 end Suzuki
 
