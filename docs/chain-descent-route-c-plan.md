@@ -154,13 +154,20 @@ remaining scoped citations to full Lean proofs. Landed:
   spinor quadrics); **inst 4** Suzuki `reachesRigidOrCameron_suzuki` (σ-twisted multi-form + `GF(q)^4↔𝔽₂^d` module
   bridge, `suzukiAdapter`). Each family = one `FormAdapter`; the multi-quadric families reduce to `Qs`+`hjoint` via
   `multiFormAdapter`; Suzuki reduces to the 5 σ-forms + the bridge + `suzuki_separates`.
-- **Remaining (post-four-seals):** the **§9 combine** (four seals → one correctness object; the L1 iso-invariance
-  lemma is the load-bearing new piece), the **C# runtime** family handlers (C1–C4), and optionally promoting the
-  scoped citations (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`, `ConePreservingCollineationIsSemiSimilitude`,
-  `SuzukiFormsDetermine`) to full Lean proofs. **No further family builds remain.**
+- **✅ §9 combine / seam — DONE at the honest level (2026-07-04):** the group-pinning (`schemeAutGroup_coarse_eq_affineG`,
+  all 4 families mod the named Skresanov citation `AffineSchemeTwoClosed`) + `routeC_polySupport` certificate
+  (`ScratchRecoveredFormTransfer.lean`) + the cyclotomic dispatch (`ScratchSeamDispatch.lean`), all axiom-clean, after
+  the **vacuity correction** (§9.0a). One carried Lean atom remains: `htransport` (L1, tractable). **Remaining:** the
+  **C# runtime** (§9.2 grounded build spec; load-bearing = C1b `ClassicalGroupGenerators`) + optionally building L1
+  (`htransport`) and promoting the scoped citations (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`,
+  `ConePreservingCollineationIsSemiSimilitude`, `AffineSchemeTwoClosed`) to full Lean proofs. **No further family builds remain.**
 
 **▶ VERIFY what's landed (fresh-reader commands):**
-- Lean: `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRouteC.lean` (exit 0; the only warnings are two
+- Lean (SEAM, NEW 2026-07-04): `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRecoveredFormTransfer.lean`
+  and `… ChainDescent/ScratchSeamDispatch.lean` (both exit 0, no warnings; each ends with `#print axioms` lines showing
+  `[propext, Classical.choice, Quot.sound]`). Key decls: `schemeAutGroup_coarse_eq_affineG` + `routeC_polySupport`
+  (group-pinning + certificate); `reachesRigidOrCameron_seamDispatch` + `cyclotomic_sealDisj` (cyclotomic dispatch).
+- Lean (adapters): `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRouteC.lean` (exit 0; the only warnings are two
   `simpa`-style lints, one pre-existing). Axiom-check by appending `#print axioms ChainDescent.RouteC.<name>` and
   re-running (expect `[propext, Classical.choice, Quot.sound]`). The four seal capstones:
   `affinePolarAdapter`, `Plucker.reachesRigidOrCameron_alternating`, `HalfSpin.reachesRigidOrCameron_halfSpin`,

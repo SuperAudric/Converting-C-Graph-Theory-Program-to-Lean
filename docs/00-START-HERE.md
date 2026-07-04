@@ -162,9 +162,15 @@ close it — is set out in
 > discretization → **F4 iso-invariance**; **F2** (`q=pᵉ` semilinear); **F3** the `FormAdapter` engine + the generic
 > **multi-quadric bridges**; the 4 seal capstones = `affinePolarAdapter`, `Plucker.reachesRigidOrCameron_alternating`,
 > `HalfSpin.reachesRigidOrCameron_halfSpin`, `Suzuki.reachesRigidOrCameron_suzuki`. Review-flagged items resolved
-> (classical carries = exact scoped citations; meta-poly bootstrapping sound, plan §7a). **Next: NOT another family —
-> the §9 post-four-seals combine (four seals → one correctness object; start with the L1 iso-invariance de-risk) + the
-> C# runtime handlers.** Plan STATUS + §9. [[project_recovery_corecovery_duality_2026-07-03]].
+> (classical carries = exact scoped citations; meta-poly bootstrapping sound, plan §7a). **★ Lean SEAM now DONE too
+> (2026-07-04):** the post-four-seals combine landed at the honest level after a **vacuity correction** (`GroupReproduced`
+> = `∃gens,closure=group` is a tautology; non-vacuous "coarse reaches rigid" is *false* = node-4 — so Route C poly is
+> inherently the project's standard **meta** claim, not a coarse Lean predicate). Genuine content: group-pinning
+> `schemeAutGroup_coarse_eq_affineG` (coarse Aut = the known `affineG(similitude)`, all 4 families, mod the named Skresanov
+> citation `AffineSchemeTwoClosed`) + `routeC_polySupport` (`ScratchRecoveredFormTransfer.lean`) + the **cyclotomic dispatch
+> branch** (`ScratchSeamDispatch.lean`), all axiom-clean; the one carried Lean atom is `htransport` (L1, tractable).
+> **Next = the C# runtime (plan §9.2, a grounded build spec): load-bearing piece = C1b `ClassicalGroupGenerators`.**
+> Plan STATUS + §9.0a + §9.2. [[project_recovery_corecovery_duality_2026-07-03]] · [[project_routec_seam_2026-07-04]].
 > **★★★★ LIVE FRONTIER (2026-06-30 v2) — the polynomial route is [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md),
 > RETARGETED to `T0` (bounded branching). READ THAT DOC FIRST.** The forms-graph residue is SEALED at **quasipoly**
 > (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in build; sub-exp floor `reachesRigidOrCameron_viaSpielman`). For

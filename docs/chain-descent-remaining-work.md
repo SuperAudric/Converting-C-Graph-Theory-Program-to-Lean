@@ -31,8 +31,11 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > in build.sh; seals `affinePolarAdapter` / `Plucker.reachesRigidOrCameron_alternating` / `HalfSpin.reachesRigidOrCameron_halfSpin`
 > / `Suzuki.reachesRigidOrCameron_suzuki`). **AUTHORITATIVE = [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md)**
 > (read its STATUS). The WL-dimension material below is the *alternative* route (STALLED at the node-4 wall, recovery doc
-> §9.8.9); Route C is the live poly path. Remaining for the whole seal = the §9 combine (four Route-C seals → one object)
-> + the cited classification seam + the C# runtime — **not** the `D3d`/`ZProfileSeparates` line.
+> §9.8.9); Route C is the live poly path. **▶ SEAM DONE (2026-07-04):** the §9 combine landed at the honest level after a
+> vacuity correction (Route C poly is inherently META; genuine content = coarse Aut = the known `affineG(similitude)` mod
+> the named Skresanov citation `AffineSchemeTwoClosed`, + cyclotomic dispatch; `ScratchRecoveredFormTransfer.lean` /
+> `ScratchSeamDispatch.lean`, axiom-clean; one carried atom `htransport`=L1). **Remaining for the whole seal = the C# runtime
+> (plan §9.2 grounded spec, load-bearing C1b) + `htransport`** — **not** the `D3d`/`ZProfileSeparates` line. [[project_routec_seam_2026-07-04]].
 >
 > **▶ UPDATE (2026-06-24) — the first forms-graph instance is SEALED.** `VO⁻₄(3)` (`ScratchBM3Glue.vo4minus_seal`,
 > axiom-clean `[propext, Classical.choice, Quot.sound]`) closes the affine-polar residue at the minus form modulo `{G3}`
