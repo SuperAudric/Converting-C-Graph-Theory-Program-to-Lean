@@ -117,7 +117,16 @@ remaining scoped citations to full Lean proofs. Landed:
   not a quick win. **Honest state: C4 = harvest-free invariant DONE (answer is harvest-free) + full coordinatization for
   harvest-free confirmation = scoped, large, deferred.**
 
-**▶ C# BUILD SUMMARY (2026-07-04): C1a, C1b, C2, C3, C4 ALL LANDED, 35/35 Route-C tests + 291/291 full suite green,
+- **FAMILY-DISPATCH SCAFFOLD (2026-07-04, §9.2.7).** Refactored the hardwired affine-polar pipeline into an
+  **`IFormFamilyHandler` registry** (C# mirror of the Lean `FormAdapter`). `AffinePolarHandler` real; `Alternating` /
+  `HalfSpin` / `Suzuki` handlers with **all interconnection live** (dispatch, generic result plumbing, and — for the
+  odd-q multi-quadric families — the **`Confirm` step fully wired** via C1a `RecoverFormFamily`) and only their per-family
+  math core (fingerprint / standard-graph / closed-form |Aut|; char-2 recovery for Suzuki) as documented stubs with a
+  crisp completion contract. Dormant handlers decline safely (fall back to the descent). Suzuki's VSz(8) fingerprint is
+  live. Regression clean (114/114 Route-C + core suite). This is the prep-for-other-families work: a future builder fills
+  well-defined stubs, not a green field.
+
+**▶ C# BUILD SUMMARY (2026-07-04): C1a, C1b, C2, C3, C4 + FAMILY-DISPATCH SCAFFOLD LANDED. Route-C + core suite green,
 0 regressions.**
 The runtime spine (recover form family → build the answer group → classify → canonicalize by iso-type → Aut-free line
 recovery) is in place and validated end-to-end (order-check exact vs harvested |Aut| at n=81; scramble-invariant
@@ -1051,6 +1060,47 @@ never going to reach.
 soft coupling at C1a + C3; everything else (coordinatization, poly, classification, char-2) is legitimately outside the
 Lean. That is the *expected* shape — the Lean proves *correctness of the group answer*, and leaves *"recover the
 structure"* and *"poly runtime"* as the meta/engineering layer.
+
+#### 9.2.7 The FAMILY-DISPATCH architecture (built 2026-07-04) — how the four families interconnect
+
+Node 4 = four families; each is an **`IFormFamilyHandler`** (the C# mirror of the Lean `FormAdapter` engine), and
+`RouteCCanonicalizer` dispatches over a registry. **Affine-polar is fully built; the other three are handlers with all
+interconnection LIVE and only their per-family math core stubbed** — so a future builder fills a well-defined stub, not
+a green field. Files: `FormFamilyHandler.cs` (interface + generic `FormFamilyHandlerBase<TInv>` + generalized
+`RouteCCanonicalResult` + shared helpers), `AffinePolarHandler.cs` (real), `AlternatingHandler.cs` / `HalfSpinHandler.cs`
+/ `SuzukiHandler.cs` (scaffolds). Tests: `RouteCFamilyDispatchProbe.cs` (regression through the dispatch + stubs decline
+gracefully; 114/114 with the core suite).
+
+**The four hooks each handler implements** (the base wires the flow: `RecognizeInvariant` → `Confirm` → emit
+`StandardGraph` + `AutOrder`):
+| Hook | What it does | Shared vs per-family |
+|---|---|---|
+| `RecognizeInvariant(adj,n)` | HARVEST-FREE iso-type from `(n, valency, SRG params)`; `null` ⟹ not this family (dormant) | per-family fingerprint |
+| `Confirm(adj,n,harvest,inv)` | SAFETY: rules out a parameter-mate SRG | **odd-q families SHARE `ConfirmByMultiQuadricReconstruction` (C1a) — already wired**; Suzuki = char-2 (per-family) |
+| `StandardGraph(inv)` | the canonical standard graph of the iso-type (emitted canonical form) | per-family construction |
+| `AutOrder(inv)` | closed-form `|Aut|` of the iso-type | per-family formula |
+
+**Safety invariant:** a dormant handler's `RecognizeInvariant` returns `null`, so its `NotImplementedException` cores are
+never reached — the graph falls back to the descent. Activating `RecognizeInvariant` forces completing `StandardGraph` +
+`AutOrder` (their throws fire otherwise) — a crisp completion contract.
+
+**Per-family completion specs (the well-defined remaining work):**
+- **Alternating** (`AlternatingHandler`, Lean `reachesRigidOrCameron_alternating`, Plücker sub-Pfaffians, odd q,
+  multi-quadric): `Confirm` DONE (multi-quadric). TODO = (1) SRG fingerprint + params→iso-type; (2) `StandardGraph` =
+  canonical alternating forms graph (joint zero of the standard Plücker quadrics); (3) `AutOrder` = alternating
+  similitude group order.
+- **Half-spin** (`HalfSpinHandler`, Lean `reachesRigidOrCameron_halfSpin`, 10 D₅ spinor quadrics `S0..S9`, odd q,
+  multi-quadric): same shape as alternating. `Confirm` DONE. TODO = fingerprint + `StandardGraph` (spinor quadrics) +
+  `AutOrder` (half-spin/spin group order). Probe `route_c_halfspin_probe.py` (dim 10).
+- **Suzuki–Tits** (`SuzukiHandler`, Lean `reachesRigidOrCameron_suzuki`, CITATION-FREE, char-2): recognition LIVE for
+  VSz(8)=SRG(4096,455,6,56). TODO = (1) generalize the fingerprint to `Sz(q)`, `q=2^{2e+1}`; (2) `Confirm` = char-2 form
+  recovery (Arf / σ-twisted ovoid forms via the `GF(q)^4↔𝔽₂^d` bridge + second-derivative recovery — does NOT reuse the
+  odd-q `RecoverFormFamily`); (3) `StandardGraph` = canonical `Sz(q)` ovoid graph; (4) `AutOrder` = `q^4·|Sz(q)|·factors`,
+  `|Sz(q)| = q²(q²+1)(q−1)`. Probes `route_c_suzuki_probe.py` / `_determine_probe.py`.
+
+**Note — C1b (`ClassicalGroupGenerators`) is odd-q single-quadratic only; the multi-form / char-2 group generators are
+NOT needed for the runtime** (|Aut| comes from the closed-form `AutOrder`), only for an optional order-check verification
+test — so they are off the completion critical path for each family.
 
 ### 9.3 Later — the meta-poly rigor stage
 

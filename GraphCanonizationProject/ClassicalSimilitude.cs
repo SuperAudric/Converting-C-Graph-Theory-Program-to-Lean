@@ -67,7 +67,6 @@ namespace Canonizer
             for (int i = 0; i < dim; i++) (cls[i] == 0 ? A : Bc).Add(i);
             (int a2, int b2) = TwoSquares(nu, p);         // a²+b²=nu
 
-            int ai = 0, bi = 0;
             // if both class-lists are odd, consume one mixed pair <1,nu> first
             if ((A.Count % 2 == 1) && (Bc.Count % 2 == 1))
             {

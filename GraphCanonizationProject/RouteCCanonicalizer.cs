@@ -2,32 +2,31 @@ using System.Numerics;
 
 namespace Canonizer
 {
-    // Route C — C3 (handler logic): canonicalize a forms-graph residue via the RECOVERED ALGEBRAIC
-    // INVARIANT, not via WL/harvest. See docs/chain-descent-route-c-plan.md §9.2.2 (C3), §9.2.3.
+    // Route C — C3 (the family-dispatch entry): canonicalize a forms-graph residue via the RECOVERED
+    // ALGEBRAIC INVARIANT, not via WL/harvest. See docs/chain-descent-route-c-plan.md §9.2.2 / §9.2.7.
     //
-    // Mechanism: recover the affine structure (F1) + the form, classify the family (C2); the form's
-    // ISOMORPHISM TYPE (q, m, eps for affine-polar) is a complete iso-invariant, so the canonical
-    // graph is the STANDARD VO^eps_{2m}(q) and |Aut| is its closed form. This is the runtime image of
-    // the Lean seal: correctness by reconstruction (the recovered structure reconstructs the graph)
-    // + the group-pinning |Aut| = |affineG(similitudeGroup Q)|.
+    // Mechanism: each node-4 family {affine-polar, alternating, half-spin, Suzuki} has an
+    // IFormFamilyHandler that recognizes its iso-type (a COMPLETE invariant), confirms it (rules out a
+    // parameter-mate), and emits the STANDARD canonical graph + closed-form |Aut|. This dispatch tries
+    // the handlers in order; the first that recognizes wins. Only affine-polar is fully built; the other
+    // handlers are dormant scaffolds (they return null ⟹ fall back to the descent — SAFE).
     //
-    // Integration (option ii): a residue-seam handler at ChainDescent target == -1 calls Recognize;
-    // if it returns non-null the harness adopts (CanonicalAdjacency, AutOrder); else it declines and
-    // the harness keeps its existing behaviour (flag). Recognize is SOUND: a non-forms graph, or a
-    // recovered form that fails to reconstruct, returns null.
-    internal sealed class RouteCCanonicalResult
-    {
-        public required FormsGraphClassification Classification { get; init; }
-        public required BigInteger AutOrder { get; init; }
-        public required int[] CanonicalAdjacency { get; init; }   // the standard graph of this iso-type
-    }
-
+    // Integration (option ii): the orderer wire (CanonGraphOrdererChainDescent) calls RecognizeFromResult
+    // with its already-harvested CanonResult (no extra descent).
     internal static class RouteCCanonicalizer
     {
-        // Recognize + canonicalize `adj` as a forms graph. Runs its own automorphism harvest (F1's
-        // O_p(Aut) shortcut) to coordinatize; returns null if the graph flags, is not a recognized
-        // forms family, or the recovered structure fails to reconstruct. Small-d path (harness harvest
-        // feasible); C4 will replace the harvest with Aut-free geometric coordinatization for large d.
+        // The family-handler registry (dispatch order). affine-polar first (the built family); the
+        // others are scaffolds — see each handler's STATUS.
+        static readonly IFormFamilyHandler[] Handlers =
+        {
+            new AffinePolarHandler(),
+            new AlternatingHandler(),
+            new HalfSpinHandler(),
+            new SuzukiHandler(),
+        };
+
+        // Recognize + canonicalize `adj` as a forms graph, running its own descent harvest. Returns
+        // null if the graph flags or no family recognizes it.
         public static RouteCCanonicalResult? Recognize(int[] adj, int n)
         {
             var cd = new ChainDescent(n, adj, new CascadeOracle(), ChainDescent.DefaultBudget(n))
@@ -36,30 +35,17 @@ namespace Canonizer
             return RecognizeFromResult(adj, n, res);
         }
 
-        // The no-double-descent entry (option-ii harness wire): recognize using an ALREADY-harvested
-        // CanonResult (the orderer's single descent), so wiring Route C into RunConnected costs no
-        // extra descent. Returns null on flag / non-forms / non-affine-polar.
+        // The no-double-descent entry (option-ii harness wire): dispatch over the family handlers using
+        // an ALREADY-harvested CanonResult. First recognizer wins; null if none.
         public static RouteCCanonicalResult? RecognizeFromResult(int[] adj, int n, CanonResult res)
         {
             if (res.Flagged) return null;
-            if (!TryPrimeBase(n, out int p, out _)) return null;    // affine-polar needs n = p^d for F1
-
-            // (1) the canonical INVARIANT (q, m, eps) is recovered HARVEST-FREE (n + valency +
-            // strong-regularity); it fixes the canonical graph + closed-form |Aut| with no coordinates.
-            if (!GeometricCoordinatizer.RecoverAffinePolarInvariant(adj, n, out int q, out int m, out int eps))
-                return null;
-
-            // (2) SAFETY CONFIRMATION: recover the form and check it reconstructs the graph — this rules
-            // out a parameter-mate SRG (misclassification-safe). Uses F1's harvest to coordinatize; C4's
-            // full geometric coordinatization would make even this confirmation harvest-free (d-scaling).
-            var aff = AffineStructureRecovery.Recover(res.ResidualGroup, p, origin: 0);
-            if (aff is null) return null;
-            var cls = FormsGraphClassifier.Detect(adj, n, aff);
-            if (cls.Family != FormFamily.AffinePolar || cls.P != q || cls.M != m || cls.Eps != eps) return null;
-
-            var canonAdj = StandardVO(q, m, eps);
-            var autOrder = AffinePolarAutOrder(q, m, eps);
-            return new RouteCCanonicalResult { Classification = cls, AutOrder = autOrder, CanonicalAdjacency = canonAdj };
+            foreach (var h in Handlers)
+            {
+                var r = h.TryCanonicalize(adj, n, res);
+                if (r is not null) return r;
+            }
+            return null;
         }
 
         // |affineG^eps_{2m}(q)| = q^{2m} · [ 2 q^{m(m-1)} (q^m - eps) ∏_{i=1}^{m-1}(q^{2i}-1) ] · (q-1)
@@ -120,18 +106,6 @@ namespace Canonizer
                         }
                     if (aniso) { bb = b; cc = c; return; }
                 }
-        }
-
-        static bool TryPrimeBase(int n, out int p, out int d)
-        {
-            p = 0; d = 0;
-            if (n < 2) return false;
-            int cand = 2;
-            while (n % cand != 0) cand++;
-            int m = n, e = 0;
-            while (m % cand == 0) { m /= cand; e++; }
-            if (m != 1) return false;
-            p = cand; d = e; return true;
         }
 
         static int IPow(int b, int e) { int r = 1; for (int i = 0; i < e; i++) r *= b; return r; }
