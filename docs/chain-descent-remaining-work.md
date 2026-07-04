@@ -118,6 +118,13 @@ Policy (user): **eventually all citations except maybe Babai (G3/CFSG) are to be
 carried as a labeled hypothesis (never a fresh `axiom`), so the build stays axiom-clean; "replacing" it means proving
 it in-project and discharging the hypothesis.
 
+> **▶ The discharge routes + methodology now live in their own tracker:
+> [`chain-descent-citation-discharge.md`](./chain-descent-citation-discharge.md)** (NEW 2026-07-04). It carries the
+> full citation register (incl. the Route-C citations, below in §3a), the **found discharge routes** (`SuzukiFormsDetermine`
+> ✅ DONE via 2nd-derivative recovery; `NondegQuadricDeterminesForm` + `JointVarietyDeterminesFamily` route found via
+> vanishing-space transport for `q=p`; the FTPG residue), and the M1–M5 playbook for attempting a discharge. This table
+> is the *what-is-carried* census; that doc is the *how-to-remove-it*.
+
 | Citation | Where carried | Faithful source | Replace? | Notes |
 |---|---|---|---|---|
 | **G3 — primitive-CC / Cameron classification** | `hClassify` (all capstones) | Babai ITCS 2014 (rank 3) + J.Algebra 2015 (II); Kivva JCTB 164 (2024) (rank 4); Sun–Wilmes (`exp(n^{1/3})` threshold) | **Maybe not** (CFSG-based — the one allowed to stay cited) | The "or Cameron" escape. |
