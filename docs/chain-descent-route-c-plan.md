@@ -18,8 +18,12 @@
 
 ## STATUS (read first)
 
-**Where Route C stands (2026-07-03) — handoff snapshot.** The Route-C **Lean spine is assembled and fully axiom-clean**
-(`ScratchRouteC.lean`, 34 decls, all `[propext, Classical.choice, Quot.sound]`, NOT in `build.sh`). Landed:
+**Where Route C stands (2026-07-04) — handoff snapshot.** **★ ALL FOUR FORM FAMILIES ARE NOW SEALED** (affine-polar,
+alternating `Alt(5,q)`, half-spin, Suzuki–Tits), each modulo one exact **scoped citation** (below). The Route-C
+**Lean spine is fully assembled and axiom-clean** (`ScratchRouteC.lean`, 94 decls, all
+`[propext, Classical.choice, Quot.sound]`, NOT in `build.sh` — verify: `lake env lean ChainDescent/ScratchRouteC.lean`,
+exit 0). The remaining work is **not another family** — it is the **§9 post-four-seals combine** (four seals → one
+correctness object) + the **C# runtime** + optionally promoting the scoped citations to full Lean proofs. Landed:
 - **The single-form spine (affine-polar):** F1+A1 (C#, confirmed vs the real harness) → A3 brick 1 (isometry scheme
   refines the graph) → discretize at a spanning base (`viaOrthogonalForm_spanning`) → **F4** iso-invariance
   (`recoveredForm_colouring_equivariant`). Rests on ONE exact scoped citation, `NondegQuadricDeterminesForm` (below).
@@ -56,7 +60,7 @@
 1. ✅ **Half-spin instance — DONE 2026-07-03** (`reachesRigidOrCameron_halfSpin`, axiom-clean). The 10 validated D₅
    spinor quadrics `S0..S9` are transcribed (`ScratchRouteC.lean §HalfSpin`), `spinor_hjoint` proved from `S0..S4`
    by coordinate isolation, sealed via `multiFormAdapter` + the shared engine; brick-1 `halfSpin_refines_coneScheme`
-   landed; F4 generic. Full instance-1 parity. **⟹ 3 of 4 form families sealed; only Suzuki remains.**
+   landed; F4 generic. Full instance-1 parity. (This was the 3rd of 4 seals; Suzuki, item 2, followed.)
 2. ✅ **Suzuki–Tits instance — DONE 2026-07-04** (`reachesRigidOrCameron_suzuki`, axiom-clean, modulo the scoped
    citation `SuzukiFormsDetermine`). De-risked (5 σ-twisted forms, joint zero=cone exact, O(d) poly base), forms +
    `separates` rederived, and the `GF(q)^4↔𝔽₂^d` module bridge + `suzukiAdapter` landed. **⟹ ALL FOUR FAMILIES
@@ -65,8 +69,11 @@
    adapters combine into ONE clean seal via a single cited classification premise + one iso-invariance lemma (L1,
    the load-bearing new piece — spot-check it first); the C# canonizer still lacks *all* family handlers (C1–C4).
    §9.0 explains why "4 seals + finite exceptions" collapses to "1 citation + 1 lemma" (Route C is threshold-free).
-4. **The two carried citations** (optional, to remove them from the spine): a full Lean proof of
-   `NondegQuadricDeterminesForm` and `ConePreservingCollineationIsSemiSimilitude` (finite-geometry developments).
+4. **The four carried scoped citations** (optional, to remove them from the spine): full Lean proofs of
+   `NondegQuadricDeterminesForm` (single-quadric uniqueness), `JointVarietyDeterminesFamily` (multi-quadric — alt /
+   half-spin), `ConePreservingCollineationIsSemiSimilitude` (F2 semilinear seam), `SuzukiFormsDetermine` (the σ-twisted
+   Suzuki determiner). All are exact, correctly-scoped classical statements (finite-geometry / classical-group
+   developments) — carried like `Theorem41Statement`/`G3`, discharged externally.
 5. **The meta-poly rigor side (last):** residuals R1–R3 (§7a) — build the Aut-free geometric
    coordinatizer (also delivers F2's field recovery), name Buekenhout–Shult (R2), double-check `d=4` (R3).
 
@@ -122,21 +129,29 @@
   `recoveredForm_colouring_equivariant_semilinear` — the recovered form is iso-invariant up to scalar **and** a field
   automorphism σ (a graph iso over 𝔽_q is 𝔽_p-semilinear, `g = M∘σ̂`). `q=p` is the `σ=id` case. Remaining F2 = the C#
   field-recovery side, which folds into R1 (geometric coordinatization recovers PG over 𝔽_q, field included).
-- **◑ F3 (`IFormStructure` engine interface) — Lean interface LANDED + 2 instances SEALED (2026-07-03, axiom-clean):**
-  `FormAdapter` + `FormAdapter.reachesRigidOrCameron` (any adapter ⟹ seal); **instance 1 affine-polar**
-  (`affinePolarAdapter`) + **instance 2 alternating `Alt(5,q)`** (`reachesRigidOrCameron_alternating`, via
-  `multiFormAdapter` + the Plücker forms) both sealed; **instance 3 half-spin** scoped + `halfSpin_reduction` landed.
-  Each family reduces to one `FormAdapter` (supply `G₀` + `separates`); the multi-quadric families (alternating,
-  half-spin) reduce further to just `Qs` + `hjoint` via `multiFormAdapter`.
-- **Remaining instances:** **half-spin** (the 10 D₅ spinor quadrics + `hjoint` — §6 "Half-spin"; engine + reduction
-  already landed) and **Suzuki** (char-2 outlier, last) + the C# side of the engine.
+- **✅ F3 (`IFormStructure` engine interface) — LANDED + ALL 4 INSTANCES SEALED (axiom-clean):**
+  `FormAdapter` + `FormAdapter.reachesRigidOrCameron` (any adapter ⟹ seal; char-2-ready, verified at `p=2`);
+  **inst 1** affine-polar `affinePolarAdapter`; **inst 2** alternating `Alt(5,q)` `reachesRigidOrCameron_alternating`
+  (`multiFormAdapter` + Plücker forms); **inst 3** half-spin `reachesRigidOrCameron_halfSpin` (`multiFormAdapter` + 10
+  spinor quadrics); **inst 4** Suzuki `reachesRigidOrCameron_suzuki` (σ-twisted multi-form + `GF(q)^4↔𝔽₂^d` module
+  bridge, `suzukiAdapter`). Each family = one `FormAdapter`; the multi-quadric families reduce to `Qs`+`hjoint` via
+  `multiFormAdapter`; Suzuki reduces to the 5 σ-forms + the bridge + `suzuki_separates`.
+- **Remaining (post-four-seals):** the **§9 combine** (four seals → one correctness object; the L1 iso-invariance
+  lemma is the load-bearing new piece), the **C# runtime** family handlers (C1–C4), and optionally promoting the
+  scoped citations (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`, `ConePreservingCollineationIsSemiSimilitude`,
+  `SuzukiFormsDetermine`) to full Lean proofs. **No further family builds remain.**
 
 **▶ VERIFY what's landed (fresh-reader commands):**
-- Lean: `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRouteC.lean` (exit 0, clean). Axiom-check by
-  appending `#print axioms ChainDescent.RouteC.<name>` and re-running (expect `[propext, Classical.choice, Quot.sound]`).
+- Lean: `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRouteC.lean` (exit 0; the only warnings are two
+  `simpa`-style lints, one pre-existing). Axiom-check by appending `#print axioms ChainDescent.RouteC.<name>` and
+  re-running (expect `[propext, Classical.choice, Quot.sound]`). The four seal capstones:
+  `affinePolarAdapter`, `Plucker.reachesRigidOrCameron_alternating`, `HalfSpin.reachesRigidOrCameron_halfSpin`,
+  `Suzuki.reachesRigidOrCameron_suzuki`.
 - C#: `cd GraphCanonizationProject.Tests && dotnet test --filter "FullyQualifiedName~RouteCF1Probe.F1_Recovers_TranslationGroup&Category!=LongRunning"`
   (fast, q=2,3; the `_Large` q=5 cases are `LongRunning`, ~5 min each — canonizer cost, not F1/A1).
-- Python probes: `cd GraphCanonizationProofs && python3 route_c_reconstruct_probe.py` / `route_c_f1_probe.py`.
+- Python probes: `cd GraphCanonizationProofs && python3 route_c_reconstruct_probe.py` / `route_c_f1_probe.py` /
+  `route_c_halfspin_probe.py` (spinor quadrics: dim 10, 𝔽₂ count 2296) / `route_c_suzuki_probe.py` (Suzuki: SRG params,
+  5 σ-forms, joint zero=cone, base analysis) / `route_c_bootstrap_probe.py`.
 
 **Quality bar (project-wide):** every Lean theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; no `sorry`,
 no fresh `axiom`; `native_decide` banned; full build green when ported. "Poly time" stays a **meta-argument** (the
@@ -523,9 +538,12 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
 5. ◑ **F2** (`q=pᵉ` semilinear seam) — **Lean core LANDED** (`…_semilinear`, axiom-clean): the recovered form is
    iso-invariant up to scalar **and** Frobenius σ. Remaining: the C# field-recovery side (folds into R1's geometric
    coordinatizer — Buekenhout–Shult recovers PG over 𝔽_q, field included).
-6. ◑ **Instances 2→3→4** — F3 interface LANDED; **instance 1 (affine-polar) + instance 2 (alternating `Alt(5,q)`)
-   both SEALED axiom-clean; instance 3 (half-spin) SCOPED + reduction landed (`halfSpin_reduction`)** — a multi-quadric
-   family, reuses the engine; remaining = the 10 D₅ spinor quadrics + `hjoint`. Then Suzuki (f, char-2 last).
+6. ✅ **Instances 1→2→3→4 — ALL SEALED axiom-clean (2026-07-03/04).** inst 1 affine-polar (`affinePolarAdapter`),
+   inst 2 alternating `Alt(5,q)` (`reachesRigidOrCameron_alternating`), inst 3 half-spin (`reachesRigidOrCameron_halfSpin`),
+   inst 4 Suzuki (`reachesRigidOrCameron_suzuki`). Plus the generic multi-quadric bridges (brick-1 + F4) → alternating
+   and half-spin at full instance-1 parity. **No further family builds remain.**
+7. **▶ NEXT — the §9 post-four-seals combine** (four seals → one correctness object; start with the L1 iso-invariance
+   de-risk, §9.1) + the C# runtime handlers (C1–C4, §9.2) + optional citation-discharge.
 
 **Definition of done (Route C, affine-polar):** F1 recovers coordinates iso-invariantly (F4 ✅ equivariance core); A1
 recovers `Q` (C# ✅; Lean uniqueness = the carried `NondegQuadricDeterminesForm`); A3 refines to the isometry scheme (brick 1
@@ -649,10 +667,13 @@ disguise (global ≠ bounded-WL).
 
 ## 9. After the four seals — the combined correctness object + the C# runtime (FORWARD PLAN, build later)
 
-**Status when this section applies:** the four per-family adapters are sealed (affine-polar ✅, alternating ✅,
-half-spin ✅; Suzuki = the last). Each gives `reachesRigidOrCameron (affineScheme A.G₀)` for a *concrete* group
-`A.G₀` built from recovered forms. This section records how those four combine into ONE correctness object, and
-how the C# canonizer gets the family handlers it currently lacks. **Neither is built yet; this is the roadmap.**
+**Status: THIS SECTION IS NOW LIVE (2026-07-04).** All four per-family adapters are sealed (affine-polar ✅,
+alternating ✅, half-spin ✅, Suzuki ✅ — each modulo its scoped citation). Each gives
+`reachesRigidOrCameron (affineScheme A.G₀)` for a *concrete* group `A.G₀` built from recovered forms. This section
+is the **immediate next work**: how those four combine into ONE correctness object (§9.1), and how the C# canonizer
+gets the family handlers it currently lacks (§9.2). **The recommended entry point for the next session** — start
+with the L1 de-risk (§9.1: spot-check whether the four seal disjuncts are already iso-invariant), which is cheap and
+validates the whole combine plan.
 
 ### 9.0 The key structural fact that keeps it clean (read first)
 

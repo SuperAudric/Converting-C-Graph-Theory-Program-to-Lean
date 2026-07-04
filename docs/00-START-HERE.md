@@ -151,18 +151,20 @@ close it — is set out in
 > files into 14 named modules** (`AffinePolarSeal`, `ObservableCountBridge{,K}`, `PencilTBound`, `PairForm`, `FieldGeneric`,
 > `BadAnchorCount`, `Coordinatization`, …; rename map in plan §1), full build green ~109s, axiom-clean; `PublicTheoremIndex`
 > re-homed with all 223 decls described. The plan doc was condensed 2225→~1000 lines (build history → the archive).
-> **██████ ★★★★★ LIVE FRONTIER (2026-07-03) — POLYNOMIAL via ROUTE C (form-recovery). AUTHORITATIVE DOC:
+> **██████ ★★★★★ LIVE FRONTIER (2026-07-04) — POLYNOMIAL via ROUTE C (form-recovery). AUTHORITATIVE DOC:
 > [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md) — read its STATUS + "▶ PICK UP HERE" to continue. ██████**
 > Route C recovers the form `Q` from the abstract graph and canonicalizes via its known automorphism group, **sidestepping
 > the node-4 WL wall** that closed the direct WL/`bᵢ=1` build (recovery doc §9.8.9 — the banners just below, incl. the
-> 2026-06-30 `T0` framing, are that stalled WL route). **State (2026-07-03): the Lean spine is assembled + fully
-> axiom-clean** (`ChainDescent/ScratchRouteC.lean`, 34 decls, NOT in build.sh). F1+A1 (C#, confirmed vs the real harness)
-> → A3 refinement → spanning-base discretization → **F4 iso-invariance** all landed; **F2** (`q=pᵉ` semilinear seam) +
-> **F3** the `IFormStructure` engine interface (`FormAdapter`) landed; **instance 1 (affine-polar) + instance 2
-> (alternating `Alt(5,q)`, the first non-quadratic family) both SEALED**; **instance 3 (half-spin) scoped + reduction
-> landed**. The two review-flagged items are resolved (classical carry discharged as an exact scoped citation; meta-poly
-> bootstrapping assessed sound, plan §7a). **Next: the half-spin spinor quadrics, then Suzuki (char-2, last)** — plan
-> STATUS "▶ PICK UP HERE". [[project_recovery_corecovery_duality_2026-07-03]].
+> 2026-06-30 `T0` framing, are that stalled WL route). **★ STATE (2026-07-04): ALL FOUR FORM FAMILIES ARE SEALED**
+> (affine-polar, alternating `Alt(5,q)`, half-spin, Suzuki–Tits), each modulo one exact **scoped citation**; the Lean
+> spine is fully assembled + axiom-clean (`ChainDescent/ScratchRouteC.lean`, 94 decls, NOT in build.sh; `lake env lean
+> ChainDescent/ScratchRouteC.lean` = exit 0). F1+A1 (C#, confirmed vs the real harness) → A3 refinement → spanning-base
+> discretization → **F4 iso-invariance**; **F2** (`q=pᵉ` semilinear); **F3** the `FormAdapter` engine + the generic
+> **multi-quadric bridges**; the 4 seal capstones = `affinePolarAdapter`, `Plucker.reachesRigidOrCameron_alternating`,
+> `HalfSpin.reachesRigidOrCameron_halfSpin`, `Suzuki.reachesRigidOrCameron_suzuki`. Review-flagged items resolved
+> (classical carries = exact scoped citations; meta-poly bootstrapping sound, plan §7a). **Next: NOT another family —
+> the §9 post-four-seals combine (four seals → one correctness object; start with the L1 iso-invariance de-risk) + the
+> C# runtime handlers.** Plan STATUS + §9. [[project_recovery_corecovery_duality_2026-07-03]].
 > **★★★★ LIVE FRONTIER (2026-06-30 v2) — the polynomial route is [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md),
 > RETARGETED to `T0` (bounded branching). READ THAT DOC FIRST.** The forms-graph residue is SEALED at **quasipoly**
 > (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in build; sub-exp floor `reachesRigidOrCameron_viaSpielman`). For

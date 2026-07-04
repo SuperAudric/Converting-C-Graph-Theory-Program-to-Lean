@@ -23,6 +23,17 @@ So "what's left" is short: **one research core** (conditional on the cited class
 **citation-formalization** and **one buildable infrastructure piece** (`EdgeGeneratesFromSet`), and the **forward IR
 solver** (gated on the same core). There is **no long cleanup list**.
 
+> **▶▶▶ UPDATE (2026-07-04) — ALL FOUR forms-graph families are now SEALED via ROUTE C (form-recovery), a DIFFERENT
+> route than the WL-dimension framing in this tracker.** Route C recovers the defining form/structure from the abstract
+> graph and canonicalizes via its known automorphism group, sidestepping the bounded-WL-dimension question (`ZProfileSeparates`
+> / `D3d`) that the rest of this doc is organized around. **The forms-graph residue `(c)–(f)` = {affine-polar, alternating
+> `Alt(5,q)`, half-spin, Suzuki–Tits} is CLOSED modulo scoped citations** (`ScratchRouteC.lean`, 94 decls, axiom-clean, NOT
+> in build.sh; seals `affinePolarAdapter` / `Plucker.reachesRigidOrCameron_alternating` / `HalfSpin.reachesRigidOrCameron_halfSpin`
+> / `Suzuki.reachesRigidOrCameron_suzuki`). **AUTHORITATIVE = [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md)**
+> (read its STATUS). The WL-dimension material below is the *alternative* route (STALLED at the node-4 wall, recovery doc
+> §9.8.9); Route C is the live poly path. Remaining for the whole seal = the §9 combine (four Route-C seals → one object)
+> + the cited classification seam + the C# runtime — **not** the `D3d`/`ZProfileSeparates` line.
+>
 > **▶ UPDATE (2026-06-24) — the first forms-graph instance is SEALED.** `VO⁻₄(3)` (`ScratchBM3Glue.vo4minus_seal`,
 > axiom-clean `[propext, Classical.choice, Quot.sound]`) closes the affine-polar residue at the minus form modulo `{G3}`
 > — the first member of the forms-graph open residue below, now **proved** (not just empirically probed). The remaining
