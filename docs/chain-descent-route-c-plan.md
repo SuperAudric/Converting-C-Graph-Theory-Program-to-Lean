@@ -705,6 +705,79 @@ the combined object carries **no finite exception pile** — the only systematic
 Suzuki / Arf branch, one branch, not scattered exceptions). This is why "4 seals + finitely many exceptions"
 collapses to "1 classification citation + 1 iso-invariance lemma".
 
+### 9.0a ★ CORRECTION (2026-07-04) — the combine target is the FINER→COARSER transfer, not disjunct-transport
+
+**A scheme-level mismatch invalidates the naïve §9.1 dispatch below; read this first.** The four adapters seal the
+**fine** scheme `affineScheme(isometryGroup Q)` / `affineScheme(⨅ₖ O(Q_k))` / `suzukiG₀` — the *exact*-value
+scheme. The canonizer's residue `X` is the **coarse** given graph `affineScheme(similitudeGroup Q)` /
+`affineScheme(jointConeStab)` — the *isotropy-only* rank-3 SRG. These are **different schemes (different rank)**, so:
+- there is **no realizing permutation** `X ≅ affineScheme(G₀)` (§9.1's "transport along hiso" has a type error — the
+  ScratchSeam-style transport applies only between a residue and *the same* scheme it is iso to);
+- `SchemeRecoveredByDepth(fine) → SchemeRecoveredByDepth(coarse)` is **FALSE at bounded/poly base** — the coarse
+  scheme's own 1-WL does not discretize there (the node-4 stall Route C sidesteps). Both `SchemeRecovered`/
+  `SchemeRecoveredByDepth` are hardwired to `warmRefine (schemeAdj X)`, so they are the **wrong target** for `X`.
+
+**User decision (2026-07-04): pursue the finer→coarser recovered-form TRANSFER** — the only route that yields
+*polynomial* (not another quasipoly) closure of node 4, which is the seal's purpose (Spielman already banks quasipoly;
+another quasipoly build adds nothing). **Mechanism:** the recovered `Q` is a *global*, iso-invariant (F4) poly
+function of the graph — refining the coarse graph by the recovered-`Q` colouring is **free** (no branching; canonical
+up to one global scalar `μ`). A *similitude* (`μ≠1`) permutes the value-classes rather than fixing them, so
+`Aut(fine)=AO(Q)` is strictly smaller than `Aut(coarse)=AΓO(Q)` — refining by exact values *loses* the scalings; the
+descent recovers them via a **single reference-pin orbit-branch** (individualize one anisotropic pair to pin `μ`; the
+choices form one Aut(coarse)-orbit ⟹ a true symmetry ⟹ free, and its covering automorphisms ARE the scalings).
+
+**★ VACUITY CORRECTION (2026-07-04) — there is NO non-vacuous "coarse reaches rigid" predicate to prove.** A first
+build attempt targeted `GroupReproduced Sc := ∃ gens, closure gens = SchemeAutGroup Sc`. **That is VACUOUS**
+(`⟨↑(SchemeAutGroup Sc), Subgroup.closure_eq _⟩` proves it for every scheme — exactly the retired `SchemeReproduced`
+the project excised, `Cascade.lean` "do not regress (2026-06-07)"). The genuine, non-vacuous "reaches rigid" is
+`SchemeRecoveredByDepth` — keyed on the **visible-realizer harvest over `warmRefine (schemeAdj Sc)`**, non-vacuous
+precisely because its same-cell clause fails when cells ⊋ orbits. **Decisive consequence:** `SchemeRecoveredByDepth Sc`
+is about the *coarse* `warmRefine`, whose cells ⊋ orbits at bounded/poly base — that IS the node-4 stall. So the
+*non-vacuous* "coarse reaches rigid" is **false** here, and the only *true* form is the *vacuous* tautology.
+**Route C cannot produce a non-vacuous coarse `SchemeRecoveredByDepth`; there is no finer→coarser transfer at that
+level.** Instead Route C **changes the canonization object**: it augments the descent with the poly, iso-invariant
+recovered form `Q` (F4) — i.e. runs on the **fine** scheme, whose `SchemeRecoveredByDepth` *is* non-vacuously true
+(the adapter) — and the coarse graph is canonized because that colouring is an iso-invariant poly refinement of it
+(brick-1 + F4), adding no branching. "Poly" stays the project's meta-claim over that augmented descent.
+
+**✅ WHAT T1 ACTUALLY PROVES (2026-07-04, all axiom-clean + genuinely non-vacuous,
+[`ScratchRecoveredFormTransfer.lean`](../GraphCanonizationProofs/ChainDescent/ScratchRecoveredFormTransfer.lean)):**
+- `affineG_le_schemeAutGroup` — `affineG G₀ ≤ SchemeAutGroup(affineScheme G₀)` (the affine group acts as scheme auts
+  of its own orbital scheme; via `orbMk_smul` + `isSchemeAut_of_relOfPair_eq`). The `≥` half of every 2-closure here.
+- `schemeAutGroup_affineScheme_mono` (`hmono`) — `H ≤ G ⟹ SchemeAutGroup(affineScheme H) ≤ SchemeAutGroup(affineScheme G)`
+  (finer affine scheme ⟹ smaller Aut group), via `affineScheme_refines_of_le` + the `relOfPair`-characterisation of
+  `IsSchemeAut`. Instantiated `isometrySimilitude_schemeAutGroup_mono` (the honest "recovered form only *refines*").
+- `schemeAutGroup_coarse_eq_affineG` — **modulo the Skresanov 2-closure citation `hSkresanov`** (`SchemeAutGroup(coarse)
+  ≤ affineG(similitude)` = no unexpected automorphisms = Skresanov rank-3 2-closure, already in the seal's stack), the
+  coarse scheme's Aut group is *exactly* `affineG(similitudeGroup Q) = translations ⋊ AΓO(Q)`. The non-vacuous
+  group-pinning the |Aut| side + the meta poly argument consume (and where the reference-pin scalings `AΓO ⊋ AO` live).
+
+**Honest scope of the poly closure.** "The coarse forms graph is poly-canonized" is the **meta-composition** of: the
+**fine** adapter (`SchemeRecoveredByDepth fine`, genuine harvest content) + the F4/brick-1/`hmono` canonicity bridge +
+`schemeAutGroup_coarse_eq_affineG` (mod Skresanov). It is **not** a further non-vacuous Lean predicate — any predicate
+on the coarse `warmRefine` is vacuous or false. This is consistent with the project's stance that "poly" is a
+meta-claim over a structural object, never a Lean runtime proof.
+
+**✅ T1-cite + certificate LANDED (2026-07-04, axiom-clean).** The Skresanov 2-closure is now a **single named
+generic citation** `AffineSchemeTwoClosed hneg := SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (carried like
+`Theorem41Statement`/G3), and `schemeAutGroup_affineScheme_eq_affineG` pins `SchemeAutGroup(affineScheme G₀) = affineG
+G₀` for **any** `G₀` modulo it — **one lemma, all four families** (instantiate `G₀ := similitudeGroup Q` /
+`jointConeStab Qs` / Suzuki cone-stab; affine-polar instance = `schemeAutGroup_coarse_eq_affineG`). The honest
+deliverable is bundled in **`routeC_polySupport`**: given the citation + the fine adapter's `SchemeRecoveredByDepth
+fine`, it returns the triple `(i)` coarse Aut `= affineG(similitude)` `∧` `(ii)` fine harvest (genuine) `∧` `(iii)`
+fine `≤` coarse (only refines) — the full structural support for the meta poly-canonization (+ F4 for iso-invariance).
+
+**Remaining follow-ups:** (T3) the multi-form instantiation is **already covered** by the generic lemma (plug in
+`jointConeStab Qs`); a concrete instance can wait for the ScratchRouteC port; (T2) the C# |Aut| runtime uses
+`schemeAutGroup_coarse_eq_affineG` to hand `AΓO(Q)` to Schreier–Sims; (T4) the **cyclotomic** dispatch branch (routed
+to `…affineSlice` — §9.1 omits it, 5 cases not 4). The classification premise §9.1/L3 is unchanged and sound (Cameron
++ Liebeck 1987 + Skresanov 2020/22 + Ponomarenko). Register the new citation `AffineSchemeTwoClosed` (= Skresanov
+rank-3 2-closure) in `chain-descent-citation-discharge.md` alongside the other Route-C carries.
+
+> **▶ §9.1 below is SUPERSEDED for the multi-form families by §9.0a** (its "transport the adapter seal along hiso"
+> mis-types the fine/coarse schemes). It stays correct for affine-polar's *quasipoly* pair-route seal (ScratchSeam),
+> which is a different, already-banked object. The live combine is §9.0a's finer→coarser transfer.
+
 ### 9.1 The Lean correctness object — one dispatch theorem over one cited premise
 
 Target shape (the clean "reaches rigid or Cameron via Route C"):
