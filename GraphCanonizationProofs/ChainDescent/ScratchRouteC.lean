@@ -1003,4 +1003,112 @@ theorem halfSpin_refines_coneScheme {x y x' y' : Fin (p ^ 16)}
 
 end HalfSpin
 
+/-! ## Suzuki–Tits family (instance 4) — the σ-twisted ovoid forms (rederivation)
+
+The Suzuki–Tits graph `VSz(q)` (`q = 2^{2e+1}`) is the Cayley graph on `GF(q)^4` whose connection set is the
+cone over the **Tits ovoid** `O = {(1,a,b, ab + a^{σ+2} + b^σ)} ∪ {(0,0,0,1)}`, where `σ` is the **Tits
+endomorphism** (`σ∘σ = Frobenius = (·)²`). Unlike the other three families the ovoid is **not** cut by quadratic
+forms, and (de-risk `route_c_suzuki_probe.py`, q=8) **not** by any single σ-twisted form either — but its cone IS
+the **joint** zero locus of a **5-dim family of σ-twisted type-(1,2) forms** `σ(xₐ)·x_b·x_c` (validated: joint
+zero = cone EXACTLY, |·|=456; and the joint value-profile separates at base `4 ≤ d+1` ⟹ poly, the
+`coords_determine_multi` mechanism). So Suzuki is the **σ-twisted sibling of alternating/half-spin**.
+
+This section **rederives the 5 forms in Lean** (canonical, representation-independent: all-unit coefficients) over
+an abstract char-2 commutative ring `K` with a Tits endomorphism `σ`, and proves the core fact that they cut the
+cone: each `SF_k` (i) **vanishes on the affine ovoid** `(1, a, b, ovoidC a b)` [via `σ` a ring hom + `σ∘σ=(·)²`],
+(ii) **vanishes at infinity** `(0,0,0,1)`, and (iii) is **σ-twisted homogeneous** (`SF_k(λx) = σλ·λ²·SF_k(x)`), so
+by (i)+(ii)+(iii) it vanishes on the whole cone. All axiom-clean. `SF0` = the single derived form
+`x₃x₀^{σ+1}+x₁x₂x₀^σ+x₁^{σ+2}+x₂^σx₀²`; `SF1..SF4` trim its spurious zeros. The remaining Suzuki work (the σ-twisted
+`coords_determine_multi` = `separates`, and the `GF(q)^4 ↔ 𝔽₂^d` module bridge to the char-2-ready engine) is the
+next step; here the forms themselves are landed and proven to model the connection set. -/
+
+namespace Suzuki
+
+variable {K : Type*} [CommRing K] [CharP K 2] (σ : K →+* K)
+
+/-- The 4th ovoid coordinate: `c = a·b + a^{σ+2} + b^σ = a·b + σa·a² + σb` (affine chart `x₀=1`). -/
+def ovoidC (a b : K) : K := a * b + σ a * a ^ 2 + σ b
+
+/-- Suzuki σ-twisted form 0 (= the single derived `F`; `x₃x₀^{σ+1}+x₁x₂x₀^σ+x₁^{σ+2}+x₂^σx₀²`). -/
+def SF0 (x0 x1 x2 x3 : K) : K :=
+  σ x0 * x0 * x3 + σ x0 * x1 * x2 + σ x1 * x1 ^ 2 + σ x2 * x0 ^ 2
+/-- Suzuki σ-twisted form 1. -/
+def SF1 (x0 x1 x2 x3 : K) : K :=
+  σ x0 * x2 ^ 2 + σ x1 * x0 * x3 + σ x1 * x1 * x2 + σ x3 * x0 ^ 2
+/-- Suzuki σ-twisted form 2. -/
+def SF2 (x0 x1 x2 x3 : K) : K :=
+  σ x0 * x2 * x3 + σ x1 * x1 * x3 + σ x2 * x0 * x2 + σ x3 * x0 * x1
+/-- Suzuki σ-twisted form 3. -/
+def SF3 (x0 x1 x2 x3 : K) : K :=
+  σ x0 * x3 ^ 2 + σ x2 * x0 * x3 + σ x2 * x1 * x2 + σ x3 * x1 ^ 2
+/-- Suzuki σ-twisted form 4. -/
+def SF4 (x0 x1 x2 x3 : K) : K :=
+  σ x1 * x3 ^ 2 + σ x2 * x2 ^ 2 + σ x3 * x0 * x3 + σ x3 * x1 * x2
+
+/-- The 5 forms as a family (`ι = Fin 5`), for the eventual joint-value adapter. -/
+def suzukiForms (x0 x1 x2 x3 : K) : Fin 5 → K
+  | 0 => SF0 σ x0 x1 x2 x3 | 1 => SF1 σ x0 x1 x2 x3 | 2 => SF2 σ x0 x1 x2 x3
+  | 3 => SF3 σ x0 x1 x2 x3 | 4 => SF4 σ x0 x1 x2 x3
+
+/-- `(4 : K) = 0` in char 2 (`4 = 2·2`, `2 = 0`) — clears the `·4` coefficients `ring_nf` produces when four
+equal monomials collect. -/
+theorem four_eq_zero : (4 : K) = 0 := by
+  rw [show (4 : K) = 2 * 2 from by norm_num, CharTwo.two_eq_zero, zero_mul]
+
+/-- `SF0` vanishes on the affine ovoid (needs no `σ∘σ` — `SF0` is linear in `x₃`). -/
+theorem SF0_ovoid (a b : K) : SF0 σ 1 a b (ovoidC σ a b) = 0 := by
+  simp only [SF0, ovoidC, map_one, one_mul, mul_one]
+  ring_nf
+  simp only [CharTwo.two_eq_zero, mul_zero, add_zero]
+
+theorem SF1_ovoid (hσ : ∀ x : K, σ (σ x) = x ^ 2) (a b : K) :
+    SF1 σ 1 a b (ovoidC σ a b) = 0 := by
+  simp only [SF1, ovoidC, map_one, one_mul, mul_one, map_add, map_mul, map_pow, hσ]
+  ring_nf
+  simp only [CharTwo.two_eq_zero, mul_zero, add_zero]
+
+theorem SF2_ovoid (hσ : ∀ x : K, σ (σ x) = x ^ 2) (a b : K) :
+    SF2 σ 1 a b (ovoidC σ a b) = 0 := by
+  simp only [SF2, ovoidC, map_one, one_mul, mul_one, map_add, map_mul, map_pow, hσ]
+  ring_nf
+  simp only [CharTwo.two_eq_zero, mul_zero, add_zero]
+
+theorem SF3_ovoid (hσ : ∀ x : K, σ (σ x) = x ^ 2) (a b : K) :
+    SF3 σ 1 a b (ovoidC σ a b) = 0 := by
+  simp only [SF3, ovoidC, map_one, one_mul, mul_one, map_add, map_mul, map_pow, hσ]
+  ring_nf
+  simp only [CharTwo.two_eq_zero, four_eq_zero, mul_zero, add_zero]
+
+theorem SF4_ovoid (hσ : ∀ x : K, σ (σ x) = x ^ 2) (a b : K) :
+    SF4 σ 1 a b (ovoidC σ a b) = 0 := by
+  simp only [SF4, ovoidC, mul_one, map_add, map_mul, map_pow, hσ]
+  ring_nf
+  simp only [CharTwo.two_eq_zero, four_eq_zero, mul_zero, add_zero]
+
+/-- All 5 forms vanish on the affine ovoid (packaged over `Fin 5`). -/
+theorem suzukiForms_ovoid (hσ : ∀ x : K, σ (σ x) = x ^ 2) (a b : K) (k : Fin 5) :
+    suzukiForms σ 1 a b (ovoidC σ a b) k = 0 := by
+  fin_cases k
+  · exact SF0_ovoid σ a b
+  · exact SF1_ovoid σ hσ a b
+  · exact SF2_ovoid σ hσ a b
+  · exact SF3_ovoid σ hσ a b
+  · exact SF4_ovoid σ hσ a b
+
+omit [CharP K 2] in
+/-- All 5 forms vanish at the point at infinity `(0,0,0,1)`. -/
+theorem suzukiForms_infty (k : Fin 5) : suzukiForms σ 0 0 0 1 k = 0 := by
+  fin_cases k <;> simp [suzukiForms, SF0, SF1, SF2, SF3, SF4, map_zero]
+
+omit [CharP K 2] in
+/-- **σ-twisted homogeneity** — `SF_k(λ·x) = σλ·λ²·SF_k(x)`, so `{SF_k=0}` is a cone (and vanishing on the
+ovoid + at infinity ⟹ vanishing on the whole connection set). Pure ring identity via `σ` multiplicative. -/
+theorem suzukiForms_homog (l x0 x1 x2 x3 : K) (k : Fin 5) :
+    suzukiForms σ (l * x0) (l * x1) (l * x2) (l * x3) k
+      = σ l * l ^ 2 * suzukiForms σ x0 x1 x2 x3 k := by
+  fin_cases k <;>
+    simp only [suzukiForms, SF0, SF1, SF2, SF3, SF4, map_mul] <;> ring
+
+end Suzuki
+
 end ChainDescent.RouteC
