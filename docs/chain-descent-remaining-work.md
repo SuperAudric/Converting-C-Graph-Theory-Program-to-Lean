@@ -335,7 +335,7 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > (colouring props), `RefinedWittExtends` (Witt citation). Key math: even dim ⟹ Gauss sum scale-invariant ⟹ `isoConeSum`
 > nowhere-zero ⟹ clean separation. **NEXT = Piece 3** (leaf-count assembly `leaves_le_prod_concentrated`) + discharge the
 > residuals; odd `d` awaits an `isoConeSum_eval_even` extension. **Read the recovery doc STATUS HANDOFF block** for the
-> full pickup guide (residuals in priority order, critical-path modules, build commands). Full findings = recovery doc §9.7.
+> full pickup guide (residuals in priority order, critical-path modules, build notes). Full findings = recovery doc §9.7.
 >
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full

@@ -524,7 +524,7 @@ only for §1 (build/verify/doc-sync conventions) and §2 (Lean gotchas).
 
 ## 4. The code
 
-Two sides, both under the repo root. Build commands are in [`../README.md`](../README.md).
+Two sides, both under the repo root. Build notes are in [`../README.md`](../README.md).
 
 **C# — the experiment bed** (`GraphCanonizationProject/`). Strategies are tried
 here first. `ChainDescent.cs` + `CanonGraphOrdererChainDescent.cs` are the

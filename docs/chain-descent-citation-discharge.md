@@ -29,6 +29,12 @@ on the strictly-stronger `|Aut|`-naming statements (scalar-`μ` / injective-`Φ`
 residues are named honestly (the FTPG for the `q=pᵉ` field twist; the quadric Nullstellensatz *only* for exact
 `Aut`-naming; the seal's `Theorem41`/Spielman).
 
+**★ LIVE FRONTIER (2026-07-05): the full `NondegQuadricDeterminesForm` discharge is underway — see §3.5.** Heart +
+assembly + isotropic-existence bedrock + `isotropic_span` are landed axiom-clean (11 lemmas, `ScratchNullstellensatz{,Structural}.lean`,
+WIP not in build); the citation is reduced to EXACTLY two finite-geometry facts (`hspan`, `hlink`) at the Witt-index-1/`q=3`
+boundary. **§3.5 is the pick-up point** (has the lemma map, the two remaining facts with routes, VERIFY notes, and the
+NEXT ACTIONABLE STEP).
+
 **★ Load-bearing reframe (verified 2026-07-04).** The four Route-C **seals** (`reachesRigidOrCameron_{affinePolar via
 affinePolarAdapter, alternating, halfSpin, suzuki}`) carry **no citation** — they rest on the *proved* `separates`
 certificates. The Route-C citations live **only in the F4 iso-invariance layer** (canonicalization / L1-combine
@@ -77,7 +83,7 @@ truth for what is still carried (a discharged citation is *removed*, not merely 
 | Citation (Prop) | Where carried | What it is / faithful source | Load-bearing? | Discharge status |
 |---|---|---|---|---|
 | **`Suzuki.SuzukiFormsDetermine`** | *(removed)* `RouteCFormAdapters` §Suzuki | σ-twisted ovoid determiner; was Suzuki 1962 / `Sz(q)` 2-trans | was Route-C Suzuki `separates` | **✅ DISCHARGED 2026-07-04** — proved outright (§3.1). Deleted. |
-| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2)** + **heart + ASSEMBLY landed axiom-clean (§3.5, 2026-07-05)** (`ScratchNullstellensatz.lean`: `nullstellensatz_core` + `nullstellensatz_of_structural`, 5 lemmas). Citation now = EXACTLY two structural finite-field facts (`hspan` punctured-cone-span + `hlink` aniso-diameter-2); entry point = Chevalley–Warning (in Mathlib) + a QF→MvPolynomial bridge (to build). Not yet in `build.sh`. |
+| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2)** + **heart + ASSEMBLY + isotropic-existence bedrock landed axiom-clean (§3.5, 2026-07-05)** (`ScratchNullstellensatz{,Structural}.lean`, 11 lemmas). Citation reduced to EXACTLY two structural finite-field facts (`hspan` punctured-cone-span + `hlink` aniso-diameter-2); bedrock `exists_isotropic_of_nondegenerate` + `isotropic_span` DONE (via diagonalize + `binary_represents`, NOT Chevalley–Warning). REMAINING = `hspan`/`hlink` (Witt-index-1/`q=3` boundary; `hlink` via point-count). Not yet in `build.sh`. |
 | **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredFamily_colouring_equivariant` (injective-`Φ`); **no longer** the F4-multi partition object | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) | **`|Aut|`-naming only** (F4-multi iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — same vanishing-space route (`recoveredFamily_partition_isoInvariant_vanishing`, generic core `recoveredForm_partition_isoInvariant_gen`). Injective-`Φ` still carried only for `Aut`-naming. |
 | **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | fundamental theorem of projective geometry (collineations are semilinear) + quadric uniqueness; Artin, *Geometric Algebra* | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3)** — FTPG genuinely deep; not elementarily dischargeable. Vacuous at `q=p` (`σ=id`). Keep cited for now. |
 | **`AffineSchemeTwoClosed`** | `RouteCSeam.lean` (`schemeAutGroup_affineScheme_eq_affineG` / `routeC_polySupport`) | rank-3 affine 2-closure: `SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (no unexpected automorphisms); Skresanov arXiv:2007.14696 / 2202.03746. Converse `≥` is **proved** (`affineG_le_schemeAutGroup`). | Route-C coarse-Aut pinning (the `\|Aut\|` side / meta poly) — **one named premise, all four families** via `G₀ := similitudeGroup Q` / `jointConeStab Qs` / Suzuki cone-stab | **○ CITED** — Skresanov rank-3 2-closure; formalizable, off the near-term path. Same instance as the Skresanov row below, now a concrete named Lean `Prop`. |
@@ -187,8 +193,16 @@ Route-C citation set, and only for the field-extension case (the prime-field res
 
 The §3.2 work discharged the **F4 iso-invariance** use of this citation. The *stronger* statement — "a nondegenerate
 quadric determines its form up to a scalar `μ`" (`vanishDim = 1`, needed for exact `Aut = AΓO(Q)` naming) — is now being
-proved outright. It is `NondegQuadricDeterminesForm` itself. **Scratch build: `ChainDescent/ScratchNullstellensatz.lean`
-(not in `build.sh` yet).**
+proved outright. It is `NondegQuadricDeterminesForm` itself.
+
+**Where it lives (two WIP scratch files, NOT in `build.sh`; each builds standalone):**
+- `ChainDescent/ScratchNullstellensatz.lean` — the field-general heart + the assembly (`nullstellensatz_of_structural`).
+- `ChainDescent/ScratchNullstellensatzStructural.lean` — the finite-field structural build (isotropic existence →
+  `isotropic_span`), which imports the first for `quad_lin_combo`.
+
+Namespace `ChainDescent.Nullstellensatz` throughout. **Probes** (in `GraphCanonizationProofs/`):
+`nullstellensatz_structural_probe.py` (isotropic-span, aniso-connectivity, `deg2_vanishDim = 1`) and
+`nullstellensatz_hspan_hlink_probe.py` (punctured-cone span, aniso diameter-2).
 
 **The elementary path (M3-style, probe-validated — avoids Witt).** Char `≠ 2` ⟹ a quadratic form ↔ its polar bilinear
 form. For anisotropic `y` and isotropic `x`, restrict `Q` to the line `x + t·y`: a quadratic in `t` with roots `t = 0`
@@ -218,10 +232,11 @@ R = μ·Q` (char `≠ 2`), with `μ ≠ 0` from the *reverse* inclusion `Q y ≠
 of `nullstellensatz_of_structural`); both probe-validated, both a genuine finite-field build:**
 1. **`hspan` / `IsotropicConeSpans`** — for a nondegenerate `Q` on `𝔽_q^d` (`q` odd, `d ≥ 4`) and each anisotropic `y`,
    the **punctured** isotropic cone `{x | Q x = 0 ∧ polar Q x y ≠ 0}` spans `V`. Probe: worst-case rank `= d` over all
-   anisotropic `y`, `VO^±_{4,6}(3,5,7)` (`nsp2.py`, 2026-07-05).
+   anisotropic `y`, `VO^±_{4,6}(3,5,7)` (`nullstellensatz_hspan_hlink_probe.py`, 2026-07-05).
 2. **`hlink` / `AnisotropicConnected`** — the anisotropic vectors have `polar`-**diameter ≤ 2**: any `y, y'` are linked
    through one anisotropic `z` with `polar Q y z ≠ 0 ∧ polar Q z y' ≠ 0`. Probe: diameter `= 2`, same families
-   (`nsp2.py`). (Diameter-2 replaces a general connectivity induction — chosen for a clean `const` proof.)
+   (`nullstellensatz_hspan_hlink_probe.py`). (Diameter-2 replaces a general connectivity induction — chosen for a clean
+   `const` proof.)
 
 **Structural-facts build (in `ScratchNullstellensatzStructural.lean`). The citation quantifies over ARBITRARY nondeg
 `Q`, so this is the general finite-field statement.**
@@ -249,6 +264,22 @@ of `nullstellensatz_of_structural`); both probe-validated, both a genuine finite
     tangent section); the cleanest route is TBD (⊥-argument stalls at Witt-index 1; a counting/dimension argument may work).
   The assembly guarantees these two facts are all that is missing.
 `vanishDim = 1` (`deg2_vanishDim` in the probe) is the sanity target the finished theorem reproduces.
+
+**▶ VERIFY (fresh-reader notes).** `cd GraphCanonizationProofs` first.
+- Build: `lake build ChainDescent.ScratchNullstellensatz ChainDescent.ScratchNullstellensatzStructural` (~5s; both green).
+- Axioms: write a temp file importing `ChainDescent.ScratchNullstellensatzStructural` (it re-exports everything) with
+  `#print axioms nullstellensatz_of_structural` / `exists_isotropic_of_nondegenerate` / `isotropic_span`, then
+  `lake env lean /path/to/check.lean` — expect `[propext, Classical.choice, Quot.sound]` for each.
+- Probes: `python3 nullstellensatz_structural_probe.py` and `python3 nullstellensatz_hspan_hlink_probe.py`.
+
+**▶ NEXT ACTIONABLE STEP.** Prove `hlink` first (it reuses existing infrastructure): the point-count needs a **cone-size
+bound** for a general nondeg `Q` — check whether `ChainDescent/GaussCount.lean`'s `card_quadForm_eq` (or the affine-polar
+count) generalizes to arbitrary nondeg `Q` over `𝔽_q`, then `z ∉ y^⊥ ∪ y'^⊥ ∪ cone` by cardinality. Then `hspan` (harder,
+route TBD). When BOTH land: (i) they are the last two hypotheses of `nullstellensatz_of_structural`, so instantiating it
+proves `NondegQuadricDeterminesForm` outright over `𝔽_q^d` (`d ≥ 4`, `q` odd); (ii) then **delete the carried
+`NondegQuadricDeterminesForm` premise** from `recoveredForm_colouring_equivariant` in `RouteCFormAdapters.lean` and confirm
+`#print axioms` unchanged; (iii) port both scratch files into `build.sh` (after `RouteCFormAdapters` / before its consumers)
+and add their decls to `PublicTheoremIndex.md`. Only then is this citation fully discharged.
 
 ### 3.4 Seal-track citations (pointers, not re-derived here)
 

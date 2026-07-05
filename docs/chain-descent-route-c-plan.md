@@ -158,7 +158,13 @@ the C# runtime is close to as complete as it usefully can be. Fuller record: [[p
    `recoveredFamily_partition_isoInvariant_vanishing`, `vanishingColour_refines_form`; the recovered colour partition is
    proved iso-invariant with no dimension count). Those two remain carried ONLY on the strictly-stronger `|Aut|`-naming
    theorems (`recovered{Form,Family}_colouring_equivariant`). So the live Route-C carries are now just FTPG
-   `ConePreservingCollineationIsSemiSimilitude` (hard, q=pᵉ only) + Skresanov `AffineSchemeTwoClosed` (meta-poly pinning).
+   `ConePreservingCollineationIsSemiSimilitude` (hard, q=pᵉ only) + Skresanov `AffineSchemeTwoClosed` (meta-poly pinning),
+   plus `NondegQuadricDeterminesForm`/`JointVarietyDeterminesFamily` on the `|Aut|`-naming side only.
+   **★ FULL `NondegQuadricDeterminesForm` discharge UNDERWAY (2026-07-05) — see `chain-descent-citation-discharge.md` §3.5.**
+   Heart + assembly (`nullstellensatz_of_structural`) + isotropic-existence bedrock + `isotropic_span` landed axiom-clean
+   (11 lemmas, `ScratchNullstellensatz{,Structural}.lean`, WIP not in build). Reduced to EXACTLY two finite-geometry facts
+   (`hspan` punctured-cone-span + `hlink` aniso-diameter-2) at the Witt-index-1/`q=3` boundary; `hlink` has a point-count
+   route (reuse `GaussCount`). §3.5 is the pick-up point (lemma map + VERIFY + NEXT STEP).
 3. *(lower)* **C# frame+WL confirmation** into `AffinePolarHandler.Confirm` (harvest-free p≥5 mate-ruling) — sound but
    advances no proof (reduces to the WL-dim core); the harvest-based `ConfirmByMultiQuadricReconstruction` already works.
 4. *(lower)* **Suzuki generalization** past q=8 or **alternating/half-spin runtime** — both gated on a sparse/implicit
@@ -379,7 +385,7 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
   `AffineSchemeTwoClosed`) to full Lean proofs, or Track A (a multi-quadric pair-route) for a per-family coarse `SealDisj`.
   **No further family builds remain.**
 
-**▶ VERIFY what's landed (fresh-reader commands).** The Route-C spine is now in `build.sh`, so verification is the
+**▶ VERIFY what's landed (fresh-reader notes).** The Route-C spine is now in `build.sh`, so verification is the
 normal build + an axiom-checker file (the ported modules carry **no** inline `#print axioms` — that would print on every
 build; the axiom check is done out-of-line):
 - **Full build:** `bash scripts/build.sh` (serial, ~68s; ends `✔ serial build complete`, `exit=0`). The four Route-C

@@ -987,7 +987,7 @@ forcing-circuit extraction are the *same kind of step*. See §11.15 for the full
 > axiom-clean; the entire Gauss content is PROVED (`hψ` constructed). Top capstone =
 > **`ScratchGramStratWLBridge.colorEq_iff_stabOrbit_wittOnly`** (`C u=C u' ↔ StabOrbit` modulo four hypotheses). **▶ TO
 > CONTINUE, read the HANDOFF block at the top of this STATUS** — it lists the four residuals (in priority order),
-> Piece 3 (leaf-count assembly), the odd-`d` note, the critical-path vs off-path modules, and the build/verify commands.
+> Piece 3 (leaf-count assembly), the odd-`d` note, the critical-path vs off-path modules, and the build/verify notes.
 > **[The `GramCountsRecoverGram`-open framing (in the HISTORICAL section plan) and the pre-orbit-direct "`ZProfileSeparatesK`
 > / `ClassCountsSeparateGram`" framing are both SUPERSEDED — see the HANDOFF block.]**
 > **Then read:** this STATUS + §1 (cost model) + §2c (strength ladder) + §4 (the open core) + §6 (phased plan) + §8 (ITEM A/B).
