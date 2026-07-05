@@ -1816,7 +1816,7 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `SealDisj` | 34-38 | The seal disjunction (`reachesRigidOrCameron` conclusion shape) with the free `IsCameronScheme` predicate + depth bound as parameters. | Definition |
+| `SealDisj` | 35-40 | The seal disjunction (`reachesRigidOrCameron` conclusion shape) with the free `IsCameronScheme` predicate + depth bound as parameters. | Definition |
 | `reachesRigidOrCameron_seamDispatch` | 47-63 | **The generic seam dispatch.** A residue that is Cameron, or realized by some already-sealed scheme `Y`, is itself sealed — one theorem over all forms-graph families + the cyclotomic branch. Carries the generic `htransport`. | — |
 | `reachesRigidOrCameron_affineResidue` | 65-78 | **The named combined seam.** `reachesRigidOrCameron_seamDispatch` under the name recording intent — the seam over the *whole* Skresanov-isolated affine residue (the cyclotomic scheme + the four forms-graph families), each supplied as an already-sealed realized `Y`. | — |
 | `separatesAtBoundedBase_affinePolar` | 87-98 | **The Cameron-free producer.** `IsotropySeparatesAtBase Q T` (+ bounded `T`) gives a bounded base discretising the affine-polar similitude scheme — extracted before the `Or.inl(Or.inr)` padding. | — |
@@ -1826,7 +1826,7 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `schemeAutGroup_affineScheme_mono` | 162-180 | **`hmono`.** A finer affine scheme has a smaller automorphism group (`H ≤ G ⟹ SchemeAutGroup(affineScheme H) ≤ SchemeAutGroup(affineScheme G)`) — the honest sense in which the recovered form only *refines*. | — |
 | `isometrySimilitude_schemeAutGroup_mono` | 182-188 | The concrete `hmono` for Route C's fine⟶coarse: the recovered isometry scheme's Aut group is `≤` the given similitude graph's. | — |
 | `AffineSchemeTwoClosed` | 190-198 | **Skresanov rank-3 2-closure citation** (one named premise, all four families): the affine scheme of `G₀` has no unexpected automorphisms. | Definition |
-| `schemeAutGroup_affineScheme_eq_affineG` | 200-210 | **The finer→coarser group-pinning.** Modulo Skresanov, the coarse forms graph's Aut group is exactly `affineG G₀ = translations ⋊ (known classical group)` — the |Aut|-side content. | — |
+| `schemeAutGroup_affineScheme_eq_affineG` | 200-210 | **The finer→coarser group-pinning.** Modulo Skresanov, the coarse forms graph's Aut group is exactly `affineG G₀ = translations ⋊ (known classical group)` — the \|Aut\|-side content. | — |
 | `schemeAutGroup_coarse_eq_affineG` | 212-219 | **Affine-polar instance of the group-pinning.** The given `VO^ε` graph's Aut group is exactly `affineG(similitudeGroup Q) = translations ⋊ AΓO(Q)`, modulo Skresanov — the `G₀ := similitudeGroup Q` case of `schemeAutGroup_affineScheme_eq_affineG`. | — |
 | `routeC_polySupport` | 221-240 | **Route C poly-support certificate.** Bundles (coarse Aut = known group) ∧ (fine harvest, genuine) ∧ (fine ≤ coarse) — the structural support for the meta poly-canonization. | — |
 
@@ -1834,7 +1834,7 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `SchemeRealizes` | 33-34 | A permutation realizes a scheme iso `S ≅ X` (preserves `schemeAdj`) — the combinatorial iso the cited classification supplies. | Definition |
+| `SchemeRealizes` | 30-34 | A permutation realizes a scheme iso `S ≅ X` (preserves `schemeAdj`) — the combinatorial iso the cited classification supplies. | Definition |
 | `warmRefine_congr_samePartition` | 38-45 | **Partition-congruence of warm refinement.** Refining two same-partition seed colourings yields same-partition results — the engine that lets the base-transport pass through `warmRefine`. | — |
 | `mem_image_transport` | 47-53 | Membership transport under a permutation: `g i ∈ T.image g ↔ i ∈ T` (injectivity of `g`). | — |
 | `indiv_samePartition_image` | 55-70 | **Seed transport.** The `T`-individualized colouring and the `g`-pullback of the `g(T)`-individualized colouring induce the same partition — index labels differ, the partition does not. | — |
@@ -2350,3 +2350,286 @@ See `docs/chain-descent-recovery-route.md` §6/§8.
 | `WLGeneric.samePartition.refl` | 122 | `samePartition` is reflexive. | — |
 | `WLGeneric.samePartition.symm` | 124-125 | `samePartition` is symmetric. | — |
 | `WLGeneric.samePartition.trans` | 127-129 | `samePartition` is transitive. | — |
+## ChainDescent/ScratchBaseAug.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `BaseAug.IsoSetEq` | 37-41 | The base-augmentation observable: `u, u'` have the same isotropic set in the plane `W` (what `Obs_aug` delivers once `C^∞` pins `W`). | Definition |
+| `BaseAug.sameExactGram_of_triple` | 43-53 | Packages the three Gram equalities `(Q u = Q u', polar u a = polar u' a, polar u b = polar u' b)` as `Wall.SameExactGram` over `{a,b}`. | — |
+| `BaseAug.sameExactGram_of_isoSetEq_generic` | 55-73 | **★** Step B generic branch: on an anisotropic base at the generic level (`Z(u)` spans), `IsoSetEq ⟹ SameExactGram` to `{a,b}` — no counting. | — |
+| `BaseAug.eq_wComp_of_isotropic_of_anisotropic` | 75-91 | (ii)-glue: on an anisotropic plane with isotropic complement component, `Z(u) = {u_W}` (the unique isotropic-in-`W` point). | — |
+| `BaseAug.sameExactGram_of_isoSetEq_singleton_anis` | 93-116 | **★** Step B singleton branch: on an anisotropic plane in the singleton locus, `IsoSetEq` alone forces the `W`-components to match, then `SameExactGram` follows — the match is derived, not carried. | — |
+
+## ChainDescent/ScratchBoundedMultLeaves.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `BoundedBranching.depth` | 32-35 | Total depth (levels) of a `BTree`, counting every node — the range of the per-level product below. | Definition |
+| `BoundedBranching.depth_nil` | 37 | The empty node has depth `0`. | `@[simp]` |
+| `BoundedBranching.depth_cons` | 38-39 | Depth of a non-empty node unfolds to `1 + ` the max child depth. | — |
+| `BoundedBranching.BoundedDegAt` | 41-45 | **Per-level branching bound.** A node at depth `k` has `≤ b k` children (recursively) — the level-dependent generalisation of `BoundedDeg` the recovery route needs, where `bᵢ` varies sharply by level. | Definition |
+| `BoundedBranching.leaves_le_prod` | 47-91 | **★ Per-level leaf bound.** Under a per-level branching bound `b` (each `b j ≥ 1`), `leaves ≤ ∏_{j<depth} b(k+j)`; a level with `b j = 1` contributes factor `1`, so branching concentrated at a few levels yields a tight product. | — |
+| `BoundedBranching.leaves_le_prod_concentrated` | 93-107 | **★ Concentration corollary — branching confined to a level set `J`.** If `b j = 1` off a finite level set `J`, then `leaves ≤ ∏_{j∈J} b j` — the recovery route's `concentrated branching ⟹ poly leaves` (single span-dim-1 level, `b = q(q−1)/2`). | — |
+| `BoundedBranching.leaves_le_pow_of_prod` | 109-114 | **`leaves_le_pow` recovered (sanity).** The constant bound `b ≡ B` gives back the uniform `leaves ≤ B^depth`, confirming `leaves_le_prod` is a genuine generalisation. | — |
+
+## ChainDescent/ScratchBranchDepth.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `BranchDepth.spanning_sameExactGram_determines` | 60-79 | **The spanning determiner (generalised `coords_determineK`).** With nondegenerate polar form, the exact Gram profile to a base whose span is `⊤` determines the vertex; generalises the standard-frame determiner to an arbitrary spanning base. | — |
+| `BranchDepth.stabOrbit_singleton_of_spanning` | 81-92 | **★ Orbit-singletons at a spanning anisotropic base.** At a base that spans `V` and carries an anisotropic vector, every `Stab(S)`-orbit is a singleton — the geometric backbone of `an O(d) base rigidifies the forms graph`. | — |
+| `BranchDepth.branchLevels_le_finrank` | 96-104 | **★ The `O(d)` branch-depth ceiling (arithmetic).** An independent family of `L` branch-level vectors has `L ≤ finrank K V`; feeds Phase 1's depth bound. | — |
+| `BranchDepth.branchLevels_le_dim_forms` | 106-112 | **The forms-graph specialisation `L ≤ d`.** On `V = Fin d → K` an independent branch-level family numbers `≤ d`, i.e. `L = O(d)` — the recovery route's second poly factor, modulo the span-growth seam. | — |
+| `BranchDepth.stab_fixes_span` | 129-138 | **The fixed-point kernel.** A similitude fixing `S` pointwise is linear, hence fixes all of `span S` pointwise — the source of every orbit-triviality fact below. | — |
+| `BranchDepth.stabOrbit_trivial_of_mem_span` | 140-145 | **A vertex in `span S` is a singleton `Stab(S)`-orbit** — it cannot be moved, since every `S`-fixing similitude fixes `span S`. | — |
+| `BranchDepth.notMem_span_of_stabOrbit_ne` | 147-152 | **Non-trivial orbit ⟹ outside the span (span-growth kernel).** A vertex with a non-trivial `Stab(S)`-orbit is not in `span S` — what makes a genuine fork add a new dimension. | — |
+| `BranchDepth.span_lt_span_insert_of_stabOrbit_ne` | 154-164 | **★ A fork into a non-trivial orbit strictly grows the span:** individualizing a non-trivial-orbit vertex enlarges `span` — the step that drives the `L ≤ d` count. | — |
+| `BranchDepth.strictChain_le_finrank` | 166-181 | **The strict-chain count.** A strictly increasing chain of `L+1` subspaces has `L ≤ finrank K V` steps — the dimension ceiling behind `L = O(d)`. | — |
+| `BranchDepth.nontrivialForks_le_finrank` | 183-193 | **★ Span-growth, solved: non-trivial-orbit forks are `≤ d`.** A chain of bases whose spans strictly increase at every level has `≤ finrank K V` levels; the residual singleton-orbit forks are exactly the cell-discretisation gap (the shared open WL-orbit defect). | — |
+
+## ChainDescent/ScratchComplementFactor.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ComplementFactor.map_add_of_polar_zero` | 44-50 | **Orthogonal vectors add in `Q`:** `polar Q x y = 0` ⟹ `Q(x+y) = Q x + Q y` — the pure-algebra core of the split. | — |
+| `ComplementFactor.polar_zero_of_mem_orthogonal` | 52-58 | **The complement kills the polar pairing:** for `x ∈ W` and `y ∈ Wᗮ`, `polar Q x y = 0`. | — |
+| `ComplementFactor.map_add_split` | 60-64 | **The orthogonal split (sum form):** for `x ∈ W`, `y ∈ Wᗮ`, `Q(x+y) = Q x + Q y`. | — |
+| `ComplementFactor.map_sub_split` | 66-79 | **★ The orthogonal split (difference form) — the count-factoring foundation.** For `v = v₁+v₂`, `u = u₁+u₂` split across `W ⊕ Wᗮ`, the difference norm splits: `Q((v₁+v₂)−(u₁+u₂)) = Q(v₁−u₁) + Q(v₂−u₂)`, separating local Gram data from the complement datum. | — |
+| `ComplementFactor.exists_decomp_of_isCompl` | 81-89 | **Decomposition into `W ⊕ Wᗮ`:** from `IsCompl W Wᗮ`, every vertex splits as `v = v₁ + v₂` with `v₁ ∈ W`, `v₂ ∈ Wᗮ` — feeds `map_sub_split`. | — |
+
+## ChainDescent/ScratchComplementFactorK.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ComplementFactorK.levelset_count_factors_through_chiDet` | 38-100 | **★ The `d`-cancellation (increment 2, reused).** For two same-size configs with nondegenerate Gram whose discriminant characters `χ(det G)` agree, the scaled homogeneous level-set counts are equal uniformly in `d` — the `d`-dependent factors cancel, so isotropy counts factor through the local config invariant with the complement contributing only the common Gauss factor. | — |
+
+## ChainDescent/ScratchConicCount.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ConicCount.card_prod_eq` | 23-43 | The hyperbola count `#{(u,v) : u·v = a} = q − 1` for `a ≠ 0`. | — |
+| `ConicCount.card_sq_sub_eq` | 45-63 | The difference-of-squares count `#{(x,z) : x²−z² = a}` equals the hyperbola count via `(x,z) ↦ (x−z, x+z)`. | — |
+| `ConicCount.sum_quadraticChar_sq_sub` | 65-98 | **★** The crux character sum `∑ₓ χ(x² − a) = −1` (`a ≠ 0`, char ≠ 2) — proved elementarily, no additive Gauss sums. | — |
+| `ConicCount.card_binary_form` | 100-150 | **★** The binary-conic count `#{w₁x² + w₂y² = c} = q − χ(−w₁w₂⁻¹)` for a nondegenerate diagonal form and `c ≠ 0` — Gauss-sum-free. | — |
+| `ConicCount.card_sq_eq_le_two` | 152-170 | A quadratic `y² = k` has at most two roots in a field. | — |
+| `ConicCount.exists_both_nonzero_solution` | 172-247 | **★** For `q ≥ 7`, a nondegenerate diagonal binary form has a level-`c` solution with both coordinates nonzero — yielding the three non-collinear points that discharge `hspan`. | — |
+
+## ChainDescent/ScratchConicSpan.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ConicSpan.map_ortho_comb` | 33-41 | The plane form is diagonal: for an orthogonal pair, `Q(x•a + y•b) = x²·Q a + y²·Q b`. | — |
+| `ConicSpan.indep_smul_pair` | 43-52 | Scaling by nonzero scalars preserves pair linear independence. | — |
+| `ConicSpan.exists_three_indep_levelset` | 54-88 | Three non-collinear points of the plane `Q`-level set `{v : Q v = c}` (orthogonal anisotropic pair, `c ≠ 0`, `q ≥ 7`) — the geometric input `hspan_of_two_indep` needs. | — |
+| `ConicSpan.hspan_of_conic` | 90-149 | The `hspan` transport capstone (generic `c ≠ 0` case): for a vertex with anisotropic complement component, its isotropic set `Z(u)` affinely spans the plane `W` — the `hspan` hypothesis of `exactGram_of_sameWProfile`. | — |
+| `ConicSpan.exists_orthogonal_decomp` | 151-187 | Every vertex splits as `u = u_W + u_⊥` (`u_W ∈ W`, `u_⊥ ∈ Wᗮ`) via the explicit diagonal projection — no `IsCompl`/restrict machinery. | — |
+| `ConicSpan.hspan_or_singleton` | 189-208 | The `hspan` dichotomy for a bare vertex: either `u`'s complement component is isotropic (the singleton locus) or `Z(u)` affinely spans `W`. | — |
+| `ConicSpan.exactGram_of_isotropic_complement` | 210-245 | Singleton-locus recovery: two isotropic-complement vertices with the same `W`-component have the same exact Gram to `{a,b}` — no spanning needed. | — |
+
+## ChainDescent/ScratchDominatorForms.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `DominatorForms.polar_eq_qSub` | 52-59 | **The polar↔`Q`-value identity:** `polar Q x s = Q x + Q s − Q(x−s)` — the bridge between exact Gram data and the affine isometry scheme's `Q`-value-of-difference relation. | — |
+| `DominatorForms.spanning_exactQ_determines` | 61-73 | **★ Full-base forced-triangle pinning (exact-`Q` form).** At a base spanning `⊤` with nondegenerate polar form, the exact `Q`-value profile (`Q t = Q t'` and `Q(t−s)=Q(t'−s)` for all `s ∈ S`) pins the vertex — the δ′-closure completion re-expressed in the scheme's own relation. | — |
+| `DominatorForms.twoPoint_insufficient_unless_spans` | 75-85 | **The two-point premise is a projection of the full-base one.** The δ′ step's two-point data is the `S={α,β}` instance; when `{α,β}` does not span (always for `d ≥ 3`), `hspan` fails — the formal shadow of the dimensional wall (two constraints vs `d`). | — |
+
+## ChainDescent/ScratchGramStratCharSum.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.gramStratCount_charsum` | 35-94 | **Off critical path (Piece 1b, raw expansion).** `gramStratCount u g · |K|⁴` as the four-fold Fourier sum of the count's four defining constraints (`Q z = g₀`, `polar z a = g₁`, `polar z b = g₂`, `Q(u−z)=0`), via Brick Aₖ. | — |
+| `GramStrat.gramStrat_inner_normalize` | 96-110 | **Off critical path (Piece 1b).** Rewrites the inner z-exponent into the `Q`-plus-linear normal form `(r₀+r₃)·Qz + polar z (r₁•a+r₂•b−r₃•u) + r₃·Qu`, ready for the D1 Gauss bricks (with `u` inside the quadratic and phase). | — |
+| `GramStrat.gramStratCount_charsum_normalized` | 112-125 | **Off critical path (Piece 1b, combined).** `gramStratCount · |K|⁴` as a Fourier sum whose inner z-sum is in the D1-ready normal form — the endpoint of Piece 1b feeding the fibre-sum route. | — |
+
+## ChainDescent/ScratchGramStratConeEval.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.associated_separatingLeft_of_polarBilin_nondeg` | 37-46 | `(associated Q).SeparatingLeft` follows from `polarBilin` nondegeneracy (char ≠ 2, since `polarBilin = 2•associated`). | — |
+| `GramStrat.isoConeSum_eval_even` | 48-143 | **Key theorem.** The even-dimension closed form of the isotropic-cone sum: `|K|·isoConeSum Q ψ y = |V|·𝟙[y=0] + G₁·(|K|·𝟙[Qy=0] − 1)` with `G₁ = ∑_x ψ(Q x)` (char ≠ 2, `Q` nondegenerate, even `finrank`). | — |
+| `GramStrat.isoConeSum_ne_zero` | 145-194 | **Key theorem.** At even ambient dimension the cone sum `isoConeSum Q ψ y ≠ 0` for every `y` (char zero) — the non-vanishing that makes the factored transform separate the Gram. | — |
+
+## ChainDescent/ScratchGramStratConeSep.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.isoConeSumSeparatesGram` | 38-183 | **Key theorem — the cone non-degeneracy, discharged.** `IsoConeSumSeparatesGram Q a b` holds (char ≠ 2, `2` invertible, finite-dimensional): the factored-transform equality determines the exact Gram to `{a,b}` and the plane flag. | — |
+| `GramStrat.gramCountsEq_iff_stabOrbit_wittOnly` | 185-194 | **Capstone — `bᵢ=1` modulo only the Witt citation.** With the cone non-degeneracy proved, `SameGramStratCounts u u' ↔ StabOrbit` at a `GoodBase` of even dimension, carrying only `RefinedWittExtends`; the analytic content is axiom-clean and `ψ` is constructed internally. | — |
+
+## ChainDescent/ScratchGramStratCount.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.gramK` | 44-46 | `u`'s exact Gram to the base `{a,b}` — the triple `(Q u, polar Q u a, polar Q u b)` that stratifies `z` in the round-3 count. | Definition |
+| `GramStrat.gramStratCount` | 48-52 | The round-3 gram-stratified observable `T(u;g) = #{z : gramK z = g ∧ Q(u−z)=0}` — count of `z` isotropic-to-`u` in Gram-stratum `g`. Uses a genuine (non-`Classical`) `DecidablePred` so its filter shares the `GaussCount` toolkit's decidability instance. | Definition, `noncomputable` |
+| `GramStrat.SameGramStratCounts` | 54-56 | The round-3 observable relation: `u, u'` have equal gram-stratified count profiles. | Definition |
+| `GramStrat.polar_isometry` | 58-63 | A `μ=1` similitude (isometry) preserves the polar form. | — |
+| `GramStrat.gramK_isometry` | 65-76 | A base-fixing isometry preserves `gramK` (it fixes `a, b` and preserves `Q` and `polar`). | — |
+| `GramStrat.sameGramStratCounts_of_stabOrbit` | 78-106 | **Soundness (free).** `Stab({a,b})`-orbit-related vertices share the round-3 count profile (a base-fixing similitude is an isometry that reindexes the count), so the observable's cells are unions of orbits. | — |
+| `GramStrat.GramCountsRecoverOrbit` | 108-113 | **The crux (K-non-degeneracy).** The predicate that equal round-3 count profiles recover the `Stab({a,b})`-orbit — the open Gauss content of Route A, probe-true and form-independent. | Definition |
+| `GramStrat.gramCountsEq_iff_stabOrbit` | 115-121 | **Capstone (Piece 1a).** Soundness + the K-non-degeneracy crux give `SameGramStratCounts u u' ↔ StabOrbit` (`bᵢ=1`), targeting the orbit directly with no `SameExactGram`/Witt detour. | — |
+
+## ChainDescent/ScratchGramStratEval.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.gramStrat_inner_eval_ne` | 34-54 | **Off critical path (Piece 1c(i), bulk `r₀+r₃≠0`).** Completes the square in the inner z-sum via Gauss Brick D1: `u` factors into the phase `ψ(r₃·Qu)` and the completed-square constant `Q(r₁•a+r₂•b−r₃•u)`. | — |
+| `GramStrat.gramStrat_inner_eval_zero` | 55-76 | **Off critical path (Piece 1c(i), boundary `r₀+r₃=0`).** The quadratic part drops; the inner sum is the linear character sum, evaluating to `|V|` when the functional `polar Q · wᵣ` is zero (i.e. `wᵣ = 0` for nondegenerate `Q`), else `0`. | — |
+
+## ChainDescent/ScratchGramStratGauss.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.countHat` | 55-58 | The `g`-Fourier transform of the round-3 count profile, `∑_g ψ(⟨t,g⟩)·gramStratCount u g`. Works over any `CommRing` and any `ψ` (no Gauss brick, no primitivity). | Definition, `noncomputable` |
+| `GramStrat.isoConeSum` | 60-64 | **The isotropic-cone character sum** `∑_{w : Q w = 0} ψ(polar Q w y)` — the classical finite-field Gauss object carrying the remaining non-degeneracy. | Definition, `noncomputable` |
+| `GramStrat.countHat_eq_of_sameGramStratCounts` | 66-73 | Trivial direction: equal count profiles give equal `countHat` transforms (`countHat` is `R'`-linear in the count). | — |
+| `GramStrat.countHat_eq_isoSum` | 75-105 | The transform is the isotropy-stratified character sum `∑_{z : Q(u−z)=0} ψ(⟨t, gramK z⟩)` (pull the count into the sum fibrewise over `gramK`). | — |
+| `GramStrat.countHat_factor` | 107-142 | **Key theorem — the factorization (analytic core of `GramCountsRecoverGram`).** `countHat u t = ψ(⟨t, gramK u⟩) · isoConeSum Q ψ (t₀•u + t₁•a + t₂•b)`: `u`'s exact Gram sits in the phase, the complement/flag data in the cone sum. | — |
+
+## ChainDescent/ScratchGramStratGaussReduce.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.gramK_eq_iff_sameExactGram` | 42-60 | `gramK u = gramK u'` iff `SameExactGram Q {a,b} u u'` — the observable's Gram triple is exactly the exact-Gram data to `{a,b}`. | — |
+| `GramStrat.IsoConeSumSeparatesGram` | 62-75 | **The honest single open Gauss statement.** At a `GoodBase`, equality of the factored transforms `ψ(⟨t,gramK u⟩)·isoConeSum(…)` for all `t` forces `gramK u = gramK u'` and the plane flag — stated purely via the classical `isoConeSum`, no `gramStratCount`. | Definition |
+| `GramStrat.gramCountsRecoverGram_of_isoConeSep` | 77-103 | **The reduction (primitive character discharged).** The cone non-degeneracy `IsoConeSumSeparatesGram` discharges `GramCountsRecoverGram`; a primitive additive character `ψ` is constructed internally (Mathlib `FiniteField.primitiveChar`), so no `hψ` is carried. | — |
+| `GramStrat.gramCountsEq_iff_stabOrbit_of_isoConeSep` | 105-113 | **Capstone.** `SameGramStratCounts u u' ↔ StabOrbit` at a `GoodBase` of even dimension, modulo the classical `IsoConeSumSeparatesGram` and the carried `RefinedWittExtends`. | — |
+
+## ChainDescent/ScratchGramStratInvert.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.gsum_orthogonality` | 40-88 | **Off critical path.** `K³` character orthogonality: `∑_g ψ(⟨t,g⟩) = |K|³` if `t = 0`, else `0`. | — |
+| `GramStrat.innerZ` | 90-95 | **Off critical path.** The surviving inner z-sum of the round-3 character sum at dual variable `r` (the fibre-sum route's 1c(i) inner sum, kept opaque as a `def`). | Definition, `noncomputable` |
+| `GramStrat.gramStrat_transform_eval` | 97-126 | **Off critical path (fibre-sum route).** The evaluated `g`-transform: `g`-orthogonality collapses the `(r₀,r₁,r₂)`-sum onto the fibre `r₀₁₂ = s`, leaving only the `innerZ` fibre sum weighted by `|K|³`, with `u` living entirely in `innerZ`. | — |
+| `GramStrat.sameGramStratCounts_transform` | 128-143 | **Off critical path.** Equal round-3 count profiles give equal `innerZ` fibre sums for every `s` — the Gauss-sum equality the fibre-sum inversion would consume. | — |
+
+## ChainDescent/ScratchGramStratOrbit.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.stabOrbit_imp_span_iff` | 55-72 | The plane-membership flag `u ∈ span{a,b}` is orbit-sound: `Stab({a,b})`-orbit-related vertices agree on it (either membership forces `u = u'`), making `RefinedWittExtends`'s flag hypothesis the tight converse of soundness. | — |
+| `GramStrat.GoodBase` | 74-82 | The good span-dim-2 base conditions: `a, b` orthogonal anisotropic, char ≠ 2, and `Q.polarBilin` nondegenerate. Carried as the antecedent of both reduction predicates (without it the bare `∀ Q a b` forms are false). | Definition |
+| `GramStrat.GramCountsRecoverGram` | 84-92 | **The open Gauss content (probe-true).** At a `GoodBase`, the round-3 count profile determines the exact Gram to `{a,b}` and the plane-membership flag. | Definition |
+| `GramStrat.RefinedWittExtends` | 94-103 | **The carried, known-true Witt content.** At a `GoodBase`, exact Gram to `{a,b}` plus the plane flag give the same `Stab({a,b})`-orbit — Witt extension on the nondegenerate `W^⊥`, cited only in this true `GoodBase` form. | Definition |
+| `GramStrat.gramCountsRecoverOrbit_of` | 105-113 | **The reduction.** `GramCountsRecoverGram` (Gauss) + `RefinedWittExtends` (Witt) compose to the crux `GramCountsRecoverOrbit` at a `GoodBase`. | — |
+| `GramStrat.gramCountsEq_iff_stabOrbit_refined` | 115-122 | **Capstone.** `SameGramStratCounts u u' ↔ StabOrbit` at a `GoodBase`, modulo the two isolated pieces `GramCountsRecoverGram` and `RefinedWittExtends`. | — |
+
+## ChainDescent/ScratchGramStratWLBridge.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GramStrat.ColorRefinesGramK` | 41-44 | The (necessary) fineness hypothesis of the WL bridge: the colouring `C` refines `gramK` (equal colour forces equal exact Gram to `{a,b}`). Weaker than `C∞ = orbits`; this is the open WL-dimension residual. | Definition |
+| `GramStrat.sameGramStratCounts_of_sameClassCounts` | 46-102 | **Piece 2 — the WL bridge.** If `C` refines `gramK`, equal 1-WL class-count profiles give equal gram-stratified count profiles. | — |
+| `GramStrat.colorEq_iff_stabOrbit_wittOnly` | 104-122 | **Capstone (assembly).** At a `GoodBase` of even dimension, for a refinement-invariant, 1-WL-stable colouring refining `gramK`, the WL colour equality is exactly the orbit relation: `C u = C u' ↔ StabOrbit`, modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant, RefinedWittExtends}`. The whole Gauss/analytic content is discharged axiom-clean. | — |
+
+## ChainDescent/ScratchJointCountInvariant.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `JointCountInvariant.isoClassK_similitude` | 37-49 | **A similitude preserves the isotropy class:** `isoClassK Q (g w) = isoClassK Q w`. | — |
+| `JointCountInvariant.isoClassK_similitude_symm` | 51-58 | **The inverse form:** `isoClassK Q (g⁻¹ w) = isoClassK Q w`. | — |
+| `JointCountInvariant.jointIsoCountK_similitude_fix` | 59-93 | **★ Soundness — a base-fixing similitude preserves the joint isotropy count:** if `g` fixes every point of `S` then `jointIsoCountK Q (g u) S = jointIsoCountK Q u S`. | — |
+| `JointCountInvariant.jointCountProfile` | 94-101 | **The sub-config joint-count profile observable:** `u ↦ (S' ↦ jointIsoCountK Q u S')` over sub-configs `S' ⊆ S₀` — the richer profile route A separates on at a span-dim-2 base. | Definition, `noncomputable` |
+| `JointCountInvariant.obsInvariant_jointCountProfile` | 102-115 | **★ `ObsInvariant` for the joint-count profile.** The sub-config joint-count profile is `Stab(S₀)`-invariant, discharging the FREE half of `obsEq_iff_stabOrbit` and reducing route A at a span-dim-2 base to `WallKernelFor (jointCountProfile Q S₀ ·) Q ↑S₀`. | — |
+
+## ChainDescent/ScratchPlanePin.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `PlanePin.zSet` | 38-41 | The `zSet` observable `zSet Q W u = {w ∈ W : Q(u−w)=0}` — `u`'s isotropic set in the plane `W`; the observable route A separates on. | Definition |
+| `PlanePin.zSet_eq_iff_isoSetEq` | 43-60 | `zSet u = zSet u' ↔ IsoSetEq` — the observable's equality relation is exactly same-isotropic-set-in-`W`. | — |
+| `PlanePin.zSet_invariant` | 62-80 | `zSet` is `Stab({a,b})`-invariant (`ObsInvariant`) — soundness, free. | — |
+| `PlanePin.isoSetEq_symm` | 82-84 | `IsoSetEq` is symmetric. | — |
+| `PlanePin.sameExactGram_symm` | 86-89 | `SameExactGram` is symmetric. | — |
+| `PlanePin.wallKernel_zSet_anisotropic` | 91-114 | On an anisotropic plane, `WallKernelFor zSet` holds (`zSet u = zSet u' ⟹ SameExactGram` to `{a,b}`), composing both Step-B branches with no counting. | — |
+| `PlanePin.zSetEq_iff_stabOrbit_anisotropic` | 116-128 | The `zSet`-observable capstone: on an anisotropic plane, `zSet u = zSet u' ↔ StabOrbit` (`bᵢ=1` for `zSet`), isolating the whole open route-A content as "1-WL-stable refines `zSet`". | — |
+
+## ChainDescent/ScratchPlanePinInduction.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `PlanePinInduction.SeparatedBy` | 52-60 | One-round `χ(pairForm)` separation of two plane points via an anchor pair drawn from a pinned set `P` — the inner body of `ChiProfileSeparatesPlane` with anchors ranging over a set rather than a fixed base. Part of the plane-pinning line (SUPERSEDED; only the `WLWiring` core survives). | Definition |
+| `PlanePinInduction.SeparatedBy.mono` | 62-66 | `SeparatedBy` is monotone in the anchor set `P` — more pinned anchors only help. | — |
+| `PlanePinInduction.SeparatedBy.symm` | 68-73 | `SeparatedBy` is symmetric in the two plane points, using the same anchors. | — |
+| `PlanePinInduction.seed` | 75-76 | The pinning-closure seed — the span-dim-2 base `{0,a,b}`, pinned by individualisation. | Definition |
+| `PlanePinInduction.mem_seed_iff` | 78-79 | Membership in `seed a b` unfolds to `x = 0 ∨ x = a ∨ x = b`. | — |
+| `PlanePinInduction.pinStep` | 81-85 | One round of pinning — adjoin every `w ∈ W` that `SeparatedBy P` distinguishes from every other plane point. | Definition |
+| `PlanePinInduction.pinIter` | 87-91 | The `ℕ`-indexed pinning closure (`pinIter 0 = {0,a,b}`; each round applies `pinStep`), monotone increasing. | Definition |
+| `PlanePinInduction.PinClosure` | 93-95 | `x` is pinned if it enters `pinIter` at some round. | Definition |
+| `PlanePinInduction.PlanePinnable` | 97-102 | The inductive Step-C target: the pinning closure reaches all of the plane `W`. The plane-pinnability predicate — plane-pinning line SUPERSEDED/REFUTED by probe. | Definition |
+| `PlanePinInduction.pinClosure_of_mem_pinIter` | 104-107 | Membership in any `pinIter n` implies `PinClosure`. | — |
+| `PlanePinInduction.sep_of_mem_pinIter` | 109-123 | A pinned non-seed point carries its separation certificate: at some round it was `SeparatedBy (pinIter m)` from every other plane point. | — |
+| `PlanePinInduction.chiProfileSeparatesPlane_of_pinnable` | 125-166 | Composition: `PlanePinnable` (plus base-pair side conditions and `S₀ ⊇ pinned`) yields the one-shot `ChiProfileSeparatesPlane Q S₀ W`. | — |
+| `PlanePinInduction.count_profile_separates_of_pinnable` | 168-189 | End-to-end (count level): `PlanePinnable` makes distinct plane points differ in `jointIsoCountK` at some base pair. | — |
+
+## ChainDescent/ScratchPlaneSep.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `PlaneSep.plane_count_sep` | 34-51 | **★** Per-round separator: plane points with differing `χ(pairForm)` to a base pair `{t,t₀}` have different joint isotropy counts — the seal's per-pair lever fires for plane-point pinning. | — |
+| `PlaneSep.ChiProfileSeparatesPlane` | 53-66 | The accumulation kernel: the `χ(pairForm)`-profile over base pairs separates the plane (distinct plane points differ at some pair). The sole route-A obligation of the plane-pinning line (OPEN; that line since SUPERSEDED/REFUTED by probe). | Definition |
+| `PlaneSep.count_profile_separates_of_kernel` | 68-84 | **★** Reduction: `ChiProfileSeparatesPlane` makes the joint-count observable injective on `W` (distinct plane points differ in `jointIsoCountK` at some base pair). | — |
+
+## ChainDescent/ScratchSpanDim2Geom.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SpanDim2Geom.map_sub_eq` | 34-39 | `Q(u − w) = Q u + Q w − polar Q u w`. | — |
+| `SpanDim2Geom.norm_diff_affine` | 41-46 | The affine difference identity `Q(u−w) − Q(u'−w) = polar Q (u'−u) w + (Q u − Q u')`; the quadratic part cancels, leaving an affine function of `w`. | — |
+| `SpanDim2Geom.exactGram_of_sameWProfile` | 48-102 | **★** The span-dim-2 geometric recovery core: same isotropic-set profile over `W` (one-directional containment) plus `Z(u)` affinely spanning `W` ⟹ same exact Gram to `{a,b}` — `d`-independent, no Gauss, no Witt. | — |
+
+## ChainDescent/ScratchSpanDim2Recovery.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SpanDim2Recovery.ObsInvariant` | 42-46 | The predicate "`obs` is `Stab(S)`-invariant": every `S`-fixing similitude preserves the observable (characterises what refinement sees). | Definition |
+| `SpanDim2Recovery.stabOrbit_imp_obsEq` | 48-53 | Soundness (free half): same `Stab(S)`-orbit implies same observable, so `obs`-cells are unions of orbits. | — |
+| `SpanDim2Recovery.obsEq_iff_stabOrbit` | 55-65 | **★** The reduction capstone: invariance + the wall kernel for `obs` + carried Witt give `obs t = obs t' ↔ StabOrbit` — i.e. `obs`-cells ARE the orbits (`bᵢ=1`). | — |
+| `SpanDim2Recovery.SpanDim2Recovers` | 67-74 | Bundles the two route-A inputs at a base `S` (observable invariance + wall kernel + Witt), yielding `bᵢ=1`. | Structure |
+| `SpanDim2Recovery.obsEq_iff_stabOrbit_of_recovers` | 76-81 | Packaged capstone: from `SpanDim2Recovers`, the `obs`-cell relation is exactly the `Stab(S)`-orbit relation. | — |
+
+## ChainDescent/ScratchSpanDim2Span.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SpanDim2Span.hspan_of_two_indep` | 36-73 | **★** The combinatorial bridge: in a 2-dim plane, three isotropic points with two linearly independent difference vectors make `Z − w₀` span `W` — the `hspan` hypothesis of `exactGram_of_sameWProfile`; pure linear algebra. | — |
+
+## ChainDescent/ScratchSpanDimBound.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SpanDimBound.polar_eq_of_mem_span_singleton` | 39-48 | Polar collapses on a line: for `s ∈ span{a}`, `polar Q t s` is determined by the single scalar `polar Q t a`. | — |
+| `SpanDimBound.stabOrbit_cover_card_le_line` | 50-80 | **★** The span-dim-1 orbit-multiplicity bound `bᵢ ≤ q²` (POLY), unconditional mod Witt — sharpens the `|K|^{|S|+1}` cover to `|K|²` by collapsing the polar profile onto the line's scalar. The PROVEN half of the recovery route. | — |
+
+## ChainDescent/ScratchWLClassCounts.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `WLClassCounts.iso3` | 51-54 | **The 3-valued isotropy relation over `V`** that 1-WL sees on the forms graph: `0` (self), `1` (isotropic nonzero), `2` (anisotropic); the abstract-`V` analogue of `isoClassK`. | Definition, `noncomputable` |
+| `WLClassCounts.iso3_similitude` | 56-70 | A similitude preserves `iso3` (fixes `0`, scales `Q` by a nonzero multiplier so preserves `Q(·)=0`). | — |
+| `WLClassCounts.classCount` | 71-74 | **The 1-WL neighbourhood count of colour class `c` at relation `k`:** `#{z : C z = c ∧ iso3 Q (u−z) = k}` — counting against a whole colour class, the power the singleton-anchor closure lacked. | Definition, `noncomputable` |
+| `WLClassCounts.SameClassCounts` | 76-79 | **The class-count profile relation:** `u, u'` have equal 1-WL class-count profiles — the iterated observable the wall kernel runs against. | Definition |
+| `WLClassCounts.IsWLStable` | 81-84 | **`C` is 1-WL-stable (equitable):** equal colour ⟹ equal class-count profile, the fixpoint property of the stable colouring `C^∞`; carried as a property of the actual WL colouring. | Definition |
+| `WLClassCounts.ClassCountsSeparateGram` | 86-92 | **★ THE CORRECT OPEN PREDICATE (the frontier).** The class-count profile separates the exact Gram — the iterated colour-class instance of the wall kernel, replacing the false singleton-anchor `PlanePinnable`; proving it is the WL-dimension frontier. | Definition |
+| `WLClassCounts.wallKernelFor_sameClassCounts` | 94-96 | `ClassCountsSeparateGram` is literally `WallKernelFor` for the class-count observable — the intended instance. | — |
+| `WLClassCounts.wallKernel_of_wlStable` | 98-103 | **Stable `C` + class-count separation ⟹ the colour-equality wall kernel.** Equal colour ⟹ equal class-count profile ⟹ equal exact Gram. | — |
+| `WLClassCounts.colorEq_iff_stabOrbit` | 105-114 | **★ `bᵢ=1` for the 1-WL-stable colouring — the corrected wiring capstone.** With `C` refinement-invariant, WL-stable, its class-counts separating the exact Gram, and the carried Witt extension, `C u = C u' ↔ StabOrbit`; the open content is the single predicate `ClassCountsSeparateGram`. | — |
+| `WLClassCounts.sameClassCounts_of_stabOrbit` | 116-139 | **Soundness (FREE) — `SameClassCounts` is a graph invariant.** A `Stab(S)`-invariant `C` gives orbit-related vertices equal class-count profiles, so class-count cells are always unions of orbits. | — |
+
+## ChainDescent/ScratchWLWiring.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `WLWiring.IsColorSingleton` | 48-49 | `w` is a colour-singleton under `C`: the unique vertex of its colour (individualised / pinned). | Definition |
+| `WLWiring.ReadsSingletonIsotropy` | 61-66 | **The minimal 1-WL property the wiring needs.** Interface field: a refinement colouring `C` reflects the isotropy indicator `Q(·−w)=0` to any colour-singleton anchor `w`, so `C u` determines whether `Q(u−w)=0`. | Structure |
+| `WLWiring.PinsPlane` | 68-69 | **`C` pins the plane `W`:** every plane point is a colour-singleton (Insight 4, `C^∞` pins `W`). | Definition |
+| `WLWiring.refines_zSet_of_pinsPlane` | 71-78 | **`ReadsSingletonIsotropy` + `PinsPlane` ⟹ `C` refines `zSet`.** Equal colour forces the isotropic sets in the pinned plane `W` to coincide. | — |
+| `WLWiring.stabOrbit_of_colorEq` | 80-94 | **The wiring payoff — WL-colour equality ⟹ same `Stab`-orbit** (the hard `cells ⊆ orbits` direction / `bᵢ=1` hard half), for a plane-pinning singleton-reading colouring on an anisotropic base `{a,b}`. | — |
+| `WLWiring.colorEq_iff_stabOrbit` | 96-110 | **Full `bᵢ=1` for the WL colouring.** Adding `Stab`-invariance upgrades the payoff to the iff `C u = C u' ↔ StabOrbit`, so the WL cells coincide exactly with the `Stab({a,b})`-orbits. | — |
+| `WLWiring.ReadsSingletonCounts` | 122-128 | **The count analogue of `ReadsSingletonIsotropy`.** Interface field: `C` reflects the joint isotropy count `jointIsoCountK Q · {t,t₀}` against colour-singleton anchors `t, t₀`. | Structure |
+| `WLWiring.SeparatesPlaneFromComplement` | 130-135 | **The genuinely-open residual, named.** Plane points get a different `C`-colour from every non-plane vertex — the honest remaining WL-dimension content (orbit-rigidity of the plane does not make its points global colour-singletons). | Definition |
+| `WLWiring.pinIter_subset_W` | 137-148 | The pinning closure never leaves the plane: `pinIter ⊆ W` given the seed is inside `W`. | — |
+| `WLWiring.colorSingleton_of_mem_pinIter` | 150-183 | **The induction — every pinned point is a colour-singleton.** By induction on the closure level, using the complement separation, the count-reading interface, and `plane_count_sep` to rule out same-colour distinct plane points. | — |
+| `WLWiring.pinsPlane_of_planePinnable` | 185-202 | **Reduce `C` pins `W` to `PlanePinnable` + the two interfaces + the residual.** If the pinning closure reaches all of `W`, `C` reads singleton counts, plane points are colour-separated from the complement, and the base is individualised, then `C` pins `W` — chaining with the Core gives `bᵢ=1` end-to-end. | — |
