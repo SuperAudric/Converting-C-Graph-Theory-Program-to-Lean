@@ -511,20 +511,20 @@ theorem configGaussSum_eq_det (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
 
 end ChainDescent
 
-#print axioms ChainDescent.isoIncidence_eq_linearConds
-#print axioms ChainDescent.count_coset
-#print axioms ChainDescent.reduction_to_levelset
-#print axioms ChainDescent.spanning_w0_exists
-#print axioms ChainDescent.reduction_to_levelset_nondeg
-#print axioms ChainDescent.levelset_fourier
-#print axioms ChainDescent.levelset_fourier_prod
-#print axioms ChainDescent.levelset_fourier_split
-#print axioms ChainDescent.s0_boundary_collapse
-#print axioms ChainDescent.levelset_count_eq
-#print axioms ChainDescent.configForm_apply
-#print axioms ChainDescent.polar_configForm_single
-#print axioms ChainDescent.configForm_nondegenerate
-#print axioms ChainDescent.configForm_exists_orthoBasis
-#print axioms ChainDescent.configGaussSum_eval
-#print axioms ChainDescent.prod_quadChar_eq_det
-#print axioms ChainDescent.configGaussSum_eq_det
+--#print axioms ChainDescent.isoIncidence_eq_linearConds
+--#print axioms ChainDescent.count_coset
+--#print axioms ChainDescent.reduction_to_levelset
+--#print axioms ChainDescent.spanning_w0_exists
+--#print axioms ChainDescent.reduction_to_levelset_nondeg
+--#print axioms ChainDescent.levelset_fourier
+--#print axioms ChainDescent.levelset_fourier_prod
+--#print axioms ChainDescent.levelset_fourier_split
+--#print axioms ChainDescent.s0_boundary_collapse
+--#print axioms ChainDescent.levelset_count_eq
+--#print axioms ChainDescent.configForm_apply
+--#print axioms ChainDescent.polar_configForm_single
+--#print axioms ChainDescent.configForm_nondegenerate
+--#print axioms ChainDescent.configForm_exists_orthoBasis
+--#print axioms ChainDescent.configGaussSum_eval
+--#print axioms ChainDescent.prod_quadChar_eq_det
+--#print axioms ChainDescent.configGaussSum_eq_det

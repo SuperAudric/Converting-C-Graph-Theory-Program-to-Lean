@@ -394,13 +394,13 @@ end
 
 end ChainDescent
 
-#print axioms ChainDescent.isoClassK_ne_two_iff
-#print axioms ChainDescent.coords_determineK
-#print axioms ChainDescent.qProfileSeparatesAtBaseK_of_zProfileSeparatesK
-#print axioms ChainDescent.isotropySeparatesK_of_zProfileSeparatesK
-#print axioms ChainDescent.jointIsoCountK_eq_restricted
-#print axioms ChainDescent.zProfileSeparatesK_of_zSep
-#print axioms ChainDescent.isoClassK_eq_isoClass
-#print axioms ChainDescent.isoCount_transport
-#print axioms ChainDescent.isotropySeparatesAtBase_of_K
-#print axioms ChainDescent.reachesRigidOrCameron_viaIsotropySeparatesK_wittFree
+--#print axioms ChainDescent.isoClassK_ne_two_iff
+--#print axioms ChainDescent.coords_determineK
+--#print axioms ChainDescent.qProfileSeparatesAtBaseK_of_zProfileSeparatesK
+--#print axioms ChainDescent.isotropySeparatesK_of_zProfileSeparatesK
+--#print axioms ChainDescent.jointIsoCountK_eq_restricted
+--#print axioms ChainDescent.zProfileSeparatesK_of_zSep
+--#print axioms ChainDescent.isoClassK_eq_isoClass
+--#print axioms ChainDescent.isoCount_transport
+--#print axioms ChainDescent.isotropySeparatesAtBase_of_K
+--#print axioms ChainDescent.reachesRigidOrCameron_viaIsotropySeparatesK_wittFree

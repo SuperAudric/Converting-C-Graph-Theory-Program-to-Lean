@@ -414,18 +414,18 @@ end NV4bCount
 
 end ChainDescent
 
-#print axioms ChainDescent.polar_pencil_apply
-#print axioms ChainDescent.pencil_radical_key
-#print axioms ChainDescent.polarRad_pencil_subset_span
-#print axioms ChainDescent.polarRad_pencil_eq_bot
-#print axioms ChainDescent.pairForm_self_sub
-#print axioms ChainDescent.exists_ne_zero_polar_eq_zero
-#print axioms ChainDescent.exists_pairForm_self_sub_ne_zero
-#print axioms ChainDescent.exists_anisotropic
-#print axioms ChainDescent.gramQuadPoly_ne_zero
-#print axioms ChainDescent.planeDiscPoly_eval
-#print axioms ChainDescent.planeDiscPoly_totalDegree_le
-#print axioms ChainDescent.planeDiscPoly_ne_zero
-#print axioms ChainDescent.exists_good_plane_anchor
-#print axioms ChainDescent.linearIndependent_of_pairForm_ne_zero
-#print axioms ChainDescent.exists_hgood
+--#print axioms ChainDescent.polar_pencil_apply
+--#print axioms ChainDescent.pencil_radical_key
+--#print axioms ChainDescent.polarRad_pencil_subset_span
+--#print axioms ChainDescent.polarRad_pencil_eq_bot
+--#print axioms ChainDescent.pairForm_self_sub
+--#print axioms ChainDescent.exists_ne_zero_polar_eq_zero
+--#print axioms ChainDescent.exists_pairForm_self_sub_ne_zero
+--#print axioms ChainDescent.exists_anisotropic
+--#print axioms ChainDescent.gramQuadPoly_ne_zero
+--#print axioms ChainDescent.planeDiscPoly_eval
+--#print axioms ChainDescent.planeDiscPoly_totalDegree_le
+--#print axioms ChainDescent.planeDiscPoly_ne_zero
+--#print axioms ChainDescent.exists_good_plane_anchor
+--#print axioms ChainDescent.linearIndependent_of_pairForm_ne_zero
+--#print axioms ChainDescent.exists_hgood

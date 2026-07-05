@@ -64,4 +64,4 @@ theorem exists_separating_base
 
 end ChainDescent
 
-#print axioms ChainDescent.exists_separating_base
+--#print axioms ChainDescent.exists_separating_base

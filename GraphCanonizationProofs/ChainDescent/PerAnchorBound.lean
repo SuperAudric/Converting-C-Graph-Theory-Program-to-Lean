@@ -185,8 +185,8 @@ end
 
 end ChainDescent
 
-#print axioms ChainDescent.int_char_pointwise
-#print axioms ChainDescent.counting_identity
-#print axioms ChainDescent.charSum_int_le_norm
-#print axioms ChainDescent.card_agree_le
-#print axioms ChainDescent.c0_le_threequarters
+--#print axioms ChainDescent.int_char_pointwise
+--#print axioms ChainDescent.counting_identity
+--#print axioms ChainDescent.charSum_int_le_norm
+--#print axioms ChainDescent.card_agree_le
+--#print axioms ChainDescent.c0_le_threequarters

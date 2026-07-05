@@ -382,9 +382,9 @@ theorem jointIsoCountK_ne_of_chiSep_pair (Q : QuadraticForm K (Fin d → K))
 
 end ChainDescent
 
-#print axioms ChainDescent.cone_count_zero_splitK
-#print axioms ChainDescent.levelset_count_collapseK
-#print axioms ChainDescent.fullcount_pair_closedK
-#print axioms ChainDescent.chi_configDet_eq_chi_pairFormK
-#print axioms ChainDescent.jointIsoCountK_pair_closed_corr0
-#print axioms ChainDescent.jointIsoCountK_ne_of_chiSep_pair
+--#print axioms ChainDescent.cone_count_zero_splitK
+--#print axioms ChainDescent.levelset_count_collapseK
+--#print axioms ChainDescent.fullcount_pair_closedK
+--#print axioms ChainDescent.chi_configDet_eq_chi_pairFormK
+--#print axioms ChainDescent.jointIsoCountK_pair_closed_corr0
+--#print axioms ChainDescent.jointIsoCountK_ne_of_chiSep_pair

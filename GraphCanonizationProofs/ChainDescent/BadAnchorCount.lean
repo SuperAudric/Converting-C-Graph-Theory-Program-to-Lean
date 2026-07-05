@@ -420,15 +420,15 @@ end
 
 end ChainDescent
 
-#print axioms ChainDescent.fail_count_split
-#print axioms ChainDescent.matching_F_bound
-#print axioms ChainDescent.good_anchor_fail_le
-#print axioms ChainDescent.zeroCountShift_card_le
-#print axioms ChainDescent.good_anchor_fail_le_const
-#print axioms ChainDescent.mvPoly_zeros_count_le_dim
-#print axioms ChainDescent.hPu_of_hgood
-#print axioms ChainDescent.hPv_of_hgood
-#print axioms ChainDescent.hnz_of_hgood
-#print axioms ChainDescent.bad_anchor_card_le_hgood
-#print axioms ChainDescent.bad_anchor_count_le_of_poly
-#print axioms ChainDescent.notHgood_eval_zero_of_repr
+--#print axioms ChainDescent.fail_count_split
+--#print axioms ChainDescent.matching_F_bound
+--#print axioms ChainDescent.good_anchor_fail_le
+--#print axioms ChainDescent.zeroCountShift_card_le
+--#print axioms ChainDescent.good_anchor_fail_le_const
+--#print axioms ChainDescent.mvPoly_zeros_count_le_dim
+--#print axioms ChainDescent.hPu_of_hgood
+--#print axioms ChainDescent.hPv_of_hgood
+--#print axioms ChainDescent.hnz_of_hgood
+--#print axioms ChainDescent.bad_anchor_card_le_hgood
+--#print axioms ChainDescent.bad_anchor_count_le_of_poly
+--#print axioms ChainDescent.notHgood_eval_zero_of_repr

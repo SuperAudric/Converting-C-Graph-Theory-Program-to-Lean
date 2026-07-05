@@ -440,13 +440,13 @@ theorem reachesRigidOrCameron_affinePolar {p d : ℕ} [Fact p.Prime]
 
 end ChainDescent
 
-#print axioms ChainDescent.exists_pow_matching_lt
-#print axioms ChainDescent.exists_pow_matching_le
-#print axioms ChainDescent.exists_pow_matching_block
-#print axioms ChainDescent.exists_separating_base_of_split
-#print axioms ChainDescent.exists_separating_base_of_split_bounded
-#print axioms ChainDescent.cbar_lt
-#print axioms ChainDescent.jointIsoCountK_ne_of_sep
-#print axioms ChainDescent.exists_zProfileSeparatesK
-#print axioms ChainDescent.exists_isotropySeparatesAtBaseK
-#print axioms ChainDescent.reachesRigidOrCameron_affinePolar
+--#print axioms ChainDescent.exists_pow_matching_lt
+--#print axioms ChainDescent.exists_pow_matching_le
+--#print axioms ChainDescent.exists_pow_matching_block
+--#print axioms ChainDescent.exists_separating_base_of_split
+--#print axioms ChainDescent.exists_separating_base_of_split_bounded
+--#print axioms ChainDescent.cbar_lt
+--#print axioms ChainDescent.jointIsoCountK_ne_of_sep
+--#print axioms ChainDescent.exists_zProfileSeparatesK
+--#print axioms ChainDescent.exists_isotropySeparatesAtBaseK
+--#print axioms ChainDescent.reachesRigidOrCameron_affinePolar

@@ -402,11 +402,11 @@ end
 
 end ChainDescent
 
-#print axioms ChainDescent.qProfileSeparatesAtBase_of_zProfileSeparates
-#print axioms ChainDescent.isotropySeparates_of_zProfileSeparates
-#print axioms ChainDescent.jointIsoCount_eq_restricted
-#print axioms ChainDescent.coarse_incidence_agree
-#print axioms ChainDescent.incidence_to_V
-#print axioms ChainDescent.incidence_agree_V
-#print axioms ChainDescent.cone_count_zero_split
-#print axioms ChainDescent.fullcount_agree_modulo_corr
+--#print axioms ChainDescent.qProfileSeparatesAtBase_of_zProfileSeparates
+--#print axioms ChainDescent.isotropySeparates_of_zProfileSeparates
+--#print axioms ChainDescent.jointIsoCount_eq_restricted
+--#print axioms ChainDescent.coarse_incidence_agree
+--#print axioms ChainDescent.incidence_to_V
+--#print axioms ChainDescent.incidence_agree_V
+--#print axioms ChainDescent.cone_count_zero_split
+--#print axioms ChainDescent.fullcount_agree_modulo_corr

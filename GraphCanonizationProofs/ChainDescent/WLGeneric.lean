@@ -130,8 +130,8 @@ theorem trans {χ₁ χ₂ χ₃ : V → Nat}
 
 end samePartition
 
-#print axioms refineStep_iff
-#print axioms sigKey_eq_iff
+--#print axioms refineStep_iff
+--#print axioms sigKey_eq_iff
 
 end WLGeneric
 end ChainDescent

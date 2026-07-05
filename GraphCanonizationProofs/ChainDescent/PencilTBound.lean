@@ -453,17 +453,17 @@ end
 
 end ChainDescent
 
-#print axioms ChainDescent.polarRad_card_filter
-#print axioms ChainDescent.polarRad_ne_top_of_ne_zero
-#print axioms ChainDescent.radical_card_mul_card_le
-#print axioms ChainDescent.mvPoly_zeros_count_le
-#print axioms ChainDescent.det_totalDegree_le
-#print axioms ChainDescent.pencilDisc_totalDegree_le
-#print axioms ChainDescent.pencilDisc_eval
-#print axioms ChainDescent.polarRad_ne_bot_iff_det_eq_zero
-#print axioms ChainDescent.degenerate_count_le
-#print axioms ChainDescent.sum_two_bucket_le
-#print axioms ChainDescent.sqrt_mul_le_div
-#print axioms ChainDescent.c0_le
-#print axioms ChainDescent.norm_quadraticChar
-#print axioms ChainDescent.normT_bucket_bound
+--#print axioms ChainDescent.polarRad_card_filter
+--#print axioms ChainDescent.polarRad_ne_top_of_ne_zero
+--#print axioms ChainDescent.radical_card_mul_card_le
+--#print axioms ChainDescent.mvPoly_zeros_count_le
+--#print axioms ChainDescent.det_totalDegree_le
+--#print axioms ChainDescent.pencilDisc_totalDegree_le
+--#print axioms ChainDescent.pencilDisc_eval
+--#print axioms ChainDescent.polarRad_ne_bot_iff_det_eq_zero
+--#print axioms ChainDescent.degenerate_count_le
+--#print axioms ChainDescent.sum_two_bucket_le
+--#print axioms ChainDescent.sqrt_mul_le_div
+--#print axioms ChainDescent.c0_le
+--#print axioms ChainDescent.norm_quadraticChar
+--#print axioms ChainDescent.normT_bucket_bound

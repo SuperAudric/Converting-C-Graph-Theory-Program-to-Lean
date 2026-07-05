@@ -445,8 +445,8 @@ theorem configGaussSum_eq_detK (Q : QuadraticForm K (Fin d → K))
 
 end ChainDescent
 
-#print axioms ChainDescent.isoIncidence_eq_linearCondsK
-#print axioms ChainDescent.reduction_to_levelset_nondegK
-#print axioms ChainDescent.levelset_count_eqK
-#print axioms ChainDescent.configFormK_nondegenerate
-#print axioms ChainDescent.configGaussSum_eq_detK
+--#print axioms ChainDescent.isoIncidence_eq_linearCondsK
+--#print axioms ChainDescent.reduction_to_levelset_nondegK
+--#print axioms ChainDescent.levelset_count_eqK
+--#print axioms ChainDescent.configFormK_nondegenerate
+--#print axioms ChainDescent.configGaussSum_eq_detK

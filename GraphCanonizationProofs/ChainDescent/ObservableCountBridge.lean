@@ -469,13 +469,13 @@ theorem jointIsoCount_ne_of_chiSep_pair (Q : QuadraticForm (ZMod p) (Fin d → Z
 
 end ChainDescent
 
-#print axioms ChainDescent.levelset_count_collapse
-#print axioms ChainDescent.fullcount_eq_jointIsoCount_add_corr
-#print axioms ChainDescent.fullcount_pair_eq_levelset
-#print axioms ChainDescent.fullcount_pair_closed
-#print axioms ChainDescent.configPolarDet_eq_pairForm
-#print axioms ChainDescent.chi_configDet_eq_chi_pairForm
-#print axioms ChainDescent.chiSep_imp_zSep_field
-#print axioms ChainDescent.pairCount_ne_of_chiSep_field
-#print axioms ChainDescent.jointIsoCount_pair_closed_corr0
-#print axioms ChainDescent.jointIsoCount_ne_of_chiSep_pair
+--#print axioms ChainDescent.levelset_count_collapse
+--#print axioms ChainDescent.fullcount_eq_jointIsoCount_add_corr
+--#print axioms ChainDescent.fullcount_pair_eq_levelset
+--#print axioms ChainDescent.fullcount_pair_closed
+--#print axioms ChainDescent.configPolarDet_eq_pairForm
+--#print axioms ChainDescent.chi_configDet_eq_chi_pairForm
+--#print axioms ChainDescent.chiSep_imp_zSep_field
+--#print axioms ChainDescent.pairCount_ne_of_chiSep_field
+--#print axioms ChainDescent.jointIsoCount_pair_closed_corr0
+--#print axioms ChainDescent.jointIsoCount_ne_of_chiSep_pair
