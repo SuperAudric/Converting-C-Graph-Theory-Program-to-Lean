@@ -1183,8 +1183,10 @@ for ALL p.** A user push (recover scalars via a fixed frame, using incidences) l
 SINGLE PATH, for every case tested** (q=3,5,7; d=4,6 — VO⁻₄(5): 5 steps → 625/625 cells; VO⁻₆(3): 6 → 729/729;
 VO⁻₄(7): 5 → 2401/2401). So the whole graph is pinned by a size-`(d+1)` frame + 1-WL — no line-sums, no cone-blindness,
 no O_p(Aut) harvest. The cone-blindness / 45-freedom obstruction was an **artifact of the line-sum method's
-over-generation**, NOT fundamental (the `RouteCAmbiguityProbe` separately confirmed the 45 are wrong-coordinatizations of
-the *same* graph — 12/12 non-injective — not distinct graphs). **Consequence — the correct framing:** harvest-free
+over-generation**, NOT fundamental (the `RouteCAmbiguityProbe`, q=5, separately confirmed the freedoms are
+wrong-coordinatizations of the *same* graph: of 12 randomly-sampled freedoms, **`stillValid=0`** give a *distinct valid*
+coordinatization — all 12 collapse to non-injective coords, 0 broke reconstruction — so the freedoms are wrong coords, not
+distinct graphs). **Consequence — the correct framing:** harvest-free
 coordinatization/canonicalization of these graphs is **easy empirically** (greedy WL-discretize, `O(d)=O(log n)` frame);
 the ONE remaining open item is *proving* that discretization is poly (that the greedy choices are Aut-symmetric ⟹
 single-path), which is **the project's EXISTING WL-dimension / node-4 core** — NOT a new Route-C-specific problem.

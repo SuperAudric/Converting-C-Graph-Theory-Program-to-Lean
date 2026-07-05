@@ -82,6 +82,9 @@ public class RouteCScalarRecoveryProbe
             int distinct = cells.Distinct().Count();
             int totalCells = col.Distinct().Count();                  // whole-graph discretization
             _out.WriteLine($"VO^{(eps < 0 ? "-" : "+")}_4({q}) frame {name}: line-scalars distinct={distinct}/{q - 1}; WHOLE-GRAPH cells={totalCells}/{n} {(totalCells == n ? "DISCRETIZED ✓" : "NOT discrete")}");
+            // Robust cross-q claim: a spanning isotropic frame + 1-WL fully discretizes (both q=3 and q=5).
+            // (The scalar-lumping {o,e}→2 distinct is q=5-specific, so not asserted here.)
+            if (name.StartsWith("spanning")) Assert.Equal(n, totalCells);
         }
     }
 
@@ -116,6 +119,10 @@ public class RouteCScalarRecoveryProbe
         }
         int cells = color.Distinct().Count();
         _out.WriteLine($"VO^{(eps < 0 ? "-" : "+")}_{d}({q}) n={n}: greedy individualizations to discretize = {indiv} (d+1={d + 1}); cells={cells}/{n} {(cells == n ? "✓" : "STUCK")}");
+        // THE load-bearing frame+WL finding (plan §9.2.8): greedy individualize-refine fully discretizes
+        // VO^ε_d(q) in ≤ d+1 steps, for all p. Guard it (was report-only, a silent-regression risk).
+        Assert.Equal(n, cells);
+        Assert.True(indiv <= d + 1, $"expected ≤ d+1={d + 1} greedy individualizations, got {indiv}");
     }
 
     // VO^eps_d(q) Cayley graph for general even d (standard form: hyperbolic pairs + anisotropic tail for eps=-1)

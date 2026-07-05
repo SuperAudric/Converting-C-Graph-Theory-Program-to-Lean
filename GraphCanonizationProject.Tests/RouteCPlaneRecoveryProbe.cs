@@ -64,6 +64,11 @@ public class RouteCPlaneRecoveryProbe
 
         _out.WriteLine($"VO^{(eps < 0 ? "-" : "+")}_4({q}): trials={trials} planeSize={planeSize} exactPlaneRecovered={exactPlane}");
         _out.WriteLine($"    closure sizes: {string.Join(",", closureSizes.Distinct().OrderBy(z => z))}");
+        // FINDING (negative, plan §9.2.8): isotropic-line closure does NOT reliably recover the 2-flat —
+        // it stalls on the minus type (0/trials) and is only sporadic on the plus type (VO⁺₄(5): 1/8).
+        // This rules out line-completion as a plane-recovery shortcut. Guard against that finding regressing
+        // (i.e. closure suddenly recovering ALL planes). NB: not Assert.Equal(0,·) — plus-type recovers some.
+        Assert.True(exactPlane < trials, $"line-closure unexpectedly recovered ALL planes ({exactPlane}/{trials}) — the 'planes not line-recoverable' finding regressed");
     }
 
     static bool Dependent(int[] x, int[] y, int q, int d)
