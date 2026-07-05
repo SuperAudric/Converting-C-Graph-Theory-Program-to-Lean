@@ -68,11 +68,30 @@ remaining scoped citations to full Lean proofs. Landed:
 `htransport` is DISCHARGED** (`ScratchSeamTransport.lean`, axiom-clean; §9 item 3, [[project_routec_seam_2026-07-04]]) —
 the Route-C seam carries **no uncited/unproved atom**. Mechanism: transport the ONE light predicate `SeparatesAtBoundedBase`
 (not the 4-way `SealDisj`) via a cross-graph `warmRefine_transport_iso`; capstone `reachesRigidOrCameron_viaSchurianRank3Affine_proved`.
-So the Lean deliverable is complete **modulo scoped citations + PORT**. Remaining Lean: (a) **PORT** the scratch spine
-(`ScratchRouteC`, `ScratchSeamTransport`, `ScratchRecoveredFormTransfer`, `ScratchSeamDispatch`, `ScratchSeam`) into
-`build.sh`+`lakefile`+`PublicTheoremIndex.md` — mechanical, no math; (b) promote the scoped citations to full proofs
-(`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`, `ConePreservingCollineationIsSemiSimilitude`,
-`AffineSchemeTwoClosed`) — optional, `chain-descent-citation-discharge.md` has routes.
+**★ HONEST SCOPE (do not overstate): the four family seals + the seam are done; the combine is complete as a
+META-COMPOSITION (family adapters + transport + group-pinning + cyclotomic dispatch), NOT yet wired into the
+canonizer's node-4 hook.** So the Lean deliverable is "four family seals + atom-free seam" — **complete modulo PORT +
+L4 wiring + scoped citations**. Remaining Lean:
+- (a) **PORT — ✅ DONE (2026-07-05).** The five scratch spine files are consolidated into **three named build modules**:
+  `RouteCTransport` (← Cascade; `SchemeRealizes` + the `…_transport_iso` tower + `separatesAtBoundedBase_transport` + the
+  3 distilled partition helpers), `RouteCFormAdapters` (← CascadeAffine; the four family seals + engine; git-mv of
+  `ScratchRouteC`), `RouteCSeam` (← CascadeAffine, RouteCTransport; `SealDisj` + generic dispatch + affine-polar atom-free
+  capstone + cyclotomic dispatch + finer→coarser group-pinning). Added to `build.sh` MODULES; **full `build.sh` green (66s),
+  all nine capstones axiom-clean `[propext, Classical.choice, Quot.sound]`** (verified via a checker file, per the
+  build-noise caveat below). `PublicTheoremIndex.md` updated (scoped: −`ScratchSeam` section, +3 RouteC sections with
+  headline descriptions). Dropped, not ported: `ScratchSeam`'s superseded carried-`htransport` theorem, and
+  `ScratchNodeCountBridge`'s demoted CellsAreOrbits half (only its 3 transport helpers were distilled into `RouteCTransport`;
+  the file itself stays scratch — still imported by the demoted `ScratchBoundedBranching`). The 4 superseded scratch seam
+  files (`ScratchSeam`/`…Transport`/`…Dispatch`/`…RecoveredFormTransfer`) are deleted. *Note on `defaultTargets`:* Route C
+  goes in `build.sh` MODULES only (not `lakefile.toml` `defaultTargets`) — matching the existing convention where
+  `AffinePolarSeal` + the whole pair route are build.sh-only and bare `lake build` is the intentionally-lighter set.
+- (b) **L4 — the node-4 wiring (the actual payoff, currently UNWIRED).** Feed a Route-C poly cert into the existing
+  residue hook `reachesRigidOrCameron_viaAffineFormScheme` (`CascadeAffine.lean:2057`), retiring its quasipoly `hFormCert`
+  for the affine-polar family. Until this lands, the four seals are a proved *island* — they conclude `SealDisj` in
+  isolation but do not discharge the canonizer's node-4 case at poly. This is what turns "combine done" into "the
+  affine-polar node-4 case is sealed at poly", and it is the natural port-enabled next step (§9.1 L4).
+- (c) **promote the scoped citations** to full proofs (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`,
+  `ConePreservingCollineationIsSemiSimilitude`, `AffineSchemeTwoClosed`) — optional, `chain-descent-citation-discharge.md` has routes.
 
 **C# — the runtime is ~as-complete-as-useful (reassessment 2026-07-05).** Built and green (60/60 fast Route-C tests +
 Suzuki LongRunning, 0 regressions, full build clean). Pipeline: recover form family (C1a) → build answer group (C1b) →
@@ -94,9 +113,14 @@ existing WL-dim core, so it advances no proof); and alternating/half-spin runtim
 the C# runtime is close to as complete as it usefully can be. Fuller record: [[project_routec_csharp_build_2026-07-04]].
 
 **▶ NEXT TASKS (any is a clean pick-up; rough priority):**
-1. **PORT the Lean scratch spine into `build.sh`** (mechanical) — puts the four seals + L1 under the green-build guarantee.
-   Verify each still elaborates axiom-clean first (`lake env lean ChainDescent/<file>.lean` — see "VERIFY" below; note a
-   stray cwd can give a spurious "no such file", re-run with `cd GraphCanonizationProofs`).
+0. ✅ **PORT — DONE (2026-07-05).** Route C is in `build.sh` as `RouteCTransport`/`RouteCFormAdapters`/`RouteCSeam`
+   (consolidated from the 5 scratch files + the NodeCountBridge transport helpers); full build green, axiom-clean, index
+   updated. See STATUS "HONEST SCOPE" item (a).
+1. **★ L4 — wire the poly cert into the node-4 hook (the actual payoff; currently UNWIRED).** Feed a Route-C poly cert
+   into `reachesRigidOrCameron_viaAffineFormScheme` (`CascadeAffine.lean:2057`), retiring its quasipoly `hFormCert` for
+   the affine-polar family — this connects the four island seals to the canonizer's residue seam (§9.1 L4). Downstream of
+   the ported `RouteCFormAdapters`/`RouteCSeam`, so no import cycle. **This is what makes "combine done" mean "the
+   affine-polar node-4 case is sealed at poly".**
 2. **Promote scoped citations** to full Lean proofs (above) — `chain-descent-citation-discharge.md` §routes.
 3. *(lower)* **C# frame+WL confirmation** into `AffinePolarHandler.Confirm` (harvest-free p≥5 mate-ruling) — sound but
    advances no proof (reduces to the WL-dim core); the harvest-based `ConfirmByMultiQuadricReconstruction` already works.
@@ -105,6 +129,9 @@ the C# runtime is close to as complete as it usefully can be. Fuller record: [[p
 5. *(cleanup)* Move the one-shot exploratory `Probe_*` tests out of the gating build (`[Trait("Category","Exploratory")]`
    + default filter) — they are report-only by design (26 flagged, sweep in this session's history); the 3 RouteC probes
    that back live §9.2.8 claims are already asserted.
+6. *(cleanup, pre-existing)* `PublicTheoremIndex.md` is stale for ~27 non-build scratch files (the generator sweeps all
+   active source; a blanket `rewrite` surfaces ~200 undescribed rows). Not this port's job — a separate scoped decision
+   (exclude scratch, or a full description pass). The Route-C rows were spliced in without triggering that sweep.
 Everything below is the dated build history.
 
 **▶ C# BUILD (2026-07-04) — C1a + C1b (build history follows).**

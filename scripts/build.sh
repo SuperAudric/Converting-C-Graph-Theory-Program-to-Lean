@@ -76,6 +76,12 @@ MODULES=(
   ChainDescent.ObservableCountBridge # ← IsotropicIncidenceCount, ProfileReduction, PairForm (the χ(det G₂)↔Z_u(S) bridge over ZMod p; capstone jointIsoCount_ne_of_chiSep_pair; was BridgeA/B/C/D)
   ChainDescent.ObservableCountBridgeK # ← ObservableCountBridge, IsotropicIncidenceCountK, PairForm (bridge over abstract K: jointIsoCountK_ne_of_chiSep_pair; was BridgeAllK)
   ChainDescent.AffinePolarSeal      # ← Matching, BadAnchorCount, GoodAnchorNonvacuity, ObservableCountBridgeK, FieldGeneric (matching assembly + q=p seal reachesRigidOrCameron_affinePolar; was Incr5)
+  # ── Route C — the constructive form-recovery POLY route (ported 2026-07-05 from Scratch{RouteC,Seam,SeamTransport,SeamDispatch,RecoveredFormTransfer} + the NodeCountBridge transport helpers).
+  # Recover the form Q from the abstract graph ⟹ Aut = known classical group ⟹ canonicalize; sidesteps the node-4 WL wall.
+  # Four family seals (affine-polar/alternating/half-spin/Suzuki) + the atom-free seam (L1 htransport discharged). All axiom-clean.
+  ChainDescent.RouteCTransport      # ← Cascade (cross-graph WL-transport toolkit: SchemeRealizes + …_transport_iso tower + separatesAtBoundedBase_transport)
+  ChainDescent.RouteCFormAdapters   # ← CascadeAffine (the four Route-C form-family poly seals via the FormAdapter engine + multi-quadric bridges)
+  ChainDescent.RouteCSeam           # ← CascadeAffine, RouteCTransport (SealDisj + generic dispatch + affine-polar atom-free capstone + finer→coarser group-pinning)
 )
 
 start=$(date +%s)

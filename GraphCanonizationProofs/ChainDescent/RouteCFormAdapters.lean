@@ -8,7 +8,7 @@ frame** `{0, e₁, …, e_d}` (`frameBase`) — and Route C, working from an abs
 coordinates**: it must individualize an *iso-invariantly chosen* base. So the necessary first brick is to generalize
 the seal from the standard frame to **any base whose difference-vectors span `V`**.
 
-**What it proves (both axiom-clean, `lake env lean`, NOT in `build.sh`):**
+**What it proves (all axiom-clean, in `build.sh`; the four Route-C form-family seals live in this module):**
 * `coords_determine_spanning` — the spanning generalization of the landed `coords_determine` (`CascadeAffine.lean:2640`):
   if `Q`'s polar form is nondegenerate and the `Q`-values `Q v`, `Q (v − s)` agree with `v'` on a set `S` that
   **spans** `V`, then `v = v'`. (Same `Q`-value profile ⟹ same polar coordinates on a spanning set ⟹ by

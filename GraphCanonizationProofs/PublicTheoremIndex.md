@@ -1687,14 +1687,6 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 |------|------|-------------|-------|
 | `c0_route2_arith` | 5-51 | — | — |
 
-## ChainDescent/ScratchSeam.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `SchemeRealizes` | 33-37 | — | Definition |
-| `SealDisj` | 39-44 | — | Definition |
-| `reachesRigidOrCameron_viaSchurianRank3Affine` | 46-68 | — | — |
-
 ## ChainDescent/ScratchTBoundCorank.lean
 
 | Name | Line | Description | Notes |
@@ -1713,6 +1705,146 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `c0_le2` | 188-226 | — | — |
 | `normT_bucket_bound_corank2` | 228-294 | — | — |
 | `c0_le_threequarters_corank2` | 296-376 | — | — |
+## ChainDescent/RouteCFormAdapters.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RouteC.coords_determine_spanning` | 48-70 | — | — |
+| `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` | 72-127 | **Route C back-half.** The recovered isometry scheme `O(Q)` discretizes at ANY spanning base and seals via `viaSpielman` — spanning generalization of `viaOrthogonalForm`, no standard frame, no `hSmallAutThin`. | — |
+| `RouteC.affineScheme_refines_of_le` | 139-156 | — | — |
+| `RouteC.isometryScheme_refines_similitudeScheme` | 158-176 | **A3 brick 1.** `O(Q) ≤ GO(Q)` ⟹ the recovered isometry scheme refines the given similitude graph — the consistency half of the refinement bridge. | — |
+| `RouteC.NondegQuadricDeterminesForm` | 198-220 | **Scoped citation.** A nondegenerate quadric determines its quadratic form up to a nonzero scalar (`p≠2`, `d≥4`); the classical carry under A1 / F4 (projective Nullstellensatz). | Definition |
+| `RouteC.similitude_colouring_equivariant` | 222-233 | — | — |
+| `RouteC.similitude_conePreserving` | 235-250 | — | — |
+| `RouteC.recoveredForm_colouring_equivariant` | 252-272 | **F4 core.** A graph iso's linear part carries the `Q`-cone to the `Q'`-cone, so the recovered-`Q` difference colouring transports by one global scalar — the iso-invariance making recovered-form discretization canonical. | — |
+| `RouteC.frobVec` | 290-294 | — | Definition |
+| `RouteC.frobVec_sub` | 295-301 | — | — |
+| `RouteC.semisimilitude_colouring_equivariant` | 302-313 | — | — |
+| `RouteC.ConePreservingCollineationIsSemiSimilitude` | 315-328 | **Scoped citation (F2).** A cone-preserving collineation is a semi-similitude (fundamental theorem of projective geometry) — the `q=pᵉ` semilinear seam. | Definition |
+| `RouteC.recoveredForm_colouring_equivariant_semilinear` | 330-347 | **F4 over `𝔽_q`.** The semilinear (`q=pᵉ`) form of F4 — the recovered form is iso-invariant including the Frobenius/ΓL part. | — |
+| `RouteC.FormAdapter` | 364-378 | **The generic Route-C engine interface.** A form family plugs in its linear group `G₀` (∋ −1), a bounded spanning base, and a `separates` certificate. | Structure |
+| `RouteC.FormAdapter.reachesRigidOrCameron` | 380-391 | **The shared engine theorem.** Any `FormAdapter` reaches the rigid-or-Cameron disjunction — one engine, N family instances. | — |
+| `RouteC.affinePolarAdapter` | 393-419 | **Instance 1** — affine-polar `VO^ε` as a `FormAdapter` (validates the interface). | Definition, `noncomputable` |
+| `RouteC.coords_determine_multi` | 435-455 | — | — |
+| `RouteC.coords_determine_multi_spanning` | 457-476 | — | — |
+| `RouteC.multiFormAdapter` | 478-511 | **The multi-quadric engine.** A family of quadratic forms whose joint cone is the connection set plugs into one adapter — basis for the non-quadratic families. | Definition, `noncomputable` |
+| `RouteC.jointConeStab` | 534-554 | — | Definition |
+| `RouteC.neg_mem_jointConeStab` | 556-563 | — | — |
+| `RouteC.iInf_isometryGroup_le_jointConeStab` | 565-576 | — | — |
+| `RouteC.multiIsometryScheme_refines_coneScheme` | 578-593 | **brick-1-multi.** The recovered joint-isometry scheme `⨅ₖ O(Q_k)` refines the graph-intrinsic cone-stabilizer scheme. | — |
+| `RouteC.multiSimilitude_colouring_equivariant` | 595-607 | — | — |
+| `RouteC.JointVarietyDeterminesFamily` | 609-625 | **Scoped citation (multi-form).** The joint variety determines its quadric family up to an invertible linear change — the F4-multi sibling of `NondegQuadricDeterminesForm`. | Definition |
+| `RouteC.recoveredFamily_colouring_equivariant` | 627-645 | — | — |
+| `RouteC.recoveredFamily_partition_isoInvariant` | 647-664 | **F4-multi payoff.** The recovered value-tuple colour partition is iso-invariant (a graph iso transports it by a global injective Φ). | — |
+| `RouteC.polar_linMulLin` | 675-680 | — | — |
+| `RouteC.Plucker.pc` | 685-686 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf0` | 688-690 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf1` | 691-693 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf2` | 694-696 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf3` | 697-699 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf4` | 700-702 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.pluckerForms` | 704-706 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf0_polar` | 708-711 | — | — |
+| `RouteC.Plucker.Pf1_polar` | 712-715 | — | — |
+| `RouteC.Plucker.Pf2_polar` | 716-719 | — | — |
+| `RouteC.Plucker.plucker_hjoint` | 721-760 | — | — |
+| `RouteC.Plucker.alternatingAdapter` | 762-765 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.reachesRigidOrCameron_alternating` | 767-780 | **Instance 2 sealed** — the alternating `Alt(5,q)` family via 5 Plücker quadrics; the first non-quadratic Route-C seal. | — |
+| `RouteC.Plucker.alternating_refines_coneScheme` | 782-794 | — | — |
+| `RouteC.HalfSpin.halfSpin_reduction` | 816-833 | — | — |
+| `RouteC.HalfSpin.sc` | 850-851 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S0` | 853-855 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S1` | 856-858 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S2` | 859-861 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S3` | 862-864 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S4` | 865-867 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S5` | 868-870 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S6` | 871-873 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S7` | 874-876 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S8` | 877-879 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S9` | 880-882 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.spinorForms` | 884-887 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S0_polar` | 889-892 | — | — |
+| `RouteC.HalfSpin.S1_polar` | 893-896 | — | — |
+| `RouteC.HalfSpin.S2_polar` | 897-900 | — | — |
+| `RouteC.HalfSpin.S3_polar` | 901-904 | — | — |
+| `RouteC.HalfSpin.S4_polar` | 905-908 | — | — |
+| `RouteC.HalfSpin.spinor_hjoint` | 910-969 | — | — |
+| `RouteC.HalfSpin.spinAdapter` | 971-974 | — | Definition, `noncomputable` |
+| `RouteC.HalfSpin.reachesRigidOrCameron_halfSpin` | 976-990 | **Instance 3 sealed** — the half-spin family via the 10 D₅ spinor quadrics. | — |
+| `RouteC.HalfSpin.halfSpin_refines_coneScheme` | 992-1002 | — | — |
+| `RouteC.Suzuki.ovoidC` | 1029-1030 | — | Definition |
+| `RouteC.Suzuki.SF0` | 1032-1034 | — | Definition |
+| `RouteC.Suzuki.SF1` | 1035-1037 | — | Definition |
+| `RouteC.Suzuki.SF2` | 1038-1040 | — | Definition |
+| `RouteC.Suzuki.SF3` | 1041-1043 | — | Definition |
+| `RouteC.Suzuki.SF4` | 1044-1046 | — | Definition |
+| `RouteC.Suzuki.suzukiForms` | 1048-1051 | — | Definition |
+| `RouteC.Suzuki.four_eq_zero` | 1053-1056 | — | — |
+| `RouteC.Suzuki.SF0_ovoid` | 1058-1062 | — | — |
+| `RouteC.Suzuki.SF1_ovoid` | 1064-1068 | — | — |
+| `RouteC.Suzuki.SF2_ovoid` | 1070-1074 | — | — |
+| `RouteC.Suzuki.SF3_ovoid` | 1076-1080 | — | — |
+| `RouteC.Suzuki.SF4_ovoid` | 1082-1086 | — | — |
+| `RouteC.Suzuki.suzukiForms_ovoid` | 1088-1098 | — | — |
+| `RouteC.Suzuki.suzukiForms_infty` | 1099-1103 | — | — |
+| `RouteC.Suzuki.suzukiForms_homog` | 1104-1110 | — | — |
+| `RouteC.Suzuki.SFv` | 1125-1126 | — | Definition |
+| `RouteC.Suzuki.PreservesForms` | 1128-1131 | — | Definition |
+| `RouteC.Suzuki.SF0_recover` | 1147-1153 | — | — |
+| `RouteC.Suzuki.SF1_recover_x3` | 1155-1161 | — | — |
+| `RouteC.Suzuki.SF1_recover_x0` | 1163-1169 | — | — |
+| `RouteC.Suzuki.SF4_recover_x1` | 1171-1179 | — | — |
+| `RouteC.Suzuki.preservesForms_eq` | 1180-1184 | — | — |
+| `RouteC.Suzuki.recover_x2` | 1186-1191 | — | — |
+| `RouteC.Suzuki.recover_x3` | 1193-1198 | — | — |
+| `RouteC.Suzuki.recover_x0` | 1200-1205 | — | — |
+| `RouteC.Suzuki.recover_x1` | 1207-1212 | — | — |
+| `RouteC.Suzuki.suzukiForms_determine` | 1214-1241 | **Suzuki citation discharge.** The 5 σ-twisted ovoid forms determine the coordinates on the enlarged base — makes `reachesRigidOrCameron_suzuki` citation-free. | — |
+| `RouteC.Suzuki.SFbar` | 1256-1257 | — | Definition |
+| `RouteC.Suzuki.suzukiG₀` | 1259-1276 | — | Definition |
+| `RouteC.Suzuki.preservesForms_of_mem_G₀` | 1277-1284 | — | — |
+| `RouteC.Suzuki.neg_mem_suzukiG₀` | 1286-1292 | — | — |
+| `RouteC.Suzuki.suzukiBaseVecs` | 1294-1298 | — | Definition |
+| `RouteC.Suzuki.suzukiBase` | 1300-1304 | — | Definition, `noncomputable` |
+| `RouteC.Suzuki.suzukiBase_card_le` | 1305-1310 | — | — |
+| `RouteC.Suzuki.base_sfv_eq` | 1311-1320 | — | — |
+| `RouteC.Suzuki.suzukiAdapter` | 1322-1355 | — | Definition, `noncomputable` |
+| `RouteC.Suzuki.reachesRigidOrCameron_suzuki` | 1357-1371 | **Instance 4 sealed, citation-free** — Suzuki–Tits via 5 σ-twisted ovoid forms; `separates` proved by second-derivative recovery (no citation, no `hσ`). | — |
+
+## ChainDescent/RouteCSeam.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SealDisj` | 34-38 | The seal disjunction (`reachesRigidOrCameron` conclusion shape) with the free `IsCameronScheme` predicate + depth bound as parameters. | Definition |
+| `reachesRigidOrCameron_seamDispatch` | 47-63 | **The generic seam dispatch.** A residue that is Cameron, or realized by some already-sealed scheme `Y`, is itself sealed — one theorem over all forms-graph families + the cyclotomic branch. Carries the generic `htransport`. | — |
+| `reachesRigidOrCameron_affineResidue` | 65-78 | — | — |
+| `separatesAtBoundedBase_affinePolar` | 87-98 | **The Cameron-free producer.** `IsotropySeparatesAtBase Q T` (+ bounded `T`) gives a bounded base discretising the affine-polar similitude scheme — extracted before the `Or.inl(Or.inr)` padding. | — |
+| `reachesRigidOrCameron_viaSchurianRank3Affine_proved` | 100-118 | **The affine-polar atom-free capstone.** `htransport` DISCHARGED: transports the light `SeparatesAtBoundedBase` (not the 4-way `SealDisj`) and re-derives via `viaSpielman` — no `IsCameronScheme`-invariance premise. | — |
+| `cyclotomic_sealDisj` | 120-138 | **The cyclotomic dispatch input.** The 1-dim cyclotomic scheme satisfies `SealDisj` (via `affineSlice`) — the branch the four-case sketch dropped. | — |
+| `affineG_le_schemeAutGroup` | 147-160 | — | — |
+| `schemeAutGroup_affineScheme_mono` | 162-180 | — | — |
+| `isometrySimilitude_schemeAutGroup_mono` | 182-188 | — | — |
+| `AffineSchemeTwoClosed` | 190-198 | **Skresanov rank-3 2-closure citation** (one named premise, all four families): the affine scheme of `G₀` has no unexpected automorphisms. | Definition |
+| `schemeAutGroup_affineScheme_eq_affineG` | 200-210 | **The finer→coarser group-pinning.** Modulo Skresanov, the coarse forms graph's Aut group is exactly `affineG G₀ = translations ⋊ (known classical group)` — the |Aut|-side content. | — |
+| `schemeAutGroup_coarse_eq_affineG` | 212-219 | — | — |
+| `routeC_polySupport` | 221-240 | **Route C poly-support certificate.** Bundles (coarse Aut = known group) ∧ (fine harvest, genuine) ∧ (fine ≤ coarse) — the structural support for the meta poly-canonization. | — |
+
+## ChainDescent/RouteCTransport.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SchemeRealizes` | 33-34 | A permutation realizes a scheme iso `S ≅ X` (preserves `schemeAdj`) — the combinatorial iso the cited classification supplies. | Definition |
+| `warmRefine_congr_samePartition` | 38-45 | — | — |
+| `mem_image_transport` | 47-53 | — | — |
+| `indiv_samePartition_image` | 55-70 | — | — |
+| `signature_transport_iso` | 77-100 | — | — |
+| `sigKey_transport_iso` | 102-108 | — | — |
+| `refineStep_transport_iso` | 110-117 | — | — |
+| `iterate_refineStep_transport_iso` | 119-131 | — | — |
+| `warmRefine_transport_iso` | 133-142 | **The cross-graph WL-transport deliverable.** The whole `warmRefine` fixpoint transports along a graph iso `g` (`adj₂∘g = adj₁`) — the two-adjacency generalization of `warmRefine_transport`. | — |
+| `separatesAtBoundedBase_transport` | 148-189 | **The L1 payoff.** `SeparatesAtBoundedBase` is invariant along a scheme iso (`SchemeRealizes f`) — transports the single light predicate, no `schemeEquiv`/`StabilizerAt`. | — |
+
 ## ChainDescent/AffinePolarSeal.lean
 
 | Name | Line | Description | Notes |
