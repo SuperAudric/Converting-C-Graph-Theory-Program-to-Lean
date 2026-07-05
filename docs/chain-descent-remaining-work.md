@@ -31,15 +31,20 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > in build.sh; seals `affinePolarAdapter` / `Plucker.reachesRigidOrCameron_alternating` / `HalfSpin.reachesRigidOrCameron_halfSpin`
 > / `Suzuki.reachesRigidOrCameron_suzuki`). **AUTHORITATIVE = [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md)**
 > (read its STATUS). The WL-dimension material below is the *alternative* route (STALLED at the node-4 wall, recovery doc
-> §9.8.9); Route C is the live poly path. **▶ SEAM DONE (2026-07-04):** the §9 combine landed at the honest level after a
-> vacuity correction (Route C poly is inherently META; genuine content = coarse Aut = the known `affineG(similitude)` mod
-> the named Skresanov citation `AffineSchemeTwoClosed`, + cyclotomic dispatch; `ScratchRecoveredFormTransfer.lean` /
-> `ScratchSeamDispatch.lean`, axiom-clean; one carried atom `htransport`=L1). **▶ C# RUNTIME BUILT (2026-07-04/05): C1a–C4
-> + family-dispatch LANDED, 57/57 Route-C tests green** (plan STATUS "C# BUILD — HANDOFF SNAPSHOT"; affine-polar live, other
-> 3 families = scaffolds). **KEY FINDING (2026-07-05): frame+WL discretizes VO^ε_d(q) in `d+1` steps for ALL p** ⟹ harvest-free
-> coordinatization cheap; cone-blindness was a line-sum artifact; residual open = proving discretization poly (= existing
-> WL-dim core). Remaining for the whole seal = the frame+WL harvest-free confirmation (next C# step) + `htransport` — **not**
-> the `D3d`/`ZProfileSeparates` line. [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
+> §9.8.9); Route C is the live poly path. **▶ SEAM DONE + L1 DISCHARGED (2026-07-04/05):** the §9 combine landed at the
+> honest level after a vacuity correction (Route C poly is inherently META; genuine content = coarse Aut = the known
+> `affineG(similitude)` mod the named Skresanov citation `AffineSchemeTwoClosed`, + cyclotomic dispatch;
+> `ScratchRecoveredFormTransfer.lean` / `ScratchSeamDispatch.lean`, axiom-clean). **★ `htransport` (L1) is now DISCHARGED
+> (2026-07-05, `ScratchSeamTransport.lean`, axiom-clean) — the seam carries NO atom**: transport ONE light predicate
+> `SeparatesAtBoundedBase` (cross-graph `warmRefine_transport_iso`), not the 4-way `SealDisj`; capstone
+> `reachesRigidOrCameron_viaSchurianRank3Affine_proved`. **▶ C# RUNTIME BUILT (2026-07-04/05): C1a–C4 + family-dispatch +
+> Suzuki runtime prototype (VSz(8), 2026-07-05); 60/60 fast Route-C tests + Suzuki LongRunning** (affine-polar + Suzuki live;
+> alternating/half-spin DORMANT — dense-infeasible FEASIBILITY WALL, plan §9.2.7). **KEY FINDING (2026-07-05): frame+WL
+> discretizes VO^ε_d(q) in `d+1` steps for ALL p** ⟹ cone-blindness was a line-sum artifact; residual open = proving
+> discretization poly (= existing WL-dim core). **★ REMAINING for the whole Route-C seal = PORT the scratch spine into
+> `build.sh` + promote the scoped citations** (NOT the frame+WL C# confirm, which is sound but advances no proof — reassessment
+> 2026-07-05: C# is ~as-complete-as-useful, remaining high-value work is Lean). [[project_routec_csharp_build_2026-07-04]] ·
+> [[project_routec_seam_2026-07-04]].
 >
 > **▶ UPDATE (2026-06-24) — the first forms-graph instance is SEALED.** `VO⁻₄(3)` (`ScratchBM3Glue.vo4minus_seal`,
 > axiom-clean `[propext, Classical.choice, Quot.sound]`) closes the affine-polar residue at the minus form modulo `{G3}`

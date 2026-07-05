@@ -168,13 +168,17 @@ close it — is set out in
 > inherently the project's standard **meta** claim, not a coarse Lean predicate). Genuine content: group-pinning
 > `schemeAutGroup_coarse_eq_affineG` (coarse Aut = the known `affineG(similitude)`, all 4 families, mod the named Skresanov
 > citation `AffineSchemeTwoClosed`) + `routeC_polySupport` (`ScratchRecoveredFormTransfer.lean`) + the **cyclotomic dispatch
-> branch** (`ScratchSeamDispatch.lean`), all axiom-clean; the one carried Lean atom is `htransport` (L1, tractable).
-> **★ C# RUNTIME BUILT (2026-07-04/05): C1a–C4 + family-dispatch registry LANDED, 57/57 Route-C tests green** (plan STATUS
-> "C# BUILD — HANDOFF SNAPSHOT"). Affine-polar family live; alternating/half-spin/Suzuki = wired scaffolds. **KEY FINDING
-> (2026-07-05, plan §9.2.8): a size-`(d+1)` frame + WL discretizes VO^ε_d(q) for ALL p** — harvest-free coordinatization is
-> cheap; the "cone-blindness" hard core was a line-sum artifact; residual open = proving the discretization is poly (= the
-> existing WL-dim core). **Next = build the frame+WL harvest-free confirmation** into `AffinePolarHandler` (plan HANDOFF
-> SNAPSHOT + §9.2.8). [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
+> branch** (`ScratchSeamDispatch.lean`), all axiom-clean. **★ L1 `htransport` DISCHARGED (2026-07-05,
+> `ScratchSeamTransport.lean`, axiom-clean) — the seam carries NO atom** (transport ONE light predicate
+> `SeparatesAtBoundedBase` via a cross-graph `warmRefine_transport_iso`, not the 4-way `SealDisj`; capstone
+> `reachesRigidOrCameron_viaSchurianRank3Affine_proved`) ⟹ the Lean deliverable is complete modulo scoped citations + PORT.
+> **★ C# RUNTIME BUILT (2026-07-04/05): C1a–C4 + family-dispatch + Suzuki runtime prototype (VSz(8), 2026-07-05); 60/60
+> fast Route-C tests + Suzuki LongRunning** (affine-polar + Suzuki live; alternating/half-spin DORMANT — dense-infeasible
+> FEASIBILITY WALL, plan §9.2.7). **KEY FINDING (2026-07-05): a size-`(d+1)` frame + WL discretizes VO^ε_d(q) for ALL p** —
+> cone-blindness was a line-sum artifact; residual open = proving the discretization is poly (= the existing WL-dim core).
+> **★ NEXT (reassessment 2026-07-05): PORT the scratch spine into `build.sh` + promote scoped citations** — the remaining
+> high-value Route-C work is Lean, NOT the frame+WL C# confirm (sound but advances no proof; harvest-based Confirm already
+> works). See the plan's HANDOFF SNAPSHOT "NEXT TASKS". [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
 > **★★★★ LIVE FRONTIER (2026-06-30 v2) — the polynomial route is [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md),
 > RETARGETED to `T0` (bounded branching). READ THAT DOC FIRST.** The forms-graph residue is SEALED at **quasipoly**
 > (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in build; sub-exp floor `reachesRigidOrCameron_viaSpielman`). For

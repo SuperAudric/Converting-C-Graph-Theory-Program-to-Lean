@@ -18,8 +18,10 @@
 
 ## STATUS (read first)
 
-**Where Route C stands (2026-07-04) — handoff snapshot.** **★ ALL FOUR FORM FAMILIES ARE NOW SEALED** (affine-polar,
-alternating `Alt(5,q)`, half-spin, Suzuki–Tits). **★ SUZUKI IS NOW CITATION-FREE (2026-07-04):** the old scoped
+**Where Route C stands (2026-07-05) — see the HANDOFF SNAPSHOT below for the current state + next tasks.** **★ ALL FOUR
+FORM FAMILIES ARE SEALED** (affine-polar, alternating `Alt(5,q)`, half-spin, Suzuki–Tits) **+ the L1 seam atom
+`htransport` is DISCHARGED** (2026-07-05) ⟹ the Lean deliverable is complete modulo scoped citations + PORT; the C#
+runtime is ~as-complete-as-useful (affine-polar + Suzuki live). **★ SUZUKI IS NOW CITATION-FREE (2026-07-04):** the old scoped
 citation `SuzukiFormsDetermine` is **discharged** — `separates` is proved outright by second-derivative recovery on
 an enlarged base (see "Suzuki" below), so `reachesRigidOrCameron_suzuki` carries **no citation and no `hσ`**. So
 three families rest on one exact scoped citation each (`NondegQuadricDeterminesForm` / `JointVarietyDeterminesFamily`),
@@ -60,26 +62,50 @@ remaining scoped citations to full Lean proofs. Landed:
   (`NondegQuadricDeterminesForm`); the **meta-poly bootstrapping is assessed sound** (§7a — global coordinatization,
   not the node-4 wall in disguise).
 
-**▶▶▶ C# BUILD — HANDOFF SNAPSHOT (2026-07-05). Read this first; the dated bullets below are the build history.**
-**State:** the Route-C C# runtime is built and green (**57/57 Route-C tests, 0 regressions**, full build clean). Pipeline:
-recover form family (C1a) → build answer group (C1b) → classify (C2) → canonicalize by iso-type (C3, **default ON**) →
-Aut-free geometry (C4). Family-dispatch registry (`IFormFamilyHandler`) is in place; **affine-polar is the only live
-family**, alternating/half-spin/Suzuki are wired scaffolds (§9.2.7). Files: `QuadraticFormRecovery.cs` (C1a),
-`ClassicalGroupGenerators.cs`+`ClassicalSimilitude.cs` (C1b), `FormsGraphClassifier.cs` (C2), `RouteCCanonicalizer.cs`+
-`FormFamilyHandler.cs`+`AffinePolarHandler.cs`+`{Alternating,HalfSpin,Suzuki}Handler.cs`+`FormsGraphBuilder.cs` (C3),
-`GeometricCoordinatizer.cs` (C4). Tests: `RouteC*Probe.cs`.
-**Key results:** the canonical *answer* `(q,m,ε)`+`|Aut|` is harvest-free for all q (`RecoverAffinePolarInvariant`); the
-*confirmation* (rule out parameter-mates) is currently harvest-free only via the p=3 line-sum coordinatizer, else uses the
-descent harvest. **★ DECISIVE FINDING (2026-07-05, §9.2.8 CORRECTION): a size-`(d+1)` frame + WL discretizes VO^ε_d(q) for
-ALL p in `d+1` greedy steps (`RouteCScalarRecoveryProbe`)** — so harvest-free coordinatization/confirmation is cheap for
-every p; the cone-blindness "hard core" was a line-sum artifact. The residual open item is *proving* that discretization is
-poly (= the project's existing WL-dim/node-4 core), NOT a Route-C-specific barrier.
-**▶ THE NEXT STEP (the pick-up):** build the harvest-free confirmation as **frame+WL discretize → compare to StandardVO**,
-and wire it into `AffinePolarHandler.Confirm` (replacing / falling back from the harvest-based
-`ConfirmByMultiQuadricReconstruction`). Concretely: greedily individualize a size-`(d+1)` frame + 1-WL refine to a discrete
-colouring (the `RouteCScalarRecoveryProbe.Refine`/greedy loop is a working prototype), then confirm the input is genuinely
-VO by comparing its canonical form against `RouteCCanonicalizer.StandardVO(q,m,ε)`. This makes the p≥5 path harvest-free.
-Then: the alternating/half-spin/Suzuki family cores (§9.2.7 completion specs). Everything below is the dated history.
+**▶▶▶ HANDOFF SNAPSHOT (2026-07-05, current). Read this first; the dated bullets below are the build history.**
+
+**LEAN — the seam is now ATOM-FREE.** All four family adapters sealed axiom-clean (`ScratchRouteC.lean`), and **★ L1
+`htransport` is DISCHARGED** (`ScratchSeamTransport.lean`, axiom-clean; §9 item 3, [[project_routec_seam_2026-07-04]]) —
+the Route-C seam carries **no uncited/unproved atom**. Mechanism: transport the ONE light predicate `SeparatesAtBoundedBase`
+(not the 4-way `SealDisj`) via a cross-graph `warmRefine_transport_iso`; capstone `reachesRigidOrCameron_viaSchurianRank3Affine_proved`.
+So the Lean deliverable is complete **modulo scoped citations + PORT**. Remaining Lean: (a) **PORT** the scratch spine
+(`ScratchRouteC`, `ScratchSeamTransport`, `ScratchRecoveredFormTransfer`, `ScratchSeamDispatch`, `ScratchSeam`) into
+`build.sh`+`lakefile`+`PublicTheoremIndex.md` — mechanical, no math; (b) promote the scoped citations to full proofs
+(`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`, `ConePreservingCollineationIsSemiSimilitude`,
+`AffineSchemeTwoClosed`) — optional, `chain-descent-citation-discharge.md` has routes.
+
+**C# — the runtime is ~as-complete-as-useful (reassessment 2026-07-05).** Built and green (60/60 fast Route-C tests +
+Suzuki LongRunning, 0 regressions, full build clean). Pipeline: recover form family (C1a) → build answer group (C1b) →
+classify (C2) → canonicalize by iso-type (C3, **default ON**) → Aut-free geometry (C4), dispatched over an
+`IFormFamilyHandler` registry (§9.2.7). **Live families: affine-polar (odd q) + Suzuki (VSz(8), NEW 2026-07-05 runtime
+prototype).** Alternating/half-spin are **dormant by design** — the **FEASIBILITY WALL** (§9.2.7): dense `n²` adjacency
+makes `Alt(5,q)=q^{10}` (≥14 GB) and half-spin `q^{16}` uninstantiable at every usable `q`, so those handlers would never
+fire; their correctness content is the sealed Lean adapters. Suzuki files: `SuzukiOvoid.cs` + `SuzukiHandler.cs` +
+`RouteCCanonicalizer.SuzukiAutOrder`; the load-bearing new idea is a **field-agnostic F₂ degree-signature `Confirm`**
+(cone is cubic-cut but not quadric-cut ⟹ distinguishes VSz(8) from its cospectral mate VO⁻₄(8) with no field recovery).
+Other files: `QuadraticFormRecovery.cs` (C1a), `ClassicalGroupGenerators.cs`+`ClassicalSimilitude.cs` (C1b),
+`FormsGraphClassifier.cs` (C2), `FormFamilyHandler.cs`+`AffinePolarHandler.cs`+`{Alternating,HalfSpin}Handler.cs`+
+`FormsGraphBuilder.cs` (C3), `GeometricCoordinatizer.cs` (C4). Tests: `RouteC*Probe.cs`.
+
+**★ REASSESSMENT VERDICT (2026-07-05): the remaining high-value Route-C work is LEAN, not more C#.** The genuine
+through-the-wall mechanism (recover `Q` globally → known group `AΓO(Q)`) is confirmed for affine-polar; the 2026-07-05
+frame+WL finding is a *negative* result (it dissolves the fake cone-blindness sub-problem but reduces to the project's
+existing WL-dim core, so it advances no proof); and alternating/half-spin runtime is blocked by the feasibility wall. So
+the C# runtime is close to as complete as it usefully can be. Fuller record: [[project_routec_csharp_build_2026-07-04]].
+
+**▶ NEXT TASKS (any is a clean pick-up; rough priority):**
+1. **PORT the Lean scratch spine into `build.sh`** (mechanical) — puts the four seals + L1 under the green-build guarantee.
+   Verify each still elaborates axiom-clean first (`lake env lean ChainDescent/<file>.lean` — see "VERIFY" below; note a
+   stray cwd can give a spurious "no such file", re-run with `cd GraphCanonizationProofs`).
+2. **Promote scoped citations** to full Lean proofs (above) — `chain-descent-citation-discharge.md` §routes.
+3. *(lower)* **C# frame+WL confirmation** into `AffinePolarHandler.Confirm` (harvest-free p≥5 mate-ruling) — sound but
+   advances no proof (reduces to the WL-dim core); the harvest-based `ConfirmByMultiQuadricReconstruction` already works.
+4. *(lower)* **Suzuki generalization** past q=8 or **alternating/half-spin runtime** — both gated on a sparse/implicit
+   graph representation (the feasibility wall); large infra, arguably not worth it (those graphs can't be canonizer inputs).
+5. *(cleanup)* Move the one-shot exploratory `Probe_*` tests out of the gating build (`[Trait("Category","Exploratory")]`
+   + default filter) — they are report-only by design (26 flagged, sweep in this session's history); the 3 RouteC probes
+   that back live §9.2.8 claims are already asserted.
+Everything below is the dated build history.
 
 **▶ C# BUILD (2026-07-04) — C1a + C1b (build history follows).**
 - **C1a `RecoverFormFamily`** (added to `QuadraticFormRecovery.cs`): generalizes A1 from `kernel[0]` (one quadratic) to
@@ -201,11 +227,13 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
    proved, not carried). **Eliminates** the `IsCameronScheme`-invariance premise (Cameron asserted on `S` directly, never
    transported) AND the `SchemeBlockRecovered`/`schemeEquiv` wrinkle (block never transported). Supersedes ScratchSeam's
    carried-`htransport` `reachesRigidOrCameron_viaSchurianRank3Affine`.
-4. ✅ **The C# runtime — C1a–C4 + family-dispatch LANDED (2026-07-04/05), 57/57 Route-C tests green.** See the
-   "C# BUILD — HANDOFF SNAPSHOT" at the top of STATUS + §9.2. Affine-polar family live; alternating/half-spin/Suzuki =
-   wired scaffolds (§9.2.7). **★ NEXT ACTIONABLE = the frame+WL harvest-free confirmation** (§9.2.8 CORRECTION):
-   frame+WL discretizes VO^ε_d(q) in `d+1` steps for ALL p, so build it into `AffinePolarHandler.Confirm` to make the
-   p≥5 path harvest-free. Then the alternating/half-spin/Suzuki family cores (§9.2.7 completion specs).
+4. ✅ **The C# runtime — C1a–C4 + family-dispatch LANDED (2026-07-04/05); Suzuki runtime prototype ADDED (2026-07-05).**
+   See the "HANDOFF SNAPSHOT" at the top of STATUS + §9.2 + §9.2.7. **Live families: affine-polar (odd q) + Suzuki
+   (VSz(8))**; alternating/half-spin **dormant by design** (FEASIBILITY WALL, §9.2.7 — dense-infeasible at every `q`).
+   60/60 fast Route-C tests + Suzuki LongRunning, 0 regressions. **★ REASSESSMENT (2026-07-05): C# runtime is
+   ~as-complete-as-useful; the remaining high-value Route-C work is LEAN (PORT + citations), not more C#** — the frame+WL
+   confirmation (§9.2.8) is sound but advances no proof (reduces to the WL-dim core), and the harvest-based `Confirm`
+   already works. Details: HANDOFF SNAPSHOT "NEXT TASKS" + [[project_routec_csharp_build_2026-07-04]].
 5. **The remaining carried scoped citations** (optional, to remove them from the spine): full Lean proofs of
    `NondegQuadricDeterminesForm` (single-quadric uniqueness), `JointVarietyDeterminesFamily` (multi-quadric — alt /
    half-spin), `ConePreservingCollineationIsSemiSimilitude` (F2 semilinear seam), and `AffineSchemeTwoClosed` (the
@@ -285,8 +313,13 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
   `ConePreservingCollineationIsSemiSimilitude`, `AffineSchemeTwoClosed`) to full Lean proofs + PORT (`ScratchSeamTransport`
   + the ScratchRouteC spine → `build.sh`). **No further family builds remain.**
 
-**▶ VERIFY what's landed (fresh-reader commands):**
-- Lean (SEAM, NEW 2026-07-04): `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRecoveredFormTransfer.lean`
+**▶ VERIFY what's landed (fresh-reader commands).** NB: always `cd GraphCanonizationProofs` first — a stray working
+directory gives a spurious `no such file or directory` on `ChainDescent/…`; re-run from the repo root.
+- Lean (L1 SEAM TRANSPORT, NEW 2026-07-05): `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchSeamTransport.lean`
+  (exit 0, no diagnostics; ends with `#print axioms` showing `[propext, Classical.choice, Quot.sound]`). Key decls:
+  `warmRefine_transport_iso` (cross-graph WL transport), `separatesAtBoundedBase_transport` (step 2),
+  `reachesRigidOrCameron_viaSchurianRank3Affine_proved` (the seam, `htransport` proved).
+- Lean (SEAM, 2026-07-04): `… lake env lean ChainDescent/ScratchRecoveredFormTransfer.lean`
   and `… ChainDescent/ScratchSeamDispatch.lean` (both exit 0, no warnings; each ends with `#print axioms` lines showing
   `[propext, Classical.choice, Quot.sound]`). Key decls: `schemeAutGroup_coarse_eq_affineG` + `routeC_polySupport`
   (group-pinning + certificate); `reachesRigidOrCameron_seamDispatch` + `cyclotomic_sealDisj` (cyclotomic dispatch).
@@ -297,6 +330,10 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
   `Suzuki.reachesRigidOrCameron_suzuki`.
 - C#: `cd GraphCanonizationProject.Tests && dotnet test --filter "FullyQualifiedName~RouteCF1Probe.F1_Recovers_TranslationGroup&Category!=LongRunning"`
   (fast, q=2,3; the `_Large` q=5 cases are `LongRunning`, ~5 min each — canonizer cost, not F1/A1).
+- C# (Suzuki, NEW 2026-07-05): `dotnet test --filter "FullyQualifiedName~RouteCSuzukiProbe&Category!=LongRunning"`
+  (fast: σ-form model + Clebsch negative-control degree signature + `AutOrder`); the `StandardGraph_IsVSz8_SRG`,
+  `DegreeSignature_CubicNotQuadric`, `Confirm_Path_IsBasisInvariant_VSz8` cases are `LongRunning` (build the 4096-vertex
+  graph, ~2 min each). Whole fast suite: `dotnet test --filter "FullyQualifiedName~RouteC&Category!=LongRunning"` (60/60).
 - Python probes: `cd GraphCanonizationProofs && python3 route_c_reconstruct_probe.py` / `route_c_f1_probe.py` /
   `route_c_halfspin_probe.py` (spinor quadrics: dim 10, 𝔽₂ count 2296) / `route_c_suzuki_probe.py` (Suzuki: SRG params,
   5 σ-forms, joint zero=cone, base analysis) / `route_c_bootstrap_probe.py`.
@@ -1112,13 +1149,17 @@ structure"* and *"poly runtime"* as the meta/engineering layer.
 
 #### 9.2.7 The FAMILY-DISPATCH architecture (built 2026-07-04) — how the four families interconnect
 
+> **★ UPDATE (2026-07-05): Suzuki is now BUILT (runtime prototype), not a scaffold** — see the "★ SUZUKI BUILT" +
+> "★★ FEASIBILITY WALL" blocks lower in this section. Live families = affine-polar + Suzuki; alternating/half-spin
+> stay dormant (dense-infeasible). The paragraph just below is the original 2026-07-04 scaffold description.
+
 Node 4 = four families; each is an **`IFormFamilyHandler`** (the C# mirror of the Lean `FormAdapter` engine), and
 `RouteCCanonicalizer` dispatches over a registry. **Affine-polar is fully built; the other three are handlers with all
 interconnection LIVE and only their per-family math core stubbed** — so a future builder fills a well-defined stub, not
 a green field. Files: `FormFamilyHandler.cs` (interface + generic `FormFamilyHandlerBase<TInv>` + generalized
 `RouteCCanonicalResult` + shared helpers), `AffinePolarHandler.cs` (real), `AlternatingHandler.cs` / `HalfSpinHandler.cs`
-/ `SuzukiHandler.cs` (scaffolds). Tests: `RouteCFamilyDispatchProbe.cs` (regression through the dispatch + stubs decline
-gracefully; 114/114 with the core suite).
+/ `SuzukiHandler.cs` (scaffolds — Suzuki since built, above). Tests: `RouteCFamilyDispatchProbe.cs` (regression through the
+dispatch + stubs decline gracefully; 114/114 with the core suite).
 
 **The four hooks each handler implements** (the base wires the flow: `RecognizeInvariant` → `Confirm` → emit
 `StandardGraph` + `AutOrder`):

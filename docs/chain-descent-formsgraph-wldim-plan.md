@@ -251,7 +251,9 @@ heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `af
    is the template. §11.6.
 4. **Other schurian families** (alternating / half-spin) — reuse the skeleton + the field-generic chain. §11.4.
 5. **char-2 + Suzuki** — one bespoke track (Arf + additive trace; Mathlib substrate absent); deferred. §11.5.
-6. **The seam build** — `htransport` (spiked `ScratchSeam`, on disk), mechanical, on the landed `forcedNode_relabel`. §11.6.
+6. ~~**The seam build** — `htransport`~~ **✅ DONE (2026-07-05, `ScratchSeamTransport.lean`, axiom-clean)** — `htransport`
+   is DISCHARGED (transport the light `SeparatesAtBoundedBase`, not the 4-way `SealDisj`, via cross-graph
+   `warmRefine_transport_iso`); capstone `reachesRigidOrCameron_viaSchurianRank3Affine_proved`. See `chain-descent-route-c-plan.md` §9 item 3. §11.6.
 
 **NOT the open SRG-WL-dimension problem** — structure/base/answer are known (Skresanov); see §2.
 **History** (increment 3–5 blow-by-blow, sessions 1–3, the `VO⁻₄(3)` instance seal, the spike/dead-end log) →
@@ -324,7 +326,7 @@ The decl-level math writeup that used to live here is now fully captured by thos
   reaches `q≥16`), `ScratchRoute2{,Arith}`, `ScratchCountTight` (`c0_le_route2`: `NS ≤ (1−1/4q²)·|V|`, no threshold).
 - **`VO⁻₄(3)` instance** (the concrete `decide`-based proof-of-concept; its *result* is superseded by `AffinePolarSeal` as
   the general route, kept as a worked instance): `ScratchBM3Bridge`, `ScratchBM3Glue` (`vo4minus_seal`).
-- **Seam spike**: `ScratchSeam` (the one mechanical `htransport` obligation; §11.6).
+- **Seam spike**: `ScratchSeam` → **`htransport` DISCHARGED ✅ (2026-07-05, `ScratchSeamTransport.lean`, axiom-clean); §11.6.**
 
 **Rename / merge map (new ← old).** `Matching`←ScratchMatching · `PairForm`←PairSep · `PencilTBound`←Corank+GoodAnchor+
 Bucket+ChiNorm+TBound · `PerAnchorBound`←Count+C0+C0Final · `BadAnchorCount`←Incr4+Incr4b · `Coordinatization`←Incr4c ·
@@ -812,6 +814,14 @@ Dependency-ordered, with the modifications folded in:
 > with them, only the combinatorial layer).
 
 ### 11.6 Step group 4 — structural wiring (citations + glue) — DESIGN THE SEAM EARLY
+
+> **★ REALIZED (2026-07-05) — the prose below is the historical scoping; the seam is BUILT.** `htransport` was
+> DISCHARGED axiom-clean (`ScratchSeamTransport.lean`), and the "option (b) — prove it, don't hide it in the citation"
+> verdict below was followed. The realization went further than this scoping foresaw: rather than transport the 4-way
+> `SealDisj`, it transports the ONE light predicate `SeparatesAtBoundedBase` (the forms-graph seal is Cameron-free and
+> inhabits only `SchemeRecoveredByDepth`), via a cross-graph `warmRefine_transport_iso` — eliminating the
+> `IsCameronScheme`-invariance premise and the `SchemeBlockRecovered`/`schemeEquiv` wrinkle entirely. Capstone
+> `reachesRigidOrCameron_viaSchurianRank3Affine_proved`. Authoritative: `chain-descent-route-c-plan.md` §9 item 3.
 
 This is the **load-bearing** step — it produces the rigid-or-Cameron conclusion for the schurian residue (NOT, per
 AUDIT-S finding 3, a "discharge of `hSmallAutThin`": the per-family `wittFree` route is a *parallel* seal route, and the
