@@ -37,6 +37,7 @@ Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, 
 NOT in `build.sh` yet (WIP scratch).
 -/
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
+import Mathlib.LinearAlgebra.BilinearForm.Properties
 import Mathlib.Tactic.LinearCombination
 
 namespace ChainDescent.Nullstellensatz
@@ -99,6 +100,83 @@ theorem form_eq_of_polar_eq_smul (Q R : QuadraticForm K V) (μ : K) (h2 : (2 : K
   rw [QuadraticMap.polar_self, QuadraticMap.polar_self] at hxx
   simp only [nsmul_eq_mul, Nat.cast_ofNat] at hxx
   exact mul_left_cancel₀ h2 (by linear_combination hxx)
+
+/-! ### The assembly — the two structural facts imply the μ-scalar conclusion
+
+`nullstellensatz_of_structural` reduces the full quadric Nullstellensatz to two **purely geometric** facts about the
+nondegenerate `Q` (probe-validated for the `VO^ε` families, `nsp2.py`):
+- `hspan` — for each anisotropic `y`, the **punctured isotropic cone** `{x | Q x = 0 ∧ polar Q x y ≠ 0}` spans `V`.
+- `hlink` — the anisotropic vectors have **`polar`-diameter ≤ 2**: any two are joined through one anisotropic `z` with
+  `polar Q y z ≠ 0` and `polar Q z y' ≠ 0` (replaces a general connectivity induction).
+Everything else is elementary and proved here. This is the "isolate" capstone: the opaque Nullstellensatz is now
+exactly these two finite-geometry facts + `nullstellensatz_core`. -/
+theorem nullstellensatz_of_structural [Nontrivial V] (Q R : QuadraticForm K V)
+    (hQnd : (QuadraticMap.polarBilin Q).Nondegenerate)
+    (hcone : ∀ v, Q v = 0 ↔ R v = 0)
+    (hspan : ∀ y, Q y ≠ 0 →
+      Submodule.span K {x | Q x = 0 ∧ QuadraticMap.polar Q x y ≠ 0} = ⊤)
+    (hlink : ∀ y y', Q y ≠ 0 → Q y' ≠ 0 →
+      ∃ z, Q z ≠ 0 ∧ QuadraticMap.polar Q y z ≠ 0 ∧ QuadraticMap.polar Q z y' ≠ 0) :
+    ∃ μ : Kˣ, ∀ v, R v = (μ : K) * Q v := by
+  classical
+  -- (0) an anisotropic vector exists (else `polarBilin Q = 0`, impossible for a nondegenerate form).
+  have hEx : ∃ y, Q y ≠ 0 := by
+    by_contra h
+    simp only [not_exists, not_not] at h
+    have hz : QuadraticMap.polarBilin Q = 0 := by
+      ext x y
+      simp [QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, h]
+    exact LinearMap.BilinForm.not_nondegenerate_zero K V (hz ▸ hQnd)
+  -- (†) the per-anisotropic-`y` identity `Q y · polar R x y = R y · polar Q x y`, for ALL x
+  -- (proved on the punctured cone via `nullstellensatz_core`, then extended by linearity over its span).
+  have key : ∀ y, Q y ≠ 0 → ∀ x,
+      Q y * QuadraticMap.polar R x y = R y * QuadraticMap.polar Q x y := by
+    intro y hy x
+    have hx : x ∈ Submodule.span K {x | Q x = 0 ∧ QuadraticMap.polar Q x y ≠ 0} := by
+      rw [hspan y hy]; exact Submodule.mem_top
+    induction hx using Submodule.span_induction with
+    | mem z hz =>
+        obtain ⟨hziso, hzp⟩ := hz
+        have hc := nullstellensatz_core Q R (fun v hv => (hcone v).mp hv) hziso (y := y)
+        have h0 := (mul_eq_zero.mp hc).resolve_left hzp
+        linear_combination -h0
+    | zero => simp
+    | add a b _ _ pa pb =>
+        simp only [QuadraticMap.polar_add_left]
+        linear_combination pa + pb
+    | smul c a _ pa =>
+        simp only [QuadraticMap.polar_smul_left, smul_eq_mul]
+        linear_combination c * pa
+  -- (step) two `polar`-linked anisotropic vectors have the same ratio `R/Q`.
+  have step : ∀ y z, Q y ≠ 0 → Q z ≠ 0 → QuadraticMap.polar Q y z ≠ 0 →
+      R y * Q z = R z * Q y := by
+    intro y z hy hz hpyz
+    have e1 : Q z * QuadraticMap.polar R y z = R z * QuadraticMap.polar Q y z := key z hz y
+    have e2 : Q y * QuadraticMap.polar R y z = R y * QuadraticMap.polar Q y z := by
+      have h := key y hy z
+      rwa [QuadraticMap.polar_comm R z y, QuadraticMap.polar_comm Q z y] at h
+    have h3 : (R y * Q z) * QuadraticMap.polar Q y z = (R z * Q y) * QuadraticMap.polar Q y z := by
+      linear_combination Q y * e1 - Q z * e2
+    exact mul_right_cancel₀ hpyz h3
+  -- (const) hence the ratio is constant across ALL anisotropic vectors (via the diameter-≤2 link).
+  have const : ∀ y y', Q y ≠ 0 → Q y' ≠ 0 → R y * Q y' = R y' * Q y := by
+    intro y y' hy hy'
+    obtain ⟨z, hz, hyz, hzy'⟩ := hlink y y' hy hy'
+    have s1 : R y * Q z = R z * Q y := step y z hy hz hyz
+    have s2 : R z * Q y' = R y' * Q z := step z y' hz hy' hzy'
+    have h3 : (R y * Q y') * Q z = (R y' * Q y) * Q z := by
+      linear_combination Q y' * s1 + Q y * s2
+    exact mul_right_cancel₀ hz h3
+  -- (finish) `μ := R y₀ / Q y₀`; `R v = μ Q v` by cases on `Q v = 0` (cone) vs `≠ 0` (constancy).
+  obtain ⟨y0, hy0⟩ := hEx
+  have hRy0 : R y0 ≠ 0 := fun h => hy0 ((hcone y0).mpr h)
+  refine ⟨Units.mk0 (R y0 * (Q y0)⁻¹) (mul_ne_zero hRy0 (inv_ne_zero hy0)), fun v => ?_⟩
+  simp only [Units.val_mk0]
+  by_cases hv : Q v = 0
+  · rw [(hcone v).mp hv, hv, mul_zero]
+  · have hc := const v y0 hv hy0
+    rw [show R y0 * (Q y0)⁻¹ * Q v = R y0 * Q v * (Q y0)⁻¹ by ring, ← hc,
+      mul_assoc, mul_inv_cancel₀ hy0, mul_one]
 
 end Field
 

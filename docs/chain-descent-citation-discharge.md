@@ -77,7 +77,7 @@ truth for what is still carried (a discharged citation is *removed*, not merely 
 | Citation (Prop) | Where carried | What it is / faithful source | Load-bearing? | Discharge status |
 |---|---|---|---|---|
 | **`Suzuki.SuzukiFormsDetermine`** | *(removed)* `RouteCFormAdapters` §Suzuki | σ-twisted ovoid determiner; was Suzuki 1962 / `Sz(q)` 2-trans | was Route-C Suzuki `separates` | **✅ DISCHARGED 2026-07-04** — proved outright (§3.1). Deleted. |
-| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2)** + **full discharge BEGUN (§3.5, 2026-07-05)** — mathematical heart landed axiom-clean (`ScratchNullstellensatz.lean`: `nullstellensatz_core` + 3 lemmas); reduced to two named structural facts (`IsotropicConeSpans`, `AnisotropicConnected`) + an elementary assembly. Not yet in `build.sh`. |
+| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2)** + **heart + ASSEMBLY landed axiom-clean (§3.5, 2026-07-05)** (`ScratchNullstellensatz.lean`: `nullstellensatz_core` + `nullstellensatz_of_structural`, 5 lemmas). Citation now = EXACTLY two structural finite-field facts (`hspan` punctured-cone-span + `hlink` aniso-diameter-2); entry point = Chevalley–Warning (in Mathlib) + a QF→MvPolynomial bridge (to build). Not yet in `build.sh`. |
 | **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredFamily_colouring_equivariant` (injective-`Φ`); **no longer** the F4-multi partition object | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) | **`|Aut|`-naming only** (F4-multi iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — same vanishing-space route (`recoveredFamily_partition_isoInvariant_vanishing`, generic core `recoveredForm_partition_isoInvariant_gen`). Injective-`Φ` still carried only for `Aut`-naming. |
 | **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | fundamental theorem of projective geometry (collineations are semilinear) + quadric uniqueness; Artin, *Geometric Algebra* | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3)** — FTPG genuinely deep; not elementarily dischargeable. Vacuous at `q=p` (`σ=id`). Keep cited for now. |
 | **`AffineSchemeTwoClosed`** | `RouteCSeam.lean` (`schemeAutGroup_affineScheme_eq_affineG` / `routeC_polySupport`) | rank-3 affine 2-closure: `SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (no unexpected automorphisms); Skresanov arXiv:2007.14696 / 2202.03746. Converse `≥` is **proved** (`affineG_le_schemeAutGroup`). | Route-C coarse-Aut pinning (the `\|Aut\|` side / meta poly) — **one named premise, all four families** via `G₀ := similitudeGroup Q` / `jointConeStab Qs` / Suzuki cone-stab | **○ CITED** — Skresanov rank-3 2-closure; formalizable, off the near-term path. Same instance as the Skresanov row below, now a concrete named Lean `Prop`. |
@@ -198,27 +198,43 @@ form. For anisotropic `y` and isotropic `x`, restrict `Q` to the line `x + t·y`
 `x`, and **anisotropic connectivity** makes the ratio `R y / Q y` a global constant `μ`. Then `polar R = μ·polar Q ⟹
 R = μ·Q` (char `≠ 2`), with `μ ≠ 0` from the *reverse* inclusion `Q y ≠ 0 ⟹ R y ≠ 0`.
 
-**✅ LANDED (axiom-clean) — the mathematical heart:**
+**✅ LANDED (axiom-clean) — the mathematical heart AND the full assembly:**
 - `quad_lin_combo` — `Q(c•x + d•y) = c²Qx + d²Qy + cd·polar Q x y` (the workhorse expansion).
 - **`nullstellensatz_core`** — the `w`-construction, **ring-general**: `polar Q x y·(polar Q x y·R y − Q y·polar R x y)
   = 0` for isotropic `x`, any `y`. The genuinely non-obvious, reusable content; no field/finiteness/dimension.
 - `nullstellensatz_pointwise` — field cancellation: `polar Q x y ≠ 0 ⟹ polar Q x y·R y = Q y·polar R x y`.
-- `form_eq_of_polar_eq_smul` — the finish: `polar R = μ·polar Q ⟹ R = μ·Q` (char `≠ 2`, via `polar_self`).
+- `form_eq_of_polar_eq_smul` — `polar R = μ·polar Q ⟹ R = μ·Q` (char `≠ 2`, via `polar_self`; a spare — the finish
+  below uses the cleaner case-split instead).
+- **`nullstellensatz_of_structural`** — **the ASSEMBLY, axiom-clean.** Reduces the full μ-scalar conclusion to the two
+  structural facts below. Structure (all elementary, all proved): `nullstellensatz_core` rewrites as
+  `polar Q x y · L_y(x) = 0` with `L_y(x) := Q y·polar R x y − R y·polar Q x y` **linear in `x`**; on the punctured
+  cone (`hspan`) `L_y ≡ 0` by `Submodule.span_induction`, giving the per-`y` identity `Q y·polar R x y = R y·polar Q x y`
+  ∀x (`key`); two `polar`-linked anisotropic vectors then share the ratio `R/Q` (`step`); the diameter-≤2 link
+  (`hlink`) makes it a global constant (`const`); and `R v = μ Q v` follows by a **case split** — `Q v = 0 ⟹ R v = 0`
+  (cone) `= μ·0`, else constancy — so no `polarBilin`-extension or anisotropic-span is needed. `μ ≠ 0` (⟹ `Kˣ`) from the
+  reverse cone inclusion. Existence of an anisotropic vector comes from `not_nondegenerate_zero`.
 
-**◻ REMAINING — reduced to two purely-structural finite-geometry facts (Mathlib has neither; this is the honest hard
-core the opaque "Nullstellensatz" is now isolated to):**
-1. **`IsotropicConeSpans`** — the isotropic vectors of a nondegenerate `Q` on `𝔽_q^d` (`q` odd, `d ≥ 4`, all `VO^ε`
-   incl. the elliptic `d=4` boundary) span `V`. Probe: rank `= d` for `VO^±_{4,6}(3,5,7)`
-   (`nullstellensatz_path_probe.py` / `nsp.py`, 2026-07-05).
-2. **`AnisotropicConnected`** — the anisotropic vectors are connected under `polar Q z z' ≠ 0`. Probe: connected, same
-   families.
-The gluing assembly (`IsotropicConeSpans → AnisotropicConnected → the μ-scalar conclusion`) is elementary linear algebra
-— a linear functional vanishing on a spanning set + a connectivity induction on the ratio + `form_eq_of_polar_eq_smul` —
-but is real Lean work (needs `polarBilin`-as-`LinearMap` plumbing and the span/connectivity inductions). Building it, and
-the two structural facts, is the next step. Until both land, the citation stays carried. **Effort estimate:** the two
-structural facts are the bulk (a hand-rolled Witt-free argument, or explicit per-`VO^ε`-family isotropic bases +
-connectivity — moderate each); the assembly is smaller. `vanishDim = 1` (`deg2_vanishDim` in the probe) is the sanity
-target the finished theorem reproduces.
+**◻ REMAINING — the citation is now EXACTLY these two structural finite-geometry facts (the hypotheses `hspan`, `hlink`
+of `nullstellensatz_of_structural`); both probe-validated, both a genuine finite-field build:**
+1. **`hspan` / `IsotropicConeSpans`** — for a nondegenerate `Q` on `𝔽_q^d` (`q` odd, `d ≥ 4`) and each anisotropic `y`,
+   the **punctured** isotropic cone `{x | Q x = 0 ∧ polar Q x y ≠ 0}` spans `V`. Probe: worst-case rank `= d` over all
+   anisotropic `y`, `VO^±_{4,6}(3,5,7)` (`nsp2.py`, 2026-07-05).
+2. **`hlink` / `AnisotropicConnected`** — the anisotropic vectors have `polar`-**diameter ≤ 2**: any `y, y'` are linked
+   through one anisotropic `z` with `polar Q y z ≠ 0 ∧ polar Q z y' ≠ 0`. Probe: diameter `= 2`, same families
+   (`nsp2.py`). (Diameter-2 replaces a general connectivity induction — chosen for a clean `const` proof.)
+
+**Scoped entry point for the structural facts (the next sub-build).** The citation quantifies over **arbitrary**
+nondeg `Q` (not just the standard `VO^ε`), so this is the general finite-field statement. Path found:
+- **Isotropic-vector existence** (the crux both facts rest on) — **Chevalley–Warning** IS in Mathlib
+  (`FieldTheory.ChevalleyWarning.char_dvd_card_solutions`: `totalDegree < #vars ⟹ p ∣ #zeros`; `Q` is degree 2, `d ≥ 4`
+  vars ⟹ `p ∣ #zeros`, and `0` is a zero ⟹ a nonzero isotropic exists). **Blocking sub-task:** Mathlib has **no
+  `QuadraticForm → MvPolynomial` (degree ≤ 2) bridge** — a general `QuadraticForm` is abstract (companion bilinear map),
+  so representing it as an `MvPolynomial` over a basis and bounding `totalDegree ≤ 2` is the first piece to build.
+- Then: isotropic vectors **span** (hyperbolic-plane / orthogonal-complement induction off one isotropic vector), the
+  **punctured** upgrade, and a **point-count** (hyperplane + cone sizes) for diameter-2. This is a multi-lemma
+  finite-geometry development — realistically the bulk of this citation's remaining cost.
+`vanishDim = 1` (`deg2_vanishDim` in the probe) is the sanity target the finished theorem reproduces. Until both facts
+land, the citation stays carried; the assembly guarantees they are all that is missing.
 
 ### 3.4 Seal-track citations (pointers, not re-derived here)
 
