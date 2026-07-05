@@ -1140,6 +1140,30 @@ never reached — the graph falls back to the descent. Activating `RecognizeInva
 NOT needed for the runtime** (|Aut| comes from the closed-form `AutOrder`), only for an optional order-check verification
 test — so they are off the completion critical path for each family.
 
+**★★ FEASIBILITY WALL (2026-07-05) — the per-family runtime is size-bounded; only affine-polar + Suzuki are
+dense-instantiable.** The whole pipeline is a dense `n²` adjacency (`adj[x*n+y]`, `StandardCayleyGraph` allocates
+`new int[n*n]`). The families' vertex counts: affine-polar `VO^ε_{2m}(q)` = `q^{2m}` (feasible, `n≤625`); **alternating
+`Alt(5,q)` = `q^{10}`** (smallest odd-q = `3^{10}=59 049` ⟹ **~14 GB dense** — infeasible; q=2 is size-OK but char-2, so
+no feasible odd-q test exists); **half-spin D₅ = `q^{16}`** (even `2^{16}=65 536` ⟹ ~17 GB — infeasible at every q);
+**Suzuki `VSz(q)` = `q⁴`** (q=8 ⟹ 4096, feasible; q=2 degenerate, q=32 ⟹ `2^{20}` infeasible). ⟹ **alternating &
+half-spin runtime handlers are MOOT** in the dense infra (such graphs can't even be loaded; they'd never fire) — they
+stay **dormant prototypes**, their correctness content being the sealed Lean adapters + probe-validated forms; they
+become real only under a sparse/implicit graph representation (a large, separate infra item). **The one feasible +
+genuine non-affine-polar runtime family is Suzuki (VSz(8)).**
+
+**★ SUZUKI BUILT (2026-07-05, runtime prototype).** `SuzukiHandler` all four hooks implemented against
+`SuzukiOvoid.cs` (GF(2ᵏ), Tits ovoid/cone, `StandardGraph`, σ-twisted GF(q) forms, + the F₂ degree-signature).
+Validated (`RouteCSuzukiProbe`): VSz(8)=SRG(4096,455,6,56); the 5-dim σ-twisted GF(8) form family cuts the cone
+exactly (the Lean `suzukiAdapter` model); and — the load-bearing new idea — a **FIELD-AGNOSTIC F₂ DEGREE-SIGNATURE
+`Confirm`** that separates VSz(8) from its cospectral affine-polar mate VO⁻₄(q): the Tits-ovoid cone is genuinely
+**cubic** over F₂ (cut by degree-3 forms) but **NOT quadric-cut**, whereas VO⁻₄(q)'s cone IS a quadric. Basis-invariant
+(a linear F₂ change preserves monomial degree) ⟹ **no field recovery needed**. Negative control passes (Clebsch=VO⁻₄(2)
+reads quadric ⟹ rejected). `Confirm`'s real path validated on F1-recovered coords. **Honest limits:** (i) only q=8 is
+runnable; general-q recognition/`StandardGraph`/`AutOrder` are formula-only; (ii) `AutOrder = q⁴·|Sz(q)|·(2e+1)` is a
+CITED closed form — the empirical order-check hits the PermutationGroup sifting wall at n=4096 (can't compute the true
+|Aut| of a 4096-vertex SRG). Files: `SuzukiOvoid.cs`, `SuzukiHandler.cs`, `RouteCCanonicalizer.SuzukiAutOrder`, test
+`RouteCSuzukiProbe.cs`.
+
 **★ SLOT AUDIT (2026-07-04) — the 4-hook interface is COMPLETE for all four families; no missing slot.** Suzuki is an
 outlier only in *implementation* (char-2/Arf inside its `Confirm`, and the `GF(q)⁴↔𝔽₂^d` module bridge inside
 recovery/construction) — not in *interface shape*; even char-2 coordinatization is the shared `Coordinatize` (F1 works

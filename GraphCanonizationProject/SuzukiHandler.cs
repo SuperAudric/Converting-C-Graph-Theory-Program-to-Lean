@@ -7,22 +7,23 @@ namespace Canonizer
     // CITATION-FREE, via the 5 σ-twisted ovoid forms + the GF(q)^4↔𝔽₂^d module bridge + second-derivative
     // recovery). CHAR-2 (Sz(q), q = 2^{2e+1}) — a SEPARATE track from the odd-q multi-quadric machinery.
     //
-    // ── STATUS: SCAFFOLD READY; recognition LIVE for VSz(8); recovery (char-2) STUBBED. ─────────────
-    // INTERCONNECTION DONE: registered; the SRG fingerprint recognition is LIVE (the known VSz(8)
-    // instance); result plumbing generic. `Confirm` is the char-2 stub — it returns FALSE (declines),
-    // so the handler recognizes the fingerprint but SAFELY falls back to the descent until the char-2
-    // recovery lands. Once Confirm is real, StandardGraph/AutOrder must also be filled (they throw).
+    // ── STATUS: BUILT (runtime prototype, q=8). ─────────────────────────────────────────────────────
+    // All four hooks are implemented against SuzukiOvoid (the validated construction, RouteCSuzukiProbe).
+    // FEASIBILITY: q=8 (VSz(8), n=4096) is the ONLY genuine + dense-instantiable Suzuki case (q=2 is
+    // degenerate; q=32 ⟹ n=2^20). So this handler runs/tests at q=8; larger q is formula-only (unreachable
+    // in the dense n×n infra) — see docs/chain-descent-route-c-plan.md §9.2.7.
     //
-    // TO COMPLETE (well-defined; char-2 track — does NOT reuse the odd-q RecoverFormFamily):
-    //   (1) RecognizeInvariant — generalize the fingerprint from VSz(8)=SRG(4096,455,6,56) to Sz(q),
-    //       q = 2^{2e+1} (params as a function of q). Currently the q=8 instance only.
-    //   (2) Confirm — char-2 form recovery: recover the 5 σ-twisted ovoid forms via the GF(q)^4↔𝔽₂^d
-    //       module bridge + second-derivative recovery (Arf, not the degree-2 kernel solve), then check
-    //       the joint zero reconstructs the graph. Source: route_c_suzuki_probe.py / _determine_probe.py
-    //       + the Lean `suzukiAdapter` (SF_k, suzukiForms_determine).
-    //   (3) StandardGraph — the canonical Sz(q) ovoid graph on q^4 vertices.
-    //   (4) AutOrder — closed-form |Aut| = |affineG(Sz(q))| = q^4 · |Sz(q)|·(field/similitude factors);
-    //       |Sz(q)| = q^2 (q^2+1)(q-1).
+    // The four hooks (char-2 track — does NOT reuse the odd-q RecoverFormFamily):
+    //   RecognizeInvariant — n=q^4, q=2^{2e+1}, valency (q²+1)(q−1). LOOSE (aliases the cospectral VO⁻₄(q));
+    //                        Confirm does the sound disambiguation.
+    //   Confirm            — the FIELD-AGNOSTIC F₂ DEGREE SIGNATURE: the recovered cone is cut by cubic F₂
+    //                        forms but NOT by quadrics. VO⁻₄(q)'s cone IS a quadric ⟹ rejected. This is the
+    //                        runtime image of the Lean σ-twisted `suzukiAdapter`, without needing field
+    //                        recovery (a linear F₂ basis change preserves monomial degree). Needs F1 coords.
+    //   StandardGraph      — SuzukiOvoid.StandardGraph(q) (the Tits-ovoid Cayley graph).
+    //   AutOrder           — q^4 · |Sz(q)| · (field autos); |Sz(q)| = q²(q²+1)(q−1). CITED closed form —
+    //                        NOT empirically verified (the order-check hits the PermutationGroup sifting wall
+    //                        at n≫81; the harness cannot compute |Aut| of a 4096-vertex SRG).
     internal sealed class SuzukiHandler : FormFamilyHandlerBase<SuzukiHandler.Inv>
     {
         internal sealed class Inv { public int Q; }
@@ -31,23 +32,36 @@ namespace Canonizer
 
         protected override Inv? RecognizeInvariant(int[] adj, int n)
         {
-            // LIVE for the known VSz(8) instance; general Sz(q) fingerprint is TODO 1.
-            if (!FormsGraphClassifier.StronglyRegular(adj, n, out int k, out int lam, out int mu)) return null;
-            if (n == 4096 && k == 455 && lam == 6 && mu == 56) return new Inv { Q = 8 };
-            return null;
+            int q = IntRoot(n, 4);
+            if (q < 8 || IPow(q, 4) != n) return null;   // n = q^4, q ≥ 8
+            if (!IsPow2OddExp(q)) return null;            // q = 2^{2e+1} (genuine Suzuki)
+            long k = (long)(q * q + 1) * (q - 1);         // valency (q²+1)(q−1)
+            if (!RegularWithValency(adj, n, k)) return null;
+            return new Inv { Q = q };
         }
 
-        // STUB (char-2 recovery not built): declines safely ⟹ falls back to the descent. TODO 2.
-        protected override bool Confirm(int[] adj, int n, CanonResult harvest, Inv inv) => false;
+        // Sound disambiguation vs the cospectral VO⁻₄(q): the Tits-ovoid cone is genuinely cubic over F₂.
+        protected override bool Confirm(int[] adj, int n, CanonResult harvest, Inv inv)
+        {
+            var aff = Coordinatize(harvest, n);           // F1 socle recovery, p=2 (char-agnostic)
+            if (aff is null || aff.P != 2) return false;  // no F₂ coords ⟹ decline (safe)
+            var cone = SuzukiOvoid.ConeFromGraph(adj, n, aff);
+            return SuzukiOvoid.IsOvoidConeBySignature(cone, aff.Dim);
+        }
 
-        // TODO 3: FormsGraphBuilder.StandardCayleyGraph(inv.Q, 4, diff => onSuzukiOvoidCone(diff)) — the
-        // connection set is the Sz(q) ovoid cone (char-2, over GF(q) not F_2; needs the module bridge).
-        protected override int[] StandardGraph(Inv inv) =>
-            throw new NotImplementedException("SuzukiHandler.StandardGraph — canonical Sz(q) ovoid graph via FormsGraphBuilder.StandardCayleyGraph (TODO 3).");
+        protected override int[] StandardGraph(Inv inv) => SuzukiOvoid.StandardGraph(inv.Q);
 
-        protected override BigInteger AutOrder(Inv inv) =>
-            throw new NotImplementedException("SuzukiHandler.AutOrder — closed-form |affineG(Sz(q))| (TODO 4).");
+        protected override BigInteger AutOrder(Inv inv) => RouteCCanonicalizer.SuzukiAutOrder(inv.Q);
 
         protected override string Describe(Inv inv) => $"Sz({inv.Q})";
+
+        // ── local helpers ───────────────────────────────────────────────────────
+        static int IntRoot(int n, int r) { int x = (int)Math.Round(Math.Pow(n, 1.0 / r)); foreach (int c in new[] { x - 1, x, x + 1 }) if (c > 0 && IPow(c, r) == n) return c; return -1; }
+        static bool IsPow2OddExp(int q) { if (q < 2) return false; int e = 0, m = q; while (m % 2 == 0) { m /= 2; e++; } return m == 1 && (e % 2 == 1); }
+        static bool RegularWithValency(int[] adj, int n, long k)
+        {
+            for (int v = 0; v < n; v++) { long deg = 0; int b = v * n; for (int w = 0; w < n; w++) deg += adj[b + w]; if (deg != k) return false; }
+            return true;
+        }
     }
 }

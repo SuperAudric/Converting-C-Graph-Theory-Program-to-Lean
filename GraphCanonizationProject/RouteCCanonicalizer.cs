@@ -58,6 +58,17 @@ namespace Canonizer
             return BigInteger.Pow(Q, 2 * m) * o * (Q - 1);
         }
 
+        // |Aut(VSz(q))| = q^4 · |Sz(q)| · (field automorphisms), |Sz(q)| = q²(q²+1)(q−1), field autos =
+        // log₂(q) = 2e+1 (q = 2^{2e+1}). CITED closed form — NOT empirically verifiable (the order-check
+        // hits the PermutationGroup sifting wall at n = q^4 ≫ 81). q=8: 4096·29120·3 = 357,646,336.
+        public static BigInteger SuzukiAutOrder(int q)
+        {
+            BigInteger Q = q;
+            BigInteger sz = Q * Q * (Q * Q + 1) * (Q - 1);
+            int fieldExp = 0; { int m = q; while (m > 1) { m >>= 1; fieldExp++; } }   // log₂ q
+            return BigInteger.Pow(Q, 4) * sz * fieldExp;
+        }
+
         // The standard affine-polar graph VO^eps_{2m}(q) on (F_q)^{2m}, natural vertex order, standard
         // form Q = sum_{i<m-?} x_{2i}x_{2i+1} (+ anisotropic binary tail y^2+by z+c z^2 for eps=-1).
         public static int[] StandardVO(int q, int m, int eps)
