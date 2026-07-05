@@ -77,7 +77,7 @@ truth for what is still carried (a discharged citation is *removed*, not merely 
 | Citation (Prop) | Where carried | What it is / faithful source | Load-bearing? | Discharge status |
 |---|---|---|---|---|
 | **`Suzuki.SuzukiFormsDetermine`** | *(removed)* `RouteCFormAdapters` §Suzuki | σ-twisted ovoid determiner; was Suzuki 1962 / `Sz(q)` 2-trans | was Route-C Suzuki `separates` | **✅ DISCHARGED 2026-07-04** — proved outright (§3.1). Deleted. |
-| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — the F4 partition iso-invariance is now citation-free (`recoveredForm_partition_isoInvariant`, vanishing-space transport). Full Nullstellensatz still carried only for exact `Aut`-naming (C#/meta). |
+| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2)** + **full discharge BEGUN (§3.5, 2026-07-05)** — mathematical heart landed axiom-clean (`ScratchNullstellensatz.lean`: `nullstellensatz_core` + 3 lemmas); reduced to two named structural facts (`IsotropicConeSpans`, `AnisotropicConnected`) + an elementary assembly. Not yet in `build.sh`. |
 | **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredFamily_colouring_equivariant` (injective-`Φ`); **no longer** the F4-multi partition object | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) | **`|Aut|`-naming only** (F4-multi iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — same vanishing-space route (`recoveredFamily_partition_isoInvariant_vanishing`, generic core `recoveredForm_partition_isoInvariant_gen`). Injective-`Φ` still carried only for `Aut`-naming. |
 | **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | fundamental theorem of projective geometry (collineations are semilinear) + quadric uniqueness; Artin, *Geometric Algebra* | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3)** — FTPG genuinely deep; not elementarily dischargeable. Vacuous at `q=p` (`σ=id`). Keep cited for now. |
 | **`AffineSchemeTwoClosed`** | `RouteCSeam.lean` (`schemeAutGroup_affineScheme_eq_affineG` / `routeC_polySupport`) | rank-3 affine 2-closure: `SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (no unexpected automorphisms); Skresanov arXiv:2007.14696 / 2202.03746. Converse `≥` is **proved** (`affineG_le_schemeAutGroup`). | Route-C coarse-Aut pinning (the `\|Aut\|` side / meta poly) — **one named premise, all four families** via `G₀ := similitudeGroup Q` / `jointConeStab Qs` / Suzuki cone-stab | **○ CITED** — Skresanov rank-3 2-closure; formalizable, off the near-term path. Same instance as the Skresanov row below, now a concrete named Lean `Prop`. |
@@ -182,6 +182,43 @@ elementarily dischargeable — and it is *essential* for `q=pᵉ, e>1`, because 
 a `K`-form without the semilinear decomposition (so the §3.2 `W`-transport needs `g` linear, which fails at `e>1`). At
 `q=p` it is the `σ=id` specialization and collapses to §3.2. **Verdict:** keep cited for now; it is the one hard residue of the
 Route-C citation set, and only for the field-extension case (the prime-field residue does not need it).
+
+### 3.5 `NondegQuadricDeterminesForm` — the full quadric Nullstellensatz — discharge BEGUN (2026-07-05)
+
+The §3.2 work discharged the **F4 iso-invariance** use of this citation. The *stronger* statement — "a nondegenerate
+quadric determines its form up to a scalar `μ`" (`vanishDim = 1`, needed for exact `Aut = AΓO(Q)` naming) — is now being
+proved outright. It is `NondegQuadricDeterminesForm` itself. **Scratch build: `ChainDescent/ScratchNullstellensatz.lean`
+(not in `build.sh` yet).**
+
+**The elementary path (M3-style, probe-validated — avoids Witt).** Char `≠ 2` ⟹ a quadratic form ↔ its polar bilinear
+form. For anisotropic `y` and isotropic `x`, restrict `Q` to the line `x + t·y`: a quadratic in `t` with roots `t = 0`
+(giving `x`) and a second root giving another isotropic point `w = Q y·x − polar Q x y·y`. Since `Z(Q) ⊆ Z(R)`,
+`R(w) = 0`; expanding gives the **line-restriction identity**. Reading it as a linear functional in `x`, it forces
+`polar R (·) y = (R y / Q y)·polar Q (·) y` on the isotropic cone; the isotropic cone **spanning** `V` extends it to all
+`x`, and **anisotropic connectivity** makes the ratio `R y / Q y` a global constant `μ`. Then `polar R = μ·polar Q ⟹
+R = μ·Q` (char `≠ 2`), with `μ ≠ 0` from the *reverse* inclusion `Q y ≠ 0 ⟹ R y ≠ 0`.
+
+**✅ LANDED (axiom-clean) — the mathematical heart:**
+- `quad_lin_combo` — `Q(c•x + d•y) = c²Qx + d²Qy + cd·polar Q x y` (the workhorse expansion).
+- **`nullstellensatz_core`** — the `w`-construction, **ring-general**: `polar Q x y·(polar Q x y·R y − Q y·polar R x y)
+  = 0` for isotropic `x`, any `y`. The genuinely non-obvious, reusable content; no field/finiteness/dimension.
+- `nullstellensatz_pointwise` — field cancellation: `polar Q x y ≠ 0 ⟹ polar Q x y·R y = Q y·polar R x y`.
+- `form_eq_of_polar_eq_smul` — the finish: `polar R = μ·polar Q ⟹ R = μ·Q` (char `≠ 2`, via `polar_self`).
+
+**◻ REMAINING — reduced to two purely-structural finite-geometry facts (Mathlib has neither; this is the honest hard
+core the opaque "Nullstellensatz" is now isolated to):**
+1. **`IsotropicConeSpans`** — the isotropic vectors of a nondegenerate `Q` on `𝔽_q^d` (`q` odd, `d ≥ 4`, all `VO^ε`
+   incl. the elliptic `d=4` boundary) span `V`. Probe: rank `= d` for `VO^±_{4,6}(3,5,7)`
+   (`nullstellensatz_path_probe.py` / `nsp.py`, 2026-07-05).
+2. **`AnisotropicConnected`** — the anisotropic vectors are connected under `polar Q z z' ≠ 0`. Probe: connected, same
+   families.
+The gluing assembly (`IsotropicConeSpans → AnisotropicConnected → the μ-scalar conclusion`) is elementary linear algebra
+— a linear functional vanishing on a spanning set + a connectivity induction on the ratio + `form_eq_of_polar_eq_smul` —
+but is real Lean work (needs `polarBilin`-as-`LinearMap` plumbing and the span/connectivity inductions). Building it, and
+the two structural facts, is the next step. Until both land, the citation stays carried. **Effort estimate:** the two
+structural facts are the bulk (a hand-rolled Witt-free argument, or explicit per-`VO^ε`-family isotropic bases +
+connectivity — moderate each); the assembly is smaller. `vanishDim = 1` (`deg2_vanishDim` in the probe) is the sanity
+target the finished theorem reproduces.
 
 ### 3.4 Seal-track citations (pointers, not re-derived here)
 
