@@ -223,18 +223,23 @@ of `nullstellensatz_of_structural`); both probe-validated, both a genuine finite
    through one anisotropic `z` with `polar Q y z ≠ 0 ∧ polar Q z y' ≠ 0`. Probe: diameter `= 2`, same families
    (`nsp2.py`). (Diameter-2 replaces a general connectivity induction — chosen for a clean `const` proof.)
 
-**Scoped entry point for the structural facts (the next sub-build).** The citation quantifies over **arbitrary**
-nondeg `Q` (not just the standard `VO^ε`), so this is the general finite-field statement. Path found:
-- **Isotropic-vector existence** (the crux both facts rest on) — **Chevalley–Warning** IS in Mathlib
-  (`FieldTheory.ChevalleyWarning.char_dvd_card_solutions`: `totalDegree < #vars ⟹ p ∣ #zeros`; `Q` is degree 2, `d ≥ 4`
-  vars ⟹ `p ∣ #zeros`, and `0` is a zero ⟹ a nonzero isotropic exists). **Blocking sub-task:** Mathlib has **no
-  `QuadraticForm → MvPolynomial` (degree ≤ 2) bridge** — a general `QuadraticForm` is abstract (companion bilinear map),
-  so representing it as an `MvPolynomial` over a basis and bounding `totalDegree ≤ 2` is the first piece to build.
-- Then: isotropic vectors **span** (hyperbolic-plane / orthogonal-complement induction off one isotropic vector), the
-  **punctured** upgrade, and a **point-count** (hyperplane + cone sizes) for diameter-2. This is a multi-lemma
-  finite-geometry development — realistically the bulk of this citation's remaining cost.
-`vanishDim = 1` (`deg2_vanishDim` in the probe) is the sanity target the finished theorem reproduces. Until both facts
-land, the citation stays carried; the assembly guarantees they are all that is missing.
+**Structural-facts build (in `ScratchNullstellensatzStructural.lean`). The citation quantifies over ARBITRARY nondeg
+`Q`, so this is the general finite-field statement.**
+
+- ✅ **BEDROCK DONE (2026-07-05, axiom-clean) — isotropic-vector existence.** `exists_isotropic_of_nondegenerate`: a
+  nondegenerate `Q` in `dim ≥ 3` over a finite field of odd order has a **nonzero isotropic vector**. Route (chosen over
+  Chevalley–Warning, which would need a missing `QuadraticForm → MvPolynomial` bridge): **diagonalize**
+  (`equivalent_weightedSumSquares_units_of_nondegenerate'`) → find an isotropic vector for the unit-weighted sum of
+  squares (`weightedSumSquares_isotropic`, the `(α,β,1,0,…)` vector with `α,β` from **`binary_represents`** =
+  `A x²+B y²=c` solvable via `FiniteField.exists_root_sum_quadratic`) → transport back along the isometry. Plus the
+  bridge `separatingLeft_associated_of_polarBilin_nondeg` (`polarBilin.Nondegenerate ⟹ (associated Q).SeparatingLeft`).
+- ◻ **REMAINING — `hspan` and `hlink` from the bedrock.** Build isotropic vectors *into* structure:
+  - `hspan` (punctured isotropic cone spans) — from an isotropic vector, extract a hyperbolic plane (nondeg ⟹ ∃ `w`,
+    `polar Q v w ≠ 0`); the cone is rich enough to span, then the `polar Q x y ≠ 0` puncture.
+  - `hlink` (anisotropic `polar`-diameter ≤ 2) — a point-count (hyperplane + cone sizes) or a hyperbolic-structure
+    argument (delicate at `q = 3`).
+  These are the remaining finite-geometry work; the assembly guarantees they are all that is missing.
+`vanishDim = 1` (`deg2_vanishDim` in the probe) is the sanity target the finished theorem reproduces.
 
 ### 3.4 Seal-track citations (pointers, not re-derived here)
 
