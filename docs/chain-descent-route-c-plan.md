@@ -1151,9 +1151,27 @@ needs the additive structure, which needs `B`, which is cone-blind.
 - **Parallelism by edge-count / perfect-matching**: aliases on perpendicular directions; distinguishing a *translation*
   matching from an *affine* one needs the line ordering = the scalar structure (cone-blind).
 
-**Net.** `p=3` is genuinely special (2 non-origin points per line ⟹ scalar structure forced) and is DONE (harvest-free,
-provably poly). `p ≥ 5` is the classical polar-space coordinatization (Von Staudt), a substantial correct-but-intricate
-algorithm — **not** a missing clever trick. **Recommended next options** (scope before committing): (a) implement Von
+**★★★ CORRECTION (2026-07-05) — the "hard core" above was a LINE-SUM ARTIFACT; the natural method (frame + WL) is cheap
+for ALL p.** A user push (recover scalars via a fixed frame, using incidences) led to the decisive experiment
+(`RouteCScalarRecoveryProbe`): **greedy, coordinate-free individualize-refine discretizes VO^ε_d(q) in `d+1` steps,
+SINGLE PATH, for every case tested** (q=3,5,7; d=4,6 — VO⁻₄(5): 5 steps → 625/625 cells; VO⁻₆(3): 6 → 729/729;
+VO⁻₄(7): 5 → 2401/2401). So the whole graph is pinned by a size-`(d+1)` frame + 1-WL — no line-sums, no cone-blindness,
+no O_p(Aut) harvest. The cone-blindness / 45-freedom obstruction was an **artifact of the line-sum method's
+over-generation**, NOT fundamental (the `RouteCAmbiguityProbe` separately confirmed the 45 are wrong-coordinatizations of
+the *same* graph — 12/12 non-injective — not distinct graphs). **Consequence — the correct framing:** harvest-free
+coordinatization/canonicalization of these graphs is **easy empirically** (greedy WL-discretize, `O(d)=O(log n)` frame);
+the ONE remaining open item is *proving* that discretization is poly (that the greedy choices are Aut-symmetric ⟹
+single-path), which is **the project's EXISTING WL-dimension / node-4 core** — NOT a new Route-C-specific problem.
+So my earlier "distinct narrow hard core" claim was wrong: the line-sum method manufactured a separate problem; the
+natural frame+WL method reduces right back to the one open core the whole project already has. Structural facts confirmed
+en route (all correct, `RouteCScalarRecoveryProbe`): scalars are DETERMINED once a frame is fixed (Aut point-stabilizer of
+`o` is linear ⟹ fixes all multiples of a fixed axis point); the only real freedom is the frame/reflection choice; the
+multiplicative structure recovers `−1` (=`4e` at q=5) for free, leaving the `2↔3` step, which the frame+WL discretization
+resolves directly. **NEXT (revised): build the harvest-free confirmation as frame+WL discretize → compare to StandardVO
+(cheap, all p), NOT the line-sum/Von Staudt route.** The p=3 line-sum coordinatizer stays as a landed alternative.
+
+**(Superseded framing, kept for context.)** `p=3` line-sum coordinatization is DONE (harvest-free); `p ≥ 5` line-sum
+stalls on cone-blindness — but that stall is now understood as a method artifact, not the fundamental barrier. **Recommended next options** (scope before committing): (a) implement Von
 Staudt's algebra of throws for the polar space (multi-session, the general solution); or (b) a *lighter sound* harvest-free
 certificate that rules out parameter-mates without full coords (e.g. verifying the isotropic-line geometry is exactly the
 polar-space incidence structure — sound-but-not-complete is acceptable since a wrong *fail* just falls back to the

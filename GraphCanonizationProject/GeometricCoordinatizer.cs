@@ -181,6 +181,17 @@ namespace Canonizer
             return rank;
         }
 
+        // The full line-sum solution space basis (coordinate-function candidates), for analysis.
+        public static List<int[]> LineSumSolutionSpace(int[] adj, int n)
+        {
+            if (!PrimePower(n, out int p, out _)) return new List<int[]>();
+            var lines = RecoverAllIsotropicLines(adj, n, p);
+            var rows = new List<int[]>();
+            var origin = new int[n]; origin[0] = 1; rows.Add(origin);
+            foreach (var line in lines) { var r = new int[n]; foreach (int v in line) r[v] = 1; rows.Add(r); }
+            return NullSpaceModP(rows, n, p);
+        }
+
         // Diagnostic: (number of recovered lines, null-space dimension of the line-sum system).
         public static (int lines, int nullDim) LineSumDiagnostic(int[] adj, int n)
         {
