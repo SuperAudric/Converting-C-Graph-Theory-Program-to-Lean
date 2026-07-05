@@ -29,15 +29,19 @@ via **anisotropic B-connectivity** (structural fact 2) makes the ratio `R y / Q 
   `y → y+a` (`Q a = 0`, `polar Q a y ≠ 0`) using only `nullstellensatz_pointwise`; `ratioEdge`/`ratio_step_edge`
   package this as a graph edge, and `ratio_const_of_reflTransGen` propagates constancy along any PATH
   (`Relation.ReflTransGen`). So constancy reduces to a single CONNECTIVITY fact.
-- ◻ **REMAINING = ONE structural finite-geometry fact** (`hconn`, the hypothesis of `nullstellensatz_of_connectivity`):
-  **the isotropic-edge graph on anisotropic vectors is connected** — `Relation.ReflTransGen (ratioEdge Q)` joins any
-  two anisotropic vectors. Probe-CONFIRMED connected (`nullstellensatz_hconn_probe.py`, 2026-07-05): 1 component,
+- ✅ **CONNECTIVITY SCAFFOLD LANDED, axiom-clean:** `ratioEdge_symm` (edges are symmetric on anisotropic vertices),
+  `reflTransGen_ratioEdge_symm` (walks reverse), and `hconn_of_hub` — which reduces the open `hconn` to a **one-sided
+  HUB lemma**: `∀ z, Q z ≠ 0 → ReflTransGen (ratioEdge Q) r z` for a single anisotropic reference `r`.
+- ◻ **REMAINING = the HUB lemma** (`hub`, above) — every anisotropic vector is reachable by isotropic steps from a
+  fixed reference. Probe-CONFIRMED the graph is connected (`nullstellensatz_hconn_probe.py`, 2026-07-05): 1 component,
   **diameter 3–4 for `VO^±_{4,6}(3,5,7)` INCLUDING the `d=4` elliptic `q=3` boundary** — the exact regime where the
-  old `hspan` was hard. (NB: diameter-2 is FALSE — a common `m` need not exist — so the fact is genuine connectivity,
-  not a fixed bound.) Discharge routes: an explicit bounded walk (hyperbolic-plane hub) or the `GaussCount` point-count
-  for edge existence. The old `hspan` (punctured cone spans — hard at `d=4` elliptic) and its `isotropic_span` bedrock
-  are now OFF the critical path (kept in `ScratchNullstellensatzStructural.lean` as spares; `nullstellensatz_of_structural`
-  retained as a proven alternative reduction). Until `hconn` is discharged, the citation stays carried.
+  old `hspan` was hard. (NB: diameter-2 is FALSE — a common `m` need not exist — so the fact is genuine connectivity.)
+  **The hub's core is a COUNTING fact** (route B): each walk step needs an isotropic direction `a` with `polar Q a y ≠ 0`
+  avoiding 2–3 further hyperplane conditions, i.e. "the isotropic cone is not covered by a few hyperplanes" — provable
+  from cone-sizes via `GaussCount` (`card_quadForm_eq`, after diagonalizing to the anisotropic basis). Single-hyperplane
+  avoidance is free from `isotropic_span`, but the walk genuinely needs ≥2 (spanning alone doesn't give it). The old
+  `hspan` route and its `isotropic_span` bedrock are OFF the critical path (kept in `ScratchNullstellensatzStructural.lean`
+  as spares; `nullstellensatz_of_structural` retained as a proven alternative reduction). Until `hub` lands the citation stays carried.
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`, `native_decide` banned.
 NOT in `build.sh` yet (WIP scratch).
@@ -140,6 +144,27 @@ theorem ratio_step_edge (Q R : QuadraticForm K V) (hcone : ∀ v, Q v = 0 → R 
     (by rw [QuadraticMap.polar_comm]; exact hpol)
   rwa [show a + (b - a) = b by abel] at hrs
 
+/-- **The isotropic-edge relation is symmetric on anisotropic vectors.** If `ratioEdge Q a b` and `a` is
+anisotropic, then `ratioEdge Q b a`. (The isotropy `Q(b−a)=0` is even; the non-tangency flips sign:
+`polar Q b (a−b) = −polar Q a (b−a)`, using `Q(b−a)=0 ⟹ polar Q a b = Q a + Q b`.) Lets us reverse walks. -/
+theorem ratioEdge_symm (Q : QuadraticForm K V) {a b : V}
+    (h : ratioEdge Q a b) (ha : Q a ≠ 0) : ratioEdge Q b a := by
+  obtain ⟨_, hiso, hpol⟩ := h
+  -- Q(b−a)=0 rewritten as `polar Q a b = Q a + Q b`
+  have hQ' : QuadraticMap.polar Q a b = Q a + Q b := by
+    have h0 : Q (b + -a) = Q b + Q a - QuadraticMap.polar Q b a := by
+      rw [QuadraticMap.map_add (⇑Q) b (-a), QuadraticMap.map_neg, QuadraticMap.polar_neg_right]; ring
+    have h1 : Q b + Q a - QuadraticMap.polar Q b a = 0 := by
+      rw [← h0, show b + -a = b - a by abel]; exact hiso
+    rw [QuadraticMap.polar_comm]; linear_combination -h1
+  refine ⟨ha, ?_, ?_⟩
+  · rw [show a - b = -(b - a) by abel, QuadraticMap.map_neg]; exact hiso
+  · have key : QuadraticMap.polar Q b (a - b) = - QuadraticMap.polar Q a (b - a) := by
+      rw [QuadraticMap.polar_sub_right, QuadraticMap.polar_sub_right, QuadraticMap.polar_self,
+        QuadraticMap.polar_self, QuadraticMap.polar_comm Q b a, two_nsmul, two_nsmul]
+      linear_combination 2 * hQ'
+    rw [key]; exact neg_ne_zero.mpr hpol
+
 /-- **Ratio constancy along a path** — the reflexive-transitive closure of `ratioEdge` preserves `R/Q`. By
 induction on the path: each edge preserves the ratio (`ratio_step_edge`) and the relation `R a·Q b = R b·Q a`
 is transitive on anisotropic vectors. Carries anisotropy of the endpoint so intermediate cancellations are valid. -/
@@ -152,6 +177,26 @@ theorem ratio_const_of_reflTransGen (Q R : QuadraticForm K V) (hcone : ∀ v, Q 
       obtain ⟨hm, ihe⟩ := ih
       have he := ratio_step_edge Q R hcone hedge
       exact ⟨hedge.1, mul_right_cancel₀ hm (by linear_combination Q b * ihe + Q y * he)⟩
+
+/-- **Walks reverse** (the edge relation is symmetric on anisotropic vertices, and every vertex on a walk from an
+anisotropic start is anisotropic). `ReflTransGen (ratioEdge Q) y z` with `y` anisotropic ⟹ `z` anisotropic and
+`ReflTransGen (ratioEdge Q) z y`. -/
+theorem reflTransGen_ratioEdge_symm (Q : QuadraticForm K V) {y z : V} (hy : Q y ≠ 0)
+    (h : Relation.ReflTransGen (ratioEdge Q) y z) :
+    Q z ≠ 0 ∧ Relation.ReflTransGen (ratioEdge Q) z y := by
+  induction h with
+  | refl => exact ⟨hy, .refl⟩
+  | @tail m z _ hmz ih =>
+      obtain ⟨hm, ihpath⟩ := ih
+      exact ⟨hmz.1, (Relation.ReflTransGen.single (ratioEdge_symm Q hmz hm)).trans ihpath⟩
+
+/-- **Hub reduction of connectivity.** If every anisotropic vector is reachable from a single anisotropic
+reference `r` (`hub`), then any two anisotropic vectors are connected: `y → r` (reverse of `hub y`) then
+`r → y'` (`hub y'`). Reduces the open `hconn` to a one-sided `hub` lemma. -/
+theorem hconn_of_hub (Q : QuadraticForm K V) {r : V} (hr : Q r ≠ 0)
+    (hub : ∀ z, Q z ≠ 0 → Relation.ReflTransGen (ratioEdge Q) r z) :
+    ∀ y y', Q y ≠ 0 → Q y' ≠ 0 → Relation.ReflTransGen (ratioEdge Q) y y' :=
+  fun y y' hy hy' => ((reflTransGen_ratioEdge_symm Q hr (hub y hy)).2).trans (hub y' hy')
 
 /-- **The connectivity assembly — the hspan-free route to the μ-scalar conclusion.** Reduces the full quadric
 Nullstellensatz to a SINGLE structural fact: the isotropic-edge graph on anisotropic vectors is **connected**

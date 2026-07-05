@@ -288,18 +288,19 @@ reduction, but no longer the live route (`hspan` was the hard `d=4`-elliptic fac
   `lake env lean /path/to/check.lean` — expect `[propext, Classical.choice, Quot.sound]` for each.
 - Probes: `python3 nullstellensatz_structural_probe.py` and `python3 nullstellensatz_hspan_hlink_probe.py`.
 
-**▶ NEXT ACTIONABLE STEP (rerouted).** Prove **`hconn`** — the single remaining fact = *graph connectivity*. Two viable
-routes (probe-confirmed the graph is connected, diameter 3–4):
-- **(A) Explicit bounded walk via a hyperbolic-plane hub (recommended — likely avoids heavy counting).** Take a
-  hyperbolic pair `{e,f}` (isotropic, `polar Q e f = 1`, from `exists_hyperbolic_partner`, already proven). Connect any
-  anisotropic `y` to a fixed reference (e.g. `e+f`, `Q=1`) in a bounded number of `ratioEdge` steps using
-  `ReflTransGen`. Each single step `y → y+a` needs one isotropic `a` with `polar Q a y ≠ 0` and `Q(y+a) ≠ 0` — cheap to
-  exhibit constructively (scale within the plane / use `e`, `f`). Symmetry then gives any-to-any.
-- **(B) `GaussCount` point-count for step existence.** Diagonalize `Q` (`equivalent_weightedSumSquares_units_of_nondegenerate'`,
-  already used in the structural file), then `card_quadForm_eq` / `count2_eq_charsum` show enough isotropic non-tangent
-  directions exist to take each needed step; assemble into a `ReflTransGen` path.
+**▶ NEXT ACTIONABLE STEP (rerouted).** `hconn` (graph connectivity) is now reduced by the **route-(A) scaffold**
+(`ratioEdge_symm` + `reflTransGen_ratioEdge_symm` + `hconn_of_hub`, all axiom-clean) to a **one-sided HUB lemma**:
+`∀ z, Q z ≠ 0 → ReflTransGen (ratioEdge Q) r z` for a fixed anisotropic reference `r` (e.g. `e+f` from a hyperbolic
+pair). **Finding:** route (A)'s fully-explicit walk does NOT avoid counting — each `ratioEdge` step from `y` needs an
+isotropic `a` with `polar Q a y ≠ 0` *and* 2–3 further non-vanishing conditions (to control where the step lands and
+keep the intermediate anisotropic), i.e. "the isotropic cone is not covered by a few hyperplanes." Single-hyperplane
+avoidance is free from `isotropic_span`, but ≥2 is not — so the hub's core is genuinely **route (B)**:
+- **(B) `GaussCount` cone-count.** Diagonalize `Q` (`equivalent_weightedSumSquares_units_of_nondegenerate'`, already
+  used in the structural file), then `card_quadForm_eq` gives `|{a : Q a = 0}|` and hyperplane-section sizes; conclude
+  "∃ isotropic `a` avoiding `k` hyperplanes" by `|cone| > k·max|cone ∩ hyperplane|` (true for `d ≥ 4`, `q` not tiny).
+  Assemble the per-step existence into a bounded `ReflTransGen` walk (≤ 3–4 steps) → the hub lemma → `hconn`.
 
-When `hconn` lands: (a) instantiate `nullstellensatz_of_connectivity` to prove `NondegQuadricDeterminesForm` outright
+When `hconn` (hub) lands: (a) instantiate `nullstellensatz_of_connectivity` to prove `NondegQuadricDeterminesForm` outright
 over `𝔽_q^d` (`d ≥ 4`, `q` odd); (b) **delete the carried premise** from `recoveredForm_colouring_equivariant` in
 `RouteCFormAdapters.lean`, confirm `#print axioms` unchanged; (c) port the scratch files into `build.sh` (after
 `RouteCFormAdapters`) and add decls to `PublicTheoremIndex.md`. Only then is this citation fully discharged.
