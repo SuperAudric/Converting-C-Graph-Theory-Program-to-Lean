@@ -169,8 +169,12 @@ close it — is set out in
 > `schemeAutGroup_coarse_eq_affineG` (coarse Aut = the known `affineG(similitude)`, all 4 families, mod the named Skresanov
 > citation `AffineSchemeTwoClosed`) + `routeC_polySupport` (`ScratchRecoveredFormTransfer.lean`) + the **cyclotomic dispatch
 > branch** (`ScratchSeamDispatch.lean`), all axiom-clean; the one carried Lean atom is `htransport` (L1, tractable).
-> **Next = the C# runtime (plan §9.2, a grounded build spec): load-bearing piece = C1b `ClassicalGroupGenerators`.**
-> Plan STATUS + §9.0a + §9.2. [[project_recovery_corecovery_duality_2026-07-03]] · [[project_routec_seam_2026-07-04]].
+> **★ C# RUNTIME BUILT (2026-07-04/05): C1a–C4 + family-dispatch registry LANDED, 57/57 Route-C tests green** (plan STATUS
+> "C# BUILD — HANDOFF SNAPSHOT"). Affine-polar family live; alternating/half-spin/Suzuki = wired scaffolds. **KEY FINDING
+> (2026-07-05, plan §9.2.8): a size-`(d+1)` frame + WL discretizes VO^ε_d(q) for ALL p** — harvest-free coordinatization is
+> cheap; the "cone-blindness" hard core was a line-sum artifact; residual open = proving the discretization is poly (= the
+> existing WL-dim core). **Next = build the frame+WL harvest-free confirmation** into `AffinePolarHandler` (plan HANDOFF
+> SNAPSHOT + §9.2.8). [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
 > **★★★★ LIVE FRONTIER (2026-06-30 v2) — the polynomial route is [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md),
 > RETARGETED to `T0` (bounded branching). READ THAT DOC FIRST.** The forms-graph residue is SEALED at **quasipoly**
 > (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in build; sub-exp floor `reachesRigidOrCameron_viaSpielman`). For

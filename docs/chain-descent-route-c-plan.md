@@ -60,7 +60,28 @@ remaining scoped citations to full Lean proofs. Landed:
   (`NondegQuadricDeterminesForm`); the **meta-poly bootstrapping is assessed sound** (§7a — global coordinatization,
   not the node-4 wall in disguise).
 
-**▶ C# BUILD IN PROGRESS (2026-07-04) — C1a + C1b LANDED, all tests green.**
+**▶▶▶ C# BUILD — HANDOFF SNAPSHOT (2026-07-05). Read this first; the dated bullets below are the build history.**
+**State:** the Route-C C# runtime is built and green (**57/57 Route-C tests, 0 regressions**, full build clean). Pipeline:
+recover form family (C1a) → build answer group (C1b) → classify (C2) → canonicalize by iso-type (C3, **default ON**) →
+Aut-free geometry (C4). Family-dispatch registry (`IFormFamilyHandler`) is in place; **affine-polar is the only live
+family**, alternating/half-spin/Suzuki are wired scaffolds (§9.2.7). Files: `QuadraticFormRecovery.cs` (C1a),
+`ClassicalGroupGenerators.cs`+`ClassicalSimilitude.cs` (C1b), `FormsGraphClassifier.cs` (C2), `RouteCCanonicalizer.cs`+
+`FormFamilyHandler.cs`+`AffinePolarHandler.cs`+`{Alternating,HalfSpin,Suzuki}Handler.cs`+`FormsGraphBuilder.cs` (C3),
+`GeometricCoordinatizer.cs` (C4). Tests: `RouteC*Probe.cs`.
+**Key results:** the canonical *answer* `(q,m,ε)`+`|Aut|` is harvest-free for all q (`RecoverAffinePolarInvariant`); the
+*confirmation* (rule out parameter-mates) is currently harvest-free only via the p=3 line-sum coordinatizer, else uses the
+descent harvest. **★ DECISIVE FINDING (2026-07-05, §9.2.8 CORRECTION): a size-`(d+1)` frame + WL discretizes VO^ε_d(q) for
+ALL p in `d+1` greedy steps (`RouteCScalarRecoveryProbe`)** — so harvest-free coordinatization/confirmation is cheap for
+every p; the cone-blindness "hard core" was a line-sum artifact. The residual open item is *proving* that discretization is
+poly (= the project's existing WL-dim/node-4 core), NOT a Route-C-specific barrier.
+**▶ THE NEXT STEP (the pick-up):** build the harvest-free confirmation as **frame+WL discretize → compare to StandardVO**,
+and wire it into `AffinePolarHandler.Confirm` (replacing / falling back from the harvest-based
+`ConfirmByMultiQuadricReconstruction`). Concretely: greedily individualize a size-`(d+1)` frame + 1-WL refine to a discrete
+colouring (the `RouteCScalarRecoveryProbe.Refine`/greedy loop is a working prototype), then confirm the input is genuinely
+VO by comparing its canonical form against `RouteCCanonicalizer.StandardVO(q,m,ε)`. This makes the p≥5 path harvest-free.
+Then: the alternating/half-spin/Suzuki family cores (§9.2.7 completion specs). Everything below is the dated history.
+
+**▶ C# BUILD (2026-07-04) — C1a + C1b (build history follows).**
 - **C1a `RecoverFormFamily`** (added to `QuadraticFormRecovery.cs`): generalizes A1 from `kernel[0]` (one quadratic) to
   the whole degree-2 **vanishing-space basis** (`RecoveredFormFamily{Basis[][], EvaluateAll, OnCone}`). Test
   `RouteCFormFamilyProbe.cs` (6/6): multi-quadric Cayley graphs (F₃⁴/F₅⁴/F₃⁶, VanishDim 2–4) reconstruct with **0
@@ -128,6 +149,11 @@ remaining scoped citations to full Lean proofs. Landed:
   precisely located — NOT parallelism-detection, which the line-sum method sidesteps). **Honest state: C4 = harvest-free
   invariant DONE + harvest-free full coordinatization DONE for small-ambiguity (p=3, pipeline provably poly there) +
   large-ambiguity (p≥5) isolation = the precisely-characterized open core.**
+  > **⚠ SUPERSEDED (2026-07-05) — read §9.2.8 CORRECTION.** The "p≥5 open core" here was a **line-sum-method artifact**.
+  > The natural method — **fix a size-`(d+1)` frame + WL** — discretizes VO^ε_d(q) for ALL p in `d+1` greedy steps
+  > (`RouteCScalarRecoveryProbe`), so harvest-free coordinatization is cheap for every p. The residual open item is
+  > *proving* that discretization is poly (= the project's existing WL-dim core), not a Route-C-specific barrier. The
+  > p=3 line-sum coordinatizer stays as a landed alternative; the go-forward confirmation route is frame+WL (§9.2.8).
 
 - **FAMILY-DISPATCH SCAFFOLD (2026-07-04, §9.2.7).** Refactored the hardwired affine-polar pipeline into an
   **`IFormFamilyHandler` registry** (C# mirror of the Lean `FormAdapter`). `AffinePolarHandler` real; `Alternating` /
@@ -167,11 +193,11 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
    `routeC_polySupport` certificate (`ScratchRecoveredFormTransfer.lean`), and the **cyclotomic dispatch branch**
    `reachesRigidOrCameron_seamDispatch`/`cyclotomic_sealDisj` (`ScratchSeamDispatch.lean`, the dropped 5th case). All
    axiom-clean. The one carried Lean atom across the seam is `htransport` (L1 — tractable, `forcedNode_relabel`-backed).
-4. **★ NEXT — the C# runtime: see §9.2 (grounded build spec).** The canonizer still lacks all family handlers. **The
-   load-bearing new piece is C1b `ClassicalGroupGenerators`** (build `AΓO(Q)` generators from the recovered form → hand
-   to the existing Schreier–Sims), enabled by the group-pinning above. §9.2 names every existing method to build on, every
-   new piece + its interface, the pipeline, the per-piece verification, and the Lean contracts. Order: C1a→C1b→C2→C3→C4.
-   §9.0 explains why "4 seals + finite exceptions" collapses to "1 citation + 1 lemma" (Route C is threshold-free).
+4. ✅ **The C# runtime — C1a–C4 + family-dispatch LANDED (2026-07-04/05), 57/57 Route-C tests green.** See the
+   "C# BUILD — HANDOFF SNAPSHOT" at the top of STATUS + §9.2. Affine-polar family live; alternating/half-spin/Suzuki =
+   wired scaffolds (§9.2.7). **★ NEXT ACTIONABLE = the frame+WL harvest-free confirmation** (§9.2.8 CORRECTION):
+   frame+WL discretizes VO^ε_d(q) in `d+1` steps for ALL p, so build it into `AffinePolarHandler.Confirm` to make the
+   p≥5 path harvest-free. Then the alternating/half-spin/Suzuki family cores (§9.2.7 completion specs).
 5. **The remaining carried scoped citations** (optional, to remove them from the spine): full Lean proofs of
    `NondegQuadricDeterminesForm` (single-quadric uniqueness), `JointVarietyDeterminesFamily` (multi-quadric — alt /
    half-spin), `ConePreservingCollineationIsSemiSimilitude` (F2 semilinear seam), and `AffineSchemeTwoClosed` (the
@@ -1170,13 +1196,12 @@ multiplicative structure recovers `−1` (=`4e` at q=5) for free, leaving the `2
 resolves directly. **NEXT (revised): build the harvest-free confirmation as frame+WL discretize → compare to StandardVO
 (cheap, all p), NOT the line-sum/Von Staudt route.** The p=3 line-sum coordinatizer stays as a landed alternative.
 
-**(Superseded framing, kept for context.)** `p=3` line-sum coordinatization is DONE (harvest-free); `p ≥ 5` line-sum
-stalls on cone-blindness — but that stall is now understood as a method artifact, not the fundamental barrier. **Recommended next options** (scope before committing): (a) implement Von
-Staudt's algebra of throws for the polar space (multi-session, the general solution); or (b) a *lighter sound* harvest-free
-certificate that rules out parameter-mates without full coords (e.g. verifying the isotropic-line geometry is exactly the
-polar-space incidence structure — sound-but-not-complete is acceptable since a wrong *fail* just falls back to the
-descent); or (c) accept the harvest-based confirmation for `p ≥ 5` (the *answer* is already harvest-free; only the mate-
-ruling-out confirmation uses the harvest) and treat general-p Aut-free confirmation as cited/deferred.
+**(Superseded framing, kept only as history — do NOT pursue these; the CORRECTION above replaces them.)** Before the
+frame+WL finding, the p≥5 options considered were: (a) implement Von Staudt's algebra of throws (multi-session); (b) a
+*lighter sound* mate-ruling certificate without full coords; (c) accept the harvest-based confirmation for p≥5. **These are
+all subsumed:** frame+WL (the CORRECTION) delivers exactly what (b) wanted — a cheap, sound, harvest-free discretization
+that rules out mates by comparison to `StandardVO` — for all p, without Von Staudt (a) and without falling back to (c).
+So the go-forward is the frame+WL confirmation; (a)/(b)/(c) are not live.
 
 ### 9.3 Later — the meta-poly rigor stage
 

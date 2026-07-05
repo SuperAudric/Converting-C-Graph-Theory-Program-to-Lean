@@ -34,8 +34,12 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > §9.8.9); Route C is the live poly path. **▶ SEAM DONE (2026-07-04):** the §9 combine landed at the honest level after a
 > vacuity correction (Route C poly is inherently META; genuine content = coarse Aut = the known `affineG(similitude)` mod
 > the named Skresanov citation `AffineSchemeTwoClosed`, + cyclotomic dispatch; `ScratchRecoveredFormTransfer.lean` /
-> `ScratchSeamDispatch.lean`, axiom-clean; one carried atom `htransport`=L1). **Remaining for the whole seal = the C# runtime
-> (plan §9.2 grounded spec, load-bearing C1b) + `htransport`** — **not** the `D3d`/`ZProfileSeparates` line. [[project_routec_seam_2026-07-04]].
+> `ScratchSeamDispatch.lean`, axiom-clean; one carried atom `htransport`=L1). **▶ C# RUNTIME BUILT (2026-07-04/05): C1a–C4
+> + family-dispatch LANDED, 57/57 Route-C tests green** (plan STATUS "C# BUILD — HANDOFF SNAPSHOT"; affine-polar live, other
+> 3 families = scaffolds). **KEY FINDING (2026-07-05): frame+WL discretizes VO^ε_d(q) in `d+1` steps for ALL p** ⟹ harvest-free
+> coordinatization cheap; cone-blindness was a line-sum artifact; residual open = proving discretization poly (= existing
+> WL-dim core). Remaining for the whole seal = the frame+WL harvest-free confirmation (next C# step) + `htransport` — **not**
+> the `D3d`/`ZProfileSeparates` line. [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
 >
 > **▶ UPDATE (2026-06-24) — the first forms-graph instance is SEALED.** `VO⁻₄(3)` (`ScratchBM3Glue.vo4minus_seal`,
 > axiom-clean `[propext, Classical.choice, Quot.sound]`) closes the affine-polar residue at the minus form modulo `{G3}`
