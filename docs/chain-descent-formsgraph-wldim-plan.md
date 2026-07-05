@@ -828,7 +828,8 @@ AUDIT-S finding 3, a "discharge of `hSmallAutThin`": the per-family `wittFree` r
 seam is a cited classification case-split that routes the abstract residue `S` to its concrete `affineScheme(Q)`). Target
 pinned by **AUDIT-S (§11.0)**; this step executes it.
 
-> **▶▶▶ SEAM SPIKE DONE (2026-06-26, `ChainDescent/ScratchSeam.lean`, axiom-clean) — the seam CLOSES architecturally; it
+> **▶▶▶ SEAM SPIKE DONE (2026-06-26, then PORTED — the seam now lives in `ChainDescent/RouteCSeam.lean`, `ScratchSeam.lean`
+> deleted 2026-07-05; L1 `htransport` later DISCHARGED, see `docs/chain-descent-route-c-plan.md`) — the seam CLOSES architecturally; it
 > reduces to ONE new obligation, and option (b) is the clean route (correcting the earlier option-(a) lean).** The stub
 > **`reachesRigidOrCameron_viaSchurianRank3Affine`** compiles axiom-clean: from (C) the cited classification
 > (`IsCameronScheme S ∨ ∃ Q T f, T.card ≤ bound ∧ IsotropySeparatesAtBase Q T ∧ SchemeRealizes f S (affineScheme Q)`) and

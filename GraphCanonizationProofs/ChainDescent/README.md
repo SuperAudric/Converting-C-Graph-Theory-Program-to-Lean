@@ -33,6 +33,12 @@ The active library is this `ChainDescent/` split plus the top-level
 | `CFI.lean` | CFI gadgets, gauge flips (`cfiFlipAut`), the `Z₂^β` cycle space, the CFI-cov coverage instance |
 | `Group.lean` | permutation-group scaffolding |
 
+> This table is the **core** substrate only. The forms-graph node-4 work is further modules in `build.sh` (not listed
+> here): `CascadeAffine` + the ~14 pair-route modules (`…AffinePolarSeal`, the quasipoly `VO^ε` seal) and the **Route C**
+> spine `RouteCTransport` / `RouteCFormAdapters` / `RouteCSeam` / `RouteCNode4` (form-recovery poly route — recover `Q`,
+> canonicalize via its known Aut). The authoritative complete list is `scripts/build.sh` MODULES + `PublicTheoremIndex.md`;
+> the Route-C narrative + decl homes are in [`docs/chain-descent-route-c-plan.md`](../../docs/chain-descent-route-c-plan.md).
+
 ---
 
 ## 2. The C# implementation being modelled

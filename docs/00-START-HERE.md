@@ -157,8 +157,8 @@ close it — is set out in
 > the node-4 WL wall** that closed the direct WL/`bᵢ=1` build (recovery doc §9.8.9 — the banners just below, incl. the
 > 2026-06-30 `T0` framing, are that stalled WL route). **★ STATE (2026-07-04): ALL FOUR FORM FAMILIES ARE SEALED**
 > (affine-polar, alternating `Alt(5,q)`, half-spin, Suzuki–Tits), each modulo one exact **scoped citation**; the Lean
-> spine is fully assembled + axiom-clean (`ChainDescent/ScratchRouteC.lean`, 94 decls, NOT in build.sh; `lake env lean
-> ChainDescent/ScratchRouteC.lean` = exit 0). F1+A1 (C#, confirmed vs the real harness) → A3 refinement → spanning-base
+> spine is **PORTED into `build.sh` and axiom-clean (2026-07-05)** — the modules `RouteCTransport` / `RouteCFormAdapters`
+> (ex-`ScratchRouteC`) / `RouteCSeam` / `RouteCNode4`; full `build.sh` green ~68s. F1+A1 (C#, confirmed vs the real harness) → A3 refinement → spanning-base
 > discretization → **F4 iso-invariance**; **F2** (`q=pᵉ` semilinear); **F3** the `FormAdapter` engine + the generic
 > **multi-quadric bridges**; the 4 seal capstones = `affinePolarAdapter`, `Plucker.reachesRigidOrCameron_alternating`,
 > `HalfSpin.reachesRigidOrCameron_halfSpin`, `Suzuki.reachesRigidOrCameron_suzuki`. Review-flagged items resolved
@@ -167,18 +167,21 @@ close it — is set out in
 > = `∃gens,closure=group` is a tautology; non-vacuous "coarse reaches rigid" is *false* = node-4 — so Route C poly is
 > inherently the project's standard **meta** claim, not a coarse Lean predicate). Genuine content: group-pinning
 > `schemeAutGroup_coarse_eq_affineG` (coarse Aut = the known `affineG(similitude)`, all 4 families, mod the named Skresanov
-> citation `AffineSchemeTwoClosed`) + `routeC_polySupport` (`ScratchRecoveredFormTransfer.lean`) + the **cyclotomic dispatch
-> branch** (`ScratchSeamDispatch.lean`), all axiom-clean. **★ L1 `htransport` DISCHARGED (2026-07-05,
-> `ScratchSeamTransport.lean`, axiom-clean) — the seam carries NO atom** (transport ONE light predicate
+> citation `AffineSchemeTwoClosed`) + `routeC_polySupport` + the **cyclotomic dispatch branch** (all now in `RouteCSeam`),
+> all axiom-clean. **★ L1 `htransport` DISCHARGED — the seam carries NO atom** (transport ONE light predicate
 > `SeparatesAtBoundedBase` via a cross-graph `warmRefine_transport_iso`, not the 4-way `SealDisj`; capstone
-> `reachesRigidOrCameron_viaSchurianRank3Affine_proved`) ⟹ the Lean deliverable is complete modulo scoped citations + PORT.
-> **★ C# RUNTIME BUILT (2026-07-04/05): C1a–C4 + family-dispatch + Suzuki runtime prototype (VSz(8), 2026-07-05); 60/60
-> fast Route-C tests + Suzuki LongRunning** (affine-polar + Suzuki live; alternating/half-spin DORMANT — dense-infeasible
-> FEASIBILITY WALL, plan §9.2.7). **KEY FINDING (2026-07-05): a size-`(d+1)` frame + WL discretizes VO^ε_d(q) for ALL p** —
-> cone-blindness was a line-sum artifact; residual open = proving the discretization is poly (= the existing WL-dim core).
-> **★ NEXT (reassessment 2026-07-05): PORT the scratch spine into `build.sh` + promote scoped citations** — the remaining
-> high-value Route-C work is Lean, NOT the frame+WL C# confirm (sound but advances no proof; harvest-based Confirm already
-> works). See the plan's HANDOFF SNAPSHOT "NEXT TASKS". [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
+> `RouteCSeam.reachesRigidOrCameron_viaSchurianRank3Affine_proved`). **★ PORT DONE (2026-07-05):** the whole spine (5
+> scratch files) is consolidated into the 4 `RouteC*` build modules, `build.sh` green, index updated, superseded scratch
+> deleted. **★ L4 DONE (2026-07-05, `RouteCNode4.lean`):** the affine-polar node-4 residue is discharged with **no
+> `hFormCert`** (`reachesRigidOrCameron_viaAffineFormScheme_routeC` — that predicate is FALSE at bounded base §9.0a, so
+> Route C SUPERSEDES the hook via the isotropy-separation path, not by filling its hypothesis), and the multi-form families
+> get the §9.0a meta-composition (**Track B**: `routeC_polySupport_of_adapter` + `routeC_polySupport_{alternating,halfSpin,suzuki}`;
+> Suzuki via a `formConeStab` generalization for its cubic cone). **★ C# RUNTIME BUILT: C1a–C4 + family-dispatch + Suzuki
+> runtime prototype** (affine-polar + Suzuki live; alternating/half-spin DORMANT — dense-infeasible FEASIBILITY WALL, plan §9.2.7).
+> **★ NEXT: promote the scoped citations** (`NondegQuadricDeterminesForm` / `JointVarietyDeterminesFamily` /
+> `ConePreservingCollineationIsSemiSimilitude` / `AffineSchemeTwoClosed`) to full Lean proofs — or **Track A** (a
+> multi-quadric pair-route) if a per-family coarse `SealDisj` for the multi-form families is wanted. See the plan's HANDOFF
+> SNAPSHOT "NEXT TASKS". [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
 > **★★★★ LIVE FRONTIER (2026-06-30 v2) — the polynomial route is [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md),
 > RETARGETED to `T0` (bounded branching). READ THAT DOC FIRST.** The forms-graph residue is SEALED at **quasipoly**
 > (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in build; sub-exp floor `reachesRigidOrCameron_viaSpielman`). For

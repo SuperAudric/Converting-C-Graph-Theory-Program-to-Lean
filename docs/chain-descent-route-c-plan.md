@@ -19,17 +19,19 @@
 ## STATUS (read first)
 
 **Where Route C stands (2026-07-05) — see the HANDOFF SNAPSHOT below for the current state + next tasks.** **★ ALL FOUR
-FORM FAMILIES ARE SEALED** (affine-polar, alternating `Alt(5,q)`, half-spin, Suzuki–Tits) **+ the L1 seam atom
-`htransport` is DISCHARGED** (2026-07-05) ⟹ the Lean deliverable is complete modulo scoped citations + PORT; the C#
-runtime is ~as-complete-as-useful (affine-polar + Suzuki live). **★ SUZUKI IS NOW CITATION-FREE (2026-07-04):** the old scoped
-citation `SuzukiFormsDetermine` is **discharged** — `separates` is proved outright by second-derivative recovery on
-an enlarged base (see "Suzuki" below), so `reachesRigidOrCameron_suzuki` carries **no citation and no `hσ`**. So
-three families rest on one exact scoped citation each (`NondegQuadricDeterminesForm` / `JointVarietyDeterminesFamily`),
-and Suzuki rests on none. The Route-C **Lean spine is fully assembled and axiom-clean** (`ScratchRouteC.lean`, ~100
-decls, all `[propext, Classical.choice, Quot.sound]`, NOT in `build.sh` — verify: `lake env lean
-ChainDescent/ScratchRouteC.lean`, exit 0). The remaining work is **not another family** — it is the **§9
-post-four-seals combine** (four seals → one correctness object) + the **C# runtime** + optionally promoting the
-remaining scoped citations to full Lean proofs. Landed:
+FORM FAMILIES ARE SEALED** (affine-polar, alternating `Alt(5,q)`, half-spin, Suzuki–Tits), **the whole Lean spine is
+PORTED into `build.sh` and axiom-clean** (`RouteCTransport` / `RouteCFormAdapters` / `RouteCSeam` / `RouteCNode4`; full
+`build.sh` green ~68s; verify a decl with the checker pattern in "VERIFY" below), **the seam is atom-free** (L1
+`htransport` DISCHARGED), and **L4 is DONE** — the affine-polar node-4 residue is discharged with no `hFormCert`
+(`RouteCNode4.reachesRigidOrCameron_viaAffineFormScheme_routeC`), and the multi-form families have the §9.0a
+meta-composition (Track B: `routeC_polySupport_of_adapter` + per-family corollaries). The C# runtime is
+~as-complete-as-useful (affine-polar + Suzuki live). **★ SUZUKI IS CITATION-FREE:** the old scoped citation
+`SuzukiFormsDetermine` is **discharged** — `separates` is proved outright by second-derivative recovery on an enlarged
+base, so `reachesRigidOrCameron_suzuki` carries no citation and no `hσ`. So three families rest on one exact scoped
+citation each (`NondegQuadricDeterminesForm` / `JointVarietyDeterminesFamily`), Suzuki on none.
+**⟹ The remaining work is NOT another family and NOT the combine (both done); it is (a) promoting the scoped citations to
+full Lean proofs (optional), and (b) — if a per-family coarse `SealDisj` is wanted for the multi-form families — Track A
+(a multi-quadric pair-route, major).** Landed (all in `build.sh`, axiom-clean; module homes in §1 / `RouteCFormAdapters`):
 - **The single-form spine (affine-polar):** F1+A1 (C#, confirmed vs the real harness) → A3 brick 1 (isometry scheme
   refines the graph) → discretize at a spanning base (`viaOrthogonalForm_spanning`) → **F4** iso-invariance
   (`recoveredForm_colouring_equivariant`). Rests on ONE exact scoped citation, `NondegQuadricDeterminesForm` (below).
@@ -64,14 +66,16 @@ remaining scoped citations to full Lean proofs. Landed:
 
 **▶▶▶ HANDOFF SNAPSHOT (2026-07-05, current). Read this first; the dated bullets below are the build history.**
 
-**LEAN — the seam is now ATOM-FREE.** All four family adapters sealed axiom-clean (`ScratchRouteC.lean`), and **★ L1
-`htransport` is DISCHARGED** (`ScratchSeamTransport.lean`, axiom-clean; §9 item 3, [[project_routec_seam_2026-07-04]]) —
+**LEAN — the seam is now ATOM-FREE.** All four family adapters sealed axiom-clean (`RouteCFormAdapters.lean`), and **★ L1
+`htransport` is DISCHARGED** (`RouteCSeam.lean`, axiom-clean; §9 item 3, [[project_routec_seam_2026-07-04]]) —
 the Route-C seam carries **no uncited/unproved atom**. Mechanism: transport the ONE light predicate `SeparatesAtBoundedBase`
 (not the 4-way `SealDisj`) via a cross-graph `warmRefine_transport_iso`; capstone `reachesRigidOrCameron_viaSchurianRank3Affine_proved`.
-**★ HONEST SCOPE (do not overstate): the four family seals + the seam are done; the combine is complete as a
-META-COMPOSITION (family adapters + transport + group-pinning + cyclotomic dispatch), NOT yet wired into the
-canonizer's node-4 hook.** So the Lean deliverable is "four family seals + atom-free seam" — **complete modulo PORT +
-L4 wiring + scoped citations**. Remaining Lean:
+**★ HONEST SCOPE (do not overstate): the four family seals + the seam are done, PORTED, and the node-4 discharge (L4)
+has landed** — a genuine coarse `SealDisj` for **affine-polar** (`RouteCNode4.reachesRigidOrCameron_viaAffineFormScheme_routeC`,
+no `hFormCert`) and the §9.0a **meta-composition** for the three multi-form families (Track B). The Route-C *poly* claim
+itself stays the project's standard **meta** claim (§9.0a — there is no non-vacuous coarse-scheme Lean predicate). So the
+Lean deliverable is complete **modulo scoped citations** (+ optional Track A for a per-family multi-form coarse `SealDisj`).
+Landed:
 - (a) **PORT — ✅ DONE (2026-07-05).** The five scratch spine files are consolidated into **three named build modules**:
   `RouteCTransport` (← Cascade; `SchemeRealizes` + the `…_transport_iso` tower + `separatesAtBoundedBase_transport` + the
   3 distilled partition helpers), `RouteCFormAdapters` (← CascadeAffine; the four family seals + engine; git-mv of
@@ -96,10 +100,17 @@ L4 wiring + scoped citations**. Remaining Lean:
   content is the **classification** (`SchemeRealizes f S (affineScheme(similitudeGroup Q))` — the Skresanov/Cameron/Liebeck
   citation that `S` *is* this family) + the pair-route scope (`q=p` odd, large) + `{G3}` — the same premises as the banked
   `reachesRigidOrCameron_affinePolar`, now transported to the abstract residue. **The affine-polar node-4 case is now
-  actually discharged** (poly-ness stays the project meta-claim, §9.0a). *Remaining:* the multi-form families
-  (alternating/half-spin/Suzuki) are still island seals — their L4-analog needs a `jointConeStab`-side transport + a
-  bounded-base separation producer (their adapters prove `separates` but no `exists_…SeparatesAtBase` bounded-base witness
-  is composed yet); a follow-on, not blocking.
+  actually discharged** (poly-ness stays the project meta-claim, §9.0a).
+  - **Multi-form Track B — ✅ DONE (2026-07-05, `RouteCNode4.lean`, axiom-clean).** The three multi-form families get the
+    §9.0a meta-composition via a generic engine `routeC_polySupport_of_adapter` (any `FormAdapter` + a coarse over-group
+    `Gc ≥ A.G₀`, mod one Skresanov `AffineSchemeTwoClosed`) → the triple (coarse Aut = `affineG Gc` ∧ fine harvest
+    **extracted from the adapter**, no carried `hfine` ∧ fine ≤ coarse), with corollaries
+    `routeC_polySupport_{alternating,halfSpin,suzuki}`. Suzuki needed a `formConeStab` generalization (its ovoid cone is
+    **cubic**, so `jointConeStab` — typed for `QuadraticForm` — doesn't apply) + a `suzukiG₀ ≤ formConeStab` bridge. This
+    retires the multi-form island status at the meta level (fine seal ↔ coarse graph via group-pinning + refinement).
+  - **Track A (deferred):** a genuine coarse `SealDisj` for the multi-form families (full parity with affine-polar's
+    strong L4) needs a multi-quadric coarse discretization (`IsotropySeparatesAtBase Qs` — a multi-quadric pair-route),
+    major new math; only affine-polar has one. Not blocking (Track B suffices for the meta poly argument).
 - (c) **promote the scoped citations** to full proofs (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`,
   `ConePreservingCollineationIsSemiSimilitude`, `AffineSchemeTwoClosed`) — optional, `chain-descent-citation-discharge.md` has routes.
 
@@ -248,7 +259,7 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
 0. ✅ **Multi-quadric bridges — DONE 2026-07-03** (brick-1-multi + F4-multi, generic; alternating at full
    instance-1 parity, half-spin pre-equipped). See STATUS "Multi-quadric bridges".
 1. ✅ **Half-spin instance — DONE 2026-07-03** (`reachesRigidOrCameron_halfSpin`, axiom-clean). The 10 validated D₅
-   spinor quadrics `S0..S9` are transcribed (`ScratchRouteC.lean §HalfSpin`), `spinor_hjoint` proved from `S0..S4`
+   spinor quadrics `S0..S9` are transcribed (`RouteCFormAdapters.lean §HalfSpin`), `spinor_hjoint` proved from `S0..S4`
    by coordinate isolation, sealed via `multiFormAdapter` + the shared engine; brick-1 `halfSpin_refines_coneScheme`
    landed; F4 generic. Full instance-1 parity. (This was the 3rd of 4 seals; Suzuki, item 2, followed.)
 2. ✅ **Suzuki–Tits instance — DONE + CITATION-FREE 2026-07-04** (`reachesRigidOrCameron_suzuki`, axiom-clean, **no
@@ -262,9 +273,9 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
    transfer reframed after a **vacuity correction** (`GroupReproduced` was a tautology; non-vacuous coarse-reaches-rigid
    is false = node-4), yielding the *genuine* non-vacuous content — group-pinning
    `schemeAutGroup_affineScheme_eq_affineG` (all 4 families, mod the named Skresanov citation `AffineSchemeTwoClosed`) +
-   `routeC_polySupport` certificate (`ScratchRecoveredFormTransfer.lean`), and the **cyclotomic dispatch branch**
-   `reachesRigidOrCameron_seamDispatch`/`cyclotomic_sealDisj` (`ScratchSeamDispatch.lean`, the dropped 5th case). All
-   axiom-clean. **★ `htransport` (L1) is now DISCHARGED (2026-07-05, `ScratchSeamTransport.lean`, axiom-clean) — the
+   `routeC_polySupport` certificate (`RouteCSeam.lean`), and the **cyclotomic dispatch branch**
+   `reachesRigidOrCameron_seamDispatch`/`cyclotomic_sealDisj` (`RouteCSeam.lean`, the dropped 5th case). All
+   axiom-clean. **★ `htransport` (L1) is now DISCHARGED (2026-07-05, `RouteCSeam.lean`, axiom-clean) — the
    seam carries NO atom.** Decomposition (user's, source-validated): the forms-graph seal is Cameron-free and inhabits
    only `SchemeRecoveredByDepth` via the light `SeparatesAtBoundedBase`, so transport ONE predicate, not four —
    `separatesAtBoundedBase_transport` (via a cross-graph `warmRefine_transport_iso`, a localized generalization of the
@@ -300,7 +311,7 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
 - Both odd-q and char-2 for F1 (full `Aut` delivered); A1 is odd-q (char-2 = separate Arf track). All C# tests green,
   existing `PermutationGroup` tests unaffected.
 
-**✅ DONE — the Lean spine (`ChainDescent/ScratchRouteC.lean`, all axiom-clean, NOT in `build.sh`).**
+**✅ DONE — the Lean spine (`ChainDescent/RouteCFormAdapters.lean`, all axiom-clean, in `build.sh`).**
 - `coords_determine_spanning` + `reachesRigidOrCameron_viaOrthogonalForm_spanning` — the **spanning-base** generalization
   of the landed `coords_determine`/`viaOrthogonalForm`: the isometry scheme `O(Q)` discretizes at ANY base whose
   differences span (Route C individualizes an iso-invariantly chosen base, not the literal standard frame).
@@ -350,30 +361,38 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
   `multiFormAdapter`; Suzuki reduces to the 5 σ-forms + the bridge + `suzuki_separates`.
 - **✅ §9 combine / seam — DONE at the honest level (2026-07-04):** the group-pinning (`schemeAutGroup_coarse_eq_affineG`,
   all 4 families mod the named Skresanov citation `AffineSchemeTwoClosed`) + `routeC_polySupport` certificate
-  (`ScratchRecoveredFormTransfer.lean`) + the cyclotomic dispatch (`ScratchSeamDispatch.lean`), all axiom-clean, after
-  the **vacuity correction** (§9.0a). **★ `htransport` (L1) DISCHARGED (2026-07-05, `ScratchSeamTransport.lean`,
+  (`RouteCSeam.lean`) + the cyclotomic dispatch (`RouteCSeam.lean`), all axiom-clean, after
+  the **vacuity correction** (§9.0a). **★ `htransport` (L1) DISCHARGED (2026-07-05, `RouteCSeam.lean`,
   axiom-clean) — no carried atom remains** (4 lemmas: cross-graph `warmRefine_transport_iso` → `separatesAtBoundedBase_transport`
   + `separatesAtBoundedBase_affinePolar` → `reachesRigidOrCameron_viaSchurianRank3Affine_proved`; see item 3 above).
-  **Remaining:** the **C# runtime** (§9.2 grounded build spec; load-bearing = C1b `ClassicalGroupGenerators`) + promoting
-  the scoped citations (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`,
-  `ConePreservingCollineationIsSemiSimilitude`, `AffineSchemeTwoClosed`) to full Lean proofs + PORT (`ScratchSeamTransport`
-  + the ScratchRouteC spine → `build.sh`). **No further family builds remain.**
+  **★ PORT DONE (2026-07-05):** the whole spine is in `build.sh` as `RouteCTransport`/`RouteCFormAdapters`/`RouteCSeam`/`RouteCNode4`.
+  **★ L4 DONE (2026-07-05, `RouteCNode4.lean`):** affine-polar node-4 discharged with no `hFormCert`; multi-form Track B
+  meta-composition landed (see NEXT-TASKS item 1). **★ C# runtime BUILT.** **Remaining:** promoting the scoped citations
+  (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`, `ConePreservingCollineationIsSemiSimilitude`,
+  `AffineSchemeTwoClosed`) to full Lean proofs, or Track A (a multi-quadric pair-route) for a per-family coarse `SealDisj`.
+  **No further family builds remain.**
 
-**▶ VERIFY what's landed (fresh-reader commands).** NB: always `cd GraphCanonizationProofs` first — a stray working
-directory gives a spurious `no such file or directory` on `ChainDescent/…`; re-run from the repo root.
-- Lean (L1 SEAM TRANSPORT, NEW 2026-07-05): `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchSeamTransport.lean`
-  (exit 0, no diagnostics; ends with `#print axioms` showing `[propext, Classical.choice, Quot.sound]`). Key decls:
-  `warmRefine_transport_iso` (cross-graph WL transport), `separatesAtBoundedBase_transport` (step 2),
-  `reachesRigidOrCameron_viaSchurianRank3Affine_proved` (the seam, `htransport` proved).
-- Lean (SEAM, 2026-07-04): `… lake env lean ChainDescent/ScratchRecoveredFormTransfer.lean`
-  and `… ChainDescent/ScratchSeamDispatch.lean` (both exit 0, no warnings; each ends with `#print axioms` lines showing
-  `[propext, Classical.choice, Quot.sound]`). Key decls: `schemeAutGroup_coarse_eq_affineG` + `routeC_polySupport`
-  (group-pinning + certificate); `reachesRigidOrCameron_seamDispatch` + `cyclotomic_sealDisj` (cyclotomic dispatch).
-- Lean (adapters): `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRouteC.lean` (exit 0; the only warnings are two
-  `simpa`-style lints, one pre-existing). Axiom-check by appending `#print axioms ChainDescent.RouteC.<name>` and
-  re-running (expect `[propext, Classical.choice, Quot.sound]`). The four seal capstones:
-  `affinePolarAdapter`, `Plucker.reachesRigidOrCameron_alternating`, `HalfSpin.reachesRigidOrCameron_halfSpin`,
-  `Suzuki.reachesRigidOrCameron_suzuki`.
+**▶ VERIFY what's landed (fresh-reader commands).** The Route-C spine is now in `build.sh`, so verification is the
+normal build + an axiom-checker file (the ported modules carry **no** inline `#print axioms` — that would print on every
+build; the axiom check is done out-of-line):
+- **Full build:** `bash scripts/build.sh` (serial, ~68s; ends `✔ serial build complete`, `exit=0`). The four Route-C
+  modules build last: `RouteCTransport` → `RouteCFormAdapters` → `RouteCSeam` → `RouteCNode4`.
+- **Axiom-clean check** (per gap: a scratch/temp file's `#print axioms` survives to stdout; a built `.olean` doesn't, so
+  check out-of-line). Write a temp file that imports the module and prints axioms, then `cd GraphCanonizationProofs &&
+  lake env lean /path/to/check.lean` (expect `[propext, Classical.choice, Quot.sound]` for each). NB always
+  `cd GraphCanonizationProofs` first — a stray cwd gives a spurious `no such file`. Example:
+  ```lean
+  import ChainDescent.RouteCNode4
+  open ChainDescent
+  #print axioms reachesRigidOrCameron_viaAffineFormScheme_routeC   -- L4 (affine-polar, no hFormCert)
+  #print axioms routeC_polySupport_of_adapter                      -- Track B engine (multi-form meta-support)
+  #print axioms RouteC.Plucker.reachesRigidOrCameron_alternating   -- a family seal
+  #print axioms reachesRigidOrCameron_viaSchurianRank3Affine_proved -- L1 seam (htransport proved)
+  ```
+- **Key decl homes:** the four seals + `FormAdapter` engine + multi-quadric bridges = `RouteCFormAdapters` (namespace
+  `ChainDescent.RouteC`, sub-namespaces `Plucker`/`HalfSpin`/`Suzuki`); the cross-graph transport tower + `SchemeRealizes`
+  + `separatesAtBoundedBase_transport` = `RouteCTransport`; `SealDisj` + dispatch + group-pinning + L1 seam capstone =
+  `RouteCSeam`; L4 + Track B (`routeC_polySupport_*`, `formConeStab`) = `RouteCNode4`.
 - C#: `cd GraphCanonizationProject.Tests && dotnet test --filter "FullyQualifiedName~RouteCF1Probe.F1_Recovers_TranslationGroup&Category!=LongRunning"`
   (fast, q=2,3; the `_Large` q=5 cases are `LongRunning`, ~5 min each — canonizer cost, not F1/A1).
 - C# (Suzuki, NEW 2026-07-05): `dotnet test --filter "FullyQualifiedName~RouteCSuzukiProbe&Category!=LongRunning"`
@@ -510,31 +529,31 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `neg_mem_isometryGroup` | `CascadeAffine.lean:2678` | `−1 ∈ O(Q)` (the `hneg` for `affineScheme`) |
 | `frameBase`, `frameBase_card_le` | `CascadeAffine.lean:2684`,`:2688` (idx 1215-6) | the `{0,e₁,…,e_d}` base and `card ≤ d+1` |
 | `reachesRigidOrCameron_viaOrthogonalForm` | `CascadeAffine.lean:2704` (idx 1217) | **the back-half** — `O(Q)` (nondeg) discretizes at `frameBase` and seals via `viaSpielman`. NB: **isometry** scheme, not the given similitude graph (§2c) |
-| `RouteC.coords_determine_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `coords_determine`: `Q`-values at any *spanning* base `S` (`span S = ⊤`) determine the vertex |
-| `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `viaOrthogonalForm`: `O(Q)` discretizes at any base `T∋o` whose differences `{t̄−ō}` span — the iso-invariantly-chosen base Route C needs |
-| `RouteC.isometryScheme_refines_similitudeScheme` | `ScratchRouteC.lean` (**Route C A3 brick 1, NEW, axiom-clean**) | `O(Q)≤GO(Q)` ⟹ the isometry scheme refines the given similitude graph (finer `relOfPair`) — the recovered form is consistent, not fabricated |
-| `RouteC.NondegQuadricDeterminesForm` | `ScratchRouteC.lean` (**Route C — the exact carried classical citation, NEW**) | scoped premise (`p≠2`, `4≤d`, `Q` nondeg): same isotropic cone ⟹ scalar-multiple form (A1's `vanishDim=1` uniqueness). The EXACT true statement (unrestricted form false at `d=3,q=3`); Hirschfeld / projective Nullstellensatz; carried like `Theorem41Statement` |
-| `RouteC.similitude_colouring_equivariant`, `RouteC.similitude_conePreserving` | `ScratchRouteC.lean` (**Route C F4 bricks, NEW, axiom-clean**) | a form similitude carries the difference colouring by one scalar (`Q'(gu−gt)=μ·Q(u−t)`) + preserves the cone — pure linearity |
-| `RouteC.recoveredForm_colouring_equivariant` | `ScratchRouteC.lean` (**Route C F4 capstone, NEW, axiom-clean**) | graph-iso cone-preservation + `NondegQuadricDeterminesForm` ⟹ the recovered difference colouring is equivariant (iso-invariant up to global scalar) — the "discrete ⟹ canonical" link |
-| `RouteC.frobVec`, `RouteC.frobVec_sub`, `RouteC.semisimilitude_colouring_equivariant` | `ScratchRouteC.lean` §F2 (**Route C F2 bricks, NEW, axiom-clean**) | coordinate-wise Frobenius σ̂ + its additivity + the semilinear equivariance identity `Q'(M(σ̂u)−M(σ̂t))=μ·σ(Q(u−t))` |
-| `RouteC.ConePreservingCollineationIsSemiSimilitude` | `ScratchRouteC.lean` §F2 (**Route C F2 cited premise, NEW**) | scoped (`(2:K)≠0`, `4≤d`): cone-preserving collineation `g` ⟹ `g=M∘σ̂` semi-similitude (fundamental thm of projective geometry + `NondegQuadricDeterminesForm`; carried) |
-| `RouteC.recoveredForm_colouring_equivariant_semilinear` | `ScratchRouteC.lean` §F2 (**Route C F2 capstone, NEW, axiom-clean**) | q=pᵉ: the recovered form is iso-invariant up to scalar **and** field auto σ — F4 for the semilinear (ΓL) case; `q=p` = the `σ=id` specialization |
-| `RouteC.FormAdapter`, `RouteC.FormAdapter.reachesRigidOrCameron` | `ScratchRouteC.lean` §F3 (**Route C engine interface, NEW, axiom-clean**) | the `IFormStructure` interface (`G₀` + `−1∈G₀` + bounded base + `separates`) + the shared engine theorem (any adapter ⟹ the seal). 1 engine, N family adapters |
-| `RouteC.affinePolarAdapter` | `ScratchRouteC.lean` §F3 (**Route C instance 1, NEW, axiom-clean**) | affine-polar `VO^ε` as a `FormAdapter` (`G₀=O(Q)`, frame base, `coords_determine` certificate) — validates the interface, reproduces `viaOrthogonalForm` |
-| `RouteC.coords_determine_multi`, `RouteC.coords_determine_multi_spanning` | `ScratchRouteC.lean` (**Route C alternating-family `separates` core, NEW, axiom-clean**) | a *family* `{Q_k}` with trivial common polar-radical determines the vertex from the joint value-profile (frame / spanning base) — the multi-quadric `separates` for `Alt(n≥5,q)` (Plücker quadrics), generalizes `coords_determine` |
-| `RouteC.multiFormAdapter` | `ScratchRouteC.lean` (**Route C alternating engine hookup, NEW, axiom-clean**) | a form family `{Q_k}` with joint nondegeneracy ⟹ a `FormAdapter` (`G₀ = ⨅ₖ O(Q_k)` the joint isometry group, frame base, `coords_determine_multi` certificate). `affinePolarAdapter` = the `ι=Unit` case |
-| `RouteC.Plucker.{Pf0..Pf4, pluckerForms, plucker_hjoint}` | `ScratchRouteC.lean §Plucker` (**Route C alternating instance, NEW, axiom-clean**) | the concrete 5 sub-Pfaffian quadrics on `𝔽_p^10` (via `linMulLin`) + their joint nondegeneracy `plucker_hjoint` (the sole geometric input) |
-| `RouteC.Plucker.alternatingAdapter`, `RouteC.Plucker.reachesRigidOrCameron_alternating` | `ScratchRouteC.lean §Plucker` (**Route C instance 2 CAPSTONE, NEW, axiom-clean**) | `Alt(5,q)` as a sealed `FormAdapter` + the rigid-or-Cameron seal — the **first concrete non-quadratic (multi-form) Route-C family, end to end** |
-| `RouteC.affineScheme_refines_of_le` | `ScratchRouteC.lean` (**generic refinement bridge, NEW, axiom-clean**) | `H ≤ G` (both `∋ −1`) ⟹ `affineScheme H` refines `affineScheme G`. The reusable core of every Route-C refinement brick; `isometryScheme_refines_similitudeScheme` is now its one-line corollary |
-| `RouteC.jointConeStab`, `RouteC.neg_mem_jointConeStab`, `RouteC.iInf_isometryGroup_le_jointConeStab` | `ScratchRouteC.lean` (**multi-quadric bridges, NEW, axiom-clean**) | the **graph-intrinsic** setwise stabilizer of the joint cone `{v : ∀k, Q_k v=0}` (= the connection set) as a `Subgroup` + `−1∈` it + `⨅ₖ O(Q_k) ≤` it. The multi-form analog of `similitudeGroup`, defined from the graph not the form |
-| `RouteC.multiIsometryScheme_refines_coneScheme` | `ScratchRouteC.lean` (**brick-1-multi, NEW, axiom-clean**) | the recovered joint-isometry scheme `⨅ₖ O(Q_k)` refines the cone-stabilizer scheme — the multi-form refinement leg (analog of `isometryScheme_refines_similitudeScheme`), tied to the actual graph via `jointConeStab`. `alternating_refines_coneScheme` = the concrete `Alt(5,q)` application |
-| `RouteC.multiSimilitude_colouring_equivariant`, `RouteC.JointVarietyDeterminesFamily`, `RouteC.recoveredFamily_colouring_equivariant`, `RouteC.recoveredFamily_partition_isoInvariant` | `ScratchRouteC.lean` (**F4-multi, NEW, axiom-clean**) | the multi-form iso-invariance leg: provable equivariance brick (colouring transports by global `Φ`) + the scoped carried citation `JointVarietyDeterminesFamily` (joint variety determines the family up to invertible `Φ`; multi-form sibling of `NondegQuadricDeterminesForm`) + capstone (injective `Φ`) + partition-invariance payoff (`Φ` cancels in comparisons) |
-| `RouteC.polar_linMulLin` | `ScratchRouteC.lean` (**reusable primitive, NEW, axiom-clean**) | `polar (linMulLin f g) x y = f x·g y + f y·g x` — the polar of a Clifford-term-sum quadric (Plücker / spinor forms) |
-| `RouteC.HalfSpin.{S0..S9, spinorForms, S0_polar..S4_polar, spinor_hjoint}` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3, NEW, axiom-clean**) | the 10 concrete D₅ spinor quadrics on `𝔽_p^16` (validated by `route_c_halfspin_probe.py`: dim=10, exact 𝔽₂ count 2296, radical 0) + their joint nondegeneracy `spinor_hjoint` (from the 5 quadruple forms by coordinate isolation) |
-| `RouteC.HalfSpin.{halfSpin_reduction, spinAdapter, reachesRigidOrCameron_halfSpin, halfSpin_refines_coneScheme}` | `ScratchRouteC.lean §HalfSpin` (**Route C instance 3 CAPSTONE, NEW, axiom-clean**) | half-spin as a sealed `FormAdapter` (`spinAdapter`) + the rigid-or-Cameron seal (`reachesRigidOrCameron_halfSpin`) + brick-1 (`halfSpin_refines_coneScheme`) — instance 3 DONE, full instance-1 parity |
-| `RouteC.Suzuki.{ovoidC, SF0..SF4, suzukiForms, four_eq_zero, suzukiForms_ovoid, suzukiForms_infty, suzukiForms_homog}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 — the σ-twisted forms rederived, NEW, axiom-clean**) | over a char-2 `CommRing K` with a Tits endo `σ` (`σ∘σ=(·)²`): the 5 σ-twisted Suzuki forms + proofs they cut the cone (vanish on the ovoid + at infinity + σ-twisted homogeneous). De-risk-validated (`route_c_suzuki_probe.py`, joint zero=cone exact) |
-| `RouteC.Suzuki.{SFv, PreservesForms, SuzukiFormsDetermine, preservesForms_eq, suzuki_separates}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 — the σ-twisted `separates`, NEW, axiom-clean**) | the σ-twisted analog of `coords_determine_multi`'s `separates`: the joint-isometry orbit-profile at the frame ⟹ (via `preservesForms_eq` + the scoped citation `SuzukiFormsDetermine`) `v=v'`. `SuzukiFormsDetermine` is carried (false for small `K`, true for `GF(2^{2e+1})`; `Sz(q)` 2-transitivity) |
-| `RouteC.Suzuki.{SFbar, suzukiG₀, preservesForms_of_mem_G₀, neg_mem_suzukiG₀, suzukiBase, suzukiBase_card_le, suzukiAdapter, reachesRigidOrCameron_suzuki}` | `ScratchRouteC.lean §Suzuki` (**Route C instance 4 CAPSTONE — module bridge + seal, NEW, axiom-clean**) | the `GF(q)^4↔𝔽₂^d` bridge via an additive iso `Ψ` (no `ZMod 2`-module on `K` needed) → `suzukiG₀` (joint isometry, subgroup of `Fin D→ZMod 2 ≃ₗ …`) + `neg_mem` free (char 2) + `suzukiBase` (`≤5`) + `separates` transported to `suzuki_separates` ⟹ `suzukiAdapter` + the seal `reachesRigidOrCameron_suzuki`. **Instance 4 SEALED (modulo `SuzukiFormsDetermine`); all 4 families done** |
+| `RouteC.coords_determine_spanning` | `RouteCFormAdapters.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `coords_determine`: `Q`-values at any *spanning* base `S` (`span S = ⊤`) determine the vertex |
+| `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` | `RouteCFormAdapters.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `viaOrthogonalForm`: `O(Q)` discretizes at any base `T∋o` whose differences `{t̄−ō}` span — the iso-invariantly-chosen base Route C needs |
+| `RouteC.isometryScheme_refines_similitudeScheme` | `RouteCFormAdapters.lean` (**Route C A3 brick 1, NEW, axiom-clean**) | `O(Q)≤GO(Q)` ⟹ the isometry scheme refines the given similitude graph (finer `relOfPair`) — the recovered form is consistent, not fabricated |
+| `RouteC.NondegQuadricDeterminesForm` | `RouteCFormAdapters.lean` (**Route C — the exact carried classical citation, NEW**) | scoped premise (`p≠2`, `4≤d`, `Q` nondeg): same isotropic cone ⟹ scalar-multiple form (A1's `vanishDim=1` uniqueness). The EXACT true statement (unrestricted form false at `d=3,q=3`); Hirschfeld / projective Nullstellensatz; carried like `Theorem41Statement` |
+| `RouteC.similitude_colouring_equivariant`, `RouteC.similitude_conePreserving` | `RouteCFormAdapters.lean` (**Route C F4 bricks, NEW, axiom-clean**) | a form similitude carries the difference colouring by one scalar (`Q'(gu−gt)=μ·Q(u−t)`) + preserves the cone — pure linearity |
+| `RouteC.recoveredForm_colouring_equivariant` | `RouteCFormAdapters.lean` (**Route C F4 capstone, NEW, axiom-clean**) | graph-iso cone-preservation + `NondegQuadricDeterminesForm` ⟹ the recovered difference colouring is equivariant (iso-invariant up to global scalar) — the "discrete ⟹ canonical" link |
+| `RouteC.frobVec`, `RouteC.frobVec_sub`, `RouteC.semisimilitude_colouring_equivariant` | `RouteCFormAdapters.lean` §F2 (**Route C F2 bricks, NEW, axiom-clean**) | coordinate-wise Frobenius σ̂ + its additivity + the semilinear equivariance identity `Q'(M(σ̂u)−M(σ̂t))=μ·σ(Q(u−t))` |
+| `RouteC.ConePreservingCollineationIsSemiSimilitude` | `RouteCFormAdapters.lean` §F2 (**Route C F2 cited premise, NEW**) | scoped (`(2:K)≠0`, `4≤d`): cone-preserving collineation `g` ⟹ `g=M∘σ̂` semi-similitude (fundamental thm of projective geometry + `NondegQuadricDeterminesForm`; carried) |
+| `RouteC.recoveredForm_colouring_equivariant_semilinear` | `RouteCFormAdapters.lean` §F2 (**Route C F2 capstone, NEW, axiom-clean**) | q=pᵉ: the recovered form is iso-invariant up to scalar **and** field auto σ — F4 for the semilinear (ΓL) case; `q=p` = the `σ=id` specialization |
+| `RouteC.FormAdapter`, `RouteC.FormAdapter.reachesRigidOrCameron` | `RouteCFormAdapters.lean` §F3 (**Route C engine interface, NEW, axiom-clean**) | the `IFormStructure` interface (`G₀` + `−1∈G₀` + bounded base + `separates`) + the shared engine theorem (any adapter ⟹ the seal). 1 engine, N family adapters |
+| `RouteC.affinePolarAdapter` | `RouteCFormAdapters.lean` §F3 (**Route C instance 1, NEW, axiom-clean**) | affine-polar `VO^ε` as a `FormAdapter` (`G₀=O(Q)`, frame base, `coords_determine` certificate) — validates the interface, reproduces `viaOrthogonalForm` |
+| `RouteC.coords_determine_multi`, `RouteC.coords_determine_multi_spanning` | `RouteCFormAdapters.lean` (**Route C alternating-family `separates` core, NEW, axiom-clean**) | a *family* `{Q_k}` with trivial common polar-radical determines the vertex from the joint value-profile (frame / spanning base) — the multi-quadric `separates` for `Alt(n≥5,q)` (Plücker quadrics), generalizes `coords_determine` |
+| `RouteC.multiFormAdapter` | `RouteCFormAdapters.lean` (**Route C alternating engine hookup, NEW, axiom-clean**) | a form family `{Q_k}` with joint nondegeneracy ⟹ a `FormAdapter` (`G₀ = ⨅ₖ O(Q_k)` the joint isometry group, frame base, `coords_determine_multi` certificate). `affinePolarAdapter` = the `ι=Unit` case |
+| `RouteC.Plucker.{Pf0..Pf4, pluckerForms, plucker_hjoint}` | `RouteCFormAdapters.lean §Plucker` (**Route C alternating instance, NEW, axiom-clean**) | the concrete 5 sub-Pfaffian quadrics on `𝔽_p^10` (via `linMulLin`) + their joint nondegeneracy `plucker_hjoint` (the sole geometric input) |
+| `RouteC.Plucker.alternatingAdapter`, `RouteC.Plucker.reachesRigidOrCameron_alternating` | `RouteCFormAdapters.lean §Plucker` (**Route C instance 2 CAPSTONE, NEW, axiom-clean**) | `Alt(5,q)` as a sealed `FormAdapter` + the rigid-or-Cameron seal — the **first concrete non-quadratic (multi-form) Route-C family, end to end** |
+| `RouteC.affineScheme_refines_of_le` | `RouteCFormAdapters.lean` (**generic refinement bridge, NEW, axiom-clean**) | `H ≤ G` (both `∋ −1`) ⟹ `affineScheme H` refines `affineScheme G`. The reusable core of every Route-C refinement brick; `isometryScheme_refines_similitudeScheme` is now its one-line corollary |
+| `RouteC.jointConeStab`, `RouteC.neg_mem_jointConeStab`, `RouteC.iInf_isometryGroup_le_jointConeStab` | `RouteCFormAdapters.lean` (**multi-quadric bridges, NEW, axiom-clean**) | the **graph-intrinsic** setwise stabilizer of the joint cone `{v : ∀k, Q_k v=0}` (= the connection set) as a `Subgroup` + `−1∈` it + `⨅ₖ O(Q_k) ≤` it. The multi-form analog of `similitudeGroup`, defined from the graph not the form |
+| `RouteC.multiIsometryScheme_refines_coneScheme` | `RouteCFormAdapters.lean` (**brick-1-multi, NEW, axiom-clean**) | the recovered joint-isometry scheme `⨅ₖ O(Q_k)` refines the cone-stabilizer scheme — the multi-form refinement leg (analog of `isometryScheme_refines_similitudeScheme`), tied to the actual graph via `jointConeStab`. `alternating_refines_coneScheme` = the concrete `Alt(5,q)` application |
+| `RouteC.multiSimilitude_colouring_equivariant`, `RouteC.JointVarietyDeterminesFamily`, `RouteC.recoveredFamily_colouring_equivariant`, `RouteC.recoveredFamily_partition_isoInvariant` | `RouteCFormAdapters.lean` (**F4-multi, NEW, axiom-clean**) | the multi-form iso-invariance leg: provable equivariance brick (colouring transports by global `Φ`) + the scoped carried citation `JointVarietyDeterminesFamily` (joint variety determines the family up to invertible `Φ`; multi-form sibling of `NondegQuadricDeterminesForm`) + capstone (injective `Φ`) + partition-invariance payoff (`Φ` cancels in comparisons) |
+| `RouteC.polar_linMulLin` | `RouteCFormAdapters.lean` (**reusable primitive, NEW, axiom-clean**) | `polar (linMulLin f g) x y = f x·g y + f y·g x` — the polar of a Clifford-term-sum quadric (Plücker / spinor forms) |
+| `RouteC.HalfSpin.{S0..S9, spinorForms, S0_polar..S4_polar, spinor_hjoint}` | `RouteCFormAdapters.lean §HalfSpin` (**Route C instance 3, NEW, axiom-clean**) | the 10 concrete D₅ spinor quadrics on `𝔽_p^16` (validated by `route_c_halfspin_probe.py`: dim=10, exact 𝔽₂ count 2296, radical 0) + their joint nondegeneracy `spinor_hjoint` (from the 5 quadruple forms by coordinate isolation) |
+| `RouteC.HalfSpin.{halfSpin_reduction, spinAdapter, reachesRigidOrCameron_halfSpin, halfSpin_refines_coneScheme}` | `RouteCFormAdapters.lean §HalfSpin` (**Route C instance 3 CAPSTONE, NEW, axiom-clean**) | half-spin as a sealed `FormAdapter` (`spinAdapter`) + the rigid-or-Cameron seal (`reachesRigidOrCameron_halfSpin`) + brick-1 (`halfSpin_refines_coneScheme`) — instance 3 DONE, full instance-1 parity |
+| `RouteC.Suzuki.{ovoidC, SF0..SF4, suzukiForms, four_eq_zero, suzukiForms_ovoid, suzukiForms_infty, suzukiForms_homog}` | `RouteCFormAdapters.lean §Suzuki` (**Route C instance 4 — the σ-twisted forms rederived, NEW, axiom-clean**) | over a char-2 `CommRing K` with a Tits endo `σ` (`σ∘σ=(·)²`): the 5 σ-twisted Suzuki forms + proofs they cut the cone (vanish on the ovoid + at infinity + σ-twisted homogeneous). De-risk-validated (`route_c_suzuki_probe.py`, joint zero=cone exact) |
+| `RouteC.Suzuki.{SFv, PreservesForms, SuzukiFormsDetermine, preservesForms_eq, suzuki_separates}` | `RouteCFormAdapters.lean §Suzuki` (**Route C instance 4 — the σ-twisted `separates`, NEW, axiom-clean**) | the σ-twisted analog of `coords_determine_multi`'s `separates`: the joint-isometry orbit-profile at the frame ⟹ (via `preservesForms_eq` + the scoped citation `SuzukiFormsDetermine`) `v=v'`. `SuzukiFormsDetermine` is carried (false for small `K`, true for `GF(2^{2e+1})`; `Sz(q)` 2-transitivity) |
+| `RouteC.Suzuki.{SFbar, suzukiG₀, preservesForms_of_mem_G₀, neg_mem_suzukiG₀, suzukiBase, suzukiBase_card_le, suzukiAdapter, reachesRigidOrCameron_suzuki}` | `RouteCFormAdapters.lean §Suzuki` (**Route C instance 4 CAPSTONE — module bridge + seal, NEW, axiom-clean**) | the `GF(q)^4↔𝔽₂^d` bridge via an additive iso `Ψ` (no `ZMod 2`-module on `K` needed) → `suzukiG₀` (joint isometry, subgroup of `Fin D→ZMod 2 ≃ₗ …`) + `neg_mem` free (char 2) + `suzukiBase` (`≤5`) + `separates` transported to `suzuki_separates` ⟹ `suzukiAdapter` + the seal `reachesRigidOrCameron_suzuki`. **Instance 4 SEALED (modulo `SuzukiFormsDetermine`); all 4 families done** |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -611,9 +630,9 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 | # | piece | side | status / notes |
 |---|---|---|---|
 | **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03).** Confirmed against the REAL harness (`RouteCF1Probe.cs`): recovers `T` exactly (ground-truth), regular + elementary-abelian, coordinatizes the cone (`vanishDim=1`) — VO^ε₄(q), q=2,3,5, both types; char-agnostic (full `Aut` delivered). **Production code landed:** general group ops on `PermutationGroup.cs` (`RegularNormalPSubgroup(p)`, `NormalClosure`, `Elements`, `HasExponentDividing`, `Perm.Order`/`Pow`) + `AffineStructureRecovery.Recover` (coordinatization); the probe now exercises the production path (all pass; 26 existing `PermutationGroup` tests green). "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite). Remaining: the Lean side (F4 iso-invariance) + `q=pᵉ` (F2). |
-| **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **◑ SEMILINEAR CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean` §F2):** `recoveredForm_colouring_equivariant_semilinear` — a graph iso over 𝔽_q is 𝔽_p-**semilinear** (`g = M∘σ̂`), so the recovered form transports up to scalar **and** field auto σ: `Q'(gu−gt)=μ·σ(Q(u−t))`. Bricks `frobVec`/`frobVec_sub`/`semisimilitude_colouring_equivariant` (provable) + cited `ConePreservingCollineationIsSemiSimilitude` (fundamental thm of proj. geometry, carried). The `q=p` case = the `σ=id` specialization. **𝔽_q-structure RECOVERY** (getting the field) is subsumed by geometric coordinatization (§7a/R1: Buekenhout–Shult recovers PG over 𝔽_q). Remaining: C# field recovery (with R1) |
-| **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C#+Lean | **◑ LEAN INTERFACE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `FormAdapter` (bundles `G₀` + `−1∈G₀` + a bounded base + the `separates` certificate) + `FormAdapter.reachesRigidOrCameron` (the shared engine theorem: any adapter ⟹ the seal, family-agnostic) + `affinePolarAdapter` (instance 1, validates non-vacuity, reproduces `viaOrthogonalForm`). Each family now = **one `FormAdapter`** (supply only `separates`). C# side (thin merge point) still to build |
-| **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **✅ EQUIVARIANCE CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `recoveredForm_colouring_equivariant` (+ bricks `similitude_colouring_equivariant`/`similitude_conePreserving`). Rests only on `NondegQuadricDeterminesForm` — **discharged as an exact scoped citation** (= A1's finite-geometry uniqueness; F4 and A1-Lean unify). Not vacuous (scoped `p≠2`/`d≥4`, exactly the true range) |
+| **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **◑ SEMILINEAR CORE LANDED (2026-07-03, axiom-clean, `RouteCFormAdapters.lean` §F2):** `recoveredForm_colouring_equivariant_semilinear` — a graph iso over 𝔽_q is 𝔽_p-**semilinear** (`g = M∘σ̂`), so the recovered form transports up to scalar **and** field auto σ: `Q'(gu−gt)=μ·σ(Q(u−t))`. Bricks `frobVec`/`frobVec_sub`/`semisimilitude_colouring_equivariant` (provable) + cited `ConePreservingCollineationIsSemiSimilitude` (fundamental thm of proj. geometry, carried). The `q=p` case = the `σ=id` specialization. **𝔽_q-structure RECOVERY** (getting the field) is subsumed by geometric coordinatization (§7a/R1: Buekenhout–Shult recovers PG over 𝔽_q). Remaining: C# field recovery (with R1) |
+| **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C#+Lean | **◑ LEAN INTERFACE LANDED (2026-07-03, axiom-clean, `RouteCFormAdapters.lean`):** `FormAdapter` (bundles `G₀` + `−1∈G₀` + a bounded base + the `separates` certificate) + `FormAdapter.reachesRigidOrCameron` (the shared engine theorem: any adapter ⟹ the seal, family-agnostic) + `affinePolarAdapter` (instance 1, validates non-vacuity, reproduces `viaOrthogonalForm`). Each family now = **one `FormAdapter`** (supply only `separates`). C# side (thin merge point) still to build |
+| **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **✅ EQUIVARIANCE CORE LANDED (2026-07-03, axiom-clean, `RouteCFormAdapters.lean`):** `recoveredForm_colouring_equivariant` (+ bricks `similitude_colouring_equivariant`/`similitude_conePreserving`). Rests only on `NondegQuadricDeterminesForm` — **discharged as an exact scoped citation** (= A1's finite-geometry uniqueness; F4 and A1-Lean unify). Not vacuous (scoped `p≠2`/`d≥4`, exactly the true range) |
 | **F5** | **Generic seal→poly spine** — `RecoverForm ⟹ refined scheme ⟹ discrete_affineScheme_of_jointSeparates ⟹ viaSpielman` | Lean | **downstream all landed & generic**; only the A3 refinement bridge is new |
 
 ### Instance 1 — affine-polar `VO^ε` (proves the whole spine)
@@ -622,8 +641,8 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 |---|---|---|
 | **A1** | `RecoverForm` = solve the degree-2 vanishing system on the cone | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03, `QuadraticFormRecovery.RecoverForm`):** recovers `Q` up to scalar by one kernel solve on F1's coordinates; the recovered `Q` + coords **reconstruct the entire graph** (`Q(coords[x]−coords[y])=0 ⟺ x~y`, **0 mismatches**, VO^±₄(3)). Odd-q (returns null in char-2). Lean side = a finite-geometry nondegeneracy lemma (`⟨Q⟩` = the vanishing space) |
 | **A2** | `Separates` = `coords_determine` / `spanning_sameExactGram_determines` | **LANDED, axiom-clean** |
-| **A2⁺** | the spanning back-half — `RouteC.coords_determine_spanning` + `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` (isometry scheme discretizes at any iso-invariantly-chosen spanning base) | **✅ LANDED 2026-07-03, axiom-clean** (`ScratchRouteC.lean`, NOT in `build.sh`) |
-| **A3** | **the refinement bridge** — recovered `Q` upgrades the similitude graph to the isometry scheme, which `viaOrthogonalForm_spanning` discretizes | **◑ brick 1 LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `isometryScheme_refines_similitudeScheme` — `O(Q)≤GO(Q)` ⟹ the isometry scheme (exact-`Q` relations) refines the given similitude graph (isotropy-only). The consistency half. Remaining A3 content = the discreteness-transfer, now discharged by **F4** (`recoveredForm_colouring_equivariant`, ✅ landed 2026-07-03) — the iso-invariance that makes "discrete ⟹ canonical" |
+| **A2⁺** | the spanning back-half — `RouteC.coords_determine_spanning` + `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` (isometry scheme discretizes at any iso-invariantly-chosen spanning base) | **✅ LANDED 2026-07-03, axiom-clean** (`RouteCFormAdapters.lean`, in `build.sh`) |
+| **A3** | **the refinement bridge** — recovered `Q` upgrades the similitude graph to the isometry scheme, which `viaOrthogonalForm_spanning` discretizes | **◑ brick 1 LANDED (2026-07-03, axiom-clean, `RouteCFormAdapters.lean`):** `isometryScheme_refines_similitudeScheme` — `O(Q)≤GO(Q)` ⟹ the isometry scheme (exact-`Q` relations) refines the given similitude graph (isotropy-only). The consistency half. Remaining A3 content = the discreteness-transfer, now discharged by **F4** (`recoveredForm_colouring_equivariant`, ✅ landed 2026-07-03) — the iso-invariance that makes "discrete ⟹ canonical" |
 | **A4** | `AutGens` = `GO(Q)` generators (reflections) → existing `PermutationGroup` (only for the \|Aut\| side) | Schreier–Sims exists; generator list is standard classical-group data |
 
 Instance 1 forces F1/F3/F4/F5 into existence, so it is **most of the total work**; the other three families then
@@ -641,7 +660,7 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
   - **`n≥5` is the genuinely-new family — MULTI-QUADRIC:** `rank≤2` is cut out by the **Plücker quadrics** (4×4
     sub-Pfaffians; 5 for `n=5`), so the connection set is their **joint cone** (Grassmann `G(2,n)`). Each Plücker form
     is individually degenerate; only *jointly* do their polar forms separate. **✅ `Alt(5,q)` FULLY SEALED
-    (2026-07-03, axiom-clean, `ScratchRouteC.lean §Plucker`):** the concrete 5 sub-Pfaffians `Pf₀..Pf₄` on `𝔽_p^10`
+    (2026-07-03, axiom-clean, `RouteCFormAdapters.lean §Plucker`):** the concrete 5 sub-Pfaffians `Pf₀..Pf₄` on `𝔽_p^10`
     (built via `linMulLin`), their joint nondegeneracy `plucker_hjoint` (`Pf₀` isolates coords `4..9`, `Pf₁` isolates
     `1,2,3`, `Pf₂` isolates `0`), assembled by `multiFormAdapter` into `alternatingAdapter`, sealed by the capstone
     **`reachesRigidOrCameron_alternating`** — the first concrete **non-quadratic (multi-form)** Route-C family, end to
@@ -672,7 +691,7 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
   - **pair×quadruple forms**: `Q₅=-x₁x₁₄+x₂x₁₃-x₄x₁₂+x₇x₁₁`, `Q₆=-x₁x₁₅+x₃x₁₃-x₅x₁₂+x₈x₁₁`,
     `Q₇=-x₂x₁₅+x₃x₁₄-x₆x₁₂+x₉x₁₁`, `Q₈=-x₄x₁₅+x₅x₁₄-x₆x₁₃+x₁₀x₁₁`, `Q₉=-x₇x₁₅+x₈x₁₄-x₉x₁₃+x₁₀x₁₂`  ← needed to model
     the graph (cone = joint zero of all 10), not for `hjoint`.
-  **✅ PORTED & SEALED (2026-07-03, axiom-clean, `ScratchRouteC.lean §HalfSpin`):** the 10 forms `S0..S9` transcribed
+  **✅ PORTED & SEALED (2026-07-03, axiom-clean, `RouteCFormAdapters.lean §HalfSpin`):** the 10 forms `S0..S9` transcribed
   via `linMulLin`+`LinearMap.proj`; polars `S0_polar..S4_polar`; `spinor_hjoint` proved from `S0..S4` by the
   `plucker_hjoint` coordinate-isolation pattern; assembled by `multiFormAdapter` into `spinAdapter`, sealed by
   `reachesRigidOrCameron_halfSpin`; brick-1 `halfSpin_refines_coneScheme` (F4 generic). **Instance 3 DONE, full
@@ -724,7 +743,7 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
     `multiFormAdapter`** (the `F_k` are σ-twisted, not quadratic — over the `𝔽₂` linearization they are cubic), so it
     needs a σ-twisted *sibling* of `coords_determine_multi`; but the generic `FormAdapter` engine + `neg_mem` + seal are
     shared/free (char-2-ready, verified). Then `suzukiAdapter` → `reachesRigidOrCameron_suzuki`.
-  - **✅ REDERIVATION LANDED (2026-07-04, axiom-clean, `ScratchRouteC.lean §Suzuki`):** over an abstract char-2
+  - **✅ REDERIVATION LANDED (2026-07-04, axiom-clean, `RouteCFormAdapters.lean §Suzuki`):** over an abstract char-2
     `CommRing K` with a Tits endomorphism `σ` (`σ∘σ = (·)²`), the 5 σ-twisted forms `SF0..SF4` + the `ovoidC`
     parametrization are defined, and each is **proven to cut the cone**: `suzukiForms_ovoid` (vanish on the affine
     ovoid `(1,a,b,ovoidC a b)` — via `σ` a ring hom + `σ∘σ=(·)²`, char-2 cancellation), `suzukiForms_infty` (vanish
@@ -767,7 +786,7 @@ The genuine per-family content is exactly `separates` (+ identifying `G₀`):
 ### Sequencing & risks (updated 2026-07-03)
 1. ✅ **F1 + A1** (C# recovery front) — DONE + confirmed against the real harness (`AffineStructureRecovery`,
    `QuadraticFormRecovery`, `RouteCF1Probe.cs`).
-2. ✅ **A2⁺ + A3 brick 1** (Lean spine from landed pieces) — DONE, axiom-clean (`ScratchRouteC.lean`).
+2. ✅ **A2⁺ + A3 brick 1** (Lean spine from landed pieces) — DONE, axiom-clean (`RouteCFormAdapters.lean`).
 3. ✅ **F4** equivariance core — **LANDED 2026-07-03, axiom-clean** (`recoveredForm_colouring_equivariant` + bricks).
    Rests only on `NondegQuadricDeterminesForm` — now DISCHARGED as an exact scoped citation (§ STATUS remaining).
 4. ✅ **Meta-poly bootstrapping** — ASSESSED + RESOLVED (§7a): Route C is poly, non-circular (global coordinatization ≠
@@ -963,7 +982,7 @@ recovered form `Q` (F4) — i.e. runs on the **fine** scheme, whose `SchemeRecov
 (brick-1 + F4), adding no branching. "Poly" stays the project's meta-claim over that augmented descent.
 
 **✅ WHAT T1 ACTUALLY PROVES (2026-07-04, all axiom-clean + genuinely non-vacuous,
-[`ScratchRecoveredFormTransfer.lean`](../GraphCanonizationProofs/ChainDescent/ScratchRecoveredFormTransfer.lean)):**
+[`RouteCSeam.lean`](../GraphCanonizationProofs/ChainDescent/RouteCSeam.lean)):**
 - `affineG_le_schemeAutGroup` — `affineG G₀ ≤ SchemeAutGroup(affineScheme G₀)` (the affine group acts as scheme auts
   of its own orbital scheme; via `orbMk_smul` + `isSchemeAut_of_relOfPair_eq`). The `≥` half of every 2-closure here.
 - `schemeAutGroup_affineScheme_mono` (`hmono`) — `H ≤ G ⟹ SchemeAutGroup(affineScheme H) ≤ SchemeAutGroup(affineScheme G)`
@@ -990,7 +1009,7 @@ fine`, it returns the triple `(i)` coarse Aut `= affineG(similitude)` `∧` `(ii
 fine `≤` coarse (only refines) — the full structural support for the meta poly-canonization (+ F4 for iso-invariance).
 
 **✅ T4 (cyclotomic dispatch) LANDED (2026-07-04, axiom-clean,
-[`ScratchSeamDispatch.lean`](../GraphCanonizationProofs/ChainDescent/ScratchSeamDispatch.lean)).** The four-case
+[`RouteCSeam.lean`](../GraphCanonizationProofs/ChainDescent/RouteCSeam.lean)).** The four-case
 sketch dropped the **cyclotomic** branch (the affine residue is `{1-dim cyclotomic} ∪ {forms-graphs (c)–(f)}` — 5
 cases). Fixed by generalizing the ScratchSeam dispatch: `reachesRigidOrCameron_seamDispatch` routes `S` that is
 "Cameron, **or realized by *some* already-sealed scheme `Y`** (`SchemeRealizes f S Y ∧ SealDisj Y`)". Because the
@@ -1001,7 +1020,7 @@ supplies the cyclotomic `Y` (via `affineSlice`, mod its cited `TwinsAreSemilinea
 as ScratchSeam. **⟹ the cyclotomic branch is now first-class, and the dispatch is uniform over the whole affine residue.**
 
 **Remaining follow-ups:** (T3) the multi-form instantiation is **already covered** by the generic pinning lemma (plug in
-`jointConeStab Qs`); a concrete instance can wait for the ScratchRouteC port; (T2) the C# |Aut| runtime uses
+`jointConeStab Qs`); a concrete instance landed with the 2026-07-05 port; (T2) the C# |Aut| runtime uses
 `schemeAutGroup_coarse_eq_affineG` to hand `AΓO(Q)` to Schreier–Sims. The classification premise §9.1/L3 is unchanged
 and sound (Cameron + Liebeck 1987 + Skresanov 2020/22 + Ponomarenko). `AffineSchemeTwoClosed` (= Skresanov rank-3
 2-closure) is registered in `chain-descent-citation-discharge.md`. The one carried Lean obligation across the seam is
@@ -1067,7 +1086,7 @@ So the test strategy (§9.2.4) targets **"the built group equals the recovered c
 iso-invariant"**, NOT "flags → no-flag".
 
 **The reframe that drives the design (this session):** the Lean group-pinning `schemeAutGroup_coarse_eq_affineG`
-(`ScratchRecoveredFormTransfer.lean`, mod the Skresanov citation `AffineSchemeTwoClosed`) proves the answer group is
+(`RouteCSeam.lean`, mod the Skresanov citation `AffineSchemeTwoClosed`) proves the answer group is
 **exactly `affineG(similitudeGroup Q) = translations ⋊ AΓO(Q)`** — a *known* classical group. So the C# runtime does
 **not** need to *harvest* `Aut` from the descent on the coarse graph (that's the node-4 stall). It **recovers `Q`,
 constructs a generating set for `AΓO(Q)` directly, and hands it to the existing Schreier–Sims** (`PermutationGroup`),
@@ -1159,9 +1178,9 @@ colouring-injection is the fallback / cross-check.
 
 #### 9.2.5 Lean contracts the C# must honour (the spec is not free-floating)
 
-- `ScratchRecoveredFormTransfer.schemeAutGroup_coarse_eq_affineG` — **the group C1b builds IS `affineG(similitudeGroup Q)`**;
+- `RouteCSeam.schemeAutGroup_coarse_eq_affineG` — **the group C1b builds IS `affineG(similitudeGroup Q)`**;
   its `Order` is `|AΓO(Q)|·p^d`. This is the correctness target for C1b.
-- `ScratchRecoveredFormTransfer.routeC_polySupport` — the triple (coarse Aut = known group ∧ fine harvest ∧ fine refines
+- `RouteCSeam.routeC_polySupport` — the triple (coarse Aut = known group ∧ fine harvest ∧ fine refines
   coarse); C1b delivers (i), the colouring-injection (§9.2.3) delivers (ii)/(iii).
 - The `FormAdapter` instances (`affinePolarAdapter`, `…_alternating`, `…_halfSpin`, `…_suzuki`) — each family's
   `separates` certificate; C1a/C1b are their runtime mirror (the form + its group).

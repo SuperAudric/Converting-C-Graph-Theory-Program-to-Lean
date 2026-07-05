@@ -27,24 +27,25 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > route than the WL-dimension framing in this tracker.** Route C recovers the defining form/structure from the abstract
 > graph and canonicalizes via its known automorphism group, sidestepping the bounded-WL-dimension question (`ZProfileSeparates`
 > / `D3d`) that the rest of this doc is organized around. **The forms-graph residue `(c)–(f)` = {affine-polar, alternating
-> `Alt(5,q)`, half-spin, Suzuki–Tits} is CLOSED modulo scoped citations** (`ScratchRouteC.lean`, 94 decls, axiom-clean, NOT
-> in build.sh; seals `affinePolarAdapter` / `Plucker.reachesRigidOrCameron_alternating` / `HalfSpin.reachesRigidOrCameron_halfSpin`
+> `Alt(5,q)`, half-spin, Suzuki–Tits} is CLOSED modulo scoped citations** (PORTED to `build.sh` 2026-07-05 as
+> `RouteCTransport`/`RouteCFormAdapters`/`RouteCSeam`/`RouteCNode4`, all axiom-clean; seals `affinePolarAdapter` /
+> `Plucker.reachesRigidOrCameron_alternating` / `HalfSpin.reachesRigidOrCameron_halfSpin`
 > / `Suzuki.reachesRigidOrCameron_suzuki`). **AUTHORITATIVE = [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md)**
 > (read its STATUS). The WL-dimension material below is the *alternative* route (STALLED at the node-4 wall, recovery doc
 > §9.8.9); Route C is the live poly path. **▶ SEAM DONE + L1 DISCHARGED (2026-07-04/05):** the §9 combine landed at the
 > honest level after a vacuity correction (Route C poly is inherently META; genuine content = coarse Aut = the known
-> `affineG(similitude)` mod the named Skresanov citation `AffineSchemeTwoClosed`, + cyclotomic dispatch;
-> `ScratchRecoveredFormTransfer.lean` / `ScratchSeamDispatch.lean`, axiom-clean). **★ `htransport` (L1) is now DISCHARGED
-> (2026-07-05, `ScratchSeamTransport.lean`, axiom-clean) — the seam carries NO atom**: transport ONE light predicate
+> `affineG(similitude)` mod the named Skresanov citation `AffineSchemeTwoClosed`, + cyclotomic dispatch; all now in
+> `RouteCSeam.lean`, axiom-clean). **★ `htransport` (L1) DISCHARGED — the seam carries NO atom**: transport ONE light predicate
 > `SeparatesAtBoundedBase` (cross-graph `warmRefine_transport_iso`), not the 4-way `SealDisj`; capstone
-> `reachesRigidOrCameron_viaSchurianRank3Affine_proved`. **▶ C# RUNTIME BUILT (2026-07-04/05): C1a–C4 + family-dispatch +
-> Suzuki runtime prototype (VSz(8), 2026-07-05); 60/60 fast Route-C tests + Suzuki LongRunning** (affine-polar + Suzuki live;
-> alternating/half-spin DORMANT — dense-infeasible FEASIBILITY WALL, plan §9.2.7). **KEY FINDING (2026-07-05): frame+WL
-> discretizes VO^ε_d(q) in `d+1` steps for ALL p** ⟹ cone-blindness was a line-sum artifact; residual open = proving
-> discretization poly (= existing WL-dim core). **★ REMAINING for the whole Route-C seal = PORT the scratch spine into
-> `build.sh` + promote the scoped citations** (NOT the frame+WL C# confirm, which is sound but advances no proof — reassessment
-> 2026-07-05: C# is ~as-complete-as-useful, remaining high-value work is Lean). [[project_routec_csharp_build_2026-07-04]] ·
-> [[project_routec_seam_2026-07-04]].
+> `reachesRigidOrCameron_viaSchurianRank3Affine_proved`. **★ L4 DONE (2026-07-05, `RouteCNode4.lean`):** affine-polar node-4
+> residue discharged with no `hFormCert` (Route C SUPERSEDES the hook — `hFormCert` is false at bounded base §9.0a — via the
+> isotropy-separation path); multi-form families get the §9.0a meta-composition (**Track B**: `routeC_polySupport_of_adapter`
+> + per-family corollaries; Suzuki via a `formConeStab` generalization for its cubic cone). **▶ C# RUNTIME BUILT: C1a–C4 +
+> family-dispatch + Suzuki prototype** (affine-polar + Suzuki live; alternating/half-spin DORMANT — dense-infeasible, plan §9.2.7).
+> **★ REMAINING for Route C = promote the scoped citations** (`NondegQuadricDeterminesForm` / `JointVarietyDeterminesFamily`
+> / `ConePreservingCollineationIsSemiSimilitude` / `AffineSchemeTwoClosed`; discharge routes in
+> `chain-descent-citation-discharge.md`), or Track A (a multi-quadric pair-route) for a per-family multi-form coarse `SealDisj`.
+> [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
 >
 > **▶ UPDATE (2026-06-24) — the first forms-graph instance is SEALED.** `VO⁻₄(3)` (`ScratchBM3Glue.vo4minus_seal`,
 > axiom-clean `[propext, Classical.choice, Quot.sound]`) closes the affine-polar residue at the minus form modulo `{G3}`
@@ -238,7 +239,11 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >   *structural* build beyond affine-polar, but de-risked.
 > - **Layer E — carried hypotheses (Lean-carried, not new math): `hImprim`** (block tower built; collapses to same core) +
 >   **`SchurianScheme`** (model assumption `orbitalScheme H`, not discharged).
-> - **Layer F — PORT (mechanical, no math):** ALL scratch modules → `build.sh`+`lakefile`+`PublicTheoremIndex.md`. Inventory:
+> - **Layer F — PORT (mechanical, no math). ✅ LARGELY DONE:** the pair-route modules in this inventory (increment-3/4/5,
+>   `ProfileReduction`/`Matching`/`FieldGeneric`/`BadAnchorCount`/`AffinePolarSeal`/`GaussCount`, …) were PORTED 2026-06-27/28,
+>   and the **Route C spine** (`RouteCTransport`/`RouteCFormAdapters`/`RouteCSeam`/`RouteCNode4`) was PORTED 2026-07-05; the
+>   `ScratchSeam` spike is superseded by `RouteCSeam`. The inventory below is the **pre-port snapshot** — the forms-graph /
+>   Route-C modules named here are now in `build.sh`; the remaining scratch is the demoted WL-dim routes (Route A/B). Original list:
 >   increment-3 8 + `ProfileReduction`/`Matching`/`PairSep`/`LemmaA-B`/`BM3*`; **#1 corank** (`ScratchPencilCorank`/`Bridge`/`Regroup`/
 >   `TBoundCorank`); **field-gen #4** (`FieldGeneric`/`FieldGenAdapter`/`BridgeK`/`LemmaAK`/`BridgeAllK`); **increment-4**
 >   (`BadAnchorCount`/`b`/`c`/`d`); **Route 0** (`ScratchPencilCorank2`/`TBoundCorank2`); **Route 2 tail** (`ScratchCountTight`/
