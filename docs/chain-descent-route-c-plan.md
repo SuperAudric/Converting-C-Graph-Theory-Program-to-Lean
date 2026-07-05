@@ -85,11 +85,21 @@ L4 wiring + scoped citations**. Remaining Lean:
   files (`ScratchSeam`/`…Transport`/`…Dispatch`/`…RecoveredFormTransfer`) are deleted. *Note on `defaultTargets`:* Route C
   goes in `build.sh` MODULES only (not `lakefile.toml` `defaultTargets`) — matching the existing convention where
   `AffinePolarSeal` + the whole pair route are build.sh-only and bare `lake build` is the intentionally-lighter set.
-- (b) **L4 — the node-4 wiring (the actual payoff, currently UNWIRED).** Feed a Route-C poly cert into the existing
-  residue hook `reachesRigidOrCameron_viaAffineFormScheme` (`CascadeAffine.lean:2057`), retiring its quasipoly `hFormCert`
-  for the affine-polar family. Until this lands, the four seals are a proved *island* — they conclude `SealDisj` in
-  isolation but do not discharge the canonizer's node-4 case at poly. This is what turns "combine done" into "the
-  affine-polar node-4 case is sealed at poly", and it is the natural port-enabled next step (§9.1 L4).
+- (b) **L4 — the node-4 discharge — ✅ DONE for the affine-polar family (2026-07-05, `RouteCNode4.lean`, axiom-clean,
+  in build).** `reachesRigidOrCameron_viaAffineFormScheme_routeC`: the abstract affine-polar node-4 residue `S` reaches
+  the **same** seal disjunction as `reachesRigidOrCameron_viaAffineFormScheme` (`CascadeAffine.lean:2057`) — but carries
+  **NO `hFormCert`** and **no carried `IsotropySeparatesAtBase`**. Key correction to the earlier framing: `viaAffineFormScheme`'s
+  `hFormCert` is a `RelCountsDetermineOrbit`/`CellsAreOrbits`-style predicate, which §9.0a shows is **false at bounded base**
+  (the node-4 stall) — Route C does *not* discharge it; it supplies the **alternative** path that bypasses it
+  (pair-route `exists_isotropySeparatesAtBaseK` → `isotropySeparatesAtBase_of_K` → `separatesAtBoundedBase_transport`
+  → `viaSpielman`). So L4 *supersedes* the hook for this family rather than filling its hypothesis. The residual carried
+  content is the **classification** (`SchemeRealizes f S (affineScheme(similitudeGroup Q))` — the Skresanov/Cameron/Liebeck
+  citation that `S` *is* this family) + the pair-route scope (`q=p` odd, large) + `{G3}` — the same premises as the banked
+  `reachesRigidOrCameron_affinePolar`, now transported to the abstract residue. **The affine-polar node-4 case is now
+  actually discharged** (poly-ness stays the project meta-claim, §9.0a). *Remaining:* the multi-form families
+  (alternating/half-spin/Suzuki) are still island seals — their L4-analog needs a `jointConeStab`-side transport + a
+  bounded-base separation producer (their adapters prove `separates` but no `exists_…SeparatesAtBase` bounded-base witness
+  is composed yet); a follow-on, not blocking.
 - (c) **promote the scoped citations** to full proofs (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`,
   `ConePreservingCollineationIsSemiSimilitude`, `AffineSchemeTwoClosed`) — optional, `chain-descent-citation-discharge.md` has routes.
 
@@ -116,11 +126,12 @@ the C# runtime is close to as complete as it usefully can be. Fuller record: [[p
 0. ✅ **PORT — DONE (2026-07-05).** Route C is in `build.sh` as `RouteCTransport`/`RouteCFormAdapters`/`RouteCSeam`
    (consolidated from the 5 scratch files + the NodeCountBridge transport helpers); full build green, axiom-clean, index
    updated. See STATUS "HONEST SCOPE" item (a).
-1. **★ L4 — wire the poly cert into the node-4 hook (the actual payoff; currently UNWIRED).** Feed a Route-C poly cert
-   into `reachesRigidOrCameron_viaAffineFormScheme` (`CascadeAffine.lean:2057`), retiring its quasipoly `hFormCert` for
-   the affine-polar family — this connects the four island seals to the canonizer's residue seam (§9.1 L4). Downstream of
-   the ported `RouteCFormAdapters`/`RouteCSeam`, so no import cycle. **This is what makes "combine done" mean "the
-   affine-polar node-4 case is sealed at poly".**
+1. ✅ **L4 — DONE for affine-polar (2026-07-05, `RouteCNode4.lean`, axiom-clean, in build).**
+   `reachesRigidOrCameron_viaAffineFormScheme_routeC` discharges the affine-polar node-4 residue's seal with NO `hFormCert`
+   (see STATUS "HONEST SCOPE" item (b) for the full mechanism + the `hFormCert`-is-false-at-bounded-base correction).
+   **NEXT frontier here = the multi-form L4-analog** (alternating/half-spin/Suzuki): compose each adapter's `separates`
+   into a bounded-base `SeparatesAtBoundedBase` witness on its `jointConeStab`/Suzuki scheme + a `jointConeStab`-side
+   transport (the affine-polar `viaSchurianRank3Affine_proved` is `similitudeGroup`-specific) — retires their island status.
 2. **Promote scoped citations** to full Lean proofs (above) — `chain-descent-citation-discharge.md` §routes.
 3. *(lower)* **C# frame+WL confirmation** into `AffinePolarHandler.Confirm` (harvest-free p≥5 mate-ruling) — sound but
    advances no proof (reduces to the WL-dim core); the harvest-based `ConfirmByMultiQuadricReconstruction` already works.

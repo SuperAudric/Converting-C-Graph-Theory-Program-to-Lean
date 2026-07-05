@@ -82,6 +82,7 @@ MODULES=(
   ChainDescent.RouteCTransport      # ← Cascade (cross-graph WL-transport toolkit: SchemeRealizes + …_transport_iso tower + separatesAtBoundedBase_transport)
   ChainDescent.RouteCFormAdapters   # ← CascadeAffine (the four Route-C form-family poly seals via the FormAdapter engine + multi-quadric bridges)
   ChainDescent.RouteCSeam           # ← CascadeAffine, RouteCTransport (SealDisj + generic dispatch + affine-polar atom-free capstone + finer→coarser group-pinning)
+  ChainDescent.RouteCNode4          # ← AffinePolarSeal, RouteCSeam (L4: affine-polar node-4 discharge with the pair-route separation discharged + transported — NO hFormCert)
 )
 
 start=$(date +%s)

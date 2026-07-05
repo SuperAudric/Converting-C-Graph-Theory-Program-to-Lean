@@ -1845,6 +1845,12 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `warmRefine_transport_iso` | 133-142 | **The cross-graph WL-transport deliverable.** The whole `warmRefine` fixpoint transports along a graph iso `g` (`adj₂∘g = adj₁`) — the two-adjacency generalization of `warmRefine_transport`. | — |
 | `separatesAtBoundedBase_transport` | 148-189 | **The L1 payoff.** `SeparatesAtBoundedBase` is invariant along a scheme iso (`SchemeRealizes f`) — transports the single light predicate, no `schemeEquiv`/`StabilizerAt`. | — |
 
+## ChainDescent/RouteCNode4.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `reachesRigidOrCameron_viaAffineFormScheme_routeC` | 44-83 | **L4 — the affine-polar node-4 discharge via Route C, no `hFormCert`.** The abstract residue reaches the seal (same conclusion as `viaAffineFormScheme`) from the classification (`S ≅` the standard `VO^ε` scheme) + the pair-route scope — the separation is discharged internally (`exists_isotropySeparatesAtBaseK`) and transported (`separatesAtBoundedBase_transport`), so no `RelCountsDetermineOrbit`/`hFormCert` is carried. Supersedes the abstract hook for this family. | — |
+
 ## ChainDescent/AffinePolarSeal.lean
 
 | Name | Line | Description | Notes |
