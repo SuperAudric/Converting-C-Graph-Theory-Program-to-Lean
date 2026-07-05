@@ -126,12 +126,20 @@ the C# runtime is close to as complete as it usefully can be. Fuller record: [[p
 0. ✅ **PORT — DONE (2026-07-05).** Route C is in `build.sh` as `RouteCTransport`/`RouteCFormAdapters`/`RouteCSeam`
    (consolidated from the 5 scratch files + the NodeCountBridge transport helpers); full build green, axiom-clean, index
    updated. See STATUS "HONEST SCOPE" item (a).
-1. ✅ **L4 — DONE for affine-polar (2026-07-05, `RouteCNode4.lean`, axiom-clean, in build).**
-   `reachesRigidOrCameron_viaAffineFormScheme_routeC` discharges the affine-polar node-4 residue's seal with NO `hFormCert`
-   (see STATUS "HONEST SCOPE" item (b) for the full mechanism + the `hFormCert`-is-false-at-bounded-base correction).
-   **NEXT frontier here = the multi-form L4-analog** (alternating/half-spin/Suzuki): compose each adapter's `separates`
-   into a bounded-base `SeparatesAtBoundedBase` witness on its `jointConeStab`/Suzuki scheme + a `jointConeStab`-side
-   transport (the affine-polar `viaSchurianRank3Affine_proved` is `similitudeGroup`-specific) — retires their island status.
+1. ✅ **L4 — DONE (2026-07-05, `RouteCNode4.lean`, axiom-clean, in build).**
+   - **affine-polar (L4-strong):** `reachesRigidOrCameron_viaAffineFormScheme_routeC` — a genuine coarse `SealDisj` on the
+     abstract residue, NO `hFormCert` (STATUS "HONEST SCOPE" item (b); the `hFormCert`-is-false-at-bounded-base correction).
+   - **multi-form (Track B / L4-meta, ALL THREE families):** `routeC_polySupport_of_adapter` (generic engine over any
+     `FormAdapter` + coarse over-group `Gc ≥ A.G₀`, mod one Skresanov `AffineSchemeTwoClosed`) + corollaries
+     `routeC_polySupport_{alternating,halfSpin,suzuki}`. Delivers the §9.0a meta-composition triple — (i) coarse Aut =
+     `affineG(coarse group)` ∧ (ii) fine harvest **extracted from the adapter** (via
+     `schemeRecoveredByDepth_of_separatesAtBoundedBase` on the adapter's own `SeparatesAtBoundedBase` witness — no carried
+     `hfine`, an improvement over affine-polar's `routeC_polySupport`) ∧ (iii) fine ≤ coarse. Retires the island status of
+     the multi-form fine seals at the meta level. Suzuki needed a `formConeStab` generalization (its ovoid cone is **cubic**,
+     not quadric-cut, so `jointConeStab` — typed for `QuadraticForm` — doesn't apply) + a `suzukiG₀ ≤ formConeStab` bridge.
+   - **Deferred (Track A):** a coarse `SealDisj` for the multi-form families (full L4-strong parity) needs a multi-quadric
+     coarse discretization (`IsotropySeparatesAtBase Qs` — a multi-quadric pair-route), major new math; only affine-polar has it.
+   **NEXT frontier here** = promote scoped citations, or (if a per-family coarse `SealDisj` is wanted) Track A.
 2. **Promote scoped citations** to full Lean proofs (above) — `chain-descent-citation-discharge.md` §routes.
 3. *(lower)* **C# frame+WL confirmation** into `AffinePolarHandler.Confirm` (harvest-free p≥5 mate-ruling) — sound but
    advances no proof (reduces to the WL-dim core); the harvest-based `ConfirmByMultiQuadricReconstruction` already works.

@@ -1850,6 +1850,12 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `reachesRigidOrCameron_viaAffineFormScheme_routeC` | 44-83 | **L4 — the affine-polar node-4 discharge via Route C, no `hFormCert`.** The abstract residue reaches the seal (same conclusion as `viaAffineFormScheme`) from the classification (`S ≅` the standard `VO^ε` scheme) + the pair-route scope — the separation is discharged internally (`exists_isotropySeparatesAtBaseK`) and transported (`separatesAtBoundedBase_transport`), so no `RelCountsDetermineOrbit`/`hFormCert` is carried. Supersedes the abstract hook for this family. | — |
+| `routeC_polySupport_of_adapter` | 109-124 | **Track B engine.** From any `FormAdapter A` + a coarse over-group `Gc ≥ A.G₀` (mod the Skresanov `AffineSchemeTwoClosed`), the §9.0a poly-support triple: coarse Aut = `affineG Gc` ∧ fine harvest **extracted from the adapter** (no carried hypothesis) ∧ fine ≤ coarse. One engine, all four families. | — |
+| `routeC_polySupport_alternating` | 126-144 | **Track B — alternating.** `routeC_polySupport_of_adapter` at the Plücker family (`alternatingAdapter` + `jointConeStab pluckerForms`); retires the island status of `reachesRigidOrCameron_alternating` at the meta level. | — |
+| `routeC_polySupport_halfSpin` | 146-164 | **Track B — half-spin.** `routeC_polySupport_of_adapter` at the D₅ spinor family (`spinAdapter` + `jointConeStab spinorForms`). | — |
+| `formConeStab` | 173-190 | **The cone stabilizer of an arbitrary (non-quadratic) form family** — setwise stabilizer of the joint zero locus; the graph-intrinsic coarse group for any forms graph. `jointConeStab` is the `QuadraticForm` case; `formConeStab (SFbar)` the Suzuki (cubic) case. | Definition |
+| `suzukiG₀_le_formConeStab` | 196-201 | **Suzuki fine ⟶ coarse bridge** — a σ-twisted-form-value preserver preserves the ovoid cone, so `suzukiG₀ ≤ formConeStab (SFbar)`; the cubic analog of `iInf_isometryGroup_le_jointConeStab`. | — |
+| `routeC_polySupport_suzuki` | 207-231 | **Track B — Suzuki–Tits.** `routeC_polySupport_of_adapter` at the σ-twisted ovoid family via the cubic `formConeStab (SFbar)`; completes the multi-form set. | — |
 
 ## ChainDescent/AffinePolarSeal.lean
 
