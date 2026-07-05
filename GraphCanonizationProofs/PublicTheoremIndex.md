@@ -1548,8 +1548,8 @@ imports both this module and `CascadeAffine`. All decls axiom-clean `[propext, C
 | `sum_quadForm_eval` | 150-186 | **Brick B3′** — basis-explicit `sum_addChar_quadForm` (weights `Q(v i)` for an orthogonal basis `v`; value pinned, no existential). Powers the scaling relation. | — |
 | `sum_addChar_quadForm_smul` | 188-225 | **Brick C-scale** — scaling the form by a unit `s` scales the Gauss sum by `χ(s)^d`: `∑ₓ ψ(s·Q x) = χ(s)^d·∑ₓ ψ(Q x)` (change of additive character). For `d` even, scale-invariant. | — |
 | `sum_addChar_quadForm_smul_ne_zero` | 227-250 | **(M2 — the cancellable constant)** If `∑_x ψ(Q x) ≠ 0` then `∑_x ψ(s·Q x) ≠ 0` for any unit `s` (factor `χ(s)^d` is a unit). This is the global Gauss value that cancels when comparing two configurations' multi-point sums `S(r) = ψ(Gram-expr)·∑_x ψ(R·Q x)`, yielding `ψ(Gram-expr_u) = ψ(Gram-expr_{u'})`. | — |
-| `gaussSum_sq_ne_zero` | 252-268 | — | — |
-| `sum_addChar_quadForm_ne_zero` | 270-287 | — | — |
+| `gaussSum_sq_ne_zero` | 252-268 | **The quadratic Gauss sum squared is nonzero** in a char-zero domain (`gaussSum χ ψ ^ 2 = χ(-1)·card K`, both factors nonzero). First factor of the bridge's carried `hK`. | — |
+| `sum_addChar_quadForm_ne_zero` | 270-287 | **The quadratic Gauss sum over `V` is nonzero** given an orthogonal anisotropic basis in char zero — `∑_x ψ(Q x) ≠ 0`. Second factor of the bridge's carried `hK`. | — |
 | `card_quadForm_eq` | 289-328 | **Brick C — THE affine-quadric point count (Mathlib-absent).** `#{x:Q x=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑ₓ ψ(Q x)`, from Brick A + the scaling relation. The assembled count formula. | — |
 | `sum_addChar_quadForm_linear` | 330-358 | **Brick D1 — complete the square.** `∑_w ψ(r·Q w + polar Q w a') = ψ(−r⁻¹·Q a')·∑_w ψ(r·Q w)` (linear term absorbed by the shift `w ↦ w + r⁻¹a'`). The engine of hyperplane-section / joint counts. | — |
 | `count2_eq_charsum` | 360-380 | **Brick A2** — the two-condition count `#{x:f x=c ∧ g x=d}` as a double-indexed character sum (generalizes Brick A). The entry point for the k-fold count assembly (the Gauss endpoint). | — |
@@ -1583,233 +1583,233 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `BM3Bridge.encV` | 15 | — | `abbrev` |
-| `BM3Bridge.Qvo` | 17-18 | — | Definition |
-| `BM3Bridge.co` | 20-21 | — | Definition |
-| `BM3Bridge.Qc` | 22 | — | Definition |
-| `BM3Bridge.Qsh` | 23-28 | — | Definition |
-| `BM3Bridge.co_encV` | 30-34 | — | — |
-| `BM3Bridge.val_zero` | 36-37 | — | — |
-| `BM3Bridge.coord_id` | 38-39 | — | — |
-| `BM3Bridge.QvoVal` | 41-46 | — | — |
-| `BM3Bridge.Qc_encV` | 48-50 | — | — |
-| `BM3Bridge.coord_sub` | 52-56 | — | — |
-| `BM3Bridge.Qsh_encV` | 58-63 | — | — |
-| `BM3Bridge.encV_zero` | 65-66 | — | — |
-| `BM3Bridge.encV_val_zero` | 68-70 | — | — |
-| `BM3Bridge.restrictedF` | 72-75 | — | Definition |
-| `BM3Bridge.restricted_bridge` | 77-104 | — | — |
-| `BM3Bridge.fam` | 106-107 | — | Definition |
-| `BM3Bridge.sigF` | 108 | — | Definition |
-| `BM3Bridge.sigF_injective` | 110-111 | — | — |
+| `BM3Bridge.encV` | 15 | The computable base-3 digit equiv `Fin 4 → ZMod 3 ≃ Fin 81` (`finFunctionFinEquiv`) transporting the abstract vector space to `Nat`-codes. | `abbrev` |
+| `BM3Bridge.Qvo` | 17-18 | The concrete unbundled VO⁻₄(3) minus-form `y₀y₁ + y₂² + y₃²` over `ZMod 3`. | Definition |
+| `BM3Bridge.co` | 20-21 | The `i`-th base-3 digit of a `Nat` code, indexed to match `encV`. | Definition |
+| `BM3Bridge.Qc` | 22 | The minus-form `Qvo` evaluated directly on a `Nat` code's digits, reduced mod 3. | Definition |
+| `BM3Bridge.Qsh` | 23-28 | The shifted (basepoint-translated) minus-form value on `Nat` codes — the incidence value `Qvo(y − (b − v))` in pure-`Nat` form. | Definition |
+| `BM3Bridge.co_encV` | 30-34 | **Foundational.** The `Nat` digit-decode `co` of a code recovers the corresponding coordinate's `ZMod 3` `val`. | — |
+| `BM3Bridge.val_zero` | 36-37 | A `ZMod 3` element is zero iff its `val` is zero. | — |
+| `BM3Bridge.coord_id` | 38-39 | The `val` of `x − z + w` in `ZMod 3` as an explicit `Nat` `%3` expression. | — |
+| `BM3Bridge.QvoVal` | 41-46 | `(Qvo w).val` written as a flat `Nat` polynomial mod 3 over the coordinate `val`s. | — |
+| `BM3Bridge.Qc_encV` | 48-50 | The `Nat`-code form `Qc` at a code equals `(Qvo ·).val` of the decoded vector. | — |
+| `BM3Bridge.coord_sub` | 52-56 | The shifted coordinate `((y − (b − v)) i).val` as an explicit `Nat` `%3` expression. | — |
+| `BM3Bridge.Qsh_encV` | 58-63 | The `Nat`-code shifted form `Qsh` at codes equals `(Qvo (y − (b − v))).val`, the shifted incidence value. | — |
+| `BM3Bridge.encV_zero` | 65-66 | `encV` sends the zero vector to the zero code. | — |
+| `BM3Bridge.encV_val_zero` | 68-70 | A code has `val = 0` iff its decoded vector is zero. | — |
+| `BM3Bridge.restrictedF` | 72-75 | The kernel-fast restricted isotropy count: a pure-`Nat`-predicate `card` over `Finset (Fin 81)` (nonzero, isotropic, and vanishing at two shifted bases). | Definition |
+| `BM3Bridge.restricted_bridge` | 77-104 | **THE BRIDGE.** The abstract VO⁻₄(3) restricted isotropy count (over `Fin 4 → ZMod 3`, the Lemma-B object) equals the `Nat`-predicate count `restrictedF` at the codes of `v, b₁, b₂`. | — |
+| `BM3Bridge.fam` | 106-107 | The 6 base-pair codes (as `Nat` pairs) making up the T₉ separating family. | Definition |
+| `BM3Bridge.sigF` | 108 | The separating signature of a code: the list of `restrictedF` counts over the `fam` base-pairs. | Definition |
+| `BM3Bridge.sigF_injective` | 110-111 | **THE DECIDED INJECTIVITY** (kernel `decide`, no `native_decide`). `sigF` is injective — the T₉ family separates all basepoints. | — |
 
 ## ChainDescent/ScratchBM3Glue.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Bil` | 17-23 | — | Definition, `noncomputable` |
-| `Qbun` | 25-26 | — | Definition, `noncomputable` |
-| `Qbun_apply` | 28-29 | — | `@[simp]` |
-| `Bv` | 31-34 | — | Definition |
-| `T₉` | 36-37 | — | Definition, `noncomputable` |
-| `hcard9` | 39-41 | — | — |
-| `Sij_subset` | 43-50 | — | — |
-| `vcount_eq` | 52-64 | — | — |
-| `comp_eq` | 66-79 | — | — |
-| `isoSep` | 81-117 | — | — |
-| `vo4minus_seal` | 119-122 | — | Definition |
+| `Bil` | 17-23 | The VO⁻₄(3) bilinear form `B(x,y) = x₀y₁ + x₂y₂ + x₃y₃` (with `B x x = Qvo x`). | Definition, `noncomputable` |
+| `Qbun` | 25-26 | The bundled VO⁻₄(3) minus-form `QuadraticForm` over `ZMod 3`, from `Bil`. | Definition, `noncomputable` |
+| `Qbun_apply` | 28-29 | The bundled `Qbun` agrees pointwise with the concrete minus-form `Qvo`. | `@[simp]` |
+| `Bv` | 31-34 | The 9 base vectors of T₉ in vector form (codes `[0,1,3,9,27,54,40,70,10]`). | Definition |
+| `T₉` | 36-37 | The size-9 base on the scheme, the image of `Bv` under `affineE`. | Definition, `noncomputable` |
+| `hcard9` | 39-41 | `T₉` has cardinality at most 9. | — |
+| `Sij_subset` | 43-50 | Each base-pair 2-subset `{affineE (Bv i), affineE (Bv j)}` lies in `T₉`. | — |
+| `vcount_eq` | 52-64 | **B-M1.** The incidence isotropy count for base-pair `{Bv i, Bv j}` at basepoint `w` equals the bridged `Nat`-predicate count `restrictedF` at the codes. | — |
+| `comp_eq` | 66-79 | Per base-pair, the fine isotropy-count antecedent forces the bridged `restrictedF` counts at `u` and `u'` to agree. | — |
+| `isoSep` | 81-117 | **B-M3 — the seal's Gauss target.** `IsotropySeparatesAtBase Qbun T₉`: the fine isotropy-count antecedent forces `u = u'`. | — |
+| `vo4minus_seal` | 119-122 | **THE VO⁻₄(3) SEAL** (mod cited `{G3}`). The Witt-free capstone instantiated at the minus-form `Qbun` and base `T₉`, carrying no `hSmallAutThin` and no Witt. | Definition |
 
 ## ChainDescent/ScratchCountTight.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `int_char_pointwise_tight` | 23-30 | — | — |
-| `counting_identity_tight` | 32-55 | — | — |
-| `card_agree_le_tight` | 57-74 | — | — |
+| `int_char_pointwise_tight` | 23-30 | **Tight per-element χ-inequality.** For `ca, cb ∈ {−1,0,1}`: `2·[ca=cb] ≤ 1 + [ca=0] + ca·cb`, coefficient `1` on `[ca=0]` (vs `2` in `int_char_pointwise`) — the pointwise seed of the tight small-q count. | — |
+| `counting_identity_tight` | 32-55 | **Tight c₀ counting identity (ℤ).** `2·#{χ(a)=χ(b)} ≤ #{a=0} + |V| + ∑ χ(a)χ(b)` — strictly tighter than `counting_identity` (one copy of the zero count, not two). | — |
+| `card_agree_le_tight` | 57-74 | **Tight count controlled by the magnitude (ℝ).** `2·#{χ(a)=χ(b)} ≤ #{a=0} + |V| + ‖T‖` — the small-q-tail replacement for `card_agree_le`, with a single `z_u`. | — |
 
 ## ChainDescent/ScratchPencilBridge.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `finrank_polarRad_eq_finrankKer` | 26-73 | — | — |
+| `finrank_polarRad_eq_finrankKer` | 26-73 | **The corank bridge.** The `finrank` of the polar-radical of `G` equals the `finrank` of the kernel of its Gram matrix's `mulVecLin` — reconciling the `|radical|` magnitude with the corank-stratified `sum_finrankKer_le` budget. | — |
 
 ## ChainDescent/ScratchPencilCorank.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `pencilPoly` | 43-45 | — | Definition, `noncomputable` |
-| `pencilPoly_mul_map` | 47-51 | — | — |
-| `pow_card_dvd_pencilDet_of_cols` | 53-101 | — | — |
-| `exists_cols_ker` | 103-142 | — | — |
-| `finrankKer_le_rootMult` | 144-152 | — | — |
-| `pencilDet_natDegree_le` | 154-159 | — | — |
-| `sum_finrankKer_le` | 161-179 | — | — |
-| `pencilPoly_det_eval` | 181-189 | — | — |
-| `pencilPoly_det_ne_zero` | 191-216 | — | — |
-| `pow_sum_mul_bound` | 218-249 | — | — |
-| `concentration_bound` | 251-277 | — | — |
+| `pencilPoly` | 43-45 | The matrix pencil `A + X·B` packaged as a single matrix over `K[X]` (each entry `C(A i j) + X·C(B i j)`); the object whose determinant carries the corank-multiplicity data. | Definition, `noncomputable` |
+| `pencilPoly_mul_map` | 47-51 | Right-multiplying the pencil `pencilPoly A B` by a constant matrix `Q` yields the pencil of the products, `pencilPoly (A*Q) (B*Q)`. | — |
+| `pow_card_dvd_pencilDet_of_cols` | 53-101 | **The column-factoring core.** If `Q` is invertible with its `S`-columns in `ker(A + t₀·B)`, then `(X − C t₀)^|S|` divides `det(pencilPoly A B)` — the divisibility that converts corank into a root of the pencil determinant. | — |
+| `exists_cols_ker` | 103-142 | Builds an invertible matrix `Q` and index set `S` of size `finrank ker(M₀)` whose `S`-columns lie in `ker(M₀.mulVecLin)` (kernel basis plus a complement), supplying the input to `pow_card_dvd_pencilDet_of_cols`. | — |
+| `finrankKer_le_rootMult` | 144-152 | **CORANK ≤ ROOT-MULTIPLICITY** (the corank-tightening crux). For the pencil `A + X·B` with nonzero determinant, the corank `finrank ker(A + t₀·B)` is at most the multiplicity of `t₀` as a root of `det(A + X·B)`. | — |
+| `pencilDet_natDegree_le` | 154-159 | The pencil determinant `det(A + X·B)` has degree at most `d`. | — |
+| `sum_finrankKer_le` | 161-179 | **∑ corank ≤ d** (the corank-stratified budget). Over any finite set of ratios `t`, the total corank `∑ finrank ker(A + t·B)` is at most `d` — the fact that breaks the uniform-bucket `d` factor. | — |
+| `pencilPoly_det_eval` | 181-189 | Evaluating the pencil determinant at `t₀` recovers `det(A + t₀·B)`. | — |
+| `pencilPoly_det_ne_zero` | 191-216 | **Good anchor ⟹ pencil determinant nonzero.** If some ratio makes `y•A + z•B` nonsingular, then `det(A + X·B)` is not the zero polynomial (the hypothesis needed to apply the corank lemmas). | — |
+| `pow_sum_mul_bound` | 218-249 | **Multiplicative bound** (`s ≥ 2`): a sum of `s`-powers with exponents `≥ 1` is at most `s` raised to the sum of the exponents. | — |
+| `concentration_bound` | 251-277 | **CONCENTRATION** (the bucket arithmetic). With `s ≥ 2`, exponents `1 ≤ c t ≤ D−1`, and `∑ c t ≤ D`, gives `∑ s^(c t) ≤ 2·s^(D−1)` — turning the corank-`(d−1)` worst case into a constant factor rather than a `d`-fold one. | — |
 
 ## ChainDescent/ScratchPencilCorank2.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `polar_pairForm` | 23-35 | — | — |
-| `polar_pencil_pairForm` | 37-49 | — | — |
-| `pencil_polarRad_finrank_le` | 51-231 | — | — |
-| `single_polarRad_finrank_le` | 233-277 | — | — |
+| `polar_pairForm` | 23-35 | The polar of `pairForm Q a`, expanded as `4·Q a·polar Q x h − 2·polar Q x a·polar Q h a`. | — |
+| `polar_pencil_pairForm` | 37-49 | The polar of the pencil `F = y•pairForm Q a + z•pairForm Q b`, fully expanded in terms of `polar Q`. | — |
+| `pencil_polarRad_finrank_le` | 51-231 | **The geometric corank cap.** For the pencil `y•pairForm Q a + z•pairForm Q b` with `a, b` linearly independent, `y, z ≠ 0`, nondegenerate `Q.polarBilin` (char ≠ 2, `finrank V ≥ 4`), the polar-radical has corank at least 2: `finrank (polarRad F) ≤ finrank V − 2`. | — |
+| `single_polarRad_finrank_le` | 233-277 | **The single-form corank-1 cap (the `z_u` sibling of the pencil cap).** For nondegenerate `Q.polarBilin` and non-isotropic anchor `Q a ≠ 0`, `polarRad (pairForm Q a) ⊆ span{a}` so `finrank ≤ 1` — tightening the `z_u` zero-count term from `n/√q` to `√n·√q` and its threshold from `q ≥ 256` to `q ≥ 16`. | — |
 
 ## ChainDescent/ScratchPencilRegroup.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `ker_smul_mulVecLin` | 25-30 | — | — |
-| `finrankKer_ratio` | 32-39 | — | — |
-| `radicalCard_eq_pow` | 41-57 | — | — |
-| `corank_ratio_eq` | 59-66 | — | — |
-| `sum_comp_ratio_le` | 68-81 | — | — |
-| `fiber_fst_card_le` | 83-98 | — | — |
-| `sqrt_natpow` | 100-104 | — | — |
-| `pencilDet_ne_zero_of_good` | 106-119 | — | — |
-| `deg_bucket_le` | 121-232 | — | — |
+| `ker_smul_mulVecLin` | 25-30 | Scaling a matrix by a nonzero constant preserves the kernel of its `mulVecLin`. | — |
+| `finrankKer_ratio` | 32-39 | **Scale-invariance of the corank along a ratio.** For `y ≠ 0`, the corank of the pencil member `y•A + z•B` equals that of the normalized member `A + (z/y)•B`. | — |
+| `radicalCard_eq_pow` | 41-57 | **The radical cardinality as a corank power.** The radical-count of the pencil member `y•P + z•R` equals `|K|^{corank}` of the normalized Gram matrix `A + (z/y)•B` — connecting the `ScratchTBound` magnitude to the ratio corank. | — |
+| `corank_ratio_eq` | 59-66 | The normalized-Gram corank at a ratio equals the polar-radical dimension `finrank (polarRad (y•P + z•R))` (finrank form of `radicalCard_eq_pow`). | — |
+| `sum_comp_ratio_le` | 68-81 | **Fiber-collapse bound.** For a nonneg `h` factoring through `ρ`, the sum of `h ∘ ρ` over `S` is at most `N` times the ratio-sum, where `N` bounds each fiber's size. | — |
+| `fiber_fst_card_le` | 83-98 | Every ratio-fiber `{x ∈ S : x.2/x.1 = t}` (nonzero first coordinates) has at most `|K|` elements, injecting into `K` via the first coordinate. | — |
+| `sqrt_natpow` | 100-104 | `√(a^c) = (√a)^c` for `a ≥ 0`. | — |
+| `pencilDet_ne_zero_of_good` | 106-119 | **Good anchor ⟹ pencil determinant nonzero (the `hgood → hp` bridge).** A nondegenerate pencil member (`polarRad (y•P + z•R) = ⊥`) makes the Gram-matrix pencil determinant nonzero, supplying the `deg_bucket_le`/corank hypotheses. | — |
+| `deg_bucket_le` | 121-232 | **The corank-stratified degenerate bucket bound (A-assembly).** The `ScratchTBound` degenerate-bucket sum `∑ √(|V|·|radical|)` is at most `2·|K|·(|V|/√|K|)` — the `d`-free bound that drops `ScratchBucket.c0_le`'s `hq2` threshold on `q`. | — |
 
 ## ChainDescent/ScratchRoute2.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `chi_norm_le` | 24-31 | — | — |
-| `sum_chi_indicator` | 33-40 | — | — |
-| `normT_triangle` | 48-132 | — | — |
-| `c0_le_route2` | 134-222 | — | — |
+| `chi_norm_le` | 24-31 | `‖χ y‖ ≤ [y ≠ 0]` for the ℂ-valued quadratic character — the χ-weight vanishes on zero and is `≤ 1` elsewhere. | — |
+| `sum_chi_indicator` | 33-40 | `∑_y [y ≠ 0] = |K| − 1` — the row/column count feeding the `(q−1)²` factor of the triangle bound. | — |
+| `normT_triangle` | 48-132 | **Route 2 triangle `T`-bound (piece 2).** For a good anchor (`t₀−u, t₀−v` independent, `Q` nondegenerate, `d ≥ 4`): `q·T ≤ (q−1)²·q^{d−1}`, i.e. `T ≤ (1−1/q)²·|V|`, with NO threshold `hq3`. | — |
+| `c0_le_route2` | 134-222 | **Route 2 tail capstone (piece 4).** For a good anchor (`d ≥ 4`, `|K| ≥ 3` odd) the agreement count satisfies `4q²·NS ≤ (4q²−1)·|V|`, i.e. `NS ≤ (1 − 1/(4q²))·|V| < |V|` — closing the odd-char small-q tail uniformly with NO threshold. | — |
 
 ## ChainDescent/ScratchRoute2Arith.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `c0_route2_arith` | 5-51 | — | — |
+| `c0_route2_arith` | 5-51 | **Route 2 tail arithmetic.** From the tight count, the corank-1 zero-count, the triangle `T·q² ≤ (q−1)²·n`, and `q⁴ ≤ n`, `q ≥ 3`, derives `4q²·NS ≤ (4q²−1)·n` — the clean `δ = 1/(4q²)` gap with `√` only internal. | — |
 
 ## ChainDescent/ScratchTBoundCorank.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `normT_bucket_bound_corank` | 20-96 | — | — |
-| `c0_le_const` | 98-108 | — | — |
-| `c0_le_threequarters_corank` | 110-190 | — | — |
+| `normT_bucket_bound_corank` | 20-96 | **Corank-stratified `|T|` bound (step C).** `|K|·‖T‖ ≤ |K|²·√|V| + 2·|K|·(|V|/√|K|)` — the degenerate deg bucket coefficient is the constant `2`, not `d`, via the corank-stratified `deg_bucket_le`. | — |
+| `c0_le_const` | 98-108 | **The `c₀ ≤ ¾` arithmetic with the constant deg coefficient — no `hq2`.** Specializing `c0_le` at `dR := 2` makes its `d`-dependent threshold collapse into the already-present `q ≥ 256`, so only `d ≥ 3` and `q ≥ 256` bind. | — |
+| `c0_le_threequarters_corank` | 110-190 | **THE per-anchor `c₀ ≤ ¾` bound — corank-tightened (no `hq2`).** Removes the `64·d² ≤ q` threshold by using the corank-stratified deg bucket, dropping `VO⁻₄(q)` from `q ≥ 1024` to `q ≥ 256`. | — |
 
 ## ChainDescent/ScratchTBoundCorank2.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `le_two_pow_sub_two` | 27-35 | — | — |
-| `concentration_bound2` | 37-84 | — | — |
-| `deg_bucket_le2` | 86-186 | — | — |
-| `c0_le2` | 188-226 | — | — |
-| `normT_bucket_bound_corank2` | 228-294 | — | — |
-| `c0_le_threequarters_corank2` | 296-376 | — | — |
+| `le_two_pow_sub_two` | 27-35 | The arithmetic helper `D ≤ 2^(D−2)` for `D ≥ 4`, used in the all-corank-1 case of the cap-`d−2` concentration bound. | — |
+| `concentration_bound2` | 37-84 | **Concentration, cap `D−2`.** For `s ≥ 2` and exponents in `[1, D−2]` summing to `≤ D`, `∑ s^(c t) ≤ 2·s^(D−2)` — one `√q` sharper than `concentration_bound`, the arithmetic behind Route 0's threshold drop. | — |
+| `deg_bucket_le2` | 86-186 | **Route 0 cap-`d−2` degenerate bucket.** For the pencil `y•pairForm Q p + z•pairForm Q r` with independent `p, r` and nondegenerate polar form, the degenerate-bucket sum is `≤ 2·|V|` — one `√q` sharper than `deg_bucket_le`, via the rank-2 corank cap `pencil_polarRad_finrank_le`. | — |
+| `c0_le2` | 188-226 | **Route 0 `c₀ ≤ ¾` arithmetic at threshold `q ≥ 16`.** Feeding the cap-`d−2` deg term `2n/q` and the corank-1 `z_u` bound, closes `NS ≤ ¾·n` for `q ≥ 16` — dropping `c0_le_const`'s `q ≥ 256`. | — |
+| `normT_bucket_bound_corank2` | 228-294 | **Route 0 `|T|` bound.** `|K|·‖T‖ ≤ |K|²·√|V| + 2·|V|` — the degenerate deg bucket is now `2·|V|` (via `deg_bucket_le2`), one `√q` smaller than `normT_bucket_bound_corank`. | — |
+| `c0_le_threequarters_corank2` | 296-376 | **THE per-anchor `c₀ ≤ ¾` bound — Route 0 (threshold `q ≥ 16`).** Drops `c0_le_threequarters_corank`'s `q ≥ 256` to `q ≥ 16`, at the cost of new hypotheses `d ≥ 4`, `t₀−u, t₀−v` independent, `Q.polarBilin` nondegenerate, and non-isotropic anchor. | — |
 ## ChainDescent/RouteCFormAdapters.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `RouteC.coords_determine_spanning` | 48-70 | — | — |
+| `RouteC.coords_determine_spanning` | 48-70 | **Key lemma.** The spanning generalization of `coords_determine`: with a nondegenerate polar form, agreeing `Q`-value profiles over a spanning base `S` force `v = v'`. The vertex-determiner Route C needs when the base is an iso-invariantly chosen spanning set rather than the standard frame. | — |
 | `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` | 72-127 | **Route C back-half.** The recovered isometry scheme `O(Q)` discretizes at ANY spanning base and seals via `viaSpielman` — spanning generalization of `viaOrthogonalForm`, no standard frame, no `hSmallAutThin`. | — |
-| `RouteC.affineScheme_refines_of_le` | 139-156 | — | — |
+| `RouteC.affineScheme_refines_of_le` | 139-156 | **The generic refinement core.** For subgroups `H ≤ G` (both containing `−1`), the affine orbital scheme of `H` is finer than that of `G`. Reusable base of every Route-C refinement brick: recovering a smaller group refines, never fabricates. | — |
 | `RouteC.isometryScheme_refines_similitudeScheme` | 158-176 | **A3 brick 1.** `O(Q) ≤ GO(Q)` ⟹ the recovered isometry scheme refines the given similitude graph — the consistency half of the refinement bridge. | — |
 | `RouteC.NondegQuadricDeterminesForm` | 198-220 | **Scoped citation.** A nondegenerate quadric determines its quadratic form up to a nonzero scalar (`p≠2`, `d≥4`); the classical carry under A1 / F4 (projective Nullstellensatz). | Definition |
-| `RouteC.similitude_colouring_equivariant` | 222-233 | — | — |
-| `RouteC.similitude_conePreserving` | 235-250 | — | — |
+| `RouteC.similitude_colouring_equivariant` | 222-233 | **F4 brick 1.** A form similitude `Q' (g v) = μ·Q v` transports the difference colouring by the same scalar: `Q' (g u − g t) = μ·Q (u − t)`. The load-bearing equivariance content of F4. | — |
+| `RouteC.similitude_conePreserving` | 235-250 | **F4 brick 1b.** A form similitude carries the `Q`-cone to the `Q'`-cone (`Q' (g v) = 0 ↔ Q v = 0`); the consistency direction complementing `NondegQuadricDeterminesForm`. | — |
 | `RouteC.recoveredForm_colouring_equivariant` | 252-272 | **F4 core.** A graph iso's linear part carries the `Q`-cone to the `Q'`-cone, so the recovered-`Q` difference colouring transports by one global scalar — the iso-invariance making recovered-form discretization canonical. | — |
-| `RouteC.frobVec` | 290-294 | — | Definition |
-| `RouteC.frobVec_sub` | 295-301 | — | — |
-| `RouteC.semisimilitude_colouring_equivariant` | 302-313 | — | — |
+| `RouteC.frobVec` | 290-294 | The coordinate-wise action `x ↦ (σ(xᵢ))` of a field endomorphism `σ` on `V` — the semilinear part of a collineation of `AG(d,q)`. | Definition |
+| `RouteC.frobVec_sub` | 295-301 | `σ̂` is additive: `σ̂(u − t) = σ̂ u − σ̂ t`. What makes the semilinear equivariance identity go through. | — |
+| `RouteC.semisimilitude_colouring_equivariant` | 302-313 | **F2 brick 1.** A semi-similitude `g = M∘σ̂` transports the difference colouring by scalar `μ` and field automorphism `σ`: `Q'(M σ̂ u − M σ̂ t) = μ·σ(Q(u − t))`. The `q = pᵉ` analog of `similitude_colouring_equivariant`. | — |
 | `RouteC.ConePreservingCollineationIsSemiSimilitude` | 315-328 | **Scoped citation (F2).** A cone-preserving collineation is a semi-similitude (fundamental theorem of projective geometry) — the `q=pᵉ` semilinear seam. | Definition |
 | `RouteC.recoveredForm_colouring_equivariant_semilinear` | 330-347 | **F4 over `𝔽_q`.** The semilinear (`q=pᵉ`) form of F4 — the recovered form is iso-invariant including the Frobenius/ΓL part. | — |
 | `RouteC.FormAdapter` | 364-378 | **The generic Route-C engine interface.** A form family plugs in its linear group `G₀` (∋ −1), a bounded spanning base, and a `separates` certificate. | Structure |
 | `RouteC.FormAdapter.reachesRigidOrCameron` | 380-391 | **The shared engine theorem.** Any `FormAdapter` reaches the rigid-or-Cameron disjunction — one engine, N family instances. | — |
 | `RouteC.affinePolarAdapter` | 393-419 | **Instance 1** — affine-polar `VO^ε` as a `FormAdapter` (validates the interface). | Definition, `noncomputable` |
-| `RouteC.coords_determine_multi` | 435-455 | — | — |
-| `RouteC.coords_determine_multi_spanning` | 457-476 | — | — |
+| `RouteC.coords_determine_multi` | 435-455 | **Multi-form `coords_determine` (the alternating family's `separates` core).** A family of quadratic forms whose polar forms jointly separate (trivial common radical) determines the vertex from the joint value-profile at the standard frame. The `ι = Unit` case is `coords_determine`. | — |
+| `RouteC.coords_determine_multi_spanning` | 457-476 | **Multi-form `coords_determine` at a spanning base** — `coords_determine_multi` with the value-profile taken over any spanning set, combining the joint-radical and spanning arguments for Route C's iso-invariant base. | — |
 | `RouteC.multiFormAdapter` | 478-511 | **The multi-quadric engine.** A family of quadratic forms whose joint cone is the connection set plugs into one adapter — basis for the non-quadratic families. | Definition, `noncomputable` |
-| `RouteC.jointConeStab` | 534-554 | — | Definition |
-| `RouteC.neg_mem_jointConeStab` | 556-563 | — | — |
-| `RouteC.iInf_isometryGroup_le_jointConeStab` | 565-576 | — | — |
+| `RouteC.jointConeStab` | 534-554 | **The cone stabilizer — the graph-intrinsic linear group of a multi-quadric forms graph.** The setwise stabilizer of the joint isotropic cone (= the connection set): definable from the graph alone, so its affine scheme is the multi-form refinement target (analog of `similitudeGroup`). | Definition |
+| `RouteC.neg_mem_jointConeStab` | 556-563 | `−1 ∈ jointConeStab Qs` — the `hneg` input for the cone-stabilizer scheme (`Q_k(−v) = Q_k v` leaves the cone condition unchanged). | — |
+| `RouteC.iInf_isometryGroup_le_jointConeStab` | 565-576 | The joint isometry group is contained in the cone stabilizer (`⨅ₖ O(Q_k) ≤ jointConeStab Qs`) — what lets `affineScheme_refines_of_le` fire for the multi-form refinement brick. | — |
 | `RouteC.multiIsometryScheme_refines_coneScheme` | 578-593 | **brick-1-multi.** The recovered joint-isometry scheme `⨅ₖ O(Q_k)` refines the graph-intrinsic cone-stabilizer scheme. | — |
-| `RouteC.multiSimilitude_colouring_equivariant` | 595-607 | — | — |
+| `RouteC.multiSimilitude_colouring_equivariant` | 595-607 | **F4-multi brick.** If a graph iso's linear part transports the value-tuple colouring by a global map `Φ`, it transports the difference colouring by the same `Φ`. Multi-form analog of `similitude_colouring_equivariant` (with `Φ` arbitrary). | — |
 | `RouteC.JointVarietyDeterminesFamily` | 609-625 | **Scoped citation (multi-form).** The joint variety determines its quadric family up to an invertible linear change — the F4-multi sibling of `NondegQuadricDeterminesForm`. | Definition |
-| `RouteC.recoveredFamily_colouring_equivariant` | 627-645 | — | — |
+| `RouteC.recoveredFamily_colouring_equivariant` | 627-645 | **F4-multi.** Given a joint-cone-preserving graph iso, joint nondegeneracy, and the cited `JointVarietyDeterminesFamily`, the recovered value-tuple difference colouring transports by a single global injective `Φ` — the multi-quadric completion of F4. | — |
 | `RouteC.recoveredFamily_partition_isoInvariant` | 647-664 | **F4-multi payoff.** The recovered value-tuple colour partition is iso-invariant (a graph iso transports it by a global injective Φ). | — |
-| `RouteC.polar_linMulLin` | 675-680 | — | — |
-| `RouteC.Plucker.pc` | 685-686 | — | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf0` | 688-690 | — | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf1` | 691-693 | — | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf2` | 694-696 | — | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf3` | 697-699 | — | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf4` | 700-702 | — | Definition, `noncomputable` |
-| `RouteC.Plucker.pluckerForms` | 704-706 | — | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf0_polar` | 708-711 | — | — |
-| `RouteC.Plucker.Pf1_polar` | 712-715 | — | — |
-| `RouteC.Plucker.Pf2_polar` | 716-719 | — | — |
-| `RouteC.Plucker.plucker_hjoint` | 721-760 | — | — |
-| `RouteC.Plucker.alternatingAdapter` | 762-765 | — | Definition, `noncomputable` |
+| `RouteC.polar_linMulLin` | 675-680 | **Reusable primitive.** `polar (linMulLin f g) x y = f x·g y + f y·g x` — the building block for the polar of any Clifford-term-sum quadric (Plücker sub-Pfaffians, D₅ spinor quadrics). | — |
+| `RouteC.Plucker.pc` | 685-686 | The `i`-th Plücker coordinate projection on `𝔽_p^10`. | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf0` | 688-690 | Sub-Pfaffian deleting index 0 (`x₄x₉ − x₅x₈ + x₆x₇`); one of the 5 Plücker quadrics. | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf1` | 691-693 | Sub-Pfaffian deleting index 1 (`x₁x₉ − x₂x₈ + x₃x₇`). | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf2` | 694-696 | Sub-Pfaffian deleting index 2 (`x₀x₉ − x₂x₆ + x₃x₅`). | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf3` | 697-699 | Sub-Pfaffian deleting index 3 (`x₀x₈ − x₁x₆ + x₃x₄`). | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf4` | 700-702 | Sub-Pfaffian deleting index 4 (`x₀x₇ − x₁x₅ + x₂x₄`). | Definition, `noncomputable` |
+| `RouteC.Plucker.pluckerForms` | 704-706 | The family of 5 Plücker quadrics (`Fin 5`); the `Alt(5,q)` connection set is their joint cone. | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf0_polar` | 708-711 | The polar form of `Pf0`, expanded in coordinates. | — |
+| `RouteC.Plucker.Pf1_polar` | 712-715 | The polar form of `Pf1`, expanded in coordinates. | — |
+| `RouteC.Plucker.Pf2_polar` | 716-719 | The polar form of `Pf2`, expanded in coordinates. | — |
+| `RouteC.Plucker.plucker_hjoint` | 721-760 | **The Plücker quadrics are jointly nondegenerate** (trivial common polar radical) — the sole geometric input the alternating adapter needs (`Pf₀` isolates coords 4..9, `Pf₁` isolates 1,2,3, `Pf₂` isolates 0). | — |
+| `RouteC.Plucker.alternatingAdapter` | 762-765 | **`Alt(5,q)` as a sealed `FormAdapter`** — the Plücker quadrics assembled via `multiFormAdapter`; `G₀ = ⨅ₖ O(Pf_k)`. The first concrete non-quadratic Route-C family. | Definition, `noncomputable` |
 | `RouteC.Plucker.reachesRigidOrCameron_alternating` | 767-780 | **Instance 2 sealed** — the alternating `Alt(5,q)` family via 5 Plücker quadrics; the first non-quadratic Route-C seal. | — |
-| `RouteC.Plucker.alternating_refines_coneScheme` | 782-794 | — | — |
-| `RouteC.HalfSpin.halfSpin_reduction` | 816-833 | — | — |
-| `RouteC.HalfSpin.sc` | 850-851 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S0` | 853-855 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S1` | 856-858 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S2` | 859-861 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S3` | 862-864 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S4` | 865-867 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S5` | 868-870 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S6` | 871-873 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S7` | 874-876 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S8` | 877-879 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S9` | 880-882 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.spinorForms` | 884-887 | — | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S0_polar` | 889-892 | — | — |
-| `RouteC.HalfSpin.S1_polar` | 893-896 | — | — |
-| `RouteC.HalfSpin.S2_polar` | 897-900 | — | — |
-| `RouteC.HalfSpin.S3_polar` | 901-904 | — | — |
-| `RouteC.HalfSpin.S4_polar` | 905-908 | — | — |
-| `RouteC.HalfSpin.spinor_hjoint` | 910-969 | — | — |
-| `RouteC.HalfSpin.spinAdapter` | 971-974 | — | Definition, `noncomputable` |
+| `RouteC.Plucker.alternating_refines_coneScheme` | 782-794 | **`Alt(5,q)` brick-1 (concrete).** The recovered joint-isometry scheme refines the graph-intrinsic cone-stabilizer scheme of the Plücker family — the refinement leg for alternating. | — |
+| `RouteC.HalfSpin.halfSpin_reduction` | 816-833 | **Half-spin reduction (instance 3 target).** Committing the D₅ dimensions: any 10 quadratic forms on `𝔽_p^16` with joint nondegeneracy are sealed via `multiFormAdapter`, reducing all remaining half-spin work to constructing the spinor quadrics and their `hjoint`. | — |
+| `RouteC.HalfSpin.sc` | 850-851 | The `i`-th half-spin coordinate projection on `𝔽_p^16`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S0` | 853-855 | D₅ spinor quadric — the quadruple form for `1234` (`x_∅x_{1234} = Pf`). | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S1` | 856-858 | D₅ spinor quadric — the quadruple form for `1235`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S2` | 859-861 | D₅ spinor quadric — the quadruple form for `1245`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S3` | 862-864 | D₅ spinor quadric — the quadruple form for `1345`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S4` | 865-867 | D₅ spinor quadric — the quadruple form for `2345`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S5` | 868-870 | D₅ spinor quadric — pair×quadruple form 5. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S6` | 871-873 | D₅ spinor quadric — pair×quadruple form 6. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S7` | 874-876 | D₅ spinor quadric — pair×quadruple form 7. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S8` | 877-879 | D₅ spinor quadric — pair×quadruple form 8. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S9` | 880-882 | D₅ spinor quadric — pair×quadruple form 9. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.spinorForms` | 884-887 | The family of 10 D₅ spinor quadrics (`Fin 10`); their joint cone is the pure-spinor cone = the half-spin connection set. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S0_polar` | 889-892 | The polar form of `S0`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.S1_polar` | 893-896 | The polar form of `S1`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.S2_polar` | 897-900 | The polar form of `S2`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.S3_polar` | 901-904 | The polar form of `S3`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.S4_polar` | 905-908 | The polar form of `S4`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.spinor_hjoint` | 910-969 | **The 10 spinor quadrics are jointly nondegenerate** (trivial common polar radical) — the `hjoint` the half-spin adapter needs, provable from the 5 quadruple forms `S0..S4` alone. | — |
+| `RouteC.HalfSpin.spinAdapter` | 971-974 | **The D₅ half-spin family as a sealed `FormAdapter`** — the 10 spinor quadrics assembled via `multiFormAdapter`; `G₀ = ⨅ₖ O(S_k)`. | Definition, `noncomputable` |
 | `RouteC.HalfSpin.reachesRigidOrCameron_halfSpin` | 976-990 | **Instance 3 sealed** — the half-spin family via the 10 D₅ spinor quadrics. | — |
-| `RouteC.HalfSpin.halfSpin_refines_coneScheme` | 992-1002 | — | — |
-| `RouteC.Suzuki.ovoidC` | 1029-1030 | — | Definition |
-| `RouteC.Suzuki.SF0` | 1032-1034 | — | Definition |
-| `RouteC.Suzuki.SF1` | 1035-1037 | — | Definition |
-| `RouteC.Suzuki.SF2` | 1038-1040 | — | Definition |
-| `RouteC.Suzuki.SF3` | 1041-1043 | — | Definition |
-| `RouteC.Suzuki.SF4` | 1044-1046 | — | Definition |
-| `RouteC.Suzuki.suzukiForms` | 1048-1051 | — | Definition |
-| `RouteC.Suzuki.four_eq_zero` | 1053-1056 | — | — |
-| `RouteC.Suzuki.SF0_ovoid` | 1058-1062 | — | — |
-| `RouteC.Suzuki.SF1_ovoid` | 1064-1068 | — | — |
-| `RouteC.Suzuki.SF2_ovoid` | 1070-1074 | — | — |
-| `RouteC.Suzuki.SF3_ovoid` | 1076-1080 | — | — |
-| `RouteC.Suzuki.SF4_ovoid` | 1082-1086 | — | — |
-| `RouteC.Suzuki.suzukiForms_ovoid` | 1088-1098 | — | — |
-| `RouteC.Suzuki.suzukiForms_infty` | 1099-1103 | — | — |
-| `RouteC.Suzuki.suzukiForms_homog` | 1104-1110 | — | — |
-| `RouteC.Suzuki.SFv` | 1125-1126 | — | Definition |
-| `RouteC.Suzuki.PreservesForms` | 1128-1131 | — | Definition |
-| `RouteC.Suzuki.SF0_recover` | 1147-1153 | — | — |
-| `RouteC.Suzuki.SF1_recover_x3` | 1155-1161 | — | — |
-| `RouteC.Suzuki.SF1_recover_x0` | 1163-1169 | — | — |
-| `RouteC.Suzuki.SF4_recover_x1` | 1171-1179 | — | — |
-| `RouteC.Suzuki.preservesForms_eq` | 1180-1184 | — | — |
-| `RouteC.Suzuki.recover_x2` | 1186-1191 | — | — |
-| `RouteC.Suzuki.recover_x3` | 1193-1198 | — | — |
-| `RouteC.Suzuki.recover_x0` | 1200-1205 | — | — |
-| `RouteC.Suzuki.recover_x1` | 1207-1212 | — | — |
+| `RouteC.HalfSpin.halfSpin_refines_coneScheme` | 992-1002 | **Half-spin brick-1 (concrete).** The recovered joint-isometry scheme refines the graph-intrinsic cone-stabilizer scheme of the D₅ spinor family — the refinement leg for half-spin. | — |
+| `RouteC.Suzuki.ovoidC` | 1029-1030 | The 4th Tits-ovoid coordinate `c = a·b + σa·a² + σb` (affine chart `x₀ = 1`). | Definition |
+| `RouteC.Suzuki.SF0` | 1032-1034 | Suzuki σ-twisted form 0 (the single derived form `x₃x₀^{σ+1}+x₁x₂x₀^σ+x₁^{σ+2}+x₂^σx₀²`). | Definition |
+| `RouteC.Suzuki.SF1` | 1035-1037 | Suzuki σ-twisted form 1. | Definition |
+| `RouteC.Suzuki.SF2` | 1038-1040 | Suzuki σ-twisted form 2. | Definition |
+| `RouteC.Suzuki.SF3` | 1041-1043 | Suzuki σ-twisted form 3. | Definition |
+| `RouteC.Suzuki.SF4` | 1044-1046 | Suzuki σ-twisted form 4. | Definition |
+| `RouteC.Suzuki.suzukiForms` | 1048-1051 | The 5 σ-twisted Suzuki forms packaged as a family over `Fin 5`, for the joint-value adapter. | Definition |
+| `RouteC.Suzuki.four_eq_zero` | 1053-1056 | `(4 : K) = 0` in char 2 — clears the `·4` coefficients `ring_nf` produces when four equal monomials collect. | — |
+| `RouteC.Suzuki.SF0_ovoid` | 1058-1062 | `SF0` vanishes on the affine ovoid `(1, a, b, ovoidC a b)`. | — |
+| `RouteC.Suzuki.SF1_ovoid` | 1064-1068 | `SF1` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
+| `RouteC.Suzuki.SF2_ovoid` | 1070-1074 | `SF2` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
+| `RouteC.Suzuki.SF3_ovoid` | 1076-1080 | `SF3` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
+| `RouteC.Suzuki.SF4_ovoid` | 1082-1086 | `SF4` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
+| `RouteC.Suzuki.suzukiForms_ovoid` | 1088-1098 | All 5 σ-twisted forms vanish on the affine ovoid (packaged over `Fin 5`). | — |
+| `RouteC.Suzuki.suzukiForms_infty` | 1099-1103 | All 5 forms vanish at the point at infinity `(0,0,0,1)`. | — |
+| `RouteC.Suzuki.suzukiForms_homog` | 1104-1110 | **σ-twisted homogeneity** — `SF_k(λ·x) = σλ·λ²·SF_k(x)`, so each `{SF_k = 0}` is a cone; with ovoid + infinity vanishing this gives vanishing on the whole connection set. | — |
+| `RouteC.Suzuki.SFv` | 1125-1126 | The Suzuki form family evaluated on a vector `v : Fin 4 → K`. | Definition |
+| `RouteC.Suzuki.PreservesForms` | 1128-1131 | A map preserves the σ-twisted Suzuki forms (`F_k(g w) = F_k(w)`) — the joint σ-form isometry condition whose orbit-of-difference relation is the Route-C isometry-scheme colouring. | Definition |
+| `RouteC.Suzuki.SF0_recover` | 1147-1153 | Recovery of `x₂` — the 2nd discrete derivative `D₀D₁ SF0` collapses to `x₂` (σ-terms cancel in char 2). | — |
+| `RouteC.Suzuki.SF1_recover_x3` | 1155-1161 | Recovery of `x₃` — `D₀D₁ SF1 = x₃`. | — |
+| `RouteC.Suzuki.SF1_recover_x0` | 1163-1169 | Recovery of `x₀` — `D₁D₃ SF1 = x₀`. | — |
+| `RouteC.Suzuki.SF4_recover_x1` | 1171-1179 | Recovery of `x₁` — `D₂D₃ SF4 = x₁`. | — |
+| `RouteC.Suzuki.preservesForms_eq` | 1180-1184 | A form-preserving map that carries `b` to `a` equalizes the form-values (`F_k a = F_k b`) — the σ-twisted "orbit ⟹ equal-values" half. | — |
+| `RouteC.Suzuki.recover_x2` | 1186-1191 | `SFv`-level recovery of `x₂` (`D₀D₁ SF0`), lifting `SF0_recover` through coordinate evaluation. | — |
+| `RouteC.Suzuki.recover_x3` | 1193-1198 | `SFv`-level recovery of `x₃` (`D₀D₁ SF1`). | — |
+| `RouteC.Suzuki.recover_x0` | 1200-1205 | `SFv`-level recovery of `x₀` (`D₁D₃ SF1`). | — |
+| `RouteC.Suzuki.recover_x1` | 1207-1212 | `SFv`-level recovery of `x₁` (`D₂D₃ SF4`). | — |
 | `RouteC.Suzuki.suzukiForms_determine` | 1214-1241 | **Suzuki citation discharge.** The 5 σ-twisted ovoid forms determine the coordinates on the enlarged base — makes `reachesRigidOrCameron_suzuki` citation-free. | — |
-| `RouteC.Suzuki.SFbar` | 1256-1257 | — | Definition |
-| `RouteC.Suzuki.suzukiG₀` | 1259-1276 | — | Definition |
-| `RouteC.Suzuki.preservesForms_of_mem_G₀` | 1277-1284 | — | — |
-| `RouteC.Suzuki.neg_mem_suzukiG₀` | 1286-1292 | — | — |
-| `RouteC.Suzuki.suzukiBaseVecs` | 1294-1298 | — | Definition |
-| `RouteC.Suzuki.suzukiBase` | 1300-1304 | — | Definition, `noncomputable` |
-| `RouteC.Suzuki.suzukiBase_card_le` | 1305-1310 | — | — |
-| `RouteC.Suzuki.base_sfv_eq` | 1311-1320 | — | — |
-| `RouteC.Suzuki.suzukiAdapter` | 1322-1355 | — | Definition, `noncomputable` |
+| `RouteC.Suzuki.SFbar` | 1256-1257 | The Suzuki forms in `𝔽₂`-coordinates via the additive iso `Ψ` (`SFbar = SFv ∘ Ψ`). | Definition |
+| `RouteC.Suzuki.suzukiG₀` | 1259-1276 | **The transported Suzuki joint-isometry group** — the `𝔽₂`-linear autos of `Fin D → ZMod 2` preserving every `SFbar`, a clean subgroup feeding the char-2 engine. | Definition |
+| `RouteC.Suzuki.preservesForms_of_mem_G₀` | 1277-1284 | `g ∈ suzukiG₀` ⟹ its `Ψ`-conjugate preserves the `K`-side forms — the link from the standard-space isometry to the `K`-side determiner. | — |
+| `RouteC.Suzuki.neg_mem_suzukiG₀` | 1286-1292 | `−1 ∈ suzukiG₀` — free in char 2 (`Ψ(−w) = Ψw`, so `neg` preserves every `SFbar`). | — |
+| `RouteC.Suzuki.suzukiBaseVecs` | 1294-1298 | The 8 base vectors on the `K`-side (`{0, e₀, e₁, e₂, e₃, e₀+e₁, e₁+e₃, e₂+e₃}`) whose pairwise sums power the second-derivative recovery. | Definition |
+| `RouteC.Suzuki.suzukiBase` | 1300-1304 | The individualized base — `Ψ`-images of `suzukiBaseVecs` transported to `Fin (2^D)` (`≤ 8` points). | Definition, `noncomputable` |
+| `RouteC.Suzuki.suzukiBase_card_le` | 1305-1310 | The Suzuki base has `≤ 8` points. | — |
+| `RouteC.Suzuki.base_sfv_eq` | 1311-1320 | **Per-base-vector transport.** A `G₀`-orbit witness at the `Ψ`-image of `b` gives equality of the σ-form values of the two vertices' differences by `b`. | — |
+| `RouteC.Suzuki.suzukiAdapter` | 1322-1355 | **The Suzuki family as a `FormAdapter`** (instance 4). `G₀ = suzukiG₀`, base = enlarged frame images (`≤ 8`), `separates` = transport to the proved determiner `suzukiForms_determine` — no citation, no `hσ`, no field-size hypothesis. | Definition, `noncomputable` |
 | `RouteC.Suzuki.reachesRigidOrCameron_suzuki` | 1357-1371 | **Instance 4 sealed, citation-free** — Suzuki–Tits via 5 σ-twisted ovoid forms; `separates` proved by second-derivative recovery (no citation, no `hσ`). | — |
 
 ## ChainDescent/RouteCSeam.lean
@@ -1818,16 +1818,16 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 |------|------|-------------|-------|
 | `SealDisj` | 34-38 | The seal disjunction (`reachesRigidOrCameron` conclusion shape) with the free `IsCameronScheme` predicate + depth bound as parameters. | Definition |
 | `reachesRigidOrCameron_seamDispatch` | 47-63 | **The generic seam dispatch.** A residue that is Cameron, or realized by some already-sealed scheme `Y`, is itself sealed — one theorem over all forms-graph families + the cyclotomic branch. Carries the generic `htransport`. | — |
-| `reachesRigidOrCameron_affineResidue` | 65-78 | — | — |
+| `reachesRigidOrCameron_affineResidue` | 65-78 | **The named combined seam.** `reachesRigidOrCameron_seamDispatch` under the name recording intent — the seam over the *whole* Skresanov-isolated affine residue (the cyclotomic scheme + the four forms-graph families), each supplied as an already-sealed realized `Y`. | — |
 | `separatesAtBoundedBase_affinePolar` | 87-98 | **The Cameron-free producer.** `IsotropySeparatesAtBase Q T` (+ bounded `T`) gives a bounded base discretising the affine-polar similitude scheme — extracted before the `Or.inl(Or.inr)` padding. | — |
 | `reachesRigidOrCameron_viaSchurianRank3Affine_proved` | 100-118 | **The affine-polar atom-free capstone.** `htransport` DISCHARGED: transports the light `SeparatesAtBoundedBase` (not the 4-way `SealDisj`) and re-derives via `viaSpielman` — no `IsCameronScheme`-invariance premise. | — |
 | `cyclotomic_sealDisj` | 120-138 | **The cyclotomic dispatch input.** The 1-dim cyclotomic scheme satisfies `SealDisj` (via `affineSlice`) — the branch the four-case sketch dropped. | — |
-| `affineG_le_schemeAutGroup` | 147-160 | — | — |
-| `schemeAutGroup_affineScheme_mono` | 162-180 | — | — |
-| `isometrySimilitude_schemeAutGroup_mono` | 182-188 | — | — |
+| `affineG_le_schemeAutGroup` | 147-160 | **The `≥` half of the 2-closure.** `affineG G₀ ≤ SchemeAutGroup(affineScheme G₀)`: the affine group acts as scheme automorphisms of its own orbital scheme — reusable for both the fine (`isometryGroup`) and coarse (`similitudeGroup`) schemes. | — |
+| `schemeAutGroup_affineScheme_mono` | 162-180 | **`hmono`.** A finer affine scheme has a smaller automorphism group (`H ≤ G ⟹ SchemeAutGroup(affineScheme H) ≤ SchemeAutGroup(affineScheme G)`) — the honest sense in which the recovered form only *refines*. | — |
+| `isometrySimilitude_schemeAutGroup_mono` | 182-188 | The concrete `hmono` for Route C's fine⟶coarse: the recovered isometry scheme's Aut group is `≤` the given similitude graph's. | — |
 | `AffineSchemeTwoClosed` | 190-198 | **Skresanov rank-3 2-closure citation** (one named premise, all four families): the affine scheme of `G₀` has no unexpected automorphisms. | Definition |
 | `schemeAutGroup_affineScheme_eq_affineG` | 200-210 | **The finer→coarser group-pinning.** Modulo Skresanov, the coarse forms graph's Aut group is exactly `affineG G₀ = translations ⋊ (known classical group)` — the |Aut|-side content. | — |
-| `schemeAutGroup_coarse_eq_affineG` | 212-219 | — | — |
+| `schemeAutGroup_coarse_eq_affineG` | 212-219 | **Affine-polar instance of the group-pinning.** The given `VO^ε` graph's Aut group is exactly `affineG(similitudeGroup Q) = translations ⋊ AΓO(Q)`, modulo Skresanov — the `G₀ := similitudeGroup Q` case of `schemeAutGroup_affineScheme_eq_affineG`. | — |
 | `routeC_polySupport` | 221-240 | **Route C poly-support certificate.** Bundles (coarse Aut = known group) ∧ (fine harvest, genuine) ∧ (fine ≤ coarse) — the structural support for the meta poly-canonization. | — |
 
 ## ChainDescent/RouteCTransport.lean
@@ -1835,13 +1835,13 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `SchemeRealizes` | 33-34 | A permutation realizes a scheme iso `S ≅ X` (preserves `schemeAdj`) — the combinatorial iso the cited classification supplies. | Definition |
-| `warmRefine_congr_samePartition` | 38-45 | — | — |
-| `mem_image_transport` | 47-53 | — | — |
-| `indiv_samePartition_image` | 55-70 | — | — |
-| `signature_transport_iso` | 77-100 | — | — |
-| `sigKey_transport_iso` | 102-108 | — | — |
-| `refineStep_transport_iso` | 110-117 | — | — |
-| `iterate_refineStep_transport_iso` | 119-131 | — | — |
+| `warmRefine_congr_samePartition` | 38-45 | **Partition-congruence of warm refinement.** Refining two same-partition seed colourings yields same-partition results — the engine that lets the base-transport pass through `warmRefine`. | — |
+| `mem_image_transport` | 47-53 | Membership transport under a permutation: `g i ∈ T.image g ↔ i ∈ T` (injectivity of `g`). | — |
+| `indiv_samePartition_image` | 55-70 | **Seed transport.** The `T`-individualized colouring and the `g`-pullback of the `g(T)`-individualized colouring induce the same partition — index labels differ, the partition does not. | — |
+| `signature_transport_iso` | 77-100 | **The cross-graph transport root.** A graph iso `g` (`adj₂∘g = adj₁`) carries `adj₁`'s 1-WL signature at `v` onto `adj₂`'s at `g v` — the two-adjacency generalization of `signature_transport`. | — |
+| `sigKey_transport_iso` | 102-108 | Cross-graph transport of the refinement key `sigKey` along a graph iso `g`. | — |
+| `refineStep_transport_iso` | 110-117 | Cross-graph transport of one 1-WL round `refineStep` along a graph iso `g`. | — |
+| `iterate_refineStep_transport_iso` | 119-131 | Cross-graph transport of iterated `refineStep` — the `χ`-hypothesis re-establishes itself each round, so the induction carries it. | — |
 | `warmRefine_transport_iso` | 133-142 | **The cross-graph WL-transport deliverable.** The whole `warmRefine` fixpoint transports along a graph iso `g` (`adj₂∘g = adj₁`) — the two-adjacency generalization of `warmRefine_transport`. | — |
 | `separatesAtBoundedBase_transport` | 148-189 | **The L1 payoff.** `SeparatesAtBoundedBase` is invariant along a scheme iso (`SchemeRealizes f`) — transports the single light predicate, no `schemeEquiv`/`StabilizerAt`. | — |
 
@@ -2233,7 +2233,7 @@ See `docs/chain-descent-cellsareorbits-route.md` §6.
 | `singlePathDisposition_of_cellsAreOrbits` | 117-121 | The forms-graph math (full `CellsAreOrbits` at every base) discharges the disposition. | — |
 | `CertifiedSinglePath` | 123-136 | The two poly ingredients bundled: `boundedNodes` (`≤ n`) + `cellsCertified` (every consumed cell one residual orbit). The structural object the **meta** poly-argument reads "poly time" off. | Structure |
 | `certifiedSinglePath_of_disposition` | 138-150 | **★ The bridge capstone (Increment 0).** `SinglePathDisposition ⟹ CertifiedSinglePath` — both poly ingredients discharged from the disposition. | — |
-| `NodeCountBridge.certifiedSinglePath_of_cellsAreOrbits` | 152-162 | — | — |
+| `NodeCountBridge.certifiedSinglePath_of_cellsAreOrbits` | 152-162 | **Recovery route angle (b).** Full `CellsAreOrbits` at every base discharges the single-path disposition, hence the certified single path — the composition taken when routing through the forms-graph `CellsAreOrbits` scaffold rather than proving `SelectedCellIsOrbit` directly. | — |
 | `warmRefine_congr_samePartition` | 183-190 | `warmRefine` is a `samePartition` congruence in its seed (the `D=∅` case of `warmRefine_agree_off'`). The engine that passes representative-transport through warm refinement. | — |
 | `mem_insert_transport` | 192-206 | An `S`-fixing aut `g` with `g v₁=v₂` carries `insert v₁ S` onto `insert v₂ S`: `g i ∈ insert v₂ S ↔ i ∈ insert v₁ S`. | — |
 | `indiv_samePartition_transport` | 208-226 | **Seed transport.** The `v₁`-individualized seed and the `g`-pullback of the `v₂`-individualized seed induce the same partition (both singletons-on-pinned-set; `g` matches the pinned sets). Literal index-labels differ, partition does not. | — |
@@ -2324,29 +2324,29 @@ See `docs/chain-descent-recovery-route.md` §6/§8.
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `WLVis.product_coord_regular` | 32-48 | — | — |
-| `WLVis.product_coord_regular_indep` | 50-55 | — | — |
-| `WLVis.linear_eq_unique` | 75-88 | — | — |
-| `WLVis.product_fix_two_indep` | 90-97 | — | — |
-| `WLVis.commDeg` | 101-105 | — | Definition, `noncomputable` |
-| `WLVis.commDeg_const_of_comm` | 107-111 | — | — |
-| `WLVis.commDeg_nonconst_of_noncomm` | 113-127 | — | — |
-| `WLVis.commDeg_const_iff_comm` | 129-150 | — | — |
+| `WLVis.product_coord_regular` | 32-48 | **Blindness heart.** Fixing the first coordinate of the product relation `a·y·z = 1` to any `a` leaves exactly `|G|` completing pairs, independent of `a` and of whether `G` is abelian — the perfect-quasigroup property that makes the standard CFI/multipede gadget 1-WL-blind to group structure. | — |
+| `WLVis.product_coord_regular_indep` | 50-55 | The fix-one completion count on the product gadget is the same for all fixed values `a, a'` — the interchangeability of segment values that 1-WL blindness literally needs. | — |
+| `WLVis.linear_eq_unique` | 75-88 | **Degree-2 blindness kernel.** The solution set of `u·z·w = 1` is a singleton, so every fix-two completion count on the minimal `d=3` product gadget is `1`, independent of the fixed values and of `G` — the `Γ`-blindness a 2-WL pair-refinement sees. | — |
+| `WLVis.product_fix_two_indep` | 90-97 | Fix-two completion counts on the minimal `d=3` product gadget agree across all coordinate pairs and fixed values (each `= 1`); the degree-2 analogue of `product_coord_regular_indep`. | — |
+| `WLVis.commDeg` | 101-105 | The commuting-degree `|C(g)|` of a group element — the 1-WL degree of `g`'s value-vertex in a commuting-pairs gadget (`noncomputable`). | Definition, `noncomputable` |
+| `WLVis.commDeg_const_of_comm` | 107-111 | **Visibility heart (abelian side).** On an abelian group the commuting-degree is constant `= |G|`, so the commuting-pairs gadget is also 1-WL-blind there. | — |
+| `WLVis.commDeg_nonconst_of_noncomm` | 113-127 | **Visibility heart (non-abelian side).** On a non-abelian group some element commutes with strictly fewer elements than `1` does, so colour refinement splits the segment by centralizer size — non-abelian structure is 1-WL-visible through a commuting-pairs gadget. | — |
+| `WLVis.commDeg_const_iff_comm` | 129-150 | The dichotomy in one statement: the commuting-degree is constant iff the group is abelian — the commuting-pairs gadget is 1-WL-blind exactly on abelian groups and visible exactly on non-abelian ones. | — |
 
 ## ChainDescent/WLGeneric.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `WLGeneric.Colouring` | 35-36 | — | Definition |
-| `WLGeneric.GAdj` | 38-40 | — | `abbrev` |
-| `WLGeneric.GPOE` | 42-44 | — | `abbrev` |
-| `WLGeneric.signature` | 48-53 | — | Definition |
-| `WLGeneric.sigKey` | 68-71 | — | Definition |
-| `WLGeneric.sigKey_eq_iff` | 73-86 | — | — |
-| `WLGeneric.refineStep` | 90-93 | — | Definition |
-| `WLGeneric.refineStep_iff` | 95-104 | — | — |
-| `WLGeneric.warmRefine` | 106-110 | — | Definition |
-| `WLGeneric.samePartition` | 114-116 | — | Definition |
-| `WLGeneric.samePartition.refl` | 122 | — | — |
-| `WLGeneric.samePartition.symm` | 124-125 | — | — |
-| `WLGeneric.samePartition.trans` | 127-129 | — | — |
+| `WLGeneric.Colouring` | 35-36 | A colouring assigns each vertex a natural-number colour (`V → Nat`). | Definition |
+| `WLGeneric.GAdj` | 38-40 | Labelled graph on an arbitrary finite vertex type `V` — the `V`-generic analogue of `AdjMatrix n`'s `adj` field. | `abbrev` |
+| `WLGeneric.GPOE` | 42-44 | Partial-order matrix on `V` (`V → V → POE`), the generic analogue of `PMatrix n`; pass the constant `POE.unknown` for a plain graph. | `abbrev` |
+| `WLGeneric.signature` | 48-53 | The 1-WL signature of a vertex `v`: the multiset of `(neighbour-colour, adjacency-value, P-relation)` tuples over all `u ≠ v`. This is the object whose `Γ`-(in)dependence drives the rigid-Cameron rungs. | Definition |
+| `WLGeneric.sigKey` | 68-71 | The canonical refinement key of `v` — old colour prepended to its sorted encoded signature multiset — so that two vertices share a key iff same old colour and same signature. | Definition |
+| `WLGeneric.sigKey_eq_iff` | 73-86 | Equal `sigKey`s ⟺ same old colour and same `signature`; the injectivity backing the refinement key. | — |
+| `WLGeneric.refineStep` | 90-93 | One round of 1-WL refinement over `V`: recolour each vertex by the encoded canonical `sigKey`. | Definition |
+| `WLGeneric.refineStep_iff` | 95-104 | **The splitting lever.** Two vertices get the same refined colour iff they had the same old colour AND the same `signature` — equal signatures ⟹ no split (hideability), unequal ⟹ split (visibility). | — |
+| `WLGeneric.warmRefine` | 106-110 | Warm refinement: iterate `refineStep` `Fintype.card V` times (enough rounds since each non-fixpoint round strictly refines). | Definition |
+| `WLGeneric.samePartition` | 114-116 | Two colourings induce the same partition iff their equivalence classes coincide. | Definition |
+| `WLGeneric.samePartition.refl` | 122 | `samePartition` is reflexive. | — |
+| `WLGeneric.samePartition.symm` | 124-125 | `samePartition` is symmetric. | — |
+| `WLGeneric.samePartition.trans` | 127-129 | `samePartition` is transitive. | — |
