@@ -29,11 +29,14 @@ on the strictly-stronger `|Aut|`-naming statements (scalar-`μ` / injective-`Φ`
 residues are named honestly (the FTPG for the `q=pᵉ` field twist; the quadric Nullstellensatz *only* for exact
 `Aut`-naming; the seal's `Theorem41`/Spielman).
 
-**★ LIVE FRONTIER (2026-07-05): the full `NondegQuadricDeterminesForm` discharge is underway — see §3.5.** Heart +
-assembly + isotropic-existence bedrock + `isotropic_span` are landed axiom-clean (11 lemmas, `ScratchNullstellensatz{,Structural}.lean`,
-WIP not in build); the citation is reduced to EXACTLY two finite-geometry facts (`hspan`, `hlink`) at the Witt-index-1/`q=3`
-boundary. **§3.5 is the pick-up point** (has the lemma map, the two remaining facts with routes, VERIFY notes, and the
-NEXT ACTIONABLE STEP).
+**★ LIVE FRONTIER (2026-07-05, REROUTED): the full `NondegQuadricDeterminesForm` discharge is underway — see §3.5.**
+Heart + BOTH assemblies landed axiom-clean (13 lemmas, `ScratchNullstellensatz{,Structural}.lean`, WIP not in build).
+**★ `hspan` ELIMINATED by a better cut:** the new `nullstellensatz_of_connectivity` assembly derives the μ-scalar from
+ratio-CONSTANCY on anisotropic vectors alone (`ratio_step`, from `nullstellensatz_pointwise`), so the citation is now
+reduced to **ONE** finite-geometry fact — `hconn` (the isotropic-edge graph on anisotropic vectors is connected;
+probe-confirmed, diameter 3–4 incl. the `d=4` elliptic `q=3` boundary) — which dodges the Witt-index-1/`q=3`
+obstruction that stalled `hspan` and is provable by an explicit walk or the `GaussCount` point-count. The old
+`hspan`+`isotropic_span` route is kept as a proven spare but is OFF the critical path. **§3.5 is the pick-up point.**
 
 **★ Load-bearing reframe (verified 2026-07-04).** The four Route-C **seals** (`reachesRigidOrCameron_{affinePolar via
 affinePolarAdapter, alternating, halfSpin, suzuki}`) carry **no citation** — they rest on the *proved* `separates`
@@ -83,7 +86,7 @@ truth for what is still carried (a discharged citation is *removed*, not merely 
 | Citation (Prop) | Where carried | What it is / faithful source | Load-bearing? | Discharge status |
 |---|---|---|---|---|
 | **`Suzuki.SuzukiFormsDetermine`** | *(removed)* `RouteCFormAdapters` §Suzuki | σ-twisted ovoid determiner; was Suzuki 1962 / `Sz(q)` 2-trans | was Route-C Suzuki `separates` | **✅ DISCHARGED 2026-07-04** — proved outright (§3.1). Deleted. |
-| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2)** + **heart + ASSEMBLY + isotropic-existence bedrock landed axiom-clean (§3.5, 2026-07-05)** (`ScratchNullstellensatz{,Structural}.lean`, 11 lemmas). Citation reduced to EXACTLY two structural finite-field facts (`hspan` punctured-cone-span + `hlink` aniso-diameter-2); bedrock `exists_isotropic_of_nondegenerate` + `isotropic_span` DONE (via diagonalize + `binary_represents`, NOT Chevalley–Warning). REMAINING = `hspan`/`hlink` (Witt-index-1/`q=3` boundary; `hlink` via point-count). Not yet in `build.sh`. |
+| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2)** + **heart + BOTH assemblies landed axiom-clean (§3.5, 2026-07-05, REROUTED)** (`ScratchNullstellensatz{,Structural}.lean`, 13 lemmas). **`hspan` ELIMINATED:** the new `nullstellensatz_of_connectivity` derives the μ-scalar from ratio-constancy alone (`ratio_step`, from `nullstellensatz_pointwise`), reducing the citation to ONE fact `hconn` (isotropic-edge graph on aniso vectors is connected; probe-confirmed diameter 3–4 incl. `d=4` elliptic `q=3` boundary — diameter-2 is FALSE), provable by an explicit walk or the `GaussCount` point-count. Old `hspan`+`isotropic_span` route kept as a proven spare, off critical path. REMAINING = `hconn` (graph connectivity). Not yet in `build.sh`. |
 | **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredFamily_colouring_equivariant` (injective-`Φ`); **no longer** the F4-multi partition object | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) | **`|Aut|`-naming only** (F4-multi iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — same vanishing-space route (`recoveredFamily_partition_isoInvariant_vanishing`, generic core `recoveredForm_partition_isoInvariant_gen`). Injective-`Φ` still carried only for `Aut`-naming. |
 | **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | fundamental theorem of projective geometry (collineations are semilinear) + quadric uniqueness; Artin, *Geometric Algebra* | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3)** — FTPG genuinely deep; not elementarily dischargeable. Vacuous at `q=p` (`σ=id`). Keep cited for now. |
 | **`AffineSchemeTwoClosed`** | `RouteCSeam.lean` (`schemeAutGroup_affineScheme_eq_affineG` / `routeC_polySupport`) | rank-3 affine 2-closure: `SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (no unexpected automorphisms); Skresanov arXiv:2007.14696 / 2202.03746. Converse `≥` is **proved** (`affineG_le_schemeAutGroup`). | Route-C coarse-Aut pinning (the `\|Aut\|` side / meta poly) — **one named premise, all four families** via `G₀ := similitudeGroup Q` / `jointConeStab Qs` / Suzuki cone-stab | **○ CITED** — Skresanov rank-3 2-closure; formalizable, off the near-term path. Same instance as the Skresanov row below, now a concrete named Lean `Prop`. |
@@ -228,15 +231,28 @@ R = μ·Q` (char `≠ 2`), with `μ ≠ 0` from the *reverse* inclusion `Q y ≠
   (cone) `= μ·0`, else constancy — so no `polarBilin`-extension or anisotropic-span is needed. `μ ≠ 0` (⟹ `Kˣ`) from the
   reverse cone inclusion. Existence of an anisotropic vector comes from `not_nondegenerate_zero`.
 
-**◻ REMAINING — the citation is now EXACTLY these two structural finite-geometry facts (the hypotheses `hspan`, `hlink`
-of `nullstellensatz_of_structural`); both probe-validated, both a genuine finite-field build:**
-1. **`hspan` / `IsotropicConeSpans`** — for a nondegenerate `Q` on `𝔽_q^d` (`q` odd, `d ≥ 4`) and each anisotropic `y`,
-   the **punctured** isotropic cone `{x | Q x = 0 ∧ polar Q x y ≠ 0}` spans `V`. Probe: worst-case rank `= d` over all
-   anisotropic `y`, `VO^±_{4,6}(3,5,7)` (`nullstellensatz_hspan_hlink_probe.py`, 2026-07-05).
-2. **`hlink` / `AnisotropicConnected`** — the anisotropic vectors have `polar`-**diameter ≤ 2**: any `y, y'` are linked
-   through one anisotropic `z` with `polar Q y z ≠ 0 ∧ polar Q z y' ≠ 0`. Probe: diameter `= 2`, same families
-   (`nullstellensatz_hspan_hlink_probe.py`). (Diameter-2 replaces a general connectivity induction — chosen for a clean
-   `const` proof.)
+**★ REROUTE (2026-07-05) — `hspan` ELIMINATED; the citation is now ONE fact (`hconn`).** The observation: the assembly's
+per-`y` identity `key` (which needed `hspan`) is only ever evaluated at ANISOTROPIC vectors, and the finish needs only
+that the ratio `μ_w := R w / Q w` is **constant on anisotropic `w`** — no polar-form extension, no spanning. The new
+`nullstellensatz_of_connectivity` (axiom-clean) captures exactly this:
+- **`ratio_step`** (axiom-clean, from `nullstellensatz_pointwise` — NO structural input): for isotropic `a` with
+  `polar Q a y ≠ 0`, `μ_{y+a} = μ_y` (i.e. `R y·Q(y+a) = R(y+a)·Q y`). The engine that spreads `μ`.
+- **`ratioEdge` / `ratio_step_edge` / `ratio_const_of_reflTransGen`** (axiom-clean) — package the step as a graph edge
+  `a — b` (`b` anisotropic, `b−a` isotropic, non-tangent) and propagate constancy along any PATH via
+  `Relation.ReflTransGen`.
+- **`hconn` (THE ONE REMAINING FACT)** — the isotropic-edge graph on anisotropic vectors is **CONNECTED**:
+  `Relation.ReflTransGen (ratioEdge Q)` joins any two anisotropic vectors. **Probe result** (`nullstellensatz_hconn_probe.py`,
+  2026-07-05): 1 component, **diameter 3–4 for `VO^±_{4,6}(3,5,7)` INCLUDING the `d=4` elliptic `q=3` boundary** — the
+  exact regime where `hspan` was hard, so the obstruction is genuinely gone (connectivity is TRUE there). **Correction to
+  the first cut:** diameter-2 (a single common `m`) is FALSE (probe: ~50% of pairs have no 2-step join even at `d=6`); the
+  fact is genuine connectivity, not a fixed diameter. Discharge routes: an explicit bounded walk (hyperbolic-plane hub —
+  connect any anisotropic `y` to a fixed reference through the plane `⟨e,f⟩`), or the `GaussCount` `count2_eq_charsum` /
+  `card_quadForm_eq` point-count for edge/step existence (after diagonalizing to the anisotropic basis it needs).
+
+**Superseded (kept as proven spares, OFF the critical path):** the old two-fact reduction `nullstellensatz_of_structural`
+(needs `hspan` + the old `hlink`) and its bedrock `isotropic_span` / `exists_isotropic_of_nondegenerate` /
+`exists_hyperbolic_partner` remain axiom-clean in `ScratchNullstellensatzStructural.lean` — a valid alternative
+reduction, but no longer the live route (`hspan` was the hard `d=4`-elliptic fact).
 
 **Structural-facts build (in `ScratchNullstellensatzStructural.lean`). The citation quantifies over ARBITRARY nondeg
 `Q`, so this is the general finite-field statement.**
@@ -272,14 +288,21 @@ of `nullstellensatz_of_structural`); both probe-validated, both a genuine finite
   `lake env lean /path/to/check.lean` — expect `[propext, Classical.choice, Quot.sound]` for each.
 - Probes: `python3 nullstellensatz_structural_probe.py` and `python3 nullstellensatz_hspan_hlink_probe.py`.
 
-**▶ NEXT ACTIONABLE STEP.** Prove `hlink` first (it reuses existing infrastructure): the point-count needs a **cone-size
-bound** for a general nondeg `Q` — check whether `ChainDescent/GaussCount.lean`'s `card_quadForm_eq` (or the affine-polar
-count) generalizes to arbitrary nondeg `Q` over `𝔽_q`, then `z ∉ y^⊥ ∪ y'^⊥ ∪ cone` by cardinality. Then `hspan` (harder,
-route TBD). When BOTH land: (i) they are the last two hypotheses of `nullstellensatz_of_structural`, so instantiating it
-proves `NondegQuadricDeterminesForm` outright over `𝔽_q^d` (`d ≥ 4`, `q` odd); (ii) then **delete the carried
-`NondegQuadricDeterminesForm` premise** from `recoveredForm_colouring_equivariant` in `RouteCFormAdapters.lean` and confirm
-`#print axioms` unchanged; (iii) port both scratch files into `build.sh` (after `RouteCFormAdapters` / before its consumers)
-and add their decls to `PublicTheoremIndex.md`. Only then is this citation fully discharged.
+**▶ NEXT ACTIONABLE STEP (rerouted).** Prove **`hconn`** — the single remaining fact = *graph connectivity*. Two viable
+routes (probe-confirmed the graph is connected, diameter 3–4):
+- **(A) Explicit bounded walk via a hyperbolic-plane hub (recommended — likely avoids heavy counting).** Take a
+  hyperbolic pair `{e,f}` (isotropic, `polar Q e f = 1`, from `exists_hyperbolic_partner`, already proven). Connect any
+  anisotropic `y` to a fixed reference (e.g. `e+f`, `Q=1`) in a bounded number of `ratioEdge` steps using
+  `ReflTransGen`. Each single step `y → y+a` needs one isotropic `a` with `polar Q a y ≠ 0` and `Q(y+a) ≠ 0` — cheap to
+  exhibit constructively (scale within the plane / use `e`, `f`). Symmetry then gives any-to-any.
+- **(B) `GaussCount` point-count for step existence.** Diagonalize `Q` (`equivalent_weightedSumSquares_units_of_nondegenerate'`,
+  already used in the structural file), then `card_quadForm_eq` / `count2_eq_charsum` show enough isotropic non-tangent
+  directions exist to take each needed step; assemble into a `ReflTransGen` path.
+
+When `hconn` lands: (a) instantiate `nullstellensatz_of_connectivity` to prove `NondegQuadricDeterminesForm` outright
+over `𝔽_q^d` (`d ≥ 4`, `q` odd); (b) **delete the carried premise** from `recoveredForm_colouring_equivariant` in
+`RouteCFormAdapters.lean`, confirm `#print axioms` unchanged; (c) port the scratch files into `build.sh` (after
+`RouteCFormAdapters`) and add decls to `PublicTheoremIndex.md`. Only then is this citation fully discharged.
 
 ### 3.4 Seal-track citations (pointers, not re-derived here)
 

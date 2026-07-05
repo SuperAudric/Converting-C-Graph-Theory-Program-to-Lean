@@ -18,20 +18,26 @@ isotropic cone **spans** `V` (structural fact 1) the identity extends to all `x`
 via **anisotropic B-connectivity** (structural fact 2) makes the ratio `R y / Q y` a global constant `μ`. Then
 `polar R = μ · polar Q` ⟹ `R = μ · Q` (char `≠ 2`), with `μ ≠ 0` from the *reverse* cone inclusion (`Q y ≠ 0 ⟹ R y ≠ 0`).
 
-**STATUS (2026-07-05 — BEGUN).**
+**STATUS (2026-07-05 — REROUTED: `hspan` ELIMINATED).**
 - ✅ **The mathematical heart is LANDED, axiom-clean, ring-general:** `quad_lin_combo` (the `Q(c•x+d•y)` expansion) and
   **`nullstellensatz_core`** (the `w`-construction: `polar Q x y · (polar Q x y · R y − Q y · polar R x y) = 0` for
   isotropic `x`, any `y`, over ANY `CommRing`), plus the field-level cancellation `nullstellensatz_pointwise`
   (`polar Q x y ≠ 0 ⟹ polar Q x y · R y = Q y · polar R x y`). This is the genuinely non-obvious, reusable content.
-- ◻ **REMAINING = two purely-structural finite-geometry facts** (Mathlib has neither; they are the honest hard core the
-  opaque "Nullstellensatz" citation is now reduced to — each is elementary to STATE and standard, no longer a black box):
-  1. **`IsotropicConeSpans`** — the isotropic vectors of a nondegenerate `Q` on `𝔽_q^d` (`q` odd, `d ≥ 4`, all four
-     `VO^ε` types incl. the elliptic `d = 4` boundary) span `V`. Probe-confirmed rank `= d` for `VO^±_{4,6}(3,5,7)`.
-  2. **`AnisotropicConnected`** — the anisotropic vectors are connected under the relation `polar Q z z' ≠ 0`
-     (so the ratio `R z / Q z` is forced constant). Probe-confirmed connected for the same families.
-  The assembly `IsotropicConeSpans → AnisotropicConnected → (the μ-scalar conclusion)` is elementary linear algebra
-  (linear functional vanishing on a spanning set + a connectivity induction + `polar_self` to pass `polar R = μ polar Q`
-  back to `R = μ Q`); it is the next build step. Until both structural facts are discharged, the citation stays carried.
+- ✅ **THE HSPAN-FREE ASSEMBLY IS LANDED, axiom-clean (`nullstellensatz_of_connectivity` + supporting lemmas).** A
+  better cut: the μ-scalar conclusion follows from ratio-CONSTANCY on anisotropic vectors alone (the finish is a case
+  split, no polar-form extension, no spanning). `ratio_step` proves the ratio is preserved along an isotropic edge
+  `y → y+a` (`Q a = 0`, `polar Q a y ≠ 0`) using only `nullstellensatz_pointwise`; `ratioEdge`/`ratio_step_edge`
+  package this as a graph edge, and `ratio_const_of_reflTransGen` propagates constancy along any PATH
+  (`Relation.ReflTransGen`). So constancy reduces to a single CONNECTIVITY fact.
+- ◻ **REMAINING = ONE structural finite-geometry fact** (`hconn`, the hypothesis of `nullstellensatz_of_connectivity`):
+  **the isotropic-edge graph on anisotropic vectors is connected** — `Relation.ReflTransGen (ratioEdge Q)` joins any
+  two anisotropic vectors. Probe-CONFIRMED connected (`nullstellensatz_hconn_probe.py`, 2026-07-05): 1 component,
+  **diameter 3–4 for `VO^±_{4,6}(3,5,7)` INCLUDING the `d=4` elliptic `q=3` boundary** — the exact regime where the
+  old `hspan` was hard. (NB: diameter-2 is FALSE — a common `m` need not exist — so the fact is genuine connectivity,
+  not a fixed bound.) Discharge routes: an explicit bounded walk (hyperbolic-plane hub) or the `GaussCount` point-count
+  for edge existence. The old `hspan` (punctured cone spans — hard at `d=4` elliptic) and its `isotropic_span` bedrock
+  are now OFF the critical path (kept in `ScratchNullstellensatzStructural.lean` as spares; `nullstellensatz_of_structural`
+  retained as a proven alternative reduction). Until `hconn` is discharged, the citation stays carried.
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`, `native_decide` banned.
 NOT in `build.sh` yet (WIP scratch).
@@ -100,6 +106,81 @@ theorem form_eq_of_polar_eq_smul (Q R : QuadraticForm K V) (μ : K) (h2 : (2 : K
   rw [QuadraticMap.polar_self, QuadraticMap.polar_self] at hxx
   simp only [nsmul_eq_mul, Nat.cast_ofNat] at hxx
   exact mul_left_cancel₀ h2 (by linear_combination hxx)
+
+/-- **Ratio-preservation step (from the line-restriction core — NO structural input).** If `a` is isotropic
+(`Q a = 0`) and `polar Q a y ≠ 0`, then the anisotropic ratio `R/Q` is *unchanged* along the isotropic edge
+`y → y + a`: `R y · Q (y + a) = R (y + a) · Q y`. Proof: `Q(y+a) = Q y + polar Q y a`, `R(y+a) = R y + polar R y a`
+(with `R a = 0` from the cone), and `nullstellensatz_pointwise` supplies `polar R a y = (R y / Q y)·polar Q a y`
+— the two lines then match by `ring`. This is the engine that spreads the constant `μ` across anisotropic vectors
+along isotropic steps; it uses only `nullstellensatz_core` (hence no spanning, no dimension, no finiteness, no
+char hypothesis). It REPLACES the `hspan`-dependent per-`y` identity of the older assembly. -/
+theorem ratio_step (Q R : QuadraticForm K V) (hcone : ∀ v, Q v = 0 → R v = 0)
+    {a y : V} (ha : Q a = 0) (hay : QuadraticMap.polar Q a y ≠ 0) :
+    R y * Q (y + a) = R (y + a) * Q y := by
+  have hQya : Q (y + a) = Q y + QuadraticMap.polar Q y a := by
+    rw [QuadraticMap.map_add (⇑Q) y a, ha]; ring
+  have hRya : R (y + a) = R y + QuadraticMap.polar R y a := by
+    rw [QuadraticMap.map_add (⇑R) y a, hcone a ha]; ring
+  have hp := nullstellensatz_pointwise Q R hcone ha hay
+  rw [hQya, hRya, QuadraticMap.polar_comm Q y a, QuadraticMap.polar_comm R y a]
+  linear_combination hp
+
+/-- **The isotropic-edge relation on anisotropic vectors.** `b` is one non-tangent isotropic step from `a`:
+`b` is anisotropic, `b − a` is isotropic, and `a` is not `Q`-orthogonal to `b − a`. `ratio_step_edge` shows the
+ratio `R/Q` is preserved along such an edge; connectivity of this graph (probe-confirmed, diameter 3–4 for all
+`VO^ε` incl. the `d=4` elliptic boundary) makes the ratio globally constant. -/
+def ratioEdge (Q : QuadraticForm K V) (a b : V) : Prop :=
+  Q b ≠ 0 ∧ Q (b - a) = 0 ∧ QuadraticMap.polar Q a (b - a) ≠ 0
+
+/-- **One isotropic edge preserves the ratio** (repackaging `ratio_step`): `ratioEdge Q a b ⟹ R a·Q b = R b·Q a`. -/
+theorem ratio_step_edge (Q R : QuadraticForm K V) (hcone : ∀ v, Q v = 0 → R v = 0)
+    {a b : V} (h : ratioEdge Q a b) : R a * Q b = R b * Q a := by
+  obtain ⟨_, hiso, hpol⟩ := h
+  have hrs := ratio_step Q R hcone (a := b - a) hiso
+    (by rw [QuadraticMap.polar_comm]; exact hpol)
+  rwa [show a + (b - a) = b by abel] at hrs
+
+/-- **Ratio constancy along a path** — the reflexive-transitive closure of `ratioEdge` preserves `R/Q`. By
+induction on the path: each edge preserves the ratio (`ratio_step_edge`) and the relation `R a·Q b = R b·Q a`
+is transitive on anisotropic vectors. Carries anisotropy of the endpoint so intermediate cancellations are valid. -/
+theorem ratio_const_of_reflTransGen (Q R : QuadraticForm K V) (hcone : ∀ v, Q v = 0 → R v = 0)
+    {y : V} (hy : Q y ≠ 0) {y' : V} (h : Relation.ReflTransGen (ratioEdge Q) y y') :
+    Q y' ≠ 0 ∧ R y * Q y' = R y' * Q y := by
+  induction h with
+  | refl => exact ⟨hy, by ring⟩
+  | @tail m b _ hedge ih =>
+      obtain ⟨hm, ihe⟩ := ih
+      have he := ratio_step_edge Q R hcone hedge
+      exact ⟨hedge.1, mul_right_cancel₀ hm (by linear_combination Q b * ihe + Q y * he)⟩
+
+/-- **The connectivity assembly — the hspan-free route to the μ-scalar conclusion.** Reduces the full quadric
+Nullstellensatz to a SINGLE structural fact: the isotropic-edge graph on anisotropic vectors is **connected**
+(`hconn`, the reflexive-transitive closure of `ratioEdge` joins any two anisotropic vectors). The ratio `R/Q` is
+preserved along each edge (`ratio_step`), so connectivity makes it globally constant, and `R v = μ Q v` follows
+by a case split on `Q v = 0` (cone) vs `≠ 0` (constancy). No `hspan`, no polar-form finish, no char hypothesis.
+Connectivity HOLDS at the `d = 4` elliptic boundary (probe: diameter 3–4 for all `VO^ε_{4,6}(3,5,7)`) — the exact
+regime where the old `hspan` was hard — so the delicate obstruction is genuinely gone; only its discharge (graph
+connectivity via the `GaussCount` point-count / an explicit walk) remains. -/
+theorem nullstellensatz_of_connectivity (Q R : QuadraticForm K V)
+    (hcone : ∀ v, Q v = 0 ↔ R v = 0)
+    (hEx : ∃ y, Q y ≠ 0)
+    (hconn : ∀ y y', Q y ≠ 0 → Q y' ≠ 0 → Relation.ReflTransGen (ratioEdge Q) y y') :
+    ∃ μ : Kˣ, ∀ v, R v = (μ : K) * Q v := by
+  classical
+  have hcone' : ∀ v, Q v = 0 → R v = 0 := fun v h => (hcone v).mp h
+  -- the ratio is constant across all anisotropic vectors, by connectivity.
+  have const : ∀ y y', Q y ≠ 0 → Q y' ≠ 0 → R y * Q y' = R y' * Q y := fun y y' hy hy' =>
+    (ratio_const_of_reflTransGen Q R hcone' hy (hconn y y' hy hy')).2
+  -- `μ := R y₀ / Q y₀`; `R v = μ Q v` by cases on `Q v = 0` (cone) vs `≠ 0` (constancy).
+  obtain ⟨y0, hy0⟩ := hEx
+  have hRy0 : R y0 ≠ 0 := fun h => hy0 ((hcone y0).mpr h)
+  refine ⟨Units.mk0 (R y0 * (Q y0)⁻¹) (mul_ne_zero hRy0 (inv_ne_zero hy0)), fun v => ?_⟩
+  simp only [Units.val_mk0]
+  by_cases hv : Q v = 0
+  · rw [(hcone v).mp hv, hv, mul_zero]
+  · have hc := const v y0 hv hy0
+    rw [show R y0 * (Q y0)⁻¹ * Q v = R y0 * Q v * (Q y0)⁻¹ by ring, ← hc,
+      mul_assoc, mul_inv_cancel₀ hy0, mul_one]
 
 /-! ### The assembly — the two structural facts imply the μ-scalar conclusion
 
