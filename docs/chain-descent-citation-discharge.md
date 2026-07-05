@@ -233,12 +233,21 @@ of `nullstellensatz_of_structural`); both probe-validated, both a genuine finite
   squares (`weightedSumSquares_isotropic`, the `(α,β,1,0,…)` vector with `α,β` from **`binary_represents`** =
   `A x²+B y²=c` solvable via `FiniteField.exists_root_sum_quadratic`) → transport back along the isometry. Plus the
   bridge `separatingLeft_associated_of_polarBilin_nondeg` (`polarBilin.Nondegenerate ⟹ (associated Q).SeparatingLeft`).
-- ◻ **REMAINING — `hspan` and `hlink` from the bedrock.** Build isotropic vectors *into* structure:
-  - `hspan` (punctured isotropic cone spans) — from an isotropic vector, extract a hyperbolic plane (nondeg ⟹ ∃ `w`,
-    `polar Q v w ≠ 0`); the cone is rich enough to span, then the `polar Q x y ≠ 0` puncture.
-  - `hlink` (anisotropic `polar`-diameter ≤ 2) — a point-count (hyperplane + cone sizes) or a hyperbolic-structure
-    argument (delicate at `q = 3`).
-  These are the remaining finite-geometry work; the assembly guarantees they are all that is missing.
+- ✅ **`exists_hyperbolic_partner`** (2026-07-05, axiom-clean) — an isotropic `v ≠ 0` has an isotropic `f` with
+  `polar Q v f = 1` (nondeg ⟹ ∃ `u`, `polar Q v u ≠ 0`; rescale + correct by `Q u' • v`).
+- ✅ **`isotropic_span`** (2026-07-05, axiom-clean) — the isotropic vectors span `V` (dim ≥ 3). Clean proof from ONE
+  hyperbolic pair: for any `u`, `w := t·v + s·f + u` is isotropic for `s := 1 − polar Q v u`, `t := −(Q u + s·polar Q u f)`,
+  so `u = w − t·v − s·f ∈ span{isotropic}`. Holds even at the `d = 4` elliptic boundary (uses one pair, not a Witt
+  decomposition).
+- ◻ **REMAINING — `hspan` and `hlink`.** Both hinge on the **Witt-index-1 / `q = 3` boundary**: at `d = 4` elliptic there
+  are no two orthogonal independent isotropic vectors, so the "add an orthogonal punctured isotropic" trick (`hspan`) and
+  the small-`q` in-plane constructions (`hlink`) both fail — they need the ambient `d ≥ 4`.
+  - `hlink` (anisotropic `polar`-diameter ≤ 2) — a **point-count** works: `z ∉ y^⊥ ∪ y'^⊥ ∪ cone` exists when
+    `q^d > 2q^{d-1} + |cone|` (exact for VO⁻₄(3): `81 > 27+27+21`). Needs a quadric cone-size bound — the project's
+    `GaussCount` machinery (`card_quadForm_eq`) is the likely source, generalized to arbitrary nondeg `Q`.
+  - `hspan` (punctured isotropic cone spans) — a structural argument (the punctured cone still spans despite the removed
+    tangent section); the cleanest route is TBD (⊥-argument stalls at Witt-index 1; a counting/dimension argument may work).
+  The assembly guarantees these two facts are all that is missing.
 `vanishDim = 1` (`deg2_vanishDim` in the probe) is the sanity target the finished theorem reproduces.
 
 ### 3.4 Seal-track citations (pointers, not re-derived here)

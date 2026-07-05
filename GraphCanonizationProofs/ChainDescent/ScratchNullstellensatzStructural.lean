@@ -15,20 +15,26 @@ solvability** (`FiniteField.exists_root_sum_quadratic`), NOT Chevalley–Warning
 - ✅ `separatingLeft_associated_of_polarBilin_nondeg` — the `polarBilin.Nondegenerate ⟹ (associated Q).SeparatingLeft`
   bridge (char `≠ 2`).
 - ✅ **`exists_isotropic_of_nondegenerate`** — the BEDROCK: a nondegenerate `Q` in `dim ≥ 3` over a finite field of odd
-  order has a nonzero isotropic vector (diagonalize + `weightedSumSquares_isotropic` + isometry transport). All axiom-clean.
-- ◻ next: from the bedrock, `hspan` (punctured isotropic cone spans) and `hlink` (anisotropic `polar`-diameter ≤ 2),
-  then plug into `nullstellensatz_of_structural` to discharge the citation. These need building isotropic vectors *into*
-  a hyperbolic/spanning structure (the remaining finite-geometry work).
+  order has a nonzero isotropic vector (diagonalize + `weightedSumSquares_isotropic` + isometry transport).
+- ✅ `exists_hyperbolic_partner` — an isotropic `v ≠ 0` has an isotropic `f` with `polar Q v f = 1` (hyperbolic pair).
+- ✅ **`isotropic_span`** — the isotropic vectors span `V` (dim ≥ 3). Clean proof from ONE hyperbolic pair
+  (`u = w − t·v − s·f`, `w := t·v + s·f + u` made isotropic); holds even at the `d = 4` elliptic boundary. All axiom-clean.
+- ◻ next: `hspan` (punctured isotropic cone spans) and `hlink` (anisotropic `polar`-diameter ≤ 2), then plug into
+  `nullstellensatz_of_structural`. **Both hinge on the Witt-index-1 / `q = 3` boundary** (at `d = 4` elliptic there are
+  no two orthogonal independent isotropic vectors, so the "add an orthogonal punctured isotropic" trick and the small-`q`
+  in-plane constructions both fail) — they need genuine case-analysis finite geometry using the ambient `d ≥ 4`. This is
+  the remaining delicate frontier.
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`/`axiom`, `native_decide` banned. WIP scratch.
 -/
 import Mathlib.FieldTheory.Finite.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.IsometryEquiv
+import ChainDescent.ScratchNullstellensatz
 
 namespace ChainDescent.Nullstellensatz
 
-open Polynomial
+open Polynomial QuadraticMap
 
 /-- **Binary solvability over a finite field of odd order.** For units `A, B` and any target `c`, the nondegenerate
 binary form `A x² + B y²` represents `c`. Pigeonhole on the square-value sets, packaged by
@@ -127,5 +133,65 @@ theorem exists_isotropic_of_nondegenerate {K V : Type*} [Field K] [Fintype K] [A
   · have hmap := φ.map_app (φ.symm u)
     rw [φ.apply_symm_apply] at hmap
     rw [← hmap]; exact huiso
+
+/-- **A hyperbolic partner for an isotropic vector.** For nondegenerate `Q` and a nonzero isotropic `v`, there is an
+isotropic `f` with `polar Q v f = 1` (so `{v, f}` is a hyperbolic pair). Nondegeneracy gives some `u` with
+`polar Q v u ≠ 0`; rescale and correct by `Q u' • v` to make it isotropic. Char-free, dimension-free. -/
+theorem exists_hyperbolic_partner {K V : Type*} [Field K] [AddCommGroup V] [Module K V]
+    (Q : QuadraticForm K V) (hQ : (QuadraticMap.polarBilin Q).Nondegenerate) {v : V}
+    (hv : Q v = 0) (hv0 : v ≠ 0) :
+    ∃ f : V, Q f = 0 ∧ QuadraticMap.polar Q v f = 1 := by
+  obtain ⟨u, hu⟩ : ∃ u, QuadraticMap.polar Q v u ≠ 0 := by
+    by_contra h
+    simp only [not_exists, not_not] at h
+    exact hv0 (hQ.1 v (fun y => by rw [QuadraticMap.polarBilin_apply_apply]; exact h y))
+  have hc0 : QuadraticMap.polar Q v u ≠ 0 := hu
+  set u' := (QuadraticMap.polar Q v u)⁻¹ • u with hu'
+  have hvu' : QuadraticMap.polar Q v u' = 1 := by
+    rw [hu', QuadraticMap.polar_smul_right, smul_eq_mul, inv_mul_cancel₀ hc0]
+  refine ⟨u' - Q u' • v, ?_, ?_⟩
+  · rw [show u' - Q u' • v = (1 : K) • u' + (-(Q u')) • v by rw [one_smul, neg_smul, sub_eq_add_neg],
+      quad_lin_combo, hv]
+    have : QuadraticMap.polar Q u' v = 1 := by rw [QuadraticMap.polar_comm]; exact hvu'
+    rw [this]; ring
+  · rw [QuadraticMap.polar_sub_right, hvu', QuadraticMap.polar_smul_right,
+      show QuadraticMap.polar Q v v = 2 • Q v from Q.polar_self v, hv]
+    simp
+
+/-- **Isotropic vectors span (dim ≥ 3, nondegenerate, finite field of odd order).** With a hyperbolic pair `{v, f}`
+(from isotropic existence), every `u` is a difference of isotropic vectors: choose `s := 1 − polar Q v u` and
+`t := −(Q u + s · polar Q u f)`, so `w := t·v + s·f + u` is isotropic and `u = w − t·v − s·f`. Uses only ONE hyperbolic
+pair, so it holds even at the `d = 4` elliptic boundary. The bridge from `exists_isotropic_of_nondegenerate` to the
+structural facts. -/
+theorem isotropic_span {K V : Type*} [Field K] [Fintype K] [AddCommGroup V] [Module K V]
+    [FiniteDimensional K V] [Invertible (2 : K)] (hodd : Fintype.card K % 2 = 1)
+    (hdim : 3 ≤ Module.finrank K V) (Q : QuadraticForm K V)
+    (hQ : (QuadraticMap.polarBilin Q).Nondegenerate) :
+    Submodule.span K {x : V | Q x = 0} = ⊤ := by
+  obtain ⟨v, hv0, hviso⟩ := exists_isotropic_of_nondegenerate hodd hdim Q hQ
+  obtain ⟨f, hfiso, hvf⟩ := exists_hyperbolic_partner Q hQ hviso hv0
+  rw [eq_top_iff]
+  intro u _
+  set s : K := 1 - QuadraticMap.polar Q v u with hs
+  set t : K := -(Q u + s * QuadraticMap.polar Q u f) with ht
+  set w : V := t • v + s • f + u with hw
+  have hsp : s + QuadraticMap.polar Q v u = 1 := by rw [hs]; ring
+  -- Q w = 0 : expand over the hyperbolic pair
+  have hQa : Q (t • v + s • f)
+      = t * t * Q v + s * s * Q f + t * s * QuadraticMap.polar Q v f := quad_lin_combo Q t s v f
+  have hpau : QuadraticMap.polar Q (t • v + s • f) u
+      = t * QuadraticMap.polar Q v u + s * QuadraticMap.polar Q f u := by
+    rw [QuadraticMap.polar_add_left, QuadraticMap.polar_smul_left, QuadraticMap.polar_smul_left,
+      smul_eq_mul, smul_eq_mul]
+  have hwiso : Q w = 0 := by
+    rw [hw, show t • v + s • f + u = (t • v + s • f) + u from by abel,
+      QuadraticMap.map_add (⇑Q) _ _, hQa, hpau, hviso, hfiso, hvf, QuadraticMap.polar_comm Q f u]
+    rw [ht, hs]; ring
+  have hueq : u = w - t • v - s • f := by rw [hw]; abel
+  rw [hueq]
+  refine Submodule.sub_mem _ (Submodule.sub_mem _ ?_ ?_) ?_
+  · exact Submodule.subset_span (show w ∈ {x : V | Q x = 0} from hwiso)
+  · exact Submodule.smul_mem _ _ (Submodule.subset_span (show v ∈ {x : V | Q x = 0} from hviso))
+  · exact Submodule.smul_mem _ _ (Submodule.subset_span (show f ∈ {x : V | Q x = 0} from hfiso))
 
 end ChainDescent.Nullstellensatz
