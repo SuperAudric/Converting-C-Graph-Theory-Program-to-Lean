@@ -192,7 +192,15 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
    `schemeAutGroup_affineScheme_eq_affineG` (all 4 families, mod the named Skresanov citation `AffineSchemeTwoClosed`) +
    `routeC_polySupport` certificate (`ScratchRecoveredFormTransfer.lean`), and the **cyclotomic dispatch branch**
    `reachesRigidOrCameron_seamDispatch`/`cyclotomic_sealDisj` (`ScratchSeamDispatch.lean`, the dropped 5th case). All
-   axiom-clean. The one carried Lean atom across the seam is `htransport` (L1 — tractable, `forcedNode_relabel`-backed).
+   axiom-clean. **★ `htransport` (L1) is now DISCHARGED (2026-07-05, `ScratchSeamTransport.lean`, axiom-clean) — the
+   seam carries NO atom.** Decomposition (user's, source-validated): the forms-graph seal is Cameron-free and inhabits
+   only `SchemeRecoveredByDepth` via the light `SeparatesAtBoundedBase`, so transport ONE predicate, not four —
+   `separatesAtBoundedBase_transport` (via a cross-graph `warmRefine_transport_iso`, a localized generalization of the
+   landed single-graph `warmRefine_transport`) + `separatesAtBoundedBase_affinePolar` (extract the Cameron-free content
+   before the `Or.inl (Or.inr …)` padding) → `reachesRigidOrCameron_viaSchurianRank3Affine_proved` (seam, `htransport`
+   proved, not carried). **Eliminates** the `IsCameronScheme`-invariance premise (Cameron asserted on `S` directly, never
+   transported) AND the `SchemeBlockRecovered`/`schemeEquiv` wrinkle (block never transported). Supersedes ScratchSeam's
+   carried-`htransport` `reachesRigidOrCameron_viaSchurianRank3Affine`.
 4. ✅ **The C# runtime — C1a–C4 + family-dispatch LANDED (2026-07-04/05), 57/57 Route-C tests green.** See the
    "C# BUILD — HANDOFF SNAPSHOT" at the top of STATUS + §9.2. Affine-polar family live; alternating/half-spin/Suzuki =
    wired scaffolds (§9.2.7). **★ NEXT ACTIONABLE = the frame+WL harvest-free confirmation** (§9.2.8 CORRECTION):
@@ -269,10 +277,13 @@ the order-check past n≈81. Multi-form (alternating/half-spin) + char-2 (Suzuki
 - **✅ §9 combine / seam — DONE at the honest level (2026-07-04):** the group-pinning (`schemeAutGroup_coarse_eq_affineG`,
   all 4 families mod the named Skresanov citation `AffineSchemeTwoClosed`) + `routeC_polySupport` certificate
   (`ScratchRecoveredFormTransfer.lean`) + the cyclotomic dispatch (`ScratchSeamDispatch.lean`), all axiom-clean, after
-  the **vacuity correction** (§9.0a). One carried Lean atom remains: `htransport` (L1, tractable). **Remaining:** the
-  **C# runtime** (§9.2 grounded build spec; load-bearing = C1b `ClassicalGroupGenerators`) + optionally building L1
-  (`htransport`) and promoting the scoped citations (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`,
-  `ConePreservingCollineationIsSemiSimilitude`, `AffineSchemeTwoClosed`) to full Lean proofs. **No further family builds remain.**
+  the **vacuity correction** (§9.0a). **★ `htransport` (L1) DISCHARGED (2026-07-05, `ScratchSeamTransport.lean`,
+  axiom-clean) — no carried atom remains** (4 lemmas: cross-graph `warmRefine_transport_iso` → `separatesAtBoundedBase_transport`
+  + `separatesAtBoundedBase_affinePolar` → `reachesRigidOrCameron_viaSchurianRank3Affine_proved`; see item 3 above).
+  **Remaining:** the **C# runtime** (§9.2 grounded build spec; load-bearing = C1b `ClassicalGroupGenerators`) + promoting
+  the scoped citations (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`,
+  `ConePreservingCollineationIsSemiSimilitude`, `AffineSchemeTwoClosed`) to full Lean proofs + PORT (`ScratchSeamTransport`
+  + the ScratchRouteC spine → `build.sh`). **No further family builds remain.**
 
 **▶ VERIFY what's landed (fresh-reader commands):**
 - Lean (SEAM, NEW 2026-07-04): `cd GraphCanonizationProofs && lake env lean ChainDescent/ScratchRecoveredFormTransfer.lean`

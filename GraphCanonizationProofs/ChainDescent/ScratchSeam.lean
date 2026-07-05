@@ -11,6 +11,15 @@ transport `htransport`:** the seal disjunction is invariant under a realizing pe
 with `schemeAdj S v w = schemeAdj X (f v) (f w)`. Everything else is the cited classification (`hclass`, a faithful
 "`S` is Cameron, or `≅` a forms-graph family") + the landed per-family `wittFree` capstone.
 
+★★ UPDATE (2026-07-05) — `htransport` is now DISCHARGED in `ChainDescent/ScratchSeamTransport.lean` (axiom-clean);
+`reachesRigidOrCameron_viaSchurianRank3Affine_proved` there SUPERSEDES the carried-`htransport` theorem below. The
+discharge does NOT transport all four disjuncts: the forms-graph seal is Cameron-free and inhabits ONLY
+`SchemeRecoveredByDepth`, so it transports the single LIGHT predicate `SeparatesAtBoundedBase` (warmRefine-only) via a
+cross-graph `warmRefine_transport_iso`, then re-derives via `viaSpielman` on `S`. This eliminates the `IsCameronScheme`
+premise (Cameron asserted on `S` directly) and never touches `SchemeBlockRecovered`. NB the paragraph below is slightly
+optimistic: `SchemeBlockRecovered` is NOT purely `schemeAdj` — it also uses `S.schemeEquiv I` + `S.rank`; that wrinkle is
+moot precisely because the new route never transports that disjunct.
+
 Why this is bounded, not a wall: all four disjuncts (`SchemeBlockRecovered`/`AbelianConsumed`/`SchemeRecoveredByDepth`/
 `IsCameronScheme`) are defined purely through `schemeAdj` + `IsAut`/`IsBase`, and `f` *conjugates* those
 (`isAut_schemeAdj_iff` already shows adjacency-auts = scheme-auts). So `htransport` factors through a small core —
