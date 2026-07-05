@@ -19,10 +19,15 @@
 **Policy (user).** Eventually *all* citations except possibly **G3** (Babai / CFSG) are to be fully built in Lean;
 G3 may stay cited (it is CFSG-based). Everything else is a discharge target — some already have routes.
 
-**Headline (2026-07-04).** One citation is **fully discharged** this session (`SuzukiFormsDetermine`, Route C). Two
-more (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`) have a **found, compiling discharge route** for the
-`q=p` structural object (vanishing-space transport, §3.2). The genuinely-hard residues are named honestly (the FTPG for
-the `q=pᵉ` field twist; the quadric Nullstellensatz *only* for exact `Aut`-naming; the seal's `Theorem41`/Spielman).
+**Headline (2026-07-04, updated 2026-07-05).** One citation is **fully discharged** (`SuzukiFormsDetermine`, Route C).
+Two more (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`) are now **discharged from the F4
+iso-invariance object** — the vanishing-space transport of §3.2 is **BANKED** (axiom-clean, in `build.sh`; 5 lemmas in
+`RouteCFormAdapters.lean`: `vanishingForm_transport_gen`, `recoveredForm_partition_isoInvariant{_gen,}`,
+`recoveredFamily_partition_isoInvariant_vanishing`, `vanishingColour_refines_form`). The recovered colour partition is
+proved iso-invariant with **no dimension count**, so those two citations no longer gate F4; they remain carried **only**
+on the strictly-stronger `|Aut|`-naming statements (scalar-`μ` / injective-`Φ`), a C#/meta concern. The genuinely-hard
+residues are named honestly (the FTPG for the `q=pᵉ` field twist; the quadric Nullstellensatz *only* for exact
+`Aut`-naming; the seal's `Theorem41`/Spielman).
 
 **★ Load-bearing reframe (verified 2026-07-04).** The four Route-C **seals** (`reachesRigidOrCameron_{affinePolar via
 affinePolarAdapter, alternating, halfSpin, suzuki}`) carry **no citation** — they rest on the *proved* `separates`
@@ -72,9 +77,9 @@ truth for what is still carried (a discharged citation is *removed*, not merely 
 | Citation (Prop) | Where carried | What it is / faithful source | Load-bearing? | Discharge status |
 |---|---|---|---|---|
 | **`Suzuki.SuzukiFormsDetermine`** | *(removed)* `RouteCFormAdapters` §Suzuki | σ-twisted ovoid determiner; was Suzuki 1962 / `Sz(q)` 2-trans | was Route-C Suzuki `separates` | **✅ DISCHARGED 2026-07-04** — proved outright (§3.1). Deleted. |
-| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` (F4 `recoveredForm_colouring_equivariant`) | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **F4 only** (not the seal) | **◑ ROUTE FOUND (§3.2)** — dischargeable for `q=p` via vanishing-space transport; full Nullstellensatz needed only for exact `Aut`-naming (C#/meta). |
-| **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` (F4-multi `recoveredFamily_colouring_equivariant`) | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) | **F4-multi only** | **◑ ROUTE FOUND (§3.2)** — same vanishing-space route as above (multi-dim `W`). |
-| **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | fundamental theorem of projective geometry (collineations are semilinear) + quadric uniqueness; Artin, *Geometric Algebra* | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3)** — FTPG genuinely deep; not elementarily dischargeable. Vacuous at `q=p` (`σ=id`). Keep cited. |
+| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — the F4 partition iso-invariance is now citation-free (`recoveredForm_partition_isoInvariant`, vanishing-space transport). Full Nullstellensatz still carried only for exact `Aut`-naming (C#/meta). |
+| **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredFamily_colouring_equivariant` (injective-`Φ`); **no longer** the F4-multi partition object | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) | **`|Aut|`-naming only** (F4-multi iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — same vanishing-space route (`recoveredFamily_partition_isoInvariant_vanishing`, generic core `recoveredForm_partition_isoInvariant_gen`). Injective-`Φ` still carried only for `Aut`-naming. |
+| **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | fundamental theorem of projective geometry (collineations are semilinear) + quadric uniqueness; Artin, *Geometric Algebra* | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3)** — FTPG genuinely deep; not elementarily dischargeable. Vacuous at `q=p` (`σ=id`). Keep cited for now. |
 | **`AffineSchemeTwoClosed`** | `RouteCSeam.lean` (`schemeAutGroup_affineScheme_eq_affineG` / `routeC_polySupport`) | rank-3 affine 2-closure: `SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (no unexpected automorphisms); Skresanov arXiv:2007.14696 / 2202.03746. Converse `≥` is **proved** (`affineG_le_schemeAutGroup`). | Route-C coarse-Aut pinning (the `\|Aut\|` side / meta poly) — **one named premise, all four families** via `G₀ := similitudeGroup Q` / `jointConeStab Qs` / Suzuki cone-stab | **○ CITED** — Skresanov rank-3 2-closure; formalizable, off the near-term path. Same instance as the Skresanov row below, now a concrete named Lean `Prop`. |
 | **`Theorem41Statement`** | `CoherentConfig.lean` (affine-slice / seam capstones) | Ponomarenko arXiv:2006.13592 §4 (pointed separability) | seal (affine slice) | **○ PLANNED** — the separability substrate is the intended proof (Stage 3); see `chain-descent-general-cc-separability.md`. |
 | **`hSpielman` (`SeparatesAtBoundedBase`)** | `Cascade.lean` (`…viaSpielman`) | Spielman STOC 1996 primitive-SRG discretization (sub-exp floor `exp(Õ(n^{1/5}))`, BCSTW FOCS'13) | the citable sub-exp floor | **○ OPTIONAL** — a genuine large WL/SRG result; off the critical path (δ′/rainbow routes bypass per-family). |
@@ -113,7 +118,20 @@ enlarge the base until the recovery becomes linear, then it is elementary. Run t
 *(This exact trick did NOT transfer to the other three — they are Nullstellensatz/normality, not difference identities;
 see §3.2 for their different route.)*
 
-### 3.2 `NondegQuadricDeterminesForm` + `JointVarietyDeterminesFamily` — ROUTE FOUND (vanishing-space transport)
+### 3.2 `NondegQuadricDeterminesForm` + `JointVarietyDeterminesFamily` — F4 DISCHARGED, BANKED (vanishing-space transport)
+
+> **★ STATUS (2026-07-05): the F4 discharge below is now BANKED, axiom-clean, in `build.sh`.** The "moderate refactor,
+> not yet done" note at the end of this section is **DONE** — the five lemmas
+> (`vanishingForm_transport_gen`, `recoveredForm_partition_isoInvariant_gen` + its single/multi specializations
+> `recoveredForm_partition_isoInvariant` / `recoveredFamily_partition_isoInvariant_vanishing`, and the refinement fact
+> `vanishingColour_refines_form`) are in `RouteCFormAdapters.lean` and prove the recovered colour partition
+> iso-invariant with **no citation**. One design refinement vs. the original sketch: rather than *redefining* the
+> colouring object, the payoff is stated directly as a **partition-invariance iff** over the whole vanishing space
+> `W(C)` (two pairs `W(C)`-indistinguishable in the source ⟺ their `g`-images `W(C')`-indistinguishable), which is
+> exactly what "the recovered colouring is a canonical refinement" means and needs neither a basis choice nor a
+> dimension count. The scalar-`μ` / injective-`Φ` theorems (`recovered{Form,Family}_colouring_equivariant`) are kept as
+> the strictly-stronger `|Aut|`-naming statements and still carry the two citations — the intended residual scope.
+
 
 **The reduction.** Both citations assert *"the degree-2 forms vanishing on the variety = the expected span"* (`⟨Q⟩`
 for the single quadric; `span{Q_k}` for Grassmann/spinor) — the projective Nullstellensatz / projective normality.
@@ -147,19 +165,22 @@ planes: on a hyperbolic plane `H`, `R|_H` vanishing on the two axes forces `R|_H
 across overlapping planes using `d ≥ 4` connectivity) — formalizable but moderate–large (needs Witt / hyperbolic-plane
 plumbing). Keep it cited until the `|Aut|` side is built.
 
-**To bank the F4 discharge** (a moderate refactor, not yet done): redefine the recovered colouring around `W` (colour a
-pair `(u,t)` by the tuple of a fixed `W`-basis evaluated at `u−t`); land `vanishingForm_transport` + `_inv`; prove the
-partition-invariance payoff (the invertible pullback plays the role of the single-form scalar `μ` / multi-form `Φ`);
-prove separation via `Q ∈ W`; rewire `recoveredForm_colouring_equivariant` + `recoveredFamily_colouring_equivariant` +
-`recoveredFamily_partition_isoInvariant` to drop `hcite`. Leaves the two citations needed only on the C# `|Aut|` side.
+**To bank the F4 discharge — ✅ DONE (2026-07-05).** Executed as: land the pullback `vanishingForm_transport_gen`
+(generic in the cone predicate `C`, so one lemma serves both single quadric and multi-form family) and its `g.symm`
+inverse (folded into the payoff proof); prove the **partition-invariance iff** `recoveredForm_partition_isoInvariant_gen`
+(the pullback `W(C') ≅ W(C)` plays the role of the single-form scalar `μ` / multi-form `Φ` — but with no dimension
+count); specialize to `recoveredForm_partition_isoInvariant` (single) and `recoveredFamily_partition_isoInvariant_vanishing`
+(multi); prove separation-preservation via `Q ∈ W` (`vanishingColour_refines_form`). All five axiom-clean, in `build.sh`.
+The old `recovered{Form,Family}_colouring_equivariant` are **kept** (not rewired) — they are the strictly-stronger
+`|Aut|`-naming statements and legitimately still carry the two citations, needed only on the C# `|Aut|` side.
 
-### 3.3 `ConePreservingCollineationIsSemiSimilitude` — HARD (keep cited)
+### 3.3 `ConePreservingCollineationIsSemiSimilitude` — HARD (keep cited for now)
 
 This is the **fundamental theorem of projective geometry** (a cone-preserving collineation of `PG(d,q)`, `d≥2`, is
 semilinear `g = M∘σ̂`) composed with the quadric uniqueness of §3.2. The FTPG is genuinely deep and **not**
 elementarily dischargeable — and it is *essential* for `q=pᵉ, e>1`, because for a field-twisted `g`, `F'∘g` is not even
 a `K`-form without the semilinear decomposition (so the §3.2 `W`-transport needs `g` linear, which fails at `e>1`). At
-`q=p` it is the `σ=id` specialization and collapses to §3.2. **Verdict:** keep cited; it is the one hard residue of the
+`q=p` it is the `σ=id` specialization and collapses to §3.2. **Verdict:** keep cited for now; it is the one hard residue of the
 Route-C citation set, and only for the field-extension case (the prime-field residue does not need it).
 
 ### 3.4 Seal-track citations (pointers, not re-derived here)

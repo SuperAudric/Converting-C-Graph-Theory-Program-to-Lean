@@ -152,6 +152,13 @@ the C# runtime is close to as complete as it usefully can be. Fuller record: [[p
      coarse discretization (`IsotropySeparatesAtBase Qs` — a multi-quadric pair-route), major new math; only affine-polar has it.
    **NEXT frontier here** = promote scoped citations, or (if a per-family coarse `SealDisj` is wanted) Track A.
 2. **Promote scoped citations** to full Lean proofs (above) — `chain-descent-citation-discharge.md` §routes.
+   **★ F4 DISCHARGE DONE (2026-07-05):** `NondegQuadricDeterminesForm` + `JointVarietyDeterminesFamily` are now off the
+   **F4 iso-invariance object** — the §3.2 vanishing-space transport is BANKED (5 axiom-clean lemmas in
+   `RouteCFormAdapters.lean`: `vanishingForm_transport_gen`, `recoveredForm_partition_isoInvariant{_gen,}`,
+   `recoveredFamily_partition_isoInvariant_vanishing`, `vanishingColour_refines_form`; the recovered colour partition is
+   proved iso-invariant with no dimension count). Those two remain carried ONLY on the strictly-stronger `|Aut|`-naming
+   theorems (`recovered{Form,Family}_colouring_equivariant`). So the live Route-C carries are now just FTPG
+   `ConePreservingCollineationIsSemiSimilitude` (hard, q=pᵉ only) + Skresanov `AffineSchemeTwoClosed` (meta-poly pinning).
 3. *(lower)* **C# frame+WL confirmation** into `AffinePolarHandler.Confirm` (harvest-free p≥5 mate-ruling) — sound but
    advances no proof (reduces to the WL-dim core); the harvest-based `ConfirmByMultiQuadricReconstruction` already works.
 4. *(lower)* **Suzuki generalization** past q=8 or **alternating/half-spin runtime** — both gated on a sparse/implicit

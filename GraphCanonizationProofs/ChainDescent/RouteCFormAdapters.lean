@@ -271,6 +271,93 @@ theorem recoveredForm_colouring_equivariant
     (Q'.comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) hQ hcone
   exact ⟨μ, fun u t => similitude_colouring_equivariant Q Q' (fun v => hμ v) u t⟩
 
+/-! ## F4 citation-free — the vanishing-space (`W`) route to partition iso-invariance (`q = p`)
+
+`recoveredForm_colouring_equivariant` above concludes the **single-scalar** identity `Q'(g u − g t) = μ · Q(u − t)`,
+which asserts `dim W(Q) = 1` (the degree-2 forms vanishing on `cone(Q)` are exactly `⟨Q⟩`) — the projective
+Nullstellensatz, carried as `NondegQuadricDeterminesForm`. But F4's actual job — **iso-invariance of the recovered
+colour partition** — needs no dimension count. Colour a pair `(u,t)` by the evaluation `F ↦ F(u−t)` over the whole
+degree-2 **vanishing space** `W(Q) = {F | F ≡ 0 on cone(Q)}`, an *intrinsic* invariant of the graph (it is read off
+the connection set from the origin). A cone-preserving linear iso `g` induces a canonical linear iso `W(Q') ≅ W(Q)`
+by pullback `F' ↦ F'∘g` — needing only cone-preservation + `g` bijective, **NO dimension count** — so the `W`-colour
+partition transports. And since `Q ∈ W(Q)`, the `W`-colouring **refines** the `Q`-colouring, so the
+`coords_determine` separation still fires. This discharges the F4 iso-invariance object from
+`NondegQuadricDeterminesForm` (and `JointVarietyDeterminesFamily`, via the generic core) at `q = p`; the citations
+remain needed only for the strictly stronger `|Aut|`-naming statement `Aut = AΓO(Q)` (the C#/meta side — see
+`chain-descent-citation-discharge.md` §3.2). The core is generic over an arbitrary "cone" predicate `C`, so it
+serves both the single quadric (`C v := Q v = 0`) and the multi-form family (`C v := ∀ k, Qs k v = 0`). -/
+
+/-- **The load-bearing pullback (`W`-transport), generic in the cone predicate.** If `g` carries `cone(C)` to
+`cone(C')` (`C v ↔ C' (g v)`), then pulling a form `F'` vanishing on `cone(C')` back by `g` gives a form vanishing
+on `cone(C)`: `F' ∈ W(C') ⟹ F'∘g ∈ W(C)`. Elementary (`comp_apply` + the cone equivalence); no dimension count,
+no citation. The `≅` half of the vanishing-space transport (the other half is the same lemma at `g.symm`). -/
+theorem vanishingForm_transport_gen {C C' : (Fin d → ZMod p) → Prop}
+    (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) (hcone : ∀ v, C v ↔ C' (g v))
+    (F' : QuadraticForm (ZMod p) (Fin d → ZMod p)) (hF' : ∀ v, C' v → F' v = 0) :
+    ∀ v, C v → (F'.comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) v = 0 := by
+  intro v hv
+  rw [QuadraticMap.comp_apply]
+  exact hF' (g v) ((hcone v).mp hv)
+
+/-- **F4 citation-free payoff (generic) — the recovered `W`-colour partition is iso-invariant.** Two source pairs
+are indistinguishable by the whole vanishing space `W(C)` **iff** their `g`-images are indistinguishable by `W(C')`.
+Proved by pulling each vanishing form across `g` (`vanishingForm_transport_gen`) and its inverse `g.symm` — NO
+`NondegQuadricDeterminesForm`, NO dimension count. This is the iso-invariance F4 actually needs (the recovered
+colouring is a canonical refinement of the graph); the scalar-`μ` / injective-`Φ` statements
+(`recoveredForm_colouring_equivariant`, `recoveredFamily_colouring_equivariant`) are the strictly stronger
+`|Aut|`-naming forms that still carry the citation. -/
+theorem recoveredForm_partition_isoInvariant_gen {C C' : (Fin d → ZMod p) → Prop}
+    (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) (hcone : ∀ v, C v ↔ C' (g v))
+    (u t u' t' : Fin d → ZMod p) :
+    (∀ F : QuadraticForm (ZMod p) (Fin d → ZMod p), (∀ v, C v → F v = 0) →
+        F (u - t) = F (u' - t')) ↔
+      (∀ F' : QuadraticForm (ZMod p) (Fin d → ZMod p), (∀ v, C' v → F' v = 0) →
+        F' (g u - g t) = F' (g u' - g t')) := by
+  -- the reversed cone equivalence (via g.symm), for the ← direction
+  have hcone_rev : ∀ w, C' w ↔ C (g.symm w) := by
+    intro w
+    have h := (hcone (g.symm w)).symm
+    rwa [LinearEquiv.apply_symm_apply] at h
+  constructor
+  · intro h F' hF'
+    have hval : ∀ a b : Fin d → ZMod p,
+        (F'.comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) (a - b) = F' (g a - g b) := by
+      intro a b; rw [QuadraticMap.comp_apply, LinearEquiv.coe_coe, map_sub]
+    rw [← hval u t, ← hval u' t']
+    exact h _ (vanishingForm_transport_gen g hcone F' hF')
+  · intro h F hF
+    have hval' : ∀ a b : Fin d → ZMod p,
+        (F.comp (g.symm : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) (g a - g b) = F (a - b) := by
+      intro a b
+      rw [QuadraticMap.comp_apply, LinearEquiv.coe_coe, map_sub,
+        LinearEquiv.symm_apply_apply, LinearEquiv.symm_apply_apply]
+    rw [← hval' u t, ← hval' u' t']
+    exact h _ (vanishingForm_transport_gen g.symm hcone_rev F hF)
+
+/-- **F4 citation-free — single quadric.** The recovered `W(Q)`-colour partition of a nondegenerate affine-polar
+graph is iso-invariant under a cone-preserving linear iso `g`, with **no `NondegQuadricDeterminesForm`**. The
+`C v := Q v = 0` specialization of `recoveredForm_partition_isoInvariant_gen`. -/
+theorem recoveredForm_partition_isoInvariant
+    (Q Q' : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+    (hcone : ∀ v, Q v = 0 ↔ Q' (g v) = 0) (u t u' t' : Fin d → ZMod p) :
+    (∀ F : QuadraticForm (ZMod p) (Fin d → ZMod p), (∀ v, Q v = 0 → F v = 0) →
+        F (u - t) = F (u' - t')) ↔
+      (∀ F' : QuadraticForm (ZMod p) (Fin d → ZMod p), (∀ v, Q' v = 0 → F' v = 0) →
+        F' (g u - g t) = F' (g u' - g t')) :=
+  recoveredForm_partition_isoInvariant_gen (C := fun v => Q v = 0) (C' := fun v => Q' v = 0) g hcone u t u' t'
+
+/-- **The `W`-colouring refines the `Q`-colouring** (so the discharge does not lose separation). Since
+`Q ∈ W(Q)` (a form vanishes on its own cone), any two pairs indistinguishable by the whole vanishing space are in
+particular `Q`-indistinguishable — hence anything `coords_determine` separates via the `Q`/isometry colouring, the
+citation-free `W`-colouring separates too. Trivial (`F := Q`), but it closes the "separation still fires" half. -/
+theorem vanishingColour_refines_form (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (u t u' t' : Fin d → ZMod p)
+    (h : ∀ F : QuadraticForm (ZMod p) (Fin d → ZMod p), (∀ v, Q v = 0 → F v = 0) →
+        F (u - t) = F (u' - t')) :
+    Q (u - t) = Q (u' - t') :=
+  h Q (fun _ hv => hv)
+
 /-! ## F2 — the `q = pᵉ` semilinear (Frobenius / ΓL) seam
 
 For `q = p` (prime) the whole spine above works over `ZMod p` because the additive structure F1 recovers
@@ -662,6 +749,25 @@ theorem recoveredFamily_partition_isoInvariant {ι : Type*}
   constructor
   · intro h; rw [h]
   · intro h; exact hΦinj h
+
+/-- **F4-multi citation-free — the recovered joint-`W` colour partition is iso-invariant, with NO
+`JointVarietyDeterminesFamily`.** The multi-form sibling of `recoveredForm_partition_isoInvariant`: colour a pair by
+the whole degree-2 space vanishing on the **joint** cone `{v | ∀ k, Qs k v = 0}`, and the partition transports under
+a joint-cone-preserving linear iso `g`. The `C v := ∀ k, Qs k v = 0` specialization of the generic
+`recoveredForm_partition_isoInvariant_gen` — the elementary vanishing-space route (`chain-descent-citation-discharge.md`
+§3.2), discharging the F4-multi iso-invariance object from the projective-normality citation at `q = p`. The injective-`Φ`
+statement `recoveredFamily_colouring_equivariant` remains the strictly stronger `|Aut|`-naming form that carries the
+citation. -/
+theorem recoveredFamily_partition_isoInvariant_vanishing {ι : Type*}
+    (Qs Qs' : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+    (hcone : ∀ v, (∀ k, Qs k v = 0) ↔ (∀ k, Qs' k (g v) = 0)) (u t u' t' : Fin d → ZMod p) :
+    (∀ F : QuadraticForm (ZMod p) (Fin d → ZMod p), (∀ v, (∀ k, Qs k v = 0) → F v = 0) →
+        F (u - t) = F (u' - t')) ↔
+      (∀ F' : QuadraticForm (ZMod p) (Fin d → ZMod p), (∀ v, (∀ k, Qs' k v = 0) → F' v = 0) →
+        F' (g u - g t) = F' (g u' - g t')) :=
+  recoveredForm_partition_isoInvariant_gen (C := fun v => ∀ k, Qs k v = 0)
+    (C' := fun v => ∀ k, Qs' k v = 0) g hcone u t u' t'
 
 /-! ### The concrete alternating instance `Alt(5,q)` — the Plücker quadrics + the sealed adapter
 
