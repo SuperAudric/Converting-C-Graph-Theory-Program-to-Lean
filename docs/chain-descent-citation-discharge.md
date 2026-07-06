@@ -307,15 +307,20 @@ bounds, for ANY quadratic `P`, `(|{P=0}|·q − qᵈ)² ≤ (q−1)²·(qᵈ·|r
 axiom-clean, no from-scratch ℂ-magnitude work needed. Bricks (in `ScratchNullstellensatzCount.lean`):
 - ✅ **`radical_card_one`** + **`cone_card_lower`** (2026-07-06, axiom-clean) — nondeg ⟹ radical `{0}` ⟹
   `qᵈ − (q−1)√(qᵈ) ≤ |cone|·q`, i.e. `|cone| ≥ q^{d-1} − (q−1)q^{d/2−1}`. Direct from `zeroCount_sq_le`.
-- ◻ **section upper bound** `|cone ∩ u^⊥| ≤ q^{d-2} + O(·)` — via `norm_sq_sum_addChar_quadForm_linear_le` (the
-  quadratic+linear sum, already in `PairForm`) or `zeroCount_sq_le` on `Q|_{u^⊥}`.
-- ◻ **`cone_not_covered` (k=2)** — union bound `|cone| > |cone ∩ z^⊥| + |cone ∩ e^⊥|` (comfortable even at `d=4 q=3`:
-  `21 > 9+3`, or crude `21 > 2·9=18`).
-- ◻ **the `A_e`-hub walk** (structural, no counting): within "non-tangent to `e`" connectivity uses only
-  `ratioEdge_smul`/`_line` + scalar choices; each tangent-to-`e` vector joins `A_e` in one step needing the `k=2`
-  covering. Then `hub` (via `hconn_of_hub`) → `hconn`.
-Only `q > k` (`q > 2`) is needed, so no `q`-floor beyond `q ≥ 3`. Diagonalization (`equivalent_weightedSumSquares_units_of_nondegenerate'`,
-already used) supplies any basis needed.
+- ✅ **`card_zeros_odd`** (2026-07-06, axiom-clean) — the reusable heart: nondeg quadric in ODD dim `m` ⟹
+  `|{Q=0}|·q = |V|` exactly (the `card_quadForm_eq` bracket `∑χ(t)=0` for odd power). In `ScratchNullstellensatzCount.lean`.
+- ◻ **exact anisotropic section** `sec_aniso : |cone ∩ u^⊥| = q^{d-2}` for `Q u ≠ 0` — apply `card_zeros_odd` to
+  `(u^⊥, Q|_{u^⊥})`: `u` anisotropic ⟹ `V = ⟨u⟩ ⊕ u^⊥` orthogonally and `polar Q u x = 2λ·Q u`, so the section is
+  EXACTLY `{w ∈ u^⊥ | Q w = 0}`. Needs `Q|_{u^⊥}` nondeg (Mathlib `nondegenerate_restrict_of_disjoint_orthogonal` +
+  `orthogonal_orthogonal`, `Disjoint u^⊥ ⟨u⟩` from `Q u ≠ 0`) + `finrank u^⊥ = d−1` odd (`finrank_orthogonal`).
+  (Isotropic `u` sections VARY and can exceed `q^{d-2}` — **avoid** them in the covering.)
+- ◻ **`cone_not_covered` (k=2, BOTH vectors anisotropic)** — clean union bound `|cone| > 2·q^{d-2}`, holds for ALL
+  `q ≥ 3` (`d=4 q=3` minus: `21 > 18` ✓) — **no small-`q` tail**, because both sections are the EXACT `q^{d-2}`. This is
+  why the covering must be designed with anisotropic hyperplane-vectors only (an isotropic hub vector reintroduces the
+  tight `d=4 q=3` boundary).
+- ◻ **the walk/hub** (structural, no counting): use `ratioEdge_smul`/`_line` + scalar choices, structured so each step's
+  covering uses anisotropic vectors, then `hub` (via `hconn_of_hub`) → `hconn`.
+Diagonalization (`equivalent_weightedSumSquares_units_of_nondegenerate'`, already used) supplies any basis needed.
 
 When `hconn` (via `cone_not_covered` → hub) lands: (a) instantiate `nullstellensatz_of_connectivity` to prove `NondegQuadricDeterminesForm` outright
 over `𝔽_q^d` (`d ≥ 4`, `q` odd); (b) **delete the carried premise** from `recoveredForm_colouring_equivariant` in
