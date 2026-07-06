@@ -149,14 +149,14 @@ contains an unhandled obstruction — NOT because the algorithm is weak. This is
 "or Cameron/hidden-Johnson/IR-residue" escape; its proof consumes the classification citations.
 NON-VACUITY OBLIGATION (separate lemma, `unhandledResidue_nonvacuous` below): `UnhandledResidue` is neither
 always-true nor defined as "flagged". -/
-theorem flag_iff_residue (n : ℕ) (G : AdjMatrix n) :
-    canonForm? n G = none ↔ UnhandledResidue n G := by
+theorem residue_if_flag (n : ℕ) (G : AdjMatrix n) :
+    canonForm? n G = none → UnhandledResidue n G := by
   -- discharged by: `reachesRigidOrCameron_*` (Seal Phase) + `cameron_classification` (+ Skresanov/Liebeck/
   --                Ponomarenko for the residue identification) + the IR-Phase residual characterization.
   sorry
 
 /-- **Non-vacuity of ③ (the documented vacuity-trap guard).** There exist handled graphs (a flag is not
-forced) AND unhandled ones (the excluded set is real). Without this, `flag_iff_residue` is meaningless.
+forced) AND unhandled ones (the excluded set is real). Without this, `residue_if_flag` is meaningless.
 Fill with concrete witnesses (e.g. a forms-graph / CFI instance handled; a hidden-Johnson instance not). -/
 theorem unhandledResidue_nonvacuous :
     (∃ (n : ℕ) (G : AdjMatrix n), ¬ UnhandledResidue n G) ∧
@@ -178,7 +178,7 @@ theorem canonizer (n : ℕ) (G : AdjMatrix n) :
   refine ⟨fun H cG cH hG hH => canon_complete n G H cG cH hG hH, ?_⟩
   rcases canon_poly_or_flag n G with hpoly | hflag
   · exact Or.inl hpoly
-  · exact Or.inr ((flag_iff_residue n G).mp hflag)
+  · exact Or.inr ((residue_if_flag n G) hflag)
 
 /-! ## 5. The axiom footprint (the deliverable)
 
@@ -189,6 +189,6 @@ CURRENT output includes `sorryAx` — the visible "remaining work" marker. -/
 #print axioms canonizer
 -- #print axioms canon_complete
 -- #print axioms canon_poly_or_flag
--- #print axioms flag_iff_residue
+-- #print axioms residue_if_flag
 
 end Showcase

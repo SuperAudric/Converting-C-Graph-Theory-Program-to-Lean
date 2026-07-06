@@ -69,7 +69,7 @@ existing pieces; "new" = a genuinely unbuilt object.
 | **①b `canon_complete`** | Complete iso-invariant when it answers | `spine_branch_independent` + `warm_6_2` (direction-invariance) + `canon_sound` | **Built substrate; assembly** |
 | **①c `flag_iso_invariant`** | Flagging is a class property | partition-invariant selector (`target_direction_blind` / the spine) | **Built substrate; assembly** |
 | **② `canon_poly_or_flag`** | Poly-time or flag | **Cost model** (new) + the **consumption bridge** "reaches-rigid ⟹ poly node budget ⟹ ¬flag ∧ cost ≤ poly" (new) | **NEW — the main gap; where poly stops being meta** |
-| **③ `flag_iff_residue`** | Flag ⟺ genuine obstruction | **`UnhandledResidue` definition** (new) + `reachesRigidOrCameron_*` consumed (Seal) + IR residual characterization (IR) + citations | **NEW — gated on Seal + IR completion** |
+| **③ `residue_if_flag`** | Flag → genuine obstruction | **`UnhandledResidue` definition** (new) + `reachesRigidOrCameron_*` consumed (Seal) + IR residual characterization (IR) + citations | **NEW — gated on Seal + IR completion** |
 | **non-vacuity** | Handled and unhandled graphs both exist | concrete witnesses (a forms-graph / CFI handled; a hidden-Johnson unhandled) | **NEW — small, but the anti-vacuity guard** |
 
 **Reading of the map.** The correctness trio is close (the hard invariance work — `warm_6_2`,
