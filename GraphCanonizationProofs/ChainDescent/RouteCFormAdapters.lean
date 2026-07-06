@@ -38,6 +38,7 @@ consumes `Aut`, whose poly recovery for this residue is the open T0 problem — 
 bootstrapping"). Full pickup: `docs/chain-descent-route-c-plan.md` STATUS + §6a. See §4 for the preexisting-lemma names.
 -/
 import ChainDescent.CascadeAffine
+import ChainDescent.NullstellensatzHlink
 
 namespace ChainDescent.RouteC
 
@@ -219,6 +220,17 @@ def NondegQuadricDeterminesForm (p d : ℕ) [Fact p.Prime] : Prop :=
     (Q.polarBilin).Nondegenerate → (∀ v, Q v = 0 ↔ R v = 0) →
       ∃ μ : (ZMod p)ˣ, ∀ v, R v = (μ : ZMod p) * Q v
 
+/-- **The Nullstellensatz citation, DISCHARGED (even `d`).** `NondegQuadricDeterminesForm p d` is no longer
+an assumption but a theorem: for odd prime `p` and even `4 ≤ d`, a nondegenerate quadric on `(ZMod p)^d` is
+determined up to a `(ZMod p)ˣ` scalar by its isotropic cone. Proof = `nondegQuadric_zmod_of_even`
+(`ChainDescent.Nullstellensatz`; structural route hspan + hlink + Gauss-sum counting; axiom-clean). Every
+Route-C instantiation is even-dimensional (`VO^ε_{2m}`, `m ≥ 2`), so `hev : Even d` is always available; the
+`even`-scope is the exact range the structural section count (`sec_aniso`, odd `u^⊥`) covers. -/
+theorem nondegQuadricDeterminesForm_of_even (hp : p ≠ 2) (hev : Even d) :
+    NondegQuadricDeterminesForm p d :=
+  fun _ hd Q R hQnd hcone =>
+    ChainDescent.Nullstellensatz.nondegQuadric_zmod_of_even p d hp hev hd Q R hQnd hcone
+
 /-- **F4 brick 1 — a form similitude carries the difference colouring (equivariance, provable).** If `g`
 is a similitude from `Q` to `Q'` (`Q' (g v) = μ · Q v`), then the recovered-`Q` **difference** colouring
 transports by the same scalar: `Q' (g u − g t) = μ · Q (u − t)`. This is the exact sense in which the
@@ -251,23 +263,24 @@ theorem similitude_conePreserving
 
 /-- **F4 — the recovered-`Q` difference colouring is iso-invariant (equivariant under a graph iso's
 linear part).** Given the linear part `g` of a graph isomorphism (which carries the `Q`-cone to the
-`Q'`-cone: `Q v = 0 ↔ Q' (g v) = 0`), the nondegeneracy of `Q`, and the **exact cited classical fact**
-`NondegQuadricDeterminesForm` (A1's uniqueness, `hcite`, scoped `p ≠ 2`, `4 ≤ d`), the recovered
-difference colouring transports with a single global scalar `μ`: `Q' (g u − g t) = μ · Q (u − t)` for all
-`u, t`. So canonicalizing via the recovered form produces a *canonical* (iso-invariant) colouring — the
-property the poly canonicalization claim needs, and the one the banked seal does **not** supply
+`Q'`-cone: `Q v = 0 ↔ Q' (g v) = 0`), the nondegeneracy of `Q`, and — for even `d` — the now-**discharged**
+quadric Nullstellensatz `nondegQuadricDeterminesForm_of_even` (A1's uniqueness; no longer a premise), the
+recovered difference colouring transports with a single global scalar `μ`: `Q' (g u − g t) = μ · Q (u − t)`
+for all `u, t`. So canonicalizing via the recovered form produces a *canonical* (iso-invariant) colouring —
+the property the poly canonicalization claim needs, and the one the banked seal does **not** supply
 (discreteness does not transfer to the coarser similitude scheme). Composes with A3 brick 1
 (`isometryScheme_refines_similitudeScheme`) and `viaOrthogonalForm_spanning` to give: iso-invariant
-discrete colouring at a spanning base ⟹ (meta) poly canonical labelling. Axiom-clean; the only
-non-elementary input is `hcite`, threaded up as a premise exactly like `Theorem41Statement`. -/
+discrete colouring at a spanning base ⟹ (meta) poly canonical labelling. Axiom-clean; the Nullstellensatz
+input is now proved outright (`ChainDescent.Nullstellensatz.nondegQuadric_zmod_of_even`), so only the
+elementary `hev : Even d` (always available for `VO^ε_{2m}`) is carried. -/
 theorem recoveredForm_colouring_equivariant
-    (hcite : NondegQuadricDeterminesForm p d) (hp : p ≠ 2) (hd : 4 ≤ d)
+    (hp : p ≠ 2) (hd : 4 ≤ d) (hev : Even d)
     (Q Q' : QuadraticForm (ZMod p) (Fin d → ZMod p))
     (hQ : (Q.polarBilin).Nondegenerate)
     {g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)}
     (hcone : ∀ v, Q v = 0 ↔ Q' (g v) = 0) :
     ∃ μ : (ZMod p)ˣ, ∀ u t : Fin d → ZMod p, Q' (g u - g t) = (μ : ZMod p) * Q (u - t) := by
-  obtain ⟨μ, hμ⟩ := hcite hp hd Q
+  obtain ⟨μ, hμ⟩ := nondegQuadricDeterminesForm_of_even hp hev hp hd Q
     (Q'.comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) hQ hcone
   exact ⟨μ, fun u t => similitude_colouring_equivariant Q Q' (fun v => hμ v) u t⟩
 

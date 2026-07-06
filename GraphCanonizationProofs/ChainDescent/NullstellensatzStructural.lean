@@ -30,7 +30,7 @@ Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`/`
 import Mathlib.FieldTheory.Finite.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.IsometryEquiv
-import ChainDescent.ScratchNullstellensatz
+import ChainDescent.Nullstellensatz
 
 namespace ChainDescent.Nullstellensatz
 

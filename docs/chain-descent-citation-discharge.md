@@ -19,24 +19,26 @@
 **Policy (user).** Eventually *all* citations except possibly **G3** (Babai / CFSG) are to be fully built in Lean;
 G3 may stay cited (it is CFSG-based). Everything else is a discharge target — some already have routes.
 
-**Headline (2026-07-04, updated 2026-07-05).** One citation is **fully discharged** (`SuzukiFormsDetermine`, Route C).
-Two more (`NondegQuadricDeterminesForm`, `JointVarietyDeterminesFamily`) are now **discharged from the F4
+**Headline (2026-07-04 … 2026-07-06).** Two citations are **fully discharged** (`SuzukiFormsDetermine` + now
+**`NondegQuadricDeterminesForm`**, both Route C). `JointVarietyDeterminesFamily` is **discharged from the F4
 iso-invariance object** — the vanishing-space transport of §3.2 is **BANKED** (axiom-clean, in `build.sh`; 5 lemmas in
 `RouteCFormAdapters.lean`: `vanishingForm_transport_gen`, `recoveredForm_partition_isoInvariant{_gen,}`,
 `recoveredFamily_partition_isoInvariant_vanishing`, `vanishingColour_refines_form`). The recovered colour partition is
-proved iso-invariant with **no dimension count**, so those two citations no longer gate F4; they remain carried **only**
-on the strictly-stronger `|Aut|`-naming statements (scalar-`μ` / injective-`Φ`), a C#/meta concern. The genuinely-hard
-residues are named honestly (the FTPG for the `q=pᵉ` field twist; the quadric Nullstellensatz *only* for exact
-`Aut`-naming; the seal's `Theorem41`/Spielman).
+proved iso-invariant with **no dimension count**, so it no longer gates F4; it remains carried **only** on the
+strictly-stronger `|Aut|`-naming statement (injective-`Φ`), a C#/meta concern. The genuinely-hard residues are named
+honestly (the FTPG for the `q=pᵉ` field twist; the seal's `Theorem41`/Spielman).
 
-**★ LIVE FRONTIER (2026-07-05, REROUTED): the full `NondegQuadricDeterminesForm` discharge is underway — see §3.5.**
-Heart + BOTH assemblies landed axiom-clean (13 lemmas, `ScratchNullstellensatz{,Structural}.lean`, WIP not in build).
-**★ `hspan` ELIMINATED by a better cut:** the new `nullstellensatz_of_connectivity` assembly derives the μ-scalar from
-ratio-CONSTANCY on anisotropic vectors alone (`ratio_step`, from `nullstellensatz_pointwise`), so the citation is now
-reduced to **ONE** finite-geometry fact — `hconn` (the isotropic-edge graph on anisotropic vectors is connected;
-probe-confirmed, diameter 3–4 incl. the `d=4` elliptic `q=3` boundary) — which dodges the Witt-index-1/`q=3`
-obstruction that stalled `hspan` and is provable by an explicit walk or the `GaussCount` point-count. The old
-`hspan`+`isotropic_span` route is kept as a proven spare but is OFF the critical path. **§3.5 is the pick-up point.**
+**★ `NondegQuadricDeterminesForm` FULLY DISCHARGED (2026-07-06, axiom-clean, in `build.sh`).** The 4 files ported →
+`ChainDescent.Nullstellensatz{,Structural,Count,Hlink}` (Scratch prefix dropped). The **structural route** (not the
+connectivity/`hconn` reroute — which needs a `k=4` cover that PROVABLY FAILS at the `d=4` elliptic `q=3` VO⁻₄(3)
+boundary the citation's `p≠2` scope forces) is what closed it: the crux **`section_iso_count`** (exact isotropic-`u`
+section identity, type-independent gap `(q−2)q²>0` at `q≥3`) feeds **`cone_punctured_span`** (hspan) +
+**`aniso_polar_diameter_two`** (hlink) into `nullstellensatz_of_structural`, instantiated at `ZMod p` by
+**`nondegQuadric_zmod_of_even`** = exact `NondegQuadricDeterminesForm p d` for **even `d`** (every `VO^ε_{2m}` use;
+odd `d` open + unused). `RouteC.nondegQuadricDeterminesForm_of_even` proves the predicate; the `hcite` premise is
+**deleted** from `recoveredForm_colouring_equivariant` (now carries only elementary `Even d`; `#print axioms` =
+`[propext, Classical.choice, Quot.sound]`). The old `nullstellensatz_of_connectivity`/`hconn` cut is kept as a
+proven spare. **§3.5 = the design record.**
 
 **★ Load-bearing reframe (verified 2026-07-04).** The four Route-C **seals** (`reachesRigidOrCameron_{affinePolar via
 affinePolarAdapter, alternating, halfSpin, suzuki}`) carry **no citation** — they rest on the *proved* `separates`
@@ -86,7 +88,7 @@ truth for what is still carried (a discharged citation is *removed*, not merely 
 | Citation (Prop) | Where carried | What it is / faithful source | Load-bearing? | Discharge status |
 |---|---|---|---|---|
 | **`Suzuki.SuzukiFormsDetermine`** | *(removed)* `RouteCFormAdapters` §Suzuki | σ-twisted ovoid determiner; was Suzuki 1962 / `Sz(q)` 2-trans | was Route-C Suzuki `separates` | **✅ DISCHARGED 2026-07-04** — proved outright (§3.1). Deleted. |
-| **`NondegQuadricDeterminesForm`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredForm_colouring_equivariant` (scalar-`μ`); **no longer** the F4 partition object | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | **`|Aut|`-naming only** (F4 iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2)** + **heart + BOTH assemblies landed axiom-clean (§3.5, 2026-07-05, REROUTED)** (`ScratchNullstellensatz{,Structural}.lean`, 13 lemmas). **`hspan` ELIMINATED:** the new `nullstellensatz_of_connectivity` derives the μ-scalar from ratio-constancy alone (`ratio_step`, from `nullstellensatz_pointwise`), reducing the citation to ONE fact `hconn` (isotropic-edge graph on aniso vectors is connected; probe-confirmed diameter 3–4 incl. `d=4` elliptic `q=3` boundary — diameter-2 is FALSE), provable by an explicit walk or the `GaussCount` point-count. Old `hspan`+`isotropic_span` route kept as a proven spare, off critical path. REMAINING = `hconn` (graph connectivity). Not yet in `build.sh`. |
+| **`NondegQuadricDeterminesForm`** | *(hcite removed)* — `RouteC.nondegQuadricDeterminesForm_of_even` proves it; `recoveredForm_colouring_equivariant` carries only `Even d` | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | was `|Aut|`-naming only | **✅ DISCHARGED 2026-07-06** (axiom-clean, in `build.sh`). Ported → `ChainDescent.Nullstellensatz{,Structural,Count,Hlink}`. **Structural route** (not the `hconn` reroute — its `k=4` walk fails `q=3`): crux `section_iso_count` (exact isotropic-`u` section, gap `(q−2)q²>0`) → `cone_punctured_span` (hspan) + `aniso_polar_diameter_two` (hlink) → `nullstellensatz_of_structural` → `nondegQuadric_zmod_of_even` for **even `d`** (every `VO^ε_{2m}`; odd `d` open+unused). `#print axioms` = `[propext, Classical.choice, Quot.sound]`. `hconn` spare kept. |
 | **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredFamily_colouring_equivariant` (injective-`Φ`); **no longer** the F4-multi partition object | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) | **`|Aut|`-naming only** (F4-multi iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — same vanishing-space route (`recoveredFamily_partition_isoInvariant_vanishing`, generic core `recoveredForm_partition_isoInvariant_gen`). Injective-`Φ` still carried only for `Aut`-naming. |
 | **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | fundamental theorem of projective geometry (collineations are semilinear) + quadric uniqueness; Artin, *Geometric Algebra* | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3)** — FTPG genuinely deep; not elementarily dischargeable. Vacuous at `q=p` (`σ=id`). Keep cited for now. |
 | **`AffineSchemeTwoClosed`** | `RouteCSeam.lean` (`schemeAutGroup_affineScheme_eq_affineG` / `routeC_polySupport`) | rank-3 affine 2-closure: `SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (no unexpected automorphisms); Skresanov arXiv:2007.14696 / 2202.03746. Converse `≥` is **proved** (`affineG_le_schemeAutGroup`). | Route-C coarse-Aut pinning (the `\|Aut\|` side / meta poly) — **one named premise, all four families** via `G₀ := similitudeGroup Q` / `jointConeStab Qs` / Suzuki cone-stab | **○ CITED** — Skresanov rank-3 2-closure; formalizable, off the near-term path. Same instance as the Skresanov row below, now a concrete named Lean `Prop`. |
@@ -192,7 +194,16 @@ a `K`-form without the semilinear decomposition (so the §3.2 `W`-transport need
 `q=p` it is the `σ=id` specialization and collapses to §3.2. **Verdict:** keep cited for now; it is the one hard residue of the
 Route-C citation set, and only for the field-extension case (the prime-field residue does not need it).
 
-### 3.5 `NondegQuadricDeterminesForm` — the full quadric Nullstellensatz — discharge BEGUN (2026-07-05)
+### 3.5 `NondegQuadricDeterminesForm` — the full quadric Nullstellensatz — ✅ DISCHARGED (2026-07-06)
+
+> **✅ DONE (2026-07-06, axiom-clean, in `build.sh`).** The text below is the DESIGN RECORD; it predates the final
+> cut. What actually landed: the **structural route** (NOT the `hconn`/connectivity reroute this section explores — that
+> needs a `k=4` cover which PROVABLY FAILS at the `d=4` elliptic `q=3` VO⁻₄(3) boundary). The crux was the *exact*
+> isotropic-`u` section count `section_iso_count` (`ChainDescent.NullstellensatzCount`) — type-independent gap
+> `(q−2)q²>0` at `q≥3` — feeding `cone_punctured_span` (hspan) + `aniso_polar_diameter_two` (hlink) into
+> `nullstellensatz_of_structural`, instantiated at `ZMod p` by `nondegQuadric_zmod_of_even` for **even `d`** (every
+> `VO^ε_{2m}` use; odd `d` left open + unused). Wired via `RouteC.nondegQuadricDeterminesForm_of_even`; the `hcite`
+> premise is deleted from `recoveredForm_colouring_equivariant`. Files: `ChainDescent.Nullstellensatz{,Structural,Count,Hlink}`.
 
 The §3.2 work discharged the **F4 iso-invariance** use of this citation. The *stronger* statement — "a nondegenerate
 quadric determines its form up to a scalar `μ`" (`vanishDim = 1`, needed for exact `Aut = AΓO(Q)` naming) — is now being

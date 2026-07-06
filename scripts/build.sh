@@ -80,7 +80,18 @@ MODULES=(
   # Recover the form Q from the abstract graph ⟹ Aut = known classical group ⟹ canonicalize; sidesteps the node-4 WL wall.
   # Four family seals (affine-polar/alternating/half-spin/Suzuki) + the atom-free seam (L1 htransport discharged). All axiom-clean.
   ChainDescent.RouteCTransport      # ← Cascade (cross-graph WL-transport toolkit: SchemeRealizes + …_transport_iso tower + separatesAtBoundedBase_transport)
-  ChainDescent.RouteCFormAdapters   # ← CascadeAffine (the four Route-C form-family poly seals via the FormAdapter engine + multi-quadric bridges)
+  # ── Nullstellensatz discharge — the quadric Nullstellensatz `NondegQuadricDeterminesForm` proved outright
+  # (ported 2026-07-06 from the Scratch{Nullstellensatz,…Structural,…Count,…Hlink} files). A nondegenerate
+  # quadric of even finrank ≥ 4 over an odd finite field is determined up to scalar by its isotropic cone.
+  # Structural route: hspan (`cone_punctured_span`) + hlink (`aniso_polar_diameter_two`) into
+  # `nullstellensatz_of_structural`; the finite-geometry counting is Gauss-sum based (`section_iso_count`),
+  # primitive ℂ-char built internally. Capstone `nondegQuadric_zmod_of_even` = `NondegQuadricDeterminesForm`
+  # (even d); discharges the citation carried by `recoveredForm_colouring_equivariant`. All axiom-clean.
+  ChainDescent.Nullstellensatz            # ← Mathlib (field-general assembly: nullstellensatz_of_structural / _of_connectivity)
+  ChainDescent.NullstellensatzStructural  # ← Nullstellensatz (bedrock: isotropic existence/span, associated-form nondeg)
+  ChainDescent.NullstellensatzCount       # ← PairForm, Coordinatization, Nullstellensatz(Structural) (Gauss counting: section_iso_count, cone_punctured_span)
+  ChainDescent.NullstellensatzHlink       # ← NullstellensatzCount (hlink + the discharge theorems nondegQuadric_{determines_of,zmod}_of_even)
+  ChainDescent.RouteCFormAdapters   # ← CascadeAffine, NullstellensatzHlink (the four Route-C form-family poly seals via the FormAdapter engine + multi-quadric bridges)
   ChainDescent.RouteCSeam           # ← CascadeAffine, RouteCTransport (SealDisj + generic dispatch + affine-polar atom-free capstone + finer→coarser group-pinning)
   ChainDescent.RouteCNode4          # ← AffinePolarSeal, RouteCSeam (L4: affine-polar node-4 discharge with the pair-route separation discharged + transported — NO hFormCert)
 )

@@ -1,5 +1,5 @@
 /-
-# Nullstellensatz discharge — the cone-covering count (WIP, route B)
+# Nullstellensatz discharge — the cone-covering count (LANDED)
 
 The connectivity fact `hconn` (⟹ `nullstellensatz_of_connectivity`) reduces, via the route-A scaffold, to ONE
 classical counting lemma:
@@ -30,22 +30,34 @@ nondeg quadric in ODD dim `m` ⟹ `|{Q=0}|·q = |V|` exactly, via the `∑χ(t)=
 - ✅ (ii) **`cone_not_covered` (k=2, both aniso `u₁,u₂`)** — `cone_card_lower` + 2×`sec_aniso` + union `|cone| > 2q^{d-2}`
   (nlinarith over ℝ; needs `finrank ≥ 4`, `q ≥ 3`, even finrank). ∃ isotropic `a` non-tangent to both `u₁,u₂`.
 
-**REMAINING (structural, NOT counting):**
-- (iii) **walk/hub → `hconn`.** Connect any two anisotropic `y,z` by `ratioEdge`s. Case `z−y` isotropic: direct/near-direct
-  via `cone_not_covered(y,z)` + `ratioEdge_smul/_line`. Case `z−y` anisotropic (the subtle one): a common-direction `a`
-  from `cone_not_covered(y, z−y)` gives `s* := Q(z−y)/polar Q(z−y) a` with `z−(y+s*a)` isotropic — a 2-step `y —(y+s*a)— z`
-  **when `y+s*a` is anisotropic**; the `Q(y+s*a)=0` coincidence needs a fallback (perturb `a`, or strengthen
-  `cone_not_covered` to "the good set is large" — it has `≥ q^{d-1}−2q^{d-2}` elements, so freedom exists). Then
-  `hconn_of_hub` (or directly build `hconn`).
-- (iv) **final discharge** — construct primitive `ψ` via `AddChar.FiniteField.primitiveChar_to_Complex`, `hF` from `p`
-  odd; instantiate `nullstellensatz_of_connectivity` ⟹ `NondegQuadricDeterminesForm`; delete the carried premise.
+**✅ DISCHARGE COMPLETE (2026-07-06, all axiom-clean, in `build.sh`).** The scope correction (the honest 2-step /
+`hconn` walk needs a `k=4` cover that PROVABLY FAILS at `q=3, d=4` elliptic VO⁻₄(3), which the citation's scope
+`p ≠ 2` — INCLUDES `p=3` — forces us to cover) was resolved by taking the **structural route** (`hspan+hlink`) with
+the **exact** isotropic-`u` section count instead of the crude magnitude bound. The chain, all landed here + in
+`NullstellensatzHlink`:
+- (iii-a) **`section_iso_count`** — exact `section·q² + (q−1)|V| = |cone|·q²` (equivalently the type-independent gap
+  `(q−2)q² > 0` at `q ≥ 3`), via a two-constraint character sum — the crux that clears the `q=3` boundary.
+- (iii-b) **`cone_not_covered_gen`** — `y` aniso + `u` ANY nonzero ⟹ isotropic `a` off `y^⊥ ∪ u^⊥`.
+- (iii-c) **`cone_punctured_span`** (hspan) — the punctured cone spans (polar-orthogonal complement `= ⊥`).
+- (iii-d) **`aniso_polar_diameter_two`** (hlink, in `NullstellensatzHlink`) — anisotropic polar-diameter ≤ 2, a
+  `q=3`-tight union-bound count using `cone_card_upper` + the exact section saving.
+- (iv) **discharge** — `nondegQuadric_{determines_of,zmod}_of_even` (in `NullstellensatzHlink`) instantiate
+  `nullstellensatz_of_structural` (even `d`); `RouteC.nondegQuadricDeterminesForm_of_even` proves the exact
+  `NondegQuadricDeterminesForm` predicate, and `recoveredForm_colouring_equivariant` no longer carries the citation
+  (its `hcite` premise deleted; `#print axioms` = `[propext, Classical.choice, Quot.sound]`).
 
-Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`/`axiom`, `native_decide` banned. WIP.
+Scope note: the structural section count (`sec_aniso`, `u^⊥` odd-dim) covers **even `finrank`** — which is exactly
+every Route-C instantiation (`VO^ε_{2m}`, `m ≥ 2`); odd `d` (not used) is left open. The old
+`nullstellensatz_of_connectivity`/hub route is a valid but strictly harder alternative (its walk needs the `k=4`
+cover that fails `q=3`) — kept as a proven spare.
+
+Quality bar (met): axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`/`axiom`, `native_decide` banned.
 -/
 import ChainDescent.PairForm
 import ChainDescent.Coordinatization
-import ChainDescent.ScratchNullstellensatz
-import ChainDescent.ScratchNullstellensatzStructural
+import ChainDescent.Nullstellensatz
+import ChainDescent.NullstellensatzStructural
+import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
 
 namespace ChainDescent.Nullstellensatz
 
@@ -296,3 +308,230 @@ theorem cone_not_covered {ψ : AddChar K ℂ} (hF : ringChar K ≠ 2) (hψ : ψ.
   obtain ⟨a, ha⟩ := Finset.card_pos.mp hgoodpos
   simp only [hgood, Finset.mem_filter, Finset.mem_univ, true_and] at ha
   exact ⟨a, ha.1, ha.2.1, ha.2.2⟩
+
+/-- **The exact ISOTROPIC-`u` hyperplane section (the crux).** For nondegenerate `Q` and a NONZERO ISOTROPIC `u`
+(`Q u = 0`, `u ≠ 0`), the tangent section `{x | Q x = 0 ∧ polar Q u x = 0}` and the full cone are related by the
+**type-independent** identity (no discriminant / Witt index):
+`section·q² + (q−1)·|V| = cone·q²` (equivalently `section = |cone| − (q−1)q^{d−2}`).
+Proof by the two-constraint character-sum count (`count2_eq_charsum`): the `q²·section` sum splits over the dual
+variable `r` for `Q`. The `r = 0` slice is `q·|ker(polar Q u)| = |V|` (a nonzero-functional hyperplane); every `r ≠ 0`
+slice is **independent of** the second dual variable `s` because `Q u = 0` kills the linear shift
+(`sum_addChar_quadForm_linear` with `a' = s•u`, `Q(s•u) = s²·Q u = 0`), collapsing to `q·∑ₓ ψ(r·Q x)`, whose `r`-sum is
+`q·|cone| − |V|`. The type-dependent Gauss terms never appear. -/
+theorem section_iso_count {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    (Q : QuadraticForm K V) (hQnd : (QuadraticMap.polarBilin Q).Nondegenerate)
+    {u : V} (hu : Q u = 0) (hu0 : u ≠ 0) :
+    (Finset.univ.filter (fun x : V => Q x = 0 ∧ QuadraticMap.polar Q u x = 0)).card
+        * (Fintype.card K * Fintype.card K)
+      + (Fintype.card K - 1) * Fintype.card V
+      = (Finset.univ.filter (fun x : V => Q x = 0)).card
+          * (Fintype.card K * Fintype.card K) := by
+  classical
+  have hq1 : 1 ≤ Fintype.card K := Fintype.card_pos
+  -- `polar Q u` is a nonzero linear functional (nondegeneracy).
+  have hfne : Q.polarBilin u ≠ 0 := by
+    have hex : ∃ w, QuadraticMap.polar Q u w ≠ 0 := by
+      by_contra h; push_neg at h
+      exact hu0 (hQnd.1 u (fun y => by rw [QuadraticMap.polarBilin_apply_apply]; exact h y))
+    obtain ⟨w, hw⟩ := hex
+    intro hz; apply hw
+    rw [← QuadraticMap.polarBilin_apply_apply, hz, LinearMap.zero_apply]
+  -- (A) the two-constraint count: `∑ₓ (∑ᵣ ψ(r·Qx))·(∑ₛ ψ(s·polar u x)) = Scard·q²`.
+  have hcount := count2_eq_charsum hψ (fun x : V => Q x)
+    (fun x : V => QuadraticMap.polar Q u x) 0 0
+  simp only [sub_zero] at hcount
+  -- (B) expand the product of sums and reorder to `∑ᵣ ∑ₛ ∑ₓ ψ(r·Qx + s·polar u x)`.
+  have hexpand : (∑ x : V, (∑ r : K, ψ (r * Q x)) *
+        (∑ s : K, ψ (s * QuadraticMap.polar Q u x)))
+      = ∑ r : K, ∑ s : K, ∑ x : V, ψ (r * Q x + s * QuadraticMap.polar Q u x) := by
+    simp_rw [Finset.sum_mul_sum, ← AddChar.map_add_eq_mul]
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl (fun r _ => Finset.sum_comm)
+  -- ker-cardinality helper: `q · |ker(polar Q u)| = |V|` (nonzero-functional hyperplane).
+  have hkc : (Finset.univ.filter (fun x : V => QuadraticMap.polar Q u x = 0)).card
+      = Fintype.card (LinearMap.ker (Q.polarBilin u)) := by
+    rw [Fintype.card_subtype]
+    congr 1
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, LinearMap.mem_ker,
+      QuadraticMap.polarBilin_apply_apply]
+  have hkerV : (Fintype.card K : ℂ)
+      * ((Finset.univ.filter (fun x : V => QuadraticMap.polar Q u x = 0)).card : ℂ)
+      = (Fintype.card V : ℂ) := by
+    rw [hkc]
+    have hrank : Module.finrank K (LinearMap.ker (Q.polarBilin u)) + 1 = Module.finrank K V :=
+      Module.Dual.finrank_ker_add_one_of_ne_zero hfne
+    have hkerpow : (Fintype.card (LinearMap.ker (Q.polarBilin u)) : ℂ)
+        = (Fintype.card K : ℂ) ^ Module.finrank K (LinearMap.ker (Q.polarBilin u)) := by
+      rw [Module.card_eq_pow_finrank (K := K)]; push_cast; ring
+    have hVpow : (Fintype.card V : ℂ) = (Fintype.card K : ℂ) ^ Module.finrank K V := by
+      rw [Module.card_eq_pow_finrank (K := K)]; push_cast; ring
+    rw [hkerpow, hVpow, ← hrank, pow_succ]; ring
+  -- (C) the `r = 0` slice equals `|V|`.
+  have hr0 : (∑ s : K, ∑ x : V, ψ ((0 : K) * Q x + s * QuadraticMap.polar Q u x))
+      = (Fintype.card V : ℂ) := by
+    rw [Finset.sum_congr rfl (fun s _ => Finset.sum_congr rfl (fun x _ => by rw [zero_mul, zero_add])),
+      Finset.sum_comm]
+    have h2 : ∀ x : V, (∑ s : K, ψ (s * QuadraticMap.polar Q u x))
+        = ((if QuadraticMap.polar Q u x = 0 then Fintype.card K else 0 : ℕ) : ℂ) :=
+      fun x => AddChar.sum_mulShift (QuadraticMap.polar Q u x) hψ
+    rw [Finset.sum_congr rfl (fun x _ => h2 x)]
+    simp only [Nat.cast_ite, Nat.cast_zero]
+    rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul, mul_comm]
+    exact hkerV
+  -- (D) each `r ≠ 0` slice is independent of `s` (`Q u = 0`), giving `q·∑ₓ ψ(r·Qx)`.
+  have hrne : ∀ r : K, r ≠ 0 →
+      (∑ s : K, ∑ x : V, ψ (r * Q x + s * QuadraticMap.polar Q u x))
+        = (Fintype.card K : ℂ) * ∑ x : V, ψ (r * Q x) := by
+    intro r hr
+    have hslice : ∀ s : K, (∑ x : V, ψ (r * Q x + s * QuadraticMap.polar Q u x))
+        = ∑ x : V, ψ (r * Q x) := by
+      intro s
+      have hsu : Q (s • u) = 0 := by rw [QuadraticMap.map_smul, hu, smul_zero]
+      rw [Finset.sum_congr rfl (fun x _ => by
+        rw [show r * Q x + s * QuadraticMap.polar Q u x
+              = r * Q x + QuadraticMap.polar Q x (s • u) by
+          rw [QuadraticMap.polar_smul_right, smul_eq_mul, QuadraticMap.polar_comm]])]
+      have hlin := sum_addChar_quadForm_linear ψ Q (Units.mk0 r hr) (s • u)
+      rw [Units.val_mk0] at hlin
+      rw [hlin, hsu, mul_zero, neg_zero, AddChar.map_zero_eq_one, one_mul]
+    rw [Finset.sum_congr rfl (fun s _ => hslice s), Finset.sum_const, Finset.card_univ,
+      nsmul_eq_mul]
+  -- (E) the `r ≠ 0` block sums to `q·(q·|cone| − |V|)`.
+  have hconesum : (∑ r ∈ Finset.univ.erase (0 : K), ∑ x : V, ψ (r * Q x))
+      = (Fintype.card K : ℂ) * ((Finset.univ.filter (fun x : V => Q x = 0)).card : ℂ)
+        - (Fintype.card V : ℂ) := by
+    have hfull : (∑ r : K, ∑ x : V, ψ (r * Q x))
+        = (Fintype.card K : ℂ) * ((Finset.univ.filter (fun x : V => Q x = 0)).card : ℂ) := by
+      rw [Finset.sum_comm]
+      have hin : ∀ x : V, (∑ r : K, ψ (r * Q x)) = ((if Q x = 0 then Fintype.card K else 0 : ℕ) : ℂ) :=
+        fun x => AddChar.sum_mulShift (Q x) hψ
+      rw [Finset.sum_congr rfl (fun x _ => hin x)]
+      simp only [Nat.cast_ite, Nat.cast_zero]
+      rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul, mul_comm]
+    have hzero : (∑ x : V, ψ ((0 : K) * Q x)) = (Fintype.card V : ℂ) := by
+      simp [AddChar.map_zero_eq_one, Finset.card_univ]
+    have hsplit : (∑ x : V, ψ ((0 : K) * Q x))
+          + (∑ r ∈ Finset.univ.erase (0 : K), ∑ x : V, ψ (r * Q x))
+        = ∑ r : K, ∑ x : V, ψ (r * Q x) :=
+      Finset.add_sum_erase Finset.univ (fun r : K => ∑ x : V, ψ (r * Q x)) (Finset.mem_univ (0 : K))
+    rw [hzero, hfull] at hsplit
+    linear_combination hsplit
+  -- (F) assemble: `Scard·q² = |V| + q·(q·|cone| − |V|) = q²·|cone| − (q−1)·|V|`.
+  have hL := hcount
+  rw [hexpand] at hL
+  have hsplitr : (∑ r : K, ∑ s : K, ∑ x : V, ψ (r * Q x + s * QuadraticMap.polar Q u x))
+        = (∑ s : K, ∑ x : V, ψ ((0 : K) * Q x + s * QuadraticMap.polar Q u x))
+          + ∑ r ∈ Finset.univ.erase (0 : K),
+              (∑ s : K, ∑ x : V, ψ (r * Q x + s * QuadraticMap.polar Q u x)) :=
+    (Finset.add_sum_erase Finset.univ _ (Finset.mem_univ (0 : K))).symm
+  rw [hsplitr, hr0, Finset.sum_congr rfl (fun r hr => hrne r (Finset.ne_of_mem_erase hr)),
+    ← Finset.mul_sum, hconesum] at hL
+  -- hL : |V| + q·(q·|cone| − |V|) = Scard·(q*q)
+  -- (G) cast the ℂ identity back to ℕ.
+  have hcast : ((((Finset.univ.filter (fun x : V => Q x = 0 ∧ QuadraticMap.polar Q u x = 0)).card
+        * (Fintype.card K * Fintype.card K) + (Fintype.card K - 1) * Fintype.card V) : ℕ) : ℂ)
+      = ((((Finset.univ.filter (fun x : V => Q x = 0)).card
+        * (Fintype.card K * Fintype.card K)) : ℕ) : ℂ) := by
+    push_cast [Nat.cast_sub hq1]
+    linear_combination -hL
+  exact_mod_cast hcast
+
+open Module in
+/-- **The isotropic cone is not covered by `y^⊥ ∪ u^⊥` for an anisotropic `y` and ANY nonzero `u`.**
+Generalizes `cone_not_covered` (which needs both hyperplane-vectors anisotropic) to an ARBITRARY second vector
+`u ≠ 0` — the form `hspan` needs. For anisotropic `u` it is `cone_not_covered`; for isotropic `u` the union bound
+uses the **exact** section identity `section_iso_count` (the crude Gauss bound fails at `q = 3`): the two sections
+have total card `≤ |cone| − (q−2)·|V| < |cone|`, so a non-tangent isotropic vector survives. Uniform at `q ≥ 3`,
+both types. -/
+theorem cone_not_covered_gen {ψ : AddChar K ℂ} (hF : ringChar K ≠ 2) (hψ : ψ.IsPrimitive)
+    (Q : QuadraticForm K V) (hQnd : (QuadraticMap.polarBilin Q).Nondegenerate)
+    (heven : Even (Module.finrank K V)) (hdim : 4 ≤ Module.finrank K V)
+    (hq : 3 ≤ Fintype.card K) {y u : V} (hy : Q y ≠ 0) (hu0 : u ≠ 0) :
+    ∃ a : V, Q a = 0 ∧ QuadraticMap.polar Q y a ≠ 0 ∧ QuadraticMap.polar Q u a ≠ 0 := by
+  classical
+  by_cases hu : Q u = 0
+  · -- isotropic `u`: union bound via the exact section identity
+    set cone := Finset.univ.filter (fun a : V => Q a = 0) with hcone
+    set secy := Finset.univ.filter (fun a : V => Q a = 0 ∧ QuadraticMap.polar Q y a = 0) with hsecy
+    set secu := Finset.univ.filter (fun a : V => Q a = 0 ∧ QuadraticMap.polar Q u a = 0) with hsecu
+    set good := Finset.univ.filter
+      (fun a : V => Q a = 0 ∧ QuadraticMap.polar Q y a ≠ 0 ∧ QuadraticMap.polar Q u a ≠ 0) with hgood
+    have hNV : 0 < Fintype.card V := Fintype.card_pos
+    have hsecyE : secy.card * Fintype.card K * Fintype.card K = Fintype.card V :=
+      sec_aniso hF hψ Q hQnd heven hy
+    have hsecuE : secu.card * (Fintype.card K * Fintype.card K)
+        + (Fintype.card K - 1) * Fintype.card V
+        = cone.card * (Fintype.card K * Fintype.card K) := section_iso_count hψ Q hQnd hu hu0
+    -- `secy.card + secu.card < cone.card`
+    have hlt : secy.card + secu.card < cone.card := by
+      have hqqpos : 0 < Fintype.card K * Fintype.card K := by positivity
+      have hstep : Fintype.card V < (Fintype.card K - 1) * Fintype.card V := by
+        have h1 : 1 < Fintype.card K - 1 := by omega
+        exact (lt_mul_iff_one_lt_left hNV).mpr h1
+      have hAqq : secy.card * (Fintype.card K * Fintype.card K) = Fintype.card V := by
+        rw [← mul_assoc]; exact hsecyE
+      have hmul : (secy.card + secu.card) * (Fintype.card K * Fintype.card K)
+          < cone.card * (Fintype.card K * Fintype.card K) := by
+        calc (secy.card + secu.card) * (Fintype.card K * Fintype.card K)
+            = Fintype.card V + secu.card * (Fintype.card K * Fintype.card K) := by
+              rw [add_mul, hAqq]
+          _ < (Fintype.card K - 1) * Fintype.card V
+                + secu.card * (Fintype.card K * Fintype.card K) := by
+              exact Nat.add_lt_add_right hstep _
+          _ = secu.card * (Fintype.card K * Fintype.card K)
+                + (Fintype.card K - 1) * Fintype.card V := by ring
+          _ = cone.card * (Fintype.card K * Fintype.card K) := hsecuE
+      exact lt_of_mul_lt_mul_right hmul (Nat.zero_le _)
+    -- cover: `cone ⊆ good ∪ secy ∪ secu`
+    have hsub : cone ⊆ good ∪ secy ∪ secu := by
+      intro a ha
+      simp only [hcone, Finset.mem_filter, Finset.mem_univ, true_and] at ha
+      simp only [Finset.mem_union, hgood, hsecy, hsecu, Finset.mem_filter, Finset.mem_univ,
+        true_and]
+      by_cases h1 : QuadraticMap.polar Q y a = 0
+      · left; right; exact ⟨ha, h1⟩
+      · by_cases h2 : QuadraticMap.polar Q u a = 0
+        · right; exact ⟨ha, h2⟩
+        · left; left; exact ⟨ha, h1, h2⟩
+    have hcard : cone.card ≤ good.card + secy.card + secu.card := by
+      have h1 := Finset.card_le_card hsub
+      have h2 := Finset.card_union_le (good ∪ secy) secu
+      have h3 := Finset.card_union_le good secy
+      omega
+    have hgoodpos : 0 < good.card := by omega
+    obtain ⟨a, ha⟩ := Finset.card_pos.mp hgoodpos
+    simp only [hgood, Finset.mem_filter, Finset.mem_univ, true_and] at ha
+    exact ⟨a, ha.1, ha.2.1, ha.2.2⟩
+  · -- anisotropic `u`: the landed two-anisotropic-vector case
+    exact cone_not_covered hF hψ Q hQnd heven hdim hq hy hu
+
+open Module in
+/-- **`hspan`: the punctured isotropic cone spans.** For anisotropic `y`, the set of isotropic vectors NON-tangent
+to `y` (`{x | Q x = 0 ∧ polar Q x y ≠ 0}`) spans `V`. Proof: its polar-orthogonal complement is `⊥` — any `u ≠ 0`
+orthogonal to the whole punctured cone contradicts `cone_not_covered_gen` (which supplies an isotropic `a`
+non-tangent to `y` AND to `u`) — so by nondegeneracy the span is everything. This is exactly the `hspan` hypothesis
+of `nullstellensatz_of_structural`. -/
+theorem cone_punctured_span {ψ : AddChar K ℂ} (hF : ringChar K ≠ 2) (hψ : ψ.IsPrimitive)
+    (Q : QuadraticForm K V) (hQnd : (QuadraticMap.polarBilin Q).Nondegenerate)
+    (heven : Even (Module.finrank K V)) (hdim : 4 ≤ Module.finrank K V)
+    (hq : 3 ≤ Fintype.card K) {y : V} (hy : Q y ≠ 0) :
+    Submodule.span K {x : V | Q x = 0 ∧ QuadraticMap.polar Q x y ≠ 0} = ⊤ := by
+  classical
+  set S : Set V := {x : V | Q x = 0 ∧ QuadraticMap.polar Q x y ≠ 0} with hSdef
+  have hperp : LinearMap.BilinForm.orthogonal (Q.polarBilin) (Submodule.span K S) = ⊥ := by
+    rw [eq_bot_iff]
+    intro u hu
+    rw [Submodule.mem_bot]
+    by_contra hune
+    obtain ⟨a, haQ, hay, hau⟩ := cone_not_covered_gen hF hψ Q hQnd heven hdim hq hy hune
+    have haS : a ∈ S := ⟨haQ, by rw [QuadraticMap.polar_comm]; exact hay⟩
+    have horth : LinearMap.BilinForm.IsOrtho (Q.polarBilin) a u :=
+      (LinearMap.BilinForm.mem_orthogonal_iff.mp hu) a (Submodule.subset_span haS)
+    rw [LinearMap.BilinForm.isOrtho_def, QuadraticMap.polarBilin_apply_apply,
+      QuadraticMap.polar_comm] at horth
+    exact hau horth
+  have hfr := LinearMap.BilinForm.finrank_orthogonal hQnd (Submodule.span K S)
+  rw [hperp, finrank_bot] at hfr
+  have hle : Module.finrank K (Submodule.span K S) ≤ Module.finrank K V := Submodule.finrank_le _
+  exact Submodule.eq_top_of_finrank_eq (le_antisymm hle (by omega))

@@ -42,9 +42,11 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > isotropy-separation path); multi-form families get the §9.0a meta-composition (**Track B**: `routeC_polySupport_of_adapter`
 > + per-family corollaries; Suzuki via a `formConeStab` generalization for its cubic cone). **▶ C# RUNTIME BUILT: C1a–C4 +
 > family-dispatch + Suzuki prototype** (affine-polar + Suzuki live; alternating/half-spin DORMANT — dense-infeasible, plan §9.2.7).
-> **★ REMAINING for Route C = promote the scoped citations** (`NondegQuadricDeterminesForm` / `JointVarietyDeterminesFamily`
-> / `ConePreservingCollineationIsSemiSimilitude` / `AffineSchemeTwoClosed`; discharge routes in
+> **★ REMAINING for Route C = promote the remaining scoped citations** (`JointVarietyDeterminesFamily` /
+> `ConePreservingCollineationIsSemiSimilitude` / `AffineSchemeTwoClosed`; discharge routes in
 > `chain-descent-citation-discharge.md`), or Track A (a multi-quadric pair-route) for a per-family multi-form coarse `SealDisj`.
+> **`NondegQuadricDeterminesForm` is FULLY DISCHARGED (2026-07-06, axiom-clean, in `build.sh`)** — `ChainDescent.Nullstellensatz*`
+> (`nondegQuadric_zmod_of_even`, even `d`); `recoveredForm_colouring_equivariant`'s `hcite` premise deleted.
 > [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
 >
 > **▶ UPDATE (2026-06-24) — the first forms-graph instance is SEALED.** `VO⁻₄(3)` (`ScratchBM3Glue.vo4minus_seal`,

@@ -1,5 +1,11 @@
 /-
-# Discharging `NondegQuadricDeterminesForm` — the quadric Nullstellensatz (WIP)
+# Discharging `NondegQuadricDeterminesForm` — the quadric Nullstellensatz (✅ DONE)
+
+**✅ DISCHARGED (2026-07-06, in `build.sh`, axiom-clean).** The structural route (this file's
+`nullstellensatz_of_structural`) is fed by `cone_punctured_span` (hspan) + `aniso_polar_diameter_two` (hlink) from
+`NullstellensatzCount`/`NullstellensatzHlink`, and instantiated at `ZMod p` by `nondegQuadric_zmod_of_even` — proving
+the exact `NondegQuadricDeterminesForm p d` for even `d` (`RouteC.nondegQuadricDeterminesForm_of_even`). The `hcite`
+premise is gone from `recoveredForm_colouring_equivariant`. The plan/target below is retained as the design record.
 
 **Target.** Replace the carried citation
 `NondegQuadricDeterminesForm (p d) : p ≠ 2 → 4 ≤ d → ∀ Q R, Q.polarBilin.Nondegenerate →

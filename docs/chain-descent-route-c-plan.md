@@ -159,12 +159,14 @@ the C# runtime is close to as complete as it usefully can be. Fuller record: [[p
    proved iso-invariant with no dimension count). Those two remain carried ONLY on the strictly-stronger `|Aut|`-naming
    theorems (`recovered{Form,Family}_colouring_equivariant`). So the live Route-C carries are now just FTPG
    `ConePreservingCollineationIsSemiSimilitude` (hard, q=pᵉ only) + Skresanov `AffineSchemeTwoClosed` (meta-poly pinning),
-   plus `NondegQuadricDeterminesForm`/`JointVarietyDeterminesFamily` on the `|Aut|`-naming side only.
-   **★ FULL `NondegQuadricDeterminesForm` discharge UNDERWAY (2026-07-05) — see `chain-descent-citation-discharge.md` §3.5.**
-   Heart + assembly (`nullstellensatz_of_structural`) + isotropic-existence bedrock + `isotropic_span` landed axiom-clean
-   (11 lemmas, `ScratchNullstellensatz{,Structural}.lean`, WIP not in build). Reduced to EXACTLY two finite-geometry facts
-   (`hspan` punctured-cone-span + `hlink` aniso-diameter-2) at the Witt-index-1/`q=3` boundary; `hlink` has a point-count
-   route (reuse `GaussCount`). §3.5 is the pick-up point (lemma map + VERIFY + NEXT STEP).
+   plus `JointVarietyDeterminesFamily` on the `|Aut|`-naming side only.
+   **★ FULL `NondegQuadricDeterminesForm` discharge DONE (2026-07-06, axiom-clean, in `build.sh`).** Ported →
+   `ChainDescent.Nullstellensatz{,Structural,Count,Hlink}` (Scratch dropped). Structural route: `section_iso_count`
+   (crux, exact isotropic-`u` section, gap `(q−2)q²>0` clears the `q=3` VO⁻₄(3) boundary that the `hconn` k=4 walk
+   fails) → `cone_punctured_span` (hspan) + `aniso_polar_diameter_two` (hlink) → `nullstellensatz_of_structural` →
+   `nondegQuadric_zmod_of_even` = exact `NondegQuadricDeterminesForm p d` for **even `d`** (every `VO^ε_{2m}` use).
+   `RouteC.nondegQuadricDeterminesForm_of_even` proves the predicate; `recoveredForm_colouring_equivariant`'s `hcite`
+   is DELETED (carries only `Even d`). Live Route-C carries now = FTPG + Skresanov + `JointVarietyDeterminesFamily`.
 3. *(lower)* **C# frame+WL confirmation** into `AffinePolarHandler.Confirm` (harvest-free p≥5 mate-ruling) — sound but
    advances no proof (reduces to the WL-dim core); the harvest-based `ConfirmByMultiQuadricReconstruction` already works.
 4. *(lower)* **Suzuki generalization** past q=8 or **alternating/half-spin runtime** — both gated on a sparse/implicit
