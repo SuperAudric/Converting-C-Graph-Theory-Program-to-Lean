@@ -119,6 +119,12 @@ coordinatizer (R1)** is precisely what keeps `w` poly for the affine-polar pilot
 `Aut`-computation. So R1 is not only a Seal-Phase cleanliness item — it is a *prerequisite for a poly `w`* on
 the pilot family. Any node whose honest `w` cannot be shown poly forces that family into `UnhandledResidue`
 (§7).
+**Scope note (route-c-plan §7a 2026-07-06 refinement):** this bites only on the **poly** oracle — the *quasipoly*
+pilot's per-node work is warmRefine-based (isotropy-count separation, Aut-free, no R1). For the poly oracle, R1's
+poly `w` is an **effective-construction obligation** (line-recovery → classicality → coordinatize by linear algebra),
+manifestly poly and **distinct from the WL-dim wall**; the per-graph obligation narrows to *certify vertex-transitive
+membership* (explicit `Aut`-harvest shown unnecessary — existence of transitivity suffices), classicality **cited**
+(Buekenhout–Shult / Payne–Thas), poly-time an obligation not an axiom.
 
 The D7 list = the leaf primitives these decompose to (one `F_q` op, one signature compare, …), each either a
 proven poly-size lemma or an explicitly declared unit cost.
@@ -225,8 +231,11 @@ model" to "a Lean runtime model with an explicit, inspectable primitive-cost dec
   the seal's discreteness, not left open.
 - **D7's declared primitives are a judgement call** a reviewer may push on — keep the list minimal and
   proven-where-cheap.
-- **`w` poly-ness depends on R1** for the pilot family (§4) — the Aut-free coordinatizer is on the critical
-  path for a poly (not just quasipoly-with-Aut-harvest) `w`.
+- **`w` poly-ness depends on R1** for the *poly* oracle (§4; the quasipoly pilot rides warmRefine, no R1). R1's
+  poly `w` is a **non-wall effective-construction obligation** whose per-graph core is *certify vertex-transitive
+  membership* (not full coordinatization / Aut-harvest); classicality is cited (Buekenhout–Shult / Payne–Thas), the
+  `d=4` GQ case is the residual, and there is **no poly transitivity-test shortcut** (GI-equivalent; WL-blocked for
+  n div by 16). Detail: route-c-plan §7a (2026-07-06 refinement).
 - **The renumbering / unit-cost-colour fork (§4 FINDING)** must be decided when `canonForm?`'s `refineStep`
   is chosen: declare colour-ops unit-cost (D7), or build a renumbering `refineStep`. Under the current
   `Encodable.encode` refineStep, only the unit-cost-RAM reading gives a poly `warmRefine`.

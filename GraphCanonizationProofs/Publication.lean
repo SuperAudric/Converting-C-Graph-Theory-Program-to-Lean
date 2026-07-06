@@ -130,6 +130,19 @@ for the `q = pᵉ`, `e > 1` field twist. Source: Artin, *Geometric Algebra*. -/
 opaque FundamentalThmProjGeom : Prop
 axiom ftpg : FundamentalThmProjGeom
 
+/-- Buekenhout–Shult / Veldkamp–Tits: an abstract polar space of rank ≥ 3 is CLASSICAL (embeds in `PG(d,q)`
+with its form). **CORRECTNESS/classicality only — NOT a complexity bound** (R1's poly-time is an in-project
+effective-construction obligation, route-c-plan §7a). Used only for `d ≥ 6`. Source: Buekenhout–Shult,
+Geom. Dedicata 1974; Tits, *Buildings of Spherical Type*. -/
+opaque PolarSpaceRankGe3Classical : Prop
+axiom buekenhout_shult : PolarSpaceRankGe3Classical
+
+/-- Payne–Thas: recognition/coordinatization of a CLASSICAL generalized quadrangle (the `d = 4`, rank-2 case,
+outside Buekenhout–Shult). **Correctness only.** The genuine soft spot (non-classical GQs exist), route-c-plan
+§7a (e). Source: Payne–Thas, *Finite Generalized Quadrangles*. -/
+opaque ClassicalGQRecognition : Prop
+axiom payne_thas : ClassicalGQRecognition
+
 /-! ## 3. THE OBLIGATIONS — the endgame theorem statements
 
 Each is a `sorry`-stubbed compile target. The `-- discharged by:` note records which completed project

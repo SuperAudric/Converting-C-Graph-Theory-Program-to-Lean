@@ -915,10 +915,63 @@ disguise (global ≠ bounded-WL).
 - **(R1) Build the Aut-free geometric coordinatizer** to replace/supplement `AffineStructureRecovery.Recover`'s
   `O_p(Aut)` path (which is fine for de-risking but is the circular step for the poly claim). The enabling primitive
   (line recovery) is confirmed; the remaining engineering is line-geometry → frame → coordinates (the group-law/embedding).
-- **(R2) Name + verify the geometry-recovery citation** (Buekenhout–Shult / recovering a polar space from its point graph)
-  and its poly bound — the citation the poly claim now rests on (analogous to how the seal rests on G3).
+- **(R2) Name + verify the geometry-recovery citation** — see the **2026-07-06 REFINEMENT** below.
 - **(R3) Double-check `d = 4` (GQ, rank 2)** — outside the rank≥3 embedding theorem; the probe supports it, but the
   coordinate read-off needs its own (standard) argument for generalized quadrangles.
+
+**★ 2026-07-06 REFINEMENT — the citation split, the poly obligation, and the transitivity-membership sharpening
+(literature run + a soundness argument; corrects the earlier "poly rests on Buekenhout–Shult" framing).**
+
+*(a) The citation split — R2 is NOT a poly citation.* A verified literature search (Buekenhout–Shult, Veldkamp–Tits,
+Cameron; constructive-recognition-of-classical-groups; SRG canonization) found: **no off-the-shelf theorem states a
+polynomial-time coordinatization of a classical polar-space graph.** The available results split cleanly —
+  - **Buekenhout–Shult / Veldkamp–Tits** (rank ≥ 3) and **Payne–Thas** (GQ) are **existence/characterization** theorems:
+    the recovered geometry *is* a classical polar space and the form is recoverable up to the standard equivalence. These
+    are legitimate **correctness/classicality citations** — but they carry **no complexity bound**.
+  - **Constructive recognition of classical groups** (Kantor–Seress; Leedham-Green–O'Brien; Dietrich et al.) is poly-time
+    in field + rank, but for the **group in a representation**, is Las Vegas, and runs poly-time only **modulo a
+    discrete-log oracle** — it does not solve the "coordinatize the abstract graph" problem (and discrete log is not needed
+    for our canonization use: the field is recovered only up to Frobenius, already handled by F2/FTPG).
+  - **SRG canonization** (Babai–Chen–Sun–Teng–Wilmes, FOCS 2013) is **sub-exponential** `exp(Õ(n^{1/5}))`, not poly (= the
+    project's existing `viaSpielman` floor).
+  So R2 becomes: **cite Buekenhout–Shult (rank ≥ 3) + Payne–Thas (GQ) for CLASSICALITY/CORRECTNESS only.**
+
+*(b) Poly-time is an in-project OBLIGATION, not a citation (and NOT the wall).* The coordinatization — line-recovery
+(done) → classicality (cited) → coordinatize the projective residues by the classical ternary-ring / Von Staudt effective
+procedure (linear algebra + incidence) — is **manifestly polynomial**, and it is a **different method** from the frame+WL
+route of §9.2.8 that reduces to the WL-dimension wall. So the poly bound is a **tractable, non-wall effective-construction
+argument the project makes itself** (cleanest for rank ≥ 3, `d ≥ 6`), *not* an axiom. Per the firewall (endgame-spec), an
+unproven poly claim cannot be axiomatized — so poly-time stays an obligation, and the good news is it is provable, not the wall.
+
+*(c) The transitivity-membership sharpening — the per-graph obligation is weaker than "coordinatize + harvest Aut".* Every
+handled residue is **vertex-transitive** (schurian ⟹ orbital scheme of a transitive group; Cameron = rank-3 primitive).
+Two consequences narrow R1's real target:
+  - **Existence-of-transitivity suffices for sound pruning — no explicit `Aut`-harvest is needed.** To pick one root and
+    prune the other `n−1` soundly, the canonizer needs only that *some* automorphism relates any two vertices (one orbit),
+    not the explicit permutation. Recursing (each forms-graph residue is a smaller vertex-transitive `VO_{d−2}`) gives a
+    **single-path** descent of `O(d)` steps ⟹ **poly** — exactly the recovery-route's empirical single-path finding
+    (`leaves=1, BranchingNodes=0`).
+  - **So the load-bearing per-graph step is `certify vertex-transitive MEMBERSHIP` ("is this really `VO_d`?"), not full
+    coordinatization.** Transitivity ⟹ single-path ⟹ poly is then *cited structural theory* (the orthogonal group is
+    transitive on isotropic points), applied once, not reproven per graph. Membership certification is R1's confirmation;
+    it may be strictly cheaper than explicit coordinates.
+
+*(d) There is NO poly-time shortcut via a transitivity test.* Testing vertex-transitivity in general is polynomial-time
+**equivalent to graph isomorphism** (Mathon: GI ≡ Aut); the only WL handle (Fuhlbrück–Köbler–Verbitsky, arXiv:2005.08887)
+is poly **only for prime `n`**, is **provably blocked for `n` divisible by 16** (⊇ the char-2 forms graphs), and is **open
+for odd prime-power `n`** (the odd-`q` forms graphs `n = q^d`). So "recognize parameters ⟹ assume transitive" is **unsound**
+(parameter-mates exist that are not vertex-transitive) and no test rescues it. This *reinforces* (c): the only sound route
+is **structural/geometric membership certification** (R1's confirmation), with transitivity **cited, not tested**.
+
+*(e) The genuine soft spot stays `d = 4` (R3).* The GQ case has no clean poly citation for recognizing/coordinatizing a
+*classical* GQ from its graph (non-classical GQs exist), so it needs its own argument or an explicit scope note. This is the
+one place the literature does not hand us correctness-for-free either.
+
+**Net for R1:** *not* closable by "add a citation" (the earlier hope), *not* wall-blocked. Shape = **{Buekenhout–Shult +
+Payne–Thas cite CLASSICALITY} + {poly-time = an in-project effective-construction obligation, cleanest `d ≥ 6`} + {the
+per-graph obligation is certified vertex-transitive membership, explicit `Aut`-harvest shown unnecessary} + {`d = 4` GQ = the
+residual}.** The `Publication.lean` firewall list gains Buekenhout–Shult + Payne–Thas as *correctness* citations; poly-time
+does not become an axiom.
 
 ---
 
