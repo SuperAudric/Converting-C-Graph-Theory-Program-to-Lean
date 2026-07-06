@@ -309,17 +309,17 @@ axiom-clean, no from-scratch ℂ-magnitude work needed. Bricks (in `ScratchNulls
   `qᵈ − (q−1)√(qᵈ) ≤ |cone|·q`, i.e. `|cone| ≥ q^{d-1} − (q−1)q^{d/2−1}`. Direct from `zeroCount_sq_le`.
 - ✅ **`card_zeros_odd`** (2026-07-06, axiom-clean) — the reusable heart: nondeg quadric in ODD dim `m` ⟹
   `|{Q=0}|·q = |V|` exactly (the `card_quadForm_eq` bracket `∑χ(t)=0` for odd power). In `ScratchNullstellensatzCount.lean`.
-- ◻ **exact anisotropic section** `sec_aniso : |cone ∩ u^⊥| = q^{d-2}` for `Q u ≠ 0` — apply `card_zeros_odd` to
-  `(u^⊥, Q|_{u^⊥})`: `u` anisotropic ⟹ `V = ⟨u⟩ ⊕ u^⊥` orthogonally and `polar Q u x = 2λ·Q u`, so the section is
-  EXACTLY `{w ∈ u^⊥ | Q w = 0}`. Needs `Q|_{u^⊥}` nondeg (Mathlib `nondegenerate_restrict_of_disjoint_orthogonal` +
-  `orthogonal_orthogonal`, `Disjoint u^⊥ ⟨u⟩` from `Q u ≠ 0`) + `finrank u^⊥ = d−1` odd (`finrank_orthogonal`).
-  (Isotropic `u` sections VARY and can exceed `q^{d-2}` — **avoid** them in the covering.)
-- ◻ **`cone_not_covered` (k=2, BOTH vectors anisotropic)** — clean union bound `|cone| > 2·q^{d-2}`, holds for ALL
-  `q ≥ 3` (`d=4 q=3` minus: `21 > 18` ✓) — **no small-`q` tail**, because both sections are the EXACT `q^{d-2}`. This is
-  why the covering must be designed with anisotropic hyperplane-vectors only (an isotropic hub vector reintroduces the
-  tight `d=4 q=3` boundary).
-- ◻ **the walk/hub** (structural, no counting): use `ratioEdge_smul`/`_line` + scalar choices, structured so each step's
-  covering uses anisotropic vectors, then `hub` (via `hconn_of_hub`) → `hconn`.
+- ✅ **`sec_aniso`** (2026-07-06, axiom-clean) — for anisotropic `u`, `|{Q x=0 ∧ polar Q u x=0}|·q·q = |V|` (section
+  `= q^{d-2}`, EXACT). `card_zeros_odd` on `(u^⊥, Q|_{u^⊥})`: `V = ⟨u⟩ ⊕ u^⊥`, `polar Q u x=0 ⟺ x∈u^⊥`; `Q|_{u^⊥}` nondeg
+  proved DIRECTLY (via `V = ⟨u⟩ + u^⊥`); `finrank u^⊥ = d−1` odd via `Module.Dual.finrank_ker_add_one_of_ne_zero`.
+  (Isotropic-`u` sections vary — **avoided** by using aniso vectors only.)
+- ✅ **`cone_not_covered`** (2026-07-06, axiom-clean) — k=2, both `u₁,u₂` anisotropic: ∃ isotropic `a` non-tangent to
+  both. Union bound `|cone| > 2·q^{d-2}` (nlinarith over ℝ; needs `finrank ≥ 4`, `q ≥ 3`, even finrank) — **no small-`q`
+  tail** (exact sections).
+- ◻ **the walk/hub → `hconn`** (structural, NO counting left): connect any two anisotropic `y,z` via `ratioEdge_smul/_line`
+  + `cone_not_covered`. Subtle case `z−y` anisotropic: `cone_not_covered(y, z−y)` gives `a` with `s*:=Q(z−y)/polar Q(z−y)a`
+  making `z−(y+s*a)` isotropic ⟹ 2-step `y —(y+s*a)— z` when `y+s*a` anisotropic (else perturb `a` / use the large good
+  set, size `≥ q^{d-1}−2q^{d-2}`). Then `nullstellensatz_of_connectivity`.
 Diagonalization (`equivalent_weightedSumSquares_units_of_nondegenerate'`, already used) supplies any basis needed.
 
 When `hconn` (via `cone_not_covered` → hub) lands: (a) instantiate `nullstellensatz_of_connectivity` to prove `NondegQuadricDeterminesForm` outright
