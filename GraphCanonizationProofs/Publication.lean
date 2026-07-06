@@ -26,13 +26,6 @@ theorem a reviewer accepts as known (G3/CFSG, Skresanov, Liebeck, Ponomarenko, F
 needs only real citations. If a family's poly-ness is still only a *meta* argument (as Route C's is today),
 it either becomes a real `cost ≤ poly` proof or it goes inside `UnhandledResidue`. It cannot become an axiom.
 
-**Phase names** (avoiding the "Phase 1/2/…" collisions):
-  · **Seal Phase**    — the symmetric-domain seal (`reachesRigidOrCameron`); node-4 residue + Cameron shrink.
-  · **IR Phase**      — the rigid mirror solver (recover the F₂ system → Gaussian); reuses the recovery idea.
-  · **Runtime Phase** — the Lean `canonForm?` / `cost` objects + the cost model; where "poly" stops being meta.
-  · **Publication Phase** — this file, pristine; the paper.
-  · **Maintenance**   — cross-cutting.
-
 Compile standalone (NOT via `lake build`; this file carries `axiom` and temporarily contains `sorry` by design):
   cd GraphCanonizationProofs && lake env lean Publication.lean
 Quality note: this is the ONLY file in the project permitted `axiom`. The library stays axiom-clean
