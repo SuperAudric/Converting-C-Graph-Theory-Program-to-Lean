@@ -288,19 +288,36 @@ reduction, but no longer the live route (`hspan` was the hard `d=4`-elliptic fac
   `lake env lean /path/to/check.lean` — expect `[propext, Classical.choice, Quot.sound]` for each.
 - Probes: `python3 nullstellensatz_structural_probe.py` and `python3 nullstellensatz_hspan_hlink_probe.py`.
 
-**▶ NEXT ACTIONABLE STEP (rerouted).** `hconn` (graph connectivity) is now reduced by the **route-(A) scaffold**
-(`ratioEdge_symm` + `reflTransGen_ratioEdge_symm` + `hconn_of_hub`, all axiom-clean) to a **one-sided HUB lemma**:
-`∀ z, Q z ≠ 0 → ReflTransGen (ratioEdge Q) r z` for a fixed anisotropic reference `r` (e.g. `e+f` from a hyperbolic
-pair). **Finding:** route (A)'s fully-explicit walk does NOT avoid counting — each `ratioEdge` step from `y` needs an
-isotropic `a` with `polar Q a y ≠ 0` *and* 2–3 further non-vanishing conditions (to control where the step lands and
-keep the intermediate anisotropic), i.e. "the isotropic cone is not covered by a few hyperplanes." Single-hyperplane
-avoidance is free from `isotropic_span`, but ≥2 is not — so the hub's core is genuinely **route (B)**:
-- **(B) `GaussCount` cone-count.** Diagonalize `Q` (`equivalent_weightedSumSquares_units_of_nondegenerate'`, already
-  used in the structural file), then `card_quadForm_eq` gives `|{a : Q a = 0}|` and hyperplane-section sizes; conclude
-  "∃ isotropic `a` avoiding `k` hyperplanes" by `|cone| > k·max|cone ∩ hyperplane|` (true for `d ≥ 4`, `q` not tiny).
-  Assemble the per-step existence into a bounded `ReflTransGen` walk (≤ 3–4 steps) → the hub lemma → `hconn`.
+**▶ NEXT ACTIONABLE STEP (rerouted).** `hconn` (graph connectivity) is now reduced — by the **route-(A) scaffold**
+(`ratioEdge_symm` + `reflTransGen_ratioEdge_symm` + `hconn_of_hub`) and the **edge primitives** (`ratioEdge_smul`,
+`ratioEdge_line`), all axiom-clean — to a single classical **counting lemma**:
+> **`cone_not_covered`** — nondeg `Q` on `𝔽_q^d` (`d ≥ 4`, `q` odd not tiny), vectors `u₁,…,u_k` (`k ≤ 3`) ⟹ ∃ isotropic
+> `a` with `polar Q uᵢ a ≠ 0` ∀`i` (the isotropic cone is not covered by `k` hyperplanes `uᵢ^⊥`).
 
-When `hconn` (hub) lands: (a) instantiate `nullstellensatz_of_connectivity` to prove `NondegQuadricDeterminesForm` outright
+With it, each walk step is exhibited via `ratioEdge_smul`/`_line` and the hub/`hconn` close. **Two findings:**
+- **Elementary shortcuts RULED OUT** (each recurses to `cone_not_covered`): route (A)'s fully-explicit walk still needs
+  an isotropic direction avoiding 2–3 hyperplanes per step; single-hyperplane avoidance is free from `isotropic_span`
+  but ≥2 is not; the **fiber-scaling** shortcut fails by exactly the Gauss error term (`nullstellensatz_fiber_probe.py`:
+  the tangent fiber can exceed the generic fiber by `~q^{d/2−1}`).
+- **Unification:** `cone_not_covered` is *equivalent to the old `hspan`* (`hspan` = its `k=2`/`∀w` case), so proving it
+  ALSO closes the spare `nullstellensatz_of_structural`. One lemma discharges both routes.
+
+**Route (= route B), and the project ALREADY HAS the hard machinery.** `ChainDescent.zeroCount_sq_le` (`PairForm.lean`)
+bounds, for ANY quadratic `P`, `(|{P=0}|·q − qᵈ)² ≤ (q−1)²·(qᵈ·|radical P|)` — the norm-based count bound, already
+axiom-clean, no from-scratch ℂ-magnitude work needed. Bricks (in `ScratchNullstellensatzCount.lean`):
+- ✅ **`radical_card_one`** + **`cone_card_lower`** (2026-07-06, axiom-clean) — nondeg ⟹ radical `{0}` ⟹
+  `qᵈ − (q−1)√(qᵈ) ≤ |cone|·q`, i.e. `|cone| ≥ q^{d-1} − (q−1)q^{d/2−1}`. Direct from `zeroCount_sq_le`.
+- ◻ **section upper bound** `|cone ∩ u^⊥| ≤ q^{d-2} + O(·)` — via `norm_sq_sum_addChar_quadForm_linear_le` (the
+  quadratic+linear sum, already in `PairForm`) or `zeroCount_sq_le` on `Q|_{u^⊥}`.
+- ◻ **`cone_not_covered` (k=2)** — union bound `|cone| > |cone ∩ z^⊥| + |cone ∩ e^⊥|` (comfortable even at `d=4 q=3`:
+  `21 > 9+3`, or crude `21 > 2·9=18`).
+- ◻ **the `A_e`-hub walk** (structural, no counting): within "non-tangent to `e`" connectivity uses only
+  `ratioEdge_smul`/`_line` + scalar choices; each tangent-to-`e` vector joins `A_e` in one step needing the `k=2`
+  covering. Then `hub` (via `hconn_of_hub`) → `hconn`.
+Only `q > k` (`q > 2`) is needed, so no `q`-floor beyond `q ≥ 3`. Diagonalization (`equivalent_weightedSumSquares_units_of_nondegenerate'`,
+already used) supplies any basis needed.
+
+When `hconn` (via `cone_not_covered` → hub) lands: (a) instantiate `nullstellensatz_of_connectivity` to prove `NondegQuadricDeterminesForm` outright
 over `𝔽_q^d` (`d ≥ 4`, `q` odd); (b) **delete the carried premise** from `recoveredForm_colouring_equivariant` in
 `RouteCFormAdapters.lean`, confirm `#print axioms` unchanged; (c) port the scratch files into `build.sh` (after
 `RouteCFormAdapters`) and add decls to `PublicTheoremIndex.md`. Only then is this citation fully discharged.

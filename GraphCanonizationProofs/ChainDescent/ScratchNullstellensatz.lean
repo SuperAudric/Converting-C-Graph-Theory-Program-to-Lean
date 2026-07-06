@@ -29,19 +29,26 @@ via **anisotropic B-connectivity** (structural fact 2) makes the ratio `R y / Q 
   `y → y+a` (`Q a = 0`, `polar Q a y ≠ 0`) using only `nullstellensatz_pointwise`; `ratioEdge`/`ratio_step_edge`
   package this as a graph edge, and `ratio_const_of_reflTransGen` propagates constancy along any PATH
   (`Relation.ReflTransGen`). So constancy reduces to a single CONNECTIVITY fact.
-- ✅ **CONNECTIVITY SCAFFOLD LANDED, axiom-clean:** `ratioEdge_symm` (edges are symmetric on anisotropic vertices),
-  `reflTransGen_ratioEdge_symm` (walks reverse), and `hconn_of_hub` — which reduces the open `hconn` to a **one-sided
-  HUB lemma**: `∀ z, Q z ≠ 0 → ReflTransGen (ratioEdge Q) r z` for a single anisotropic reference `r`.
-- ◻ **REMAINING = the HUB lemma** (`hub`, above) — every anisotropic vector is reachable by isotropic steps from a
-  fixed reference. Probe-CONFIRMED the graph is connected (`nullstellensatz_hconn_probe.py`, 2026-07-05): 1 component,
-  **diameter 3–4 for `VO^±_{4,6}(3,5,7)` INCLUDING the `d=4` elliptic `q=3` boundary** — the exact regime where the
-  old `hspan` was hard. (NB: diameter-2 is FALSE — a common `m` need not exist — so the fact is genuine connectivity.)
-  **The hub's core is a COUNTING fact** (route B): each walk step needs an isotropic direction `a` with `polar Q a y ≠ 0`
-  avoiding 2–3 further hyperplane conditions, i.e. "the isotropic cone is not covered by a few hyperplanes" — provable
-  from cone-sizes via `GaussCount` (`card_quadForm_eq`, after diagonalizing to the anisotropic basis). Single-hyperplane
-  avoidance is free from `isotropic_span`, but the walk genuinely needs ≥2 (spanning alone doesn't give it). The old
-  `hspan` route and its `isotropic_span` bedrock are OFF the critical path (kept in `ScratchNullstellensatzStructural.lean`
-  as spares; `nullstellensatz_of_structural` retained as a proven alternative reduction). Until `hub` lands the citation stays carried.
+- ✅ **CONNECTIVITY SCAFFOLD + EDGE BRICKS LANDED, axiom-clean:** `ratioEdge_symm` (edges symmetric on anisotropic
+  vertices), `reflTransGen_ratioEdge_symm` (walks reverse), `hconn_of_hub` (reduces `hconn` to a one-sided HUB lemma
+  `∀ z, Q z ≠ 0 → ReflTransGen (ratioEdge Q) r z`), plus the step primitives `ratioEdge_smul` (step `y → y+t•a` along an
+  isotropic direction) and `ratioEdge_line` (all anisotropic points on an isotropic line form a clique).
+- ◻ **REMAINING = ONE classical counting lemma** (feeds the hub, then `hconn`). Probe-CONFIRMED the graph is connected
+  (`nullstellensatz_hconn_probe.py`, 2026-07-05): 1 component, **diameter 3–4 for `VO^±_{4,6}(3,5,7)` INCLUDING the `d=4`
+  elliptic `q=3` boundary**. The one hard fact, after ruling out every elementary shortcut:
+  > **`cone_not_covered`** — for a nondegenerate `Q` on `𝔽_q^d` (`d ≥ 4`, `q` odd not tiny) and vectors `u₁,…,u_k`
+  > (`k ≤ 3`), there is an isotropic vector `a` with `polar Q uᵢ a ≠ 0` for all `i` (the isotropic cone is not covered
+  > by `k` hyperplanes `uᵢ^⊥`).
+  With it, each walk step is exhibited (`ratioEdge_smul`/`_line`) and the hub/`hconn` close. **Unification insight:**
+  this is *equivalent to the old `hspan`* (`hspan` = the `k=2` case, `∀ w`), so proving it also closes the spare
+  `nullstellensatz_of_structural`. **Route (only viable one):** `GaussCount` — the evaluated quadric point count
+  `|cone| = q^{d-1} + O(q^{d/2})` (`card_quadForm_eq` + a Gauss-sum magnitude bound `|∑ψ(Q)| = q^{d/2}`) and hyperplane
+  sections `|cone ∩ u^⊥| = q^{d-2}+O(q^{(d-1)/2})`, then a union bound `|cone| > Σ|cone ∩ uᵢ^⊥|` for `q > k`. Mathlib has
+  NO quadric cardinality, so this is project-`GaussCount` work (needs diagonalizing to the anisotropic basis, already
+  done in the structural file). **Elementary shortcuts RULED OUT** (all recurse to this same fact): fiber-scaling (fails
+  by the Gauss error term, `nullstellensatz_fiber_probe.py`); single-hyperplane-only walks (free from `isotropic_span`
+  but insufficient — need ≥2). The old `hspan`/`isotropic_span` route is a proven spare; `nullstellensatz_of_structural`
+  retained as an alternative reduction. Until `cone_not_covered` lands the citation stays carried.
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`, `native_decide` banned.
 NOT in `build.sh` yet (WIP scratch).
@@ -164,6 +171,31 @@ theorem ratioEdge_symm (Q : QuadraticForm K V) {a b : V}
         QuadraticMap.polar_self, QuadraticMap.polar_comm Q b a, two_nsmul, two_nsmul]
       linear_combination 2 * hQ'
     rw [key]; exact neg_ne_zero.mpr hpol
+
+/-- **Edge along an isotropic direction.** For isotropic `a` non-tangent to `y` (`polar Q y a ≠ 0`), any `t ≠ 0`
+with `y + t•a` anisotropic gives an edge `y — y + t•a`. The basic "take a step" primitive. -/
+theorem ratioEdge_smul (Q : QuadraticForm K V) {y a : V} {t : K}
+    (ha : Q a = 0) (hpol : QuadraticMap.polar Q y a ≠ 0) (ht : t ≠ 0)
+    (hb : Q (y + t • a) ≠ 0) : ratioEdge Q y (y + t • a) := by
+  refine ⟨hb, ?_, ?_⟩
+  · rw [add_sub_cancel_left, QuadraticMap.map_smul, ha, smul_zero]
+  · rw [add_sub_cancel_left, QuadraticMap.polar_smul_right, smul_eq_mul]
+    exact mul_ne_zero ht hpol
+
+/-- **Two anisotropic points on an isotropic line are one edge apart.** For isotropic `a` non-tangent to `y`,
+any two distinct anisotropic points `y + s•a`, `y + t•a` on the line are directly connected. So all anisotropic
+points on such a line form a clique — the "slide freely along an isotropic direction" primitive. -/
+theorem ratioEdge_line (Q : QuadraticForm K V) {y a : V} {s t : K}
+    (ha : Q a = 0) (hpol : QuadraticMap.polar Q y a ≠ 0) (hst : s ≠ t)
+    (hbt : Q (y + t • a) ≠ 0) :
+    ratioEdge Q (y + s • a) (y + t • a) := by
+  have hdiff : (y + t • a) - (y + s • a) = (t - s) • a := by rw [sub_smul]; abel
+  refine ⟨hbt, ?_, ?_⟩
+  · rw [hdiff, QuadraticMap.map_smul, ha, smul_zero]
+  · rw [hdiff, QuadraticMap.polar_smul_right, smul_eq_mul, QuadraticMap.polar_add_left,
+      QuadraticMap.polar_smul_left, smul_eq_mul,
+      show QuadraticMap.polar Q a a = 2 • Q a from Q.polar_self a, ha, smul_zero, mul_zero, add_zero]
+    exact mul_ne_zero (sub_ne_zero.mpr hst.symm) hpol
 
 /-- **Ratio constancy along a path** — the reflexive-transitive closure of `ratioEdge` preserves `R/Q`. By
 induction on the path: each edge preserves the ratio (`ratio_step_edge`) and the relation `R a·Q b = R b·Q a`
