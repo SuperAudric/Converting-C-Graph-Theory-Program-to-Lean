@@ -1,4 +1,3 @@
-import ChainDescent
 import ChainDescent.CascadeOracle
 import Mathlib.GroupTheory.Perm.Basic
 

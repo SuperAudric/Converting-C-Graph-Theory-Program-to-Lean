@@ -1,4 +1,3 @@
-import ChainDescent
 import ChainDescent.CFI
 import ChainDescent.Scheme
 import Mathlib.GroupTheory.Perm.Support

@@ -1,4 +1,4 @@
-import ChainDescent
+import ChainDescent.OrbitRecovery
 import ChainDescent.CascadeOracle
 import ChainDescent.Group
 import ChainDescent.Saturation

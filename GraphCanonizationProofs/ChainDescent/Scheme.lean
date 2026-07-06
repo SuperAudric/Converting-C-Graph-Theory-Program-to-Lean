@@ -1,4 +1,4 @@
-import ChainDescent
+import ChainDescent.OrbitRecovery
 import ChainDescent.Saturation
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Finset.Card

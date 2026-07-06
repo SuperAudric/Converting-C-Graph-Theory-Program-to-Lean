@@ -43,7 +43,10 @@ VERBOSE=0
 
 # Topological order: base first, then modules in increasing dependency depth.
 MODULES=(
-  ChainDescent              # base (everything imports this)
+  ChainDescent              # base / Core (POE, warmRefine, samePartition, §6.2 direction-invariance)
+  ChainDescent.Spine        # ← base (§15 descent spine + canonicalization; split from ChainDescent 2026-07-06)
+  ChainDescent.OrbitRecovery # ← Spine (§16–18 orbit recovery; split from ChainDescent 2026-07-06)
+  ChainDescent.ClosureCalculus # ← base (§13/§14 propagation-closure investigation — leaf; split from ChainDescent 2026-07-06)
   ChainDescent.Saturation   # ← Mathlib only (generic; shared by Scheme + Cascade)
   ChainDescent.GaussCount   # ← Mathlib only (Gauss-sum point-count toolkit for the B.1c-ii forms-graph discharge)
   ChainDescent.CFI          # ← base

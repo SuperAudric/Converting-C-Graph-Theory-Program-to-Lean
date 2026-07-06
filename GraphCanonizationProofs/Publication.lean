@@ -32,7 +32,7 @@ Quality note: this is the ONLY file in the project permitted `axiom`. The librar
 `[propext, Classical.choice, Quot.sound]`; the citations are carried there as *hypotheses*, and only HERE
 are they instantiated with `axiom` witnesses so `#print axioms` aggregates them into one legible list.
 -/
-import ChainDescent
+import ChainDescent.Spine
 
 namespace Showcase
 

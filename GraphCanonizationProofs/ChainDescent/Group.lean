@@ -1,4 +1,4 @@
-import ChainDescent
+import ChainDescent.OrbitRecovery
 import ChainDescent.CascadeOracle
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.GroupAction.Basic

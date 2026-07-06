@@ -1,4 +1,4 @@
-import ChainDescent
+import ChainDescent.OrbitRecovery
 import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Data.Finset.Powerset
