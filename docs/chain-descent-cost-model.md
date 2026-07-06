@@ -123,6 +123,18 @@ the pilot family. Any node whose honest `w` cannot be shown poly forces that fam
 The D7 list = the leaf primitives these decompose to (one `F_q` op, one signature compare, …), each either a
 proven poly-size lemma or an explicitly declared unit cost.
 
+**★ FINDING from the `warmRefine` brick ([`ChainDescent/ScratchCostModelWarmRefine.lean`](../GraphCanonizationProofs/ChainDescent/ScratchCostModelWarmRefine.lean), axiom-clean).**
+Two facts are proved against the *real* `warmRefine`: it is exactly `n` rounds (`warmRefine_eq_iterate`), and
+each per-vertex signature has exactly `n-1` entries (`signature_card`) — so the structural cost is
+`warmRefineCost n = n · (n · sigCost n)`, cubic under the declared per-vertex `sigCost n = n`
+(`warmRefineCost_eq`). **But the current Lean `refineStep` recolours via `Encodable.encode (sigKey …)` with
+NO cell renumbering**, so colour Nats blow up in bit-size across rounds (encode∘encode∘…). Consequence: this
+cubic bound is honest **only under a unit-cost-RAM D7 declaration** (colour compare/encode = O(1)); a genuine
+*bit-cost* poly bound requires a **renumbering `refineStep` variant** (cells → `0..k-1` each round, as the C#
+does). So the cost model must either (i) put "colour comparison / encode" on the D7 unit-cost list
+explicitly, or (ii) have the Runtime Phase define the renumbering variant. This is a real design fork, not a
+formality — flagged here and in the brick; decide it when `canonForm?`'s `refineStep` is chosen.
+
 ---
 
 ## 5. The consumption bridge — node count ≤ `nbud` (D2 hard half; ③-forward)
@@ -215,6 +227,9 @@ model" to "a Lean runtime model with an explicit, inspectable primitive-cost dec
   proven-where-cheap.
 - **`w` poly-ness depends on R1** for the pilot family (§4) — the Aut-free coordinatizer is on the critical
   path for a poly (not just quasipoly-with-Aut-harvest) `w`.
+- **The renumbering / unit-cost-colour fork (§4 FINDING)** must be decided when `canonForm?`'s `refineStep`
+  is chosen: declare colour-ops unit-cost (D7), or build a renumbering `refineStep`. Under the current
+  `Encodable.encode` refineStep, only the unit-cost-RAM reading gives a poly `warmRefine`.
 
 ---
 
