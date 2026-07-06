@@ -62,7 +62,30 @@ with the real Lean definition (the descent model + cost accounting) is exactly t
 
 opaque canonForm? (n : ℕ) (G : AdjMatrix n) : Option (Fin n → Fin n → Nat) := none
 opaque cost (n : ℕ) (G : AdjMatrix n) : ℕ := 0
-opaque UnhandledResidue (n : ℕ) (G : AdjMatrix n) : Prop := True
+
+/-! ### `UnhandledResidue` — the firewall valve, given its structural shape.
+
+The obstruction is a property of the **residue scheme the descent reaches** on `G` (an iso-invariant of `G`
+via the spine, hence well-defined and NOT "the algorithm flagged"). It is a disjunction of three structural
+atoms, one per open source of hardness — so that everything on the *handled* side needs only real citations:
+
+  · (D0) `residueNonSchurian`      — the reached residue is outside the seal's scope (not schurian). This
+        disjunct **absorbs the `SchurianScheme` model-faithfulness gap**: rather than prove the reached
+        residue is schurian (documented-infeasible), we honestly flag it. It is the IR-solver "row 4".
+  · (D1) `residueHiddenJohnson`    — SYMMETRIC domain: the reached residue is the *un-shrinkable* Cameron
+        core (the residue of the Seal-Phase Cameron shrink; the concrete `IsCameronScheme` instance minus
+        its handled sub-classes).
+  · (D2) `residueRigidObstruction` — RIGID domain: the IR-Phase residual (the "rigid-Cameron-equivalent"),
+        `⊥` if the IR Phase proves it non-viable.
+
+Each atom is `opaque` (a Seal/IR/Runtime-Phase deliverable). Its definition is deferred, but the *shape* — a
+three-way disjunction with an explicit non-schurian absorber — is fixed here. -/
+opaque residueNonSchurian       (n : ℕ) (G : AdjMatrix n) : Prop
+opaque residueHiddenJohnson     (n : ℕ) (G : AdjMatrix n) : Prop
+opaque residueRigidObstruction  (n : ℕ) (G : AdjMatrix n) : Prop
+
+def UnhandledResidue (n : ℕ) (G : AdjMatrix n) : Prop :=
+  residueNonSchurian n G ∨ residueHiddenJohnson n G ∨ residueRigidObstruction n G
 
 /-- Explicit polynomial cost bound `costConst * n ^ costDeg`. The paper pins concrete numerals for
 `costConst`, `costDeg` (explicit polynomial ≫ `∃ p : Polynomial …`: more honest, avoids formalizing the

@@ -27,7 +27,7 @@ and the obligation bodies `sorry`. It compiles green (`lake env lean Publication
 **Where the work concentrates.** Of the obligations, the unconditional-correctness trio (①a/①b/①c) rests
 largely on *already-built* Seal-Phase substrate and is mostly assembly. The weight is in **② (poly-or-flag)**
 — which requires the cost model and the "reaches-rigid ⟹ counted poly node budget" bridge, i.e. the point
-where **"poly" stops being a meta-argument** — and **③ (flag ⟺ obstruction)**, which requires the
+where **"poly" stops being a meta-argument** — and **③ (flag ⟹ obstruction)**, which requires the
 `UnhandledResidue` definition plus consuming both the Seal-Phase and IR-Phase results. Neither ② nor ③'s
 supporting objects exist yet; they are the substance of the Runtime and IR phases.
 
@@ -41,8 +41,9 @@ The finished project is the theorem `Showcase.canonizer` (and the trio + non-vac
   complete isomorphism invariant that is a genuine relabelling of the input (never wrong). It may instead
   emit an honest **flag**.
 - **Cost is conditional** — the descent runs within an explicit polynomial budget, *or* it flagged.
-- **The flag is characterized** — a flag is emitted iff the input genuinely contains an **unhandled
-  obstruction** (`UnhandledResidue`), not because the algorithm is weak.
+- **The flag is characterized** — a flag *implies* the input genuinely contains an **unhandled
+  obstruction** (`UnhandledResidue`), not algorithmic weakness (`residue_if_flag`, forward only; the reverse
+  is neither needed by the headline nor cleanly true — see §4.1).
 
 **Done ⟺** all six obligations proven **and** `#print axioms` on the headline = `[propext,
 Classical.choice, Quot.sound]` ∪ {citation axioms}, where every citation axiom is a theorem *proved outside
@@ -126,7 +127,7 @@ Builds the objects `Publication.lean` currently stubs `opaque`, and the bridge t
   (operation-count proxy, each step separately poly-size). *This piece is a candidate to split into its own
   file* — [`chain-descent-cost-model.md`] (TBD) — once its shape is fixed.
 - **The consumption bridge (②/③).** Turn the *structural* seal ("the residue reaches rigid or is Cameron")
-  into *runtime* statements ("¬flag ∧ cost ≤ poly", "flag ⟺ residue"). This is where "poly" stops being a
+  into *runtime* statements ("¬flag ∧ cost ≤ poly", "flag ⟹ residue"). This is where "poly" stops being a
   meta-argument: reaches-rigid must imply the descent discretizes in a *counted* poly number of nodes.
 - **Pilot early on the banked quasipoly seal.** `reachesRigidOrCameron_affinePolar` already carries an
   explicit base bound `O(d log p)` — the most runtime-bearing finished object in the project. Piloting the
@@ -154,13 +155,8 @@ superseded predicates), test hygiene (exploratory `Probe_*` out of the gating bu
 
 These are the load-bearing *new* pieces; each deserves a fixed shape now even if built later.
 
-1. **`UnhandledResidue` — the firewall valve (the single most important definition).** It must be:
-   (i) an *independent structural/geometric* predicate — Cameron/hidden-Johnson (symmetric) ∨ the IR residual
-   (rigid) — **not** "the algorithm flagged" (that makes ③ a tautology); (ii) defined to *absorb exactly the
-   open cases*, so everything on the handled side needs only real citations; (iii) non-vacuous on both sides.
-   Its exact definition is gated on Seal + IR producing their structural residue predicates, but its *shape*
-   (a disjunction of two structural predicates) is fixable now. This is where the whole "conditional GI ∈ P"
-   honesty is won or lost.
+1. **`UnhandledResidue` — the firewall valve (the single most important definition). Its shape is now fixed;
+   see §4.1.**
 
 2. **The cost model (`cost` + the bound).** Decide granularity early; prefer an explicit polynomial over
    `∃ p : Polynomial`. Pilot on the quasipoly seal. *Split candidate:* its own file once the granularity is
@@ -171,13 +167,71 @@ These are the load-bearing *new* pieces; each deserves a fixed shape now even if
    it is currently unbuilt — the honest measure of the gap between "we have `reachesRigidOrCameron`" and "we
    have `canonizer`".
 
+### 4.1 `UnhandledResidue` — the fixed shape and per-atom scoping
+
+**The design decision: define it on the reached residue, as a three-way disjunction with a non-schurian
+absorber.** `UnhandledResidue G` is a property of the **residue scheme the descent reaches on `G`** — the
+scheme at the deepest cell the descent cannot resolve into orbits. That scheme is an *iso-invariant of `G`*
+(the spine theorems `spine_branch_independent` / `SpineChain.eq_default` make the reached residue
+labelling-independent), so `UnhandledResidue` is well-defined and structural — yet it is **not** "the
+algorithm flagged" (`canonForm? = none`): the flag is a distinct operational event that `residue_if_flag`
+*connects* to this structural predicate. The reached-residue choice is preferred for **well-definedness +
+iso-invariance** (the descent's reached residue is a canonical object of `G`), but with ③ shipping as the
+**forward-only** `residue_if_flag` an intrinsic "`G` contains a hidden-Johnson section somewhere" is *also*
+admissible — the reverse `residue → flag` is false either way (a contained section can be individualized
+away), and forward-only never needed it. So the reached-residue choice is a definiteness preference, not
+forced by ③'s shape.
+
+The shape, now committed in `Publication.lean §1`:
+```
+UnhandledResidue G  :=  residueNonSchurian G  ∨  residueHiddenJohnson G  ∨  residueRigidObstruction G
+```
+
+| Atom | Domain | What it is | Delivered by | Status |
+|---|---|---|---|---|
+| **(D0) `residueNonSchurian`** | scope | reached residue is **not schurian** ⟹ outside the seal, honestly flagged | Runtime Phase (define the reached residue + its schurian test) | **NEW — but it DISSOLVES the `SchurianScheme` gap** |
+| **(D1) `residueHiddenJohnson`** | symmetric | reached residue is the **un-shrinkable Cameron core** (= the concrete `IsCameronScheme` instance minus its handled sub-classes) | **Seal Phase — the Cameron shrink** | **NEW — research; the shrink defines it** |
+| **(D2) `residueRigidObstruction`** | rigid | the **IR residual** ("rigid-Cameron-equivalent") | **IR Phase** | **NEW — research; `⊥` if "no rigid-Cameron"** |
+
+**Why (D0) is the important insight.** The `SchurianScheme` model-faithfulness gap ("is the canonizer's actual
+2-WL-closure residue equal to the `orbitalScheme H` model?") is flagged project-wide as *documented-infeasible*
+to discharge. The endgame **does not need to close it**: if the reached residue is not schurian, it is outside
+the seal's scope, so the honest thing is to flag it — which (D0) does by construction. A scary open gap becomes
+an honest exclusion (and it coincides with the IR-solver's row-4 non-schurian residue, which is *by design* a
+flag, never a seal obligation). The cost is only that non-schurian inputs are "unhandled" — which they
+genuinely are.
+
+**Why (D1) is lighter than it looks: the seal is already parameterized on `IsCameronScheme`.** In the library,
+`IsCameronScheme : ∀ m, SchurianScheme m → Prop` is a **parameter** threaded through every seal capstone
+(`reachesRigidOrCameron`, `SealDisj`, …) — the seal does not fix what "Cameron" means; the caller supplies it.
+So the Seal-Phase Cameron shrink is concretely: **instantiate `IsCameronScheme`, then split it**
+`IsCameronScheme = IsHandledCameron ∨ IsHiddenJohnson`, prove the handled part *reaches rigid* (so it exits the
+Cameron escape), and let `residueHiddenJohnson` be the leftover `IsHiddenJohnson` on the reached residue. (D1)
+is thus not a from-scratch predicate — it is the residue of refining an already-abstract parameter.
+
+**How this steps the current form.** `Publication.lean` moved from the vacuous `opaque UnhandledResidue := True`
+to a real `def` over three `opaque` atoms (compiles green). Filling each atom is a named phase deliverable; the
+disjunction *shape* — crucially the (D0) absorber — is locked without waiting on any of them. The obligations
+①–③ + non-vacuity are unchanged.
+
+**Non-vacuity is now LOAD-BEARING (the ③-shape consequence).** ③ ships as the forward-only `residue_if_flag`
+(`flag → UnhandledResidue`) — the reverse was dropped to avoid proving false border cases. This is the right
+call (the headline only uses the forward direction, via `.mp`; `residue → flag` is false anyway), **but it
+removes the automatic vacuity guard the biconditional gave for free**: under `↔`, `UnhandledResidue := True`
+was self-refuting ("always flags" is false); under `flag → residue`, `True` satisfies ③ *trivially*. So
+`unhandledResidue_nonvacuous` is no longer a nice-to-have — it is the **sole firewall** against a vacuous ③,
+and it must name real families on both sides: a **handled** instance (a forms-graph `VO^ε` / a CFI graph ⟹
+all three atoms false ⟹ `¬UnhandledResidue` ∧ canonized) *and* an **unhandled** instance (a hidden-Johnson
+witness ⟹ (D1)). The handled-and-canonized witness is the load-bearing half — it is what proves the algorithm
+actually claims something. Treat it as a hard obligation, not a formality.
+
 ---
 
 ## 5. Ordering and dependencies
 
 ```
 Seal Phase (node-4 R1, Cameron shrink) ─┐
-                                        ├─→ UnhandledResidue definition ─→ ③ flag_iff_residue ─┐
+                                        ├─→ UnhandledResidue definition ─→ ③ residue_if_flag ──┐
 IR Phase (rigid solver, rigid residual)─┘                                                      │
                                                                                                ├─→ canonizer (headline)
 Runtime Phase: canonForm?/cost + cost model ─→ ② canon_poly_or_flag ───────────────────────────┤
