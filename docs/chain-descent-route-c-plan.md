@@ -1055,6 +1055,24 @@ P2/P3 are recompositions of landed pieces.**
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the
 *theorem* that whatever flags is large — the two are not interchangeable.
 
+**★ Empirical de-risk of P1 (2026-07-07, PASSED) — `P1ConfinementProbe.cs`.** Ran the real `ChainDescent` canonizer on
+the sharpest danger case: **Chang graphs** `SRG(28,12,6,4)` (Seidel-switch of `T(8)=J(8,2)` by a perfect matching and by
+an 8-cycle) — the classic **small-`Aut`, non-Schurian, non-VT** SRGs (`|Aut| = 384, 96`; harvested-group **orbits = 2**
+⟹ certified non-transitive), with `T(8)` (`|Aut| = 8! = 40320`, orbits = 1, VT/schurian) as control. Every P1 prediction
+held on both Chang graphs, both descent modes:
+- **No flag** (resolved well within the `~9.8M` node budget: `nodes = 11–17`, `maxDepth = 3–6` — a short base, as
+  small-`Aut` predicts);
+- **Zero Phase-1 starvation** (`ClassifyStarved = BranchStarved = 0`) ⟹ a per-node-flag assume-VT mechanism would
+  **never fire** on these non-VT graphs;
+- **Rigid decisions routed to Phase 2** under deferral (`Phase2Nodes = 2`) — the *largeness*-clause saving grace
+  (non-VT small-`Aut` residue treated as rigid, not as a VT family), observed directly;
+- **Iso-invariance held** (`canon(G) = canon(πG)`, soundness anchor).
+The control `T(8)` (the VT case the mechanism must keep) resolved single-path (`leaves = 1, branchingNodes = 0`). **No
+falsifier.** Scope/limits (honest): one parameter family at `n = 28`; the current canonizer flags only on *global*
+budget exhaustion (per-node flag not built yet), so "no flag + zero starve + Phase-2 routing" is the faithful *proxy*
+for "would not Phase-1-flag". Strengthening (later, if wanted): Paulus `SRG(25,12,5,6)`/`SRG(26,10,3,4)` and larger
+non-VT SRGs. This clears P1 to proceed to the Lean proof (step 2 = P4).
+
 ---
 
 ## 8. Pointers
