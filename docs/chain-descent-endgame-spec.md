@@ -30,16 +30,31 @@ largely on *already-built* Seal-Phase substrate and is mostly assembly. The weig
 where **"poly" stops being a meta-argument** — and **③ (flag ⟹ obstruction)**, which requires the
 `UnhandledResidue` definition plus consuming both the Seal-Phase and IR-Phase results.
 
-**Progress (2026-07-06/07 — the Runtime-Phase cost model has STARTED; see [`chain-descent-cost-model.md`](./chain-descent-cost-model.md)).**
-The cost-model **framework is landed axiom-clean** (`ScratchCostModel.lean`: `CostM` + `budgetedIterate` +
-the ② mechanism `cost_budgetedIterate_le`), and it settled the ② vs ③ split: **② is unconditional by
-construction** (budget-capped), so *all* poly content lives in **③-forward** (`residue_if_flag`) — a
-refinement of the §2 map below (② is the *safety* guarantee; ③-forward is the *completeness/poly* content).
-The first per-node `w` brick landed (`ScratchCostModelWarmRefine.lean`) with a renumbering/unit-cost finding.
-`UnhandledResidue` now has its **structural shape** in `Publication.lean` (a 3-way disjunction with
-`residueNonSchurian` absorbing the `SchurianScheme` gap). Still unbuilt: `canonForm?`/`cost` as a real
-budgeted descent (the D4 build), the `UnhandledResidue` disjunct *definitions* (Seal/IR deliverables), and
-the pilot's node-count bound. **R1's status is refined** — see [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md) §7a (2026-07-06).
+No more than one progress update log to prevent this file from reducing to a build increment log. Other changes should be filtered into stable state documentation if needed.
+**Progress (the Runtime-Phase cost model + the non-rigid correctness ARCHITECTURE have STARTED).**
+Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cost-model.md) STATUS + route-c-plan
+§7b/§7c ([[project_confinement_lemma_2026-07-07]]):
+
+- **The correctness architecture — witness-or-assume-VT (SUPERSEDES R1).** ① on the non-rigid residue is now a real
+  algorithm: refine the flag to a **per-node** budget; a Phase-1 over-budget flag ⟹ (confinement lemma) the residue is
+  primitive rank-3 ⟹ VT ⟹ assume-VT-prune-and-continue (node-4/Cameron *handled*, single-path poly; `none` only in
+  rigid Phase 2). This makes the flag/budget mechanism **load-bearing for correctness** — the cost model shifted from a
+  *demonstration* to a *prerequisite*. The whole non-rigid ① reduces to the **confinement lemma** (route-c §7c, sub-obligations
+  P1–P4): **P1** empirically PASSED (`P1ConfinementProbe.cs`; Lean pending), **P2** substrate landed (`RecoversWhileSymmetric`/
+  `DiscretizesAtBases` split), **P3** = the seal (in build), **P4** Lean reduction DONE (`ScratchConfinementP4.lean`)
+  modulo the **citable Witt flag-transitivity** (`Publication.lean witt_flag_transitivity`). `UnhandledResidue` atoms
+  made structural (issue-#1 firewall).
+
+- **The cost model.** Framework landed axiom-clean (`ScratchCostModel.lean`: `CostM` + `budgetedIterate` + `cost_budgetedIterate_le`),
+  settling **② unconditional by construction** (all poly content in ③-forward). The **per-node cap** variant
+  (`ScratchCostModelPerNode.lean`) gives ② with NO `hstep`. The instance is attached to **`defaultSpineChain`** (proven
+  node bound): `spineCappedCanonizer_cost_le` proves **`cost ≤ n⁴` concretely on the real descent** (matches C#
+  `16n⁴`), and the cost is **co-defined** (`ScratchCostModelCostedWarmRefine.lean`: `value=warmRefine`,
+  `cost=warmRefineCost n`, not a fiat literal — the D1 seam closed).
+
+Still unbuilt: `canonForm?`/`cost` as a **value-co-defined** budgeted descent (σ = descent state; currently σ=ℕ level
+counter), completeness (③-forward, run returns `some`), the output map `canonForm? = leaf.canonAdj`, the **oracle
+summand** of `w`, P1/P2 in Lean + the confinement assembly, and the `UnhandledResidue` disjunct *definitions*.
 
 ---
 
