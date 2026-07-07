@@ -36,14 +36,26 @@ open ChainDescent.CostModel.CostedWarmRefine
 
 variable {n : Nat}
 
-open scoped Classical in
+/-- **`Discrete` is decidable** — `∀ i j : Fin n, χ i = χ j → i = j` is a decidable `∀` over a `Fintype` with
+`DecidableEq`. Replaces the `Classical` decidability the descent's `done` used, so the descent is **computable**
+(Tier A of the executable track). -/
+instance decidableDiscrete (χ : Colouring n) : Decidable (Discrete χ) := by
+  unfold Discrete; infer_instance
+
+/-- **A leaf is decidable** — `IsLeaf` unfolds to `Discrete chain.partition`. Makes `spineCappedCanonizer.done`
+computable (no `Classical`). -/
+instance decidableIsLeaf {adj : AdjMatrix n} {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) : Decidable chain.IsLeaf := by
+  unfold SpineChain.IsLeaf; infer_instance
+
 /-- **The per-node-capped canonizer over the real spine.** `σ = ℕ` is the descent level: `step` advances one level,
 charging the **co-defined** per-level cost `(costedWarmRefine adj chₖ.P chₖ.χι).cost` — the actual accumulated cost of
 running the refinement loop at level `k` (not a fiat literal; `cost_costedWarmRefine` proves it equals
 `warmRefineCost n`). `done` = the level-`k` partition is discrete (`IsLeaf`); node budget `n` (the proven depth);
-per-node bound `w = warmRefineCost n`. `noncomputable` because `done` uses classical decidability of discreteness —
-irrelevant to the cost bound, which holds for any `done`. -/
-noncomputable def spineCappedCanonizer (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+per-node bound `w = warmRefineCost n`. **Computable** (Tier A): `done` uses the real `decidableIsLeaf`, `step`/`nbud`/`w`
+are all computable, so the descent runs. -/
+def spineCappedCanonizer (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) : CappedCanonizer Nat where
   step := fun k =>
     let ch := defaultSpineChain adj P₀ χι₀ sel k

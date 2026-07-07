@@ -39,16 +39,17 @@ variable {n : Nat}
 /-! ## The capped descent — the ② cost object -/
 
 /-- The per-node-capped spine descent over the canonical parameters (`defaultP₀`/`defaultχι₀`/`nonDiscreteSel`),
-run from level `0` with node budget `n`. Its `.1` is the leaf/flag signal, its `.2` the cost. -/
-noncomputable def descent (adj : AdjMatrix n) : CostM (Option Nat) :=
+run from level `0` with node budget `n`. Its `.1` is the leaf/flag signal, its `.2` the cost. **Computable**
+(Tier A): `spineCappedCanonizer` + `budgetedIterate` all reduce, so the descent runs. -/
+def descent (adj : AdjMatrix n) : CostM (Option Nat) :=
   (spineCappedCanonizer adj defaultP₀ defaultχι₀ nonDiscreteSel).run n 0
 
 /-- The descent's leaf/flag signal: `some k` = a leaf reached within the node budget; `none` = flag
-(node budget exhausted). -/
-noncomputable def descentResult (adj : AdjMatrix n) : Option Nat := (descent adj).1
+(node budget exhausted). Computable. -/
+def descentResult (adj : AdjMatrix n) : Option Nat := (descent adj).1
 
-/-- The descent's cost — the ② operation count (`ℕ`), from the actual capped run. -/
-noncomputable def descentCost (adj : AdjMatrix n) : Nat := (descent adj).2
+/-- The descent's cost — the ② operation count (`ℕ`), from the actual capped run. Computable. -/
+def descentCost (adj : AdjMatrix n) : Nat := (descent adj).2
 
 /-- **② — the descent cost is `≤ n⁴`, unconditional.** Directly the per-node-cap bound
 `spineCappedCanonizer_cost_le`; no per-node-cost hypothesis (a later quasipoly oracle summand of `w` would
