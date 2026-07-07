@@ -59,8 +59,16 @@ the algorithm, so a quasipoly harvest doesn't break the bound (it flags, `flagsA
 the flag phase. **Attachment decision (scoping):** instantiate over **`defaultSpineChain`** — node bound already proven
 (`defaultSpineChain_reaches_leaf : ∃ k ≤ n, IsLeaf` ⟹ `nbud = n`), correctness via `spine_branch_independent` +
 `SpineChain.canonAdj` (→ `canonForm?`), per-node work = `warmRefine` + oracle. It is single-path (assume-VT `leaves=1`),
-so the branch-frontier σ of §3 is **not needed** for the poly target; the `≤ n` path is the whole cost. NEXT = the
-`CappedCanonizer` instance over `defaultSpineChain` (`step` = one spine level).
+so the branch-frontier σ of §3 is **not needed** for the poly target; the `≤ n` path is the whole cost.
+
+**★ CappedCanonizer INSTANCE over the real spine LANDED (2026-07-07, `ScratchCostModelSpine.lean`, axiom-clean
+`[propext, Classical.choice, Quot.sound]`).** `spineCappedCanonizer` instantiates the capped canonizer over
+`defaultSpineChain` (σ = the descent level `k`; `step` advances a level; `done` = leaf/discrete; `nbud = n`;
+`w = warmRefineCost n`). Capstone **`spineCappedCanonizer_cost_le`**: the run costs **`≤ n · warmRefineCost n = n⁴`,
+unconditionally** — the first *concrete* ② discharge on the actual canonizer's descent (matches the C#
+`DefaultBudget`'s `16·n⁴`). The per-node cap makes it free of any per-node-cost hypothesis. **NEXT sub-steps:**
+completeness (`defaultSpineChain_reaches_leaf` ⟹ run returns `some`, ③-forward), the output map
+`canonForm? = leaf.canonAdj`, and the oracle summand of `w`.
 
 ---
 
