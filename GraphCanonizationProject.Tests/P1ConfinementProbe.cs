@@ -191,6 +191,97 @@ public class P1ConfinementProbe
         _out.WriteLine("");
     }
 
+    // ── (B)-side: a RIGID residual must be identified as such without the harvest depth biting ──
+    // Untwisted circulant multipede (m checks, offsets {0,1,3}; odd ⟹ dim ker 0 = rigid GAUGE). The
+    // circulant base carries a cyclic symmetry that Phase 1 consumes, THEN the descent reaches the rigid
+    // gauge residual — exactly "a purely rigid residual reached after consuming all symmetries of Phase 1".
+    // The bounded single-path harvest (`DeepenAnchor`, depth ≤ n) must DISCRETIZE this residual well within
+    // the bound (MaxRecursionDepth ~ tw ≪ n) and classify its reps as REAL ⟹ DEFER to Phase 2, with NO
+    // starvation (ClassifyStarved=BranchStarved=0). i.e. the rigid residual is identified without the depth
+    // bound ever being the binding constraint — and iso-invariance holds.
+    static int[] BuildRigidMultipede(int m, int[] offsets, out int n)
+    {
+        int nV = m, nW = m;
+        var biadj = new int[nV, nW];
+        for (int i = 0; i < m; i++) foreach (var o in offsets) biadj[i, ((i + o) % m + m) % m] = 1;
+        var nbr = new List<int>[nV];
+        for (int v = 0; v < nV; v++)
+        {
+            nbr[v] = new List<int>();
+            for (int w = 0; w < nW; w++) if (biadj[v, w] != 0) nbr[v].Add(w);
+        }
+        var aIdx = new int[nW]; var bIdx = new int[nW];
+        int idx = 0;
+        for (int w = 0; w < nW; w++) { aIdx[w] = idx++; bIdx[w] = idx++; }
+        var mids = new List<(int v, int bm)>();
+        for (int v = 0; v < nV; v++)
+        {
+            int d = nbr[v].Count; // untwisted: even-parity middle vertices
+            for (int bm = 0; bm < (1 << d); bm++)
+                if (System.Numerics.BitOperations.PopCount((uint)bm) % 2 == 0) mids.Add((v, bm));
+        }
+        var midIdx = new int[mids.Count];
+        for (int i = 0; i < mids.Count; i++) midIdx[i] = idx++;
+        n = idx;
+        var adj = new int[n * n];
+        for (int i = 0; i < mids.Count; i++)
+        {
+            var (v, bm) = mids[i]; int mi = midIdx[i]; int d = nbr[v].Count;
+            for (int k = 0; k < d; k++)
+            {
+                int w = nbr[v][k];
+                int target = ((bm >> k) & 1) != 0 ? aIdx[w] : bIdx[w];
+                adj[mi * n + target] = 1; adj[target * n + mi] = 1;
+            }
+        }
+        return adj;
+    }
+
+    [Fact]
+    [Trait("Category", "LongRunning")]
+    public void RigidResidual_IdentifiedWithoutHarvestDepthIssue()
+    {
+        _out.WriteLine("(B)-side — a RIGID residual (post Phase-1 symmetry consumption) is identified as rigid");
+        _out.WriteLine("without the harvest depth bound biting (route-c-plan §7c operational sharpening).\n");
+
+        var adj = BuildRigidMultipede(6, new[] { 0, 1, 3 }, out int n);
+        _out.WriteLine($"── untwisted circulant multipede m=6 offsets{{0,1,3}}  (n={n}, rigid gauge / dim ker 0) ──");
+
+        foreach (var defer in new[] { false, true })
+        {
+            var r = Canon(adj, n, defer);
+            var c = r.Stats.Cascade;
+            var (orbits, firstLen) = OrbitProfile(r.ResidualGroup, n);
+            string tag = defer ? "deferral" : "default ";
+            _out.WriteLine($"   [{tag}] {(r.Flagged ? "FLAG(" + r.FlagReason + ")" : "CANON")}  " +
+                           $"|Aut|={r.ResidualGroup.Order}  orbits={orbits}");
+            _out.WriteLine($"        nodes={r.Stats.NodeCount} leaves={r.Stats.LeafCount} maxDepth={r.Stats.MaxDepth} budget={r.Stats.Budget}");
+            _out.WriteLine($"        STARVE branch={c.BranchStarved} classify={c.ClassifyStarved}   " +
+                           $"maxRecursionDepth={c.MaxRecursionDepth} (vs n={n})   resolvedByRec={c.ResolvedByRecursion}");
+            _out.WriteLine($"        Phase2Nodes={c.Phase2Nodes} deferralActive={c.DeferralActiveNodes} " +
+                           $"consumedSymmetric={c.ConsumedSymmetric} cachedRealSkips={c.CachedRealSkips}");
+
+            if (!r.Flagged)
+            {
+                // THE HARVEST-DEPTH CLAIM: the rigid residual is discretized/identified WITHOUT starving,
+                // and the single-path deepening bottoms out far below the depth bound n.
+                Assert.True(c.ClassifyStarved == 0 && c.BranchStarved == 0,
+                    $"rigid residual STARVED the harvest (Classify={c.ClassifyStarved} Branch={c.BranchStarved}) — depth bound bit");
+                Assert.True(c.MaxRecursionDepth < n,
+                    $"harvest deepening reached the depth bound (maxRec={c.MaxRecursionDepth} ≥ n={n})");
+
+                // iso-invariance (soundness anchor).
+                var pi = RandomPerm(n, 909 + (defer ? 1 : 0));
+                var r2 = Canon(Relabel(adj, n, pi), n, defer);
+                Assert.False(r2.Flagged, "relabelled rigid multipede flagged while original canonized");
+                Assert.True(r.Matrix!.SequenceEqual(r2.Matrix!),
+                    "rigid multipede canonical form NOT iso-invariant — SOUNDNESS FAILURE");
+                _out.WriteLine($"        iso-invariance: OK   ⟹ rigid residual identified & deferred; harvest depth NOT the constraint");
+            }
+        }
+        _out.WriteLine("");
+    }
+
     [Fact]
     [Trait("Category", "LongRunning")]
     public void P1_SmallAutNonVT_DoesNotPhase1Flag()

@@ -1045,7 +1045,23 @@ flagged (large) subset, which the largeness clause *delivers*.
 | **P1** | **Largeness confinement** (the soundness linchpin) | small-`Aut` residue ⟹ orbit-harvest ≤ `w` ⟹ **does not flag**. Contrapositive: flag ⟹ large `Aut`. Pins the budget `w` ≥ the small-`Aut` oracle cost; this is where the cost model (`w`, §4 oracle term) and correctness interlock. Excludes non-Schurian SRGs from Phase-1 flags. | **New.** Needs the per-node oracle-cost bound + small-`Aut`⟹cheap-oracle. Uses landed `exists_greedy_base_le_log` (small `Aut` ⟹ base `O(log n)`). |
 | **P2** | **Deferral confinement** | Phase-1 per-node cost = symmetric-harvest cost only; rigid decisions are *deferred* (cheap push), never expensively harvested. ⟹ a Phase-1 flag is not rigid-caused ("rigid does not entangle into non-rigid"). | Substrate landed (direction-blind deferral, `exists_potential_descent`); needs a per-node cost lemma. |
 | **P3** | **Trichotomy, restricted** | large `Aut` ∧ (¬rigid, by P2) ⟹ residue is Cameron ∨ node-4 (both primitive rank-3). | The seal `reachesRigidOrCameron` (quasipoly, **in build**) — a recomposition. |
-| **P4** | **Cells-are-orbits on primitive rank-3** | for a primitive rank-3 scheme the `warmRefine` colour class (target cell) is a single `Aut`-orbit ⟹ pruning it is sound. Primitive ⟹ transitive ⟹ VT. | **New but clean.** Connect `orbitalScheme` / primitivity machinery; the actual soundness content of the prune step. |
+| **P4** | **Cells-are-orbits on primitive rank-3** | for a primitive rank-3 scheme the target cell sits in a single `Stab(S)`-orbit ⟹ pruning it is sound. Primitive ⟹ transitive ⟹ VT. | **Predicate + consumer ALREADY landed** (`NodeCountBridge.SelectedCellIsOrbit` + `selectedCell_single_stabOrbit`); wall-free structural producer **scaffolded** (`ScratchConfinementP4.lean`, axiom-clean). NEXT = discharge `SelectedCellSubsetOrbit` from rank-3 (below). |
+
+**★ Step-2 reconnaissance (2026-07-07) — the three pieces ARE the seal's existing decomposition; only the method
+of the symmetric piece changes.** Confirmed against the Lean source: piece (2) *rigid⟹deferral* = `DiscretizesAtBases`
+(the base-prefix / IR-core term, **already** split off by the landed `stablyRecoverable_iff_symmetric_and_bases`);
+piece (3) *symmetric consumed* = `RecoversWhileSymmetric` = `CellsAreOrbits` at non-base prefixes — **same target
+predicate**, whose discharge is open at multi-base (`JointProfileRecoversAt`, |T|≥2 = the node-4 wall); piece (1)
+*starvation⟹VT* is **new**. **The method difference:** the existing route discharges piece (3) by proving
+`CellsAreOrbits`/`JointProfileRecoversAt` — WL reaching orbits at a bounded base (the wall). Assume-VT instead adds a
+disjunct that **covers the gap where recovery starves** via the rank-3 GROUP structure (the selected cell ⊆ one
+`Stab(S)`-orbit — no WL-reaching), sidestepping the wall. The P4 predicate `SelectedCellIsOrbit` and its
+prune-completeness consumer are already in `ScratchNodeCountBridge.lean`; the only prior producer routed through the
+`CellsAreOrbits` wall (`selectedCellIsOrbit_of_cellsAreOrbits`). `ScratchConfinementP4.lean` opens the **second,
+wall-free producer**: `SelectedCellSubsetOrbit` (structural target) → `selectedCellIsOrbit_of_subsetOrbit` (bridge,
+axiom-clean). **NEXT increment = discharge `SelectedCellSubsetOrbit` for the primitive rank-3 residue** from the
+point-stabilizer/rank-3 structure (single-base free via `cellsAreOrbits_schemeAdj_singleton`; the crux is the
+recursion, and proving it does **not** collapse back onto the multi-base `JointProfileRecoversAt` wall).
 
 **Assembly.** P1 ⟹ flag is large; P2 ⟹ not rigid; P3 ⟹ Cameron/node-4 primitive rank-3; P4 ⟹ VT + cell = orbit ⟹
 prune sound ⟹ ① on the non-rigid residue. **Weakest links: P1 (soundness linchpin) and P4 (the prune-soundness core);
