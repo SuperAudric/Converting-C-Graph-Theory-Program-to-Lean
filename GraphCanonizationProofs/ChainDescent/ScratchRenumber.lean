@@ -121,4 +121,40 @@ theorem discrete_warmRefineR (adj : AdjMatrix n) (P : PMatrix n) (init : Colouri
     (h : Discrete (warmRefine adj P init)) : Discrete (warmRefineR adj P init) :=
   Discrete.of_samePartition (samePartition_warmRefineR adj P init).symm h
 
+/-! ## Reified renumbered refinement — the actually-`#eval`-able version
+
+**The finding (2026-07-07):** `warmRefineR` hangs on `#eval` even for SMALL colours — the blowup is not the values
+but **unmemoized recomputation**: `refineStepR χ = fun v => vertexRankNat (refineStep χ) v` recomputes `refineStep χ`
+per vertex, and `refineStep χ` re-reads the lazy `χ` closure, so nesting explodes exponentially. The cure is
+**reification**: materialise each round to a `Vector` (computed once, O(1) lookup) — then a round is O(n²)/O(n³) and
+`n` rounds are poly. Renumbering (bounded values) + reification (bounded recomputation) together make it runnable.
+
+`refineRoundMat` is *value-equal* to `refineStepR` (`refineRoundMat_eq`), so every proof above transfers; only the
+*evaluation* differs. Use `warmRefineMat` for `#eval`, `warmRefineR` for reasoning. -/
+
+/-- **One reified renumbered round.** Materialise `refineStep` to a `Vector`, then rank it (bounded `0..n-1`),
+materialising the result — so nothing is recomputed. Value-equal to `refineStepR` (`refineRoundMat_eq`). -/
+def refineRoundMat (adj : AdjMatrix n) (P : PMatrix n) (χ : Colouring n) : Colouring n :=
+  let raw := Vector.ofFn (fun v => refineStep adj P χ v)
+  let ranked := Vector.ofFn (fun v => Colouring.vertexRankNat (fun u => raw.get u) v)
+  fun v => ranked.get v
+
+/-- **The reified round computes exactly `refineStepR`** — materialisation changes only evaluation order, not
+values (`Vector.get_ofFn`). So `warmRefineMat = warmRefineR` and all partition/soundness results transfer. -/
+theorem refineRoundMat_eq (adj : AdjMatrix n) (P : PMatrix n) (χ : Colouring n) :
+    refineRoundMat adj P χ = refineStepR adj P χ := by
+  funext v
+  simp [refineRoundMat, refineStepR, Vector.get]
+
+/-- **Reified renumbered warm refinement** — `n` reified rounds. This is the one that actually `#eval`s. -/
+def warmRefineMat (adj : AdjMatrix n) (P : PMatrix n) (init : Colouring n) : Colouring n :=
+  (refineRoundMat adj P)^[n] init
+
+/-- **`warmRefineMat` computes exactly `warmRefineR`** (hence same partition as `warmRefine`, discrete at the leaf,
+①a-sound) — the runnable version equals the reasoned-about version. -/
+theorem warmRefineMat_eq (adj : AdjMatrix n) (P : PMatrix n) (init : Colouring n) :
+    warmRefineMat adj P init = warmRefineR adj P init := by
+  unfold warmRefineMat warmRefineR
+  rw [funext (refineRoundMat_eq adj P)]
+
 end ChainDescent.Renumber

@@ -101,21 +101,34 @@ canonical renumbering. **Correction to the earlier worry:** no delicate "order-e
 needed — `refineStepR` is validated by its own `refineStepR_iff` (partition-level), and the executable canonizer is
 proven ①a directly (`canonAdjComp` is a relabelling for any discrete leaf), not by matching `refineStep`'s order.
 
-## Renumbering — bridge + sound output DONE; runnable `#eval` needs a fully-renumbered DESCENT
-`ScratchRenumber.lean` adds `warmRefineR = (refineStepR)^[n]` + **`samePartition_warmRefineR`** (same partition as
-`warmRefine`, via `samePartition_iterate` = the per-round bridge chained with `refineStep_samePartition`) +
-`discrete_warmRefineR`. `ScratchRenumberExec.lean` adds `canonOutputR` (output via `warmRefineR`) + **`canonOutputR_sound`**
-(①a, axiom-clean) — a proven-sound renumbered canonizer output.
+## Renumbering — RUNNABLE output DONE via renumber + reify (the real blocker was recomputation, not values)
 
-**★ BUT `#eval canonOutputR` still HANGS — bisected 2026-07-07.** Renumbering only the *output* is insufficient: the
-leaf SEED `ch.χι = defaultColouring … k` is **already blown up** (at n=3, `(defaultSpineChain triangle … 1).χι` is a
-~7000-bit triple; the `warmRefine` leaf ~27M-bit). `IndivStep.default` keeps `warmRefine`'s blown-up values (+ a small
-individualization offset), so the seed embeds the compounding, and one `refineStep` on a 7000-bit seed explodes to
-~27M-bit via `O(bits²)` bignum arithmetic → hang. The theory (computable + ①a-sound) is complete; only the runnable
-demo waits.
+**The decisive finding (2026-07-07):** `warmRefineR` hangs on `#eval` even for SMALL colours — so the blowup was
+never the *values*, it was **unmemoized recomputation**: `refineStepR χ = fun v => vertexRankNat (refineStep χ) v`
+recomputes `refineStep χ` per vertex, each re-reading the lazy `χ` closure, exploding exponentially across rounds.
+Renumbering (bounded values) is necessary but NOT sufficient; you also need **reification** — materialise each round
+to a `Vector` (computed once, O(1) lookup).
+
+`ScratchRenumber.lean` adds `refineRoundMat` (materialise `refineStep` → rank → materialise) + `warmRefineMat`
+(`n` reified rounds), with **`refineRoundMat_eq` / `warmRefineMat_eq`** proving `warmRefineMat = warmRefineR` (only
+evaluation differs), so every partition/soundness result transfers. `ScratchRenumberExec.lean` adds **`canonOutputMat`**
+(the runnable output, `warmRefineMat`) + **`canonOutputMat_sound`** (①a, axiom-clean). It **`#eval`s** — the leaf
+canonical adjacency is now computed (CPU ~1.5s; was infeasible with `warmRefine`/`warmRefineR`).
+
+**Takeaway for the full executable:** a genuinely runnable canonizer needs the whole descent **reified**, not just
+renumbered — lazy `Colouring = Fin n → Nat` closures recompute exponentially. The output stage is now reified; the
+descent internals (`descentResult`/`defaultColouring`) still use lazy warm-refine (feasible at small n since values
+stay ≤ ~7000-bit and equality is length-fast, but they'd want reification too for larger n).
+
+The partition bridge (used by both `canonOutputR` reasoning and `canonOutputMat`): `warmRefineR = (refineStepR)^[n]` +
+**`samePartition_warmRefineR`** (same partition as `warmRefine`, via `samePartition_iterate` = the per-round bridge
+chained with `refineStep_samePartition`) + `discrete_warmRefineR`. `canonOutputR` (via `warmRefineR`) + `canonOutputR_sound`
+are the *reasoned* form; `canonOutputMat` (via `warmRefineMat`) + `canonOutputMat_sound` are the *runnable* form, equal by
+`canonOutputMat_eq`. (A false lead along the way: the 7000-bit seed `ch.χι` looked like the cause, but the true blocker
+was recomputation — reification fixes it with NO renumbered descent needed.)
 
 ## NEXT
-**Fully-renumbered descent** `defaultColouringR` / `defaultSpineChainR` using `refineStepR` at EVERY level, so the seed
-`χι` stays `< n` throughout and no `refineStep` ever sees a large value → `canonOutputR` (or its analog) `#eval`s. The
-primitive + bridge already built are exactly what this reuses; `canonOutputR_sound` transfers verbatim. Alt: Tier C-exp
-(exponential enumeration, tiny-n). Tier C-poly stays the wall.
+Optional: **reify the descent internals** (`descentResult`/`defaultColouring` still use lazy `warmRefine`) so larger-n
+graphs run — same `Vector`-materialisation pattern. Then Tier C (the iso-invariant canonical form): C-exp (exponential
+enumeration, tiny-n) or C-poly (the wall = orbit-pruning = the oracle). Or pivot back to the main proofs
+(oracle-summand → spine-`step` wiring, P1/P2 in Lean).

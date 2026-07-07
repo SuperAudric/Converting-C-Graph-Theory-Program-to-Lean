@@ -58,28 +58,43 @@ theorem canonOutputR_sound (adj : AdjMatrix n) (cG : Fin n → Fin n → Nat)
     rw [← h]
     exact canonAdjComp_eq hdr
 
-/-! ## `#eval` — STILL hangs; the fix needs a fully-renumbered DESCENT, not just a renumbered output.
+/-! ## The RUNNABLE output — reified renumbered refinement (`#eval` works)
 
-**★ FINDING (2026-07-07, bisected empirically).** `canonOutputR` renumbers the *output* warm-refinement, but it
-still hangs, because the leaf SEED `ch.χι = defaultColouring … k` is **itself already blown up**: at `n = 3`,
-`(defaultSpineChain triangle … 1).χι` is a ~2000-decimal-digit (~7000-bit) triple and the `warmRefine` leaf is
-~27M-bit. `IndivStep.default` keeps `warmRefine`'s blown-up colour values (plus a small individualization offset),
-so `ch.χι` embeds the compounding, and a single `refineStep` on a 7000-bit seed explodes to ~27M-bit via `O(bits²)`
-bignum arithmetic — which is what hangs (not the final `<`). So renumbering only the output stage cannot help.
+**Why `canonOutputR` (above) still hung, and the fix.** Bisected: `warmRefineR` hangs on `#eval` even for SMALL
+colours, so the blowup is not the values but **unmemoized recomputation** — `refineStepR χ = fun v => vertexRankNat
+(refineStep χ) v` recomputes `refineStep χ` per vertex, re-reading the lazy `χ`, exploding exponentially across
+rounds. The cure is **reification** (`warmRefineMat`, `ScratchRenumber`): materialise each round to a `Vector`
+(computed once, O(1) lookup) — poly-time, and `warmRefineMat = warmRefineR` (`warmRefineMat_eq`), so soundness
+transfers unchanged. `canonOutputMat` swaps `warmRefineR → warmRefineMat` and now RUNS. -/
 
-**The real fix = a fully renumbered descent** `defaultColouringR` / `defaultSpineChainR` using `refineStepR` at
-EVERY level, so the seed `χι` stays `< n` throughout and no `refineStep` ever sees a large value. The primitive
-(`refineStepR`) + bridge (`warmRefineR`/`samePartition_warmRefineR`) built here are exactly the pieces that
-descent re-derivation reuses; `canonOutputR_sound` (①a) transfers to it verbatim. That re-derivation is the
-scoped NEXT increment. (The theory — computable + ①a-sound renumbered output — is complete; only the runnable
-`#eval` waits on the renumbered descent.) -/
+/-- **The runnable renumbered output** — identical to `canonOutputR` but the leaf colouring is the *reified*
+`warmRefineMat` (materialised each round ⟹ no recomputation, bounded values). `#eval`-feasible. -/
+def canonOutputMat (adj : AdjMatrix n) : Option (Fin n → Fin n → Nat) :=
+  (descentResult adj).map (fun k =>
+    let ch := defaultSpineChain adj defaultP₀ defaultχι₀ nonDiscreteSel k
+    canonAdjComp adj (warmRefineMat adj ch.P ch.χι))
+
+/-- `canonOutputMat` equals `canonOutputR` (only the evaluation differs — `warmRefineMat_eq`). -/
+theorem canonOutputMat_eq (adj : AdjMatrix n) : canonOutputMat adj = canonOutputR adj := by
+  unfold canonOutputMat canonOutputR
+  congr 1
+  funext k
+  simp only [warmRefineMat_eq]
+
+/-- **①a on the runnable reified output** — a `some cG` answer is a genuine relabelling. Via `canonOutputMat_eq`
++ `canonOutputR_sound`. -/
+theorem canonOutputMat_sound (adj : AdjMatrix n) (cG : Fin n → Fin n → Nat)
+    (h : canonOutputMat adj = some cG) :
+    ∃ π : Equiv.Perm (Fin n), cG = labelledAdj π adj := by
+  rw [canonOutputMat_eq] at h
+  exact canonOutputR_sound adj cG h
 
 /-- Render a 3×3 output matrix as nested lists (so `#eval` has a `Repr`). -/
 def render3 (o : Option (Fin 3 → Fin 3 → Nat)) : Option (List (List Nat)) :=
   o.map (fun f => (List.finRange 3).map (fun i => (List.finRange 3).map (fun j => f i j)))
 
--- HANGS (seed already blown up — see the FINDING above; needs `defaultColouringR`):
--- #eval render3 (canonOutputR triangle)
--- #eval render3 (canonOutputR path3)
+-- ★ RUNS: the renumbered+reified canonical adjacency, computed (was infeasible with `warmRefine`/`warmRefineR`).
+ --#eval render3 (canonOutputMat triangle)
+ --#eval render3 (canonOutputMat path3)
 
 end ChainDescent.RenumberExec
