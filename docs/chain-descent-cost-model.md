@@ -101,6 +101,23 @@ a firewall breach. The real `canonForm?` = `canonFormOf ∘ budget-cap` (the fla
 the cap (capping only restricts the `some` set to the same values), so ①a is *content-complete now* and its Publication
 body lands with the capped object (② work). **So ①a is closed modulo the shared capped-canonForm? object that ② builds.**
 
+**★ SHARED `canonForm?` OBJECT LANDED (2026-07-07, `ScratchCanonFormCapped.lean`, axiom-clean) — ①a and ② converge in
+ONE object.** `CanonForm.canonForm? : AdjMatrix n → Option (…)` gates the sound `canonFormOf` by the real per-node-capped
+spine descent (`spineCappedCanonizer`), so **cost + flag come from the actual capped run and the `some` value is the
+sound canonizer**. Three theorems, all axiom-clean `[propext, Classical.choice, Quot.sound]`:
+- **`canonForm?_sound`** — ①a on the *flagging* object: `some cG ⟹ ∃π, cG = labelledAdj π G` (`canonFormOf_sound`
+  transferred through the gate). This is the `Publication.canon_sound` body.
+- **`descentCost_le`** — ② cost side: `descentCost G ≤ n⁴`, **unconditional** (the per-node cap; no hypothesis). This is
+  the `cost ≤ costConst·n^costDeg` side of `Publication.canon_poly_or_flag` (`Or.inl` always).
+- **`canonForm?_eq_none_iff`** — the flag IS budget exhaustion (`canonForm? = none ↔ descentResult = none`), the ③ hook.
+The Publication swap is now a one-liner set (`canonForm? := CanonForm.canonForm?`, `cost := descentCost`, `costConst=1`,
+`costDeg=4`), deferred only so the opaque swap happens once alongside ③.
+**Honest scope of the flag (keeps ③ non-vacuous):** at this level `w` is warmRefine-cost only, and the warmRefine descent
+provably reaches a leaf within `n` nodes, so the fuel-`none` never fires — the object is currently *total*. The REAL flag
+is the **oracle summand of `w`** (an expensive harvest exceeding the per-node budget ⟹ `flagsAt` ⟹ `none`), not wired yet
+(gates on confinement-P1 / R1). So ③ is deliberately NOT claimed against this object yet — wiring the oracle-cost flag is
+what makes `none` a genuine event and ③ dischargeable. **NEXT** = the oracle summand of `w` (fires the flag; gates P1).
+
 **NEXT:** the value-side descent co-definition proper (σ = descent state, `step` = the real transition projecting to
 `defaultSpineChain`) — the deeper "IS descended" level, on which ①b/②-completeness ride; then the oracle summand of `w`
 (gates confinement-P1 — the correctness-critical piece), completeness (③-forward), and the Publication param-fixing.

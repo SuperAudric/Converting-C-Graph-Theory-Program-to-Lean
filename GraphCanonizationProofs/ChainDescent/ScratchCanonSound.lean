@@ -154,4 +154,8 @@ theorem canonFormOf_sound (adj : AdjMatrix n) (cG : Fin n → Fin n → Nat)
   canonForm?_sound adj defaultP₀ defaultχι₀ nonDiscreteSel
     nonDiscreteSel_targets nonDiscreteSel_nonempty defaultP₀_antisym cG h
 
+/-- `canonFormOf` always answers `some` — it emits the leaf canonical form and never flags (flagging is the
+cost-model cap, added over this by the shared object). Lets the capped wrapper prove `flag ↔ budget-exhausted`. -/
+theorem canonFormOf_isSome (adj : AdjMatrix n) : (canonFormOf adj).isSome = true := rfl
+
 end ChainDescent.CanonSound

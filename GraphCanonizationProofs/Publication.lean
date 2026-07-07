@@ -180,13 +180,11 @@ theorem canon_sound (n : ℕ) (G : AdjMatrix n) (cG : Fin n → Fin n → Nat)
     (h : canonForm? n G = some cG) :
     ∃ π : Equiv.Perm (Fin n), cG = labelledAdj π G := by
   -- discharged by: `SpineChain.canonAdj` (leaf relabelling by the rank permutation) is a `labelledAdj`.
-  -- PROVED against the real spine, PARAMETER-FREE: `ChainDescent.CanonSound.canonFormOf_sound`
-  -- (`ScratchCanonSound.lean`, axiom-clean) — `canonFormOf : AdjMatrix n → Option …` fixes `(P₀,χι₀,sel)`
-  -- canonically and discharges `hcell/hne/hP₀`. Its shape is EXACTLY this obligation.
-  -- Final wiring waits on the CAPPED (flagging) canonForm? — `canonFormOf` never returns `none`, so wiring it
-  -- as the final `canonForm?` would make ③ (`none → UnhandledResidue`) VACUOUS. The real canonForm? = canonFormOf
-  -- ∘ budget-cap; soundness transfers through the cap (capping only restricts the `some` set, same values), so
-  -- this body becomes `canonFormOf_sound`-transferred once the capped object lands (② work).
+  -- PROVED against the SHARED capped object, axiom-clean: `ChainDescent.CanonForm.canonForm?_sound`
+  -- (`ScratchCanonFormCapped.lean`) — `CanonForm.canonForm? : AdjMatrix n → Option …` is the capped descent
+  -- (cost + flag from the real run; `some` value = the sound `CanonSound.canonFormOf`). Its shape is EXACTLY
+  -- this obligation. Remaining = set `canonForm? n G := CanonForm.canonForm? G` (parameter-free), then this
+  -- body is `CanonForm.canonForm?_sound n G cG h`. Deferred only so the opaque swap happens once, with ②/③.
   sorry
 
 /-- **①b Completeness (UNCONDITIONAL).** Whenever it answers on both inputs, the canonical forms coincide
@@ -210,6 +208,10 @@ theorem canon_poly_or_flag (n : ℕ) (G : AdjMatrix n) :
     cost n G ≤ costConst * n ^ costDeg ∨ canonForm? n G = none := by
   -- discharged by: (Runtime Phase) reaches-rigid ⟹ discretizes in poly nodes ⟹ ¬flag ∧ cost ≤ poly;
   --                otherwise flag. This is where "poly" stops being a meta-claim.
+  -- COST SIDE PROVED, unconditional: `ChainDescent.CanonForm.descentCost_le` (`ScratchCanonFormCapped.lean`,
+  -- axiom-clean) — `descentCost G ≤ n⁴` by the per-node cap, NO hypothesis (so `Or.inl` always; the `∨ none`
+  -- disjunct is the ③-forward completeness content, not needed for the cost bound). Remaining = set
+  -- `cost n G := CanonForm.descentCost G`, `costConst := 1`, `costDeg := 4`, then body = `Or.inl (descentCost_le …)`.
   sorry
 
 /-- **③ Flag characterization (where the citations live).** A flag is emitted iff the input genuinely
