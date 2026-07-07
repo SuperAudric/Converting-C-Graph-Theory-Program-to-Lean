@@ -75,9 +75,35 @@ value = warmRefine` (all spine correctness transfers) and `cost_costedWarmRefine
 (accumulated by the loop, via the reusable `CostM.iterate` + `cost_iterate_const`). The spine `step` now charges
 `(costedWarmRefine adj chₖ.P chₖ.χι).cost`, and `spineCappedCanonizer_step_cost` proves that charge `= warmRefineCost
 n` — so "the spine CAN be refined in n³" is now "running the refinement IS n³ (co-defined)". Per-round `roundCost n`
-is the D7-declared unit. **NEXT:** the value-side descent co-definition (σ = descent state, `step` = the real
-transition projecting to `defaultSpineChain`) — the deeper "IS descended" level; then completeness (③-forward), the
-output map `canonForm? = leaf.canonAdj`, and the oracle summand of `w`.
+is the D7-declared unit.
+
+**★ ①a `canon_sound` DISCHARGED on the real spine (2026-07-07, `ScratchCanonSound.lean`, axiom-clean `[propext,
+Classical.choice, Quot.sound]`) — the FIRST `Publication.lean` obligation crossed into the real runtime.** Defines a
+spine-level `canonForm?` off `defaultSpineChain` (extract the reached leaf via `defaultSpineChain_reaches_leaf`, emit
+`some (canonForm …)`; never flags — flagging is the cost side) and proves `canonForm?_sound`: a `some cG` output is
+`∃ π, cG = labelledAdj π adj` — the `Publication.canon_sound` shape, against the *actual* descent, not the `opaque`
+stub. The content lemma `canonForm_isLabelledAdj` is nearly definitional (`SpineChain.canonAdj` **is** `labelledAdj
+(rankPerm …) adj`; the lex-min `canonForm` is one such image via `canonForm_mem_image`), so it is reusable regardless
+of the leaf-extraction / `Option` wrapper.
+
+**★ ①a carried pieces CLOSED — a parameter-free canonizer (2026-07-07, same module).** The three carried descent
+parameters are now discharged to concrete canonical choices, giving `canonFormOf : AdjMatrix n → Option (…)` (the exact
+`Publication.canonForm?` shape) + `canonFormOf_sound` (the exact `canon_sound` shape), axiom-clean. Scoping outcome:
+`P₀ := unknown` everywhere (antisymmetric by `rfl`) and `χι₀ := 0` (no carried predicate) are **trivial**; the selector
+is the one carried piece with content — `nonDiscreteSel χ` = the whole non-discrete part, chosen `PartitionInvariant`
+(pure partition data — what the spine's cross-branch sharing needs, and what a raw-colour-min rule *fails*, per
+ChainDescent.lean §968), discharging `TargetsNonsingletonCell` + `NonemptyOnNonDiscrete` trivially. It over-individualizes
+(a ② *efficiency* matter, not ①a); since `canonForm_isLabelledAdj` is **selector-agnostic**, ①a transfers to the eventual
+single-cell ② selector for free.
+**The one subtlety — final Publication wiring waits on the CAPPED canonForm?, NOT `canonFormOf` directly:** `canonFormOf`
+never returns `none`, so wiring it as the final `canonForm?` would make ③ (`none → UnhandledResidue`) **vacuously true** —
+a firewall breach. The real `canonForm?` = `canonFormOf ∘ budget-cap` (the flagging version); soundness transfers through
+the cap (capping only restricts the `some` set to the same values), so ①a is *content-complete now* and its Publication
+body lands with the capped object (② work). **So ①a is closed modulo the shared capped-canonForm? object that ② builds.**
+
+**NEXT:** the value-side descent co-definition proper (σ = descent state, `step` = the real transition projecting to
+`defaultSpineChain`) — the deeper "IS descended" level, on which ①b/②-completeness ride; then the oracle summand of `w`
+(gates confinement-P1 — the correctness-critical piece), completeness (③-forward), and the Publication param-fixing.
 
 ---
 
@@ -192,6 +218,25 @@ cubic bound is honest **only under a unit-cost-RAM D7 declaration** (colour comp
 does). So the cost model must either (i) put "colour comparison / encode" on the D7 unit-cost list
 explicitly, or (ii) have the Runtime Phase define the renumbering variant. This is a real design fork, not a
 formality — flagged here and in the brick; decide it when `canonForm?`'s `refineStep` is chosen.
+
+**★ D7 fork scoping (2026-07-07) — renumbering (ii) is the better target and is only *moderately* harder than the
+declaration (i), because rank-compression is order-preserving.** Costs of each:
+- **(i) declare colour-ops unit-cost** — *zero* Lean work (add one D7 list entry; the existing
+  `refineStep = Encodable.encode (sigKey …)` stays). But it is the *weakest* paper claim: `encode∘encode∘…` colour
+  bit-size genuinely blows up super-linearly, so a reviewer auditing a **bit-cost** bound sees the blow-up declared
+  away. Standard for unit-cost RAM (WL is `O(n³)` there), but soft. Always available as a fallback.
+- **(ii) renumbering `refineStepR`** — rank-compress each round's colours to `0..k-1`, so colour Nats stay `≤ n`
+  (bit-size `O(log n)`) and the cubic bound is honest in **bit-cost**. **The de-risking insight:** rank-compression
+  is *order-preserving*, so it preserves BOTH the partition (same fibres) AND the colour order — hence `vertexRank`
+  and `canonForm` are **literally unchanged**. So (ii) is NOT a spine re-derivation: it is one `refineStepR` def + one
+  inductive **order-equivalence bridge** (`refineStep` and `refineStepR` are related by an order-preserving colour
+  bijection at every round ⟹ `samePartition` + equal `vertexRank`), after which the whole spine/soundness transfers
+  and only the *cost measure* moves onto the bounded-colour variant. The one place it could get fiddly is proving the
+  order-equivalence invariant *propagates through a refinement round* (a multiset-signature relabelling argument) —
+  worth a spike to confirm before committing.
+- **Verdict:** target (ii) (matches the C#, honest bit-cost, tractable via the order bridge), keep (i) as the
+  no-build fallback if the bridge invariant proves annoying. Note the per-node cap already contains the *bound*
+  honesty (it charges `w` regardless of colour size); (ii) only sharpens the D7 *declaration* to be bit-cost-defensible.
 
 ---
 

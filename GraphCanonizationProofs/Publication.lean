@@ -180,6 +180,13 @@ theorem canon_sound (n : ℕ) (G : AdjMatrix n) (cG : Fin n → Fin n → Nat)
     (h : canonForm? n G = some cG) :
     ∃ π : Equiv.Perm (Fin n), cG = labelledAdj π G := by
   -- discharged by: `SpineChain.canonAdj` (leaf relabelling by the rank permutation) is a `labelledAdj`.
+  -- PROVED against the real spine, PARAMETER-FREE: `ChainDescent.CanonSound.canonFormOf_sound`
+  -- (`ScratchCanonSound.lean`, axiom-clean) — `canonFormOf : AdjMatrix n → Option …` fixes `(P₀,χι₀,sel)`
+  -- canonically and discharges `hcell/hne/hP₀`. Its shape is EXACTLY this obligation.
+  -- Final wiring waits on the CAPPED (flagging) canonForm? — `canonFormOf` never returns `none`, so wiring it
+  -- as the final `canonForm?` would make ③ (`none → UnhandledResidue`) VACUOUS. The real canonForm? = canonFormOf
+  -- ∘ budget-cap; soundness transfers through the cap (capping only restricts the `some` set, same values), so
+  -- this body becomes `canonFormOf_sound`-transferred once the capped object lands (② work).
   sorry
 
 /-- **①b Completeness (UNCONDITIONAL).** Whenever it answers on both inputs, the canonical forms coincide
