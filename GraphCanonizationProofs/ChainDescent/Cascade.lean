@@ -2,21 +2,8 @@ import ChainDescent.OrbitRecovery
 import ChainDescent.CascadeOracle
 import ChainDescent.Group
 import ChainDescent.Saturation
-import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.GroupTheory.Index
 import Mathlib.Algebra.Group.Subgroup.Finite
 import Mathlib.Data.ZMod.Basic
-import Mathlib.Algebra.Module.Equiv.Basic
-import Mathlib.Algebra.Module.Pi
-import Mathlib.Algebra.Module.Submodule.Lattice
-import Mathlib.Data.Fintype.BigOperators
-import Mathlib.Tactic.Abel
-import Mathlib.FieldTheory.Finite.GaloisField
-import Mathlib.FieldTheory.Finite.Basic
-import Mathlib.LinearAlgebra.Basis.Basic
-import Mathlib.LinearAlgebra.Dimension.Free
-import Mathlib.GroupTheory.SpecificGroups.Cyclic
 
 /-!
 # B1 — cascade composition (Theorem 3a), Phases A + C

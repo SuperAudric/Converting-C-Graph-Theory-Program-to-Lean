@@ -1,15 +1,5 @@
-import Mathlib.Data.Finset.Max
-import Mathlib.Data.Fintype.Basic
-import Mathlib.Data.Fintype.Pi
-import Mathlib.Data.Fintype.Prod
-import Mathlib.Data.Multiset.Basic
 import Mathlib.Data.Multiset.Sort
-import Mathlib.Data.Nat.Pairing
-import Mathlib.Data.List.FinRange
 import Mathlib.Logic.Equiv.List
-import Mathlib.GroupTheory.Perm.Basic
-import Mathlib.Order.PiLex
-import Mathlib.Logic.Function.Iterate
 
 /-!
 # Direction invariance of warm 1-WL refinement (chain descent §6.2)

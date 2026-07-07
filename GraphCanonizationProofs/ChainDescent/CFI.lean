@@ -1,13 +1,5 @@
 import ChainDescent.OrbitRecovery
-import Mathlib.Algebra.BigOperators.Group.Finset.Defs
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.Data.Finset.Powerset
-import Mathlib.Data.Fintype.Powerset
-import Mathlib.Data.Fintype.Sigma
-import Mathlib.Data.Fintype.Sum
-import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Data.Nat.Choose.Sum
-import Mathlib.Data.Finset.SymmDiff
 import Mathlib.GroupTheory.Perm.Support
 
 /-!

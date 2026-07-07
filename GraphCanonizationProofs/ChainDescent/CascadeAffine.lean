@@ -11,7 +11,7 @@ import ChainDescent.Scheme
 import ChainDescent.Separability
 import ChainDescent.CoherentConfig
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
-import Mathlib.LinearAlgebra.BilinearForm.Properties
+import Mathlib.FieldTheory.Finite.GaloisField
 
 namespace ChainDescent
 

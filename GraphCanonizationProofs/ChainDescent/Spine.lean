@@ -5,7 +5,10 @@ IndivStep / DescentTrace / SpineChain + the spine branch-independence theorem, l
 `LinearOracleSpec`. Imports `ChainDescent` (Core).
 -/
 import ChainDescent
-
+import Mathlib.GroupTheory.Perm.Basic
+import Mathlib.Data.Finset.Max
+import Mathlib.Data.Fintype.Pi
+import Mathlib.Order.PiLex
 namespace ChainDescent
 
 /-! ## §15 — the descent spine

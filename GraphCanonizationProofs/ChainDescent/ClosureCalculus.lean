@@ -5,7 +5,9 @@ candidate matroid / closure system. **Negative-result investigation**: `cl_prov`
 NOT a matroid (M3 refuted); nothing else in the project depends on it. Kept building for provenance.
 -/
 import ChainDescent
-
+import Mathlib.Data.Fintype.Basic
+import Mathlib.Data.Fintype.Prod
+import Mathlib.Data.Multiset.Basic
 namespace ChainDescent
 
 /-! ## §13 — propagation closure as a candidate matroid
