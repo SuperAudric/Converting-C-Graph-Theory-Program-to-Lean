@@ -1087,9 +1087,11 @@ genuinely family-specific: for Clebsch the point-stabilizer is *not* transitive 
 (`ClebschConcrete.lean`), which is why Clebsch takes a different leg — so `FrameSelectorTransitive` is tied to the
 confined forms-graph residue (delivered by P1+P3), never assumed generically. Terminal anchor: at the seal's
 `SeparatesAtBoundedBase` (`Discrete`, all singletons) the cover is trivial; the intermediate prune nodes are what
-Witt handles. **So P4 = {complete Lean reduction} + {Witt flag-transitivity, citable}.** The remaining work is to
-either instantiate `FrameSelectorTransitive` on the concrete forms-graph residue (a classical-group formalization)
-or carry Witt as a scoped citation — same discipline as the seal's other classical inputs.
+Witt handles. **So P4 = {complete Lean reduction} + {Witt flag-transitivity, citable}.** **DECISION (2026-07-07): carry Witt as a
+scoped citation** (`Publication.lean` `witt_flag_transitivity`, correctness-only), expected to discharge before
+publication — it is a **planned in-project build** (first two small pieces already done), same discipline as the
+seal's other classical inputs. So confinement-P4 is **closed modulo the Witt citation**; no open problem remains in
+it.
 
 **Assembly.** P1 ⟹ flag is large; P2 ⟹ not rigid; P3 ⟹ Cameron/node-4 primitive rank-3; P4 ⟹ VT + cell = orbit ⟹
 prune sound ⟹ ① on the non-rigid residue. **Weakest links: P1 (soundness linchpin) and P4 (the prune-soundness core);

@@ -159,6 +159,15 @@ outside Buekenhout–Shult). **Correctness only.** The genuine soft spot (non-cl
 opaque ClassicalGQRecognition : Prop
 axiom payne_thas : ClassicalGQRecognition
 
+/-- Witt's theorem: over a field, `O(Q)` acts transitively on isometric isotropic subspaces / frames of a given
+type. Discharges `ConfinementP4.FrameSelectorTransitive` — the assume-VT prune (confinement-P4) is sound because
+the residual group is transitive on the selected isotropic-point cell, so the cell is one orbit. **Correctness
+only** — a classical group-transitivity theorem (Artin, *Geometric Algebra*), NOT a complexity bound, and NOT the
+bounded-WL-dim wall (`JointProfileRecoversAt`). Carried as a scoped citation; a **planned in-project build** (first
+pieces done), expected to discharge before publication. -/
+opaque WittFlagTransitivity : Prop
+axiom witt_flag_transitivity : WittFlagTransitivity
+
 /-! ## 3. THE OBLIGATIONS — the endgame theorem statements
 
 Each is a `sorry`-stubbed compile target. The `-- discharged by:` note records which completed project

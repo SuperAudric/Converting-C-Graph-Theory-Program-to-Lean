@@ -50,8 +50,17 @@ threatening the bound; (ii) the flag's *phase* structurally discriminates the `U
 fix); (iii) the **canonizer itself** — a Phase-1 flag ⟹ VT ⟹ assume-the-harvest-and-prune (node-4/Cameron *handled*,
 single-path poly; `none` only in rigid Phase 2). This makes the flag/budget mechanism **load-bearing for correctness ①**
 (conditional on a *confinement lemma*), so the cost model shifts from a demonstration into a **prerequisite of the
-algorithm**. The descent-model brick should therefore build the per-node-flag `budgetedIterate` and carry the confinement
-lemma as ①'s one non-rigid hypothesis. Plan: route-c-plan §7c (sub-obligations P1–P4).
+algorithm**. Plan: route-c-plan §7c (sub-obligations P1–P4; P4 reduced to the citable Witt flag-transitivity).
+
+**★ Per-node-cap variant LANDED (2026-07-07, `ScratchCostModelPerNode.lean`, core-only, axiom-clean `[propext,
+Quot.sound]`).** `capStep` charges `min(trueCost, w)` per node; `cost_budgetedIterate_capped_le` + `CappedCanonizer`
+(no `hstep` field) give **② unconditionally with NO per-node-cost hypothesis** — the cap relocates the assumption into
+the algorithm, so a quasipoly harvest doesn't break the bound (it flags, `flagsAt`). `Phase` (symmetric/rigid) records
+the flag phase. **Attachment decision (scoping):** instantiate over **`defaultSpineChain`** — node bound already proven
+(`defaultSpineChain_reaches_leaf : ∃ k ≤ n, IsLeaf` ⟹ `nbud = n`), correctness via `spine_branch_independent` +
+`SpineChain.canonAdj` (→ `canonForm?`), per-node work = `warmRefine` + oracle. It is single-path (assume-VT `leaves=1`),
+so the branch-frontier σ of §3 is **not needed** for the poly target; the `≤ n` path is the whole cost. NEXT = the
+`CappedCanonizer` instance over `defaultSpineChain` (`step` = one spine level).
 
 ---
 
