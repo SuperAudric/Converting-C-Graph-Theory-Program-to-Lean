@@ -133,4 +133,43 @@ theorem selectedCellSubsetOrbitAt_of_cover
   obtain ⟨r, hr⟩ := h T hT
   exact selectedCellSubsetOrbit_of_orbit_cover hr
 
+/-! ## The frame-base selector — its sole requirement, and where it is discharged
+
+The reduction above pins the entire confinement-P4 content to one property of the selector at each prefix: the
+residual group `StabilizerAt adj P T` acts **transitively on the selected cell** (equivalently, some frame origin
+`r`'s orbit covers it). Naming it as `FrameSelectorTransitive` isolates exactly the classical-group fact that the
+frame-base selector relies on.
+
+**Where it comes from — and why it is family-specific.** For the forms-graph residues this is **Witt's theorem**:
+the orthogonal group `O(Q)` is transitive on isometric (isotropic) frames/flags of each type, so after
+individualizing an isotropic frame `T` the residual group is transitive on the next isotropic-point cell. This is
+a *citable classical theorem* (Artin, *Geometric Algebra*), **not** the multi-base `JointProfileRecoversAt` /
+bounded-WL-dim wall (which is 1-WL *reaching* orbits — a different, open, quantitative question). It is genuinely
+family-specific: for a Clebsch-type scheme the point-stabilizer is **not** transitive on the colour classes
+(`ClebschConcrete.lean`), which is exactly why Clebsch is routed through a different leg — so `FrameSelectorTransitive`
+must be tied to the confined (forms-graph) residue, delivered by the confinement lemma (P1+P3), never assumed
+generically. Terminal anchor: at the seal's `SeparatesAtBoundedBase` (a `Discrete` base, all singletons) the cover
+holds trivially; the intermediate prune nodes are the ones needing Witt-transitivity. -/
+
+/-- **The frame-base selector's requirement (per prefix): the residual group is transitive on the selected cell.**
+Stated with a distinguished frame origin `r` (as a frame base has), whose `Stab(T)`-orbit covers the cell — i.e.
+Witt flag-transitivity of the residue's automorphism group. This is the ONE remaining input to confinement-P4;
+for the forms graphs it is Witt's theorem (citable classical), false for Clebsch-like (family-specific). -/
+def FrameSelectorTransitive (adj : AdjMatrix n) (P : PMatrix n)
+    (sel : Colouring n → Finset (Fin n)) (S₀ : Finset (Fin n)) : Prop :=
+  ∀ T : Finset (Fin n), S₀ ⊆ T → ∃ r : Fin n,
+    ∀ w, w ∈ sel (warmRefine adj P (individualizedColouring n T)) →
+      OrbitPartition adj P T r w
+
+/-- **Frame-selector transitivity discharges confinement-P4 (the full reduction).** With the residual group
+transitive on every selected cell, the per-prefix `SelectedCellSubsetOrbit` holds — hence (via
+`selectedCellIsOrbit_of_subsetOrbit`) the landed prune-completeness consumer fires at every node, wall-free. The
+assume-VT prune is sound exactly under `FrameSelectorTransitive`, whose forms-graph instance is Witt's theorem. -/
+theorem selectedCellSubsetOrbitAt_of_frameSelectorTransitive
+    {adj : AdjMatrix n} {P : PMatrix n}
+    {sel : Colouring n → Finset (Fin n)} {S₀ : Finset (Fin n)}
+    (h : FrameSelectorTransitive adj P sel S₀) :
+    SelectedCellSubsetOrbitAt adj P sel S₀ :=
+  selectedCellSubsetOrbitAt_of_cover h
+
 end ChainDescent.ConfinementP4

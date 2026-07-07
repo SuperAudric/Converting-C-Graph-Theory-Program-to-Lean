@@ -1075,11 +1075,21 @@ Discharged outright at the root (`_of_pretransitive`); reduced to orbit-cover el
 prefixes (exactly `RecoversWhileSymmetric`'s `∀ T ⊇ S₀` shape), so a single uniform per-node lemma discharges it at
 whatever residue each node presents — "every node-4 residue harvests its next step" is that per-node form.
 Formalized: `SelectedCellSubsetOrbitAt` (the `∀ T ⊇ S₀` target) + `selectedCellSubsetOrbitAt_of_cover` (one lemma,
-applied per node; axiom-clean). **NEXT = the per-prefix cover hypothesis** — `∀ T ⊇ S₀, ∃ r`, `Stab(T)`-orbit of
-`r` covers the selected cell = the residue's group transitivity on the selected cell (forms-graph / rank-3
-structure). The same statement at every node. Honest crux for this last step: it is wall-free iff the selected cell
-is *structurally* one orbit (frame / symmetry-broken base, where `cells = orbits` — the seal's `VO⁻₄(3)` route),
-not a general WL colour class that could merge orbits; pinning the selector to the former is the remaining work.
+applied per node; axiom-clean).
+
+**P4's reduction is COMPLETE — down to one citable classical fact.** The frame-base selector's sole requirement is
+named: `FrameSelectorTransitive` (the residual group `Stab(T)` is transitive on the selected cell at every prefix,
+witnessed by a frame origin), and `selectedCellSubsetOrbitAt_of_frameSelectorTransitive` discharges all of
+confinement-P4 from it (axiom-clean). **`FrameSelectorTransitive` is, for the forms graphs, Witt's theorem** —
+`O(Q)` transitive on isometric isotropic flags (Artin, *Geometric Algebra*; **citable classical**, NOT the
+`JointProfileRecoversAt`/bounded-WL-dim wall, which is 1-WL *reaching* orbits — a different, open question). It is
+genuinely family-specific: for Clebsch the point-stabilizer is *not* transitive on the colour classes
+(`ClebschConcrete.lean`), which is why Clebsch takes a different leg — so `FrameSelectorTransitive` is tied to the
+confined forms-graph residue (delivered by P1+P3), never assumed generically. Terminal anchor: at the seal's
+`SeparatesAtBoundedBase` (`Discrete`, all singletons) the cover is trivial; the intermediate prune nodes are what
+Witt handles. **So P4 = {complete Lean reduction} + {Witt flag-transitivity, citable}.** The remaining work is to
+either instantiate `FrameSelectorTransitive` on the concrete forms-graph residue (a classical-group formalization)
+or carry Witt as a scoped citation — same discipline as the seal's other classical inputs.
 
 **Assembly.** P1 ⟹ flag is large; P2 ⟹ not rigid; P3 ⟹ Cameron/node-4 primitive rank-3; P4 ⟹ VT + cell = orbit ⟹
 prune sound ⟹ ① on the non-rigid residue. **Weakest links: P1 (soundness linchpin) and P4 (the prune-soundness core);
