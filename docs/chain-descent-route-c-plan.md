@@ -988,51 +988,72 @@ does not become an axiom.
 The membership-certification framing of §7a(c) is **superseded** by a mechanism that needs no VT test (§7a d) and no
 membership oracle. It refines the flag from a global to a **per-node** budget.
 
-**Safe mode (witness-or-flag — unconditionally sound).** At a Phase-1 descent node the per-node harvest either
-(i) **completes** within budget — and since the harvest *is* a certified orbit/automorphism (verifiable by
-construction; §7a-residual (1) is a non-issue), pruning on it is sound and VT is *witnessed*, never assumed — or
-(ii) **exceeds** budget → **flag**. VT is never a precondition, so soundness (①/②) is **unconditional** and all content
-is completeness (③-forward). The flag's **phase** discriminates the `UnhandledResidue` atom: Phase-1 → node-4/Cameron
-(VT); Phase-2 → rigid (IR row-4). This alone resolves the §7a(d) VT-test blocker: you don't test transitivity, you
-witness it or flag.
+**One canonizer — witness-or-assume, with a phase-discriminated flag action.** At a Phase-1 descent node the per-node
+orbit-harvest either (i) **completes** within budget — and since the harvest *is* a certified orbit (verifiable by
+construction; §7a-residual (1) is a non-issue), pruning the target cell to one root is sound with VT *witnessed* — or
+(ii) **exceeds** budget → the flag fires, and *by the confinement lemma below* the residue is node-4/Cameron ⟹
+**vertex-transitive** ⟹ the cell is one Aut-orbit ⟹ **pick any root and prune the rest soundly WITHOUT exhibiting the
+automorphism** (pruning needs only the orbit-equality *guarantee*, which the structural VT theorem supplies, not the
+*witness*). Either branch is *prune-and-continue*: the flag **never means "give up" in Phase 1**. Recursion (each
+residue a smaller VT `VO_{d−2}`) gives a **single-path `O(d)` descent = poly** — the recovery-route's empirical
+`leaves=1, BranchingNodes=0`. There is **no separate "safe mode"**: the only place a flag emits `none` is **Phase 2**
+(the rigid / IR-row-4 residue), out of the non-rigid scope by design. So the flag's *action* is phase-discriminated —
+Phase-1: assume-VT-prune-continue (handled); Phase-2: emit `none` (unhandled rigid) — which is also what structurally
+selects the `UnhandledResidue` atom. This resolves the §7a(d) VT-test blocker outright: you never *test* transitivity,
+you witness it or (on a flag) get it from confinement.
 
-**Poly mode (assume-VT — the genuine poly upgrade for node-4/Cameron).** A Phase-1 over-budget flag, *by the
-confinement lemma below*, means the residue is node-4/Cameron ⟹ **vertex-transitive**. VT ⟹ the branch's candidate
-vertices share one Aut-orbit ⟹ some automorphism relates them ⟹ **pick either as canonical root and prune the rest
-soundly — without exhibiting the automorphism** (soundness of pruning needs only the orbit-equality *guarantee*, which
-the structural VT theorem supplies, not the *witness*). "Flag and end" becomes "flag → assume the harvest → continue";
-recursion (each residue a smaller VT `VO_{d−2}`) gives a **single-path `O(d)` descent = poly** — the recovery-route's
-empirical `leaves=1, BranchingNodes=0`.
-
-**The cost — poly mode moves the mechanism onto the SOUNDNESS-critical path.** In safe mode a wrong flag costs only
-completeness; in poly mode, assume-VT-prune on a **non-VT** residue is a **correctness bug** (unsound pruning ⟹ wrong
-canonical form). So poly-mode's ① is **conditional on the confinement lemma delivering VT** — the endgame's clean
-"① unconditional / ② conditional" split partially dissolves, and the budget/flag mechanism becomes a **load-bearing
-component of the canonizer's correctness, not external accounting** (⟹ the cost model shifts from *demonstration* to
-*prerequisite*; cost-model doc §1/§7a). **Keep both modes** (the D3 disableable-cap knob): safe = ① unconditional,
-node-4/Cameron flagged; poly = ① conditional on confinement, node-4/Cameron handled, flag set = rigid row-4 only.
+**What this delivers, and the one thing left to prove.** The mechanism is **poly-time** and **complete for the
+non-rigid residue** (every non-rigid input resolves to a canonical form; no Phase-1 `none`). **Correctness is the
+remaining obligation** — assume-VT-prune on a residue that is *not* VT would be a **correctness bug** (unsound pruning ⟹
+wrong canonical form). So ① (`canon_sound`/`canon_complete`) on the non-rigid side is **conditional on the confinement
+lemma delivering VT**. The budget/flag mechanism is therefore **load-bearing for correctness, not external accounting**
+— the cost model shifts from a *demonstration* into a **prerequisite of the algorithm** (cost-model §1/§7a). **The
+correctness proof for the non-rigid residue *is* the confinement lemma** (planned in §7c below).
 
 **The confinement lemma — the ONE obligation, and it is "the remainder" the seal already chases.**
-> *A Phase-1 over-budget flag ⟹ the reached residue is schurian (hence vertex-transitive).*
-Decompose: **seal trichotomy** (reaches rigid ∨ node-4 ∨ Cameron; quasipoly, in build) **+ deferral-confinement**
-(rigid work is deferred to Phase 2, never expensively harvested in Phase 1 — direction-blind deferral substrate
-landed) **+ largeness** (only large-Aut/primitive residues flag in Phase 1; small-Aut non-Schurian SRGs route to the
-rigid Phase-2 branch). Large-primitive ⟹ transitive ⟹ VT; schurian ⟹ orbital scheme of a transitive group ⟹ VT for
-free. **Not a new wall — a recomposition of landed pieces**, matching `ClassifyStarved/BranchStarved = 0`.
+One-line summary: *a Phase-1 over-budget flag ⟹ the residue is primitive rank-3 (node-4/Cameron) ⟹ VT ⟹ the target
+cell is one orbit ⟹ prune sound.* **The full plan — the largeness argument that kills the non-Schurian-SRG soundness
+danger, the four sub-obligations P1–P4, assembly, and tuning-≠-theorem — is §7c below.**
 
-**The sporadic worry, located precisely.** The finitely-many classified sporadic rank-3 families are
-**primitive ⟹ VT**, safe. The genuine soundness danger is a **non-Schurian SRG** reaching a Phase-1 flag — i.e. exactly
-the carried `SchurianScheme` model-faithfulness gap (remaining-work §1 caveat), which poly-mode **promotes from a
-completeness caveat to a soundness obligation**. The likely saving grace (small-Aut non-Schurian SRGs are rigid-ish ⟹
-Phase-2, not Phase-1) must be delivered as the *largeness* clause of the confinement theorem, **not** by budget tuning.
+**Net.** No VT test, no membership oracle. One poly-time canonizer, complete on the non-rigid residue; its correctness
+= the confinement lemma (§7c) = the seal's own remaining content, now soundness-critical.
 
-**Budget tuning ≠ the theorem.** The budget must be generous enough that no non-VT family flags in Phase 1 (over-large
-budget only costs speed — "witnessed non-poly resolves in poly at this size"; too-small is a *correctness* bug in poly
-mode). But tuning changes only *which inputs flag*; soundness of assume-VT needs the *proof* that whatever flags in
-Phase 1 is VT. Tuning is a practical knob layered on the confinement theorem, never a substitute for it.
+---
 
-**Net.** No VT test, no membership oracle. Safe mode is unconditionally sound today; poly mode is the real poly upgrade
-for node-4/Cameron, gated on the confinement lemma = the seal's own remaining content, now soundness-critical.
+## 7c. The confinement lemma — plan for the non-rigid correctness proof (2026-07-07)
+
+**Target (the whole non-rigid correctness proof reduces to this).** At every Phase-1 branching node, the target cell is
+a single orbit of the residue's automorphism group — so pruning it to one root is sound. It suffices to prove the flag
+case (the witness case is sound by construction):
+
+> **CONFINEMENT.** If a Phase-1 node's orbit-harvest exceeds the per-node budget `w`, then its residue is a **primitive
+> rank-3 (node-4/Cameron) scheme**, hence **vertex-transitive**, and the target cell (a `warmRefine` colour class) is a
+> single `Aut`-orbit.
+
+**Why this is the right reduction — soundness of the *dangerous* case is killed by *largeness*, not by an oracle.** The
+soundness worry is a **non-Schurian SRG** (small, non-transitive `Aut`) being assume-VT-pruned. CONFINEMENT excludes it
+*structurally*: such a graph has **small `Aut`** ⟹ a cheap exact orbit-oracle ⟹ it **resolves within `w` and never
+flags** (or fails to discretize and is **deferred to Phase 2**). Only **large-`Aut`** residues flag; a large-`Aut`
+rank-3 residue has a rank-3 automorphism group ⟹ is the orbital scheme of a primitive group ⟹ **schurian and VT by the
+classification**. So we never need the general (undischarged) `SchurianScheme` assumption — only its restriction to the
+flagged (large) subset, which the largeness clause *delivers*.
+
+**Decomposition into four sub-obligations (proof targets):**
+
+| # | Sub-obligation | Content | Status / where |
+|---|---|---|---|
+| **P1** | **Largeness confinement** (the soundness linchpin) | small-`Aut` residue ⟹ orbit-harvest ≤ `w` ⟹ **does not flag**. Contrapositive: flag ⟹ large `Aut`. Pins the budget `w` ≥ the small-`Aut` oracle cost; this is where the cost model (`w`, §4 oracle term) and correctness interlock. Excludes non-Schurian SRGs from Phase-1 flags. | **New.** Needs the per-node oracle-cost bound + small-`Aut`⟹cheap-oracle. Uses landed `exists_greedy_base_le_log` (small `Aut` ⟹ base `O(log n)`). |
+| **P2** | **Deferral confinement** | Phase-1 per-node cost = symmetric-harvest cost only; rigid decisions are *deferred* (cheap push), never expensively harvested. ⟹ a Phase-1 flag is not rigid-caused ("rigid does not entangle into non-rigid"). | Substrate landed (direction-blind deferral, `exists_potential_descent`); needs a per-node cost lemma. |
+| **P3** | **Trichotomy, restricted** | large `Aut` ∧ (¬rigid, by P2) ⟹ residue is Cameron ∨ node-4 (both primitive rank-3). | The seal `reachesRigidOrCameron` (quasipoly, **in build**) — a recomposition. |
+| **P4** | **Cells-are-orbits on primitive rank-3** | for a primitive rank-3 scheme the `warmRefine` colour class (target cell) is a single `Aut`-orbit ⟹ pruning it is sound. Primitive ⟹ transitive ⟹ VT. | **New but clean.** Connect `orbitalScheme` / primitivity machinery; the actual soundness content of the prune step. |
+
+**Assembly.** P1 ⟹ flag is large; P2 ⟹ not rigid; P3 ⟹ Cameron/node-4 primitive rank-3; P4 ⟹ VT + cell = orbit ⟹
+prune sound ⟹ ① on the non-rigid residue. **Weakest links: P1 (soundness linchpin) and P4 (the prune-soundness core);
+P2/P3 are recompositions of landed pieces.**
+
+**A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
+harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the
+*theorem* that whatever flags is large — the two are not interchangeable.
 
 ---
 

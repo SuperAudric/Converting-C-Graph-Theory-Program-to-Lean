@@ -44,14 +44,14 @@ declaration (or a renumbering variant) — a fork to decide when `canonForm?`'s 
 (b) `canonForm?` as a `BudgetedCanonizer` instance (the D4 traversal-state descent); (c) the
 node-count-on-handled-inputs bound that feeds the seal's base bound — the quasipoly pilot. §5–§6.
 
-**★ Per-node flag + assume-VT poly mode (2026-07-07, §7a).** Refining the flag to a **per-node** budget (a small
-`budgetedIterate` variant, flagging per node + recording phase) gives: (i) ② stays unconditional and the §4 colour-blowup
-stops threatening the bound; (ii) the flag's *phase* structurally discriminates the `UnhandledResidue` atom (issue-#1
-firewall fix); (iii) a **poly mode** where a Phase-1 flag ⟹ VT ⟹ assume-the-harvest-and-prune (node-4/Cameron *handled*,
-single-path poly). Poly mode makes the flag/budget mechanism **load-bearing for correctness ①** (conditional on a
-*confinement lemma*), so the cost model shifts from a demonstration into a **prerequisite of the algorithm**. The
-descent-model brick should therefore build the per-node-flag `budgetedIterate` and carry the confinement lemma as ①'s
-one poly-mode hypothesis. Detail: route-c-plan §7b.
+**★ Per-node flag + assume-VT (2026-07-07, §7a).** Refining the flag to a **per-node** budget (a small `budgetedIterate`
+variant, flagging per node + recording phase) gives: (i) ② stays unconditional and the §4 colour-blowup stops
+threatening the bound; (ii) the flag's *phase* structurally discriminates the `UnhandledResidue` atom (issue-#1 firewall
+fix); (iii) the **canonizer itself** — a Phase-1 flag ⟹ VT ⟹ assume-the-harvest-and-prune (node-4/Cameron *handled*,
+single-path poly; `none` only in rigid Phase 2). This makes the flag/budget mechanism **load-bearing for correctness ①**
+(conditional on a *confinement lemma*), so the cost model shifts from a demonstration into a **prerequisite of the
+algorithm**. The descent-model brick should therefore build the per-node-flag `budgetedIterate` and carry the confinement
+lemma as ①'s one non-rigid hypothesis. Plan: route-c-plan §7c (sub-obligations P1–P4).
 
 ---
 
@@ -74,13 +74,13 @@ discretizes in a bounded number of nodes). **This is where "poly stops being a m
 Reading, in one line: **② says "never over budget" (free); ③-forward says "the budget is generous enough
 that handled inputs finish" (the work).**
 
-**Demonstration → prerequisite (the 2026-07-07 shift; §7a).** The above holds for the *safe* (flag→give-up) mode, where
-the cost model is an *external demonstration*: the algorithm's **correctness never depends on it** (a wrong flag costs
-only completeness). The **poly mode** (§7a: a Phase-1 flag ⟹ vertex-transitive ⟹ assume-the-harvest-and-prune, which
-*handles* node-4/Cameron in poly) instead **uses the flag inside the pruning decision**, so a wrong flag becomes a
-*correctness* bug. There the cost/flag mechanism is a **load-bearing prerequisite of the algorithm**, and ① is
-conditional on the *confinement lemma* (`Phase-1 flag ⟹ schurian/VT residue`). Both modes are kept (the D3
-disableable-cap knob); the distinction is which obligation the flag serves — ③ only (safe) vs ① + ② + ③ (poly).
+**Demonstration → prerequisite (the 2026-07-07 shift; §7a).** The original framing treated the cost model as an
+*external demonstration* — a post-hoc certificate whose failure costs only completeness, never correctness. The
+per-node-flag mechanism (§7a) changes this: a Phase-1 flag ⟹ vertex-transitive ⟹ **assume-the-harvest-and-prune**, which
+*handles* node-4/Cameron in poly by **using the flag inside the pruning decision**. A wrong flag is then a *correctness*
+bug, so the cost/flag mechanism is a **load-bearing prerequisite of the algorithm**, and ① (on the non-rigid residue) is
+conditional on the *confinement lemma* (`Phase-1 flag ⟹ primitive rank-3 / VT residue`; plan: route-c-plan §7c). The
+only place the flag still emits `none` is the **rigid Phase-2** residue (IR row-4) — the design boundary of "non-rigid".
 
 ---
 
@@ -240,19 +240,20 @@ node's work hits `w`, recording *which phase* flagged) yields two consequences. 
   Phase-1 flag → node-4/Cameron (vertex-transitive); Phase-2 flag → rigid (IR row-4). Define the atoms by *which phase
   flagged* (a structural fact via the confinement lemma), **not** by "handled sub-classes" (algorithm-relative). This is
   the issue-#1 fix carried into `Publication.lean`.
-- **Two modes (the D3 disableable-cap knob):**
-  - **Safe mode — witness-or-flag.** Harvest succeeds within budget ⟹ it *is* a certified orbit/automorphism ⟹ prune
-    soundly (VT witnessed, not assumed); else flag. ① **unconditional**; node-4/Cameron sit in the flag set.
-  - **Poly mode — assume-VT.** A Phase-1 flag ⟹ (confinement lemma) node-4/Cameron ⟹ VT ⟹ pick any root and prune
-    *without* exhibiting the automorphism ⟹ single-path poly; node-4/Cameron **handled**, flag set = rigid row-4 only.
+- **One canonizer — witness-or-assume (no separate "safe mode").** At a Phase-1 node: harvest succeeds within budget ⟹
+  it *is* a certified orbit ⟹ prune soundly (VT *witnessed*); harvest exceeds budget ⟹ the flag fires and, by the
+  confinement lemma, the residue is node-4/Cameron ⟹ VT ⟹ pick any root and prune *without* exhibiting the automorphism.
+  Either way is *prune-and-continue* ⟹ single-path poly; **node-4/Cameron are handled, not flagged.** A flag emits
+  `none` only in **Phase 2** (rigid / IR row-4). So the algorithm is **poly-time and complete on the non-rigid residue**.
 
-**★ The reframe this forces — the cost model is no longer only a *demonstration*.** In poly mode the flag/budget
-mechanism is *used by the algorithm to decide to prune*, so it becomes a **load-bearing part of correctness (①)**, not
-external accounting: assume-VT-prune on a non-VT residue is a *correctness* bug, so ① is **conditional on the confinement
-lemma** (`Phase-1 flag ⟹ schurian/VT residue`). The sporadic-node-4 soundness worry = the carried `SchurianScheme`
-model-faithfulness gap, **promoted from a completeness caveat to a soundness obligation** in poly mode. Safe mode keeps ①
-unconditional. This is the sense in which "the cost model moved from demonstration into a prerequisite for the
-algorithm." See §1 (the relocation) and route-c-plan §7b (confinement lemma, decomposition, tuning-≠-theorem).
+**★ The reframe this forces — the cost model is no longer only a *demonstration*.** The flag/budget mechanism is *used by
+the algorithm to decide to prune*, so it is **load-bearing for correctness (①)**, not external accounting:
+assume-VT-prune on a non-VT residue is a *correctness* bug, so **① on the non-rigid residue is conditional on the
+confinement lemma** (`Phase-1 flag ⟹ primitive rank-3 / VT residue`). The sporadic-node-4 soundness worry = the carried
+`SchurianScheme` model-faithfulness gap, now a **soundness obligation** (killed on the flagged subset by the *largeness*
+clause — small-`Aut` non-Schurian SRGs don't flag). This is the sense in which "the cost model moved from demonstration
+into a prerequisite for the algorithm." Plan for the whole non-rigid correctness proof (sub-obligations P1–P4):
+route-c-plan §7c. See also §1 (the relocation).
 
 ---
 

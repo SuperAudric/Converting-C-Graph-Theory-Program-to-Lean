@@ -89,12 +89,13 @@ records *which phase* fired: a **Phase-1** flag ⟹ (confinement lemma) the resi
 a **Phase-2** flag ⟹ rigid (⟹ (D2)). The phase is thus the *structural* selector into these atoms — which is what
 keeps `residue_if_flag` (③) firewall-clean rather than tautological.
 
-**TWO MODES (D3 disableable-cap knob).** *Safe mode* — flag→give-up: node-4/Cameron stay in the flag set, ①
-(`canon_sound`/`canon_complete`) is UNCONDITIONAL. *Poly mode* — a Phase-1 flag ⟹ vertex-transitive ⟹
-assume-the-harvest-and-prune (node-4/Cameron become HANDLED, single-path poly); there ① is **conditional on the
-confinement lemma** `Phase-1 flag ⟹ schurian/VT residue`, carried as a hypothesis (never an axiom — it is a project
-obligation, and the sporadic-node-4 soundness worry = the `SchurianScheme` gap, soundness-critical in this mode). The
-current obligations below are stated for safe mode; the poly-mode headline would carry the confinement lemma. -/
+**FLAG ACTION IS PHASE-DISCRIMINATED (one canonizer).** A Phase-1 flag ⟹ (confinement lemma) the residue is primitive
+rank-3 (node-4/Cameron) ⟹ vertex-transitive ⟹ assume-the-harvest-and-prune (node-4/Cameron become HANDLED, single-path
+poly). A flag emits `none` only in **Phase 2** (the rigid residue, (D2)). So the canonizer is poly-time and COMPLETE on
+the non-rigid residue; its CORRECTNESS ① on that residue is **conditional on the confinement lemma**
+`Phase-1 flag ⟹ primitive rank-3 / VT residue`, carried as a hypothesis (never an axiom — a project obligation; plan:
+route-c-plan §7c, sub-obligations P1–P4). The sporadic-node-4 soundness worry = the `SchurianScheme` gap, killed on the
+flagged subset by the *largeness* clause (small-`Aut` non-Schurian SRGs don't flag). -/
 opaque residueNonSchurian       (n : ℕ) (G : AdjMatrix n) : Prop
 opaque residueHiddenJohnson     (n : ℕ) (G : AdjMatrix n) : Prop
 opaque residueRigidObstruction  (n : ℕ) (G : AdjMatrix n) : Prop
