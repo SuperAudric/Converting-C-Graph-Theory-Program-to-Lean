@@ -1058,10 +1058,21 @@ disjunct that **covers the gap where recovery starves** via the rank-3 GROUP str
 `Stab(S)`-orbit — no WL-reaching), sidestepping the wall. The P4 predicate `SelectedCellIsOrbit` and its
 prune-completeness consumer are already in `ScratchNodeCountBridge.lean`; the only prior producer routed through the
 `CellsAreOrbits` wall (`selectedCellIsOrbit_of_cellsAreOrbits`). `ScratchConfinementP4.lean` opens the **second,
-wall-free producer**: `SelectedCellSubsetOrbit` (structural target) → `selectedCellIsOrbit_of_subsetOrbit` (bridge,
-axiom-clean). **NEXT increment = discharge `SelectedCellSubsetOrbit` for the primitive rank-3 residue** from the
-point-stabilizer/rank-3 structure (single-base free via `cellsAreOrbits_schemeAdj_singleton`; the crux is the
-recursion, and proving it does **not** collapse back onto the multi-base `JointProfileRecoversAt` wall).
+wall-free producer** and reduces P4 to a clean group-transitivity interface (all axiom-clean):
+- `SelectedCellSubsetOrbit` (structural target) → `selectedCellIsOrbit_of_subsetOrbit` (bridge into the landed
+  prune-completeness consumer);
+- `selectedCellSubsetOrbit_of_orbit_cover` — reduces the target to "some representative's `Stab(S)`-orbit covers
+  the selected cell" (the interface where the rank-3 recursion plugs in);
+- `selectedCellSubsetOrbit_of_pretransitive` — **full discharge when `Stab(S)` is transitive on all vertices**
+  (the VT root anchor), carrying **NO `CellsAreOrbits`/WL input** — a concrete proof that the assume-VT route
+  genuinely sidesteps the multi-base `JointProfileRecoversAt` wall (that wall is 1-WL *reaching* orbits;
+  transitivity is a property of the group action, not of WL).
+
+So P4 now rests entirely on a **group-transitivity** statement: *`Stab(S)` is transitive on the selected cell.*
+Discharged outright at the root (`_of_pretransitive`); reduced to orbit-cover elsewhere. **NEXT increment = the
+per-level transitivity from the rank-3 recursion** — that `Stab(S)` stays transitive on the selected cell down the
+point-stabilizer chain `VO_d → VO_{d−2} → …` (single-base free via `cellsAreOrbits_schemeAdj_singleton`). This is
+family-specific structure, no longer the WL wall.
 
 **Assembly.** P1 ⟹ flag is large; P2 ⟹ not rigid; P3 ⟹ Cameron/node-4 primitive rank-3; P4 ⟹ VT + cell = orbit ⟹
 prune sound ⟹ ① on the non-rigid residue. **Weakest links: P1 (soundness linchpin) and P4 (the prune-soundness core);

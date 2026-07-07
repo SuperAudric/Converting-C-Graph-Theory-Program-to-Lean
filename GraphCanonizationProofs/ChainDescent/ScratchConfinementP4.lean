@@ -65,4 +65,44 @@ theorem selectedCellIsOrbit_of_subsetOrbit
     SelectedCellIsOrbit adj P sel S :=
   fun v w hv hw _hcolour => h v w hv hw
 
+/-! ## The structural discharge — `SelectedCellSubsetOrbit` from residual-group transitivity
+
+The content of P4 is that the residue's automorphism group `StabilizerAt adj P S` acts transitively on the
+selected cell — a GROUP fact (for primitive rank-3: the point-stabilizer is transitive on each of its three
+classes `{p}, Γ(p), Γ̄(p)`), **not** a claim that 1-WL reaches the orbit partition. These lemmas discharge
+`SelectedCellSubsetOrbit` from that transitivity, isolating the remaining family-specific obligation to "the
+residual group is transitive on the selected cell" — which sidesteps the multi-base `JointProfileRecoversAt` wall
+(that wall is 1-WL *reaching* orbits; transitivity is a property of the group action itself). -/
+
+/-- **The orbit-cover reduction — the interface for the rank-3 recursion.** If some representative `r`'s
+`Stab(S)`-orbit covers the whole selected cell, then every pair in the cell is `Stab(S)`-orbit-equivalent, i.e.
+the cell lies in one orbit. Reduces `SelectedCellSubsetOrbit` to the single-orbit-cover condition, where the
+residue's group transitivity plugs in. Proof: `v, w ∈ orbit r` ⟹ `orbit v = orbit r = orbit w` ⟹ `w ∈ orbit v`. -/
+theorem selectedCellSubsetOrbit_of_orbit_cover
+    {adj : AdjMatrix n} {P : PMatrix n}
+    {sel : Colouring n → Finset (Fin n)} {S : Finset (Fin n)} {r : Fin n}
+    (hcover : ∀ w, w ∈ sel (warmRefine adj P (individualizedColouring n S)) →
+        OrbitPartition adj P S r w) :
+    SelectedCellSubsetOrbit adj P sel S := by
+  intro v w hv hw
+  have hvr := mem_orbit_stabilizerAt_iff.mpr (hcover v hv)
+  have hwr := mem_orbit_stabilizerAt_iff.mpr (hcover w hw)
+  have hmem : w ∈ MulAction.orbit (StabilizerAt adj P S) v := by
+    rw [MulAction.orbit_eq_iff.mpr hvr, ← MulAction.orbit_eq_iff.mpr hwr]
+    exact MulAction.mem_orbit_self w
+  exact mem_orbit_stabilizerAt_iff.mp hmem
+
+/-- **Full residual transitivity ⟹ discharge (the VT root anchor).** When `StabilizerAt adj P S` acts
+transitively on *all* vertices — e.g. `S = ∅` on a vertex-transitive scheme — the selected cell is trivially
+within one orbit. The depth-0 anchor of the assume-VT recursion, discharged with **no** WL / `CellsAreOrbits`
+input, purely from the group action. -/
+theorem selectedCellSubsetOrbit_of_pretransitive
+    {adj : AdjMatrix n} {P : PMatrix n}
+    {sel : Colouring n → Finset (Fin n)} {S : Finset (Fin n)}
+    (htrans : MulAction.IsPretransitive (StabilizerAt adj P S) (Fin n)) :
+    SelectedCellSubsetOrbit adj P sel S := by
+  intro v w _ _
+  obtain ⟨g, hg⟩ := htrans.exists_smul_eq v w
+  exact mem_orbit_stabilizerAt_iff.mp ⟨g, hg⟩
+
 end ChainDescent.ConfinementP4
