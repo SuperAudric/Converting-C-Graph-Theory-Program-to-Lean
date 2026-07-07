@@ -956,12 +956,17 @@ Two consequences narrow R1's real target:
     transitive on isotropic points), applied once, not reproven per graph. Membership certification is R1's confirmation;
     it may be strictly cheaper than explicit coordinates.
 
-*(d) There is NO poly-time shortcut via a transitivity test.* Testing vertex-transitivity in general is polynomial-time
-**equivalent to graph isomorphism** (Mathon: GI ≡ Aut); the only WL handle (Fuhlbrück–Köbler–Verbitsky, arXiv:2005.08887)
-is poly **only for prime `n`**, is **provably blocked for `n` divisible by 16** (⊇ the char-2 forms graphs), and is **open
-for odd prime-power `n`** (the odd-`q` forms graphs `n = q^d`). So "recognize parameters ⟹ assume transitive" is **unsound**
-(parameter-mates exist that are not vertex-transitive) and no test rescues it. This *reinforces* (c): the only sound route
-is **structural/geometric membership certification** (R1's confirmation), with transitivity **cited, not tested**.
+*(d) No poly-time transitivity test is KNOWN — but this is a current-knowledge fact, NOT a hardness theorem (corrected
+2026-07-07).* Precise status: vertex-transitivity is **reducible to GI** (`VT ≤ₚ GI`, via computing `Aut` — Mathon), but is
+**NOT known to be GI-hard**; its complexity is **open** (not in P, not GI-hard). *(The GI-complete object is the finer
+"are these two *specific* vertices in the same orbit?" / computing the orbit partition — the standard gadget reduction
+builds a graph that is not vertex-transitive either way, so that hardness does NOT transfer to the global VT yes/no.)* The
+only WL handle (Fuhlbrück–Köbler–Verbitsky, arXiv:2005.08887) is poly **only for prime `n`**, **provably blocked for `n`
+divisible by 16** (⊇ the char-2 forms graphs), **open for odd prime-power `n`** (the odd-`q` forms graphs `n = q^d`). So
+"recognize parameters ⟹ assume transitive" is **unsound** (parameter-mates exist that are not vertex-transitive) and **no
+KNOWN test rescues it** — but a poly (relative/coloured) VT test, if found even just for these graphs, would be a legitimate
+non-paradoxical avenue (it would NOT imply GI ∈ P). So (c)'s membership-certification is the sound route *by current
+knowledge*; transitivity is **cited, not tested**, because no test is available — not because one is barred.
 
 *(e) The genuine soft spot stays `d = 4` (R3).* The GQ case has no clean poly citation for recognizing/coordinatizing a
 *classical* GQ from its graph (non-classical GQs exist), so it needs its own argument or an explicit scope note. This is the

@@ -243,8 +243,9 @@ model" to "a Lean runtime model with an explicit, inspectable primitive-cost dec
 - **`w` poly-ness depends on R1** for the *poly* oracle (§4; the quasipoly pilot rides warmRefine, no R1). R1's
   poly `w` is a **non-wall effective-construction obligation** whose per-graph core is *certify vertex-transitive
   membership* (not full coordinatization / Aut-harvest); classicality is cited (Buekenhout–Shult / Payne–Thas), the
-  `d=4` GQ case is the residual, and there is **no poly transitivity-test shortcut** (GI-equivalent; WL-blocked for
-  n div by 16). Detail: route-c-plan §7a (2026-07-06 refinement).
+  `d=4` GQ case is the residual, and there is **no KNOWN poly transitivity-test shortcut** (VT is reducible to GI but
+  NOT known GI-hard — open, not barred; WL-blocked for n div by 16). Detail: route-c-plan §7a (2026-07-06 refinement,
+  corrected 2026-07-07).
 - **The renumbering / unit-cost-colour fork (§4 FINDING)** must be decided when `canonForm?`'s `refineStep`
   is chosen: declare colour-ops unit-cost (D7), or build a renumbering `refineStep`. Under the current
   `Encodable.encode` refineStep, only the unit-cost-RAM reading gives a poly `warmRefine`.
