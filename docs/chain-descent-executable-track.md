@@ -101,9 +101,21 @@ canonical renumbering. **Correction to the earlier worry:** no delicate "order-e
 needed — `refineStepR` is validated by its own `refineStepR_iff` (partition-level), and the executable canonizer is
 proven ①a directly (`canonAdjComp` is a relabelling for any discrete leaf), not by matching `refineStep`'s order.
 
+## Renumbering — bridge + sound output DONE; runnable `#eval` needs a fully-renumbered DESCENT
+`ScratchRenumber.lean` adds `warmRefineR = (refineStepR)^[n]` + **`samePartition_warmRefineR`** (same partition as
+`warmRefine`, via `samePartition_iterate` = the per-round bridge chained with `refineStep_samePartition`) +
+`discrete_warmRefineR`. `ScratchRenumberExec.lean` adds `canonOutputR` (output via `warmRefineR`) + **`canonOutputR_sound`**
+(①a, axiom-clean) — a proven-sound renumbered canonizer output.
+
+**★ BUT `#eval canonOutputR` still HANGS — bisected 2026-07-07.** Renumbering only the *output* is insufficient: the
+leaf SEED `ch.χι = defaultColouring … k` is **already blown up** (at n=3, `(defaultSpineChain triangle … 1).χι` is a
+~7000-bit triple; the `warmRefine` leaf ~27M-bit). `IndivStep.default` keeps `warmRefine`'s blown-up values (+ a small
+individualization offset), so the seed embeds the compounding, and one `refineStep` on a 7000-bit seed explodes to
+~27M-bit via `O(bits²)` bignum arithmetic → hang. The theory (computable + ①a-sound) is complete; only the runnable
+demo waits.
+
 ## NEXT
-**Finish renumbering:** `warmRefineR = (refineStepR)^[n]` + iterate `samePartition_refineStepR` through the rounds
-(standard `samePartition` machinery, e.g. `warmRefine_congr_samePartition`) to get `samePartition (warmRefineR …)
-(warmRefine …)` — this reuses `defaultSpineChain_reaches_leaf` for leaf existence — then rewire `canonOutput` to
-compute the leaf colouring via `warmRefineR` (bounded ⟹ `vertexRank`'s `<` is fast) and `#eval` it. Alt: Tier C-exp
+**Fully-renumbered descent** `defaultColouringR` / `defaultSpineChainR` using `refineStepR` at EVERY level, so the seed
+`χι` stays `< n` throughout and no `refineStep` ever sees a large value → `canonOutputR` (or its analog) `#eval`s. The
+primitive + bridge already built are exactly what this reuses; `canonOutputR_sound` transfers verbatim. Alt: Tier C-exp
 (exponential enumeration, tiny-n). Tier C-poly stays the wall.

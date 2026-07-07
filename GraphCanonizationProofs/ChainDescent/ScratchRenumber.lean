@@ -21,6 +21,7 @@ drops onto this primitive — a NEXT increment; this file lands the primitive + 
 Axiom target `[propext, Classical.choice, Quot.sound]`. Imports the Mathlib spine. `lake env lean`, NOT in `build.sh`.
 -/
 import ChainDescent.Spine
+import ChainDescent.CascadeAffine
 
 namespace ChainDescent.Renumber
 
@@ -88,5 +89,36 @@ plain round. The bridge that lets `warmRefineR` reuse the spine's leaf-existence
 theorem samePartition_refineStepR (adj : AdjMatrix n) (P : PMatrix n) (χ : Colouring n) :
     samePartition (refineStepR adj P χ) (refineStep adj P χ) :=
   fun _ _ => vertexRankNat_eq_iff
+
+/-! ## Iterating the bridge — the renumbered warm refinement `warmRefineR` has the same partition -/
+
+/-- **The renumbered iterate matches the plain iterate at the partition level**, for every round count `k`.
+Induction: base = refl; step chains `samePartition_refineStepR` (one renumbered round is partition-equal to one
+plain round) with `refineStep_samePartition` (`refineStep` is a partition congruence, `CascadeAffine`). This is the
+"invariant propagating through a refinement round" the doc flagged — clean, because both facts are partition-level. -/
+theorem samePartition_iterate (adj : AdjMatrix n) (P : PMatrix n) (init : Colouring n) (k : Nat) :
+    samePartition ((refineStepR adj P)^[k] init) ((refineStep adj P)^[k] init) := by
+  induction k with
+  | zero => exact samePartition.refl init
+  | succ k ih =>
+    rw [Function.iterate_succ_apply', Function.iterate_succ_apply']
+    intro i j
+    exact (samePartition_refineStepR adj P _ i j).trans (refineStep_samePartition ih i j)
+
+/-- **Renumbered warm refinement**: `n` renumbered rounds. Colours stay `< n` every round (`refineStepR_lt`), so
+this is `#eval`-feasible where `warmRefine` blows up. -/
+def warmRefineR (adj : AdjMatrix n) (P : PMatrix n) (init : Colouring n) : Colouring n :=
+  (refineStepR adj P)^[n] init
+
+/-- **`warmRefineR` induces the SAME partition as `warmRefine`.** So it reaches the same leaves — the bridge that
+lets the renumbered output reuse the existing descent's leaf (`defaultSpineChain_reaches_leaf`). -/
+theorem samePartition_warmRefineR (adj : AdjMatrix n) (P : PMatrix n) (init : Colouring n) :
+    samePartition (warmRefineR adj P init) (warmRefine adj P init) :=
+  samePartition_iterate adj P init n
+
+/-- A discrete `warmRefine` leaf transfers to a discrete `warmRefineR` leaf (same partition). -/
+theorem discrete_warmRefineR (adj : AdjMatrix n) (P : PMatrix n) (init : Colouring n)
+    (h : Discrete (warmRefine adj P init)) : Discrete (warmRefineR adj P init) :=
+  Discrete.of_samePartition (samePartition_warmRefineR adj P init).symm h
 
 end ChainDescent.Renumber
