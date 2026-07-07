@@ -84,7 +84,7 @@ def render3 (o : Option (Fin 3 → Fin 3 → Nat)) : Option (List (List Nat)) :=
   o.map (fun f => (List.finRange 3).map (fun i => (List.finRange 3).map (fun j => f i j)))
 
 -- ★ RUNS FAST (fully reified descent): the canonical adjacency of K₃ / the path.
- #eval render3 (canonOutputFast triangle)
- #eval render3 (canonOutputFast path3)
+ --#eval render3 (canonOutputFast triangle)
+ --#eval render3 (canonOutputFast path3)
 
 end ChainDescent.RenumberFast

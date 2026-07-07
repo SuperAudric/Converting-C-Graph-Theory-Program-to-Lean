@@ -52,9 +52,16 @@ Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cos
   `16n⁴`), and the cost is **co-defined** (`ScratchCostModelCostedWarmRefine.lean`: `value=warmRefine`,
   `cost=warmRefineCost n`, not a fiat literal — the D1 seam closed).
 
-Still unbuilt: `canonForm?`/`cost` as a **value-co-defined** budgeted descent (σ = descent state; currently σ=ℕ level
-counter), completeness (③-forward, run returns `some`), the output map `canonForm? = leaf.canonAdj`, the **oracle
-summand** of `w`, P1/P2 in Lean + the confinement assembly, and the `UnhandledResidue` disjunct *definitions*.
+**Landed since (2026-07-07, cost-model STATUS is authoritative):** ①a `canon_sound` discharged on the real spine +
+parameter-free (`ScratchCanonSound.lean`); the **shared `canonForm?` object** (`ScratchCanonFormCapped.lean`:
+`canonForm?_sound` = ①a, `descentCost_le` = ② `cost ≤ n⁴`, `canonForm?_eq_none_iff`) — ①a and ② converge in one capped
+descent; the **oracle summand** of `w` (`ScratchCostModelOracle.lean`: `not_flagsAt_of_base_le` = confinement-P1 cost half).
+Publication swap = one-liner set, deferred so the opaque swap happens once with ③ (else ③ is vacuous).
+
+Still unbuilt: completeness (③-forward, run returns `some`), the graph-side of P1 (small-`Aut` ⟹ base ≤ baseMax) + P2 in
+Lean + the confinement assembly, and the `UnhandledResidue` disjunct *definitions*. **Separate BONUS deliverable
+(option B, not on the `#print axioms` path):** a *runnable* Lean canonizer — see
+[`chain-descent-executable-track.md`](./chain-descent-executable-track.md) (output `#eval`s + ①a-sound; still slow — OPEN).
 
 ---
 

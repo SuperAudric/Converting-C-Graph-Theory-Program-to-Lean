@@ -10,31 +10,50 @@
 
 ---
 
-## STATUS (read first)
+## STATUS (read first, 2026-07-07)
 
-**Tier A DONE (2026-07-07) — the descent RUNS.** `spineCappedCanonizer`/`descent`/`descentResult`/`descentCost`
-are now **computable** (a real `Decidable (Discrete)` / `Decidable IsLeaf` instance replaced the `Classical`
-`done`; everything else on the descent path was already computable). Validated by `#eval`
-(`ScratchExecutable.lean`): `descentResult triangle = some 1`, `descentCost triangle = 27` (= 3³). The descent —
-*find the leaf, count the cost* — executes.
+**Where it stands:** the Lean canonizer's output **is computable, `#eval`-runs, and is ①a-sound (proven,
+axiom-clean)** — the user confirmed concrete outputs on an unconstrained machine (K₃ → `[[0,0,1],[0,0,1],[1,1,0]]`,
+path 0–1–2 → `[[0,1,1],[1,0,1],[1,1,0]]`). It is **NOT yet poly-time in practice**: n=3 takes ~10 min, and reifying
+the descent did **not** fix that (see the OPEN ISSUE). It is also **not yet iso-invariant** (①b) — that is Tier C /
+the wall. Everything below is WIP scratch, **NOT in `build.sh`**, all axiom-clean `[propext, Classical.choice, Quot.sound]`.
 
-**Tier B DONE (2026-07-07) — the single-leaf labelling is computable + proven.** All axiom-clean:
-- `rankInv` — a **total, computable** inverse of `vertexRank` (`List.find?` over `Fin n`, `==`), replacing the
-  noncomputable `Equiv.ofBijective` in `rankPerm`; `rankInv_spec` proves it inverts `vertexRank` on discrete χ.
-- `canonAdjComp adj χ` — the leaf's canonical adjacency via `rankInv`; **`canonAdjComp_eq`** proves it equals the
-  spec `labelledAdj (rankPerm χ h) adj`, so it is a genuine relabelling.
-- `canonOutput` — wires it to the descent's returned leaf (**NO `Classical.choose`** — the leaf level is the loop's
-  own output); `canonOutput_sound` = ①a on this runnable output.
+**What's built (files + key decls):**
+- **Tier A — computable descent** (`ScratchExecutable.lean` + `decidableDiscrete`/`decidableIsLeaf` in
+  `ScratchCostModelSpine.lean`): `descentResult`/`descentCost` `#eval` (`some 1`, `27`). Made `spineCappedCanonizer`
+  computable (dropped `Classical` `done`).
+- **Tier B — computable single-leaf labelling** (`ScratchExecutable.lean`): `rankInv` (total, `List.find?`, replaces
+  noncomputable `Equiv.ofBijective`) + `canonAdjComp` + `canonAdjComp_eq` (= `labelledAdj (rankPerm) adj`) +
+  `canonOutput` + `canonOutput_sound` (①a). FINDING: `#eval canonOutput` HANGS (colour blowup).
+- **Renumbering** (`ScratchRenumber.lean`): `refineStepR = vertexRankNat ∘ refineStep` (bounded `<n`) + `refineStepR_iff`
+  (same partition characterisation as `refineStep`) + `warmRefineR` + `samePartition_warmRefineR` +
+  `discrete_warmRefineR`. **Plus the REIFIED** `refineRoundMat`/`warmRefineMat` (materialise each round to a `Vector`) +
+  `refineRoundMat_eq`/`warmRefineMat_eq` (= `refineStepR`/`warmRefineR`, only evaluation differs) + `materialize`/`materialize_eq`.
+- **Runnable outputs** (`ScratchRenumberExec.lean`): `canonOutputR` (via `warmRefineR`, reasoned) + `canonOutputMat`
+  (via `warmRefineMat`, runnable) + `canonOutputMat_eq` + soundness (①a). `canonOutputMat` is what the user ran (~10 min, n=3).
+- **Fully reified descent** (`ScratchRenumberFast.lean`): `defaultColouringMat` (descent colouring, each level =
+  `warmRefineMat` + `materialize`) + `leafLevelMat` (bounded `List.find?` for first `Discrete` reified leaf) +
+  `canonOutputFast` + `canonOutputFast_sound` (①a, self-contained — the search returns a decidably-`Discrete` leaf).
 
-**★ Tier B FINDING — the colour blowup makes `#eval canonOutput` INFEASIBLE (confirms D7 renumbering).** The
-labelling is computable and proven, but `#eval`-ing it hangs: the leaf colouring's `Nat` values are
-`Encodable.encode` iterated across refinement rounds (the cost-model §4 blowup), so `vertexRank`'s `<`/`==`
-comparisons are over astronomically large `Nat`s. This is the D7 fork made concrete **from the executable side** —
-a *practical* run needs the **renumbering `refineStep`** (cells → `0..k-1` each round). Renumbering is thus promoted
-from "nice for a defensible bit-cost" to a **prerequisite for a runnable executable**. The theory is complete; the
-runnable labelling demo is deferred behind renumbering.
+**★ Two findings that a fresh reader MUST internalise:**
+1. **The blowup is unmemoised RECOMPUTATION, not (only) values.** `warmRefineR` hangs on `#eval` even for SMALL
+   colours: `refineStepR χ = fun v => vertexRankNat (refineStep χ) v` recomputes `refineStep χ` per vertex, re-reading
+   the lazy `χ` closure ⟹ exponential across rounds. Fix = **reify** (materialise each round). Renumbering (bounded
+   values) is necessary but NOT sufficient.
+2. **★ OPEN ISSUE — reifying the descent did NOT give the hoped speedup.** `canonOutputFast` (reified *descent*) still
+   runs in ~the same order of time as `canonOutputMat` on the user's machine. (An earlier "~500× / 1.2s CPU" note was a
+   MEASUREMENT ARTIFACT of this dev box's 2 GB-limited `lake env lean` thrash — the `#eval` never completed here, so the
+   CPU counter caught only pre-thrash work; do NOT trust it.) **The real bottleneck is still unidentified.** Prime
+   suspects for the next reader: (a) `leafLevelMat` recomputes `defaultColouringMat k` for each `k = 0..n`, and
+   `defaultColouringMat` is itself prefix-recursive ⟹ O(n²) descent recomputations; (b) `materialize`'s `let vec :=
+   Vector.ofFn χ; fun i => vec.get i` may not actually SHARE `vec` across calls under Lean's evaluator (if not, each
+   lookup rebuilds the vector ⟹ no memoisation); (c) something still blows up in `descentResult`/`costedWarmRefine`
+   (which uses the *non-reified* `warmRefine` for the cost). **Diagnose (b) first** — it's the crux of whether reification
+   works at all. NB: this dev box cannot reliably `#eval`/measure these (2 GB thrash); profile on an unconstrained machine.
 
-**Still noncomputable / deferred: the lex-min `canonForm` (Tier C) + the practical run (needs renumbering).**
+**Deferred: Tier C — the iso-invariant canonical form (①b).** All outputs above are the leaf's *single* labelling
+(a valid relabelling), not the iso-invariant min. C-exp (exponential enumeration, tiny-n) or C-poly (orbit-pruned = the
+oracle = the wall). See "Tiers" + "the wall" below.
 
 ---
 
@@ -112,23 +131,24 @@ to a `Vector` (computed once, O(1) lookup).
 `ScratchRenumber.lean` adds `refineRoundMat` (materialise `refineStep` → rank → materialise) + `warmRefineMat`
 (`n` reified rounds), with **`refineRoundMat_eq` / `warmRefineMat_eq`** proving `warmRefineMat = warmRefineR` (only
 evaluation differs), so every partition/soundness result transfers. `ScratchRenumberExec.lean` adds **`canonOutputMat`**
-(the runnable output, `warmRefineMat`) + **`canonOutputMat_sound`** (①a, axiom-clean). It **`#eval`s** — the leaf
-canonical adjacency is now computed (CPU ~1.5s; was infeasible with `warmRefine`/`warmRefineR`).
+(the runnable output, `warmRefineMat`) + **`canonOutputMat_sound`** (①a, axiom-clean). It **`#eval`s to a real value** —
+the user ran it on an unconstrained machine (K₃ → `[[0,0,1],[0,0,1],[1,1,0]]`, path → `[[0,1,1],[1,0,1],[1,1,0]]`),
+in ~10 min for n=3.
 
-**Takeaway for the full executable:** a genuinely runnable canonizer needs the whole descent **reified**, not just
-renumbered — lazy `Colouring = Fin n → Nat` closures recompute exponentially.
+**Takeaway:** a runnable canonizer needs the whole descent **reified**, not just renumbered — lazy `Colouring = Fin n
+→ Nat` closures recompute exponentially.
 
-**★ FULLY REIFIED DESCENT (2026-07-07, `ScratchRenumberFast.lean`).** `canonOutputMat` still took ~10 min for `n=3`
-because the *descent internals* (`descentResult` via `costedWarmRefine`, `defaultColouring`) used the lazy blown-up
-`warmRefine`. `ScratchRenumberFast` reifies the whole descent: `defaultColouringMat` (each level refines with
-`warmRefineMat` and is `materialize`d — `IndivStep.default` only doubles the colour, so bounded `π` ⟹ bounded `χ'`),
-`leafLevelMat` (bounded `List.find?` for the first `Discrete` reified leaf), `canonOutputFast` (emit `canonAdjComp`
-there). **`canonOutputFast_sound` = ①a, axiom-clean** — self-contained (the search returns a *decidably `Discrete`*
-leaf, so no bridge to the original descent is needed). **Speed: `canonOutputFast` runs in ~1.2s CPU on `n=3` vs
-`canonOutputMat`'s ~10 min — a ~500× win from reifying the descent** (measured by `time`; wall-clock is dominated by
-this env's 2 GB-limited `lake env lean` thrash, not compute). The output-matrix values match what the user confirmed
-for `canonOutputMat` (same canonizer up to the renumbered leaf order). `materialize_eq` proves materialisation is
-value-preserving.
+**★ FULLY REIFIED DESCENT (2026-07-07, `ScratchRenumberFast.lean`) — built + ①a-sound, but did NOT fix the speed.**
+`canonOutputMat` took ~10 min for n=3 because the *descent internals* (`descentResult` via `costedWarmRefine`,
+`defaultColouring`) use the lazy blown-up `warmRefine`. `ScratchRenumberFast` reifies the whole descent:
+`defaultColouringMat` (each level = `warmRefineMat` + `materialize`; `IndivStep.default` only doubles the colour, so
+bounded `π` ⟹ bounded `χ'`), `leafLevelMat` (bounded `List.find?` for the first `Discrete` reified leaf),
+`canonOutputFast` (emit `canonAdjComp` there). **`canonOutputFast_sound` = ①a, axiom-clean** — self-contained (the
+search returns a *decidably `Discrete`* leaf, so no bridge to the original descent is needed). `materialize_eq` proves
+materialisation is value-preserving. **BUT the user reports `canonOutputFast` still runs in ~the same order of time as
+`canonOutputMat` — the descent reification did NOT resolve the slowness.** (A prior "~1.2s CPU / ~500× win" note was a
+FALSE reading from this dev box's 2 GB thrash — disregard it.) See the OPEN ISSUE in STATUS for the suspect list; the
+crux is whether `materialize` actually shares its `Vector` across lookups.
 
 The partition bridge (used by both `canonOutputR` reasoning and `canonOutputMat`): `warmRefineR = (refineStepR)^[n]` +
 **`samePartition_warmRefineR`** (same partition as `warmRefine`, via `samePartition_iterate` = the per-round bridge

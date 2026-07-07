@@ -131,10 +131,11 @@ P1's largeness clause: a Phase-1 flag ⟹ base > baseMax ⟹ large `Aut`** ⟹ (
 sound. This is where the cost model and correctness ① interlock — the point the "cost model = prerequisite" reframe was
 about. Still declared (the real harvest is the abstract/C# oracle); a poly `oracleBudget` needs R1.
 
-**NEXT:** (1) **renumbering `refineStep`** (D7 option ii) — now a prerequisite for a runnable `#eval` of the labelling
-(executable Tier B finding: `<`-comparisons over encode-blown-up colours hang) AND the honest bit-cost; (2) wire
-`oracleCost` into the spine `step`'s true cost so the flag fires on the real descent, then **P1/P2 in Lean** + the
-confinement assembly; (3) completeness (③-forward) + the Publication param-fixing.
+**NEXT:** (1) **wire `oracleCost` into the spine `step`'s true cost** so the flag fires on the real descent, then the
+graph-side of **P1** (small-`Aut` ⟹ base ≤ baseMax, via `exists_greedy_base_le_log`) + **P2 in Lean** + the confinement
+assembly; (2) completeness (③-forward) + the Publication param-fixing. **Renumbering `refineStep` (D7 option ii) is
+DONE** for the bit-cost/executable side — see [`chain-descent-executable-track.md`](./chain-descent-executable-track.md)
+(`refineStepR`/`warmRefineMat`); it can be adopted here to sharpen the `warmRefine` bit-cost bound whenever wanted.
 
 ---
 
