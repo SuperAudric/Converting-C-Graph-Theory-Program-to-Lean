@@ -116,9 +116,19 @@ evaluation differs), so every partition/soundness result transfers. `ScratchRenu
 canonical adjacency is now computed (CPU ~1.5s; was infeasible with `warmRefine`/`warmRefineR`).
 
 **Takeaway for the full executable:** a genuinely runnable canonizer needs the whole descent **reified**, not just
-renumbered — lazy `Colouring = Fin n → Nat` closures recompute exponentially. The output stage is now reified; the
-descent internals (`descentResult`/`defaultColouring`) still use lazy warm-refine (feasible at small n since values
-stay ≤ ~7000-bit and equality is length-fast, but they'd want reification too for larger n).
+renumbered — lazy `Colouring = Fin n → Nat` closures recompute exponentially.
+
+**★ FULLY REIFIED DESCENT (2026-07-07, `ScratchRenumberFast.lean`).** `canonOutputMat` still took ~10 min for `n=3`
+because the *descent internals* (`descentResult` via `costedWarmRefine`, `defaultColouring`) used the lazy blown-up
+`warmRefine`. `ScratchRenumberFast` reifies the whole descent: `defaultColouringMat` (each level refines with
+`warmRefineMat` and is `materialize`d — `IndivStep.default` only doubles the colour, so bounded `π` ⟹ bounded `χ'`),
+`leafLevelMat` (bounded `List.find?` for the first `Discrete` reified leaf), `canonOutputFast` (emit `canonAdjComp`
+there). **`canonOutputFast_sound` = ①a, axiom-clean** — self-contained (the search returns a *decidably `Discrete`*
+leaf, so no bridge to the original descent is needed). **Speed: `canonOutputFast` runs in ~1.2s CPU on `n=3` vs
+`canonOutputMat`'s ~10 min — a ~500× win from reifying the descent** (measured by `time`; wall-clock is dominated by
+this env's 2 GB-limited `lake env lean` thrash, not compute). The output-matrix values match what the user confirmed
+for `canonOutputMat` (same canonizer up to the renumbered leaf order). `materialize_eq` proves materialisation is
+value-preserving.
 
 The partition bridge (used by both `canonOutputR` reasoning and `canonOutputMat`): `warmRefineR = (refineStepR)^[n]` +
 **`samePartition_warmRefineR`** (same partition as `warmRefine`, via `samePartition_iterate` = the per-round bridge
