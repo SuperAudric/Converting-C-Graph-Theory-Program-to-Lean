@@ -943,7 +943,10 @@ route of §9.2.8 that reduces to the WL-dimension wall. So the poly bound is a *
 argument the project makes itself** (cleanest for rank ≥ 3, `d ≥ 6`), *not* an axiom. Per the firewall (endgame-spec), an
 unproven poly claim cannot be axiomatized — so poly-time stays an obligation, and the good news is it is provable, not the wall.
 
-*(c) The transitivity-membership sharpening — the per-graph obligation is weaker than "coordinatize + harvest Aut".* Every
+*(c) The transitivity-membership sharpening — the per-graph obligation is weaker than "coordinatize + harvest Aut".*
+**▶ SUPERSEDED by §7b (2026-07-07): the witness-or-flag mechanism needs no membership certification at all — you witness
+VT (harvest succeeds) or flag; poly-mode assumes VT from the confinement lemma. Read §7b; (c) is kept for provenance.**
+Every
 handled residue is **vertex-transitive** (schurian ⟹ orbital scheme of a transitive group; Cameron = rank-3 primitive).
 Two consequences narrow R1's real target:
   - **Existence-of-transitivity suffices for sound pruning — no explicit `Aut`-harvest is needed.** To pick one root and
@@ -977,6 +980,59 @@ Payne–Thas cite CLASSICALITY} + {poly-time = an in-project effective-construct
 per-graph obligation is certified vertex-transitive membership, explicit `Aut`-harvest shown unnecessary} + {`d = 4` GQ = the
 residual}.** The `Publication.lean` firewall list gains Buekenhout–Shult + Payne–Thas as *correctness* citations; poly-time
 does not become an axiom.
+
+---
+
+## 7b. Witness-or-flag, and the assume-VT poly upgrade (2026-07-07) — supersedes (c)'s membership search
+
+The membership-certification framing of §7a(c) is **superseded** by a mechanism that needs no VT test (§7a d) and no
+membership oracle. It refines the flag from a global to a **per-node** budget.
+
+**Safe mode (witness-or-flag — unconditionally sound).** At a Phase-1 descent node the per-node harvest either
+(i) **completes** within budget — and since the harvest *is* a certified orbit/automorphism (verifiable by
+construction; §7a-residual (1) is a non-issue), pruning on it is sound and VT is *witnessed*, never assumed — or
+(ii) **exceeds** budget → **flag**. VT is never a precondition, so soundness (①/②) is **unconditional** and all content
+is completeness (③-forward). The flag's **phase** discriminates the `UnhandledResidue` atom: Phase-1 → node-4/Cameron
+(VT); Phase-2 → rigid (IR row-4). This alone resolves the §7a(d) VT-test blocker: you don't test transitivity, you
+witness it or flag.
+
+**Poly mode (assume-VT — the genuine poly upgrade for node-4/Cameron).** A Phase-1 over-budget flag, *by the
+confinement lemma below*, means the residue is node-4/Cameron ⟹ **vertex-transitive**. VT ⟹ the branch's candidate
+vertices share one Aut-orbit ⟹ some automorphism relates them ⟹ **pick either as canonical root and prune the rest
+soundly — without exhibiting the automorphism** (soundness of pruning needs only the orbit-equality *guarantee*, which
+the structural VT theorem supplies, not the *witness*). "Flag and end" becomes "flag → assume the harvest → continue";
+recursion (each residue a smaller VT `VO_{d−2}`) gives a **single-path `O(d)` descent = poly** — the recovery-route's
+empirical `leaves=1, BranchingNodes=0`.
+
+**The cost — poly mode moves the mechanism onto the SOUNDNESS-critical path.** In safe mode a wrong flag costs only
+completeness; in poly mode, assume-VT-prune on a **non-VT** residue is a **correctness bug** (unsound pruning ⟹ wrong
+canonical form). So poly-mode's ① is **conditional on the confinement lemma delivering VT** — the endgame's clean
+"① unconditional / ② conditional" split partially dissolves, and the budget/flag mechanism becomes a **load-bearing
+component of the canonizer's correctness, not external accounting** (⟹ the cost model shifts from *demonstration* to
+*prerequisite*; cost-model doc §1/§7a). **Keep both modes** (the D3 disableable-cap knob): safe = ① unconditional,
+node-4/Cameron flagged; poly = ① conditional on confinement, node-4/Cameron handled, flag set = rigid row-4 only.
+
+**The confinement lemma — the ONE obligation, and it is "the remainder" the seal already chases.**
+> *A Phase-1 over-budget flag ⟹ the reached residue is schurian (hence vertex-transitive).*
+Decompose: **seal trichotomy** (reaches rigid ∨ node-4 ∨ Cameron; quasipoly, in build) **+ deferral-confinement**
+(rigid work is deferred to Phase 2, never expensively harvested in Phase 1 — direction-blind deferral substrate
+landed) **+ largeness** (only large-Aut/primitive residues flag in Phase 1; small-Aut non-Schurian SRGs route to the
+rigid Phase-2 branch). Large-primitive ⟹ transitive ⟹ VT; schurian ⟹ orbital scheme of a transitive group ⟹ VT for
+free. **Not a new wall — a recomposition of landed pieces**, matching `ClassifyStarved/BranchStarved = 0`.
+
+**The sporadic worry, located precisely.** The finitely-many classified sporadic rank-3 families are
+**primitive ⟹ VT**, safe. The genuine soundness danger is a **non-Schurian SRG** reaching a Phase-1 flag — i.e. exactly
+the carried `SchurianScheme` model-faithfulness gap (remaining-work §1 caveat), which poly-mode **promotes from a
+completeness caveat to a soundness obligation**. The likely saving grace (small-Aut non-Schurian SRGs are rigid-ish ⟹
+Phase-2, not Phase-1) must be delivered as the *largeness* clause of the confinement theorem, **not** by budget tuning.
+
+**Budget tuning ≠ the theorem.** The budget must be generous enough that no non-VT family flags in Phase 1 (over-large
+budget only costs speed — "witnessed non-poly resolves in poly at this size"; too-small is a *correctness* bug in poly
+mode). But tuning changes only *which inputs flag*; soundness of assume-VT needs the *proof* that whatever flags in
+Phase 1 is VT. Tuning is a practical knob layered on the confinement theorem, never a substitute for it.
+
+**Net.** No VT test, no membership oracle. Safe mode is unconditionally sound today; poly mode is the real poly upgrade
+for node-4/Cameron, gated on the confinement lemma = the seal's own remaining content, now soundness-critical.
 
 ---
 

@@ -72,14 +72,29 @@ atoms, one per open source of hardness — so that everything on the *handled* s
   · (D0) `residueNonSchurian`      — the reached residue is outside the seal's scope (not schurian). This
         disjunct **absorbs the `SchurianScheme` model-faithfulness gap**: rather than prove the reached
         residue is schurian (documented-infeasible), we honestly flag it. It is the IR-solver "row 4".
-  · (D1) `residueHiddenJohnson`    — SYMMETRIC domain: the reached residue is the *un-shrinkable* Cameron
-        core (the residue of the Seal-Phase Cameron shrink; the concrete `IsCameronScheme` instance minus
-        its handled sub-classes).
+  · (D1) `residueHiddenJohnson`    — SYMMETRIC domain: the reached residue is a Cameron scheme of a
+        **structurally named** hard type (the hidden-Johnson / un-coordinatizable geometric family — e.g. a
+        classical GQ if `d = 4` recognition stalls). **Defined by geometric type, NOT by "the handled
+        sub-classes we happened to finish"** — the latter is algorithm-relative and would erode the firewall
+        (a family whose poly proof merely didn't land must not silently fall in here). Each carved type is a
+        clean iso-invariant predicate on the residue.
   · (D2) `residueRigidObstruction` — RIGID domain: the IR-Phase residual (the "rigid-Cameron-equivalent"),
         `⊥` if the IR Phase proves it non-viable.
 
 Each atom is `opaque` (a Seal/IR/Runtime-Phase deliverable). Its definition is deferred, but the *shape* — a
-three-way disjunction with an explicit non-schurian absorber — is fixed here. -/
+three-way disjunction with an explicit non-schurian absorber — is fixed here.
+
+**PHASE-DISCRIMINATED FLAG (cost-model §7a / route-c-plan §7b).** With a *per-node* budget, the descent's flag
+records *which phase* fired: a **Phase-1** flag ⟹ (confinement lemma) the residue is node-4/Cameron (⟹ (D0)/(D1));
+a **Phase-2** flag ⟹ rigid (⟹ (D2)). The phase is thus the *structural* selector into these atoms — which is what
+keeps `residue_if_flag` (③) firewall-clean rather than tautological.
+
+**TWO MODES (D3 disableable-cap knob).** *Safe mode* — flag→give-up: node-4/Cameron stay in the flag set, ①
+(`canon_sound`/`canon_complete`) is UNCONDITIONAL. *Poly mode* — a Phase-1 flag ⟹ vertex-transitive ⟹
+assume-the-harvest-and-prune (node-4/Cameron become HANDLED, single-path poly); there ① is **conditional on the
+confinement lemma** `Phase-1 flag ⟹ schurian/VT residue`, carried as a hypothesis (never an axiom — it is a project
+obligation, and the sporadic-node-4 soundness worry = the `SchurianScheme` gap, soundness-critical in this mode). The
+current obligations below are stated for safe mode; the poly-mode headline would carry the confinement lemma. -/
 opaque residueNonSchurian       (n : ℕ) (G : AdjMatrix n) : Prop
 opaque residueHiddenJohnson     (n : ℕ) (G : AdjMatrix n) : Prop
 opaque residueRigidObstruction  (n : ℕ) (G : AdjMatrix n) : Prop
