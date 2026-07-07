@@ -88,10 +88,22 @@ output construction, not just the descent.)
 - `ChainDescent/ScratchCostModelSpine.lean` — now carries `decidableDiscrete`/`decidableIsLeaf`; `spineCappedCanonizer` computable.
 - `ChainDescent/ScratchCanonFormCapped.lean` — `descent`/`descentResult`/`descentCost` computable.
 
+## Renumbering — foundation LANDED (2026-07-07, `ScratchRenumber.lean`, axiom-clean)
+The D7-option-ii primitive: `refineStepR adj P χ = vertexRankNat (refineStep adj P χ)` — one round, then compress
+colours to their rank `0..n-1` (the C#'s `cells → 0..k-1`), breaking the cross-round encode blowup. Proven:
+- `refineStepR_lt` — colours stay `< n` (the point: no compounding bit-size);
+- `refineStepR_iff` — **same partition characterisation as `refineStep`** (same refined colour ⟺ same old colour ∧
+  same signature), so the spine's proofs (which use only `refineStep_iff`) transfer;
+- `samePartition_refineStepR` — one renumbered round is partition-equal to one plain round (the bridge seed).
+
+`vertexRankNat` is order-preserving *and* injective-on-colours (`vertexRankNat_eq_iff`), so the compression is a
+canonical renumbering. **Correction to the earlier worry:** no delicate "order-equivalence across rounds" invariant is
+needed — `refineStepR` is validated by its own `refineStepR_iff` (partition-level), and the executable canonizer is
+proven ①a directly (`canonAdjComp` is a relabelling for any discrete leaf), not by matching `refineStep`'s order.
+
 ## NEXT
-Two independent options: **(1) Renumbering `refineStep`** — the D7 variant (cells → `0..k-1` each round,
-order-preserving ⟹ `canonAdjComp` unchanged). Now a *prerequisite* for any runnable `#eval` of the labelling
-(Tier B finding), and it also sharpens the cost model's bit-cost bound. The one fiddly spot is proving the
-order-equivalence invariant propagates through a refinement round (cost-model §4). **(2) Tier C-exp** — enumerate
-`DirAssignment` order-labels + `List.min` for the lex-min (exponential, tiny-n only). Tier C-poly stays the wall.
-Renumbering (1) is the higher-value next step: it unblocks the runnable demo *and* the honest bit-cost.
+**Finish renumbering:** `warmRefineR = (refineStepR)^[n]` + iterate `samePartition_refineStepR` through the rounds
+(standard `samePartition` machinery, e.g. `warmRefine_congr_samePartition`) to get `samePartition (warmRefineR …)
+(warmRefine …)` — this reuses `defaultSpineChain_reaches_leaf` for leaf existence — then rewire `canonOutput` to
+compute the leaf colouring via `warmRefineR` (bounded ⟹ `vertexRank`'s `<` is fast) and `#eval` it. Alt: Tier C-exp
+(exponential enumeration, tiny-n). Tier C-poly stays the wall.

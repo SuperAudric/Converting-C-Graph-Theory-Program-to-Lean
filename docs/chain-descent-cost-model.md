@@ -118,9 +118,23 @@ is the **oracle summand of `w`** (an expensive harvest exceeding the per-node bu
 (gates on confinement-P1 / R1). So ③ is deliberately NOT claimed against this object yet — wiring the oracle-cost flag is
 what makes `none` a genuine event and ③ dischargeable. **NEXT** = the oracle summand of `w` (fires the flag; gates P1).
 
-**NEXT:** the value-side descent co-definition proper (σ = descent state, `step` = the real transition projecting to
-`defaultSpineChain`) — the deeper "IS descended" level, on which ①b/②-completeness ride; then the oracle summand of `w`
-(gates confinement-P1 — the correctness-critical piece), completeness (③-forward), and the Publication param-fixing.
+**★ ORACLE SUMMAND of `w` LANDED (2026-07-07, `ScratchCostModelOracle.lean`, core-only, tighter than the bar —
+`oracleCost_le_budget_of_base_le` needs NO axioms, `not_flagsAt_of_base_le` only `[propext]`).** The second `w`
+constituent (`w = warmRefineCost + oracleCost + selectCost`) — the per-node **orbit-harvest** cost, and the piece that
+makes the flag FIRE and states the confinement-P1 largeness clause on the cost side. Model (D7-declared, like the
+warmRefine brick): `oracleCost n b = n^b` (harvest at individualization base `b` explores ≤ n^b maps); `baseMax n =
+log₂ n` (small-`Aut` threshold, from `exists_greedy_base_le_log`); `oracleBudget n = n^{log₂ n}` (**quasipoly**, matching
+the pilot; the poly target sharpens `baseMax` via R1, lemmas unchanged). **The confinement-P1 cost interface:**
+`oracleCost_le_budget_of_base_le` (small base ⟹ harvest ≤ budget) → `nodeCost`/`nodeBudget` (= refinement + harvest) →
+**`not_flagsAt_of_base_le`** (a `base ≤ baseMax` node has `flagsAt = false` — does NOT flag). **The contrapositive is
+P1's largeness clause: a Phase-1 flag ⟹ base > baseMax ⟹ large `Aut`** ⟹ (P2/P3) primitive rank-3 / VT ⟹ assume-VT prune
+sound. This is where the cost model and correctness ① interlock — the point the "cost model = prerequisite" reframe was
+about. Still declared (the real harvest is the abstract/C# oracle); a poly `oracleBudget` needs R1.
+
+**NEXT:** (1) **renumbering `refineStep`** (D7 option ii) — now a prerequisite for a runnable `#eval` of the labelling
+(executable Tier B finding: `<`-comparisons over encode-blown-up colours hang) AND the honest bit-cost; (2) wire
+`oracleCost` into the spine `step`'s true cost so the flag fires on the real descent, then **P1/P2 in Lean** + the
+confinement assembly; (3) completeness (③-forward) + the Publication param-fixing.
 
 ---
 
