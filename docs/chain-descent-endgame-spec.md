@@ -28,8 +28,18 @@ and the obligation bodies `sorry`. It compiles green (`lake env lean Publication
 largely on *already-built* Seal-Phase substrate and is mostly assembly. The weight is in **② (poly-or-flag)**
 — which requires the cost model and the "reaches-rigid ⟹ counted poly node budget" bridge, i.e. the point
 where **"poly" stops being a meta-argument** — and **③ (flag ⟹ obstruction)**, which requires the
-`UnhandledResidue` definition plus consuming both the Seal-Phase and IR-Phase results. Neither ② nor ③'s
-supporting objects exist yet; they are the substance of the Runtime and IR phases.
+`UnhandledResidue` definition plus consuming both the Seal-Phase and IR-Phase results.
+
+**Progress (2026-07-06/07 — the Runtime-Phase cost model has STARTED; see [`chain-descent-cost-model.md`](./chain-descent-cost-model.md)).**
+The cost-model **framework is landed axiom-clean** (`ScratchCostModel.lean`: `CostM` + `budgetedIterate` +
+the ② mechanism `cost_budgetedIterate_le`), and it settled the ② vs ③ split: **② is unconditional by
+construction** (budget-capped), so *all* poly content lives in **③-forward** (`residue_if_flag`) — a
+refinement of the §2 map below (② is the *safety* guarantee; ③-forward is the *completeness/poly* content).
+The first per-node `w` brick landed (`ScratchCostModelWarmRefine.lean`) with a renumbering/unit-cost finding.
+`UnhandledResidue` now has its **structural shape** in `Publication.lean` (a 3-way disjunction with
+`residueNonSchurian` absorbing the `SchurianScheme` gap). Still unbuilt: `canonForm?`/`cost` as a real
+budgeted descent (the D4 build), the `UnhandledResidue` disjunct *definitions* (Seal/IR deliverables), and
+the pilot's node-count bound. **R1's status is refined** — see [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md) §7a (2026-07-06).
 
 ---
 

@@ -31,9 +31,18 @@ poly-completeness content lives in **③-forward** (`residue_if_flag`: `handled 
 refines the endgame-spec's obligation map: **② is the unconditional *safety* guarantee (never exceeds
 budget); ③-forward is the *completeness* content (handled inputs actually finish within it).**
 
-**What's left (the pilot, gated on the Runtime-Phase descent model):** (a) the per-node cost `w` from real
-primitives; (b) `canonForm?` as a `BudgetedCanonizer` instance; (c) the node-count-on-handled-inputs bound
-that feeds the seal's base bound — the quasipoly pilot. §5–§6.
+**The per-node `w` brick has started (2026-07-06).**
+[`ChainDescent/ScratchCostModelWarmRefine.lean`](../GraphCanonizationProofs/ChainDescent/ScratchCostModelWarmRefine.lean)
+(axiom-clean) lands the **warmRefine summand** of `w`: `warmRefine_eq_iterate` (n rounds, real) +
+`signature_card` (per-vertex input size `n-1`, real) + `warmRefineCost_eq` (`= n·n·n` under the declared
+`sigCost n = n`). It also surfaced the **renumbering / unit-cost-colour finding** (§4 FINDING): the current
+`Encodable.encode` `refineStep` blows up colour bit-size, so poly holds only under a unit-cost-RAM D7
+declaration (or a renumbering variant) — a fork to decide when `canonForm?`'s `refineStep` is chosen.
+
+**What's left (the pilot, gated on the Runtime-Phase descent model):** (a) the rest of `w` — `oracleCost`
+(gated on R1 for a poly, not just quasipoly-with-Aut-harvest, oracle) + `selectCost` (small, buildable now);
+(b) `canonForm?` as a `BudgetedCanonizer` instance (the D4 traversal-state descent); (c) the
+node-count-on-handled-inputs bound that feeds the seal's base bound — the quasipoly pilot. §5–§6.
 
 ---
 

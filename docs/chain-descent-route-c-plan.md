@@ -1416,9 +1416,11 @@ So the go-forward is the frame+WL confirmation; (a)/(b)/(c) are not live.
 
 ### 9.3 Later — the meta-poly rigor stage
 
-The §7a residuals R1–R3 (build the geometric coordinatizer, name Buekenhout–Shult + its poly bound, double-check
-`d=4` GQ) and, at the far end, the C#-design-into-Lean runtime model that makes "poly" (nearly) rigorous rather
-than a meta-argument. This is the project's planned final stage; nothing above blocks on it.
+The §7a residuals R1–R3 (build the geometric coordinatizer; cite Buekenhout–Shult / Payne–Thas for **classicality
+only** — poly-time is an in-project effective-construction obligation, NOT a citation, per the §7a 2026-07-06
+REFINEMENT; double-check `d=4` GQ) and, at the far end, the C#-design-into-Lean runtime model (the **cost model**,
+`docs/chain-descent-cost-model.md`, now STARTED) that makes "poly" rigorous rather than a meta-argument. This is
+the project's planned final stage; nothing above blocks on it.
 
 ### 9.4 Suggested ordering
 1. Finish Suzuki (all four sealed).
