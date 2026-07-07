@@ -254,6 +254,11 @@ declaration (i), because rank-compression is order-preserving.** Costs of each:
 - **Verdict:** target (ii) (matches the C#, honest bit-cost, tractable via the order bridge), keep (i) as the
   no-build fallback if the bridge invariant proves annoying. Note the per-node cap already contains the *bound*
   honesty (it charges `w` regardless of colour size); (ii) only sharpens the D7 *declaration* to be bit-cost-defensible.
+- **★ 2026-07-07 update — (ii) is now a PREREQUISITE, not just a declaration-sharpener.** The executable track's Tier B
+  (`chain-descent-executable-track.md`) made the leaf labelling computable, and `#eval`-ing it **hangs on the colour
+  blowup** — `vertexRank` comparisons over `Encodable.encode`-iterated `Nat`s. So for a *runnable* executable, the
+  renumbering variant (ii) is required, not optional. This promotes (ii) from "nice for bit-cost honesty" to "gates the
+  runnable demo." Recommend building it next on the executable track.
 
 ---
 

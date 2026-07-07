@@ -14,12 +14,27 @@
 
 **Tier A DONE (2026-07-07) — the descent RUNS.** `spineCappedCanonizer`/`descent`/`descentResult`/`descentCost`
 are now **computable** (a real `Decidable (Discrete)` / `Decidable IsLeaf` instance replaced the `Classical`
-`done`; everything else on the descent path — `refineStep`, `warmRefine`, `defaultSpineChain`, the cost-model
-core — was already computable). Validated by `#eval` (`ScratchExecutable.lean`): `descentResult triangle = some 1`,
-`descentCost triangle = 27` (= warmRefineCost 3 = 3³). All theorems stayed axiom-clean. The descent — the part
-that *finds the leaf and counts the cost* — executes.
+`done`; everything else on the descent path was already computable). Validated by `#eval`
+(`ScratchExecutable.lean`): `descentResult triangle = some 1`, `descentCost triangle = 27` (= 3³). The descent —
+*find the leaf, count the cost* — executes.
 
-**Still noncomputable (Tier B/C): the OUTPUT.** `canonForm?`/`canonFormOf`/`canonForm` remain noncomputable.
+**Tier B DONE (2026-07-07) — the single-leaf labelling is computable + proven.** All axiom-clean:
+- `rankInv` — a **total, computable** inverse of `vertexRank` (`List.find?` over `Fin n`, `==`), replacing the
+  noncomputable `Equiv.ofBijective` in `rankPerm`; `rankInv_spec` proves it inverts `vertexRank` on discrete χ.
+- `canonAdjComp adj χ` — the leaf's canonical adjacency via `rankInv`; **`canonAdjComp_eq`** proves it equals the
+  spec `labelledAdj (rankPerm χ h) adj`, so it is a genuine relabelling.
+- `canonOutput` — wires it to the descent's returned leaf (**NO `Classical.choose`** — the leaf level is the loop's
+  own output); `canonOutput_sound` = ①a on this runnable output.
+
+**★ Tier B FINDING — the colour blowup makes `#eval canonOutput` INFEASIBLE (confirms D7 renumbering).** The
+labelling is computable and proven, but `#eval`-ing it hangs: the leaf colouring's `Nat` values are
+`Encodable.encode` iterated across refinement rounds (the cost-model §4 blowup), so `vertexRank`'s `<`/`==`
+comparisons are over astronomically large `Nat`s. This is the D7 fork made concrete **from the executable side** —
+a *practical* run needs the **renumbering `refineStep`** (cells → `0..k-1` each round). Renumbering is thus promoted
+from "nice for a defensible bit-cost" to a **prerequisite for a runnable executable**. The theory is complete; the
+runnable labelling demo is deferred behind renumbering.
+
+**Still noncomputable / deferred: the lex-min `canonForm` (Tier C) + the practical run (needs renumbering).**
 
 ---
 
@@ -51,7 +66,7 @@ algorithm's output", not a separate exponential artifact — but does **not** re
 | Tier | Content | Blockers | State |
 |---|---|---|---|
 | **A** | **Computable descent** (find leaf, count cost) | `done` decidability (`Classical`→real `Decidable Discrete`) | ✅ **DONE** — `#eval` runs |
-| **B** | Computable single-leaf **labelling** | `rankPerm` (`Equiv.ofBijective`) → compute `rankInv` by finite search; `leafLevel` (`Classical.choose`) → use the descent loop's returned level | next |
+| **B** | Computable single-leaf **labelling** | `rankPerm` (`Equiv.ofBijective`) → `rankInv` by finite search; `leafLevel` (`Classical.choose`) → the loop's returned level | ✅ **DONE** — computable + proven; `#eval` needs renumbering (colour blowup) |
 | **C-exp** | Computable canonical form by **enumeration** | `Fintype (DirAssignment)` (noncomputable) → enumerate order-labels; `canonForm` = `List.min` | optional; **exponential**, runs on tiny `n` only |
 | **C-poly** | **Poly** canonical form (orbit-pruned; validated by ①a+①b directly) | orbit-pruning = the oracle/harvest, computable + correct | **⛔ the WALL — = the main open content; abandon-point** |
 
@@ -74,5 +89,9 @@ output construction, not just the descent.)
 - `ChainDescent/ScratchCanonFormCapped.lean` — `descent`/`descentResult`/`descentCost` computable.
 
 ## NEXT
-Tier B — computable `rankInv` (rank-permutation inverse by finite search) + a computable single-leaf `canonAdj`,
-and drop the `Classical.choose` leaf extraction in favour of the descent loop's returned level. No wall.
+Two independent options: **(1) Renumbering `refineStep`** — the D7 variant (cells → `0..k-1` each round,
+order-preserving ⟹ `canonAdjComp` unchanged). Now a *prerequisite* for any runnable `#eval` of the labelling
+(Tier B finding), and it also sharpens the cost model's bit-cost bound. The one fiddly spot is proving the
+order-equivalence invariant propagates through a refinement round (cost-model §4). **(2) Tier C-exp** — enumerate
+`DirAssignment` order-labels + `List.min` for the lex-min (exponential, tiny-n only). Tier C-poly stays the wall.
+Renumbering (1) is the higher-value next step: it unblocks the runnable demo *and* the honest bit-cost.
