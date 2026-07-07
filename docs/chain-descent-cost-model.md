@@ -131,11 +131,28 @@ P1's largeness clause: a Phase-1 flag ⟹ base > baseMax ⟹ large `Aut`** ⟹ (
 sound. This is where the cost model and correctness ① interlock — the point the "cost model = prerequisite" reframe was
 about. Still declared (the real harvest is the abstract/C# oracle); a poly `oracleBudget` needs R1.
 
-**NEXT:** (1) **wire `oracleCost` into the spine `step`'s true cost** so the flag fires on the real descent, then the
-graph-side of **P1** (small-`Aut` ⟹ base ≤ baseMax, via `exists_greedy_base_le_log`) + **P2 in Lean** + the confinement
-assembly; (2) completeness (③-forward) + the Publication param-fixing. **Renumbering `refineStep` (D7 option ii) is
-DONE** for the bit-cost/executable side — see [`chain-descent-executable-track.md`](./chain-descent-executable-track.md)
-(`refineStepR`/`warmRefineMat`); it can be adopted here to sharpen the `warmRefine` bit-cost bound whenever wanted.
+**★ ORACLE SUMMAND WIRED INTO THE REAL SPINE (2026-07-07, `ScratchCostModelSpine.lean`, axiom-clean `[propext,
+Classical.choice, Quot.sound]`) — the flag can now FIRE on the actual descent.** `spineCappedCanonizerO` extends the
+warmRefine-only `spineCappedCanonizer` (which was *total* — flag never fired ⟹ ③ vacuous): each node's true cost is now
+`(costedWarmRefine …).cost + oracleCost n (baseAt k)` (co-defined warmRefine + declared harvest at an **abstract base
+function** `baseAt : ℕ → ℕ`), and the per-node budget is `nodeBudget (warmRefineCost n) n = warmRefineCost n +
+oracleBudget n`. Four theorems: `spineCappedCanonizerO_step_cost` (charge = honest `nodeCost`);
+`spineCappedCanonizerO_cost_le` (② `cost ≤ n·(warmRefineCost n + oracleBudget n)`, unconditional, honest **quasipoly**);
+**`spineCappedCanonizerO_flagsAt_iff`** (the flag fires ⟺ `oracleBudget n < oracleCost n (baseAt k)`, i.e. base beyond
+threshold — the first *fireable* flag on the real descent); **`not_flagsAt_of_base_le_spine`** (P1 cost half on the
+spine: `baseAt k ≤ baseMax n` ⟹ `flagsAt = false`). The instance is *added alongside* the warmRefine-only `n⁴` one, NOT a
+mutation — `ScratchCanonFormCapped` still rides the total `n⁴` object (rewiring it to the fireable flag is the
+Publication swap, done once with ③, else ③ flips vacuous the wrong way).
+
+**NEXT:** (1) **the graph-side of P1** — `small-Aut residue ⟹ baseAt k ≤ baseMax n` (via `exists_greedy_base_le_log`),
+which turns `not_flagsAt_of_base_le_spine` from a cost fact into the largeness contrapositive; the abstract `baseAt`
+gets its concrete definition (the individualization-base size at spine level `k`) here. Then **P2 in Lean** + the
+confinement assembly ⟹ ①. (2) completeness (③-forward: `defaultSpineChain_reaches_leaf` ⟹ run returns `some`) + the
+Publication param-fixing (swap `canonForm?` onto the fireable-flag object). **Renumbering `refineStep` (D7 option ii)** —
+the executable-track scoping (2026-07-07) found the runnable-demo blocker is the `Encodable.encode` VALUE (exponential-
+bit Nat), fixed by an **encode-free structural round** (= D7 (ii)) + `@[csimp]` array-backing (sound; NOT
+`@[implemented_by]`, which can assert false eqns). Fold (ii) into the `canonForm?` `refineStep` choice; it also sharpens
+the `warmRefine` bit-cost bound. See [`chain-descent-executable-track.md`](./chain-descent-executable-track.md).
 
 ---
 

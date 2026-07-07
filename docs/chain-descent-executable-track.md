@@ -40,16 +40,34 @@ the wall. Everything below is WIP scratch, **NOT in `build.sh`**, all axiom-clea
    colours: `refineStepR χ = fun v => vertexRankNat (refineStep χ) v` recomputes `refineStep χ` per vertex, re-reading
    the lazy `χ` closure ⟹ exponential across rounds. Fix = **reify** (materialise each round). Renumbering (bounded
    values) is necessary but NOT sufficient.
-2. **★ OPEN ISSUE — reifying the descent did NOT give the hoped speedup.** `canonOutputFast` (reified *descent*) still
-   runs in ~the same order of time as `canonOutputMat` on the user's machine. (An earlier "~500× / 1.2s CPU" note was a
-   MEASUREMENT ARTIFACT of this dev box's 2 GB-limited `lake env lean` thrash — the `#eval` never completed here, so the
-   CPU counter caught only pre-thrash work; do NOT trust it.) **The real bottleneck is still unidentified.** Prime
-   suspects for the next reader: (a) `leafLevelMat` recomputes `defaultColouringMat k` for each `k = 0..n`, and
-   `defaultColouringMat` is itself prefix-recursive ⟹ O(n²) descent recomputations; (b) `materialize`'s `let vec :=
-   Vector.ofFn χ; fun i => vec.get i` may not actually SHARE `vec` across calls under Lean's evaluator (if not, each
-   lookup rebuilds the vector ⟹ no memoisation); (c) something still blows up in `descentResult`/`costedWarmRefine`
-   (which uses the *non-reified* `warmRefine` for the cost). **Diagnose (b) first** — it's the crux of whether reification
-   works at all. NB: this dev box cannot reliably `#eval`/measure these (2 GB thrash); profile on an unconstrained machine.
+2. **★ OPEN ISSUE — RESOLVED (2026-07-07): the bottleneck is a *value* (`Encodable.encode`), and the fix is
+   `encode-free round + @[csimp]`, NOT reification and NOT `@[implemented_by]`.** Root cause (traced to
+   [`WLGeneric.lean:92-93`](../GraphCanonizationProofs/ChainDescent/WLGeneric.lean#L92-L93)):
+   `refineStep χ v = Encodable.encode (sigKey … v)` where `sigKey : List Nat` has length ~`n`. `Encodable.encode` on a
+   `List Nat` is nested `Nat.pair` (Cantor pairing), which **squares magnitude per element ⟹ the returned `Nat` is
+   exponential-bit in `n`**, and `vertexRankNat` compares those Nats by `<` every round. So the blowup lives *inside one
+   round's return value*, produced fresh regardless of input bounds — which is exactly why reifying the descent moved
+   nothing (the earlier suspects (a)/(b)/(c) were all wrong; at small `n` the residual 10 min is instead the Mathlib
+   `Finset`/`Multiset`-`Quotient` interpreter constants, which the same fix removes).
+   **Resolution — the tooling, tested (`scratchpad/spike_impl.lean`, core-only):** `@[implemented_by]` and `@[csimp]` are
+   both honored by `#eval` and both add **zero axioms** (`#print axioms` unaffected — off the firewall surface, unlike
+   `native_decide`). **Decision: use `@[csimp]` (sound — requires a proof `slow = fast`); AVOID `@[implemented_by]`**
+   (trusted, can assert an *arbitrary/false* equation — a firewall risk; a non-faithful `refineStep` impl would make
+   `#eval` lie). **The critical catch:** `@[csimp]`/`@[implemented_by]` can only substitute an *equal* function, and
+   `refineStep`'s output Nat is load-bearing — so the `Encodable.encode` blowup is **not a swap target**; it must be
+   *removed from the definition*. **Two-layer fix:** (1) **encode-free round** (definitional, no trust) — rank vertices to
+   `0..n-1` by comparing `(χ v, sorted-signature)` keys **structurally** (lex on `List Nat`), never encoding. Same
+   partition as today, different canonical *order* ⟹ a **valid but distinct canonizer**: ①a transfers for free
+   (`canonAdjComp` is a relabelling for any discrete leaf, label-agnostic), ①b needs only that lex-on-signatures is
+   iso-canonical (it is). **This IS the cost-model D7 fork option (ii)** — `refineStepR_iff` (same-partition
+   characterisation) already done; the missing piece is ranking by structural comparison instead of by re-encoding.
+   (2) **`@[csimp]` array-backing** `signature`/`Multiset.sort`/`vertexRankNat` (value-preserving ⟹ sound) to kill the
+   `Finset` constants — pure polish.
+   **Best development point (decided):** fold layer (1) into the **D7 (ii) renumbering build** when the Runtime Phase
+   pins `canonForm?`'s `refineStep` (on the headline path anyway); do layer (2) `@[csimp]` polish LAST, in the
+   Publication phase, once `canonForm?` is frozen. Building a fast `refineStep` NOW is throwaway (the renumber fork
+   replaces it). NB: this dev box cannot reliably `#eval`/measure the heavy path (2 GB thrash); the *mechanism* was
+   validated core-only; profile the full canonizer on an unconstrained machine.
 
 **Deferred: Tier C — the iso-invariant canonical form (①b).** All outputs above are the leaf's *single* labelling
 (a valid relabelling), not the iso-invariant min. C-exp (exponential enumeration, tiny-n) or C-poly (orbit-pruned = the
@@ -158,7 +176,9 @@ are the *reasoned* form; `canonOutputMat` (via `warmRefineMat`) + `canonOutputMa
 was recomputation — reification fixes it with NO renumbered descent needed.)
 
 ## NEXT
-Optional: **reify the descent internals** (`descentResult`/`defaultColouring` still use lazy `warmRefine`) so larger-n
-graphs run — same `Vector`-materialisation pattern. Then Tier C (the iso-invariant canonical form): C-exp (exponential
-enumeration, tiny-n) or C-poly (the wall = orbit-pruning = the oracle). Or pivot back to the main proofs
-(oracle-summand → spine-`step` wiring, P1/P2 in Lean).
+The fast-executable path is now **scoped and deferred** (see finding #2, RESOLVED): the speedup is `encode-free round`
+(= D7 fork (ii), fold into the Runtime-Phase `refineStep` choice) + `@[csimp]` array-backing (Publication-phase polish).
+Do **not** reify further — reification was the wrong lever (the blocker is the `Encodable.encode` *value*, not
+recomputation). Tier C (the iso-invariant canonical form) remains the wall (C-poly = orbit-pruning = the oracle).
+**Active work pivoted back to the main proofs** (the headline path): **wire the oracle summand of `w` into the
+spine-`step`'s true cost** so the flag fires on the real descent, then P1/P2 in Lean + confinement assembly ⟹ ①.
