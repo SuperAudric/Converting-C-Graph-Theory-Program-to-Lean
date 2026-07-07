@@ -1069,10 +1069,17 @@ wall-free producer** and reduces P4 to a clean group-transitivity interface (all
   transitivity is a property of the group action, not of WL).
 
 So P4 now rests entirely on a **group-transitivity** statement: *`Stab(S)` is transitive on the selected cell.*
-Discharged outright at the root (`_of_pretransitive`); reduced to orbit-cover elsewhere. **NEXT increment = the
-per-level transitivity from the rank-3 recursion** — that `Stab(S)` stays transitive on the selected cell down the
-point-stabilizer chain `VO_d → VO_{d−2} → …` (single-base free via `cellsAreOrbits_schemeAdj_singleton`). This is
-family-specific structure, no longer the WL wall.
+Discharged outright at the root (`_of_pretransitive`); reduced to orbit-cover elsewhere.
+
+**The recursion is subsumed — no `VO_d → VO_{d−2}` unrolling.** The confinement property is quantified over
+prefixes (exactly `RecoversWhileSymmetric`'s `∀ T ⊇ S₀` shape), so a single uniform per-node lemma discharges it at
+whatever residue each node presents — "every node-4 residue harvests its next step" is that per-node form.
+Formalized: `SelectedCellSubsetOrbitAt` (the `∀ T ⊇ S₀` target) + `selectedCellSubsetOrbitAt_of_cover` (one lemma,
+applied per node; axiom-clean). **NEXT = the per-prefix cover hypothesis** — `∀ T ⊇ S₀, ∃ r`, `Stab(T)`-orbit of
+`r` covers the selected cell = the residue's group transitivity on the selected cell (forms-graph / rank-3
+structure). The same statement at every node. Honest crux for this last step: it is wall-free iff the selected cell
+is *structurally* one orbit (frame / symmetry-broken base, where `cells = orbits` — the seal's `VO⁻₄(3)` route),
+not a general WL colour class that could merge orbits; pinning the selector to the former is the remaining work.
 
 **Assembly.** P1 ⟹ flag is large; P2 ⟹ not rigid; P3 ⟹ Cameron/node-4 primitive rank-3; P4 ⟹ VT + cell = orbit ⟹
 prune sound ⟹ ① on the non-rigid residue. **Weakest links: P1 (soundness linchpin) and P4 (the prune-soundness core);

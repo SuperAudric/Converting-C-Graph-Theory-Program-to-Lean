@@ -105,4 +105,32 @@ theorem selectedCellSubsetOrbit_of_pretransitive
   obtain ⟨g, hg⟩ := htrans.exists_smul_eq v w
   exact mem_orbit_stabilizerAt_iff.mp ⟨g, hg⟩
 
+/-! ## Per-node uniformity — the "recursion" is a per-prefix universal, not an unrolling
+
+The descent never needs `VO_d → VO_{d−2}` reasoned as a chain: the confinement property is **quantified over
+prefixes** (exactly the shape of `RecoversWhileSymmetric = ∀ T ⊇ S₀, ¬IsBase T → CellsAreOrbits T`), so a single
+uniform per-node lemma discharges it at *whatever* residue each node presents. "Every node-4 residue harvests its
+next step" is precisely this per-node form — no family-specific chain. -/
+
+/-- **The per-prefix target** — `SelectedCellSubsetOrbit` at every prefix `T ⊇ S₀`. Mirrors
+`RecoversWhileSymmetric`'s `∀ T ⊇ S₀` shape; the descent's recursion IS this universal. -/
+def SelectedCellSubsetOrbitAt (adj : AdjMatrix n) (P : PMatrix n)
+    (sel : Colouring n → Finset (Fin n)) (S₀ : Finset (Fin n)) : Prop :=
+  ∀ T : Finset (Fin n), S₀ ⊆ T → SelectedCellSubsetOrbit adj P sel T
+
+/-- **Uniform per-node discharge — no recursion.** If at every prefix `T ⊇ S₀` some representative's `Stab(T)`-orbit
+covers the selected cell, the per-prefix target holds: one lemma applied at each node. The confinement content is
+thus reduced to the per-prefix cover hypothesis = the residue's **group transitivity on the selected cell**
+(forms-graph / rank-3 structure) — the same statement at every node, never a `VO_d → VO_{d−2}` unrolling. -/
+theorem selectedCellSubsetOrbitAt_of_cover
+    {adj : AdjMatrix n} {P : PMatrix n}
+    {sel : Colouring n → Finset (Fin n)} {S₀ : Finset (Fin n)}
+    (h : ∀ T : Finset (Fin n), S₀ ⊆ T → ∃ r : Fin n,
+        ∀ w, w ∈ sel (warmRefine adj P (individualizedColouring n T)) →
+            OrbitPartition adj P T r w) :
+    SelectedCellSubsetOrbitAt adj P sel S₀ := by
+  intro T hT
+  obtain ⟨r, hr⟩ := h T hT
+  exact selectedCellSubsetOrbit_of_orbit_cover hr
+
 end ChainDescent.ConfinementP4
