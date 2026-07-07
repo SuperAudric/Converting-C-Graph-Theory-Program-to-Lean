@@ -23,6 +23,7 @@ Imports the Mathlib spine — expect slower compiles. Axiom target `[propext, Cl
 -/
 import ChainDescent.ScratchCostModelPerNode
 import ChainDescent.ScratchCostModelWarmRefine
+import ChainDescent.ScratchCostModelCostedWarmRefine
 import ChainDescent.Spine
 
 namespace ChainDescent.CostModel.SpineInstance
@@ -31,20 +32,33 @@ open ChainDescent
 open ChainDescent.CostModel
 open ChainDescent.CostModel.PerNode
 open ChainDescent.CostModel.WarmRefine
+open ChainDescent.CostModel.CostedWarmRefine
 
 variable {n : Nat}
 
 open scoped Classical in
-/-- **The per-node-capped canonizer over the real spine.** `σ = ℕ` is the descent level: `step` advances one level
-charging the warmRefine per-level cost; `done` = the level-`k` partition is discrete (`IsLeaf`); node budget `n`
-(the proven depth); per-node bound `w = warmRefineCost n`. `noncomputable` only because `done` uses classical
-decidability of discreteness — irrelevant to the cost bound, which holds for any `done`. -/
+/-- **The per-node-capped canonizer over the real spine.** `σ = ℕ` is the descent level: `step` advances one level,
+charging the **co-defined** per-level cost `(costedWarmRefine adj chₖ.P chₖ.χι).cost` — the actual accumulated cost of
+running the refinement loop at level `k` (not a fiat literal; `cost_costedWarmRefine` proves it equals
+`warmRefineCost n`). `done` = the level-`k` partition is discrete (`IsLeaf`); node budget `n` (the proven depth);
+per-node bound `w = warmRefineCost n`. `noncomputable` because `done` uses classical decidability of discreteness —
+irrelevant to the cost bound, which holds for any `done`. -/
 noncomputable def spineCappedCanonizer (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) : CappedCanonizer Nat where
-  step := fun k => (k + 1, warmRefineCost n)
+  step := fun k =>
+    let ch := defaultSpineChain adj P₀ χι₀ sel k
+    (k + 1, (costedWarmRefine adj ch.P ch.χι).cost)
   done := fun k => decide (defaultSpineChain adj P₀ χι₀ sel k).IsLeaf
   nbud := fun _ => n
   w := fun _ => warmRefineCost n
+
+/-- **The per-node charge IS the real co-defined warmRefine cost** = `warmRefineCost n`. This is the seam closed: the
+number charged (and capped) per node is the actual accumulated cost of running the refinement loop
+(`cost_costedWarmRefine`), not an asserted literal. -/
+theorem spineCappedCanonizer_step_cost (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) :
+    ((spineCappedCanonizer adj P₀ χι₀ sel).step k).2 = warmRefineCost n :=
+  cost_costedWarmRefine adj _ _
 
 /-- **② over the real spine (concrete, unconditional).** The capped run over `defaultSpineChain` costs
 `≤ n · warmRefineCost n = n · n³ = n⁴`. No per-node-cost hypothesis — the cap makes ② free even if a later oracle

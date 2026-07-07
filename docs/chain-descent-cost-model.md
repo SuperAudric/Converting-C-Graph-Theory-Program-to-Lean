@@ -66,9 +66,18 @@ so the branch-frontier σ of §3 is **not needed** for the poly target; the `≤
 `defaultSpineChain` (σ = the descent level `k`; `step` advances a level; `done` = leaf/discrete; `nbud = n`;
 `w = warmRefineCost n`). Capstone **`spineCappedCanonizer_cost_le`**: the run costs **`≤ n · warmRefineCost n = n⁴`,
 unconditionally** — the first *concrete* ② discharge on the actual canonizer's descent (matches the C#
-`DefaultBudget`'s `16·n⁴`). The per-node cap makes it free of any per-node-cost hypothesis. **NEXT sub-steps:**
-completeness (`defaultSpineChain_reaches_leaf` ⟹ run returns `some`, ③-forward), the output map
-`canonForm? = leaf.canonAdj`, and the oracle summand of `w`.
+`DefaultBudget`'s `16·n⁴`). The per-node cap makes it free of any per-node-cost hypothesis.
+
+**★ CO-DEFINED cost upgrade (2026-07-07, `ScratchCostModelCostedWarmRefine.lean` + spine, axiom-clean).** Closed the
+D1 "fiat cost" seam: the per-level charge is no longer a literal but the **actual accumulated cost of running the
+refinement loop**. `costedWarmRefine` runs `n` costed rounds in the cost monad with `value_costedWarmRefine :
+value = warmRefine` (all spine correctness transfers) and `cost_costedWarmRefine : cost = warmRefineCost n`
+(accumulated by the loop, via the reusable `CostM.iterate` + `cost_iterate_const`). The spine `step` now charges
+`(costedWarmRefine adj chₖ.P chₖ.χι).cost`, and `spineCappedCanonizer_step_cost` proves that charge `= warmRefineCost
+n` — so "the spine CAN be refined in n³" is now "running the refinement IS n³ (co-defined)". Per-round `roundCost n`
+is the D7-declared unit. **NEXT:** the value-side descent co-definition (σ = descent state, `step` = the real
+transition projecting to `defaultSpineChain`) — the deeper "IS descended" level; then completeness (③-forward), the
+output map `canonForm? = leaf.canonAdj`, and the oracle summand of `w`.
 
 ---
 
