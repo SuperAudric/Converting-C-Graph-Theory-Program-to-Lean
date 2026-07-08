@@ -47,10 +47,10 @@ delivers from the GROUP (the selector picks a stabilizer-orbit: `{p}`, `Γ(p)` o
 appeal to 1-WL reaching the orbit partition — the route that sidesteps the multi-base `JointProfileRecoversAt`
 wall. It is logically stronger than `SelectedCellIsOrbit` but proved by a DIFFERENT (structural) method. -/
 def SelectedCellSubsetOrbit (adj : AdjMatrix n) (P : PMatrix n)
-    (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) : Prop :=
+    (sel : Colouring n → Finset (Fin n)) (χ : Colouring n) (S : Finset (Fin n)) : Prop :=
   ∀ v w,
-    v ∈ sel (warmRefine adj P (individualizedColouring n S)) →
-    w ∈ sel (warmRefine adj P (individualizedColouring n S)) →
+    v ∈ sel χ →
+    w ∈ sel χ →
     OrbitPartition adj P S v w
 
 /-- **The second producer of `SelectedCellIsOrbit` — structural, wall-free.** If the selected cell sits inside a
@@ -60,9 +60,9 @@ colour hypothesis. This wires the assume-VT structural target into the LANDED pr
 `CellsAreOrbits` / multi-base-WL wall. -/
 theorem selectedCellIsOrbit_of_subsetOrbit
     {adj : AdjMatrix n} {P : PMatrix n}
-    {sel : Colouring n → Finset (Fin n)} {S : Finset (Fin n)}
-    (h : SelectedCellSubsetOrbit adj P sel S) :
-    SelectedCellIsOrbit adj P sel S :=
+    {sel : Colouring n → Finset (Fin n)} {χ : Colouring n} {S : Finset (Fin n)}
+    (h : SelectedCellSubsetOrbit adj P sel χ S) :
+    SelectedCellIsOrbit adj P sel χ S :=
   fun v w hv hw _hcolour => h v w hv hw
 
 /-! ## The structural discharge — `SelectedCellSubsetOrbit` from residual-group transitivity
@@ -80,10 +80,9 @@ the cell lies in one orbit. Reduces `SelectedCellSubsetOrbit` to the single-orbi
 residue's group transitivity plugs in. Proof: `v, w ∈ orbit r` ⟹ `orbit v = orbit r = orbit w` ⟹ `w ∈ orbit v`. -/
 theorem selectedCellSubsetOrbit_of_orbit_cover
     {adj : AdjMatrix n} {P : PMatrix n}
-    {sel : Colouring n → Finset (Fin n)} {S : Finset (Fin n)} {r : Fin n}
-    (hcover : ∀ w, w ∈ sel (warmRefine adj P (individualizedColouring n S)) →
-        OrbitPartition adj P S r w) :
-    SelectedCellSubsetOrbit adj P sel S := by
+    {sel : Colouring n → Finset (Fin n)} {χ : Colouring n} {S : Finset (Fin n)} {r : Fin n}
+    (hcover : ∀ w, w ∈ sel χ → OrbitPartition adj P S r w) :
+    SelectedCellSubsetOrbit adj P sel χ S := by
   intro v w hv hw
   have hvr := mem_orbit_stabilizerAt_iff.mpr (hcover v hv)
   have hwr := mem_orbit_stabilizerAt_iff.mpr (hcover w hw)
@@ -98,9 +97,9 @@ within one orbit. The depth-0 anchor of the assume-VT recursion, discharged with
 input, purely from the group action. -/
 theorem selectedCellSubsetOrbit_of_pretransitive
     {adj : AdjMatrix n} {P : PMatrix n}
-    {sel : Colouring n → Finset (Fin n)} {S : Finset (Fin n)}
+    {sel : Colouring n → Finset (Fin n)} {χ : Colouring n} {S : Finset (Fin n)}
     (htrans : MulAction.IsPretransitive (StabilizerAt adj P S) (Fin n)) :
-    SelectedCellSubsetOrbit adj P sel S := by
+    SelectedCellSubsetOrbit adj P sel χ S := by
   intro v w _ _
   obtain ⟨g, hg⟩ := htrans.exists_smul_eq v w
   exact mem_orbit_stabilizerAt_iff.mp ⟨g, hg⟩
@@ -115,8 +114,9 @@ next step" is precisely this per-node form — no family-specific chain. -/
 /-- **The per-prefix target** — `SelectedCellSubsetOrbit` at every prefix `T ⊇ S₀`. Mirrors
 `RecoversWhileSymmetric`'s `∀ T ⊇ S₀` shape; the descent's recursion IS this universal. -/
 def SelectedCellSubsetOrbitAt (adj : AdjMatrix n) (P : PMatrix n)
-    (sel : Colouring n → Finset (Fin n)) (S₀ : Finset (Fin n)) : Prop :=
-  ∀ T : Finset (Fin n), S₀ ⊆ T → SelectedCellSubsetOrbit adj P sel T
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (S₀ : Finset (Fin n)) : Prop :=
+  ∀ T : Finset (Fin n), S₀ ⊆ T → SelectedCellSubsetOrbit adj P sel (χsel T) T
 
 /-- **Uniform per-node discharge — no recursion.** If at every prefix `T ⊇ S₀` some representative's `Stab(T)`-orbit
 covers the selected cell, the per-prefix target holds: one lemma applied at each node. The confinement content is
@@ -124,11 +124,11 @@ thus reduced to the per-prefix cover hypothesis = the residue's **group transiti
 (forms-graph / rank-3 structure) — the same statement at every node, never a `VO_d → VO_{d−2}` unrolling. -/
 theorem selectedCellSubsetOrbitAt_of_cover
     {adj : AdjMatrix n} {P : PMatrix n}
-    {sel : Colouring n → Finset (Fin n)} {S₀ : Finset (Fin n)}
+    {sel : Colouring n → Finset (Fin n)} {χsel : Finset (Fin n) → Colouring n}
+    {S₀ : Finset (Fin n)}
     (h : ∀ T : Finset (Fin n), S₀ ⊆ T → ∃ r : Fin n,
-        ∀ w, w ∈ sel (warmRefine adj P (individualizedColouring n T)) →
-            OrbitPartition adj P T r w) :
-    SelectedCellSubsetOrbitAt adj P sel S₀ := by
+        ∀ w, w ∈ sel (χsel T) → OrbitPartition adj P T r w) :
+    SelectedCellSubsetOrbitAt adj P sel χsel S₀ := by
   intro T hT
   obtain ⟨r, hr⟩ := h T hT
   exact selectedCellSubsetOrbit_of_orbit_cover hr
@@ -156,9 +156,10 @@ Stated with a distinguished frame origin `r` (as a frame base has), whose `Stab(
 Witt flag-transitivity of the residue's automorphism group. This is the ONE remaining input to confinement-P4;
 for the forms graphs it is Witt's theorem (citable classical), false for Clebsch-like (family-specific). -/
 def FrameSelectorTransitive (adj : AdjMatrix n) (P : PMatrix n)
-    (sel : Colouring n → Finset (Fin n)) (S₀ : Finset (Fin n)) : Prop :=
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (S₀ : Finset (Fin n)) : Prop :=
   ∀ T : Finset (Fin n), S₀ ⊆ T → ∃ r : Fin n,
-    ∀ w, w ∈ sel (warmRefine adj P (individualizedColouring n T)) →
+    ∀ w, w ∈ sel (χsel T) →
       OrbitPartition adj P T r w
 
 /-- **Frame-selector transitivity discharges confinement-P4 (the full reduction).** With the residual group
@@ -167,9 +168,10 @@ transitive on every selected cell, the per-prefix `SelectedCellSubsetOrbit` hold
 assume-VT prune is sound exactly under `FrameSelectorTransitive`, whose forms-graph instance is Witt's theorem. -/
 theorem selectedCellSubsetOrbitAt_of_frameSelectorTransitive
     {adj : AdjMatrix n} {P : PMatrix n}
-    {sel : Colouring n → Finset (Fin n)} {S₀ : Finset (Fin n)}
-    (h : FrameSelectorTransitive adj P sel S₀) :
-    SelectedCellSubsetOrbitAt adj P sel S₀ :=
+    {sel : Colouring n → Finset (Fin n)} {χsel : Finset (Fin n) → Colouring n}
+    {S₀ : Finset (Fin n)}
+    (h : FrameSelectorTransitive adj P sel χsel S₀) :
+    SelectedCellSubsetOrbitAt adj P sel χsel S₀ :=
   selectedCellSubsetOrbitAt_of_cover h
 
 end ChainDescent.ConfinementP4

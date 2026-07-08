@@ -44,13 +44,20 @@ same-coloured vertices *of the selected cell* are `Stab(S)`-orbit-equivalent. St
 `CellsAreOrbits` (which quantifies over *all* cells); it is exactly what the descent's scheduler needs, since the
 descent only ever individualizes within the selected cell. -/
 def SelectedCellIsOrbit (adj : AdjMatrix n) (P : PMatrix n)
-    (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) : Prop :=
+    (sel : Colouring n → Finset (Fin n)) (χ : Colouring n) (S : Finset (Fin n)) : Prop :=
   ∀ v w,
-    v ∈ sel (warmRefine adj P (individualizedColouring n S)) →
-    w ∈ sel (warmRefine adj P (individualizedColouring n S)) →
-    warmRefine adj P (individualizedColouring n S) v
-      = warmRefine adj P (individualizedColouring n S) w →
+    v ∈ sel χ →
+    w ∈ sel χ →
+    χ v = χ w →
     OrbitPartition adj P S v w
+
+/-- **The default selection colouring** — `warmRefine adj P (individualizedColouring n S)` at each base `S`. Passing
+this recovers the original `individualizedColouring`-based predicates; the runtime descent instead passes its own
+(index-free `oneStepColouring`-based) selection colouring, which is what makes the *equivariant* cross-graph selector
+land in the same cell the descent runs on. The confinement chain is generic in the colouring — it only reads
+membership and same-colour, concluding the colouring-free `OrbitPartition`. -/
+def indivχ (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) : Colouring n :=
+  warmRefine adj P (individualizedColouring n S)
 
 /-! ## 0b — the §4 math discharges it for free -/
 
@@ -59,7 +66,7 @@ wall) targets full `CellsAreOrbits`; it feeds the bridge by simply dropping the 
 bridge is keyed on the weaker predicate while the math still discharges it. -/
 theorem selectedCellIsOrbit_of_cellsAreOrbits {adj : AdjMatrix n} {P : PMatrix n}
     {sel : Colouring n → Finset (Fin n)} {S : Finset (Fin n)}
-    (h : CellsAreOrbits adj P S) : SelectedCellIsOrbit adj P sel S :=
+    (h : CellsAreOrbits adj P S) : SelectedCellIsOrbit adj P sel (indivχ adj P S) S :=
   fun v w _ _ hcell => h v w hcell
 
 /-! ## 0c — completeness: the consumed cell is a single residual orbit -/
@@ -70,12 +77,9 @@ not give: soundness says a dropped sibling *was* isomorphic; completeness says t
 there is exactly one sibling-class and consuming a single representative branches *not at all*. The bridge between
 `OrbitPartition` and the residual group action is the landed `mem_orbit_stabilizerAt_iff`. -/
 theorem selectedCell_single_stabOrbit {adj : AdjMatrix n} {P : PMatrix n}
-    {sel : Colouring n → Finset (Fin n)} {S : Finset (Fin n)}
-    (h : SelectedCellIsOrbit adj P sel S) {v w : Fin n}
-    (hv : v ∈ sel (warmRefine adj P (individualizedColouring n S)))
-    (hw : w ∈ sel (warmRefine adj P (individualizedColouring n S)))
-    (hcell : warmRefine adj P (individualizedColouring n S) v
-      = warmRefine adj P (individualizedColouring n S) w) :
+    {sel : Colouring n → Finset (Fin n)} {χ : Colouring n} {S : Finset (Fin n)}
+    (h : SelectedCellIsOrbit adj P sel χ S) {v w : Fin n}
+    (hv : v ∈ sel χ) (hw : w ∈ sel χ) (hcell : χ v = χ w) :
     w ∈ MulAction.orbit (StabilizerAt adj P S) v := by
   rw [mem_orbit_stabilizerAt_iff]
   exact h v w hv hw hcell
@@ -84,12 +88,9 @@ theorem selectedCell_single_stabOrbit {adj : AdjMatrix n} {P : PMatrix n}
 either in favour of the other is sound (they are isomorphic) and complete (no un-isomorphic class is lost). This is
 the precise content that turns "fork over representatives" into "descend on one". -/
 theorem selectedCell_prune_sound_complete {adj : AdjMatrix n} {P : PMatrix n}
-    {sel : Colouring n → Finset (Fin n)} {S : Finset (Fin n)}
-    (h : SelectedCellIsOrbit adj P sel S) {v w : Fin n}
-    (hv : v ∈ sel (warmRefine adj P (individualizedColouring n S)))
-    (hw : w ∈ sel (warmRefine adj P (individualizedColouring n S)))
-    (hcell : warmRefine adj P (individualizedColouring n S) v
-      = warmRefine adj P (individualizedColouring n S) w) :
+    {sel : Colouring n → Finset (Fin n)} {χ : Colouring n} {S : Finset (Fin n)}
+    (h : SelectedCellIsOrbit adj P sel χ S) {v w : Fin n}
+    (hv : v ∈ sel χ) (hw : w ∈ sel χ) (hcell : χ v = χ w) :
     OrbitPartition adj P S v w ∧ OrbitPartition adj P S w v :=
   ⟨h v w hv hw hcell, (h v w hv hw hcell).symm⟩
 
@@ -111,13 +112,13 @@ theorem spine_node_count_le {adj : AdjMatrix n} {P₀ : PMatrix n} {χι₀ : Co
 (weaker than `∀ S, CellsAreOrbits`). This is the structural form of the empirical `Phase2Nodes = 0` / single-path
 finding. -/
 def SinglePathDisposition (adj : AdjMatrix n) (P : PMatrix n)
-    (sel : Colouring n → Finset (Fin n)) : Prop :=
-  ∀ S : Finset (Fin n), SelectedCellIsOrbit adj P sel S
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n) : Prop :=
+  ∀ S : Finset (Fin n), SelectedCellIsOrbit adj P sel (χsel S) S
 
 /-- The forms-graph math (full `CellsAreOrbits` at every base, modulo Witt + the wall) discharges the disposition. -/
 theorem singlePathDisposition_of_cellsAreOrbits {adj : AdjMatrix n} {P : PMatrix n}
     {sel : Colouring n → Finset (Fin n)} (h : ∀ S, CellsAreOrbits adj P S) :
-    SinglePathDisposition adj P sel :=
+    SinglePathDisposition adj P sel (indivχ adj P) :=
   fun S => selectedCellIsOrbit_of_cellsAreOrbits (h S)
 
 /-- **The certified single path** — the two poly ingredients, bundled and discharged. `boundedNodes`: the descent
@@ -126,13 +127,12 @@ residual orbit (no real branching). Both are *proved* from the disposition (`cer
 The *meta* poly-argument reads "poly time" off this structural object: `≤ n` nodes × per-node poly work, with the
 single-orbit certification justifying single-representative descent. -/
 structure CertifiedSinglePath (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
-    (sel : Colouring n → Finset (Fin n)) : Prop where
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n) : Prop where
   boundedNodes : ∃ k ≤ n, (defaultSpineChain adj P₀ χι₀ sel k).IsLeaf
   cellsCertified : ∀ S : Finset (Fin n), ∀ v w,
-    v ∈ sel (warmRefine adj P₀ (individualizedColouring n S)) →
-    w ∈ sel (warmRefine adj P₀ (individualizedColouring n S)) →
-    warmRefine adj P₀ (individualizedColouring n S) v
-      = warmRefine adj P₀ (individualizedColouring n S) w →
+    v ∈ sel (χsel S) →
+    w ∈ sel (χsel S) →
+    χsel S v = χsel S w →
     w ∈ MulAction.orbit (StabilizerAt adj P₀ S) v
 
 /-- **★ The bridge capstone (Increment 0).** The single-path disposition delivers *both* poly ingredients at once:
@@ -141,10 +141,10 @@ completeness core). This is the structural reduction the doc's §1 "step 2 + ste
 the documented `canonAdj`-transport seam (representative-choice invariance of the leaf canonical), which the meta
 poly-argument consumes and which is the Increment-0 residual. -/
 theorem certifiedSinglePath_of_disposition {adj : AdjMatrix n} {P₀ : PMatrix n} {χι₀ : Colouring n}
-    {sel : Colouring n → Finset (Fin n)}
+    {sel : Colouring n → Finset (Fin n)} {χsel : Finset (Fin n) → Colouring n}
     (hcell : TargetsNonsingletonCell sel) (hne : NonemptyOnNonDiscrete sel)
-    (hdisp : SinglePathDisposition adj P₀ sel) :
-    CertifiedSinglePath adj P₀ χι₀ sel where
+    (hdisp : SinglePathDisposition adj P₀ sel χsel) :
+    CertifiedSinglePath adj P₀ χι₀ sel χsel where
   boundedNodes := defaultSpineChain_reaches_leaf adj P₀ χι₀ hcell hne
   cellsCertified := fun S _ _ hv hw hcelleq =>
     selectedCell_single_stabOrbit (hdisp S) hv hw hcelleq
@@ -158,7 +158,7 @@ theorem certifiedSinglePath_of_cellsAreOrbits {adj : AdjMatrix n} {P₀ : PMatri
     {sel : Colouring n → Finset (Fin n)}
     (hcell : TargetsNonsingletonCell sel) (hne : NonemptyOnNonDiscrete sel)
     (h : ∀ S, CellsAreOrbits adj P₀ S) :
-    CertifiedSinglePath adj P₀ χι₀ sel :=
+    CertifiedSinglePath adj P₀ χι₀ sel (indivχ adj P₀) :=
   certifiedSinglePath_of_disposition hcell hne (singlePathDisposition_of_cellsAreOrbits h)
 
 /-! ## The transport seam — representative-choice invariance (depth-1 core)

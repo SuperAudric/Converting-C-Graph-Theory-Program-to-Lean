@@ -51,10 +51,11 @@ Witt's theorem for the forms-graph residue — `O(Q)` acts transitively on the i
 fixing an isotropic frame `T`. Deliberately **distinct** from `FrameSelectorTransitive` (the ∃-frame-origin form);
 the reduction below derives that from this. -/
 def WittCellTransitive (adj : AdjMatrix n) (P₀ : PMatrix n)
-    (sel : Colouring n → Finset (Fin n)) (S₀ : Finset (Fin n)) : Prop :=
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (S₀ : Finset (Fin n)) : Prop :=
   ∀ T : Finset (Fin n), S₀ ⊆ T →
-    ∀ v w, v ∈ sel (warmRefine adj P₀ (individualizedColouring n T)) →
-      w ∈ sel (warmRefine adj P₀ (individualizedColouring n T)) →
+    ∀ v w, v ∈ sel (χsel T) →
+      w ∈ sel (χsel T) →
       OrbitPartition adj P₀ T v w
 
 /-- **The Witt reduction (PROVED): cell-transitivity ⟹ `FrameSelectorTransitive`.** Per prefix `T`, produce a
@@ -63,11 +64,12 @@ element — cell-transitivity gives `OrbitPartition r w` for every cell `w`. If 
 (the covering condition is vacuous). Needs `Nonempty (Fin n)` for the empty-cell fallback. This is the genuine
 group-action content the Witt step contributes on top of the citation. -/
 theorem frameSelectorTransitive_of_wittCellTransitive [Nonempty (Fin n)]
-    {adj : AdjMatrix n} {P₀ : PMatrix n} {sel : Colouring n → Finset (Fin n)} {S₀ : Finset (Fin n)}
-    (h : WittCellTransitive adj P₀ sel S₀) :
-    FrameSelectorTransitive adj P₀ sel S₀ := by
+    {adj : AdjMatrix n} {P₀ : PMatrix n} {sel : Colouring n → Finset (Fin n)}
+    {χsel : Finset (Fin n) → Colouring n} {S₀ : Finset (Fin n)}
+    (h : WittCellTransitive adj P₀ sel χsel S₀) :
+    FrameSelectorTransitive adj P₀ sel χsel S₀ := by
   intro T hT
-  by_cases hne : (sel (warmRefine adj P₀ (individualizedColouring n T))).Nonempty
+  by_cases hne : (sel (χsel T)).Nonempty
   · obtain ⟨r, hr⟩ := hne
     exact ⟨r, fun w hw => h T hT r w hr hw⟩
   · obtain ⟨r⟩ := ‹Nonempty (Fin n)›
@@ -90,19 +92,20 @@ Everything else — P1 (super-poly threshold), P2 (deferral), P3's seal composit
 the Witt reduction, P4's producer — is **proved** axiom-clean. This is the whole non-rigid confinement lemma
 reduced to its trusted base. -/
 theorem confinement_selectedCellIsOrbit_spine_witt (adj : AdjMatrix n) (P₀ : PMatrix n)
-    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
     (hClassify : PrimitiveCCClassification (confinementLargeScheme n) IsCameronScheme)
     (M : ResidueSchemeModel adj P₀ χι₀ sel k)
     (hprim : M.S.toAssociationScheme.IsPrimitive)
     (hCitation : PrimRank3Classical adj P₀ χι₀ sel IsCameronScheme k →
-      WittCellTransitive adj P₀ sel S)
+      WittCellTransitive adj P₀ sel χsel S)
     (hflag : flagsAt
         (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
-    SelectedCellIsOrbit adj P₀ sel S := by
+    SelectedCellIsOrbit adj P₀ sel (χsel S) S := by
   haveI : Nonempty (Fin n) := ⟨⟨0, by omega⟩⟩
-  exact confinement_selectedCellIsOrbit_spine_P3_discharged adj P₀ χι₀ sel S k hn hClassify M hprim
+  exact confinement_selectedCellIsOrbit_spine_P3_discharged adj P₀ χι₀ sel χsel S k hn hClassify M hprim
     (fun h => frameSelectorTransitive_of_wittCellTransitive (hCitation h)) hflag
 
 end ChainDescent.ConfinementWitt

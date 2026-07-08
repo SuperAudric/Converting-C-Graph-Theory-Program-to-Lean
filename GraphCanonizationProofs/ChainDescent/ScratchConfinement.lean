@@ -92,6 +92,7 @@ the threshold. The abstract `Large`/`SymmetricFlag`/`PrimRank3Classical` are the
 theorem confinement_selectedCellIsOrbit
     (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) (baseAt : Nat → Nat)
+    (χsel : Finset (Fin n) → Colouring n)
     (S : Finset (Fin n)) (k : Nat)
     (Large SymmetricFlag PrimRank3Classical : Nat → Prop)
     (hP1 : flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
@@ -99,10 +100,10 @@ theorem confinement_selectedCellIsOrbit
     (hP2 : flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel baseAt).w n) k = true → SymmetricFlag k)
     (hP3 : Large k → SymmetricFlag k → PrimRank3Classical k)
-    (hWitt : PrimRank3Classical k → FrameSelectorTransitive adj P₀ sel S)
+    (hWitt : PrimRank3Classical k → FrameSelectorTransitive adj P₀ sel χsel S)
     (hflag : flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel baseAt).w n) k = true) :
-    SelectedCellIsOrbit adj P₀ sel S :=
+    SelectedCellIsOrbit adj P₀ sel (χsel S) S :=
   selectedCellIsOrbit_of_subsetOrbit
     (selectedCellSubsetOrbitAt_of_frameSelectorTransitive
       (hWitt (hP3 (hP1 hflag) (hP2 hflag))) S (Finset.Subset.refl S))
@@ -120,16 +121,17 @@ branch). This is the structural form of the empirical single-path finding (`leav
 theorem singlePathDisposition_of_confinement
     (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) (baseAt : Nat → Nat)
+    (χsel : Finset (Fin n) → Colouring n)
     (nodeOf : Finset (Fin n) → Nat)
     (hFlagCase : ∀ S : Finset (Fin n),
         flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
           ((spineCappedCanonizerO adj P₀ χι₀ sel baseAt).w n) (nodeOf S) = true →
-        SelectedCellIsOrbit adj P₀ sel S)
+        SelectedCellIsOrbit adj P₀ sel (χsel S) S)
     (hWitness : ∀ S : Finset (Fin n),
         flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
           ((spineCappedCanonizerO adj P₀ χι₀ sel baseAt).w n) (nodeOf S) = false →
-        SelectedCellIsOrbit adj P₀ sel S) :
-    SinglePathDisposition adj P₀ sel := by
+        SelectedCellIsOrbit adj P₀ sel (χsel S) S) :
+    SinglePathDisposition adj P₀ sel χsel := by
   intro S
   cases hb : flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
       ((spineCappedCanonizerO adj P₀ χι₀ sel baseAt).w n) (nodeOf S) with
@@ -141,10 +143,10 @@ theorem singlePathDisposition_of_confinement
 node count (`≤ n`) and every consumed cell a single residual orbit (the completeness core). -/
 theorem certifiedSinglePath_of_confinement
     (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
-    (sel : Colouring n → Finset (Fin n))
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
     (hcell : TargetsNonsingletonCell sel) (hne : NonemptyOnNonDiscrete sel)
-    (hdisp : SinglePathDisposition adj P₀ sel) :
-    CertifiedSinglePath adj P₀ χι₀ sel :=
+    (hdisp : SinglePathDisposition adj P₀ sel χsel) :
+    CertifiedSinglePath adj P₀ χι₀ sel χsel :=
   certifiedSinglePath_of_disposition hcell hne hdisp
 
 /-! ## The remaining seam BEYOND P1–P4 — representative-transport invariance (①b completeness)
@@ -177,11 +179,11 @@ discharge is the last ingredient of non-rigid completeness beyond P1–P4. State
 and cannot be silently skipped. -/
 theorem isoInvariantCanonical_of_certifiedSinglePath
     (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
-    (sel : Colouring n → Finset (Fin n))
-    (_hpath : CertifiedSinglePath adj P₀ χι₀ sel)
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (_hpath : CertifiedSinglePath adj P₀ χι₀ sel χsel)
     (RepresentativeInvariant : Prop)
     (_hrep : RepresentativeInvariant)
-    (hbridge : CertifiedSinglePath adj P₀ χι₀ sel → RepresentativeInvariant →
+    (hbridge : CertifiedSinglePath adj P₀ χι₀ sel χsel → RepresentativeInvariant →
         IsoInvariantCanonical adj P₀ χι₀ sel) :
     IsoInvariantCanonical adj P₀ χι₀ sel :=
   hbridge _hpath _hrep
@@ -286,17 +288,18 @@ cell at prefix `S` is one `Stab(S)`-orbit, given only P3 (`hP3`, now consuming t
 n) < residual`) and Witt (`hWitt`). P1 (via `flag_imp_pow_baseMax_lt`) and P2 (via `flag_imp_symmetric_spine`) are
 discharged from the spine. -/
 theorem confinement_selectedCellIsOrbit_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
-    (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
     (PrimRank3Classical : Nat → Prop)
     (hP3 : 2 ^ baseMax n < spineResidualCard adj P₀ χι₀ sel k →
         ¬ IsBase adj (defaultSpineChain adj P₀ χι₀ sel k).P (defaultSpineChain adj P₀ χι₀ sel k).D →
         PrimRank3Classical k)
-    (hWitt : PrimRank3Classical k → FrameSelectorTransitive adj P₀ sel S)
+    (hWitt : PrimRank3Classical k → FrameSelectorTransitive adj P₀ sel χsel S)
     (hflag : flagsAt
         (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
-    SelectedCellIsOrbit adj P₀ sel S :=
-  confinement_selectedCellIsOrbit adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel) S k
+    SelectedCellIsOrbit adj P₀ sel (χsel S) S :=
+  confinement_selectedCellIsOrbit adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel) χsel S k
     (fun j => 2 ^ baseMax n < spineResidualCard adj P₀ χι₀ sel j)
     (fun j => ¬ IsBase adj (defaultSpineChain adj P₀ χι₀ sel j).P (defaultSpineChain adj P₀ χι₀ sel j).D)
     PrimRank3Classical

@@ -105,19 +105,20 @@ Witt). Everything else — P1, P2, P3's composition, P4's producer — is proved
 (`hWitt`). The whole confinement chain now composes through the real seal `exhaustiveObstruction_scheme`; the
 remaining obligations are the carried citations/gaps, not project logic. -/
 theorem confinement_selectedCellIsOrbit_spine_P3 (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
-    (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
+    (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
     {IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
     (hClassify : PrimitiveCCClassification IsLargeScheme IsCameronScheme)
     (M : ResidueSchemeModel adj P₀ χι₀ sel k)
     (hLargeBridge : 2 ^ baseMax n < spineResidualCard adj P₀ χι₀ sel k → IsLargeScheme n M.S)
     (hprim : M.S.toAssociationScheme.IsPrimitive)
     (hWitt : PrimRank3Classical adj P₀ χι₀ sel IsCameronScheme k →
-      FrameSelectorTransitive adj P₀ sel S)
+      FrameSelectorTransitive adj P₀ sel χsel S)
     (hflag : flagsAt
         (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
-    SelectedCellIsOrbit adj P₀ sel S :=
-  confinement_selectedCellIsOrbit_spine adj P₀ χι₀ sel S k hn
+    SelectedCellIsOrbit adj P₀ sel (χsel S) S :=
+  confinement_selectedCellIsOrbit_spine adj P₀ χι₀ sel χsel S k hn
     (PrimRank3Classical adj P₀ χι₀ sel IsCameronScheme)
     (fun hlarge hsym =>
       residue_primRank3Classical adj P₀ χι₀ sel k hClassify M hLargeBridge hprim hlarge hsym)
@@ -154,18 +155,19 @@ super-poly `confinementLargeScheme`), the model `M`, primitivity `hprim`, and Wi
 gone (proved by `largeBridge_confinementLargeScheme`). This is the confinement chain at its tightest: P1 ∧ P2 ∧ P3
 wired, largeness satisfiable, only the named external results remaining. -/
 theorem confinement_selectedCellIsOrbit_spine_P3_discharged (adj : AdjMatrix n) (P₀ : PMatrix n)
-    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
     (hClassify : PrimitiveCCClassification (confinementLargeScheme n) IsCameronScheme)
     (M : ResidueSchemeModel adj P₀ χι₀ sel k)
     (hprim : M.S.toAssociationScheme.IsPrimitive)
     (hWitt : PrimRank3Classical adj P₀ χι₀ sel IsCameronScheme k →
-      FrameSelectorTransitive adj P₀ sel S)
+      FrameSelectorTransitive adj P₀ sel χsel S)
     (hflag : flagsAt
         (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
-    SelectedCellIsOrbit adj P₀ sel S :=
-  confinement_selectedCellIsOrbit_spine_P3 adj P₀ χι₀ sel S k hn hClassify M
+    SelectedCellIsOrbit adj P₀ sel (χsel S) S :=
+  confinement_selectedCellIsOrbit_spine_P3 adj P₀ χι₀ sel χsel S k hn hClassify M
     (largeBridge_confinementLargeScheme adj P₀ χι₀ sel k M) hprim hWitt hflag
 
 end ChainDescent.ConfinementP3
