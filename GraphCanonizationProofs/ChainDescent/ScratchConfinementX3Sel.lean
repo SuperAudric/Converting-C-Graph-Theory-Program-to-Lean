@@ -141,6 +141,14 @@ theorem selCell_targets {χ : Colouring n} {v : Fin n} (hv : v ∈ selCell χ) :
     · exact ⟨a, hva, by rw [hac, ← hv.2]⟩
   · exact absurd hv (Finset.notMem_empty v)
 
+/-- Every vertex of `selCell χ` carries the selected colour `minNSVal χ` (so any two members share a colour — the
+`χ v = χ w` input `SelectedCellIsOrbit` consumes). -/
+theorem selCell_colour {χ : Colouring n} {v : Fin n} (hv : v ∈ selCell χ) : χ v = minNSVal χ := by
+  simp only [selCell] at hv
+  split at hv
+  · rw [Finset.mem_filter] at hv; exact hv.2
+  · exact absurd hv (Finset.notMem_empty v)
+
 /-! ## The single-vertex rep the descent individualizes -/
 
 /-- **The descent selector** — the minimum-index vertex of the selected cell (a singleton, or `∅` when discrete).
