@@ -54,15 +54,22 @@ Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cos
 
 **Correctness ① state (2026-07-08):** **①a `canon_sound` DONE** (shared object `ScratchCanonFormCapped.CanonForm.canonForm?`,
 also carrying ② `descentCost_le`). **①b `canon_complete`: ← direction DONE** (`ScratchConfinementCompleteness.canonForm?_complete_mpr`,
-from ①a); **→ direction = X3, REDUCED 2026-07-08 (cont.) to the residual `CanonFormImagesIsoInvariant`.** Route
-corrected: `canonForm` is the lex-min `ofMatrixLex((canonFormImages …).min' …)`, so its iso-invariance needs only the
-**image Finset to be iso-invariant** — NOT an equivariant `individualizedColouring` seed (that seed is index-based by
-design + used in 14 modules; a lex-min washes out the seed labels), and NOT "samePartition ⟹ equal canonForm" (FALSE at
-discrete leaves). The min'-reduction (`canonForm_eq_of_canonFormImages_eq`) + the `canonForm?`→leaf bridge +
-`canonPartitionInvariant_of_imagesIsoInvariant` are landed axiom-clean, so ①b → reduces to `CanonFormImagesIsoInvariant`
-(`G ≅ H ⟹ equal candidate-matrix Finsets`), provable from the BANKED `Cascade.forcedNode_relabel` +
-`RouteCTransport.warmRefine_transport_iso`. The confinement CORE (above) supplies the descent's single-orbit property; the
-X3 residual supplies the iso-invariance of the canonical.
+from ①a); **→ direction = X3 = THE INDEX-FREE CUT (2026-07-08 cont.), after three dead routes.** The lex-min reduction
+to `CanonFormImagesIsoInvariant` landed but that residual is **FALSE** for the current `canonForm`: `DirAssignment` `σ`
+breaks ties only between *equal-colour* vertices, and individualization gives committed vertices *distinct index colours*
+(`v.val`), so `σ` never re-orders them ⟹ the lex-min cannot wash out the index ⟹ current `canonForm` is genuinely not
+iso-invariant when `D ≠ ∅`. **THE CUT:** commit ONE vertex at a time with an **index-free** colour, ordering the
+committed set by canonical descent *level* (not `v.val`). Then the seed transports **literally** under a relabel
+(`indivOne (g r) ∘ g = indivOne r`, a function equality — NOT `samePartition`), dissolving the samePartition-vs-literal
+gap, and the banked `labelledAdj_rankPerm` value-lift closes it. **`ScratchConfinementX3.lean` P1–P6 all landed
+axiom-clean** (`indivOne`/`indivStep1` + literal equivariance, `descentColouring_transport` cross-graph, the value-lift
+`labelledAdj_rankPerm_cross`, and `ifCanon_iso_invariant_of_reconcile` for `H = π·G`) — **the invariance mechanism is
+proved end-to-end; the ONE remaining proof = `hrec`** (confinement `SelectedCellIsOrbit` ⟹ the reconciling automorphism
+exists — a McKay reconciliation). Remaining for ①b: **(i)** a leaf-reaching index-free descent — SpineChain-ify via the
+landed `indivStepOne : IndivStep χ {r}` + `pickOne` so ①a/② transfer and the runtime object stays single (this is a
+**re-home** off `defaultSpineChain`, whose `defaultTrace` hardwires the index-based `IndivStep.default`); **(ii)** `hrec`;
+**(iii)** rewire `canonForm?`/①b onto the index-free spine (①a is seed-agnostic). The old `CanonFormImagesIsoInvariant`
+residual is ABANDONED.
 
 **Still unbuilt for done:** **X3** (the ①b → piece); wire the witness-case/`nodeOf` into `singlePathDisposition_of_confinement`;
 discharge the confinement carriers (model=D0, `hImprim`); assemble full ①; ③-forward (run returns `some`) + the
@@ -206,8 +213,8 @@ absent from `Publication.lean`, whose statements are independent of the route ta
 The `reachesRigidOrCameron` seal is in build. For the **headline**, the non-rigid poly + completeness come from
 **Algorithm A (assume-VT / confinement)**, not from Route-C form recovery — the confinement chain consumes
 `exhaustiveObstruction_scheme` + **G3** (§1a). So the live non-rigid work is **finishing the confinement /
-Algorithm A path** (STATUS block: X3 residual `CanonFormImagesIsoInvariant`; wire `nodeOf`/witness-case →
-`CertifiedSinglePath`; discharge D0/`hImprim`), *not* R1 and *not* Route C:
+Algorithm A path** (STATUS block: X3 = the index-free cut — SpineChain-ify + `hrec` + rewire; wire
+`nodeOf`/witness-case → `CertifiedSinglePath`; discharge D0/`hImprim`), *not* R1 and *not* Route C:
 - **R1 (the Aut-free coordinatizer) is SUPERSEDED** by witness-or-assume-VT (§1a / cost-model §7a): assume-VT is
   single-path poly with no `Aut`-computation, so the meta-circularity R1 was fixing does not arise on the
   headline path.
@@ -367,10 +374,10 @@ actually claims something. Treat it as a hard obligation, not a formality.
 at one wall; finish the provable non-rigid half, then throw weight at the rigid seal where the headline ceiling
 lives:
 
-1. **Finish the non-rigid half (Algorithm A / confinement)** — nearly done, Lean-provable-clean. Close X3's
-   residual `CanonFormImagesIsoInvariant`; wire `nodeOf`/witness-case → `CertifiedSinglePath`; discharge D0 /
-   `hImprim`; assemble full ①. Banks the symmetric milestone and lets the Publication skeleton compile with the
-   rigid seal as the sole hole.
+1. **Finish the non-rigid half (Algorithm A / confinement)** — nearly done, Lean-provable-clean. Close X3 (the
+   index-free cut: SpineChain-ify the single-vertex descent, discharge `hrec` from confinement, rewire
+   `canonForm?`); wire `nodeOf`/witness-case → `CertifiedSinglePath`; discharge D0 / `hImprim`; assemble full ①.
+   Banks the symmetric milestone and lets the Publication skeleton compile with the rigid seal as the sole hole.
 2. **Build the rigid seal (Algorithm R, IR §11.12 roadmap)** — the big thrust. Lean **P1** first (extraction
    soundness, standalone) alongside C# **B1–B3** (the MVP solver wired at `target == -1`, verify-by-reconstruction).
    Then B4/B5 + P3/P4.

@@ -23,25 +23,23 @@ module scopes ①b, lands the achievable **← direction**, and pins the one ope
     different picks must give the same canonical. Substrate LANDED at the partition level:
     `NodeCountBridge.baseTransport` (a global automorphism `g` carries the whole descent subtree) + the confinement
     single-orbit property (`SelectedCellIsOrbit`, this thread).
-  - **(X3) the partition→canonical lift — CORRECTLY ROUTED 2026-07-08 (cont.): lex-min invariance of an iso-invariant
-    image Finset. The two earlier framings below are both SUPERSEDED.** ~~"samePartition ⟹ equal canonForm"~~ is FALSE
-    (trivially true at every discrete leaf, yet distinct discrete colourings give distinct `canonForm`); and
-    ~~"make `individualizedColouring` `g`-equivariant"~~ is the WRONG fix — that seed is index-based *by design*, used
-    across 14 modules incl. the sealed build (catastrophic ripple), AND **a lex-min needs no equivariant seed at all.**
-    `canonForm = ofMatrixLex ((canonFormImages …).min' …)` = the lex-smallest `canonAdj` over all `DirAssignment`s; the
-    lex-min of an **iso-invariant image Finset** is iso-invariant regardless of seed labelling (the index-based colour
-    values wash out under the min). So X3 reduces — cleanly, LANDED below — to **`CanonFormImagesIsoInvariant`**:
-    `G ≅ H ⟹ canonFormImages(descent G) = canonFormImages(descent H)` as Finsets, provable from the BANKED
-    `Cascade.forcedNode_relabel` (selector equivariant under arbitrary relabel) + `RouteCTransport.warmRefine_transport_iso`
-    (WL fixpoint transports cross-graph). `canonForm_eq_of_canonFormImages_eq` (the min'-of-equal-Finsets step) +
-    `canonForm?_eq_dCanonForm` (the `canonForm?`→leaf `canonForm` bridge) + `canonPartitionInvariant_of_imagesIsoInvariant`
-    are all landed axiom-clean. (X1)/(X2)'s transport substrate feeds the residual.
-  - **(X4) assembly** — compose into `Iso G H → canonForm? G = canonForm? H` (⟹ `cG = cH`): DONE modulo X3 via
-    `canonForm?_complete_of_imagesIsoInvariant`.
+  - **(X3) the partition→canonical lift — ROUTE IS `ScratchConfinementX3.lean` (THE INDEX-FREE CUT). The lex-min
+    reduction below is SUPERSEDED (its residual is FALSE).** History (three dead routes): "samePartition ⟹ equal
+    canonForm" is FALSE; "make `individualizedColouring` `g`-equivariant" is a 14-module ripple; and **"the lex-min
+    washes out the index" is ALSO FALSE** — `DirAssignment` `σ` breaks ties only between *equal-colour* vertices, but
+    individualization gives committed vertices *distinct index colours* (`v.val`), so `σ` never re-orders them ⟹ the
+    lex-min cannot remove the baked-in index order ⟹ the current `canonForm` is genuinely not iso-invariant when
+    `D ≠ ∅`, and `CanonFormImagesIsoInvariant` (defined below over that `canonForm`) is a **false** residual. **THE
+    LIVE ROUTE = the index-free cut** (`ScratchConfinementX3.lean`): commit ONE vertex at a time with an index-free
+    colour, ordering the committed set by descent *level* (not `v.val`), so the seed transports **literally** and the
+    banked value-lift closes X3. P1–P6 landed axiom-clean there; sole remaining proof = `hrec` (confinement
+    `SelectedCellIsOrbit` ⟹ the reconciling automorphism). The lex-min lemmas below (`min'_eq_of_eq`,
+    `canonForm_eq_of_canonFormImages_eq`, `canonForm?_eq_dCanonForm`, `canonPartitionInvariant_of_imagesIsoInvariant`)
+    are TRUE as stated and kept as a record, but they reduce ①b→ to a false target, so they are **not** the path.
+  - **(X4) assembly** — in `ScratchConfinementX3.lean` (`ifCanon_iso_invariant_of_reconcile`), modulo `hrec`.
 
-So **①b = {← LANDED} + {→ = `CanonFormImagesIsoInvariant` (a finite, structural residual)}**, with the min'-reduction,
-the `canonForm?`→leaf bridge, and the (X1)/(X2) transport substrate all banked. The remaining mathematical content is
-that ONE residual: the descent's candidate-matrix Finset is iso-invariant — no change to `individualizedColouring`.
+So **①b = {← LANDED} + {→ = the index-free cut, `ScratchConfinementX3.lean`, modulo `hrec`}**. The reduction section
+below is superseded scaffolding; see that file for the live route.
 
 Imports `ScratchCanonFormCapped` (the shared `canonForm?` + ①a `canonForm?_sound`). Axiom target `[propext,
 Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
