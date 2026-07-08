@@ -1124,12 +1124,19 @@ the PROVED `frameSelectorTransitive_of_wittCellTransitive` reduction). Capstone
 the **← direction is DONE** on the real shared object (`canonForm?_complete_mpr`, from ①a soundness — no transport). The
 **→ direction reduces to ONE open lemma**: the transport seam's partition-level substrate is banked (X1 cross-graph =
 `RouteCTransport …_transport_iso`; X2 repr-choice = `NodeCountBridge.baseTransport`; value-level = `labelledAdj_rankPerm_transport`),
-leaving **X3** — the honest canonForm-design piece (NOT "`samePartition ⟹ equal canonForm`", which is FALSE: index-based
-`individualizedColouring` makes transport samePartition-not-literal, and samePartition is trivial at discrete leaves yet
-`canonForm` differs there). Real X3 = the lex-min `canonForm` surviving the transport `g`-relabel-with-index-shift (§15.7:
-make individualization `g`-equivariant, or lex-min absorbs the shift; literal-relabel value-lift `labelledAdj_rankPerm_transport`
-is banked). `CanonPartitionInvariant` = honest output-level → target; `canonForm?_complete` proves ①b ↔ it. Remaining: X3 +
-wiring witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; then discharge carriers (model=D0, `hImprim`).
+leaving **X3**. **★ X3 CORRECTLY ROUTED + REDUCED (2026-07-08 cont., axiom-clean).** Two earlier framings SUPERSEDED:
+"`samePartition ⟹ equal canonForm`" is FALSE (trivial at discrete leaves, `canonForm` differs), and "make
+`individualizedColouring` `g`-equivariant" is the WRONG fix (index-based by design, used in 14 modules incl. the sealed
+build; and a lex-min needs no equivariant seed). `canonForm = ofMatrixLex((canonFormImages …).min' …)`; the lex-min of an
+**iso-invariant image Finset** is iso-invariant regardless of seed labelling. So X3 reduces — LANDED via `min'_eq_of_eq` +
+`canonForm_eq_of_canonFormImages_eq` (graph-agnostic min') + `canonForm?_eq_dCanonForm` (bridge) +
+`canonPartitionInvariant_of_imagesIsoInvariant` — to the residual **`CanonFormImagesIsoInvariant`** (`G ≅ H ⟹` equal
+candidate-matrix Finsets), a finite structural statement provable from BANKED `Cascade.forcedNode_relabel` (selector
+equivariant under arbitrary relabel) + `RouteCTransport.warmRefine_transport_iso` (WL transports cross-graph), via a
+cross-graph `defaultD`-transport + `DirAssignment`-bijection + per-σ `canonAdj`-value assembly (NOT yet built). NO change
+to `individualizedColouring`. `canonForm?_complete_of_imagesIsoInvariant` reduces ①b to that residual. Remaining: build
+`CanonFormImagesIsoInvariant`; wire witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; discharge carriers
+(model=D0, `hImprim`).
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the

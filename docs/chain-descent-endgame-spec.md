@@ -54,10 +54,15 @@ Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cos
 
 **Correctness ① state (2026-07-08):** **①a `canon_sound` DONE** (shared object `ScratchCanonFormCapped.CanonForm.canonForm?`,
 also carrying ② `descentCost_le`). **①b `canon_complete`: ← direction DONE** (`ScratchConfinementCompleteness.canonForm?_complete_mpr`,
-from ①a); **→ direction = X3, the one open piece** — a §15.7 `canonForm`/individualization design lemma (make
-`individualizedColouring` `g`-equivariant so transport is a literal relabel; NOT "samePartition ⟹ equal canonForm", which
-is FALSE at discrete leaves). `canonForm?_complete` proves ①b ↔ X3. The confinement CORE (above) supplies the descent's
-single-orbit property; X3 supplies the iso-invariance of the canonical.
+from ①a); **→ direction = X3, REDUCED 2026-07-08 (cont.) to the residual `CanonFormImagesIsoInvariant`.** Route
+corrected: `canonForm` is the lex-min `ofMatrixLex((canonFormImages …).min' …)`, so its iso-invariance needs only the
+**image Finset to be iso-invariant** — NOT an equivariant `individualizedColouring` seed (that seed is index-based by
+design + used in 14 modules; a lex-min washes out the seed labels), and NOT "samePartition ⟹ equal canonForm" (FALSE at
+discrete leaves). The min'-reduction (`canonForm_eq_of_canonFormImages_eq`) + the `canonForm?`→leaf bridge +
+`canonPartitionInvariant_of_imagesIsoInvariant` are landed axiom-clean, so ①b → reduces to `CanonFormImagesIsoInvariant`
+(`G ≅ H ⟹ equal candidate-matrix Finsets`), provable from the BANKED `Cascade.forcedNode_relabel` +
+`RouteCTransport.warmRefine_transport_iso`. The confinement CORE (above) supplies the descent's single-orbit property; the
+X3 residual supplies the iso-invariance of the canonical.
 
 **Still unbuilt for done:** **X3** (the ①b → piece); wire the witness-case/`nodeOf` into `singlePathDisposition_of_confinement`;
 discharge the confinement carriers (model=D0, `hImprim`); assemble full ①; ③-forward (run returns `some`) + the
