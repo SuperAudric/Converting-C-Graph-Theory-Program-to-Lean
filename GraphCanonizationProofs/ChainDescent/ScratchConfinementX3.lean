@@ -89,4 +89,51 @@ theorem indivOne_singleton (r : Fin n) : ∀ u, u ≠ r → indivOne r u ≠ ind
   rw [(indivOne_eq_one_iff r r).mpr rfl, indivOne_eq_zero_iff r u |>.mpr hu]
   decide
 
+/-! ## P2 — the single-step index-free individualization (a genuine `IndivStep`)
+
+The descent commits vertices via `IndivStep`. `IndivStep.default` is index-based (`…+v.val…`). Here is the index-free
+single-vertex replacement: commit `r` with the fresh **odd** marker `1`, everyone else with `2·χv` (even) — the
+odd/even split gives `r` a colour no one shares, and off `{r}` the colouring refines exactly as `χ` did. Crucially it
+carries **no `v.val`**, so it transports LITERALLY under a relabel (composing with the seed's literal transport), which
+is the inductive engine for the cross-graph descent transport (P4).
+
+Ordering across levels is by **pick-level**, canonically: successive `indivStep1` marks are separated by the refinement
+between levels (McKay-style), never by `v.val`. -/
+
+/-- **Single-step index-free individualization (colouring).** `r ↦ 1` (odd marker), `v ≠ r ↦ 2·χv` (even). No `v.val`. -/
+def indivStep1 (r : Fin n) (χ : Colouring n) : Colouring n :=
+  fun v => if v = r then 1 else 2 * χ v
+
+/-- **`indivStep1` transports LITERALLY.** If the seed transports literally (`χ' ∘ g = χ`, i.e. `∀ v, χ' (g v) = χ v`),
+so does one individualization step: `indivStep1 (g r) χ' (g v) = indivStep1 r χ v`. The inductive step of the literal
+cross-graph descent transport — the index-free analogue that `IndivStep.default` cannot satisfy. -/
+theorem indivStep1_equivariant (g : Equiv.Perm (Fin n)) (r : Fin n) {χ χ' : Colouring n}
+    (hχ : ∀ v, χ' (g v) = χ v) (v : Fin n) :
+    indivStep1 (g r) χ' (g v) = indivStep1 r χ v := by
+  simp only [indivStep1]
+  by_cases h : v = r
+  · subst h; simp
+  · rw [if_neg h, if_neg (fun hh => h (g.injective hh)), hχ v]
+
+/-- **`indivStep1` packaged as a genuine `IndivStep χ {r}`.** So it drops into the descent machinery exactly where
+`IndivStep.default` does, but index-free and restricted to a single committed vertex. `singletons_T`: `r`'s marker `1`
+is odd, every other colour `2·χv` is even. `refines_off_T`: off `{r}` the colouring is `2·χ`, order-isomorphic to `χ`. -/
+def indivStepOne (r : Fin n) (χ : Colouring n) : IndivStep χ {r} where
+  χ' := indivStep1 r χ
+  singletons_T := by
+    intro v hv u hu
+    rw [Finset.mem_singleton] at hv; subst hv
+    have h1 : indivStep1 v χ v = 1 := by simp [indivStep1]
+    have h2 : indivStep1 v χ u = 2 * χ u := by simp [indivStep1, hu]
+    rw [h1, h2]; omega
+  refines_off_T := by
+    intro x y hx hy
+    rw [Finset.mem_singleton] at hx hy
+    have hxc : indivStep1 r χ x = 2 * χ x := by simp [indivStep1, hx]
+    have hyc : indivStep1 r χ y = 2 * χ y := by simp [indivStep1, hy]
+    rw [hxc, hyc]; omega
+
+@[simp] theorem indivStepOne_χ' (r : Fin n) (χ : Colouring n) :
+    (indivStepOne r χ).χ' = indivStep1 r χ := rfl
+
 end ChainDescent.ConfinementX3

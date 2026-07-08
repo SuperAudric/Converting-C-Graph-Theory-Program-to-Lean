@@ -1133,19 +1133,23 @@ the PROVED `frameSelectorTransitive_of_wittCellTransitive` reduction). Capstone
 the **← direction is DONE** on the real shared object (`canonForm?_complete_mpr`, from ①a soundness — no transport). The
 **→ direction reduces to ONE open lemma**: the transport seam's partition-level substrate is banked (X1 cross-graph =
 `RouteCTransport …_transport_iso`; X2 repr-choice = `NodeCountBridge.baseTransport`; value-level = `labelledAdj_rankPerm_transport`),
-leaving **X3**. **★ X3 CORRECTLY ROUTED + REDUCED (2026-07-08 cont., axiom-clean).** Two earlier framings SUPERSEDED:
-"`samePartition ⟹ equal canonForm`" is FALSE (trivial at discrete leaves, `canonForm` differs), and "make
-`individualizedColouring` `g`-equivariant" is the WRONG fix (index-based by design, used in 14 modules incl. the sealed
-build; and a lex-min needs no equivariant seed). `canonForm = ofMatrixLex((canonFormImages …).min' …)`; the lex-min of an
-**iso-invariant image Finset** is iso-invariant regardless of seed labelling. So X3 reduces — LANDED via `min'_eq_of_eq` +
-`canonForm_eq_of_canonFormImages_eq` (graph-agnostic min') + `canonForm?_eq_dCanonForm` (bridge) +
-`canonPartitionInvariant_of_imagesIsoInvariant` — to the residual **`CanonFormImagesIsoInvariant`** (`G ≅ H ⟹` equal
-candidate-matrix Finsets), a finite structural statement provable from BANKED `Cascade.forcedNode_relabel` (selector
-equivariant under arbitrary relabel) + `RouteCTransport.warmRefine_transport_iso` (WL transports cross-graph), via a
-cross-graph `defaultD`-transport + `DirAssignment`-bijection + per-σ `canonAdj`-value assembly (NOT yet built). NO change
-to `individualizedColouring`. `canonForm?_complete_of_imagesIsoInvariant` reduces ①b to that residual. Remaining: build
-`CanonFormImagesIsoInvariant`; wire witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; discharge carriers
-(model=D0, `hImprim`).
+leaving **X3**. **★ X3 — THE CUT (2026-07-08 cont.), after three dead routes.** The lex-min reduction landed
+(`canonForm_eq_of_canonFormImages_eq` + `canonForm?_eq_dCanonForm` + `canonPartitionInvariant_of_imagesIsoInvariant`,
+axiom-clean, `ScratchConfinementCompleteness`) reducing ①b→ to `CanonFormImagesIsoInvariant` — but that residual is
+FALSE for the current `canonForm`. **DECISIVE FINDING:** `DirAssignment P₀ D` ranges over order-matrices on `D×D` only,
+and `σ` breaks ties only between **equal-colour** vertices; individualization gives committed vertices **distinct
+index-based colours** (`v.val`), so they have NO ties ⟹ `σ` never re-orders them ⟹ the lex-min CANNOT wash out the index
+⟹ current `canonForm` is genuinely not iso-invariant when `D≠∅`. **ROOT CAUSE:** the index enters ONLY via committed
+(`D`) vertices (non-committed get `2·χv`, index-free). **THE CUT:** commit ONE vertex at a time with an INDEX-FREE
+colour, ordering the committed set by canonical descent LEVEL (not `v.val`) — then the seed transports **LITERALLY**
+under a relabel (`indivOne (g r)∘g = indivOne r`, function equality, NOT samePartition), dissolving the
+samePartition-vs-literal gap; the banked `labelledAdj_rankPerm_transport` closes the value level; single-orbit cells
+(confinement) make the choice invisible (`baseTransport`). So X3 = a **Runtime-Phase design change** (single-vertex
+index-free level-ordered individualization) + cross-graph transport on BANKED pieces + the DONE confinement core — NOT a
+wash-out (dead) nor a full `canonForm` redesign. ①a transfers (selector-agnostic); ② unaffected (≤n levels). **Pieces
+(`ScratchConfinementX3.lean`):** P1 `indivOne`+literal equivariance **✅ LANDED axiom-clean** · P2 level-ordered
+committed colouring · P3 single-vertex selector+termination · P4 cross-graph LITERAL descent transport · P5 rep-choice
+invisibility · P6 assemble. Full detail: file header + [[project_confinement_lemma_2026-07-07]].
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the
