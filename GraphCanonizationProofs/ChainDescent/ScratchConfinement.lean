@@ -203,4 +203,58 @@ theorem flag_imp_large_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : C
     (spineResidualCard adj P₀ χι₀ sel) k hn
     (spineBaseAt_le_log adj P₀ χι₀ sel k) hflag
 
+/-! ## P2 — deferral confinement on the concrete spine
+
+The phase split is `IsBase T` (rigid / base-reached — residual symmetry exhausted, `DiscretizesAtBases` /
+IR-core) vs `¬IsBase T` (symmetric — residual symmetry present, `RecoversWhileSymmetric`). P2 says a Phase-1
+flag is confined to the symmetric side, and it falls straight out of P1: a flag forces a *large* residual `Aut`
+(`flag_imp_large_spine`), but a base has a *trivial* residual (`card = 1`, `card_stabilizerAt_eq_one_iff_isBase`).
+So a flag cannot occur at a base — "rigid decisions are deferred (trivial residual ⟹ `oracleCost = n^0`, cheap),
+never expensively harvested; a Phase-1 flag is not rigid-caused." -/
+
+/-- **P2 (deferral confinement).** A Phase-1 flag at node `k` implies the level-`k` prefix is **not a base** — the
+node is in the symmetric domain (`¬IsBase`, residual symmetry still present). Proof: P1 gives `n < spineResidualCard
+k`; a base has trivial residual (`spineResidualCard k = 1`); with `n ≥ 1` that is a contradiction. Hence
+rigid/base-reached / IR-core nodes (trivial residual, cheap harvest) never Phase-1-flag. -/
+theorem flag_imp_symmetric_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) (hn : 1 ≤ n)
+    (hflag : flagsAt
+        (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
+        ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
+    ¬ IsBase adj (defaultSpineChain adj P₀ χι₀ sel k).P (defaultSpineChain adj P₀ χι₀ sel k).D := by
+  intro hbase
+  have hlarge := flag_imp_large_spine adj P₀ χι₀ sel k hn hflag
+  have hone : spineResidualCard adj P₀ χι₀ sel k = 1 :=
+    card_stabilizerAt_eq_one_iff_isBase.mpr hbase
+  omega
+
+/-! ## Confinement on the concrete spine — P1 ∧ P2 discharged, only P3/Witt abstract
+
+Instantiating `confinement_selectedCellIsOrbit` with the concrete `spineBaseAt`/`spineResidualCard` (P1, via
+`spineBaseAt_le_log`) and the concrete symmetric predicate `¬IsBase` (P2, via `flag_imp_symmetric_spine`) leaves
+only the two genuinely-open seams as hypotheses: **P3** (`hP3`: large ∧ ¬rigid ⟹ primitive rank-3 classical — the
+seal recomposed on the concrete residue, carrying classicality) and **Witt** (`hWitt`: primitive rank-3 classical
+⟹ `FrameSelectorTransitive`). -/
+
+/-- **Confinement on the real spine (P1 ∧ P2 wired; P3/Witt carried).** A Phase-1 flag at node `k` ⟹ the target
+cell at prefix `S` is one `Stab(S)`-orbit, given only P3 (`hP3`) and Witt (`hWitt`) on the concrete residue. P1
+(flag ⟹ large residual) and P2 (flag ⟹ `¬IsBase`, symmetric) are discharged from the spine, no longer hypotheses. -/
+theorem confinement_selectedCellIsOrbit_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) (k : Nat) (hn : 1 ≤ n)
+    (PrimRank3Classical : Nat → Prop)
+    (hP3 : n < spineResidualCard adj P₀ χι₀ sel k →
+        ¬ IsBase adj (defaultSpineChain adj P₀ χι₀ sel k).P (defaultSpineChain adj P₀ χι₀ sel k).D →
+        PrimRank3Classical k)
+    (hWitt : PrimRank3Classical k → FrameSelectorTransitive adj P₀ sel S)
+    (hflag : flagsAt
+        (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
+        ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
+    SelectedCellIsOrbit adj P₀ sel S :=
+  confinement_selectedCellIsOrbit adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)
+    (spineResidualCard adj P₀ χι₀ sel) S k hn (spineBaseAt_le_log adj P₀ χι₀ sel k)
+    (fun j => ¬ IsBase adj (defaultSpineChain adj P₀ χι₀ sel j).P (defaultSpineChain adj P₀ χι₀ sel j).D)
+    PrimRank3Classical
+    (fun hf => flag_imp_symmetric_spine adj P₀ χι₀ sel k hn hf)
+    hP3 hWitt hflag
+
 end ChainDescent.Confinement
