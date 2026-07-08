@@ -181,4 +181,26 @@ theorem isoInvariantCanonical_of_certifiedSinglePath
     IsoInvariantCanonical adj P₀ χι₀ sel :=
   hbridge _hpath _hrep
 
+/-! ## P1 fully wired on the concrete spine — the last seam discharged
+
+Specializing `flag_imp_large` with the concrete `spineBaseAt` / `spineResidualCard` (the level-`k` residue's
+harvest base and `Aut` order, `ScratchConfinementP1`) and the proved `spineBaseAt_le_log` removes the abstract
+`baseAt` / `residualCard` / `hgreedy` from P1's largeness half: on the real spine
+`spineCappedCanonizerO … spineBaseAt`, a Phase-1 flag at node `k` implies the level-`k` residue's automorphism
+group is large. -/
+
+/-- **P1 on the concrete spine (no carried hypotheses).** A flag at node `k` of the spine instantiated with the
+real per-node harvest base `spineBaseAt` implies `n < spineResidualCard k = |StabilizerAt adj P₀ D_k|` — the
+node-`k` residue has large `Aut`. This is confinement-P1's largeness clause on the actual descent, with the
+residue-at-node seam (concrete `baseAt`/`residualCard`) closed; it feeds P3 (large ∧ ¬rigid ⟹ primitive rank-3). -/
+theorem flag_imp_large_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) (hn : 1 ≤ n)
+    (hflag : flagsAt
+        (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
+        ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
+    n < spineResidualCard adj P₀ χι₀ sel k :=
+  flag_imp_large adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)
+    (spineResidualCard adj P₀ χι₀ sel) k hn
+    (spineBaseAt_le_log adj P₀ χι₀ sel k) hflag
+
 end ChainDescent.Confinement

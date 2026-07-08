@@ -65,4 +65,52 @@ theorem not_flagsAt_of_smallAut_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χ
     _ ≤ Nat.log 2 n := Nat.log_mono_right hsmall
     _ = baseMax n := (baseMax_eq_log_two n).symm
 
+/-! ## The residue-at-node concrete definitions — the last P1 seam
+
+`flag_imp_large` (in `ScratchConfinement.lean`) carries the harvest base `baseAt` and the residual order
+`residualCard` as *abstract* functions plus a greedy hypothesis `hgreedy`. This section gives them concrete
+definitions on the real default spine and turns `hgreedy` into a theorem, so the confinement interface is fed by
+the actual descent, not a guessed shape.
+
+The level-`k` residue is `(adj, P₀)` with the spine's accumulated prefix `D_k = (defaultSpineChain … k).D`
+individualized; its automorphism group is the pointed stabilizer `StabilizerAt adj P₀ D_k`, and a greedy base
+*extending* `D_k` (from `exists_greedy_base_aux`, the pointed form of `exists_greedy_base_le_log`) has length
+`≤ log₂ |StabilizerAt adj P₀ D_k|`. -/
+
+/-- **The level-`k` residue's `Aut` order** — `|StabilizerAt adj P₀ D_k|`, the residual automorphism group after
+the default spine individualizes its level-`k` prefix. This is the concrete `residualCard`: "`n < spineResidualCard
+k`" is exactly "the node-`k` residue has large `Aut`" (the largeness clause P3 consumes). -/
+noncomputable def spineResidualCard (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) : Nat :=
+  Nat.card (StabilizerAt adj (defaultSpineChain adj P₀ χι₀ sel k).P
+    (defaultSpineChain adj P₀ χι₀ sel k).D)
+
+/-- **The level-`k` harvest base length** — how many extra individualizations a greedy base needs to discretize
+the level-`k` residue (a base *extending* the prefix `D_k`), via `exists_greedy_base_aux`. This is the concrete
+`baseAt` fed to `spineCappedCanonizerO`'s per-node harvest cost `oracleCost n (baseAt k) = n^(baseAt k)` (the
+D7-declared model: harvest at base `b` explores ≤ `n^b` maps; any greedy base bounds it). Noncomputable (greedy
+choice) — the cost model is a proof artifact; the executable track is separate. -/
+noncomputable def spineBaseAt (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) : Nat :=
+  (Classical.choose (exists_greedy_base_aux (adj := adj)
+    (P := (defaultSpineChain adj P₀ χι₀ sel k).P)
+    (Nat.card (StabilizerAt adj (defaultSpineChain adj P₀ χι₀ sel k).P
+      (defaultSpineChain adj P₀ χι₀ sel k).D))
+    (defaultSpineChain adj P₀ χι₀ sel k).D le_rfl)).length
+
+/-- **The greedy property, now a THEOREM (discharges the confinement interface's `hgreedy`).** On the concrete
+spine functions the harvest base is at most `log₂` of the residual `Aut` — `spineBaseAt k ≤ log₂ (spineResidualCard
+k)` — from `exists_greedy_base_aux`'s `2^|bs| ≤ |StabilizerAt … D_k|`. So `flag_imp_large`'s carried greedy
+hypothesis holds by construction on the real descent; nothing is left abstract in P1's largeness half. -/
+theorem spineBaseAt_le_log (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) :
+    spineBaseAt adj P₀ χι₀ sel k ≤ Nat.log 2 (spineResidualCard adj P₀ χι₀ sel k) := by
+  have hspec := Classical.choose_spec (exists_greedy_base_aux (adj := adj)
+    (P := (defaultSpineChain adj P₀ χι₀ sel k).P)
+    (Nat.card (StabilizerAt adj (defaultSpineChain adj P₀ χι₀ sel k).P
+      (defaultSpineChain adj P₀ χι₀ sel k).D))
+    (defaultSpineChain adj P₀ χι₀ sel k).D le_rfl)
+  have h2 : 2 ^ spineBaseAt adj P₀ χι₀ sel k ≤ spineResidualCard adj P₀ χι₀ sel k := hspec.2
+  exact Nat.le_log_of_pow_le (by norm_num) h2
+
 end ChainDescent.ConfinementP1
