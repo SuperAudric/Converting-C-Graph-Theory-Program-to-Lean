@@ -18,6 +18,15 @@
 
 ## STATUS (read first)
 
+> **▶▶▶ ENDGAME FRAME (2026-07-08) — Route C is PARKED off the headline critical path; §7b/§7c (confinement) is ON
+> it.** In the "two seals, one wall" endgame ([`chain-descent-endgame-spec.md`](./chain-descent-endgame-spec.md)
+> §1a), the *headline* `canonizer` gets its non-rigid poly + completeness from **Algorithm A (assume-VT /
+> confinement, §7b/§7c below)**, which consumes `exhaustiveObstruction_scheme` + **G3** — NOT Route-C form recovery.
+> So **the four Route-C form-family seals (§1–§6, the `RouteC*` build modules) are a genuine independent poly result
+> but are OFF the headline critical path** (kept in build, not built upon for `canonizer`). **§7b/§7c — the
+> confinement lemma — is the live non-rigid deliverable** and stays authoritative here. Its rigid mirror is
+> [`chain-descent-ir-blindspot-solver.md`] §11.12; the two meet at one wall (`hSmallAutThin`).
+
 **Where Route C stands (2026-07-05) — see the HANDOFF SNAPSHOT below for the current state + next tasks.** **★ ALL FOUR
 FORM FAMILIES ARE SEALED** (affine-polar, alternating `Alt(5,q)`, half-spin, Suzuki–Tits), **the whole Lean spine is
 PORTED into `build.sh` and axiom-clean** (`RouteCTransport` / `RouteCFormAdapters` / `RouteCSeam` / `RouteCNode4`; full

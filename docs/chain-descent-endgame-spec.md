@@ -99,6 +99,83 @@ a faithful external source (§ the citation register in
 
 ---
 
+## 1a. The architecture — TWO SEALS, ONE WALL (the organizing frame; read before §2–§5)
+
+> Recorded 2026-07-08 as the durable high-level plan (a fresh reader should work forwards from here, not
+> re-derive it). It reconciles pieces from several routes: the symmetry seal (route-c-plan), the confinement
+> lemma (route-c §7c / [`chain-descent-cost-model.md`]), and the rigid solver
+> ([`chain-descent-ir-blindspot-solver.md`] §11.11–§11.14). Authoritative detail lives in those docs; this is
+> the map that says how they fit and what the target is.
+
+**The one-sentence frame.** The canonizer has two domains — *symmetric* (a residue with automorphisms) and
+*rigid* (trivial `Aut`) — each handled by its **own seal**, and the two seals are **mirror images that isolate
+the same single wall**. `UnhandledResidue` therefore collapses from three opaque atoms toward **one named
+residue**.
+
+**Two algorithms are in play; be explicit about which is the deliverable.**
+- **Algorithm A — assume-VT / confinement** (what the Lean ① *proves*, the NON-RIGID deliverable). Per-node
+  budget flag; a Phase-1 over-budget flag ⟹ (confinement lemma) primitive rank-3 ⟹ vertex-transitive ⟹
+  *assume-VT-prune-and-continue* — node-4/Cameron become **handled** (single-path poly, complete), `none` only in
+  the rigid phase. **Lean-provable / axiom-clean**; citation base {G3, Liebeck, Witt, hImprim, D0}. Does **not**
+  need Route C or any per-family form recovery.
+- **Algorithm R — recovery** (what the C# main currently *runs*, and the RIGID plan's mechanism). Recognize the family,
+  recover the structure (Route-C form on the symmetric side; the F₂/ring constraint system on the rigid side),
+  canonicalize via the known/solved group. Empirically fast and complete, but its poly-ness is **meta**
+  (per-family) — so at the Lean level it either becomes a real `cost ≤ poly` proof or falls into
+  `UnhandledResidue` (the firewall forbids axiomatizing it). On the **rigid** side, recovery is the *only* option
+  (trivial `Aut` ⟹ assume-VT is vacuous), so the rigid seal is built on Algorithm R.
+
+**The two seals (mirror table, IR §11.12).**
+
+| | handles | the escape | wall |
+|---|---|---|---|
+| **symmetry seal** `reachesRigidOrCameron` | symmetry consumption (Algorithm A / assume-VT) | "or Cameron" | `hSmallAutThin` |
+| **rigid seal** `canonizesRigidResidue_or_flags` | linear-over-a-ring: CFI / multipede / `Z_{2^k}` (Algorithm R / F₂→Smith) | "or non-linear" | **= `hSmallAutThin`** |
+
+**The target — minimize `UnhandledResidue`, do NOT concede the rigid side.** The goal is the *best* headline, not
+the shortest line. Concretely:
+- **`UnhandledResidue` → one named residue.** The two seals' flag floors are the **same object** (IR §11.11
+  node-4 unification: the symmetry seal reduces node-4 from the rank-3 side, the rigid solver reduces the
+  multipede from the high-rank side, both leave the identical **non-schurian / non-linear** residue). So the
+  three `Publication` atoms (D0 non-schurian, D1 hidden-Johnson, D2 rigid) collapse toward **one** predicate.
+- **`UnhandledResidue → ⊥` is exactly closing that shared wall** (`hSmallAutThin` = "small-Aut ⟹ bounded WL-dim"
+  = rigid-GI ∈ P). That is the project's central open problem — **not reachable with current techniques**, but it
+  has **zero constructible falsifiers**, so the honest best headline is "*poly-time complete canonizer whose only
+  unhandled inputs are one named residue coinciding with a known GI-hardness frontier, for which no witness
+  exists*". If the wall ever falls, `⊥` drops in for free.
+
+**Transfer assessment (answers "does node-4/Cameron → known-solution transfer to the rigid side?").**
+- **Rigid node-4 (the F₂/ring-multipede): TRANSFERS / handled.** The F₂→ring (Smith-normal-form) solver canonizes
+  it — validated end-to-end (D-M0–M4) *and* for `Z₄` (IR §11.11). `Z_{2^k}` is **inside** the iterative engine,
+  not the floor. Lichter's FPC+rank lower bound does **not** bind it: Lichter is individualization-free; this
+  solver individualizes.
+- **Rigid Cameron: likely ABSENT** (IR §11.14, conjecture-level). Hiding is abelian/linear (a CFI gauge is a
+  module action); Johnson/Cameron is non-abelian; there is no non-abelian CFI. So the rigid seal's escape is
+  plausibly **tighter than the symmetric one — no "or Cameron" leg at all**. Proving this tightens the headline
+  and is what makes the residue collapse to one atom.
+- **Residue = the shared wall** (non-linear rigid / non-schurian symmetric = rigid-GI-in-P), no witness.
+
+**What is PARKED (genuine results, off the best-headline critical path — do not delete, do not build on for the
+headline):**
+- **Route C** (the four form-family *poly* Lean seals, in `build.sh`). Confinement/Algorithm A supersedes it *for
+  the headline* — the non-rigid poly comes from assume-VT single-path via `exhaustiveObstruction_scheme` + **G3**,
+  not from Route-C form recovery. Route C remains a real, stronger, independent poly result; it is simply not
+  required by `canonizer`.
+- **The C# main program's current shape.** It runs **Algorithm R with a *global* flag** and **Route-C dispatch**
+  for node-4 (affine-polar + Suzuki built; alternating + half-spin `NotImplementedException`). It does **not** yet
+  implement the per-node flag or the flag→VT→assume-prune hook the Lean ① proves — a real **C#↔Lean divergence**:
+  the Lean is the deliverable; the C# is the testbed. To align it, the rigid work replaces the `target == fallback`
+  exhaustive branch at `ChainDescent.Search target == -1` with the option-2 solver (IR §11.11–§11.12), and the
+  per-node flag would supersede the global one. (Revertable if needed: C# commits "Main C# build for Route C" and
+  "Connected stubs for the other graph family handlers".)
+
+**Where each half's detail lives.** Non-rigid (Algorithm A): route-c-plan §7c + [`chain-descent-cost-model.md`] +
+[[project_confinement_lemma_2026-07-07]]. Rigid seal (Algorithm R): [`chain-descent-ir-blindspot-solver.md`]
+§11.11 (engine/ceiling), §11.12 (the B1–B6 / P1–P4 roadmap, user-approved), §11.13 (ring/Smith design), §11.14
+(no-Cameron lead). The residue-collapse + shared wall: this section + IR §11.11.
+
+---
+
 ## 2. The obligation map — what each needs, and what already exists
 
 Anchored on `Publication.lean §3`. "Built" = the supporting object exists in the library; "assembly" = wiring
@@ -125,37 +202,54 @@ either built or a citation.
 Five workstreams reach the obligations. Names are for this doc's organization only (they are deliberately
 absent from `Publication.lean`, whose statements are independent of the route taken).
 
-### Seal Phase — the symmetric-domain seal, finished and reusable
-The `reachesRigidOrCameron` seal already covers every schurian residue down to the forms-graph families
-(Route C, all four sealed mod scoped citations). To feed ③ it must reach two end-states:
-- **Node-4 residue: closed and non-meta where it matters.** Route C is done at the structural level; the
-  live technical item is **R1, the Aut-free geometric coordinatizer** (removes the `O_p(Aut)` consumption so
-  the poly claim is non-circular *in the runtime*, not just meta — see route-c-plan §7a). This is also the
-  natural first probe of the cost model (Runtime Phase).
-- **Cameron shrink → the symmetric half of `UnhandledResidue`.** Investigate/shrink the Cameron escape toward
-  hidden-Johnson-only. This need not *empty* it (that is likely GI ∈ P); the deliverable is a crisp
-  *structural* predicate naming exactly what stays unhandled, which becomes the symmetric disjunct of
-  `UnhandledResidue`.
-- **Consolidate the reusable core** (the recovery / forms / Gauss substrate the IR Phase will import) and
-  prune the ⊘-superseded seal capstones — *before* IR builds on it, so the mess is not compounded.
+### Seal Phase — the symmetric-domain seal (Algorithm A), finished and reusable
+The `reachesRigidOrCameron` seal is in build. For the **headline**, the non-rigid poly + completeness come from
+**Algorithm A (assume-VT / confinement)**, not from Route-C form recovery — the confinement chain consumes
+`exhaustiveObstruction_scheme` + **G3** (§1a). So the live non-rigid work is **finishing the confinement /
+Algorithm A path** (STATUS block: X3 residual `CanonFormImagesIsoInvariant`; wire `nodeOf`/witness-case →
+`CertifiedSinglePath`; discharge D0/`hImprim`), *not* R1 and *not* Route C:
+- **R1 (the Aut-free coordinatizer) is SUPERSEDED** by witness-or-assume-VT (§1a / cost-model §7a): assume-VT is
+  single-path poly with no `Aut`-computation, so the meta-circularity R1 was fixing does not arise on the
+  headline path.
+- **Route C (four form-family poly seals) is PARKED** — a genuine independent result, off the headline critical
+  path (§1a). Keep it in build; do not build the headline on it.
+- **Cameron shrink → the symmetric obstruction atom.** On the symmetric side assume-VT *handles* Cameron when it
+  is **classical** (Witt/Liebeck); the residual symmetric obstruction is the **Cameron-non-classical** case
+  (hidden-Johnson / un-coordinatizable geometric, e.g. the `d = 4` GQ). That predicate **unifies with the rigid
+  non-linear wall** (§1a / IR §11.11) — the two become one `UnhandledResidue` atom.
+- **Consolidate the reusable core** (the recovery / forms / Gauss substrate) and prune the ⊘-superseded seal
+  capstones — *before* IR builds on it, so the mess is not compounded.
 
-Output for the endgame: a clean `reachesRigidOrCameron` object + a structural symmetric-obstruction predicate.
+Output for the endgame: a clean `reachesRigidOrCameron` object + the confinement lemma finished + the structural
+symmetric-obstruction predicate (= the shared wall).
 
-### IR Phase — the rigid mirror solver
-The rigid mirror-domain (recover the F₂ constraint system `H` → `ker(H)` → Gaussian) reuses the recovery
-*idea* and the shared geometry, giving the rigid analogue of the seal. To feed ③ it must:
-- Build the rigid solver and its Route-C analogue for the rigid node-4 residue.
-- Characterize the **rigid residual** structurally (the "rigid-Cameron-equivalent"), which — if it collapses
-  (conjectural: "no rigid-Cameron") — is empty, and otherwise is the rigid disjunct of `UnhandledResidue`.
-- **De-risk the reuse assumption first** (a scoping spike): the rigid domain has trivial `Aut`, so the seal's
-  group-harvest machinery does not transfer; what transfers is the recovery philosophy + the forms/Gauss
-  lemmas. Price the reuse before budgeting on it.
+### IR Phase — the rigid mirror seal (Algorithm R)
+The rigid seal `canonizesRigidResidue_or_flags` is the **mirror of the symmetry seal** (§1a): recover the
+F₂/ring constraint system `H` → solve over the ring (F₂-rank → Smith normal form) → canonical coset, and *flag
+non-linear*. It is Algorithm R (the only option on the rigid side — trivial `Aut` makes assume-VT vacuous).
+**Reuse pricing is DONE** (§1a, not a pending spike): the seal's **group-harvest machinery does NOT transfer**
+(nothing to harvest); what transfers is the **recovery philosophy + the shared forms/Gauss substrate**, and the
+rigid node-4 (F₂/ring-multipede) is **handled** (validated D-M0–M4 + `Z₄`, Lichter doesn't bind). The build is
+the **user-approved roadmap, IR §11.12** — do not re-scope:
+- **C# (B1–B6):** productionize the `Option2Solver` (ring-general from the start, IR §11.13), wire it at
+  `ChainDescent.Search target == -1` (replacing the exhaustive `target = fallback`), **verify-by-reconstruction**
+  makes the succeed/flag verdict iso-invariant (B3, the soundness-critical piece), fold via harvested `σ` (B4),
+  cross-checks (B5). This is also what removes the C#↔Lean divergence (§1a).
+- **Lean (P1–P4):** P1 extraction-soundness (minimal forcing-circuits generate `rowspace(H)`, pure F₂/matroid,
+  **do first** — standalone/Mathlib-direct), P2 forcing-model bridge (carry as a model hypothesis, discharge
+  later), P3 solve + canonical-form iso-invariance (the heavy new build), P4 the capstone
+  `canonizesRigidResidue_or_flags` — isolates the `LinearObstruction` hypothesis = the wall. **No new citations**
+  (unlike G3 on the symmetric side).
+- **Tighten the escape (IR §11.14):** prove the rigid medium admits **no hidden Johnson/Cameron** (hiding is
+  abelian, Johnson is not) ⟹ the rigid escape is "or non-linear" with **no Cameron carry** ⟹ the residue
+  collapses to one atom shared with the symmetric side.
 
-Output for the endgame: a structural rigid-obstruction predicate (possibly empty).
+Output for the endgame: the rigid seal + a structural rigid-obstruction predicate = the shared wall (§1a),
+minimized toward `⊥`.
 
 **Design note (robust success criterion).** State the IR goal as the *conditional* ("canonized or unhandled
 rigid residue"), not "rigid GI ∈ P". The conditional is exactly what ③ formalizes and is robust to a
-non-empty residual; "residual empty" is the optimistic case, not the success gate.
+non-empty residual; "residual empty" is the optimistic case (= closing the shared wall), not the success gate.
 
 ### Runtime Phase — the Lean runtime and cost model (the biggest conceptual leap)
 Builds the objects `Publication.lean` currently stubs `opaque`, and the bridge that makes ② true:
@@ -269,21 +363,36 @@ actually claims something. Treat it as a hard obligation, not a formality.
 
 ## 5. Ordering and dependencies
 
+**The approved sequencing (2026-07-08, §1a frame; best headline, not shortest line).** Two mirror seals meeting
+at one wall; finish the provable non-rigid half, then throw weight at the rigid seal where the headline ceiling
+lives:
+
+1. **Finish the non-rigid half (Algorithm A / confinement)** — nearly done, Lean-provable-clean. Close X3's
+   residual `CanonFormImagesIsoInvariant`; wire `nodeOf`/witness-case → `CertifiedSinglePath`; discharge D0 /
+   `hImprim`; assemble full ①. Banks the symmetric milestone and lets the Publication skeleton compile with the
+   rigid seal as the sole hole.
+2. **Build the rigid seal (Algorithm R, IR §11.12 roadmap)** — the big thrust. Lean **P1** first (extraction
+   soundness, standalone) alongside C# **B1–B3** (the MVP solver wired at `target == -1`, verify-by-reconstruction).
+   Then B4/B5 + P3/P4.
+3. **Tighten the escape** — prove IR §11.14 (no rigid Cameron) ⟹ `UnhandledResidue` collapses to one atom.
+4. **Runtime/Publication** — the cost-model consumption bridge (pilotable now on the quasipoly seal, independent),
+   the `UnhandledResidue` definition (= the shared wall), non-vacuity, the Publication swap, the headline.
+
 ```
-Seal Phase (node-4 R1, Cameron shrink) ─┐
-                                        ├─→ UnhandledResidue definition ─→ ③ residue_if_flag ──┐
-IR Phase (rigid solver, rigid residual)─┘                                                      │
-                                                                                               ├─→ canonizer (headline)
-Runtime Phase: canonForm?/cost + cost model ─→ ② canon_poly_or_flag ───────────────────────────┤
-             (pilot on quasipoly seal first)                                                   │
-Seal-Phase substrate (warm_6_2, spine) ─→ ①a/①b/①c correctness (assembly) ──────────────────────┘
+Non-rigid (Algorithm A): confinement → CertifiedSinglePath + X3 residual ─→ ① + symmetric obstruction ─┐
+                                                                                                        │
+Rigid seal (Algorithm R, IR §11.12): P1..P4 + B1..B6 + §11.14 no-Cameron ─→ rigid obstruction ─────────┤
+                                                                                                        ├─→ one named UnhandledResidue ─→ ③ ─┐
+Runtime Phase: canonForm?/cost + consumption bridge ─→ ② (pilot on quasipoly seal, independent) ────────┘                                   ├─→ canonizer
+Seal substrate (warm_6_2, spine) ─→ ①a/①b/①c ──────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Independent, start-anytime:** the cost-model pilot on the quasipoly seal (does not wait on Seal/IR); the
-  correctness trio assembly (substrate already banked); the reuse spike for IR.
-- **Gated:** ③ waits on the `UnhandledResidue` definition, which waits on Seal + IR structural residues.
+- **Independent, start-anytime:** the cost-model pilot on the quasipoly seal; the correctness trio assembly;
+  the rigid P1 (extraction soundness).
+- **Gated:** ③ waits on the `UnhandledResidue` definition = both seals' structural residues (which unify, §1a).
   ② waits on the cost model + consumption bridge.
 - **Do before IR builds on it:** the Seal-Phase substrate consolidation.
+- **Parked (not on the critical path):** Route C Lean; the C# main's global-flag + Route-C dispatch (§1a).
 
 ---
 
@@ -294,10 +403,15 @@ Seal-Phase substrate (warm_6_2, spine) ─→ ①a/①b/①c correctness (assemb
 - **`UnhandledResidue` non-vacuity / firewall.** The single failure mode that would silently hollow out the
   result. *Mitigation: the non-vacuity obligation is already in the skeleton; enforce the firewall on every
   axiom.*
-- **IR reuse assumption unpriced.** "Reuse almost all the seal work" is an aspiration given trivial rigid Aut.
-  *Mitigation: scoping spike before committing IR budget.*
-- **rigid-Cameron non-viability is conjectural.** *Mitigation: state IR's goal as the conditional; a non-empty
-  rigid residual is an expected outcome, not a failure.*
+- **IR reuse assumption — PRICED (2026-07-08, §1a).** Resolved: the group-harvest machinery does NOT transfer
+  (trivial rigid `Aut`); the recovery philosophy + forms/Gauss substrate do; rigid node-4 is handled (validated).
+  The rigid seal is Algorithm R on the F₂/ring system (IR §11.12), not a reuse of the symmetric seal's internals.
+- **rigid-Cameron non-viability is conjectural (IR §11.14).** *Mitigation: state IR's goal as the conditional; a
+  non-empty rigid residual is an expected outcome. Upside: proving no-rigid-Cameron collapses `UnhandledResidue`
+  to one atom — pursue it as a headline-tightener, not just a hope.*
+- **`UnhandledResidue → ⊥` = closing the shared wall** (`hSmallAutThin` = rigid-GI ∈ P), the central open
+  problem — NOT a near-term deliverable. *Mitigation: the honest best headline is one named residue with no
+  witness (§1a); `⊥` drops in free if the wall falls. Do not gate "done" on emptying it.*
 - **Cost-model granularity is an unmade decision** that everything in ② inherits. *Resolve at the pilot.*
 - **Paper theorem statement** should be pinned now (it is `canonizer`); it defines "clean enough" for
   Publication-Phase cleanup and prevents polishing what the paper will not use.

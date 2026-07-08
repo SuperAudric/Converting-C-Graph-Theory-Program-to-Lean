@@ -19,6 +19,17 @@
 
 ## STATUS (read first)
 
+> **▶▶▶ THIS DOC IS THE RIGID HALF OF THE "TWO SEALS, ONE WALL" ENDGAME (frame recorded 2026-07-08).** The
+> canonizer has two mirror seals: the **symmetry seal** (non-rigid, handled by **Algorithm A / confinement** —
+> route-c-plan §7c) and the **rigid seal** built here (**Algorithm R** — recover the F₂/ring system, solve, flag
+> non-linear). They **isolate the same single wall** (§11.11 node-4 unification = `hSmallAutThin` = rigid-GI ∈ P),
+> so `UnhandledResidue` collapses toward **one named residue**; §11.14 (no rigid Cameron) tightens it further. The
+> **authoritative endgame frame + approved sequencing** is [`chain-descent-endgame-spec.md`](./chain-descent-endgame-spec.md)
+> §1a + §5; **the build roadmap for this seal is §11.12** (user-approved: C# B1–B6 + Lean P1–P4, ring-general,
+> no new citations). Reuse pricing is DONE (endgame §1a): the symmetric seal's group-harvest does NOT transfer;
+> the recovery philosophy + forms/Gauss substrate do; rigid node-4 is handled (D-M0–M4 + `Z₄`). The target is to
+> minimize `UnhandledResidue` toward `⊥` (= closing the shared wall), NOT to concede the rigid side.
+
 > **▶▶ RE-BASING (2026-06-20) — READ §11 FIRST; the body below (§1–§10) is the original plan on the *previous*
 > A2 skeleton (potential-drop `Φ=(k−1)c`) and remains valid for the *bounded-WL-dim* rigid residue.** Two shifts
 > this session, both expanded in the new **§11**:

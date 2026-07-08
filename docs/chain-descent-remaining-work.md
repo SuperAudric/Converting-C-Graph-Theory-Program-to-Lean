@@ -12,6 +12,16 @@
 
 ## STATUS (read first)
 
+> **▶▶▶ ENDGAME FRAME (2026-07-08) — "TWO SEALS, ONE WALL". Read [`chain-descent-endgame-spec.md`](./chain-descent-endgame-spec.md)
+> §1a + §5 for the authoritative high-level plan + sequencing.** For the *headline* `canonizer`, the non-rigid poly
+> + completeness come from **Algorithm A (assume-VT / confinement, route-c-plan §7c)**, which consumes
+> `exhaustiveObstruction_scheme` + **G3** — **not** from Route-C form recovery. So **Route C (the four form-family
+> poly seals) is PARKED off the headline critical path** — a genuine independent result, kept in build, not built
+> upon for `canonizer`. The rigid mirror seal ([`chain-descent-ir-blindspot-solver.md`] §11.12) meets the symmetric
+> seal at the **same wall** (`hSmallAutThin`), collapsing `UnhandledResidue` to one named residue. The `modulo`-set
+> / citation material below is the *symmetric seal's* internal state — still accurate for that object, but the
+> headline path is Algorithm A, and its live carriers are {G3, Liebeck, Witt, `hImprim`, D0}.
+
 **The headline (2026-06-17).** The seal `reachesRigidOrCameron` is assembled and axiom-clean. Its live canonical
 capstone `reachesRigidOrCameron_viaBoundedMinMult` stands **`modulo {G3 + hSmallAutThin + hcatch + hImprim}`**. The
 three cleanup passes this session (`hcatch`, the separation engine, `hImprim`) reached a consistent conclusion:
