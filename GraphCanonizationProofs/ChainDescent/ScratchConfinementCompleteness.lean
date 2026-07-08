@@ -223,4 +223,45 @@ theorem canonForm?_complete_of_imagesIsoInvariant
     GraphIso G H ↔ cG = cH :=
   canonForm?_complete (canonPartitionInvariant_of_imagesIsoInvariant hImg) hG hH
 
+/-! ## X3 residual — scoping the genuine difficulty (2026-07-08, cont.)
+
+**Finding (from attempting to close `CanonFormImagesIsoInvariant`): X3 is NOT a mechanical last-lemma; it is the real
+§15.7 `canonForm`-design question, deeper than the reduction suggested.** Digging in surfaced three coupled facts:
+
+1. **The descent colouring is index-based one level BELOW `individualizedColouring`.** `defaultColouring` iterates
+   `IndivStep.default`, whose `χ'` is `if v ∈ T then 2*(χ v * n + v.val)+1 else 2*χ v` — an explicit `v.val`. So the
+   whole descent colouring transports only up to `samePartition` (not literal) under a relabel, not just the seed.
+2. **`canonForm` is level-dependent.** `canonAdj σ = labelledAdj (rankPerm (warmRefine σ.σ χ)) adj`, and `rankPerm`
+   reads colour *values*; two `samePartition` (e.g. successive-leaf-level) descent colourings give different value
+   orderings ⟹ different `rankPerm` ⟹ different `canonAdj`. Since `dLeaf` uses `Classical.choose`, `dLeaf G ≠ dLeaf H`
+   is possible even for `G ≅ H`. ⟹ **a canonical (least, `Nat.find`) leaf level is required** so `dLeaf` transports
+   exactly (via `IsLeaf` transport, which needs only `samePartition` + `Discrete.of_samePartition`).
+3. **The `DirAssignment` lex-min mods out only the order on the committed set `D`, NOT the ambient index-order of the
+   non-`D` vertices.** For a rigid residue (`D = ∅` at the leaf) `canonForm` IS iso-invariant (refinement colours are
+   structural). The index leaks exactly when individualization is needed (`D ≠ ∅`), and whether the `DirAssignment`
+   range is rich enough to wash out `IndivStep.default`'s index-tiebreak on `D` is the crux — and is currently open.
+
+**So finishing X3 requires (in order):** (a) canonicalize the leaf level (least via `Nat.find`, `DecidablePred IsLeaf`
+by `Classical.decPred`); (b) the cross-graph descent transport (`samePartition`-level — via `warmRefine_transport_iso`
++ the selector-equivariance below + the `IndivStep.default` `samePartition` transport), giving `IsLeaf` transport ⟹
+`dLeaf` invariance + `defaultD H = (defaultD G).image π`; (c) the crux: `canonFormImages` iso-invariance, which reduces
+to whether the `DirAssignment` lex-min washes out the index-tiebreak on `D` — the genuine §15.7 open piece (may force a
+`canonForm` redesign: a lex-min over a richer order set that stays poly). This is a real design problem, not assembly.
+
+The one brick below is true and reusable regardless of how (c) resolves. -/
+
+/-- **`nonDiscreteSel` is relabel-equivariant** — `nonDiscreteSel (χ ∘ π.symm) = (nonDiscreteSel χ).image π`. Pure
+partition data commutes with relabelling; the selector piece of the (b) cross-graph descent-transport step. -/
+theorem nonDiscreteSel_equivariant (χ : Colouring n) (π : Equiv.Perm (Fin n)) :
+    nonDiscreteSel (fun v => χ (π.symm v)) = (nonDiscreteSel χ).image π := by
+  ext w
+  simp only [nonDiscreteSel, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_image]
+  constructor
+  · rintro ⟨u, hune, hueq⟩
+    exact ⟨π.symm w, ⟨π.symm u, fun h => hune (π.symm.injective h), hueq⟩, by simp⟩
+  · rintro ⟨v, ⟨u, hune, hueq⟩, rfl⟩
+    refine ⟨π u, fun h => hune (π.injective h), ?_⟩
+    simp only [Equiv.symm_apply_apply]
+    exact hueq
+
 end ChainDescent.ConfinementCompleteness
