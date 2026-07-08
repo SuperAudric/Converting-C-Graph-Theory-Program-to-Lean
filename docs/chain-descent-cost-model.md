@@ -144,11 +144,18 @@ spine: `baseAt k ≤ baseMax n` ⟹ `flagsAt = false`). The instance is *added a
 mutation — `ScratchCanonFormCapped` still rides the total `n⁴` object (rewiring it to the fireable flag is the
 Publication swap, done once with ③, else ③ flips vacuous the wrong way).
 
-**NEXT:** (1) **the graph-side of P1** — `small-Aut residue ⟹ baseAt k ≤ baseMax n` (via `exists_greedy_base_le_log`),
-which turns `not_flagsAt_of_base_le_spine` from a cost fact into the largeness contrapositive; the abstract `baseAt`
-gets its concrete definition (the individualization-base size at spine level `k`) here. Then **P2 in Lean** + the
-confinement assembly ⟹ ①. (2) completeness (③-forward: `defaultSpineChain_reaches_leaf` ⟹ run returns `some`) + the
-Publication param-fixing (swap `canonForm?` onto the fireable-flag object). **Renumbering `refineStep` (D7 option ii)** —
+**★ GRAPH-SIDE OF P1 LANDED (2026-07-07, `ScratchConfinementP1.lean`, axiom-clean).** `greedy_base_card_le_baseMax`:
+small residual `|Aut^P ∅| ≤ n` ⟹ a greedy base has length `≤ baseMax n` (from `exists_greedy_base_le_log` + `Nat.log`
+monotonicity + the `Nat.log2 = Nat.log 2` bridge). `not_flagsAt_of_smallAut_spine`: on the fireable-flag spine, small
+residual (+ the harvest-base-≤-greedy interface) ⟹ node does NOT flag — the contrapositive is P1's largeness clause on
+the real descent (**Phase-1 flag ⟹ large residual `Aut`**). The abstract `baseAt`/`residualCard` are the honest interface;
+their concrete definitions (individualization base / residual-`Aut` order at the residue-at-spine-level-`k`) are the
+remaining P1 wiring.
+
+**NEXT:** (1) **finish P1** — identify the residue-at-node-`k` object so `baseAt`/`residualCard` get concrete
+definitions (the last seam), then **P2 in Lean** + the confinement assembly P1∧P2∧P3∧P4 ⟹ ①. (2) completeness
+(③-forward: `defaultSpineChain_reaches_leaf` ⟹ run returns `some`) + the Publication param-fixing (swap `canonForm?`
+onto the fireable-flag object `spineCappedCanonizerO`). **Renumbering `refineStep` (D7 option ii)** —
 the executable-track scoping (2026-07-07) found the runnable-demo blocker is the `Encodable.encode` VALUE (exponential-
 bit Nat), fixed by an **encode-free structural round** (= D7 (ii)) + `@[csimp]` array-backing (sound; NOT
 `@[implemented_by]`, which can assert false eqns). Fold (ii) into the `canonForm?` `refineStep` choice; it also sharpens
