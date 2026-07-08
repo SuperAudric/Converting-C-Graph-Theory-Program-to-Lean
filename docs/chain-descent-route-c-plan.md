@@ -1109,8 +1109,20 @@ P1–P4 — the representative-transport / `canonAdj` seam** (`NodeCountBridge.r
 + lex-min `canonForm` equality is OPEN, `isoInvariantCanonical_of_certifiedSinglePath` pins it); (b) **P4's Witt-applicability
 is conditional on the residue being CLASSICAL** — the assembly must thread classicality from P3 + Liebeck, else a
 non-classical primitive rank-3 node-4 residue is unsound-pruned yet *handled* = a silent correctness bug (vertex-VT is
-free from primitivity; deeper cell-transitivity is the Witt content). **Finish the P1 seam against this pinned interface,
-then discharge P2/P3/Witt/transport.**
+free from primitivity; deeper cell-transitivity is the Witt content).
+
+**★ CONFINEMENT CORE COMPLETE (2026-07-08) — P1 ∧ P2 ∧ P3 ∧ P4 ∧ Witt all wired; `SelectedCellIsOrbit` reduced to the
+trusted base.** Landed in sequence, all axiom-clean: **P1** residue seam (`ScratchConfinementP1`
+`spineResidualCard`/`spineBaseAt`/`spineBaseAt_le_log`; `flag_imp_large_spine`) + **super-poly threshold**
+(`baseMax=(log₂n)²`, `flag_imp_pow_baseMax_lt`; a soundness fix — see P3 row); **P2** deferral
+(`flag_imp_symmetric_spine`, a flag can't land at a base since bases have trivial residual); **P3** seal recomposition
+(`ScratchConfinementP3` `residue_primRank3Classical` wiring the real `exhaustiveObstruction_scheme`; largeness bridge
+*discharged* `largeBridge_confinementLargeScheme`); **Witt** (`ScratchConfinementWitt` — `WittCellTransitive` citation +
+the PROVED `frameSelectorTransitive_of_wittCellTransitive` reduction). Capstone
+**`ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt`** carries **only named external results** {G3, model bridge
+(=D0), primitivity (=`hImprim`), Witt+Liebeck citation}. **Remaining for full ①b:** the **transport seam**
+(`RepresentativeInvariant` — `CertifiedSinglePath ⟹ canon_complete`, `repTransport` level-lift OPEN) + wiring the
+witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; then discharge the carriers (model=D0, `hImprim`).
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the
