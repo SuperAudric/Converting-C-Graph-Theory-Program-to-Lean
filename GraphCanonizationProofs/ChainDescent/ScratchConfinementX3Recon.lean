@@ -373,6 +373,107 @@ theorem reconcile_descent
       rw [descentPicks_succ_of_empty _ _ _ _ hcH, descentPicks_succ_of_empty _ _ _ _ hcG]
       simp only [List.append_nil]; exact hpre
 
+/-! ## W3b — termination: the `selCell`-descent reaches a discrete leaf within `n` levels
+
+The `selCell` selector is value-based (not `PartitionInvariant`), so `oneStepSpineChain_reaches_leaf`'s transfer route
+(via `SpineChain.eq_default`) does not apply; and `descentPicks` uses the index-free `indivStep1`, a *different*
+colouring from the set-individualizing `defaultSpineChain`. So termination is a DIRECT growth argument: each nonempty
+step individualizes one vertex `r` (previously in a non-singleton cell), and `r` — plus every prior singleton — is a
+singleton of the next warm-refined colouring, so the non-singleton count strictly drops. Starting `≤ n`, the descent is
+discrete within `n` levels. Supplies the `Discrete (warmRefine …)` leaf hypotheses `ifCanon_iso_invariant_of_reconcile`
+(W4) consumes. -/
+
+/-- `warmRefine` preserves singletons per-vertex: a colour unique in `χ` stays unique after refinement. -/
+theorem warmRefine_preserves_singleton (adj : AdjMatrix n) (P : PMatrix n) {χ : Colouring n} {a : Fin n}
+    (hsing : ∀ u, u ≠ a → χ u ≠ χ a) : ∀ u, u ≠ a → warmRefine adj P χ u ≠ warmRefine adj P χ a := by
+  intro u hu; unfold warmRefine
+  exact iterate_refineStep_preserves_singleton adj P a n χ hsing u hu
+
+/-- `nonDiscreteSel χ = ∅ ⟹ χ discrete` (contrapositive of `nonDiscreteSel_nonempty`). -/
+theorem discrete_of_nonDiscreteSel_empty {χ : Colouring n} (h : nonDiscreteSel χ = ∅) : Discrete χ := by
+  by_contra hd; exact nonDiscreteSel_nonempty χ hd h
+
+/-- **The strict-decrease step.** Individualizing the selected rep `r` makes it — and every prior singleton — a
+singleton of the next warm-refined colouring, so the non-singleton count strictly drops. -/
+theorem nonDiscreteSel_warmRefine_shrinks (adj : AdjMatrix n) (P : PMatrix n) (χ : Colouring n)
+    (h : (selCell (warmRefine adj P χ)).Nonempty) :
+    (nonDiscreteSel (warmRefine adj P
+        (indivStep1 ((selCell (warmRefine adj P χ)).min' h) (warmRefine adj P χ)))).card
+      < (nonDiscreteSel (warmRefine adj P χ)).card := by
+  set π := warmRefine adj P χ with hπ
+  set r := (selCell π).min' h with hr
+  set π' := warmRefine adj P (indivStep1 r π) with hπ'
+  -- v singleton of π ⟹ v singleton of `indivStep1 r π`.
+  have hkeep_indiv : ∀ v, (∀ u, u ≠ v → π u ≠ π v) →
+      (∀ u, u ≠ v → indivStep1 r π u ≠ indivStep1 r π v) := by
+    intro v hv u hu
+    by_cases hvr : v = r
+    · subst hvr
+      have e1 : indivStep1 r π u = 2 * π u := by simp [indivStep1, hu]
+      have e2 : indivStep1 r π r = 1 := by simp [indivStep1]
+      rw [e1, e2]; omega
+    · have ev : indivStep1 r π v = 2 * π v := by simp [indivStep1, hvr]
+      by_cases hur : u = r
+      · subst hur
+        have eu : indivStep1 r π r = 1 := by simp [indivStep1]
+        rw [eu, ev]; omega
+      · have eu : indivStep1 r π u = 2 * π u := by simp [indivStep1, hur]
+        rw [eu, ev]; intro hcontra
+        exact hv u hu (by omega)
+  -- singletons only grow ⟹ `nonDiscreteSel` shrinks (as a subset).
+  have hsub : nonDiscreteSel π' ⊆ nonDiscreteSel π := by
+    intro v hv
+    simp only [nonDiscreteSel, Finset.mem_filter, Finset.mem_univ, true_and] at hv ⊢
+    obtain ⟨u, hune, huv⟩ := hv
+    by_contra hcon
+    exact warmRefine_preserves_singleton adj P
+      (hkeep_indiv v (fun w hw hwv => hcon ⟨w, hw, hwv⟩)) u hune huv
+  -- `r` is in a non-singleton cell of `π` (it lies in `selCell π`)…
+  have hr_in : r ∈ nonDiscreteSel π := by
+    obtain ⟨u, hu_ne, hu_eq⟩ := selCell_targets ((selCell π).min'_mem h)
+    simp only [nonDiscreteSel, Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ⟨u, hu_ne, hu_eq⟩
+  -- …but becomes a singleton of `π'`.
+  have hr_notin : r ∉ nonDiscreteSel π' := by
+    intro hrin
+    simp only [nonDiscreteSel, Finset.mem_filter, Finset.mem_univ, true_and] at hrin
+    obtain ⟨u, hune, huv⟩ := hrin
+    have hsing_indiv : ∀ w, w ≠ r → indivStep1 r π w ≠ indivStep1 r π r := by
+      intro w hw
+      have e1 : indivStep1 r π w = 2 * π w := by simp [indivStep1, hw]
+      have e2 : indivStep1 r π r = 1 := by simp [indivStep1]
+      rw [e1, e2]; omega
+    exact warmRefine_preserves_singleton adj P hsing_indiv u hune huv
+  exact Finset.card_lt_card ((Finset.ssubset_iff_of_subset hsub).mpr ⟨r, hr_in, hr_notin⟩)
+
+/-- **Leaf within `f` levels when the non-singleton count starts `≤ f`.** Induction on `f`: each nonempty step strictly
+drops the count (`nonDiscreteSel_warmRefine_shrinks`), so `≤ f` steps suffice; a discrete step stops early. -/
+theorem descentPicks_leaf (adj : AdjMatrix n) (P : PMatrix n) :
+    ∀ (f : Nat) (χ : Colouring n), (nonDiscreteSel (warmRefine adj P χ)).card ≤ f →
+      Discrete (warmRefine adj P (descentColouring adj P χ (descentPicks adj P f χ))) := by
+  intro f
+  induction f with
+  | zero =>
+    intro χ hcard
+    have : Discrete (warmRefine adj P χ) :=
+      discrete_of_nonDiscreteSel_empty (Finset.card_eq_zero.mp (Nat.le_zero.mp hcard))
+    simpa only [descentPicks_zero, descentColouring] using this
+  | succ f ih =>
+    intro χ hcard
+    by_cases h : (selCell (warmRefine adj P χ)).Nonempty
+    · rw [descentColouring_descentPicks_succ adj P f χ h]
+      exact ih _ (by have := nonDiscreteSel_warmRefine_shrinks adj P χ h; omega)
+    · rw [descentPicks_succ_of_empty adj P f χ h]
+      simp only [descentColouring]
+      exact not_not.mp (fun hnd => h ((selCell_nonempty_iff _).mpr hnd))
+
+/-- **★ W3b — the descent leaf is discrete at fuel `n`.** The full descent from any seed reaches a discrete
+warm-refined leaf within `n` levels (`nonDiscreteSel` starts `≤ n`). This is the `Discrete (warmRefine …)` hypothesis
+`ifCanon_iso_invariant_of_reconcile` needs at `fuel := n`. -/
+theorem descentPicks_leaf_univ (adj : AdjMatrix n) (P : PMatrix n) (χ : Colouring n) :
+    Discrete (warmRefine adj P (descentColouring adj P χ (descentPicks adj P n χ))) :=
+  descentPicks_leaf adj P n χ (le_trans (Finset.card_le_univ _) (le_of_eq (Fintype.card_fin n)))
+
 /-- **★ W3 corollary — the top-level reconciliation (`hrec` supplier).** Both descents run from the constant seed
 `χι` (empty prefix); the induction yields the global `b`. This is the `∃ b … picksH = (picksG.map π).map b` that
 `ifCanon_iso_invariant_of_reconcile` consumes to close ①b→. -/
