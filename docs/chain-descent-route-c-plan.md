@@ -1124,9 +1124,12 @@ the PROVED `frameSelectorTransitive_of_wittCellTransitive` reduction). Capstone
 the **← direction is DONE** on the real shared object (`canonForm?_complete_mpr`, from ①a soundness — no transport). The
 **→ direction reduces to ONE open lemma**: the transport seam's partition-level substrate is banked (X1 cross-graph =
 `RouteCTransport …_transport_iso`; X2 repr-choice = `NodeCountBridge.baseTransport`; value-level = `labelledAdj_rankPerm_transport`),
-leaving only **X3 = `samePartition ⟹ equal canonForm`** (the lex-min `canonForm` depends only on the partition — the §15.7
-design), pinned as `CanonPartitionInvariant`; `canonForm?_complete` proves ①b ↔ X3. Remaining: X3 + wiring the
-witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; then discharge the carriers (model=D0, `hImprim`).
+leaving **X3** — the honest canonForm-design piece (NOT "`samePartition ⟹ equal canonForm`", which is FALSE: index-based
+`individualizedColouring` makes transport samePartition-not-literal, and samePartition is trivial at discrete leaves yet
+`canonForm` differs there). Real X3 = the lex-min `canonForm` surviving the transport `g`-relabel-with-index-shift (§15.7:
+make individualization `g`-equivariant, or lex-min absorbs the shift; literal-relabel value-lift `labelledAdj_rankPerm_transport`
+is banked). `CanonPartitionInvariant` = honest output-level → target; `canonForm?_complete` proves ①b ↔ it. Remaining: X3 +
+wiring witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; then discharge carriers (model=D0, `hImprim`).
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the

@@ -23,18 +23,26 @@ module scopes ①b, lands the achievable **← direction**, and pins the one ope
     different picks must give the same canonical. Substrate LANDED at the partition level:
     `NodeCountBridge.baseTransport` (a global automorphism `g` carries the whole descent subtree) + the confinement
     single-orbit property (`SelectedCellIsOrbit`, this thread).
-  - **(X3) the partition→canonical lift — THE ONE OPEN LEMMA.** (X1)/(X2) both deliver **`samePartition`**, not a
-    literal colour relabel, because `individualizedColouring` is index-based (`g` moves colour *values* while
-    preserving the partition). `canonForm` reads colour values (`rankPerm`∘`vertexRank`), so the bridge needs
-    **`samePartition χ χ' → canonForm(χ) = canonForm(χ')`** — i.e. the lex-min-over-`DirAssignment` canonical
-    depends only on the partition + graph. The value-level half is LANDED
-    (`NodeCountBridge.labelledAdj_rankPerm_transport`: a literal automorphism relabel is invisible at the labelled
-    level); the open content is that the lex-min `canonForm` *is* partition-invariant (the §15.7 `canonForm`
-    design). Pinned below as `CanonPartitionInvariant`.
+  - **(X3) the partition→canonical lift — the genuine open piece, DEEPER than a `samePartition` lemma
+    (correction 2026-07-08).** (X1)/(X2) deliver only **`samePartition`** of the reached leaves, not a literal
+    colour relabel, because `individualizedColouring n S v = if v ∈ S then v.val+1 else 0` is **index-based**: a
+    transport `g` moves the pinned-vertex colour *values* (`v.val+1` vs `(g v).val+1`) while preserving the
+    partition. **`samePartition` is INSUFFICIENT to close X3** — it is *trivially* true at every discrete leaf (all
+    singletons are `samePartition`), yet distinct discrete colourings give distinct `canonForm` (different orderings
+    ⟹ different `rankPerm` ⟹ different relabel). So "`samePartition ⟹ equal canonForm`" is **false**; the real open
+    content is that the lex-min-over-`DirAssignment` `canonForm` is invariant under the specific `g`-relabel-with-
+    index-shift the transport produces. What IS landed is the **literal**-relabel value lift
+    (`NodeCountBridge.labelledAdj_rankPerm_transport`: an automorphism relabel is invisible at the labelled level);
+    the gap is precisely the index-shift between "`samePartition` via transport" and "literal relabel". Closing it is
+    a **§15.7 `canonForm`/individualization design** question — either make `individualizedColouring` `g`-equivariant
+    (a canonical, non-index seed) so transport gives a *literal* relabel and `labelledAdj_rankPerm_transport`
+    applies, or prove the lex-min absorbs the index-shift. Pinned below as `CanonPartitionInvariant` (the honest →
+    target, NOT the false `samePartition` form).
   - **(X4) assembly** — compose (X1)+(X2)+(X3) into `Iso G H → canonForm? G = canonForm? H` (⟹ `cG = cH`).
 
-So **①b = {← LANDED} + {→ modulo the single open lemma (X3) + its assembly}**, with (X1)/(X2)'s partition-level
-substrate already banked. The remaining mathematical content is exactly (X3): `canonForm` is partition-invariant.
+So **①b = {← LANDED} + {→ = the genuine (X3) canonForm-design piece + its assembly}**, with (X1)/(X2)'s
+partition-level substrate and the *literal*-relabel value lift already banked. The remaining mathematical content is
+(X3): make the descent's canonical invariant under the transport `g` despite index-based individualization.
 
 Imports `ScratchCanonFormCapped` (the shared `canonForm?` + ①a `canonForm?_sound`). Axiom target `[propext,
 Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
@@ -77,18 +85,19 @@ theorem canonForm?_complete_mpr {G H : AdjMatrix n} {cG cH : Fin n → Fin n →
   obtain ⟨πH, hπH⟩ := CanonForm.canonForm?_sound H cH hH
   exact iso_of_labelledAdj_eq (hπG.symm.trans (hEq.trans hπH))
 
-/-! ## The → direction — pinned to the one open lemma (X3)
+/-! ## The → direction — pinned to (X3), the honest canonForm-design piece
 
-`CanonPartitionInvariant` is the open content: the descent's canonical form depends only on the leaf *partition*
-(not the colour values), so partition-equal descents — which (X1) cross-graph and (X2) representative-choice both
-produce — yield equal canonicals. Kept as a `Prop` so the → assembly's dependency on it is explicit and it is not
-silently assumed. Discharging it is the §15.7 `canonForm` job (the value-level half is landed:
-`NodeCountBridge.labelledAdj_rankPerm_transport`). -/
+`CanonPartitionInvariant` is the honest → target: the canonizer is iso-invariant (isomorphic inputs get equal
+canonical forms). It is NOT the (false) `samePartition ⟹ equal canonForm`; the genuine open content (X3) is that
+the lex-min `canonForm` survives the transport `g`-relabel despite index-based individualization (see the header
+correction). Kept as a `Prop` so the → assembly's dependency is explicit. The value-level *literal*-relabel lift is
+landed (`NodeCountBridge.labelledAdj_rankPerm_transport`); (X1)/(X2) supply the transport at the partition level. -/
 
-/-- **The open lemma (X3): the canonizer's output is partition-invariant.** Abstractly: whenever two inputs' single
-paths reach leaves with the same partition, the canonical forms coincide. Concretely it is
-`samePartition χ χ' → canonForm(χ) = canonForm(χ')` for the lex-min-over-`DirAssignment` `canonForm`; here as a
-`Prop` placeholder for the § 15.7 canonForm design. The → direction of ①b is `(X1) ∧ (X2) ∧ CanonPartitionInvariant`. -/
+/-- **The → obligation (X3 + assembly): the canonizer's output is iso-invariant.** Isomorphic inputs get equal
+canonical forms. This is the honest `canon_complete.mp` target; its content is the (X3) canonForm-design piece
+(make the descent's canonical invariant under the transport `g` — §15.7), fed by the banked (X1) cross-graph and
+(X2) representative-choice transport substrate. Deliberately the *output-level* statement (not the false
+`samePartition ⟹ equal canonForm`, which is refuted at discrete leaves). -/
 def CanonPartitionInvariant : Prop :=
   ∀ (G H : AdjMatrix n) (cG cH : Fin n → Fin n → Nat),
     GraphIso G H → CanonForm.canonForm? G = some cG → CanonForm.canonForm? H = some cH → cG = cH
