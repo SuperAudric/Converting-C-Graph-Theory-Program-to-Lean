@@ -152,8 +152,15 @@ the real descent (**Phase-1 flag ⟹ large residual `Aut`**). The abstract `base
 their concrete definitions (individualization base / residual-`Aut` order at the residue-at-spine-level-`k`) are the
 remaining P1 wiring.
 
+**★ CONFINEMENT ASSEMBLY SKELETON LANDED (2026-07-08, `ScratchConfinement.lean`, axiom-clean).** The ①b target now
+consumes P1–P4 as a pinned interface (P1 + P4-producer wired real; P2/P3/Witt + transport as typed hypotheses). It
+surfaced two gaps the informal "① = P1∧P2∧P3∧P4" hid: ①b needs the **representative-transport / `canonAdj` seam** (a 5th
+ingredient beyond P1–P4; `repTransport` depth-1 core done, level-lift OPEN) and **P4's Witt-applicability must thread
+classicality** from P3 + Liebeck. Detail: route-c-plan §7c "ASSEMBLY SKELETON PINNED" + [[project_confinement_lemma_2026-07-07]].
+
 **NEXT:** (1) **finish P1** — identify the residue-at-node-`k` object so `baseAt`/`residualCard` get concrete
-definitions (the last seam), then **P2 in Lean** + the confinement assembly P1∧P2∧P3∧P4 ⟹ ①. (2) completeness
+definitions (the last seam), targeting the pinned `ScratchConfinement` interface; then **P2 in Lean** + discharge the
+assembly's carried hyps (P2/P3/Witt) + the transport seam ⟹ ①. (2) completeness
 (③-forward: `defaultSpineChain_reaches_leaf` ⟹ run returns `some`) + the Publication param-fixing (swap `canonForm?`
 onto the fireable-flag object `spineCappedCanonizerO`). **Renumbering `refineStep` (D7 option ii)** —
 the executable-track scoping (2026-07-07) found the runnable-demo blocker is the `Encodable.encode` VALUE (exponential-

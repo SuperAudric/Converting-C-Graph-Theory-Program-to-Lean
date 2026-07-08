@@ -1097,6 +1097,21 @@ it.
 prune sound ⟹ ① on the non-rigid residue. **Weakest links: P1 (soundness linchpin) and P4 (the prune-soundness core);
 P2/P3 are recompositions of landed pieces.**
 
+**★ ASSEMBLY SKELETON PINNED (2026-07-08, `ScratchConfinement.lean`, axiom-clean).** The ①b target is now stated FIRST
+and threads P1–P4 (Publication-discipline one level down, to avoid proving the pieces to *informal* interfaces that then
+don't compose — the project's recurring vacuity/compose-failure trap). P1 is wired REAL (`flag_imp_large` =
+`not_flagsAt_of_smallAut_spine` contrapositive on the spine), P4 producer + bridges are wired REAL
+(`selectedCellSubsetOrbitAt_of_frameSelectorTransitive` → `selectedCellIsOrbit_of_subsetOrbit`), and **P2/P3/Witt are
+carried as typed hypotheses** (`confinement_selectedCellIsOrbit`). The disposition assembly
+(`singlePathDisposition_of_confinement`) + `certifiedSinglePath_of_confinement` (real) reach the completeness core.
+**Two gaps the informal "① = P1∧P2∧P3∧P4" hid, now visible in the skeleton:** (a) **①b needs a 5th ingredient beyond
+P1–P4 — the representative-transport / `canonAdj` seam** (`NodeCountBridge.repTransport` depth-1 core done; the level-lift
++ lex-min `canonForm` equality is OPEN, `isoInvariantCanonical_of_certifiedSinglePath` pins it); (b) **P4's Witt-applicability
+is conditional on the residue being CLASSICAL** — the assembly must thread classicality from P3 + Liebeck, else a
+non-classical primitive rank-3 node-4 residue is unsound-pruned yet *handled* = a silent correctness bug (vertex-VT is
+free from primitivity; deeper cell-transitivity is the Witt content). **Finish the P1 seam against this pinned interface,
+then discharge P2/P3/Witt/transport.**
+
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the
 *theorem* that whatever flags is large — the two are not interchangeable.
