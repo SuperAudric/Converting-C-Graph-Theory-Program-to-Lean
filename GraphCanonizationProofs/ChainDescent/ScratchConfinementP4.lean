@@ -29,6 +29,15 @@ colour-equality hypothesis (same-orbit is then automatic — both vertices lie i
     free (`cellsAreOrbits_schemeAdj_singleton` / `jointProfileRecoversAt_singleton`); the crux is the recursion,
     and proving it does NOT silently collapse back onto the multi-base `JointProfileRecoversAt` wall.
 
+**★ COLOURING GENERALIZED (2026-07-08, W2).** All predicates here (`SelectedCellSubsetOrbit`, `SelectedCellSubsetOrbitAt`,
+`FrameSelectorTransitive`) and `NodeCountBridge.SelectedCellIsOrbit` now take an ABSTRACT selection colouring `χ : Colouring n`
+(single-base) / `χsel : Finset (Fin n) → Colouring n` (per-prefix) in place of the hardcoded `warmRefine adj P
+(individualizedColouring n S)`. The default `NodeCountBridge.indivχ adj P S := warmRefine adj P (individualizedColouring n S)`
+recovers the original behaviour; the X3 runtime descent instead instantiates `χsel` at its OWN (`oneStepColouring`-based)
+colouring, so confinement and the descent select the SAME cell (matching the C#, one `WarmPartition`). The chain reads only
+cell membership + same-colour, concluding the colouring-free `OrbitPartition` — so the generalization is mechanical. See
+route-c-plan §7c + [[project_confinement_lemma_2026-07-07]].
+
 Axiom-clean `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
 -/
 import ChainDescent.ScratchNodeCountBridge

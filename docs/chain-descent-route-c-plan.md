@@ -1155,16 +1155,33 @@ single-step + `IndivStep` instance · P3 `pickOne` single-vertex selector+termin
 (`ScratchConfinementX3Spine.lean`, axiom-clean): `oneStepSpineChain` = index-free `SpineChain` (via `indivStepOne`+`pickOne`),
 `oneStepSpineChain_reaches_leaf` (termination transferred), `oneStep_canonForm_isLabelledAdj` (①a free). **STEP (ii-a) DONE**
 (`ScratchConfinementX3Reconcile.lean`): `oneStep_cell_refines_setIndiv` (same one-step cell ⟹ same set-indiv cell).
-**★ STEP (ii-b) REFRAMED TO CONVERGENCE (2026-07-08, user correction).** The per-step "iso-invariant selection +
-reconcile" plan is WRONG; correct property = iso-**CONVERGENCE** (selection need not be iso-invariant; different
-consumption orders CONVERGE to the same state). `canonForm` = consistent output of a fixed process, not a global lex-min
-(C# deferral changes it yet each is a valid iso-invariant canonical; C# selects lowest cell-id). Splits: **C1** leaf→canonForm
-`Aut(G)`-invariant (near-done) + **C2 CONFLUENCE** = the missing core (any order → same `Aut(G)`-orbit of leaves; via a
-local diamond). **OPEN Q gating C2 (asked, unanswered):** "same state" = (a) `Aut(G)`-related leaves [confluence] or
-(b) harvest-level reframe [`canonForm` off the recovered `Stab`-chain]? Dead ends (don't re-walk): single-`b` reconcile =
-same-order only; equivariant single-vertex selector picks only singletons; `CellsAreOrbits` = the WL-dim wall (unavailable).
-NB the old `CanonFormImagesIsoInvariant` is FALSE and abandoned. **Full ii-b handoff = `ScratchConfinementX3Reconcile.lean`
-header** + [[project_confinement_lemma_2026-07-07]]. **NEXT = resolve the open Q, then build C2.**
+**★ STEP (ii-b) RESOLVED — the C2/CONVERGENCE framing is SUPERSEDED; the route is the W-plan (2026-07-08).** The
+prior "iso-CONVERGENCE / C2 confluence diamond" idea is a DEAD END — do not build it. Decisive: the C# selects the
+**lowest cell-id (= lex-rank of WL-signature) non-singleton cell**, an *equivariant* cell rule, and a FIXED schedule is
+iso-invariant (deferral = a *different* schedule gives a different-but-valid canonical ⟹ cross-schedule confluence is
+NOT the target). The assume-VT descent runs ONE fixed schedule, so ①b→ needs **fixed-schedule iso-invariance via a
+per-level McKay reconciliation with an equivariant CELL selector** — cells correspond cross-graph, only within-cell reps
+differ, reconciled per level. The single-`b` `ifCanon_iso_invariant_of_reconcile` is REVIVED (not dead): with cells
+corresponding, the per-level reconcilers compose into one `b` because each `aₖ ∈ Stab(prefix)` fixes all earlier picks.
+**The W-plan (authoritative detail = [[project_confinement_lemma_2026-07-07]] SESSION UPDATE block):**
+- **W1 ✅ (`ScratchConfinementX3Sel.lean`, axiom-clean):** equivariant `selCell` (min-colour-VALUE cell) + `selCellRep` +
+  `selCell_transport` (literal transport ⟹ exact `g`-image, since index-free `warmRefine` preserves colour VALUES) +
+  `selCellRep_both_in_target`. Replaces the WRONG `pickOne` (min-index; its cell isn't equivariant cross-graph).
+- **W2 ✅ RESOLVED BY GENERALIZATION (whole confinement chain axiom-clean, 1284 jobs green):** samePartition alone can't
+  bridge a value-based selector across the descent-colouring/`individualizedColouring` change; instead the confinement
+  chain's cell-selection colouring is now an **abstract parameter** (`χ`/`χsel : Finset→Colouring`) across
+  `ScratchNodeCountBridge` / `ScratchConfinementP4` / `Witt` / `P3` / `ScratchConfinement` (default `indivχ`). Capstone
+  `confinement_selectedCellIsOrbit_spine_witt` now yields `SelectedCellIsOrbit adj P₀ sel (χsel S) S` — instantiate
+  `sel:=selCell`, `χsel:=` the descent's own colouring ⟹ confinement reads the descent's colouring (matches the C#, one
+  `WarmPartition`). The Witt citation becomes the honest runtime obligation. **The samePartition bridge is OBVIATED.**
+- **W3 🟡 IN PROGRESS (`ScratchConfinementX3Recon.lean`):** **W3a ✅** (`descentPicks` = selCell-driven pick list +
+  `descentColouring` connection). **W3c-core ✅** `reconcile_extend` (single-step accumulation `bₖ₊₁=aₖ∘bₖ`; crux =
+  `aₖ∈Stab` fixes earlier `psH` ⟹ `psH.map aₖ=psH` ⟹ single global `b` works). **Remaining:** W3b direct termination
+  (selCell non-PI ⟹ direct growth proof from `targets`+`nonempty`, not `eq_default`); the full induction folding
+  `reconcile_extend` (discharge the per-level orbit from `SelectedCellIsOrbit`+`selCellRep_both_in_target`+`descentColouring_transport`).
+- **W4:** feed `b`/`hrec` to `ifCanon_iso_invariant_of_reconcile`; re-instantiate `oneStepSpineChain` with `selCellRep`;
+  rewire `canonForm?`/①b. NB the old `CanonFormImagesIsoInvariant` is FALSE and abandoned; ii-a (`oneStep_cell_refines_setIndiv`)
+  is retained but no longer load-bearing (the colouring generalization made the set-indiv bridge unnecessary).
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the

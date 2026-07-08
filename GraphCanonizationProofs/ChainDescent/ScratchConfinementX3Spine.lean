@@ -8,6 +8,12 @@ runtime object *single*, the index-free descent should be a genuine `SpineChain`
 This module builds `oneStepSpineChain`: the `defaultSpineChain` analogue whose `IndivStep` at each level is the
 **index-free single-vertex** `indivStepOne` (on the `pickOne` target) instead of the index-based `IndivStep.default`.
 
+**★ W4 NOTE (2026-07-08): `pickOne` (min-INDEX) here must be REPLACED by `ConfinementX3Sel.selCellRep` (min-VALUE
+cell rep) for the cross-graph route.** `pickOne`'s selected *cell* is not equivariant, so it cannot close ①b→ (W1
+finding). The re-instantiation is `selCellRep`; termination does NOT transfer via `eq_default` (selCellRep is not
+`PartitionInvariant`) — use the direct growth proof (W3b; `defaultD_grows_if_not_leaf` needs only `targets`+`nonempty`).
+See `ScratchConfinementX3Sel.lean` + `ScratchConfinementX3Recon.lean` + route-c-plan §7c "STEP (ii-b) RESOLVED".
+
 **Why it composes.**
   · `SpineChain`/`DescentTrace` are generic in the `IndivStep`; only `defaultTrace`/`defaultSpineChain` hardwire
     `IndivStep.default`. So swapping in `indivStepOne` is a legal chain.

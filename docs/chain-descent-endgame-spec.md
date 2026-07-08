@@ -30,7 +30,7 @@ largely on *already-built* Seal-Phase substrate and is mostly assembly. The weig
 where **"poly" stops being a meta-argument** — and **③ (flag ⟹ obstruction)**, which requires the
 `UnhandledResidue` definition plus consuming both the Seal-Phase and IR-Phase results.
 
-No more than one progress update log to prevent this file from reducing to a build increment log. Other changes should be filtered into stable state documentation if needed.
+Below should be no more than one progress update entry to prevent this file from reducing to a build increment log. Other changes should be filtered into stable state documentation if needed.
 **Progress (the Runtime-Phase cost model + the non-rigid correctness ARCHITECTURE have STARTED).**
 Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cost-model.md) STATUS + route-c-plan
 §7b/§7c ([[project_confinement_lemma_2026-07-07]]):
@@ -67,20 +67,29 @@ axiom-clean** (`indivOne`/`indivStep1` + literal equivariance, `descentColouring
 proved end-to-end (same-order)**. **(i) DONE** — `oneStepSpineChain` (`ScratchConfinementX3Spine.lean`): index-free
 `SpineChain` (via `indivStepOne`+`pickOne`), `oneStepSpineChain_reaches_leaf` (termination transferred off
 `defaultSpineChain`), `oneStep_canonForm_isLabelledAdj` (①a free). **(ii-a) DONE** — `oneStep_cell_refines_setIndiv`
-(same one-step cell ⟹ same set-indiv cell). **(ii-b) REFRAMED TO CONVERGENCE (user correction):** the per-step
-iso-invariant-selection plan is wrong; correct property = iso-**convergence** (selection need not be iso-invariant;
-different consumption orders converge to the same state — `canonForm` is a consistent output of a fixed process, not a
-global lex-min). Splits into **C1** leaf→canonForm `Aut(G)`-invariant (near-done) + **C2 confluence** (any order → same
-`Aut(G)`-orbit of leaves) = the missing core; **open question** (whether "same state" is `Aut(G)`-related leaves or a
-harvest-level reframe) gates C2's proof shape. Then **(iii)** rewire `canonForm?`/①b onto the index-free spine. Dead
-ends + full ii-b handoff: `ScratchConfinementX3Reconcile.lean` header. The old `CanonFormImagesIsoInvariant` is ABANDONED.
+(retained but no longer load-bearing after W2). **(ii-b) RESOLVED — the CONVERGENCE/C2-confluence framing is SUPERSEDED
+(do NOT build C2); the route is the W-plan (2026-07-08).** The C# selects the *lowest cell-id* (lex-rank of WL-signature)
+non-singleton cell — an EQUIVARIANT cell rule — and a FIXED schedule is iso-invariant (deferral = a different schedule
+gives a different-but-valid canonical ⟹ cross-schedule confluence is NOT the target). The assume-VT descent runs one
+fixed schedule, so ①b→ = **fixed-schedule iso-invariance via a per-level McKay reconciliation with an equivariant CELL
+selector**. **W1 ✅** (`ScratchConfinementX3Sel.lean`, axiom-clean): equivariant `selCell`/`selCellRep` + `selCell_transport`
+(literal cross-graph cell image) + `selCellRep_both_in_target`; replaces the WRONG `pickOne` (min-index, non-equivariant
+cell). **W2 ✅ by GENERALIZATION** (whole confinement chain axiom-clean, 1284 jobs green): the confinement chain's
+cell-selection colouring is now an abstract parameter (`χ`/`χsel`) across `ScratchNodeCountBridge`/`ConfinementP4`/`Witt`/`P3`/`Confinement`
+(default `indivχ`) — instantiate `sel:=selCell`, `χsel:=` the descent's own colouring ⟹ confinement reads the descent's
+colouring (matches the C#, one `WarmPartition`); the samePartition bridge is OBVIATED. **W3 🟡** (`ScratchConfinementX3Recon.lean`):
+W3a ✅ (`descentPicks` + `descentColouring` link), W3c-core ✅ (`reconcile_extend` — the single-`b` accumulation crux:
+`aₖ∈Stab` fixes earlier picks so one global `b` reconciles, reviving `ifCanon_iso_invariant_of_reconcile`); remaining =
+W3b direct termination + the full induction folding `reconcile_extend`. **W4** = feed `hrec` to `ifCanon_iso_invariant_of_reconcile`,
+re-instantiate `oneStepSpineChain` with `selCellRep`, rewire `canonForm?`/①b. The old `CanonFormImagesIsoInvariant` is ABANDONED.
 
-**Still unbuilt for done:** **X3** (the ①b → piece); wire the witness-case/`nodeOf` into `singlePathDisposition_of_confinement`;
-discharge the confinement carriers (model=D0, `hImprim`); assemble full ①; ③-forward (run returns `some`) + the
-`UnhandledResidue` disjunct *definitions* + the Publication swap (`canonForm? := CanonForm.canonForm?` onto the FIREABLE
-`spineCappedCanonizerO`, once, with ③); then **port the confinement/cost cluster into build.sh**. **Separate BONUS
-deliverable (option B, not on the `#print axioms` path):** a *runnable* Lean canonizer — see
-[`chain-descent-executable-track.md`](./chain-descent-executable-track.md) (output `#eval`s + ①a-sound; still slow — OPEN).
+**Still unbuilt for done:** **X3 W3/W4** (the ①b → piece — algebraic crux `reconcile_extend` in hand); wire the
+witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; discharge the confinement carriers (model=D0,
+`hImprim`); assemble full ①; ③-forward (run returns `some`) + the `UnhandledResidue` disjunct *definitions* + the
+Publication swap (`canonForm? := CanonForm.canonForm?` onto the FIREABLE `spineCappedCanonizerO`, once, with ③); then
+**port the confinement/cost cluster into build.sh**. **Separate BONUS deliverable (option B, not on the `#print axioms`
+path):** a *runnable* Lean canonizer — see [`chain-descent-executable-track.md`](./chain-descent-executable-track.md)
+(output `#eval`s + ①a-sound; still slow — OPEN).
 
 ---
 

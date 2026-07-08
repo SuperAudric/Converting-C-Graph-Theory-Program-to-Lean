@@ -17,7 +17,21 @@ from `DescentTrace.singletons` (committed vertices are `oneStepColouring`-single
 reconciliation — only this one implication, which turns a one-step cell coincidence into a set-individualization one.
 
 --------------------------------------------------------------------------------------------------------------------
-## ii-b HANDOFF (2026-07-08) — the reconciliation was REFRAMED to CONVERGENCE. READ BEFORE CONTINUING.
+## ★★ SUPERSEDED (2026-07-08 later) — the CONVERGENCE/C2 handoff below is a DEAD END. READ THIS FIRST.
+
+**Do NOT build C2/confluence.** The route is the **W-plan**: `ScratchConfinementX3Sel.lean` (W1),
+`ScratchConfinementX3Recon.lean` (W3), and the colouring-generalized confinement chain (W2). Summary:
+  · **W1** — equivariant `ConfinementX3Sel.selCell` (min-colour-VALUE cell) + `selCell_transport` + `selCellRep_both_in_target`.
+  · **W2** — confinement's cell-selection colouring is now an abstract `χ`/`χsel` parameter (`NodeCountBridge.SelectedCellIsOrbit`
+    etc.), instantiated at the descent's OWN colouring ⟹ no set-indiv/oneStep bridge needed. **This makes the ii-a lemma
+    below (`oneStep_cell_refines_setIndiv`) no longer load-bearing** (kept for reference).
+  · **W3** — `ConfinementX3Recon.descentPicks` (selCell-driven picks) + `reconcile_extend` (the single-`b` accumulation
+    crux) → the per-level McKay induction producing `b` for `ifCanon_iso_invariant_of_reconcile`'s `hrec`.
+Authoritative: [[project_confinement_lemma_2026-07-07]] SESSION UPDATE block + route-c-plan §7c "STEP (ii-b) RESOLVED".
+Everything from here down is the OLD (superseded) framing — kept only as a dead-route record.
+
+--------------------------------------------------------------------------------------------------------------------
+## ii-b HANDOFF (2026-07-08) — the reconciliation was REFRAMED to CONVERGENCE. [SUPERSEDED — see banner above.]
 
 **The reframe (user correction).** The initial plan — make the per-step target-cell *selection* iso-invariant and
 reconcile the two descents step-by-step — is the WRONG shape. The correct property is iso-**convergence**, NOT
