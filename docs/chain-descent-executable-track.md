@@ -15,8 +15,11 @@
 **Where it stands:** the Lean canonizer's output **is computable, `#eval`-runs, and is ①a-sound (proven,
 axiom-clean)** — the user confirmed concrete outputs on an unconstrained machine (K₃ → `[[0,0,1],[0,0,1],[1,1,0]]`,
 path 0–1–2 → `[[0,1,1],[1,0,1],[1,1,0]]`). It is **NOT yet poly-time in practice**: n=3 takes ~10 min, and reifying
-the descent did **not** fix that (see the OPEN ISSUE). It is also **not yet iso-invariant** (①b) — that is Tier C /
-the wall. Everything below is WIP scratch, **NOT in `build.sh`**, all axiom-clean `[propext, Classical.choice, Quot.sound]`.
+the descent did **not** fix that — **but the cause is now RESOLVED (see finding #2): the bottleneck is the
+`Encodable.encode` VALUE (exp-bit `Nat`), not recomputation; the fix is an encode-free structural round (= cost-model
+D7 fork ii) + `@[csimp]` array-backing, DEFERRED to the Runtime-Phase `refineStep` choice (do NOT reify further).** It is
+also **not yet iso-invariant** (①b) — that is Tier C / the wall. Everything below is WIP scratch, **NOT in `build.sh`**,
+all axiom-clean `[propext, Classical.choice, Quot.sound]`.
 
 **What's built (files + key decls):**
 - **Tier A — computable descent** (`ScratchExecutable.lean` + `decidableDiscrete`/`decidableIsLeaf` in
@@ -49,9 +52,11 @@ the wall. Everything below is WIP scratch, **NOT in `build.sh`**, all axiom-clea
    round's return value*, produced fresh regardless of input bounds — which is exactly why reifying the descent moved
    nothing (the earlier suspects (a)/(b)/(c) were all wrong; at small `n` the residual 10 min is instead the Mathlib
    `Finset`/`Multiset`-`Quotient` interpreter constants, which the same fix removes).
-   **Resolution — the tooling, tested (`scratchpad/spike_impl.lean`, core-only):** `@[implemented_by]` and `@[csimp]` are
-   both honored by `#eval` and both add **zero axioms** (`#print axioms` unaffected — off the firewall surface, unlike
-   `native_decide`). **Decision: use `@[csimp]` (sound — requires a proof `slow = fast`); AVOID `@[implemented_by]`**
+   **Resolution — the tooling, tested (core-only spike, re-derivable in ~15 lines):** `@[implemented_by]` and `@[csimp]`
+   are both honored by `#eval` and both add **zero axioms** (`#print axioms` unaffected — off the firewall surface,
+   unlike `native_decide`). To re-verify: attach `@[implemented_by fastWrong] def slow …` with `fastWrong` returning a
+   *different* value ⟹ `#eval slow` shows the fast value (honored) and `#print axioms slow` = none; and
+   `@[csimp] slow_eq : slow = fast` (proof required) swaps execution with `#print axioms slow_eq = [propext, Quot.sound]`. **Decision: use `@[csimp]` (sound — requires a proof `slow = fast`); AVOID `@[implemented_by]`**
    (trusted, can assert an *arbitrary/false* equation — a firewall risk; a non-faithful `refineStep` impl would make
    `#eval` lie). **The critical catch:** `@[csimp]`/`@[implemented_by]` can only substitute an *equal* function, and
    `refineStep`'s output Nat is load-bearing — so the `Encodable.encode` blowup is **not a swap target**; it must be

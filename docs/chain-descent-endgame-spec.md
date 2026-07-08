@@ -40,8 +40,9 @@ Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cos
   primitive rank-3 ⟹ VT ⟹ assume-VT-prune-and-continue (node-4/Cameron *handled*, single-path poly; `none` only in
   rigid Phase 2). This makes the flag/budget mechanism **load-bearing for correctness** — the cost model shifted from a
   *demonstration* to a *prerequisite*. The whole non-rigid ① reduces to the **confinement lemma** (route-c §7c, sub-obligations
-  P1–P4): **P1** empirically PASSED (`P1ConfinementProbe.cs`; Lean pending), **P2** substrate landed (`RecoversWhileSymmetric`/
-  `DiscretizesAtBases` split), **P3** = the seal (in build), **P4** Lean reduction DONE (`ScratchConfinementP4.lean`)
+  P1–P4): **P1** empirically PASSED (`P1ConfinementProbe.cs`) + **Lean cost-half + graph-side LANDED** (see below;
+  remaining = the residue-at-node wiring), **P2** substrate landed (`RecoversWhileSymmetric`/`DiscretizesAtBases` split;
+  Lean per-node cost lemma pending), **P3** = the seal (in build), **P4** Lean reduction DONE (`ScratchConfinementP4.lean`)
   modulo the **citable Witt flag-transitivity** (`Publication.lean witt_flag_transitivity`). `UnhandledResidue` atoms
   made structural (issue-#1 firewall).
 
@@ -55,12 +56,17 @@ Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cos
 **Landed since (2026-07-07, cost-model STATUS is authoritative):** ①a `canon_sound` discharged on the real spine +
 parameter-free (`ScratchCanonSound.lean`); the **shared `canonForm?` object** (`ScratchCanonFormCapped.lean`:
 `canonForm?_sound` = ①a, `descentCost_le` = ② `cost ≤ n⁴`, `canonForm?_eq_none_iff`) — ①a and ② converge in one capped
-descent; the **oracle summand** of `w` (`ScratchCostModelOracle.lean`: `not_flagsAt_of_base_le` = confinement-P1 cost half).
-Publication swap = one-liner set, deferred so the opaque swap happens once with ③ (else ③ is vacuous).
+descent; the **oracle summand** of `w` (`ScratchCostModelOracle.lean`), then **WIRED into the spine**
+(`ScratchCostModelSpine.spineCappedCanonizerO` — the flag can now FIRE, `spineCappedCanonizerO_flagsAt_iff`); and the
+**graph side of P1** (`ScratchConfinementP1.lean`: `greedy_base_card_le_baseMax` = small residual ⟹ greedy base ≤ baseMax
+via `exists_greedy_base_le_log`; `not_flagsAt_of_smallAut_spine` = small residual ⟹ no flag ⟹ contrapositive is P1's
+largeness clause on the real descent). All axiom-clean. Publication swap = one-liner set (now onto `spineCappedCanonizerO`),
+deferred so the opaque swap happens once with ③ (else ③ is vacuous).
 
-Still unbuilt: completeness (③-forward, run returns `some`), the graph-side of P1 (small-`Aut` ⟹ base ≤ baseMax) + P2 in
-Lean + the confinement assembly, and the `UnhandledResidue` disjunct *definitions*. **Separate BONUS deliverable
-(option B, not on the `#print axioms` path):** a *runnable* Lean canonizer — see
+Still unbuilt: the last P1 seam (concrete `baseAt`/`residualCard` = the residue-at-spine-level-`k`'s base / `Aut`-order)
++ **P2** in Lean + the confinement **assembly** P1∧P2∧P3∧P4 ⟹ ①; completeness (③-forward, run returns `some`); and the
+`UnhandledResidue` disjunct *definitions*. **Separate BONUS deliverable (option B, not on the `#print axioms` path):**
+a *runnable* Lean canonizer — see
 [`chain-descent-executable-track.md`](./chain-descent-executable-track.md) (output `#eval`s + ①a-sound; still slow — OPEN).
 
 ---
