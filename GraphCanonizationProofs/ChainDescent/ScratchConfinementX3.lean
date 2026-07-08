@@ -48,6 +48,7 @@ nor a full `canonForm` redesign. ①a transfers (it is selector-agnostic: `canon
 Axiom target `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
 -/
 import ChainDescent.ScratchConfinementCompleteness
+import ChainDescent.RouteCTransport
 
 namespace ChainDescent.ConfinementX3
 
@@ -135,5 +136,141 @@ def indivStepOne (r : Fin n) (χ : Colouring n) : IndivStep χ {r} where
 
 @[simp] theorem indivStepOne_χ' (r : Fin n) (χ : Colouring n) :
     (indivStepOne r χ).χ' = indivStep1 r χ := rfl
+
+/-! ## P3 — a single-vertex selector (one rep per step)
+
+The cut individualizes ONE vertex per step. `pickOne χ` selects a single vertex from the non-discrete part (the
+minimum-index non-singleton vertex — a concrete, terminating choice). **It need NOT be equivariant:** in the confinement
+(single-orbit) regime the pick is *invisible* at the labelled level — individualizing two same-orbit reps `v₁, v₂` (with
+`g v₁ = v₂`, `g` an automorphism fixing the prefix so `χ ∘ g = χ`) gives seeds related LITERALLY by `g`
+(`indivStep1_equivariant`), hence labelled-equal via `labelledAdj_rankPerm_transport` (P5). So a plain index-based pick
+is fine here; cross-graph correspondence is handled by invisibility, not by selector equivariance.
+
+Reuses `nonDiscreteSel` (the whole non-discrete part, `PartitionInvariant`) as the "is there a non-singleton vertex"
+oracle, then takes its `min'`. `TargetsNonsingletonCell` + `NonemptyOnNonDiscrete` transfer from `nonDiscreteSel`'s. -/
+
+open ChainDescent.CanonSound
+
+/-- **Single-vertex selector.** The minimum-index non-singleton vertex (as a singleton), or `∅` if discrete. -/
+noncomputable def pickOne (χ : Colouring n) : Finset (Fin n) :=
+  if h : (nonDiscreteSel χ).Nonempty then {(nonDiscreteSel χ).min' h} else ∅
+
+/-- `pickOne` only ever picks a vertex in a non-singleton cell (it lies in `nonDiscreteSel χ`). -/
+theorem pickOne_targets : TargetsNonsingletonCell (pickOne (n := n)) := by
+  intro χ v hv
+  unfold pickOne at hv
+  split at hv
+  · rename_i h
+    rw [Finset.mem_singleton] at hv; subst hv
+    have hm := (nonDiscreteSel χ).min'_mem h
+    simpa only [nonDiscreteSel, Finset.mem_filter, Finset.mem_univ, true_and] using hm
+  · simp at hv
+
+/-- `pickOne` is non-empty whenever the colouring is not yet discrete (a singleton, from `nonDiscreteSel` non-empty). -/
+theorem pickOne_nonempty : NonemptyOnNonDiscrete (pickOne (n := n)) := by
+  intro χ hχ
+  have hne : (nonDiscreteSel χ).Nonempty :=
+    Finset.nonempty_iff_ne_empty.mpr (nonDiscreteSel_nonempty χ hχ)
+  unfold pickOne
+  rw [dif_pos hne]
+  simp
+
+/-- `pickOne` picks at most one vertex — its cardinality is `≤ 1` (a singleton or `∅`). The "single-vertex" fact the
+cut needs: each descent step commits exactly one vertex, so committed vertices are ordered purely by pick-level. -/
+theorem pickOne_card_le_one (χ : Colouring n) : (pickOne χ).card ≤ 1 := by
+  unfold pickOne
+  split
+  · simp
+  · simp
+
+/-! ## P4 — cross-graph LITERAL descent transport (the payoff of index-freeness)
+
+The index-free descent, parametrised by the pick sequence it realises. `descentStep adj P r χ = indivStep1 r
+(warmRefine adj P χ)` = "refine, then commit `r` index-free". `descentColouring … picks` folds it over a list of picks.
+
+**The payoff:** for a graph iso `g : adj₁ → adj₂`, if the two descents use `g`-CORRESPONDING pick sequences (`picks`
+vs `picks.map g`), the colourings transport **LITERALLY** — `descentColouring adj₂ … (picks.map g) (g v) =
+descentColouring adj₁ … picks v`, a function equality, NOT merely `samePartition`. This is exactly what the index-based
+`IndivStep.default` / `individualizedColouring` could NOT give (they only transport `samePartition`), and it is the whole
+reason the cut works: `rankPerm`/`labelledAdj` read colour values, so the value-level lift needs a literal relabel.
+
+The transport is stated for *corresponding* pick sequences; reconciling the two descents' actual (non-corresponding)
+picks — same target cell, one orbit under confinement, so related by an automorphism — is P5. -/
+
+/-- One index-free descent step: refine, then commit `r` with the index-free marker. -/
+def descentStep (adj : AdjMatrix n) (P : PMatrix n) (r : Fin n) (χ : Colouring n) : Colouring n :=
+  indivStep1 r (warmRefine adj P χ)
+
+/-- The index-free descent colouring realised by a pick sequence `picks` (folded in order). -/
+def descentColouring (adj : AdjMatrix n) (P : PMatrix n) : Colouring n → List (Fin n) → Colouring n
+  | χι₀, [] => χι₀
+  | χι₀, r :: rs => descentColouring adj P (descentStep adj P r χι₀) rs
+
+/-- **One step transports literally.** `descentStep` under a graph iso `g` with corresponding pick `g r` and a
+literally-transporting seed transports literally: `warmRefine_transport_iso` (banked) carries the refine, then
+`indivStep1_equivariant` (P2) carries the commit. -/
+theorem descentStep_transport {adj₁ adj₂ : AdjMatrix n} {P₁ P₂ : PMatrix n} {g : Equiv.Perm (Fin n)}
+    (hf : ∀ v w, adj₂.adj (g v) (g w) = adj₁.adj v w) (hP : ∀ v u, P₂ (g v) (g u) = P₁ v u)
+    (r : Fin n) {χ₁ χ₂ : Colouring n} (hχ : ∀ v, χ₂ (g v) = χ₁ v) (v : Fin n) :
+    descentStep adj₂ P₂ (g r) χ₂ (g v) = descentStep adj₁ P₁ r χ₁ v := by
+  unfold descentStep
+  have hw : ∀ v, warmRefine adj₂ P₂ χ₂ (g v) = warmRefine adj₁ P₁ χ₁ v :=
+    fun v => warmRefine_transport_iso hf hP hχ v
+  exact indivStep1_equivariant g r hw v
+
+/-- **★ Cross-graph LITERAL descent transport (P4).** For a graph iso `g : adj₁ → adj₂` and `g`-corresponding pick
+sequences, the index-free descent colourings are literal `g`-relabels of one another. Induction over the pick list, each
+step by `descentStep_transport`. This literal equality is the crux enabler the samePartition-only routes lacked. -/
+theorem descentColouring_transport {adj₁ adj₂ : AdjMatrix n} {P₁ P₂ : PMatrix n} {g : Equiv.Perm (Fin n)}
+    (hf : ∀ v w, adj₂.adj (g v) (g w) = adj₁.adj v w) (hP : ∀ v u, P₂ (g v) (g u) = P₁ v u) :
+    ∀ (picks : List (Fin n)) {χ₁ χ₂ : Colouring n}, (∀ v, χ₂ (g v) = χ₁ v) →
+      ∀ v, descentColouring adj₂ P₂ χ₂ (picks.map g) (g v) = descentColouring adj₁ P₁ χ₁ picks v := by
+  intro picks
+  induction picks with
+  | nil => intro χ₁ χ₂ hχ v; exact hχ v
+  | cons r rs ih =>
+    intro χ₁ χ₂ hχ v
+    simp only [descentColouring, List.map_cons]
+    exact ih (fun v => descentStep_transport hf hP r hχ v) v
+
+/-! ## P5 — the labelled-value lift (rep-choice invisibility, cross-graph)
+
+The one cross-graph lemma that closes X3's value level. Given two **discrete** colourings related literally by a graph
+iso `g` (`ρ₂ ∘ g = ρ₁`, exactly P4's output for the warm-refined leaves), their canonical labellings COINCIDE:
+`labelledAdj (rankPerm ρ₂) adj₂ = labelledAdj (rankPerm ρ₁) adj₁`. Proof: `rankPerm_comp` (banked) turns the literal
+`g`-relabel of the colouring into a right-multiplication `rankPerm ρ₁ · g.symm` of the rank permutation, and the
+`relabelAdj` identity `hrel` then cancels the `g` at the labelled level.
+
+This ONE lemma serves BOTH roles X3 needs:
+  · **cross-graph** (`adj₂ = g·adj₁`, `g` the iso): corresponding-pick leaves give equal canonical forms;
+  · **within-graph orbit reconciliation** (`adj₁ = adj₂`, `g` an automorphism relating two same-orbit reps): the
+    single-vertex pick is invisible — the confinement single-orbit property supplies the automorphism, and index-free
+    individualization (P1/P2/P4) supplies the *literal* `ρ₂ ∘ g = ρ₁` this lemma consumes.
+It is the cross-graph generalisation of the banked (within-graph) `NodeCountBridge.labelledAdj_rankPerm_transport`. -/
+
+/-- **★ P5 — cross-graph canonical-labelling invariance.** Discrete colourings related literally by a graph iso `g`
+(`ρ₂ ∘ g = ρ₁`, with `adj₂` the `g`-relabel of `adj₁`) yield equal labelled canonical forms. Closes X3's value level;
+serves both cross-graph transport and within-graph orbit-rep invisibility (see the section note). -/
+theorem labelledAdj_rankPerm_cross {adj₁ adj₂ : AdjMatrix n} {g : Equiv.Perm (Fin n)}
+    (hrel : ∀ i j, adj₂.adj i j = adj₁.adj (g.symm i) (g.symm j))
+    {ρ₁ ρ₂ : Colouring n} (h₁ : Discrete ρ₁) (h₂ : Discrete ρ₂)
+    (hρ : ∀ v, ρ₂ (g v) = ρ₁ v) :
+    labelledAdj (Colouring.rankPerm ρ₂ h₂) adj₂ = labelledAdj (Colouring.rankPerm ρ₁ h₁) adj₁ := by
+  have hρ2 : ρ₂ = fun v => ρ₁ (g.symm v) := by
+    funext w; have h := hρ (g.symm w); rwa [Equiv.apply_symm_apply] at h
+  subst hρ2
+  rw [rankPerm_comp ρ₁ g.symm h₁ h₂]
+  funext i j
+  simp only [labelledAdj]
+  rw [hrel]
+  have key : ∀ i, g.symm ((Colouring.rankPerm ρ₁ h₁ * g.symm).symm i)
+      = (Colouring.rankPerm ρ₁ h₁).symm i := by
+    intro i
+    have hi : (Colouring.rankPerm ρ₁ h₁ * g.symm).symm i
+        = g ((Colouring.rankPerm ρ₁ h₁).symm i) := by
+      rw [Equiv.symm_apply_eq]
+      simp [Equiv.Perm.mul_apply, Equiv.symm_apply_apply, Equiv.apply_symm_apply]
+    rw [hi, Equiv.symm_apply_apply]
+  rw [key i, key j]
 
 end ChainDescent.ConfinementX3
