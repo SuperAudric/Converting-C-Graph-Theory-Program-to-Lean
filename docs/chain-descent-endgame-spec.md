@@ -64,12 +64,16 @@ committed set by canonical descent *level* (not `v.val`). Then the seed transpor
 gap, and the banked `labelledAdj_rankPerm` value-lift closes it. **`ScratchConfinementX3.lean` P1–P6 all landed
 axiom-clean** (`indivOne`/`indivStep1` + literal equivariance, `descentColouring_transport` cross-graph, the value-lift
 `labelledAdj_rankPerm_cross`, and `ifCanon_iso_invariant_of_reconcile` for `H = π·G`) — **the invariance mechanism is
-proved end-to-end; the ONE remaining proof = `hrec`** (confinement `SelectedCellIsOrbit` ⟹ the reconciling automorphism
-exists — a McKay reconciliation). Remaining for ①b: **(i)** a leaf-reaching index-free descent — SpineChain-ify via the
-landed `indivStepOne : IndivStep χ {r}` + `pickOne` so ①a/② transfer and the runtime object stays single (this is a
-**re-home** off `defaultSpineChain`, whose `defaultTrace` hardwires the index-based `IndivStep.default`); **(ii)** `hrec`;
-**(iii)** rewire `canonForm?`/①b onto the index-free spine (①a is seed-agnostic). The old `CanonFormImagesIsoInvariant`
-residual is ABANDONED.
+proved end-to-end (same-order)**. **(i) DONE** — `oneStepSpineChain` (`ScratchConfinementX3Spine.lean`): index-free
+`SpineChain` (via `indivStepOne`+`pickOne`), `oneStepSpineChain_reaches_leaf` (termination transferred off
+`defaultSpineChain`), `oneStep_canonForm_isLabelledAdj` (①a free). **(ii-a) DONE** — `oneStep_cell_refines_setIndiv`
+(same one-step cell ⟹ same set-indiv cell). **(ii-b) REFRAMED TO CONVERGENCE (user correction):** the per-step
+iso-invariant-selection plan is wrong; correct property = iso-**convergence** (selection need not be iso-invariant;
+different consumption orders converge to the same state — `canonForm` is a consistent output of a fixed process, not a
+global lex-min). Splits into **C1** leaf→canonForm `Aut(G)`-invariant (near-done) + **C2 confluence** (any order → same
+`Aut(G)`-orbit of leaves) = the missing core; **open question** (whether "same state" is `Aut(G)`-related leaves or a
+harvest-level reframe) gates C2's proof shape. Then **(iii)** rewire `canonForm?`/①b onto the index-free spine. Dead
+ends + full ii-b handoff: `ScratchConfinementX3Reconcile.lean` header. The old `CanonFormImagesIsoInvariant` is ABANDONED.
 
 **Still unbuilt for done:** **X3** (the ①b → piece); wire the witness-case/`nodeOf` into `singlePathDisposition_of_confinement`;
 discharge the confinement carriers (model=D0, `hImprim`); assemble full ①; ③-forward (run returns `some`) + the

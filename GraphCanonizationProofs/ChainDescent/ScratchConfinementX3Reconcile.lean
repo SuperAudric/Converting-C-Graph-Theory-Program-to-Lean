@@ -16,6 +16,60 @@ from `DescentTrace.singletons` (committed vertices are `oneStepColouring`-single
 `warmRefine_refines_initial` (monotonicity). The hard direction (full `samePartition`) is NOT needed for the
 reconciliation — only this one implication, which turns a one-step cell coincidence into a set-individualization one.
 
+--------------------------------------------------------------------------------------------------------------------
+## ii-b HANDOFF (2026-07-08) — the reconciliation was REFRAMED to CONVERGENCE. READ BEFORE CONTINUING.
+
+**The reframe (user correction).** The initial plan — make the per-step target-cell *selection* iso-invariant and
+reconcile the two descents step-by-step — is the WRONG shape. The correct property is iso-**convergence**, NOT
+iso-invariance: **the selection need not be iso-invariant; different orders of consuming symmetry CONVERGE to the same
+state once all symmetry is consumed.** `canonForm` is the *consistent output of a fixed process*, not a global lex-min
+(the C# confirms this: enabling deferral CHANGES the canonical form yet each schedule is *"still a valid iso-invariant
+canonical, just not the same lex-min"* — `ChainDescent.cs:158-161`). The C# selects the **lowest cell-id non-singleton
+cell** ("cell ids are iso-invariant") — colour/cell-id based, not vertex-index.
+
+**The target splits into two:**
+  · **(C1) leaf → canonForm is `Aut(G)`-invariant** — leaves in one `Aut(G)`-orbit give the same canonical form.
+    NEAR-DONE: `ScratchConfinementX3.labelledAdj_rankPerm_cross` + `Spine.labelledAdj_eq_of_isAut` already handle the
+    automorphism relabel; needs only packaging.
+  · **(C2) CONFLUENCE — the MISSING CORE PIECE.** Any two full-individualization descents (any consumption order, in
+    the orbit/assume-VT regime where every selected cell is a `Stab`-orbit) reach discrete leaves in the SAME
+    `Aut(G)`-orbit. Scoped to the confined/symmetric domain (rigid graphs flag in Phase 2, out of scope). Natural
+    route: a **local diamond** (individualize orbit-cell `A` then `B` ≈ `B` then `A`, up to an automorphism, because
+    consuming one orbit-cell preserves the other's orbit structure) → confluence → C2. Cross-graph ①b→ is then
+    `C1 + C2 + π`-transport (`H = π·G`'s leaves are the π-image of `G`'s leaf-orbit).
+
+**★ OPEN QUESTION gating C2's proof shape (asked, UNANSWERED).** Does "reach the same state" mean (a) the two leaves
+are related by an `Aut(G)` element (leaf-orbit confluence, C2 as stated) — OR (b) a harvest-level reframe (read
+`canonForm` off the recovered `Stab`-chain / the C# `Automorphisms` group, not off a single leaf)? Resolve this FIRST;
+(a) ⟹ build the diamond/confluence lemma, (b) ⟹ reframe `canonForm` around the harvested group.
+
+**DEAD ENDS — do NOT re-walk (all established this session):**
+  · **`ifCanon_iso_invariant_of_reconcile` (single global `b`, `ScratchConfinementX3`) only covers SAME-ORDER
+    consumption.** A single automorphism maps a cell to a same-colour cell, so it cannot relate two pick-lists that
+    consumed cells in different orders. Kept as the same-order building block; NOT the general reconciliation.
+  · **NO-GO: an equivariant *single-vertex* selector can only pick from singleton cells** (any within-block symmetry
+    `σ` of the colouring has `χ∘σ⁻¹ = χ`, so equivariance forces `σ(sel χ) = sel χ` ⟹ `sel χ` singleton). So no
+    single-vertex selector gives cross-graph cell-correspondence; the committed vertex inherently differs (confinement
+    handles the within-cell rep). Cell/Finset selectors escape the no-go but hit canonical tie-breaking.
+  · **PI-vs-equivariant tension:** no selector is both partition-invariant (needed to match confinement's
+    set-individualization) and equivariant (needed for cross-graph): value-based = equivariant-not-PI, index-based =
+    PI-not-equivariant. This is why per-step reconciliation via a fixed selector stalls — superseded by convergence.
+  · **`CellsAreOrbits` (all cells orbits — would dissolve everything) = the WL-dim WALL for the confined residue.
+    UNAVAILABLE.** Confinement gives only `SelectedCellIsOrbit` (the selected cell). ii-a bridges the CELL refinement
+    one direction; the full `samePartition` confluence bridge (hard direction `Refines (warmRefine indiv) oneStepColouring`,
+    via monotonicity + `warmRefine_refineStep_samePartition` idempotence + a sandwich) is deferred, needed only if C2
+    routes through confinement's set-individualization cells.
+
+**BUILT SUBSTRATE (all axiom-clean, scratch, NOT in build.sh) — inventory for the pickup:**
+  · `ScratchConfinementX3.lean` — the index-free cut P1–P6 (`indivOne`/`indivStep1` + LITERAL equivariance,
+    `descentColouring_transport` cross-graph, `labelledAdj_rankPerm_cross` value-lift, `ifCanon_iso_invariant_of_reconcile`
+    [same-order]). ①a transfers (seed-agnostic).
+  · `ScratchConfinementX3Spine.lean` — X3 step (i): `oneStepSpineChain` (the index-free `SpineChain` via `indivStepOne`
+    + `pickOne`), `oneStepSpineChain_reaches_leaf` (termination TRANSFERRED from `defaultSpineChain_reaches_leaf`),
+    `oneStep_canonForm_isLabelledAdj` (①a for free). NB `pickOne` here is min-vertex-index — for C2 the selector likely
+    changes to cell-id/colour-based (per the C#), but the SpineChain plumbing + termination-transfer pattern reuses.
+  · THIS FILE — ii-a `oneStep_cell_refines_setIndiv` (same one-step cell ⟹ same set-individualization cell).
+
 Axiom target `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
 -/
 import ChainDescent.ScratchConfinementX3Spine

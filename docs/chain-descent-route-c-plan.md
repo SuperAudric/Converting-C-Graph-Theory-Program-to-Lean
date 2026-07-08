@@ -1151,12 +1151,20 @@ wash-out (dead) nor a full `canonForm` redesign. ①a transfers (selector-agnost
 single-step + `IndivStep` instance · P3 `pickOne` single-vertex selector+termination · P4 `descentColouring_transport`
 (cross-graph LITERAL) · P5 `labelledAdj_rankPerm_cross` (labelled-value lift) · P6 `ifCanon_transport_corresponding`
 (corresponding picks) + `ifCanon_aut_invariant` (within-graph orbit invisibility) + **`ifCanon_iso_invariant_of_reconcile`**
-(cross-graph invariance for `H=π·G`, modulo the reconciling `H`-automorphism `b`). **The invariance MECHANISM is proved
-end-to-end; the ONE remaining gap = `hrec`: confinement `SelectedCellIsOrbit` ⟹ `b` exists (McKay reconciliation
-induction).** REMAINING for ①b: (i) leaf-reaching index-free descent + termination; (ii) `hrec` from confinement; (iii)
-rewire `canonForm?`/①b onto the index-free object (①a transfers — `canonForm_isLabelledAdj` is seed-agnostic). NB the old
-`CanonFormImagesIsoInvariant` (over the index-based `canonForm`) is FALSE and abandoned. Full detail: file header +
-[[project_confinement_lemma_2026-07-07]].
+(cross-graph invariance for `H=π·G`, modulo a reconciling `H`-automorphism `b`, SAME-ORDER only). **STEP (i) DONE**
+(`ScratchConfinementX3Spine.lean`, axiom-clean): `oneStepSpineChain` = index-free `SpineChain` (via `indivStepOne`+`pickOne`),
+`oneStepSpineChain_reaches_leaf` (termination transferred), `oneStep_canonForm_isLabelledAdj` (①a free). **STEP (ii-a) DONE**
+(`ScratchConfinementX3Reconcile.lean`): `oneStep_cell_refines_setIndiv` (same one-step cell ⟹ same set-indiv cell).
+**★ STEP (ii-b) REFRAMED TO CONVERGENCE (2026-07-08, user correction).** The per-step "iso-invariant selection +
+reconcile" plan is WRONG; correct property = iso-**CONVERGENCE** (selection need not be iso-invariant; different
+consumption orders CONVERGE to the same state). `canonForm` = consistent output of a fixed process, not a global lex-min
+(C# deferral changes it yet each is a valid iso-invariant canonical; C# selects lowest cell-id). Splits: **C1** leaf→canonForm
+`Aut(G)`-invariant (near-done) + **C2 CONFLUENCE** = the missing core (any order → same `Aut(G)`-orbit of leaves; via a
+local diamond). **OPEN Q gating C2 (asked, unanswered):** "same state" = (a) `Aut(G)`-related leaves [confluence] or
+(b) harvest-level reframe [`canonForm` off the recovered `Stab`-chain]? Dead ends (don't re-walk): single-`b` reconcile =
+same-order only; equivariant single-vertex selector picks only singletons; `CellsAreOrbits` = the WL-dim wall (unavailable).
+NB the old `CanonFormImagesIsoInvariant` is FALSE and abandoned. **Full ii-b handoff = `ScratchConfinementX3Reconcile.lean`
+header** + [[project_confinement_lemma_2026-07-07]]. **NEXT = resolve the open Q, then build C2.**
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the
