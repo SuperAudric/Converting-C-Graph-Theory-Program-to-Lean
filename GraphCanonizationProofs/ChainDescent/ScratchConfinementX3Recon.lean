@@ -493,4 +493,35 @@ theorem reconcile_descent_top
     (by simp)
   simpa only [descentColouring, List.nil_append] using h
 
+/-! ## W4 piece 1 — the assembly: iso ⟹ equal descent-leaf canonical form
+
+Compose the two W3 exports through `ifCanon_iso_invariant_of_reconcile` (P6c): `reconcile_descent_top` supplies the
+reconciling `b` (`hrec`), `descentPicks_leaf_univ` supplies the two leaf-discreteness hypotheses (`h₁`, `h₂`), and the
+`hmid` (discreteness along the transported picks `picksG.map π`) is the one small glue — `descentColouring_transport`
+(P4) + `discrete_transport_iff`. Result: for `H = π·G` the two `selCell`-descents reach leaves with EQUAL canonical
+labelled forms. This is ①b→ for the index-free `selCell` descent. -/
+
+/-- **★ W4.1 — descent-leaf canonical-form iso-invariance.** For a graph iso `π : G → H`, the constant seed, and the
+(list-indexed) confinement hypothesis, the `selCell`-descents of `G` and `H` (run to their discrete leaves at fuel `n`)
+produce equal canonical labelled forms. The completeness (`①b →`) statement for the index-free descent. -/
+theorem descentLeaf_canonForm_iso_invariant
+    {G H : AdjMatrix n} {P : PMatrix n} {π : Equiv.Perm (Fin n)}
+    (hiso : ∀ v w, H.adj (π v) (π w) = G.adj v w) (hisoP : ∀ v u, P (π v) (π u) = P v u)
+    {χι : Colouring n} (hχιconst : ∀ v w, χι v = χι w)
+    (hconf : ∀ done : List (Fin n),
+        SelectedCellIsOrbit H P selCell (warmRefine H P (descentColouring H P χι done)) done.toFinset)
+    (h₁ : Discrete (warmRefine G P (descentColouring G P χι (descentPicks G P n χι))))
+    (h₂ : Discrete (warmRefine H P (descentColouring H P χι (descentPicks H P n χι)))) :
+    labelledAdj (Colouring.rankPerm (warmRefine H P (descentColouring H P χι (descentPicks H P n χι))) h₂) H
+      = labelledAdj (Colouring.rankPerm (warmRefine G P (descentColouring G P χι (descentPicks G P n χι))) h₁) G := by
+  obtain ⟨b, hb, hbP, hrec⟩ := reconcile_descent_top hiso hisoP hχιconst hconf n
+  have htrans : ∀ v, warmRefine H P (descentColouring H P χι ((descentPicks G P n χι).map π)) (π v)
+      = warmRefine G P (descentColouring G P χι (descentPicks G P n χι)) v := fun v =>
+    warmRefine_transport_iso hiso hisoP
+      (descentColouring_transport hiso hisoP (descentPicks G P n χι) (fun v => hχιconst (π v) v)) v
+  have hmid : Discrete (warmRefine H P (descentColouring H P χι ((descentPicks G P n χι).map π))) :=
+    (discrete_transport_iff (g := π) htrans).mp h₁
+  exact ifCanon_iso_invariant_of_reconcile hiso hisoP hb hbP
+    (fun v => hχιconst (π v) v) (fun v => hχιconst (b v) v) hrec h₁ hmid h₂
+
 end ChainDescent.ConfinementX3Recon
