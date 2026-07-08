@@ -37,9 +37,17 @@ explores ≤ `n^b` candidate maps (a base-`b` stabiliser chain), so the declared
 real harvest is the abstract/C# oracle. -/
 def oracleCost (n b : Nat) : Nat := n ^ b
 
-/-- **The small-`Aut` base threshold** `log₂ n` (from `exists_greedy_base_le_log`: small `Aut` ⟹ base `O(log n)`).
-A node whose base exceeds this is "large" (the confinement-P1 largeness cut). -/
-def baseMax (n : Nat) : Nat := Nat.log2 n
+/-- **The base threshold** `(log₂ n)²` (superlogarithmic). A node whose harvest base exceeds this is "large"
+(the confinement-P1 largeness cut). **Why `(log₂ n)²`, not `log₂ n` (the threshold decision, 2026-07-08):** the
+flag delivers `residual > 2^(baseMax n)`, so the threshold sets the largeness the confinement lemma can rely on.
+`log₂ n` gives only `residual > n`, which is **unsound** — a poly-`Aut` non-Schurian SRG (e.g. a Chang graph,
+`|Aut| = 384 > 28 = n`) would flag and be assume-VT-pruned *incorrectly*. A **superlogarithmic** threshold
+`baseMax = ω(log n)` makes the flag fire **only** for super-polynomial `|Aut|` (`2^{(log₂ n)²} = n^{log₂ n}`,
+super-poly): for any fixed poly degree `c`, `c·log₂ n ≤ (log₂ n)²` for large `n`, so every poly-`Aut` residue is
+below threshold and does **not** flag. Super-poly-`Aut` rank-3 residues are Schurian/classified (Cameron/Babai),
+where assume-VT is sound. The lemmas below are threshold-agnostic (they use only `b ≤ baseMax ⟹ n^b ≤ n^{baseMax}`),
+so raising the threshold leaves them unchanged; the budget `oracleBudget n = n^{(log₂ n)²}` stays **quasipoly**. -/
+def baseMax (n : Nat) : Nat := (Nat.log2 n) ^ 2
 
 /-- **The per-node oracle BUDGET** = harvest cost at the threshold base = `n^{log₂ n}` (QUASIPOLY). A node with
 base ≤ `baseMax` fits; a node with base > `baseMax` exceeds it and flags. The poly target sharpens `baseMax`

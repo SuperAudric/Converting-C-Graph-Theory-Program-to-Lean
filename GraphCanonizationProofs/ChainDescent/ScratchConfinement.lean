@@ -82,31 +82,30 @@ The core reduction, with P1 plugged in real and P2/P3/Witt carried as the three 
 the input the landed prune-completeness consumer needs (`SelectedCellIsOrbit`). -/
 
 /-- **CONFINEMENT (the ①b core).** At a Phase-1 flagging node (level `k`, prefix `S`), the target cell is a single
-`Stab(S)`-orbit. Chain: P1 (`flag_imp_large`, real) ⟹ large; P2 (`hP2`) ⟹ symmetric-phase; P3 (`hP3`, the seal
-recomposed with classicality) ⟹ primitive rank-3 classical; Witt (`hWitt`) ⟹ `FrameSelectorTransitive`; P4
+`Stab(S)`-orbit. Chain: P1 (`hP1`) ⟹ `Large`; P2 (`hP2`) ⟹ `SymmetricFlag`; P3 (`hP3`, the seal recomposed with
+classicality) ⟹ `PrimRank3Classical`; Witt (`hWitt`) ⟹ `FrameSelectorTransitive`; P4
 (`selectedCellSubsetOrbitAt_of_frameSelectorTransitive` + `selectedCellIsOrbit_of_subsetOrbit`, real) ⟹
-`SelectedCellIsOrbit`. The abstract `SymmetricFlag`/`PrimRank3Classical` are the honest residue-classification
-interface; discharging `hP2`/`hP3`/`hWitt` = landing P2/P3/Witt. -/
+`SelectedCellIsOrbit`. Largeness is abstracted into `Large` + `hP1` — the concrete instantiation supplies the
+*delivered* bound (`flag_imp_pow_baseMax_lt`: `2^(baseMax n) < residual`, super-poly), decoupling the assembly from
+the threshold. The abstract `Large`/`SymmetricFlag`/`PrimRank3Classical` are the honest interface; discharging
+`hP1`/`hP2`/`hP3`/`hWitt` = landing P1/P2/P3/Witt. -/
 theorem confinement_selectedCellIsOrbit
     (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
-    (sel : Colouring n → Finset (Fin n)) (baseAt residualCard : Nat → Nat)
-    (S : Finset (Fin n)) (k : Nat) (hn : 1 ≤ n)
-    (hgreedy : baseAt k ≤ Nat.log 2 (residualCard k))
-    (SymmetricFlag PrimRank3Classical : Nat → Prop)
+    (sel : Colouring n → Finset (Fin n)) (baseAt : Nat → Nat)
+    (S : Finset (Fin n)) (k : Nat)
+    (Large SymmetricFlag PrimRank3Classical : Nat → Prop)
+    (hP1 : flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
+        ((spineCappedCanonizerO adj P₀ χι₀ sel baseAt).w n) k = true → Large k)
     (hP2 : flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel baseAt).w n) k = true → SymmetricFlag k)
-    (hP3 : n < residualCard k → SymmetricFlag k → PrimRank3Classical k)
+    (hP3 : Large k → SymmetricFlag k → PrimRank3Classical k)
     (hWitt : PrimRank3Classical k → FrameSelectorTransitive adj P₀ sel S)
     (hflag : flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel baseAt).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel baseAt).w n) k = true) :
-    SelectedCellIsOrbit adj P₀ sel S := by
-  have hlarge : n < residualCard k :=
-    flag_imp_large adj P₀ χι₀ sel baseAt residualCard k hn hgreedy hflag
-  have hsym := hP2 hflag
-  have hprim := hP3 hlarge hsym
-  have hframe := hWitt hprim
-  have hsub := selectedCellSubsetOrbitAt_of_frameSelectorTransitive hframe S (Finset.Subset.refl S)
-  exact selectedCellIsOrbit_of_subsetOrbit hsub
+    SelectedCellIsOrbit adj P₀ sel S :=
+  selectedCellIsOrbit_of_subsetOrbit
+    (selectedCellSubsetOrbitAt_of_frameSelectorTransitive
+      (hWitt (hP3 (hP1 hflag) (hP2 hflag))) S (Finset.Subset.refl S))
 
 /-! ## Disposition assembly — flag case ∪ witness case ⟹ SinglePathDisposition
 
@@ -203,6 +202,46 @@ theorem flag_imp_large_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : C
     (spineResidualCard adj P₀ χι₀ sel) k hn
     (spineBaseAt_le_log adj P₀ χι₀ sel k) hflag
 
+/-- **P1, the STRONG delivered bound (threshold-explicit largeness).** A Phase-1 flag at node `k` implies the
+residual `Aut` exceeds `2^(baseMax n)` — the honest largeness the flag delivers, set by the threshold `baseMax n =
+(log₂ n)²`, giving `2^(baseMax n) = n^{log₂ n}` (super-poly). **This is what makes the seal's super-poly
+`IsLargeScheme` satisfiable** (P3's `hLargeBridge`); the weaker `flag_imp_large_spine` (`n < residual`) is a
+corollary. Proof: the flag gives `oracleBudget n < oracleCost n (spineBaseAt k)` = `n^{baseMax n} < n^{spineBaseAt
+k}` ⟹ (`n ≥ 2`) `baseMax n < spineBaseAt k ≤ log₂(residual)` ⟹ `2^{baseMax n} < 2^{log₂ residual} ≤ residual`. -/
+theorem flag_imp_pow_baseMax_lt (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
+    (hflag : flagsAt
+        (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
+        ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
+    2 ^ baseMax n < spineResidualCard adj P₀ χι₀ sel k := by
+  have hiff := (spineCappedCanonizerO_flagsAt_iff adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel) k).mp hflag
+  simp only [oracleBudget, oracleCost] at hiff
+  rw [Nat.pow_lt_pow_iff_right hn] at hiff
+  have hlt : baseMax n < Nat.log 2 (spineResidualCard adj P₀ χι₀ sel k) :=
+    lt_of_lt_of_le hiff (spineBaseAt_le_log adj P₀ χι₀ sel k)
+  have hpos : 0 < spineResidualCard adj P₀ χι₀ sel k := card_stabilizerAt_pos
+  calc 2 ^ baseMax n
+      < 2 ^ Nat.log 2 (spineResidualCard adj P₀ χι₀ sel k) :=
+        (Nat.pow_lt_pow_iff_right (by norm_num)).mpr hlt
+    _ ≤ spineResidualCard adj P₀ χι₀ sel k := Nat.pow_log_le_self 2 hpos.ne'
+
+/-- **Satisfiability / soundness: a residue with `|Aut| ≤ 2^(baseMax n)` does NOT flag.** The exact converse of
+`flag_imp_pow_baseMax_lt` — only residues with super-poly `Aut` (`> 2^(baseMax n) = n^{log₂ n}`) flag. So every
+**poly-`Aut`** residue (`|Aut| ≤ n^c ≤ 2^(baseMax n)` once `c ≤ log₂ n`) is below threshold and is NOT
+assume-VT-pruned. This is precisely why the non-Schurian-SRG danger is excluded: a Chang graph
+(`|Aut| = 384`, poly-bounded, non-VT) never Phase-1-flags, so it is never unsoundly pruned — the soundness the
+threshold raise buys. Proof: `spineBaseAt k ≤ log₂(residual) ≤ log₂(2^{baseMax n}) = baseMax n` ⟹ not_flagsAt. -/
+theorem not_flagsAt_of_residualCard_le_pow (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) (hn : 1 ≤ n)
+    (hle : spineResidualCard adj P₀ χι₀ sel k ≤ 2 ^ baseMax n) :
+    flagsAt (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
+        ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = false := by
+  apply not_flagsAt_of_base_le_spine adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel) k hn
+  calc spineBaseAt adj P₀ χι₀ sel k
+      ≤ Nat.log 2 (spineResidualCard adj P₀ χι₀ sel k) := spineBaseAt_le_log adj P₀ χι₀ sel k
+    _ ≤ Nat.log 2 (2 ^ baseMax n) := Nat.log_mono_right hle
+    _ = baseMax n := Nat.log_pow (by norm_num : (1:ℕ) < 2) (baseMax n)
+
 /-! ## P2 — deferral confinement on the concrete spine
 
 The phase split is `IsBase T` (rigid / base-reached — residual symmetry exhausted, `DiscretizesAtBases` /
@@ -230,19 +269,20 @@ theorem flag_imp_symmetric_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀
 
 /-! ## Confinement on the concrete spine — P1 ∧ P2 discharged, only P3/Witt abstract
 
-Instantiating `confinement_selectedCellIsOrbit` with the concrete `spineBaseAt`/`spineResidualCard` (P1, via
-`spineBaseAt_le_log`) and the concrete symmetric predicate `¬IsBase` (P2, via `flag_imp_symmetric_spine`) leaves
-only the two genuinely-open seams as hypotheses: **P3** (`hP3`: large ∧ ¬rigid ⟹ primitive rank-3 classical — the
-seal recomposed on the concrete residue, carrying classicality) and **Witt** (`hWitt`: primitive rank-3 classical
-⟹ `FrameSelectorTransitive`). -/
+Instantiating `confinement_selectedCellIsOrbit` with the STRONG largeness `Large k := 2^(baseMax n) <
+spineResidualCard k` (P1, via `flag_imp_pow_baseMax_lt` — the super-poly delivered bound that makes the seal's
+`IsLargeScheme` satisfiable) and the concrete symmetric predicate `¬IsBase` (P2, via `flag_imp_symmetric_spine`)
+leaves only the two genuinely-open seams as hypotheses: **P3** (`hP3`: large ∧ ¬rigid ⟹ primitive rank-3 classical)
+and **Witt** (`hWitt`). Requires `2 ≤ n` (the threshold arithmetic; `n ≤ 1` is trivially canonical). -/
 
 /-- **Confinement on the real spine (P1 ∧ P2 wired; P3/Witt carried).** A Phase-1 flag at node `k` ⟹ the target
-cell at prefix `S` is one `Stab(S)`-orbit, given only P3 (`hP3`) and Witt (`hWitt`) on the concrete residue. P1
-(flag ⟹ large residual) and P2 (flag ⟹ `¬IsBase`, symmetric) are discharged from the spine, no longer hypotheses. -/
+cell at prefix `S` is one `Stab(S)`-orbit, given only P3 (`hP3`, now consuming the **super-poly** bound `2^(baseMax
+n) < residual`) and Witt (`hWitt`). P1 (via `flag_imp_pow_baseMax_lt`) and P2 (via `flag_imp_symmetric_spine`) are
+discharged from the spine. -/
 theorem confinement_selectedCellIsOrbit_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
-    (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) (k : Nat) (hn : 1 ≤ n)
+    (sel : Colouring n → Finset (Fin n)) (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
     (PrimRank3Classical : Nat → Prop)
-    (hP3 : n < spineResidualCard adj P₀ χι₀ sel k →
+    (hP3 : 2 ^ baseMax n < spineResidualCard adj P₀ χι₀ sel k →
         ¬ IsBase adj (defaultSpineChain adj P₀ χι₀ sel k).P (defaultSpineChain adj P₀ χι₀ sel k).D →
         PrimRank3Classical k)
     (hWitt : PrimRank3Classical k → FrameSelectorTransitive adj P₀ sel S)
@@ -250,11 +290,12 @@ theorem confinement_selectedCellIsOrbit_spine (adj : AdjMatrix n) (P₀ : PMatri
         (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
         ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
     SelectedCellIsOrbit adj P₀ sel S :=
-  confinement_selectedCellIsOrbit adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)
-    (spineResidualCard adj P₀ χι₀ sel) S k hn (spineBaseAt_le_log adj P₀ χι₀ sel k)
+  confinement_selectedCellIsOrbit adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel) S k
+    (fun j => 2 ^ baseMax n < spineResidualCard adj P₀ χι₀ sel j)
     (fun j => ¬ IsBase adj (defaultSpineChain adj P₀ χι₀ sel j).P (defaultSpineChain adj P₀ χι₀ sel j).D)
     PrimRank3Classical
-    (fun hf => flag_imp_symmetric_spine adj P₀ χι₀ sel k hn hf)
+    (fun hf => flag_imp_pow_baseMax_lt adj P₀ χι₀ sel k hn hf)
+    (fun hf => flag_imp_symmetric_spine adj P₀ χι₀ sel k (by omega) hf)
     hP3 hWitt hflag
 
 end ChainDescent.Confinement

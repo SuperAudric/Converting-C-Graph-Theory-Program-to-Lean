@@ -131,6 +131,16 @@ P1's largeness clause: a Phase-1 flag ⟹ base > baseMax ⟹ large `Aut`** ⟹ (
 sound. This is where the cost model and correctness ① interlock — the point the "cost model = prerequisite" reframe was
 about. Still declared (the real harvest is the abstract/C# oracle); a poly `oracleBudget` needs R1.
 
+**★ THRESHOLD RAISED `baseMax n := (log₂ n)²` (2026-07-08) — a SOUNDNESS fix (route-c-plan §7c P3).** `baseMax = log₂ n`
+made the flag fire at `residual > n`, which is *unsound*: a poly-`Aut` non-Schurian SRG (Chang, `|Aut|=384>28=n`, non-VT)
+would flag and be assume-VT-pruned incorrectly. The **superlogarithmic** `baseMax = ω(log n)` makes the flag fire only for
+**super-poly** `|Aut|` (`2^{(log₂n)²}=n^{log₂n} < residual`, `flag_imp_pow_baseMax_lt`), which is Schurian/classified
+(safe). The oracle lemmas are threshold-agnostic so they transferred unchanged; the budget `oracleBudget = n^{(log₂n)²}`
+stays quasipoly. Soundness↔budget tension resolved: baseMax=ω(log n) is a *correctness* floor; super-poly residues are
+handled by assume-VT single-path (not harvest), so the poly-`Aut` band's quasipoly budget is the operative cost.
+`not_flagsAt_of_residualCard_le_pow` (poly-`Aut` never flags) + `largeBridge_confinementLargeScheme` (the seal's largeness
+now provable at this threshold) are the soundness + satisfiability checks. See [[project_confinement_lemma_2026-07-07]].
+
 **★ ORACLE SUMMAND WIRED INTO THE REAL SPINE (2026-07-07, `ScratchCostModelSpine.lean`, axiom-clean `[propext,
 Classical.choice, Quot.sound]`) — the flag can now FIRE on the actual descent.** `spineCappedCanonizerO` extends the
 warmRefine-only `spineCappedCanonizer` (which was *total* — flag never fired ⟹ ③ vacuous): each node's true cost is now

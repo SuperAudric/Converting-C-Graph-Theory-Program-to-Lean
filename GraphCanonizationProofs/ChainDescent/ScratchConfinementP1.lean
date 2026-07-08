@@ -29,10 +29,14 @@ open ChainDescent.CostModel.SpineInstance
 
 variable {n : Nat}
 
-/-- **`baseMax` is `Nat.log 2`.** The oracle module defines `baseMax n = Nat.log2 n` (core-only purity); here it is
-bridged to Mathlib's `Nat.log 2 n` (`Nat.log2_eq_log_two`) so the greedy-base bound composes. -/
-theorem baseMax_eq_log_two (m : Nat) : baseMax m = Nat.log 2 m := by
-  unfold baseMax; exact Nat.log2_eq_log_two
+/-- **`log₂ ≤ baseMax`.** The oracle threshold is `baseMax m = (Nat.log2 m)² = (Nat.log 2 m)²` (superlogarithmic,
+the 2026-07-08 threshold decision), and `log₂ m ≤ (log₂ m)²` always (`Nat.le_self_pow`, `2 ≠ 0`). So a greedy base
+of length `≤ log₂|Aut| ≤ log₂ n` still fits under `baseMax n` — the P1 graph-side survives the threshold raise
+(it now needs only `≤`, not `=`). -/
+theorem log_two_le_baseMax (m : Nat) : Nat.log 2 m ≤ baseMax m := by
+  unfold baseMax
+  rw [Nat.log2_eq_log_two]
+  exact Nat.le_self_pow (by norm_num) _
 
 /-- **The graph side of P1 (pure content): a small-`Aut` node's greedy harvest base is `≤ baseMax n`.**
 `exists_greedy_base_le_log` gives a base of length `≤ log₂|Aut^P ∅|`; if the residual order is small (`≤ n`), `log₂`
@@ -46,7 +50,7 @@ theorem greedy_base_card_le_baseMax {adj : AdjMatrix n} {P : PMatrix n}
   refine ⟨bs, hbase, ?_⟩
   calc bs.length ≤ Nat.log 2 (Nat.card (StabilizerAt adj P ∅)) := hlen
     _ ≤ Nat.log 2 n := Nat.log_mono_right hsmall
-    _ = baseMax n := (baseMax_eq_log_two n).symm
+    _ ≤ baseMax n := log_two_le_baseMax n
 
 /-- **P1 assembled on the real spine: a small-residual node does NOT flag.** Given (i) the harvest base at node `k`
 is at most a greedy base of the node's residual (`baseAt k ≤ log₂(residualCard k)` — the harvest-algorithm property,
@@ -63,7 +67,7 @@ theorem not_flagsAt_of_smallAut_spine (adj : AdjMatrix n) (P₀ : PMatrix n) (χ
   apply not_flagsAt_of_base_le_spine adj P₀ χι₀ sel baseAt k hn
   calc baseAt k ≤ Nat.log 2 (residualCard k) := hbase
     _ ≤ Nat.log 2 n := Nat.log_mono_right hsmall
-    _ = baseMax n := (baseMax_eq_log_two n).symm
+    _ ≤ baseMax n := log_two_le_baseMax n
 
 /-! ## The residue-at-node concrete definitions — the last P1 seam
 
