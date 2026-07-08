@@ -1120,8 +1120,12 @@ trusted base.** Landed in sequence, all axiom-clean: **P1** residue seam (`Scrat
 *discharged* `largeBridge_confinementLargeScheme`); **Witt** (`ScratchConfinementWitt` — `WittCellTransitive` citation +
 the PROVED `frameSelectorTransitive_of_wittCellTransitive` reduction). Capstone
 **`ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt`** carries **only named external results** {G3, model bridge
-(=D0), primitivity (=`hImprim`), Witt+Liebeck citation}. **Remaining for full ①b:** the **transport seam**
-(`RepresentativeInvariant` — `CertifiedSinglePath ⟹ canon_complete`, `repTransport` level-lift OPEN) + wiring the
+(=D0), primitivity (=`hImprim`), Witt+Liebeck citation}. **★ ①b SCOPED + ← LANDED (2026-07-08, `ScratchConfinementCompleteness`, axiom-clean).** `canon_complete` (`Iso↔cG=cH`):
+the **← direction is DONE** on the real shared object (`canonForm?_complete_mpr`, from ①a soundness — no transport). The
+**→ direction reduces to ONE open lemma**: the transport seam's partition-level substrate is banked (X1 cross-graph =
+`RouteCTransport …_transport_iso`; X2 repr-choice = `NodeCountBridge.baseTransport`; value-level = `labelledAdj_rankPerm_transport`),
+leaving only **X3 = `samePartition ⟹ equal canonForm`** (the lex-min `canonForm` depends only on the partition — the §15.7
+design), pinned as `CanonPartitionInvariant`; `canonForm?_complete` proves ①b ↔ X3. Remaining: X3 + wiring the
 witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; then discharge the carriers (model=D0, `hImprim`).
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
