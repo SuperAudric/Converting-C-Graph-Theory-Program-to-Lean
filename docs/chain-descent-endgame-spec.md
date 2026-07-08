@@ -39,12 +39,11 @@ Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cos
   algorithm: refine the flag to a **per-node** budget; a Phase-1 over-budget flag ⟹ (confinement lemma) the residue is
   primitive rank-3 ⟹ VT ⟹ assume-VT-prune-and-continue (node-4/Cameron *handled*, single-path poly; `none` only in
   rigid Phase 2). This makes the flag/budget mechanism **load-bearing for correctness** — the cost model shifted from a
-  *demonstration* to a *prerequisite*. The whole non-rigid ① reduces to the **confinement lemma** (route-c §7c, sub-obligations
-  P1–P4): **P1** empirically PASSED (`P1ConfinementProbe.cs`) + **Lean cost-half + graph-side LANDED** (see below;
-  remaining = the residue-at-node wiring), **P2** substrate landed (`RecoversWhileSymmetric`/`DiscretizesAtBases` split;
-  Lean per-node cost lemma pending), **P3** = the seal (in build), **P4** Lean reduction DONE (`ScratchConfinementP4.lean`)
-  modulo the **citable Witt flag-transitivity** (`Publication.lean witt_flag_transitivity`). `UnhandledResidue` atoms
-  made structural (issue-#1 firewall).
+  *demonstration* to a *prerequisite*. The whole non-rigid ① reduces to the **confinement lemma** (route-c §7c) —
+  **CORE COMPLETE (2026-07-08), all axiom-clean:** P1 (super-poly threshold), P2 (deferral), P3 (real seal), P4 (→ Witt),
+  Witt (factored) **ALL WIRED** — `ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt` reduces the ①b core
+  `SelectedCellIsOrbit` to ONLY named citations {G3, model=D0, `hImprim`, Witt+Liebeck}. `UnhandledResidue` atoms made
+  structural (issue-#1 firewall). Detail: the CURRENT STATE block atop [[project_confinement_lemma_2026-07-07]].
 
 - **The cost model.** Framework landed axiom-clean (`ScratchCostModel.lean`: `CostM` + `budgetedIterate` + `cost_budgetedIterate_le`),
   settling **② unconditional by construction** (all poly content in ③-forward). The **per-node cap** variant
@@ -53,20 +52,18 @@ Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cos
   `16n⁴`), and the cost is **co-defined** (`ScratchCostModelCostedWarmRefine.lean`: `value=warmRefine`,
   `cost=warmRefineCost n`, not a fiat literal — the D1 seam closed).
 
-**Landed since (2026-07-07, cost-model STATUS is authoritative):** ①a `canon_sound` discharged on the real spine +
-parameter-free (`ScratchCanonSound.lean`); the **shared `canonForm?` object** (`ScratchCanonFormCapped.lean`:
-`canonForm?_sound` = ①a, `descentCost_le` = ② `cost ≤ n⁴`, `canonForm?_eq_none_iff`) — ①a and ② converge in one capped
-descent; the **oracle summand** of `w` (`ScratchCostModelOracle.lean`), then **WIRED into the spine**
-(`ScratchCostModelSpine.spineCappedCanonizerO` — the flag can now FIRE, `spineCappedCanonizerO_flagsAt_iff`); and the
-**graph side of P1** (`ScratchConfinementP1.lean`: `greedy_base_card_le_baseMax` = small residual ⟹ greedy base ≤ baseMax
-via `exists_greedy_base_le_log`; `not_flagsAt_of_smallAut_spine` = small residual ⟹ no flag ⟹ contrapositive is P1's
-largeness clause on the real descent). All axiom-clean. Publication swap = one-liner set (now onto `spineCappedCanonizerO`),
-deferred so the opaque swap happens once with ③ (else ③ is vacuous).
+**Correctness ① state (2026-07-08):** **①a `canon_sound` DONE** (shared object `ScratchCanonFormCapped.CanonForm.canonForm?`,
+also carrying ② `descentCost_le`). **①b `canon_complete`: ← direction DONE** (`ScratchConfinementCompleteness.canonForm?_complete_mpr`,
+from ①a); **→ direction = X3, the one open piece** — a §15.7 `canonForm`/individualization design lemma (make
+`individualizedColouring` `g`-equivariant so transport is a literal relabel; NOT "samePartition ⟹ equal canonForm", which
+is FALSE at discrete leaves). `canonForm?_complete` proves ①b ↔ X3. The confinement CORE (above) supplies the descent's
+single-orbit property; X3 supplies the iso-invariance of the canonical.
 
-Still unbuilt: the last P1 seam (concrete `baseAt`/`residualCard` = the residue-at-spine-level-`k`'s base / `Aut`-order)
-+ **P2** in Lean + the confinement **assembly** P1∧P2∧P3∧P4 ⟹ ①; completeness (③-forward, run returns `some`); and the
-`UnhandledResidue` disjunct *definitions*. **Separate BONUS deliverable (option B, not on the `#print axioms` path):**
-a *runnable* Lean canonizer — see
+**Still unbuilt for done:** **X3** (the ①b → piece); wire the witness-case/`nodeOf` into `singlePathDisposition_of_confinement`;
+discharge the confinement carriers (model=D0, `hImprim`); assemble full ①; ③-forward (run returns `some`) + the
+`UnhandledResidue` disjunct *definitions* + the Publication swap (`canonForm? := CanonForm.canonForm?` onto the FIREABLE
+`spineCappedCanonizerO`, once, with ③); then **port the confinement/cost cluster into build.sh**. **Separate BONUS
+deliverable (option B, not on the `#print axioms` path):** a *runnable* Lean canonizer — see
 [`chain-descent-executable-track.md`](./chain-descent-executable-track.md) (output `#eval`s + ①a-sound; still slow — OPEN).
 
 ---

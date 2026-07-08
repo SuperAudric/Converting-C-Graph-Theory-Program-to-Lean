@@ -156,11 +156,17 @@ iso-invariant). The depth-1 core is landed — `NodeCountBridge.repTransport` / 
 transport the one-deeper partition along the orbit automorphism — but the level-iteration and the lift to
 `canonAdj` equality are OPEN (partly blocked on the `canonForm` lex-min placeholder). It is pinned here as
 `RepresentativeInvariant` so the full ①b path is visible: P1–P4 ⟹ `CertifiedSinglePath`, then
-`RepresentativeInvariant` ⟹ `canon_complete`. -/
+`RepresentativeInvariant` ⟹ `canon_complete`.
 
-/-- **The completeness target, abstractly (the ①b shape).** An abstract predicate standing for "the certified
-single path computes the iso-invariant canonical" — i.e. `canon_complete` on the non-rigid residue. Kept opaque so
-the composition below is non-vacuous; the Runtime Phase replaces it with the real `canonForm?`-level statement. -/
+**★ SUPERSEDED (2026-07-08) — the real ①b lives in `ScratchConfinementCompleteness.lean`.** That module lands the
+①b **← direction** (`canonForm?_complete_mpr`) and pins the → direction to the honest **X3** open lemma
+(`CanonPartitionInvariant`; the `samePartition ⟹ equal canonForm` framing in the prose above turned out FALSE — X3
+is a §15.7 `canonForm`/individualization design piece, see that file's header). The two placeholder decls below
+(`IsoInvariantCanonical = True → True`, `isoInvariantCanonical_of_certifiedSinglePath`) are the earlier skeleton;
+keep for the `CertifiedSinglePath` shape, but the authoritative ①b interface is `ScratchConfinementCompleteness`. -/
+
+/-- **[SUPERSEDED placeholder — see `ScratchConfinementCompleteness` for the real ①b.]** An abstract predicate for
+"the certified single path computes the iso-invariant canonical". Kept only for the skeleton shape below. -/
 def IsoInvariantCanonical
     (_adj : AdjMatrix n) (_P₀ : PMatrix n) (_χι₀ : Colouring n)
     (_sel : Colouring n → Finset (Fin n)) : Prop := True → True  -- placeholder shape; Runtime Phase swaps in `canonForm?`-completeness
