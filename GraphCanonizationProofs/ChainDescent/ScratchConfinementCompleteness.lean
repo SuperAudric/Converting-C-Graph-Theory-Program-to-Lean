@@ -192,10 +192,14 @@ theorem canonForm?_eq_dCanonForm {adj : AdjMatrix n} {cG : Fin n → Fin n → N
     rw [hval] at h
     exact (Option.some.inj h).symm
 
-/-- **The sharper → obligation (X3 residual): the descent's `canonFormImages` is iso-invariant.** For `G ≅ H`, the
-two default descents reach leaves whose candidate-matrix Finsets coincide. This is the ONE remaining piece — finite
-and structural, provable from `forcedNode_relabel` + `warmRefine_transport_iso` (both BANKED), NOT from any change to
-`individualizedColouring`. -/
+/-- **The sharper → obligation over the CURRENT (index-based) `canonForm`.**
+**⚠ SUPERSEDED — this predicate is FALSE (do not attempt to prove it).** The decisive finding (`ScratchConfinementX3`
+header): `dChain` commits vertices with **distinct index-based colours** (`IndivStep.default = …+v.val…`), so committed
+vertices have no ties, the `DirAssignment` lex-min cannot re-order them, and `canonFormImages` genuinely differs for
+isomorphic inputs when `D ≠ ∅`. The lex-min reduction above (`canonForm_eq_of_canonFormImages_eq` etc.) is correct and
+kept, but its residual is not provable *for this object*. The real ①b→ target is the **index-free single-vertex descent**
+(`ScratchConfinementX3`): P1–P6 landed axiom-clean; iso-invariance is `ifCanon_iso_invariant_of_reconcile` modulo the
+confinement reconciliation. Kept here only to document why this route was abandoned. -/
 def CanonFormImagesIsoInvariant : Prop :=
   ∀ (G H : AdjMatrix n), GraphIso G H →
     canonFormImages (dChain G) (dChain_isLeaf G) = canonFormImages (dChain H) (dChain_isLeaf H)

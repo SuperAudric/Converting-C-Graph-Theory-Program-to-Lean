@@ -273,4 +273,82 @@ theorem labelledAdj_rankPerm_cross {adj₁ adj₂ : AdjMatrix n} {g : Equiv.Perm
     rw [hi, Equiv.symm_apply_apply]
   rw [key i, key j]
 
+/-! ## P6 — assembly
+
+**Record adjustment (important).** `ScratchConfinementCompleteness.CanonFormImagesIsoInvariant` is stated over the
+EXISTING `canonForm` (`dChain`, index-based `IndivStep.default` + `nonDiscreteSel`), which the decisive finding showed is
+genuinely NOT iso-invariant. So the assembly does NOT target that predicate; it targets the **index-free** descent P1–P5
+built. The eventual Publication wiring swaps the canonizer's leaf labelling onto this index-free descent (①a transfers —
+`canonForm_isLabelledAdj` is selector/seed-agnostic; the value is still `labelledAdj (rankPerm …) adj`).
+
+**P6a (this step): corresponding-pick iso-invariance — the clean composition of P4 + P5, no confinement.** When the two
+descents use `g`-corresponding pick sequences, their leaf canonical forms are equal. This is the cross-graph half; the
+within-graph orbit reconciliation of the *actual* (non-corresponding) `pickOne` choices — which needs confinement — is
+P6b. -/
+
+/-- **P6a — corresponding-pick iso-invariance.** For a graph iso `g : adj₁ → adj₂`, a literally-transporting seed, and
+`g`-corresponding pick sequences (`picks` vs `picks.map g`), the two index-free descents reach leaves with EQUAL canonical
+labelled forms. Direct composition: `descentColouring_transport` (P4) + `warmRefine_transport_iso` (banked) feed the
+literal `ρ₂ ∘ g = ρ₁` that `labelledAdj_rankPerm_cross` (P5) consumes. No confinement — the picks already correspond. -/
+theorem ifCanon_transport_corresponding
+    {adj₁ adj₂ : AdjMatrix n} {P₁ P₂ : PMatrix n} {g : Equiv.Perm (Fin n)}
+    (hf : ∀ v w, adj₂.adj (g v) (g w) = adj₁.adj v w) (hP : ∀ v u, P₂ (g v) (g u) = P₁ v u)
+    {χι₁ χι₂ : Colouring n} (hχι : ∀ v, χι₂ (g v) = χι₁ v) (picks : List (Fin n))
+    (h₁ : Discrete (warmRefine adj₁ P₁ (descentColouring adj₁ P₁ χι₁ picks)))
+    (h₂ : Discrete (warmRefine adj₂ P₂ (descentColouring adj₂ P₂ χι₂ (picks.map g)))) :
+    labelledAdj (Colouring.rankPerm
+        (warmRefine adj₂ P₂ (descentColouring adj₂ P₂ χι₂ (picks.map g))) h₂) adj₂
+      = labelledAdj (Colouring.rankPerm
+        (warmRefine adj₁ P₁ (descentColouring adj₁ P₁ χι₁ picks)) h₁) adj₁ := by
+  have hdc := descentColouring_transport hf hP picks hχι
+  have hρ : ∀ v, warmRefine adj₂ P₂ (descentColouring adj₂ P₂ χι₂ (picks.map g)) (g v)
+      = warmRefine adj₁ P₁ (descentColouring adj₁ P₁ χι₁ picks) v :=
+    fun v => warmRefine_transport_iso hf hP hdc v
+  have hrel : ∀ i j, adj₂.adj i j = adj₁.adj (g.symm i) (g.symm j) := by
+    intro i j
+    have h := hf (g.symm i) (g.symm j)
+    rwa [Equiv.apply_symm_apply, Equiv.apply_symm_apply] at h
+  exact labelledAdj_rankPerm_cross hrel h₁ h₂ hρ
+
+/-- **P6b building block — within-graph automorphism invariance (rep-choice invisibility).** Committing the
+`a`-image of a pick sequence, for an automorphism `a` fixing the seed, yields the SAME canonical form. The `adj₁ = adj₂`,
+`g = a` specialisation of `ifCanon_transport_corresponding`. This is where confinement enters: at a single-orbit cell the
+two competing single-vertex picks are related by such an `a` (`SelectedCellIsOrbit`), so the pick is invisible. -/
+theorem ifCanon_aut_invariant {adj : AdjMatrix n} {P : PMatrix n} {a : Equiv.Perm (Fin n)}
+    (ha : ∀ v w, adj.adj (a v) (a w) = adj.adj v w) (haP : ∀ v u, P (a v) (a u) = P v u)
+    {χι : Colouring n} (haχι : ∀ v, χι (a v) = χι v) (picks : List (Fin n))
+    (h₁ : Discrete (warmRefine adj P (descentColouring adj P χι picks)))
+    (h₂ : Discrete (warmRefine adj P (descentColouring adj P χι (picks.map a)))) :
+    labelledAdj (Colouring.rankPerm (warmRefine adj P (descentColouring adj P χι (picks.map a))) h₂) adj
+      = labelledAdj (Colouring.rankPerm (warmRefine adj P (descentColouring adj P χι picks)) h₁) adj :=
+  ifCanon_transport_corresponding ha haP haχι picks h₁ h₂
+
+/-! ### P6c — the top-level cross-graph invariance, modulo the confinement reconciliation
+
+The full iso-invariance for the *actual* `pickOne` sequences. For `H = π·G`, `H`'s pick sequence `picksH` need not be the
+`π`-image of `G`'s `picksG`; but at each single-orbit cell (confinement) the competing picks are related by an
+automorphism, so there is a reconciling `H`-automorphism `b` with `picksH = (picksG.map π).map b`. Given that (the
+confinement consequence, carried here as `hrec` — the one remaining obligation), the canonical forms coincide: strip `b`
+by `ifCanon_aut_invariant` (within-`H`), then transport by `π` via `ifCanon_transport_corresponding`. -/
+
+/-- **P6c — cross-graph canonical-form invariance modulo the reconciling automorphism.** For `H = π·G`, with `H`'s
+descent picks reconciled to the `π`-image of `G`'s by an `H`-automorphism `b` (`hrec` — the confinement consequence),
+the canonical forms coincide. Composition: `ifCanon_aut_invariant` (strip `b`, within `H`) then
+`ifCanon_transport_corresponding` (transport by `π`). The sole remaining gap is producing `b` from confinement's
+`SelectedCellIsOrbit` (the McKay reconciliation induction) — isolated as `hrec`. -/
+theorem ifCanon_iso_invariant_of_reconcile
+    {G H : AdjMatrix n} {P : PMatrix n} {π b : Equiv.Perm (Fin n)}
+    (hiso : ∀ v w, H.adj (π v) (π w) = G.adj v w) (hisoP : ∀ v u, P (π v) (π u) = P v u)
+    (hb : ∀ v w, H.adj (b v) (b w) = H.adj v w) (hbP : ∀ v u, P (b v) (b u) = P v u)
+    {χι : Colouring n} (hπχι : ∀ v, χι (π v) = χι v) (hbχι : ∀ v, χι (b v) = χι v)
+    {picksG picksH : List (Fin n)} (hrec : picksH = (picksG.map π).map b)
+    (h₁ : Discrete (warmRefine G P (descentColouring G P χι picksG)))
+    (hmid : Discrete (warmRefine H P (descentColouring H P χι (picksG.map π))))
+    (h₂ : Discrete (warmRefine H P (descentColouring H P χι picksH))) :
+    labelledAdj (Colouring.rankPerm (warmRefine H P (descentColouring H P χι picksH)) h₂) H
+      = labelledAdj (Colouring.rankPerm (warmRefine G P (descentColouring G P χι picksG)) h₁) G := by
+  subst hrec
+  rw [ifCanon_aut_invariant hb hbP hbχι (picksG.map π) hmid h₂]
+  exact ifCanon_transport_corresponding hiso hisoP hπχι picksG h₁ hmid
+
 end ChainDescent.ConfinementX3

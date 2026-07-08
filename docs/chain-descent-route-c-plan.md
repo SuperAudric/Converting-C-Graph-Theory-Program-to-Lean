@@ -1147,9 +1147,16 @@ samePartition-vs-literal gap; the banked `labelledAdj_rankPerm_transport` closes
 (confinement) make the choice invisible (`baseTransport`). So X3 = a **Runtime-Phase design change** (single-vertex
 index-free level-ordered individualization) + cross-graph transport on BANKED pieces + the DONE confinement core — NOT a
 wash-out (dead) nor a full `canonForm` redesign. ①a transfers (selector-agnostic); ② unaffected (≤n levels). **Pieces
-(`ScratchConfinementX3.lean`):** P1 `indivOne`+literal equivariance **✅ LANDED axiom-clean** · P2 level-ordered
-committed colouring · P3 single-vertex selector+termination · P4 cross-graph LITERAL descent transport · P5 rep-choice
-invisibility · P6 assemble. Full detail: file header + [[project_confinement_lemma_2026-07-07]].
+(`ScratchConfinementX3.lean`, P1–P6 ALL ✅ LANDED axiom-clean):** P1 `indivOne`+literal equivariance · P2 `indivStep1`
+single-step + `IndivStep` instance · P3 `pickOne` single-vertex selector+termination · P4 `descentColouring_transport`
+(cross-graph LITERAL) · P5 `labelledAdj_rankPerm_cross` (labelled-value lift) · P6 `ifCanon_transport_corresponding`
+(corresponding picks) + `ifCanon_aut_invariant` (within-graph orbit invisibility) + **`ifCanon_iso_invariant_of_reconcile`**
+(cross-graph invariance for `H=π·G`, modulo the reconciling `H`-automorphism `b`). **The invariance MECHANISM is proved
+end-to-end; the ONE remaining gap = `hrec`: confinement `SelectedCellIsOrbit` ⟹ `b` exists (McKay reconciliation
+induction).** REMAINING for ①b: (i) leaf-reaching index-free descent + termination; (ii) `hrec` from confinement; (iii)
+rewire `canonForm?`/①b onto the index-free object (①a transfers — `canonForm_isLabelledAdj` is seed-agnostic). NB the old
+`CanonFormImagesIsoInvariant` (over the index-based `canonForm`) is FALSE and abandoned. Full detail: file header +
+[[project_confinement_lemma_2026-07-07]].
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the
