@@ -1,19 +1,41 @@
 /-
 # ScratchConfinementResidual.lean — the D_k-restriction: the residual action on the base complement (WIP, NOT in build.sh)
 
-**The finding that reshapes this piece.** A `SchurianScheme n` has **vertex-transitive** `Aut`
+**The finding that reshapes this piece (precise version).** A `SchurianScheme n` has **vertex-transitive** `Aut`
 (`Scheme.schemeAutGroup_isPretransitive`: the diagonal `R₀` is a single orbital, so any two vertices are connected by
-a scheme automorphism). Therefore the confinement model `M : ResidueSchemeModel` — whose `hcard` pins
-`SchemeAutGroup(M.S) = StabilizerAt adj P D_k` and whose `hprim` demands `M.S` primitive (hence transitive) — is
-**only inhabitable when `StabilizerAt adj P D_k` is transitive on `Fin n`**, i.e. when `D_k = ∅` (the stabilizer FIXES
-`D_k` pointwise, so a transitive stabilizer forces `D_k = ∅`). For a general descent node (`D_k ≠ ∅`) the model
-`SchurianScheme n` **cannot** carry the residual — the residual group acts on the complement `Dᶜ`, fixing `D_k`.
+a scheme automorphism). The current `ResidueSchemeModel.hcard` is only a **cardinality** equality
+(`Nat.card SchemeAutGroup(M.S) = spineResidualCard k`), NOT a group equality — so the current `S : SchurianScheme n`
+model is **inhabitable and non-vacuous even for `D_k ≠ ∅`** (pick any schurian scheme of the right order). It typechecks
+and the ① showcase is green; nothing is broken. **The real problem is FAITHFULNESS, not inhabitability.** A model that
+genuinely *classifies the residue* needs `Aut(M.S)` to actually **be** the residual action `StabilizerAt adj P D_k` (so
+that G3 classifying `M.S` as Cameron says something about the residue, instead of that content being smuggled into the
+carried `hWitt`). But `StabilizerAt adj P D_k` FIXES `D_k` pointwise while a schurian scheme's `Aut` is transitive on its
+whole vertex set — so a **faithful** model genuinely **cannot** live on `Fin n` for `D_k ≠ ∅` (a scheme with `D_k` as
+fixed points is not transitive, hence not schurian). It must live on the residual `{x // x ∉ D_k}`, where the residual
+group actually acts.
 
 **So the D_k-restriction = represent the residue on its OWN vertex set, the complement `{x // x ∉ D}`.** The residual
 group `StabilizerAt adj P D` fixes `D` pointwise, hence acts on `Dᶜ`; that action is FAITHFUL (an element fixing `D`
-and `Dᶜ` is the identity), so the residual group embeds in `Perm {x // x ∉ D}`. Its orbital scheme on `{x // x ∉ D}`
-is the residual `SchurianScheme` the (reframed) model needs — with the `hcard` count transferring via the faithful
-embedding. This file builds that restriction.
+and `Dᶜ` is the identity), so the residual group embeds in `Perm {x // x ∉ D}`. This file builds that faithful
+embedding + its transport to `Fin m` + the count bridge.
+
+**★★ CORRECTION (2026-07-09 cont., user-prompted transitivity check) — the SCHEME lives on the selected CELL, NOT the
+whole complement.** The residual group is **transitive within a colour class but NOT across the complement's several
+classes** (`FrameSelectorTransitive`, `ScratchConfinementP4:167`, is transitivity on `sel (χsel T)` — the selected
+cell; its doc-comment: "for a Clebsch-type scheme the point-stabilizer is NOT transitive on the colour classes"). So
+the complement `{x // x ∉ D}` is in general a UNION of cells = intransitive ⟹ it is NOT the vertex set of a single
+`orbitalScheme` (`htrans_res` below — transitivity on ALL of `{x // x ∉ D}` — is FALSE in the multi-cell regime; the
+constructor is only inhabitable when the complement is a single cell, an over-restriction analogous to the original
+`D = ∅` one, just relocated). **The transitive object — the residue scheme G3 classifies — is the SELECTED CELL**,
+where transitivity is Witt's theorem (`FrameSelectorTransitive`, delivered by confinement-P4) and PRIMITIVITY (the
+confinement branch) makes block-transitivity = vertex-transitivity, so the block-vs-vertex concern is handled. The
+faithful-embedding machinery here (`residualRestrict_injective`) gives faithfulness on the COMPLEMENT (free); on the
+CELL the count `|cell-Aut| = spineResidualCard` instead needs the cell action FAITHFUL — the documented model-
+faithfulness gap (kernel = elements fixing the cell but moving other cells), a CARRIED hypothesis, not free. **⟹ the
+correct reframe is CELL-based: vertex set `sel (χsel T)`, transitivity from `FrameSelectorTransitive`, and a carried
+cell-faithfulness/largeness. The whole-complement constructor below is faithful-but-intransitive — kept as substrate
+(faithful embedding, count bridge, `permCongr` transport), NOT the final model. It RELOCATES the gap to cell-
+faithfulness; it does not eliminate it.**
 
 **State (2026-07-09, all axiom-clean, NOT in `build.sh`).**
   · **Foundation:** `residualRestrict` / `residualRestrictHom` (restrict a residual automorphism to `Perm {x // x ∉ D}`
@@ -44,6 +66,7 @@ import ChainDescent.ScratchConfinementSchurianModel
 namespace ChainDescent.ConfinementResidual
 
 open ChainDescent
+open ChainDescent.ConfinementP1
 
 variable {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
 
@@ -145,5 +168,73 @@ theorem residualGroupFin_card {D : Finset (Fin n)} :
       (Equiv.permCongrHom (residualEquivFin D)).injective).symm.toEquiv
   rw [hmap]
   exact Nat.card_congr (MonoidHom.ofInjective residualRestrictHom_injective).symm.toEquiv
+
+/-! ## Step 3 — the faithful residual scheme model on `Fin (residualCard D)` (additive reframe)
+
+The reframed model presents the residue by a `SchurianScheme (residualCard D)` — on the base **complement**, where the
+residual group `StabilizerAt adj P D` genuinely acts — with `Aut` FAITHFULLY that residual action (via the 2-closure
+citation + the count bridge). This is what makes G3's Cameron-classification refer to the residue, instead of that
+content being smuggled into the carried `hWitt`. It is built **additively**: the on-`Fin n` `ResidueSchemeModel`
+(`ScratchConfinementP3`) and the green ① showcase are untouched; the follow-up rethread of P3/Witt/bundle onto this
+type is a separate, reviewable step. -/
+
+/-- **Step 1 (promoted to `Fin m`).** The transported residual group `residualGroupFin` acts pretransitively on
+`Fin (residualCard D)`. Direct transport of `residualRange_pretransitive` along `residualEquivFin`: given `a b`, pull
+back to the complement, obtain a residual `g` moving one to the other, and its `permCongr` image moves `a` to `b`. -/
+theorem residualGroupFin_pretransitive {D : Finset (Fin n)}
+    (htrans_res : ∀ a b : {x : Fin n // x ∉ D}, ∃ g : StabilizerAt adj P D, residualRestrict g a = b) :
+    MulAction.IsPretransitive (residualGroupFin (adj := adj) (P := P) (D := D))
+      (Fin (residualCard D)) := by
+  refine ⟨fun a b => ?_⟩
+  obtain ⟨g, hg⟩ := htrans_res ((residualEquivFin D).symm a) ((residualEquivFin D).symm b)
+  refine ⟨⟨(Equiv.permCongrHom (residualEquivFin D)) (residualRestrict g),
+    Subgroup.mem_map.2 ⟨residualRestrict g, ⟨g, rfl⟩, rfl⟩⟩, ?_⟩
+  change (residualEquivFin D) (residualRestrict g ((residualEquivFin D).symm a)) = b
+  rw [hg, Equiv.apply_symm_apply]
+
+/-- **The reframed, FAITHFUL residue-scheme model** — presented on the base complement `Fin (residualCard D_k)`,
+`D_k` the level-`k` base prefix. Differs from `ResidueSchemeModel` only in the vertex set of `S`
+(`residualCard D_k` vs `n`), which is exactly what lets `Aut(S)` be the residual action (a schurian scheme's `Aut` is
+vertex-transitive, so on `Fin n` it could not fix `D_k`). -/
+structure ResidualSchemeModel (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) where
+  S : SchurianScheme (residualCard (defaultSpineChain adj P₀ χι₀ sel k).D)
+  hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true
+  hrank : 2 ≤ S.rank
+  hcard : Nat.card S.toAssociationScheme.SchemeAutGroup = spineResidualCard adj P₀ χι₀ sel k
+
+/-- **★ The reframed extraction constructor (faithful, on the residual vertex set).** Build `ResidualSchemeModel`
+from: residual transitivity `htrans_res` (the VT / primitive-rank-3 input), generosity `hsymm`, rank ≥ 2, and the
+scoped **2-closure citation** `h2c : SchemeAutGroup(orbitalScheme residualGroupFin) = residualGroupFin` (Skresanov
+form; needs the residue primitive rank-3, i.e. the `hImprim`/primitivity item). `S := orbitalScheme residualGroupFin`
+is schurian by construction; `hne` is free; and `hcard` composes `h2c` with the count bridge `residualGroupFin_card`
+(`|residualGroupFin| = |StabilizerAt adj P_k D_k| = spineResidualCard k`) — so the residual order transfers with NO
+extra hypothesis. This is the faithful counterpart of `residueModel_of_orbitalGroup`, valid for `D_k ≠ ∅`. -/
+noncomputable def residualSchemeModel_of_group
+    (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (k : Nat)
+    [Nonempty (Fin (residualCard (defaultSpineChain adj P₀ χι₀ sel k).D))]
+    (htrans_res : ∀ a b : {x : Fin n // x ∉ (defaultSpineChain adj P₀ χι₀ sel k).D},
+      ∃ g : StabilizerAt adj (defaultSpineChain adj P₀ χι₀ sel k).P
+        (defaultSpineChain adj P₀ χι₀ sel k).D, residualRestrict g a = b)
+    (hsymm : ∀ v w : Fin (residualCard (defaultSpineChain adj P₀ χι₀ sel k).D),
+      (orbMk v w : Orbital (residualGroupFin (adj := adj)
+        (P := (defaultSpineChain adj P₀ χι₀ sel k).P)
+        (D := (defaultSpineChain adj P₀ χι₀ sel k).D))) = orbMk w v)
+    (hrank : 2 ≤ (orbitalScheme _ (residualGroupFin_pretransitive
+      (adj := adj) (P := (defaultSpineChain adj P₀ χι₀ sel k).P) htrans_res) hsymm).rank)
+    (h2c : (orbitalScheme _ (residualGroupFin_pretransitive
+        (adj := adj) (P := (defaultSpineChain adj P₀ χι₀ sel k).P) htrans_res)
+        hsymm).toAssociationScheme.SchemeAutGroup
+      = residualGroupFin (adj := adj) (P := (defaultSpineChain adj P₀ χι₀ sel k).P)
+        (D := (defaultSpineChain adj P₀ χι₀ sel k).D)) :
+    ResidualSchemeModel adj P₀ χι₀ sel k where
+  S := orbitalScheme _ (residualGroupFin_pretransitive
+    (adj := adj) (P := (defaultSpineChain adj P₀ χι₀ sel k).P) htrans_res) hsymm
+  hne := fun i => by
+    refine ⟨(orbitalIdx _ i).out.1, (orbitalIdx _ i).out.2, ?_⟩
+    show decide (orbitalIdx _ i = orbMk (orbitalIdx _ i).out.1 (orbitalIdx _ i).out.2) = true
+    rw [orbMk_out, decide_eq_true_eq]
+  hrank := hrank
+  hcard := by rw [h2c]; exact residualGroupFin_card
 
 end ChainDescent.ConfinementResidual

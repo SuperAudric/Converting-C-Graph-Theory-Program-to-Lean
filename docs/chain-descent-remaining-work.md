@@ -39,9 +39,14 @@ ResidueSchemeModel`; (b) the 2-closure citation for `hcard` (`|SchemeAutGroup| =
 "faithfulness gap"; either recovered à la Route C, or via the pretransitive assume-VT group). **CRUCIAL COUPLING: 2-closure
 needs the residue PRIMITIVE rank-3 first ⟹ depends on item 1.** Not a wall: one citation + a constructor + a bridge.
 **BUILT (axiom-clean, 2026-07-09):** (a) `ScratchConfinementSchurianModel.residueModel_of_orbitalGroup` (schurian +
-`hne` FREE); the D_k-restriction (`ScratchConfinementResidual.lean`) — ★ FINDING: schurian ⟹ vertex-transitive `Aut`,
-so the current `ResidueSchemeModel : SchurianScheme n` is only inhabitable at `D=∅` ⟹ the residue must be modelled on
-the base-complement `{x//x∉D}` (`SchurianScheme (residualCard D)`). Foundation (`residualRestrict`, faithful) + step 1
+`hne` FREE); the D_k-restriction (`ScratchConfinementResidual.lean`) — ★ FINDING (precise): schurian ⟹ vertex-transitive `Aut`, and
+`hcard` is cardinality-only, so the current `ResidueSchemeModel : SchurianScheme n` IS inhabitable at `D≠∅` (showcase is
+green) but **UNFAITHFUL**; a FAITHFUL model cannot live on `Fin n` for `D≠∅`. **★★ CORRECTION (transitivity check): the
+scheme lives on the SELECTED CELL `sel (χsel T)`, NOT the whole complement** — the residual is transitive within a colour
+class but NOT across (`FrameSelectorTransitive`; Clebsch point-stab not transitive on colour classes), so `{x//x∉D}` is
+intransitive and the whole-complement constructor is on the wrong object (faithful-but-intransitive substrate). Cell reframe:
+transitivity from Witt, PRIMITIVITY makes block=vertex (handles the concern), but the count needs cell-faithfulness = the
+carried model-faithfulness gap. Foundation (`residualRestrict`, faithful) + step 1
 (`residualRange_pretransitive`) + step 2 count bridge (`residualGroupFin_card : |residualGroupFin| = |StabilizerAt|`)
 DONE; the `orbitalScheme`-on-`Fin m` + the structural reframe of `ResidueSchemeModel` PENDING. Detail =
 [[project_seal_phase_wrapup_2026-07-09]].
