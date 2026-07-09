@@ -20,12 +20,29 @@
 > confinement citation bundle `ConfinementCitations`. The whole W-plan (W1–W4) that closed ①b→ is done. What remains to
 > make the Seal Phase **unconditional / portable**:
 
-**1. hImprim — NOT discharged (an in-scope theorem, NOT wiring).** Block-tower infra is built
-(`exists_nontrivial_closedSubset_of_not_isPrimitive`, the Route-B chain, `schemeBlockRecovered_of_visibleRealizers`), but
-the reduction `¬IsPrimitive → ReachesRigid` is `Cascade.reachesRigidOrCameron`'s carried `hImprimitive` hypothesis and is
-explicitly *"the one genuine open, in-scope, theorem-shaped gap"* (`Cascade.lean:3278`; `cell_splits_of_imprimitive` modulo
-`BlockRefinementVisible`). Confinement separately assumes `hprim : IsPrimitive` (carried in `ConfinementCitations.hprim`).
-Discharge = build the primitivity reduction, not connect existing pieces.
+**1. hImprim / primitivity — WALL-FREE ROUTE ESTABLISHED (2026-07-09; NOT the wall).** Confinement carries
+`hprim : IsPrimitive`. **★★ KEY VERIFICATION (2026-07-09): discharging it does NOT require the wall.** The soundness need
+is `SelectedCellIsOrbit` = "the selected cell is ONE `R`-orbit (vertex-transitive)". **Imprimitive is STILL VT** (transitive
+*with* a finer invariant partition INSIDE the orbit — blocks do NOT split the orbit into several orbits; confirmed:
+`schemeBlock_fiber_transitive`/`schemeBlocks_transitive` both open with `haveI := schemeAutGroup_isPretransitive S`, i.e.
+they describe block structure INSIDE an already-transitive scheme). So an imprimitive residue SATISFIES `SelectedCellIsOrbit`
+and assume-VT-pruning it is SOUND — imprimitivity is **not a soundness concern at all**. `hprim` is a *certification* fact
+(it routes VT-certification through G3 → Cameron → Witt), not a soundness requirement.
+  - **Primary discharge (per-family, cheap): `G₀Irreducible ⟹ IsPrimitive`.** The affine/forms residue is primitive rank-3
+    by G₀-irreducibility (`CascadeAffine.G₀Irreducible` §2291, `isPrimitive_affineScheme_imp_irreducible` §2351, witness
+    `G0cyc_irreducible` §3434) — a linear-algebra condition, NO WL-dimension. So imprimitive does NOT arise for the handled
+    families; `hprim` is carried alongside {G3, Witt, Liebeck} and dischargeable per-family.
+  - **Generic backstop (wall-free): block-tower transitivity-PRESERVATION.** A hypothetical large-imprimitive residue reduces
+    to primitive constituents: `schemeBlocks_transitive` (quotient transitive) + `schemeBlock_fiber_transitive` (fiber
+    transitive) ⟹ whole transitive ⟹ `SelectedCellIsOrbit`. NO `BlockRefinementVisible`, no WL-dimension. Largeness lands in
+    a primitive-large-Cameron constituent (G3/Witt); no small-primitive-non-Cameron constituent can arise.
+  - **★ DEAD ROUTE — do NOT use `cell_splits_of_imprimitive` / `BlockRefinementVisible`.** That is the SEAL's
+    (`reachesRigidOrCameron` `hImprimitive`, `Cascade.lean:3278`) WL-VISIBILITY / recovery mechanism — `BlockRefinementVisible`
+    is literally "the WL-dimension boundary" = `hSmallAutThin` = THE WALL. Algorithm A assume-VT-PRUNES (needs only VT, which
+    the block tower PRESERVES); it never RECOVERS/splits, so it never needs visibility. **A 2026-07-09 mis-scoping routed the
+    confinement's imprimitive case through this seal mechanism and thereby REINTRODUCED the wall; that routing is discarded.**
+    Algorithm A stays unconditional-modulo-citations because P1 (flag ⟹ large `Aut`) excludes every small-`Aut` residue —
+    the entire regime where the wall lives — from flagging. Detail = [[project_seal_phase_wrapup_2026-07-09]].
 
 **2. SchurianScheme / `M` — a MODELLING gap, NOT an UnhandledResidue (corrected 2026-07-09).** Confinement carries
 `M : ResidueSchemeModel` (a faithful schurian scheme of the residue). This is **not** a D0/`residueNonSchurian` flag:
@@ -38,18 +55,26 @@ ResidueSchemeModel`; (b) the 2-closure citation for `hcard` (`|SchemeAutGroup| =
 (c) the group-supply / faithfulness bridge (exhibit the residue's residual `Aut` — the piece the source called the
 "faithfulness gap"; either recovered à la Route C, or via the pretransitive assume-VT group). **CRUCIAL COUPLING: 2-closure
 needs the residue PRIMITIVE rank-3 first ⟹ depends on item 1.** Not a wall: one citation + a constructor + a bridge.
-**BUILT (axiom-clean, 2026-07-09):** (a) `ScratchConfinementSchurianModel.residueModel_of_orbitalGroup` (schurian +
-`hne` FREE); the D_k-restriction (`ScratchConfinementResidual.lean`) — ★ FINDING (precise): schurian ⟹ vertex-transitive `Aut`, and
-`hcard` is cardinality-only, so the current `ResidueSchemeModel : SchurianScheme n` IS inhabitable at `D≠∅` (showcase is
-green) but **UNFAITHFUL**; a FAITHFUL model cannot live on `Fin n` for `D≠∅`. **★★ CORRECTION (transitivity check): the
-scheme lives on the SELECTED CELL `sel (χsel T)`, NOT the whole complement** — the residual is transitive within a colour
-class but NOT across (`FrameSelectorTransitive`; Clebsch point-stab not transitive on colour classes), so `{x//x∉D}` is
-intransitive and the whole-complement constructor is on the wrong object (faithful-but-intransitive substrate). Cell reframe:
-transitivity from Witt, PRIMITIVITY makes block=vertex (handles the concern), but the count needs cell-faithfulness = the
-carried model-faithfulness gap. Foundation (`residualRestrict`, faithful) + step 1
-(`residualRange_pretransitive`) + step 2 count bridge (`residualGroupFin_card : |residualGroupFin| = |StabilizerAt|`)
-DONE; the `orbitalScheme`-on-`Fin m` + the structural reframe of `ResidueSchemeModel` PENDING. Detail =
-[[project_seal_phase_wrapup_2026-07-09]].
+**★★ FAITHFUL CELL MODEL — BUILT + RETHREADED END-TO-END (2026-07-09, all axiom-clean, additive; old cardinality showcase
+preserved).** The model lives on the SELECTED CELL `sel (χsel T) ≅ Fin (cellCard C)` (NOT the whole complement — the residual
+is transitive within a colour class but not across it, `FrameSelectorTransitive`; the earlier whole-complement `{x//x∉D}`
+construction in `ScratchConfinementResidual.lean` is faithful-but-intransitive SUBSTRATE, not the model). Cluster (5 files):
+  - `ScratchConfinementCellModel.lean` — `CellSchemeModel` (S : `SchurianScheme (cellCard C)`, faithful) + constructor
+    `cellSchemeModel_of_group`; Witt bridge `htrans_cell_of_frameSelectorTransitive` (transitivity IS supplied by Witt,
+    non-vacuous); `CellInvariant` DISCHARGED (`cellInvariant_selCell_indivWarmRefine`, colour-invariance); **`CellActionFaithful`
+    reduced to `IsBase`** (`cellActionFaithful_of_isBase` — `K=1 ⟺ StabilizerAt(T∪C) trivial = IsBase(T∪C)`, the descent's
+    discretization predicate; forms discharge = `isotropic_span`, downstream).
+  - `ScratchConfinementCellP3.lean` — `PrimRank3ClassicalCell` + `residue_primRank3ClassicalCell` + the largeness bridge +
+    `confinement_selectedCellIsOrbit_spine_cell_discharged` (plugs into the generic assembly, which is abstract in the
+    predicate — so the rethread is ADDITIVE); plus item-1 Piece 1 `cellResidue_imprimitive_or_cameron`.
+  - `ScratchConfinementCellWitt.lean` — `confinement_selectedCellIsOrbit_spine_witt{,_classical}_cell` (Liebeck arity-poly).
+  - `ScratchConfinementCellComplete.lean` — `ConfinementCitationsCell` bundle (per-node `M : ∀ H done, Σ C, CellSchemeModel`)
+    + **`descentCanon_showcase_cell`** = the ① showcase (sound ∧ complete) on the FAITHFUL model, sorry-free.
+  - `ScratchConfinementSchurianModel.residueModel_of_orbitalGroup` (the on-`Fin n` constructor; superseded by the cell one).
+So G3 now genuinely classifies the residue CELL (`Aut(S) =` the residual cell action). **REMAINING:** (i) the forms
+`IsBase(T∪C)` discharge via `isotropic_span` (couples to form-recovery, downstream); (ii) a minor cleanliness item — the
+faithful `M`'s construction already presupposes `htrans_cell` (= Witt-transitivity), so `M`-existence and the carried `hWitt`
+overlap (redundancy, not unsoundness; resolve at per-family instantiation). Detail = [[project_seal_phase_wrapup_2026-07-09]].
 
 **3. Citations — audit exact Lean statements for reviewer-faithfulness.** The carried citations {G3 (`hClassify`),
 Liebeck, Witt, Skresanov 2-closure (`AffineSchemeTwoClosed`)} stay cited, but each hypothesis's Lean *statement* must be
