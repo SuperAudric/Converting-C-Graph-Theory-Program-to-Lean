@@ -69,6 +69,38 @@ TRUE for the forms/Cameron family (`isotropic_span`), carried here and discharge
 def CellActionFaithful {T C : Finset (Fin n)} (hinv : CellInvariant adj P T C) : Prop :=
   Function.Injective (cellRestrictHom hinv)
 
+/-- **★ `CellActionFaithful` DISCHARGED from a base** — the general (family-free) discharge. The kernel of the cell
+action is exactly `{g ∈ StabilizerAt T : g` fixes `C` pointwise`} = StabilizerAt (T ∪ C)`, so faithfulness `⟺ T ∪ C` is
+a **base** (its pointwise stabilizer is trivial = `IsBase adj P (T ∪ C)`, the descent's discretization predicate). So
+`K = 1` is not an ad-hoc hypothesis: it is "the base + selected cell discretize the graph." For the forms/Cameron family
+this holds because the cell's isotropic points SPAN (`isotropic_span`) ⟹ an isometry fixing `T ∪ C` is the identity —
+the per-family discharge, downstream. -/
+theorem cellActionFaithful_of_isBase {T C : Finset (Fin n)} (hinv : CellInvariant adj P T C)
+    (hbase : IsBase adj P (T ∪ C)) :
+    CellActionFaithful hinv := by
+  refine (injective_iff_map_eq_one (cellRestrictHom hinv)).mpr ?_
+  intro g hg
+  have hg' : cellRestrict hinv g = 1 := hg
+  have hCfix : ∀ x ∈ C, (g : Equiv.Perm (Fin n)) x = x := by
+    intro x hx
+    have h1 : cellRestrict hinv g ⟨x, hx⟩ = ⟨x, hx⟩ := by rw [hg']; rfl
+    have h2 := congrArg Subtype.val h1
+    rwa [cellRestrict_apply] at h2
+  have hgmem : ResidualAut adj P (T ∪ C) (g : Equiv.Perm (Fin n)) := by
+    refine ⟨g.2.1, g.2.2.1, ?_⟩
+    intro x hx
+    rw [Finset.mem_union] at hx
+    rcases hx with h | h
+    · exact g.2.2.2 x h
+    · exact hCfix x h
+  have hgid : (g : Equiv.Perm (Fin n)) = 1 := by
+    apply Equiv.ext
+    intro v
+    have hv := hbase v ((g : Equiv.Perm (Fin n)) v)
+      ⟨(g : Equiv.Perm (Fin n)), hgmem.1, hgmem.2.1, hgmem.2.2, rfl⟩
+    simpa using hv.symm
+  exact Subtype.ext hgid
+
 /-! ## Discharging `CellInvariant` — colour-invariance (step (1), the last "should-be-free" input)
 
 `CellInvariant` for the descent's selected cell `selCell χ` reduces to `χ` being `g`-invariant, via the W1 core
