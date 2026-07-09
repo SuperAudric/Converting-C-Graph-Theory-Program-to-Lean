@@ -20,7 +20,16 @@
 > confinement citation bundle `ConfinementCitations`. The whole W-plan (W1–W4) that closed ①b→ is done. What remains to
 > make the Seal Phase **unconditional / portable**:
 
-**1. hImprim / primitivity — WALL-FREE ROUTE ESTABLISHED (2026-07-09; NOT the wall).** Confinement carries
+**1. hImprim / primitivity — SILENT `hprim` REMOVED, WALL-FREE + AXIOM-CLEAN (2026-07-09; NOT the wall).**
+**★★★ LANDED (`ScratchConfinementCellImprim.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, additive,
+NOT in build.sh):** the confinement is now **total in primitivity** — the silent `hprim` is gone. Capstone
+`confinement_selectedCellIsOrbit_spine_cell_total` composes Piece 1's proved dichotomy (`¬IsPrimitive ∨ Cameron`)
+with the wall-free `FrameSelectorTransitive → SelectedCellIsOrbit` tail, routing **each** branch to `FST`: Cameron via
+`hWitt`, imprimitive via the new explicit `hImprimTrans : ¬IsPrimitive → FrameSelectorTransitive` (transitivity, NEVER
+`BlockRefinementVisible`). Threaded end-to-end to the **total ① showcase** `descentCanon_showcase_cell_total` (sound ∧
+complete, no silent `hprim`; bundle `ConfinementCitationsCellTotal` reads {G3, Liebeck, Witt, `hImprimTrans`, D0}).
+`hImprimTrans` is a CARRIED family input with the same downstream status as `hWitt` (vacuous on the primitive rank-3
+forms families; per-family/generic discharge is downstream, off the critical path, never the wall). Confinement carried
 `hprim : IsPrimitive`. **★★ KEY VERIFICATION (2026-07-09): discharging it does NOT require the wall.** The soundness need
 is `SelectedCellIsOrbit` = "the selected cell is ONE `R`-orbit (vertex-transitive)". **Imprimitive is STILL VT** (transitive
 *with* a finer invariant partition INSIDE the orbit — blocks do NOT split the orbit into several orbits; confirmed:
@@ -28,14 +37,22 @@ is `SelectedCellIsOrbit` = "the selected cell is ONE `R`-orbit (vertex-transitiv
 they describe block structure INSIDE an already-transitive scheme). So an imprimitive residue SATISFIES `SelectedCellIsOrbit`
 and assume-VT-pruning it is SOUND — imprimitivity is **not a soundness concern at all**. `hprim` is a *certification* fact
 (it routes VT-certification through G3 → Cameron → Witt), not a soundness requirement.
-  - **Primary discharge (per-family, cheap): `G₀Irreducible ⟹ IsPrimitive`.** The affine/forms residue is primitive rank-3
-    by G₀-irreducibility (`CascadeAffine.G₀Irreducible` §2291, `isPrimitive_affineScheme_imp_irreducible` §2351, witness
-    `G0cyc_irreducible` §3434) — a linear-algebra condition, NO WL-dimension. So imprimitive does NOT arise for the handled
-    families; `hprim` is carried alongside {G3, Witt, Liebeck} and dischargeable per-family.
-  - **Generic backstop (wall-free): block-tower transitivity-PRESERVATION.** A hypothetical large-imprimitive residue reduces
-    to primitive constituents: `schemeBlocks_transitive` (quotient transitive) + `schemeBlock_fiber_transitive` (fiber
-    transitive) ⟹ whole transitive ⟹ `SelectedCellIsOrbit`. NO `BlockRefinementVisible`, no WL-dimension. Largeness lands in
-    a primitive-large-Cameron constituent (G3/Witt); no small-primitive-non-Cameron constituent can arise.
+  - **★ PRIMARY discharge (generic, wall-free): block-tower transitivity-PRESERVATION.** A large-imprimitive residue stays
+    vertex-transitive: `schemeBlocks_transitive` (quotient transitive, `Scheme.lean:3963`) + `schemeBlock_fiber_transitive`
+    (fiber transitive, `Scheme.lean:3949`) — **both proved, both open with `haveI := schemeAutGroup_isPretransitive S`** ⟹
+    whole scheme transitive ⟹ the cell is one orbit ⟹ `SelectedCellIsOrbit`. NO `BlockRefinementVisible`, no WL-dimension,
+    no per-family case-work. This is the recommended primary route (2026-07-09 correction — see the next bullet for why the
+    former "primary" is not wiring). Remaining build = a **bridge lemma** "scheme block-tower transitivity ⟹ `SelectedCellIsOrbit`",
+    which shares the descent-`Aut`↔`SchemeAutGroup` identification (cell-faithfulness / `IsBase(T∪C)`) with checklist item 2 —
+    so items 1 and 2 are ONE work-front here, not two.
+  - **◐ SECONDARY / OPTIMIZATION (per-family, NOT cheap wiring — orientation corrected 2026-07-09): `G₀Irreducible ⟹ IsPrimitive`.**
+    This would make imprimitive vacuous for the handled families, but **the needed lemma is UNBUILT and cited backwards in the
+    prior prose.** The built `isPrimitive_affineScheme_imp_irreducible` (`CascadeAffine.lean:2351`) proves the **converse**
+    `IsPrimitive → G₀Irreducible` (its docstring: *"the direction that matters is `¬irreducible → ¬IsPrimitive`"*, `:2256`);
+    the forward `G₀Irreducible → IsPrimitive` is listed as unbuilt "Next" (`:2203`, M1 forward half). So this route requires
+    (a) a NEW forward-M1 lemma (closed-subset ⟹ invariant-subspace, dual to the built one) **and** (b) the `M.S`↔`affineScheme`
+    identification. Genuine proof work, gated on building forward-M1. Witnesses `G0cyc_irreducible` (`:3434`) etc. give
+    `G₀Irreducible`, not `IsPrimitive`. Pursue only after the generic route, as a cleanliness optimization.
   - **★ DEAD ROUTE — do NOT use `cell_splits_of_imprimitive` / `BlockRefinementVisible`.** That is the SEAL's
     (`reachesRigidOrCameron` `hImprimitive`, `Cascade.lean:3278`) WL-VISIBILITY / recovery mechanism — `BlockRefinementVisible`
     is literally "the WL-dimension boundary" = `hSmallAutThin` = THE WALL. Algorithm A assume-VT-PRUNES (needs only VT, which
