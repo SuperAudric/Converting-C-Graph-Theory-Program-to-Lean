@@ -158,7 +158,13 @@ consumes**; Phase 2 has no recovery for *its own* flag yet, so **Phase 2 is the 
 — Phase-1 totality is the point, not a vacuity; the `∨ none` disjunct of `canon_poly_or_flag` is reserved for Phase 2.
 RRU is the true **switch-over gate**: until it is an explicit proven object, Phase 2 has nothing to forward-reference.
 (Do NOT reframe RRU as "a Phase-1 flag hands a `none` to Phase 2" — that inverts the polarity; the flag is consumed, the
-handoff is the *proven* rigid residue.)
+handoff is the *proven* rigid residue.) **The boundary is the DEFERRAL scheduler, not the flag threshold** (scoped +
+resolved 2026-07-09): a cell is *consumed* (`OrbitPartition` = a path-fixing automorphism relates a pair) or a real
+decision is *deferred* (`¬OrbitPartition`), sound by `real_stays_real` (`CascadeOracle.lean`); "nothing left to consume"
+= **rigid = `IsBase`** (trivial residual, `card_stabilizerAt_eq_one_iff_isBase`). The flag is a *cost* mechanism confined
+to the `¬IsBase` side (P2 `flag_imp_symmetric_spine`), NOT the boundary — so there is no small-Aut/trivial-Aut gap. The
+substrate is all built; RRU is an assembly whose first brick is the progress lemma `¬IsBase → ∃` a consumable
+`OrbitPartition` pair. Full scoping: `chain-descent-remaining-work.md` item 6 + `[[project_rru_phase_transfer_2026-07-09]]`.
 
 **The two seals (mirror table, IR §11.12).**
 

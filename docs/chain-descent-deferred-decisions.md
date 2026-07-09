@@ -1,5 +1,13 @@
 # Chain descent — deferred decisions and the rigid-residue hand-off
 
+> **▶ This doc is the mechanism substrate for the LEAN "RRU phase-transfer theorem" (2026-07-09) — the proven Seal→Rigid
+> handoff object.** The deferral scheduler here (consume `OrbitPartition` symmetry / defer `¬OrbitPartition` reals,
+> sound by `real_stays_real` §2) *is* the phase boundary: "nothing left to consume" = rigid = `IsBase` (trivial
+> residual). RRU = "Phase 1 unconditionally reaches the first `IsBase` residue `R(G)`, iso-invariantly"; Phase 2 (§7)
+> consumes `R(G)` and is the sole source of `none`. Scoped + resolved (substrate all built; first brick = the progress
+> lemma `¬IsBase → ∃` a consumable `OrbitPartition` pair): `chain-descent-remaining-work.md` item 6 + endgame §1a +
+> memory `project_rru_phase_transfer_2026-07-09`.
+
 A scheduling architecture for the descent: **consume all symmetric
 decisions first (deferring the real ones), then enumerate the rigid
 residue exhaustively.** Two payoffs — the oracle calls become

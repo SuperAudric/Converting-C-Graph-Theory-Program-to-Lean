@@ -171,10 +171,25 @@ consumes**; Phase 2 has no recovery for its own flag yet ⟹ **Phase 2 is the so
 Publication objects: (a) ① / ② being proven against a **total, never-`none`** object is *by design* (Phase-1 totality),
 NOT a vacuity — the `∨ none` disjunct is reserved for Phase 2; (b) `Publication.canonForm?`/`cost` should **unify ① and ②
 onto one object** (today ①'s `descentCanonForm? := some (descentCanon)` is structurally always-`some`, while ②'s
-`CanonForm.canonForm?` is a separate capped object — both total, but distinct). **State:** the per-step brick is built
-(`SelectedCellIsOrbit`, confinement ①, axiom-clean); the RRU assembly (iterate-to-rigid-fixpoint + `R(G)` as an explicit
-iso-invariant + termination via strictly-decreasing residual order) is the unbuilt switch-over gate. Endgame frame =
-`chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU". Scoping in progress.
+`CanonForm.canonForm?` is a separate capped object — both total, but distinct).
+**★ SCOPED + RESOLVED (2026-07-09) — the boundary is DEFERRAL / `IsBase`, NOT the flag threshold; RRU is an ASSEMBLY of
+built parts.** The phase boundary is the **deferred-decisions** scheduler (`docs/chain-descent-deferred-decisions.md`): at
+each cell the oracle **consumes** symmetry (a pair with `OrbitPartition adj P S v w` = a path-fixing automorphism swaps
+them) or **defers** a **real decision** (`¬OrbitPartition`); soundness = **`real_stays_real`** (`CascadeOracle.lean:74`,
+reals stay real under more individualization). "Oracle has nothing left to consume" = only reals remain = **rigid** =
+**`IsBase`** (`spineResidualCard = 1`, `card_stabilizerAt_eq_one_iff_isBase`) = definition **(b) literally rigid**
+(user-confirmed). `R(G)` = the **first `IsBase` residue** reached. **THE `[small-Aut, trivial-Aut]` GAP DISSOLVES:**
+consumption is **orbit-based** (any automorphism), not size/threshold-based — `¬IsBase` always yields a consumable
+`OrbitPartition` pair, so the boundary is exactly trivial-`Aut`; the **flag is a COST mechanism**, confined to the `¬IsBase`
+symmetric side by **P2** (`flag_imp_symmetric_spine`, `ScratchConfinement.lean:266`), NOT the boundary. **Substrate ALL
+BUILT** (rigid=`IsBase`; `real_stays_real`+`OrbitPartition.mono`; P2; consumption sound large-`Aut`=confinement
+`SelectedCellIsOrbit` / small-`Aut`=`matchOracle`/`coversOrbits_of_realizers`; termination backbone
+`defaultSpineChain_reaches_leaf`). **REMAINING ASSEMBLY:** (1) **progress lemma [FIRST BRICK]** `¬IsBase → ∃ v w` in one
+cell with `OrbitPartition adj P T v w`; (2) `R(G)` = first-`IsBase` residue as an explicit object (today's `descentCanon`
+over-individualizes to *discrete*; RRU stops at the first base = for a multipede the WL-blind rigid residue Phase 2 wants);
+(3) iso-invariance of `R(G)`; (4) termination-at-rigid (consumption shrinks residual + `real_stays_real` monotonicity).
+**NEXT = the progress lemma (1).** Endgame frame = `chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU";
+full scoping = [[project_rru_phase_transfer_2026-07-09]].
 
 **Detail:** confinement thread = [[project_confinement_lemma_2026-07-07]]; ① showcase =
 `GraphCanonizationProofs/ChainDescent/ScratchConfinementX3Complete.lean`; endgame frame = `chain-descent-endgame-spec.md` §1a.
