@@ -201,10 +201,15 @@ not open.** `forcedNode adj P S₀ := S₀ ∪ movedSet` is a choice-free, deter
 choice-free/iso-invariant; the efficiency-optimal one-rep-per-orbit base is smaller = the open recovery layer).
 **What is GENUINELY still open (the real RRU frontier):** (a) **wire the descent to *compute* `rigidResidue`** —
 refinement-recovery of `forcedNode` (`movedSet_eq_nonsingletonCells_of_recoverable` is the recoverable-node half; general
-computation is the open recovery content, declassing §5 item 3); (b) **hand `R(G)` to Phase 2** as its typed input
-(unblocks the rigid seal, endgame §5 step 2); (c) **connect to Publication** — `rigidResidue` is the Phase-2 input,
-distinct from `descentCanon`'s discrete leaf, so the ①/② object-unification must account for the handoff.
-**NEXT = (b) give Phase 2 its input, OR (a) the descent↔`forcedNode` recovery bridge.**
+computation is the open recovery content, declassing §5 item 3); (b)✅ **hand `R(G)` to Phase 2** as its typed input —
+**DONE 2026-07-10, new module `ChainDescent/Phase2Handoff.lean` (in `build.sh`, axiom-clean):** `handoffBase adj :=
+rigidResidue adj` + `handoff_isRigid` (rigid, unconditional) + `orbitPartition_handoff_iff_eq` (the "no residual symmetry
+at the handoff" fact = Phase 2 is a genuinely rigid search) + `handoffBase_relabel` (iso-invariant) + the **Phase-2 solver
+contract** `Solver`/`Sound`/`IsoInvariant` (stated in `labelledAdj`/`relabelAdj` shape to compose with Publication ①a/①b/①c).
+Algorithm R is the future witness of `Sound`/`IsoInvariant`; (c) **connect to Publication** — `rigidResidue` is the Phase-2
+input, distinct from `descentCanon`'s discrete leaf, so the ①/② object-unification must account for the handoff.
+**NEXT = the Phase-2 solver (Algorithm R) as a `Phase2.Solver` witnessing `Sound`+`IsoInvariant`, OR (a) the
+descent↔`forcedNode` recovery bridge, OR (c) the Publication object-unification.**
 Original items (superseded by the above): (1) progress lemma; (2) `R(G)` explicit object; (3) iso-invariance; (4)
 termination-at-rigid. Endgame frame = `chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU";
 full scoping = [[project_rru_phase_transfer_2026-07-09]].
@@ -724,3 +729,7 @@ the non-schurian IR-solver row 4** (the forward payoff), never the seal's obliga
 *Maintenance: update §1's modulo table when a capstone's `#print axioms` carry-set changes; update §3 as items land;
 keep the deep-dives (`chain-descent-a2-potential-route.md` §9.9.x, `-ir-blindspot-solver.md`, `-self-detection-plan.md`)
 authoritative and this doc a one-screen map.*
+
+
+User notes: current reaches rigid form is uncomputable, and not linked up with the other lemmas.
+At some point the runtime should be able to run it as well, but likely rigid phase should be started before that piece.
