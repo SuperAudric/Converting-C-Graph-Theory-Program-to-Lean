@@ -66,6 +66,23 @@ theorem residue_primRank3ClassicalCell (adj : AdjMatrix n) (P₀ : PMatrix n) (�
     PrimRank3ClassicalCell adj P₀ χι₀ sel IsCameronScheme k :=
   ⟨C, M, exhaustiveObstruction_scheme hClassify M.S M.hne hprim M.hrank (hLargeBridge hlarge)⟩
 
+/-- **★ Item-1 core: the flag makes the residue provably imprimitive-OR-Cameron** (no silent `hprim`).
+`exhaustiveObstruction_scheme_trichotomy` gives `¬IsPrimitive ∨ ¬IsLarge ∨ Cameron`; the flag's largeness
+(`largeBridge_confinementLargeScheme_cell`) EXCLUDES the `¬IsLarge` branch. So a flagging (large) residue cell is either
+**imprimitive** (→ the descent split path, the descent-integration Piece 2, bottoming out on `BlockRefinementVisible` =
+the shared wall) or **Cameron** (→ Witt, handled). Primitivity is no longer assumed; `¬IsLarge` is dead. -/
+theorem cellResidue_imprimitive_or_cameron (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) {C : Finset (Fin n)}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (confinementLargeScheme n) IsCameronScheme)
+    (M : CellSchemeModel adj P₀ χι₀ sel k C)
+    (hlarge : 2 ^ baseMax n < spineResidualCard adj P₀ χι₀ sel k) :
+    ¬ M.S.toAssociationScheme.IsPrimitive ∨ IsCameronScheme (cellCard C) M.S := by
+  rcases exhaustiveObstruction_scheme_trichotomy hClassify M.S M.hne M.hrank with h | h | h
+  · exact Or.inl h
+  · exact absurd (largeBridge_confinementLargeScheme_cell adj P₀ χι₀ sel k M hlarge) h
+  · exact Or.inr h
+
 /-- **★ Confinement on the FAITHFUL cell model, largeness discharged.** Plugs the cell predicate + cell producer into
 the SAME generic `confinement_selectedCellIsOrbit_spine`. Carries only the genuine citations/gaps at the cell arity:
 `hClassify` (G3), the faithful model `M`, `hprim`, and Witt `hWitt` (now consuming the cell predicate). Concludes the
