@@ -3066,6 +3066,52 @@ theorem forcedNode_relabel (σ : Equiv.Perm (Fin n)) (S₀ : Finset (Fin n)) :
   unfold forcedNode
   rw [Finset.image_union, movedSet_relabel]
 
+/-! ### RRU — the Reaches-Rigid-Unconditionally handoff object (brick 2)
+
+The Seal Phase (Algorithm A) consumes symmetry and hands **Phase 2** (the rigid solver) a *rigid,
+iso-invariant residue* `R(G)`. The choice-free forced node at the empty base — individualize the
+whole residual support of `Aut^{P₀}(adj)` — **is** that residue: it is always a base
+(`forcedNode_isBase` ⟹ rigid = trivial residual) and transports under every relabelling
+(`forcedNode_relabel` ⟹ iso-invariant), for EVERY input (the "unconditionally" in RRU). This packages
+the existing `forcedNode` Leg-A machinery as the named Phase-1 → Phase-2 handoff
+([`docs/chain-descent-remaining-work.md`](../../../docs/chain-descent-remaining-work.md) item 6).
+
+`P₀ := (fun _ _ => POE.unknown)` (the trivial order — every permutation preserves it, so the residual
+group is the full `Aut(adj)`). NB `R(G)` individualizes the *entire* support (choice-free, hence
+iso-invariant); the one-representative-per-orbit base Phase 1 would compute for *efficiency* is a
+smaller set — refinement-*computing* `R(G)` is the separate recovery layer (`forcedNode` §"computability
+at recoverable nodes"), NOT needed for the handoff INTERFACE proven here. -/
+
+/-- **The RRU rigid residue `R(G)`.** The canonical base the Seal Phase hands to Phase 2:
+individualize the entire residual support of `Aut(adj)` (empty base, trivial order `P₀`). Choice-free,
+deterministic — `forcedNode` at `∅`. -/
+noncomputable def rigidResidue (adj : AdjMatrix n) : Finset (Fin n) :=
+  forcedNode adj (fun _ _ => POE.unknown) ∅
+
+/-- **RRU — rigid (unconditional).** `R(G)` is always a base: the residual automorphism group is
+trivial there, so the handoff residue is genuinely rigid. Holds for EVERY `adj`. -/
+theorem rigidResidue_isBase (adj : AdjMatrix n) :
+    IsBase adj (fun _ _ => POE.unknown) (rigidResidue adj) :=
+  forcedNode_isBase (adj := adj) (P := fun _ _ => POE.unknown) ∅
+
+/-- **RRU — iso-invariant.** `R(G)` transports under every relabelling `σ` (`relabelAdj σ adj` is an
+isomorphic copy of `adj`): relabelling the graph relabels its rigid residue correspondingly. So `R` is
+an isomorphism-invariant handoff — Phase 2's input never depends on the labelling. -/
+theorem rigidResidue_relabel (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) :
+    rigidResidue (relabelAdj σ adj) = (rigidResidue adj).image σ := by
+  unfold rigidResidue
+  have h := forcedNode_relabel (adj := adj) (P := (fun _ _ => POE.unknown : PMatrix n)) σ ∅
+  rwa [Finset.image_empty] at h
+
+/-- **RRU progress → moved vertex (brick 1 ⟶ the forced-node machinery).** Not-yet-rigid ⟹ the
+residual support is nonempty: some vertex is genuinely moved by a residual automorphism (a consumable
+symmetry). This is the positive form of the brick-1 progress lemma, phrased for `MovedAt` / `forcedNode`
+— exactly the converse of `isBase_of_no_moved`, so `IsBase ↔ ¬ ∃ moved` closes the loop. -/
+theorem exists_movedAt_of_not_isBase {S : Finset (Fin n)} (h : ¬ IsBase adj P S) :
+    ∃ v, MovedAt adj P S v := by
+  obtain ⟨π, hπ, v, hv⟩ := exists_nontrivial_residualAut_of_not_isBase h
+  exact ⟨v, π, hπ, hv⟩
+
 /-! ## Leg A / D1 — the whole metric/DRG family (de-classing `visiblyRecoverable_scheme`)
 
 The scheme de-classing (`Scheme.lean §10.13`, `theorem_2_HOR_of_pPolynomial`) recovers orbits

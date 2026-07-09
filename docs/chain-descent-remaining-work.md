@@ -184,11 +184,29 @@ consumption is **orbit-based** (any automorphism), not size/threshold-based — 
 symmetric side by **P2** (`flag_imp_symmetric_spine`, `ScratchConfinement.lean:266`), NOT the boundary. **Substrate ALL
 BUILT** (rigid=`IsBase`; `real_stays_real`+`OrbitPartition.mono`; P2; consumption sound large-`Aut`=confinement
 `SelectedCellIsOrbit` / small-`Aut`=`matchOracle`/`coversOrbits_of_realizers`; termination backbone
-`defaultSpineChain_reaches_leaf`). **REMAINING ASSEMBLY:** (1) **progress lemma [FIRST BRICK]** `¬IsBase → ∃ v w` in one
-cell with `OrbitPartition adj P T v w`; (2) `R(G)` = first-`IsBase` residue as an explicit object (today's `descentCanon`
-over-individualizes to *discrete*; RRU stops at the first base = for a multipede the WL-blind rigid residue Phase 2 wants);
-(3) iso-invariance of `R(G)`; (4) termination-at-rigid (consumption shrinks residual + `real_stays_real` monotonicity).
-**NEXT = the progress lemma (1).** Endgame frame = `chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU";
+`defaultSpineChain_reaches_leaf`).
+**★★★ BRICKS 1+2 LANDED (2026-07-10, `Cascade.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, IN
+`build.sh`).** **Brick 1 (progress lemma):** `exists_orbitPartition_of_not_isBase` (`¬IsBase → ∃ v w, OrbitPartition ∧
+v ≠ w`) + corollaries `exists_nontrivial_residualAut_of_not_isBase` (the generator), `one_lt_card_stabilizerAt_of_not_isBase`
+(bridge to `spineResidualCard`), `exists_warmRefine_cell_pair_of_not_isBase` (same-cell). **Brick 2 (`R(G)` object) —
+KEY FINDING: R(G) SUBSTANTIALLY ALREADY EXISTED as `forcedNode`; the memory's items (2)+(3)+(4) below were mostly built,
+not open.** `forcedNode adj P S₀ := S₀ ∪ movedSet` is a choice-free, deterministic base with `forcedNode_isBase` (rigid) +
+`forcedNode_relabel` (FULL cross-graph iso-invariance under arbitrary `σ`, not just `Aut`) + `exists_isBase_saturated`
+(iterative termination). Banked as the named RRU handoff: **`rigidResidue adj := forcedNode adj (fun _ _ => .unknown) ∅`**
+(the support of `Aut(G)`), with **`rigidResidue_isBase`** (rigid, unconditional) + **`rigidResidue_relabel`** (iso-invariant)
++ **`exists_movedAt_of_not_isBase`** (brick-1 → `MovedAt`/`forcedNode` bridge, = converse of `isBase_of_no_moved`).
+**RE-SCOPED REMAINING RRU work (the four items below are NOT from-scratch builds):** (1)✅ progress lemma = brick 1;
+(2)✅ `R(G)` object = `rigidResidue`; (3)✅ iso-invariance = `rigidResidue_relabel`; (4) termination-at-rigid:
+`forcedNode_isBase` gives a base in ONE forced step (over-individualizes the whole support — CORRECT for the handoff,
+choice-free/iso-invariant; the efficiency-optimal one-rep-per-orbit base is smaller = the open recovery layer).
+**What is GENUINELY still open (the real RRU frontier):** (a) **wire the descent to *compute* `rigidResidue`** —
+refinement-recovery of `forcedNode` (`movedSet_eq_nonsingletonCells_of_recoverable` is the recoverable-node half; general
+computation is the open recovery content, declassing §5 item 3); (b) **hand `R(G)` to Phase 2** as its typed input
+(unblocks the rigid seal, endgame §5 step 2); (c) **connect to Publication** — `rigidResidue` is the Phase-2 input,
+distinct from `descentCanon`'s discrete leaf, so the ①/② object-unification must account for the handoff.
+**NEXT = (b) give Phase 2 its input, OR (a) the descent↔`forcedNode` recovery bridge.**
+Original items (superseded by the above): (1) progress lemma; (2) `R(G)` explicit object; (3) iso-invariance; (4)
+termination-at-rigid. Endgame frame = `chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU";
 full scoping = [[project_rru_phase_transfer_2026-07-09]].
 
 **Detail:** confinement thread = [[project_confinement_lemma_2026-07-07]]; ① showcase =
