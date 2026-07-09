@@ -105,6 +105,20 @@ theorem confinement_selectedCellIsOrbit_spine_cell_total
     · exact hWitt ⟨C, M, hcam⟩
   exact selectedCellIsOrbit_of_frameSelectorTransitive hFST
 
+/-- **`hImprimTrans` from primitivity (the vacuous discharge).** When the residue cell scheme is *provably*
+primitive, the ¬IsPrimitive branch never fires, so `hImprimTrans` holds vacuously. For the affine/forms families
+primitivity is a theorem — `ScratchAffinePrimitive.irreducible_imp_isPrimitive_affineScheme` (forward-M1,
+`G₀Irreducible → IsPrimitive(affineScheme)`) supplies it — so feeding this into `confinement_selectedCellIsOrbit_spine_cell_total`
+discharges the imprimitive branch outright for that class (modulo the `M.S`↔`affineScheme` seam). -/
+theorem hImprimTrans_of_primitive
+    {adj : AdjMatrix n} {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {χsel : Finset (Fin n) → Colouring n}
+    {S : Finset (Fin n)} {k : Nat} {C : Finset (Fin n)}
+    (M : CellSchemeModel adj P₀ χι₀ sel k C)
+    (hprim : M.S.toAssociationScheme.IsPrimitive) :
+    ¬ M.S.toAssociationScheme.IsPrimitive → FrameSelectorTransitive adj P₀ sel χsel S :=
+  fun himp => absurd hprim himp
+
 /-! ## The classicality-threaded total Witt layer -/
 
 /-- **★ Confinement on the faithful cell model, classicality-threaded + TOTAL.** Mirrors

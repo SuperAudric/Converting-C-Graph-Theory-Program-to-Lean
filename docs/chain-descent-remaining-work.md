@@ -45,14 +45,17 @@ and assume-VT-pruning it is SOUND — imprimitivity is **not a soundness concern
     former "primary" is not wiring). Remaining build = a **bridge lemma** "scheme block-tower transitivity ⟹ `SelectedCellIsOrbit`",
     which shares the descent-`Aut`↔`SchemeAutGroup` identification (cell-faithfulness / `IsBase(T∪C)`) with checklist item 2 —
     so items 1 and 2 are ONE work-front here, not two.
-  - **◐ SECONDARY / OPTIMIZATION (per-family, NOT cheap wiring — orientation corrected 2026-07-09): `G₀Irreducible ⟹ IsPrimitive`.**
-    This would make imprimitive vacuous for the handled families, but **the needed lemma is UNBUILT and cited backwards in the
-    prior prose.** The built `isPrimitive_affineScheme_imp_irreducible` (`CascadeAffine.lean:2351`) proves the **converse**
-    `IsPrimitive → G₀Irreducible` (its docstring: *"the direction that matters is `¬irreducible → ¬IsPrimitive`"*, `:2256`);
-    the forward `G₀Irreducible → IsPrimitive` is listed as unbuilt "Next" (`:2203`, M1 forward half). So this route requires
-    (a) a NEW forward-M1 lemma (closed-subset ⟹ invariant-subspace, dual to the built one) **and** (b) the `M.S`↔`affineScheme`
-    identification. Genuine proof work, gated on building forward-M1. Witnesses `G0cyc_irreducible` (`:3434`) etc. give
-    `G₀Irreducible`, not `IsPrimitive`. Pursue only after the generic route, as a cleanliness optimization.
+  - **◐ SECONDARY (per-family vacuity): `G₀Irreducible ⟹ IsPrimitive` — FORWARD-M1 NOW BUILT (2026-07-09, axiom-clean).**
+    `ScratchAffinePrimitive.irreducible_imp_isPrimitive_affineScheme` proves the genuine **dual** of the pre-existing
+    `isPrimitive_affineScheme_imp_irreducible` (which was the *converse* `IsPrimitive → G₀Irreducible`; the doc/memory had
+    mis-cited it — orientation corrected). Proof = the block-system `I` ⟹ `G₀`-invariant subspace `W = {v | orbital(v) ∈ I}`
+    construction (closure = the intersection-number step of `schemeEquiv_trans` run additively), then irreducibility forces
+    `W ∈ {⊥,⊤}` ⟹ `I ∈ {{0},univ}`. Completes the intended `IsPrimitive ⟺ G₀Irreducible` (`CascadeAffine.lean:2203`). This
+    discharges `hImprimTrans` **vacuously** for the entire affine residue class: `G₀Irreducible` (checkable — `G0cyc_irreducible`
+    `:3434`, `G0pow` field-generation) → `IsPrimitive(affineScheme G₀)` → (via the `M.S`↔`affineScheme` seam = item 2)
+    `M.S.IsPrimitive` → `hImprimTrans := fun himp => absurd hprim himp`. **Remaining coupling:** the `M.S`↔`affineScheme` seam
+    (item 2). So `hImprimTrans` is discharged for affine residues **modulo the seam** — no longer a carried assumption for that
+    class, and the generic backstop (block-tower transitivity-preservation) covers any hypothetical non-affine imprimitive.
   - **★ DEAD ROUTE — do NOT use `cell_splits_of_imprimitive` / `BlockRefinementVisible`.** That is the SEAL's
     (`reachesRigidOrCameron` `hImprimitive`, `Cascade.lean:3278`) WL-VISIBILITY / recovery mechanism — `BlockRefinementVisible`
     is literally "the WL-dimension boundary" = `hSmallAutThin` = THE WALL. Algorithm A assume-VT-PRUNES (needs only VT, which
