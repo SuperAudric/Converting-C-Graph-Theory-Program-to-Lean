@@ -257,4 +257,26 @@ noncomputable def cellSchemeModel_of_group
     exact card_le_schemeAutGroup_orbitalScheme (cellGroupFin hinv)
       (cellGroupFin_pretransitive hinv htrans_cell) hsymm
 
+/-- **★ `hT` DISCHARGED — the spine-specialized cell-model constructor.** Fixing the base to the level-`k` spine prefix
+`T := (defaultSpineChain adj P₀ χι₀ sel k).D` and `P := (defaultSpineChain … k).P`, the base-identification `hT`
+(`|StabilizerAt adj P T| = spineResidualCard adj P₀ χι₀ sel k`) is **definitional** — `spineResidualCard` is *defined*
+as `Nat.card (StabilizerAt adj (defaultSpineChain … k).P (defaultSpineChain … k).D)` (`ScratchConfinementP1`). So `hT`
+is discharged by `rfl` here and drops out of the carried inputs — leaving only the family facts (`hf`/faithfulness,
+`hsymm`/generosity, `hrank`) and the Witt-supplied `htrans_cell`. This is the concrete supply site for the confinement
+model, where `T` is the actual descent base. -/
+noncomputable def cellSchemeModel_of_group_spine
+    (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (k : Nat)
+    {C : Finset (Fin n)} [Nonempty (Fin (cellCard C))]
+    (hinv : CellInvariant adj (defaultSpineChain adj P₀ χι₀ sel k).P
+      (defaultSpineChain adj P₀ χι₀ sel k).D C)
+    (hf : CellActionFaithful hinv)
+    (htrans_cell : ∀ a b : {x : Fin n // x ∈ C},
+      ∃ g : StabilizerAt adj (defaultSpineChain adj P₀ χι₀ sel k).P
+        (defaultSpineChain adj P₀ χι₀ sel k).D, cellRestrict hinv g a = b)
+    (hsymm : ∀ v w : Fin (cellCard C),
+      (orbMk v w : Orbital (cellGroupFin hinv)) = orbMk w v)
+    (hrank : 2 ≤ (orbitalScheme _ (cellGroupFin_pretransitive hinv htrans_cell) hsymm).rank) :
+    CellSchemeModel adj P₀ χι₀ sel k C :=
+  cellSchemeModel_of_group adj P₀ χι₀ sel k hinv hf htrans_cell hsymm hrank rfl
+
 end ChainDescent.ConfinementCellModel

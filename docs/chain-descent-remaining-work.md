@@ -102,8 +102,15 @@ such instantiation and makes the collapse concrete for the affine forms family:
     `descentCanon_showcase_cell_affine` — the ① showcase (sound ∧ complete) with the collapse at the ① level,
     reusing CellImprim's `_total` adaptor. Citation base reads {G3, Liebeck, Witt, **realization-citation**, D0}.
 So for the affine class the seam's imprimitive-branch obligation is now discharged by an honest external citation, not a
-carried project-assumption. **Remaining:** leg (b)'s `hT` (base id, definitional) + `hf`/`isotropic_span` (form fact),
-then PORT. Confinement carries
+carried project-assumption.
+**★★★ LEG (b) `hT` DISCHARGED (2026-07-09, axiom-clean, `cellSchemeModel_of_group_spine`).** `spineResidualCard adj P₀
+χι₀ sel k` is *defined* as `Nat.card (StabilizerAt adj (defaultSpineChain … k).P (defaultSpineChain … k).D)`
+(`ScratchConfinementP1`), so fixing the model's base to the level-`k` spine prefix (`T := (defaultSpineChain … k).D`,
+`P := (defaultSpineChain … k).P`) makes `hT` **definitional** — discharged by `rfl` in the spine-specialized constructor.
+`hT` drops out of the carried inputs; the constructor now takes only the family facts (`hf`/faithfulness, `hsymm`,
+`hrank`) + the Witt-supplied `htrans_cell`. **Remaining for leg (b):** only `hf : CellActionFaithful` ⟸ `IsBase(T∪C)`
+[`cellActionFaithful_of_isBase`, DONE] ⟸ `isotropic_span` (the form fact, form-recovery-coupled, DOWNSTREAM). **State is
+now PORT-ready** modulo that one form-coupled discharge. Confinement carries
 `M : ResidueSchemeModel` (a faithful schurian scheme of the residue). This is **not** a D0/`residueNonSchurian` flag:
 Phase-1 **recovers** (assume-VT prune), never emits `none` (`none` is Phase-2/rigid only), and the residue it handles is
 **node-4 = schurian + Cameron**. So `M` is a Lean modelling task. **Resolution (scoped 2026-07-09): the Skresanov 2-closure
