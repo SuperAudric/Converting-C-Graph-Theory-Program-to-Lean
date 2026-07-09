@@ -10,6 +10,50 @@
 
 ---
 
+## ⭐ SEAL-PHASE WRAP-UP CHECKLIST (2026-07-09) — the CURRENT authoritative "what's left for the Seal Phase"
+
+> Everything BELOW this section is organized around the older WL-dimension route. THIS section is the current
+> **Algorithm-A / confinement / "two seals"** framing and supersedes the older "what's left" prose for the headline.
+> **Seal Phase = the symmetric-domain seal = Algorithm A (confinement) = the ① correctness proof for the non-rigid
+> residue.** ① (`canon_sound` + `canon_complete`) is **DONE and axiom-clean (sorry-free)** for the index-free descent
+> canonizer `descentCanon` (`ScratchConfinementX3Complete.lean`; `descentCanon_showcase` = sound ∧ complete), modulo the
+> confinement citation bundle `ConfinementCitations`. The whole W-plan (W1–W4) that closed ①b→ is done. What remains to
+> make the Seal Phase **unconditional / portable**:
+
+**1. hImprim — NOT discharged (an in-scope theorem, NOT wiring).** Block-tower infra is built
+(`exists_nontrivial_closedSubset_of_not_isPrimitive`, the Route-B chain, `schemeBlockRecovered_of_visibleRealizers`), but
+the reduction `¬IsPrimitive → ReachesRigid` is `Cascade.reachesRigidOrCameron`'s carried `hImprimitive` hypothesis and is
+explicitly *"the one genuine open, in-scope, theorem-shaped gap"* (`Cascade.lean:3278`; `cell_splits_of_imprimitive` modulo
+`BlockRefinementVisible`). Confinement separately assumes `hprim : IsPrimitive` (carried in `ConfinementCitations.hprim`).
+Discharge = build the primitivity reduction, not connect existing pieces.
+
+**2. SchurianScheme / `M` — a MODELLING gap, NOT an UnhandledResidue (corrected 2026-07-09).** Confinement carries
+`M : ResidueSchemeModel` (a faithful schurian scheme of the residue). This is **not** a D0/`residueNonSchurian` flag:
+Phase-1 **recovers** (assume-VT prune), never emits `none` (`none` is Phase-2/rigid only), and the residue it handles is
+**node-4 = schurian + Cameron**. So `M` is a Lean modelling task. **Resolution (scoped 2026-07-09): the Skresanov 2-closure
+citation IS usable** — `affineScheme G₀ := orbitalScheme(affineG G₀)` (`CascadeAffine.lean:2204`) is `SchurianScheme` **by
+construction**, and `AffineSchemeTwoClosed` (`RouteCSeam.lean:196`) gives `SchemeAutGroup(affineScheme G₀) = affineG G₀`
+(the known classical group). So resolving `M` = (a) a scheme-extraction constructor `orbitalScheme(residual group) →
+ResidueSchemeModel`; (b) the 2-closure citation for `hcard` (`|SchemeAutGroup| = |StabilizerAt| = spineResidualCard`);
+(c) the group-supply / faithfulness bridge (exhibit the residue's residual `Aut` — the piece the source called the
+"faithfulness gap"; either recovered à la Route C, or via the pretransitive assume-VT group). **CRUCIAL COUPLING: 2-closure
+needs the residue PRIMITIVE rank-3 first ⟹ depends on item 1.** Not a wall: one citation + a constructor + a bridge.
+
+**3. Citations — audit exact Lean statements for reviewer-faithfulness.** The carried citations {G3 (`hClassify`),
+Witt+Liebeck (`hCitation`), Skresanov 2-closure (`AffineSchemeTwoClosed`)} stay cited, but each hypothesis's Lean
+*statement* must be checked to match a true, correctly-scoped external theorem (no accidental over-strength / vacuity).
+
+**4. PORT to `build.sh`.** The WIP scratch cluster (`ScratchConfinement*` + `ScratchConfinementX3{Sel,Recon,Complete}` +
+the cost-model substrate) is NOT yet in `build.sh`. Mechanical.
+
+**5. (Testbed, not Lean-Seal) C# switch to Algorithm A.** The C# runs Algorithm R + a *global* flag; aligning it to the
+per-node flag / assume-VT-prune is validation, not part of the Seal correctness *proof*.
+
+**Detail:** confinement thread = [[project_confinement_lemma_2026-07-07]]; ① showcase =
+`GraphCanonizationProofs/ChainDescent/ScratchConfinementX3Complete.lean`; endgame frame = `chain-descent-endgame-spec.md` §1a.
+
+---
+
 ## STATUS (read first)
 
 > **▶▶▶ ENDGAME FRAME (2026-07-08) — "TWO SEALS, ONE WALL". Read [`chain-descent-endgame-spec.md`](./chain-descent-endgame-spec.md)
