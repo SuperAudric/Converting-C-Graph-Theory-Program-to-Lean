@@ -64,7 +64,24 @@ and assume-VT-pruning it is SOUND — imprimitivity is **not a soundness concern
     Algorithm A stays unconditional-modulo-citations because P1 (flag ⟹ large `Aut`) excludes every small-`Aut` residue —
     the entire regime where the wall lives — from flagging. Detail = [[project_seal_phase_wrapup_2026-07-09]].
 
-**2. SchurianScheme / `M` — a MODELLING gap, NOT an UnhandledResidue (corrected 2026-07-09).** Confinement carries
+**2. SchurianScheme / `M` — a MODELLING gap, NOT an UnhandledResidue (corrected 2026-07-09).**
+**★★★ PRIMITIVITY LEG BUILT (2026-07-09, axiom-clean).** The seam has three legs — (primitivity), (2-closure/`hcard` count),
+(the recovery `SchemeRealizes f S (affineScheme G₀)` itself). The **primitivity leg is DONE end-to-end**:
+`ScratchSchemeRealizesPrimitive.isPrimitive_of_schemeRealizes` (`IsPrimitive` transports along `SchemeRealizes`, via the
+conjugation iso `S.SchemeAutGroup ≅ X.SchemeAutGroup` + `MulAction.isPreprimitive_congr` + `isPreprimitive_iff_isPrimitive`
+— no `Fin (rank+1)` dependent types), composed with forward-M1 into `isPrimitive_of_realizes_affineScheme`: **recovery
+`SchemeRealizes f S (affineScheme G₀)` (carried like Route C's `hreal`) + `G₀Irreducible` ⟹ `S.IsPrimitive`.** This closes
+item-1's `M.S.IsPrimitive` need (hence `hImprimTrans`) for the affine class.
+**★★★ LEG (b) — SKRESANOV 2-CLOSURE CITATION ELIMINATED (2026-07-09, axiom-clean).** The count bridge `hcard` was
+weakened from the Skresanov **equality** `|SchemeAutGroup(M.S)| = spineResidualCard` to a **lower bound**
+`hcard_le : spineResidualCard ≤ |SchemeAutGroup(M.S)|` — sound because `confinementLargeScheme` is a strict lower bound
+(`2^baseMax n < |SchemeAutGroup|`) and `hcard` is consumed ONLY there. The lower bound is **provable from the FREE
+direction alone** (`ScratchOrbitalSchemeAutLower.{le,card_le}_schemeAutGroup_orbitalScheme`: `G ≤ SchemeAutGroup(orbitalScheme G)`
+via `orbMk_smul`) — **no `AffineSchemeTwoClosed`/`h2c`**. `cellSchemeModel_of_group` no longer takes `h2c`; the whole
+cell cluster + total showcase re-verified axiom-clean. **Remaining for (b) (all PROVABLE, no citations, per the
+no-carried-hypotheses discipline):** `hT` (base identification `|StabilizerAt T| = spineResidualCard`, definitional at
+the spine `D_k`) + `hf : CellActionFaithful` (⟸ `IsBase(T∪C)` ⟸ `isotropic_span`, a form fact). **Remaining leg (c):**
+the actual recovery witness `SchemeRealizes f S (affineScheme G₀)` (the deep, Route-C-shared form-recovery content). Confinement carries
 `M : ResidueSchemeModel` (a faithful schurian scheme of the residue). This is **not** a D0/`residueNonSchurian` flag:
 Phase-1 **recovers** (assume-VT prune), never emits `none` (`none` is Phase-2/rigid only), and the residue it handles is
 **node-4 = schurian + Cameron**. So `M` is a Lean modelling task. **Resolution (scoped 2026-07-09): the Skresanov 2-closure

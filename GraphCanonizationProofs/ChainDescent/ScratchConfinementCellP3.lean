@@ -43,15 +43,16 @@ def PrimRank3ClassicalCell (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Col
     (IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop) (k : Nat) : Prop :=
   ∃ (C : Finset (Fin n)) (M : CellSchemeModel adj P₀ χι₀ sel k C), IsCameronScheme (cellCard C) M.S
 
-/-- **The largeness bridge on the cell model — DISCHARGED** (identical shape to `largeBridge_confinementLargeScheme`):
-the residual order IS the cell-scheme Aut order (`M.hcard`), so the flag's super-poly bound transfers verbatim. -/
+/-- **The largeness bridge on the cell model — DISCHARGED via the LOWER bound** (citation-free): the residual order
+is a lower bound on the cell-scheme Aut order (`M.hcard_le`, from the free direction only), so the flag's super-poly
+bound transfers by transitivity — no Skresanov 2-closure. -/
 theorem largeBridge_confinementLargeScheme_cell (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) (k : Nat) {C : Finset (Fin n)}
     (M : CellSchemeModel adj P₀ χι₀ sel k C)
     (h : 2 ^ baseMax n < spineResidualCard adj P₀ χι₀ sel k) :
     confinementLargeScheme n (cellCard C) M.S := by
   show 2 ^ baseMax n < Nat.card M.S.toAssociationScheme.SchemeAutGroup
-  rw [M.hcard]; exact h
+  exact lt_of_lt_of_le h M.hcard_le
 
 /-- **The cell-model producer** — from a faithful `CellSchemeModel` + G3 (`exhaustiveObstruction_scheme` at `cellCard C`)
 produce `PrimRank3ClassicalCell`. Direct mirror of `residue_primRank3Classical`, faithful at the cell arity. -/

@@ -30,6 +30,7 @@ Axiom target `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in 
 import ChainDescent.ScratchConfinementSchurianModel
 import ChainDescent.ScratchConfinementP4
 import ChainDescent.ScratchConfinementX3Sel
+import ChainDescent.ScratchOrbitalSchemeAutLower
 
 namespace ChainDescent.ConfinementCellModel
 
@@ -223,13 +224,17 @@ structure CellSchemeModel (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colo
   S : SchurianScheme (cellCard C)
   hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true
   hrank : 2 ≤ S.rank
-  hcard : Nat.card S.toAssociationScheme.SchemeAutGroup = spineResidualCard adj P₀ χι₀ sel k
+  /-- **A LOWER bound (citation-free), not the Skresanov equality.** The largeness bridge is a strict lower bound on
+  `|SchemeAutGroup|`, so it needs only `spineResidualCard ≤ |SchemeAutGroup(S)|`, which follows from the FREE direction
+  `G ≤ SchemeAutGroup(orbitalScheme G)` (`card_le_schemeAutGroup_orbitalScheme`) — no 2-closure citation. -/
+  hcard_le : spineResidualCard adj P₀ χι₀ sel k ≤ Nat.card S.toAssociationScheme.SchemeAutGroup
 
-/-- **★ The faithful cell-model constructor.** From: the cell setwise-invariance `hinv`, the carried faithfulness
-`hf : CellActionFaithful`, the Witt pairwise transitivity `htrans_cell`, generosity `hsymm`, rank ≥ 2, the scoped
-2-closure citation `h2c`, and the base identification `hT : StabilizerAt adj P T = ` the spine's residual (so the count
-= `spineResidualCard`), build the faithful `CellSchemeModel`. `S := orbitalScheme cellGroupFin` (schurian free), `hne`
-free, `hcard := h2c ⬝ cellGroupFin_card ⬝ hT`. -/
+/-- **★ The faithful cell-model constructor — CITATION-FREE `hcard_le` (no Skresanov).** From: the cell
+setwise-invariance `hinv`, the carried faithfulness `hf : CellActionFaithful`, the Witt pairwise transitivity
+`htrans_cell`, generosity `hsymm`, rank ≥ 2, and the base identification `hT : |StabilizerAt adj P T| =
+spineResidualCard`, build the faithful `CellSchemeModel`. `S := orbitalScheme cellGroupFin` (schurian free), `hne`
+free, and **`hcard_le` from the FREE direction alone** (`card_le_schemeAutGroup_orbitalScheme` ⬝ `cellGroupFin_card` ⬝
+`hT`) — the 2-closure citation `h2c` is **removed**, since only a lower bound is ever consumed. -/
 noncomputable def cellSchemeModel_of_group
     (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (k : Nat)
     {T C : Finset (Fin n)} [Nonempty (Fin (cellCard C))]
@@ -239,8 +244,6 @@ noncomputable def cellSchemeModel_of_group
     (hsymm : ∀ v w : Fin (cellCard C),
       (orbMk v w : Orbital (cellGroupFin hinv)) = orbMk w v)
     (hrank : 2 ≤ (orbitalScheme _ (cellGroupFin_pretransitive hinv htrans_cell) hsymm).rank)
-    (h2c : (orbitalScheme _ (cellGroupFin_pretransitive hinv htrans_cell)
-        hsymm).toAssociationScheme.SchemeAutGroup = cellGroupFin hinv)
     (hT : Nat.card (StabilizerAt adj P T) = spineResidualCard adj P₀ χι₀ sel k) :
     CellSchemeModel adj P₀ χι₀ sel k C where
   S := orbitalScheme _ (cellGroupFin_pretransitive hinv htrans_cell) hsymm
@@ -249,6 +252,9 @@ noncomputable def cellSchemeModel_of_group
     show decide (orbitalIdx _ i = orbMk (orbitalIdx _ i).out.1 (orbitalIdx _ i).out.2) = true
     rw [orbMk_out, decide_eq_true_eq]
   hrank := hrank
-  hcard := by rw [h2c, cellGroupFin_card hinv hf, hT]
+  hcard_le := by
+    rw [← hT, ← cellGroupFin_card hinv hf]
+    exact card_le_schemeAutGroup_orbitalScheme (cellGroupFin hinv)
+      (cellGroupFin_pretransitive hinv htrans_cell) hsymm
 
 end ChainDescent.ConfinementCellModel
