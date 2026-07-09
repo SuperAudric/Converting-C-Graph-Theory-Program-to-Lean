@@ -737,6 +737,58 @@ theorem card_stabilizerAt_eq_one_iff_isBase {S : Finset (Fin n)} :
     Nat.card (StabilizerAt adj P S) = 1 ↔ IsBase adj P S := by
   rw [← Subgroup.eq_bot_iff_card, stabilizerAt_eq_bot_iff_isBase]
 
+/-! ### RRU progress — "not yet rigid ⟹ there is symmetry to consume" (the first brick)
+
+First brick of the **RRU phase-transfer theorem** (the Seal→Rigid handoff:
+[`docs/chain-descent-remaining-work.md`](../../../docs/chain-descent-remaining-work.md) item 6,
+[`docs/chain-descent-deferred-decisions.md`](../../../docs/chain-descent-deferred-decisions.md) §7).
+While the committed base `T` is not yet a base, the residual group `Aut_T^P` is nontrivial, so *some*
+pair in the residue is genuinely moved by an `Aut_T`-automorphism — a **consumable** symmetry.
+Iterating consumption drives the descent to the first `IsBase` residue `R(G)`, the object Phase 2
+works forward from. These are elementary unfoldings of `IsBase` / `card_stabilizerAt_eq_one_iff_isBase`;
+they exist to *name* the interface the RRU assembly (progress → `R(G)` object → termination) consumes. -/
+
+/-- **RRU progress (the first brick).** If `T` is not a base, some ordered pair `(v, w)` with `v ≠ w`
+lies in a single `Aut_T`-orbit — a genuine, consumable symmetry (a residual automorphism carries
+`v ↦ w`). Definitional: `¬ IsBase` push-negates the base condition `∀ v w, OrbitPartition → v = w`. -/
+theorem exists_orbitPartition_of_not_isBase {T : Finset (Fin n)} (h : ¬ IsBase adj P T) :
+    ∃ v w, OrbitPartition adj P T v w ∧ v ≠ w := by
+  simp only [IsBase, not_forall] at h
+  obtain ⟨v, w, horb, hne⟩ := h
+  exact ⟨v, w, horb, hne⟩
+
+/-- **RRU progress — residual-automorphism form.** Not-a-base ⟹ a nontrivial residual automorphism
+exists: it preserves `adj`/`P`, fixes `T` pointwise, and moves some point. This is the generator the
+cross-branch harvest consumes (`coversOrbits_of_realizers`), whose consumption shrinks the residual
+toward `R(G)`. -/
+theorem exists_nontrivial_residualAut_of_not_isBase {T : Finset (Fin n)}
+    (h : ¬ IsBase adj P T) : ∃ π, ResidualAut adj P T π ∧ ∃ v, π v ≠ v := by
+  obtain ⟨v, w, hvw, hne⟩ := exists_orbitPartition_of_not_isBase h
+  obtain ⟨π, hπ, hπvw⟩ := orbitPartition_iff_residualAut.mp hvw
+  refine ⟨π, hπ, v, ?_⟩
+  rw [hπvw]; exact hne.symm
+
+/-- **RRU progress — cardinality form.** Not-a-base ⟺ the residual group is nontrivial (`1 < card`).
+The bridge to the flag / cost side: `spineResidualCard` (`ChainDescent/Confinement.lean`) is exactly
+`Nat.card (StabilizerAt …)`, so "still symmetric to consume" is read off the residual order. -/
+theorem one_lt_card_stabilizerAt_of_not_isBase {T : Finset (Fin n)}
+    (h : ¬ IsBase adj P T) : 1 < Nat.card (StabilizerAt adj P T) := by
+  have hpos : 0 < Nat.card (StabilizerAt adj P T) := card_stabilizerAt_pos
+  have hne1 : Nat.card (StabilizerAt adj P T) ≠ 1 := fun he =>
+    h (card_stabilizerAt_eq_one_iff_isBase.mp he)
+  omega
+
+/-- **RRU progress — same-cell form.** The moved pair shares a 1-WL cell (`warmRefine` after
+individualizing `T`): a *distinct* pair with equal refined colour, i.e. a genuine non-singleton cell
+the descent's selector can target and the oracle consume. Via `OrbitPartition.subset_warmRefine`. -/
+theorem exists_warmRefine_cell_pair_of_not_isBase {T : Finset (Fin n)}
+    (h : ¬ IsBase adj P T) :
+    ∃ v w, v ≠ w ∧
+      warmRefine adj P (individualizedColouring n T) v
+        = warmRefine adj P (individualizedColouring n T) w := by
+  obtain ⟨v, w, hvw, hne⟩ := exists_orbitPartition_of_not_isBase h
+  exact ⟨v, w, hne, hvw.subset_warmRefine⟩
+
 /-- **The chain carrier match.** Inside the residual group `Aut_S^P`, the stabilizer of a point `b` is
 exactly `Aut_{insert b S}^P` (adding `b` to the base): a residual fixing `S` and `b` fixes `insert b S`.
 The bridge for the order recursion. -/
