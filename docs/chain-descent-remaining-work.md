@@ -81,7 +81,29 @@ via `orbMk_smul`) — **no `AffineSchemeTwoClosed`/`h2c`**. `cellSchemeModel_of_
 cell cluster + total showcase re-verified axiom-clean. **Remaining for (b) (all PROVABLE, no citations, per the
 no-carried-hypotheses discipline):** `hT` (base identification `|StabilizerAt T| = spineResidualCard`, definitional at
 the spine `D_k`) + `hf : CellActionFaithful` (⟸ `IsBase(T∪C)` ⟸ `isotropic_span`, a form fact). **Remaining leg (c):**
-the actual recovery witness `SchemeRealizes f S (affineScheme G₀)` (the deep, Route-C-shared form-recovery content). Confinement carries
+the actual recovery witness `SchemeRealizes f S (affineScheme G₀)` (the deep, Route-C-shared form-recovery content) —
+**RESOLVED as a carried CITATION (2026-07-09): leg (c) is a known-true classification fact in a known-true form, not a
+project-internal claim, so it is carried in the same firewall slot as G3/Liebeck (exactly as Route C carries `hreal`),
+NOT proven in-project.**
+**★★★ AFFINE INSTANTIATION LANDED — THE REBUNDLE, CONCRETE (2026-07-09, `ScratchConfinementCellAffine.lean`, all
+axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build.sh).** The abstract `ConfinementCitationsCellTotal`
+carries `hImprimTrans` as the honest "supplied-at-instantiation" slot; the abstract 3-item collapse is **not** cleanly
+available (the redundancy is arity-dependent: `SchemeRealizes f M.S (affineScheme G₀)` only typechecks at
+`cellCard C = p^d`, so it resolves only at per-family instantiation — confirming pick-up item 3). This file is the FIRST
+such instantiation and makes the collapse concrete for the affine forms family:
+  - `AffineRealizedResidue M G₀ hneg := ∃ (hC : cellCard C = p^d) f, SchemeRealizes f (hC ▸ M.S) (affineScheme G₀ hneg)`
+    — the leg-(c) citation, concretely (Route C's `hreal` for the cell model). Arity handled by two subst-based cast
+    helpers (`hne_cast`/`isPrimitive_uncast`, bound-variable casts).
+  - `isPrimitive_of_affineRealizedResidue` — **`M.S.IsPrimitive` DERIVED** from the citation (forward-M1 via
+    `isPrimitive_of_realizes_affineScheme` + transport); `hImprimTrans_of_affineRealizedResidue` — **`hImprimTrans`
+    DERIVED** (vacuous via `hImprimTrans_of_primitive`). So both the silent `hprim` and the carried `hImprimTrans` are
+    **gone — replaced by the single honest realization citation.**
+  - `ConfinementCitationsCellAffine` bundle (drops the `hImprimTrans` field for global `hirr` + per-node `hRealize`) +
+    `descentCanon_showcase_cell_affine` — the ① showcase (sound ∧ complete) with the collapse at the ① level,
+    reusing CellImprim's `_total` adaptor. Citation base reads {G3, Liebeck, Witt, **realization-citation**, D0}.
+So for the affine class the seam's imprimitive-branch obligation is now discharged by an honest external citation, not a
+carried project-assumption. **Remaining:** leg (b)'s `hT` (base id, definitional) + `hf`/`isotropic_span` (form fact),
+then PORT. Confinement carries
 `M : ResidueSchemeModel` (a faithful schurian scheme of the residue). This is **not** a D0/`residueNonSchurian` flag:
 Phase-1 **recovers** (assume-VT prune), never emits `none` (`none` is Phase-2/rigid only), and the residue it handles is
 **node-4 = schurian + Cameron**. So `M` is a Lean modelling task. **Resolution (scoped 2026-07-09): the Skresanov 2-closure

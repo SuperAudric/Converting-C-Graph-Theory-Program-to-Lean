@@ -100,231 +100,48 @@ close it — is set out in
 
 ---
 
-## 2. Where the project is now (2026-06-10)
+## 2. Where the project is now (2026-07-09)
 
-> This section is a map; the authoritative current state is the STATUS block at
-> the top of each linked doc plus [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md).
-> Project quality bar: **every Lean theorem must be axiom-clean**
-> (`[propext, Classical.choice, Quot.sound]`), full build green.
->
-> **★ LIVE THREAD (2026-06-24) — this §2 prose is the pre-affine-closure map and predates it; for the current frontier
-> read [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) STATUS + §13.** Headlines:
-> **`VO⁻₄(3)` is SEALED** — `ScratchBM3Glue.vo4minus_seal` (axiom-clean `[propext, Classical.choice, Quot.sound]`) proves
-> the rigid-or-Cameron disjunction for the minus-form residue modulo cited `{G3}`, carrying **NO `hSmallAutThin`, NO Witt**
-> (Witt off the critical path via `…viaIsotropySeparates_wittFree`). Built from `IsotropySeparatesAtBase Qbun T₉` (Lemma
-> A + Lemma B + a `Nat`-bridge + a kernel `decide`); four scratch modules (Lemma A + Lemma B (now `IsotropicIncidenceCount` + `ProfileReduction`), `ScratchBM3Bridge/Glue`)
-> verified but **not yet ported** into the build (port = the only remaining step for the *instance*). **The live work is
-> now the GENERALIZATION** from this single instance to the full schurian residue (`hSmallAutThin` for all small-Aut
-> non-geometric schurian rank-3 families) — the forward roadmap is plan §11. **AUDIT-S done** (per-family target =
-> `IsotropySeparatesAtBase Q_fam T_fam`; the genuine new obligation is the cited classification *seam*).
-> **§11's scoping is now DONE** (AUDIT-S/A/W, **Route 1 chosen**, **GATE passed**); the live work is **plan §13**:
-> the reduction chain (**D1 + D2-bridge**) is **landed in `ChainDescent/ProfileReduction.lean`** (axiom-clean), collapsing the
-> whole generalization to a **single open predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded
-> WL-dimension of the affine forms-graphs**. **D3d is now WEIL-FREE** (exact-vs-Weil resolved): the observable is the
-> **pair** count `Z_u({t,t'})` (not the singleton — a verified correction), its invariant `χ(det G₂)` is `χ` of a quadratic,
-> and the per-pair sum factors into additive Gauss sums (`pairCharSum_factor_gen`).
-> **★★★ INCREMENT 3 CLOSED (2026-06-25, all axiom-clean, full `lake build` green, NOT in build.sh):** the pair route's
-> per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE — capstone **`PerAnchorBound.c0_le_threequarters`** (good anchor + `q≥q₀`/`d≥3` ⟹
-> `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`), built across 8 new scratch modules on top of `PairForm` (24 lemmas). The reduction
-> backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal` is LANDED (`ProfileReduction` + `…viaIsotropySeparates_wittFree`).
-> **SINCE THEN (2026-06-26):** the **bridge** (`χ(det G₂)`↔`Z_u(S)`) is CLOSED END-TO-END (`ObservableCountBridge`/`A`/`B`/`C`/`D`/`Z`,
-> all B1a wraps + the ℂ per-pair capstone `jointIsoCount_ne_of_chiSep_pair`); **the ENTIRE increment-4 cleanup is now CLOSED**
-> (axiom-clean, `BadAnchorCount`/`b`/`c`/`d`) — input `c` (`good_anchor_fail_le_const`: `#{¬sep}≤15/16·|V|`), bad-anchor `β`
-> (B-iii `pencilDetPoly_totalDegree_le≤2d` + B-ii `beta_count_closed` + C-corr `beta_full_count_closed`: `β_full·|K|≤(2d+4)|V|+2|K|`),
-> C-basis (bridge's `hv/hw`), and **NV** (`GoodAnchorNonvacuity.exists_hgood`, 14 lemmas — `hgood` non-vacuity for nondeg `Q`/`finrank≥2`/
-> `|K|≥7`). So `c̄₀<1` and **β is unconditional** modulo family props; no carried existence hypotheses remain in inc-4. The
-> **seam** is SPIKED (`ScratchSeam`, modulo mechanical `htransport`); **char-2+Suzuki** spiked (deferred). **FRONTIER = INCREMENT
-> 5** (the matching assembly + bridge wiring); the field/seam typing decision is **RESOLVED** (concern #4 lifted bridge+Crux
-> to abstract `K`). **#1 corank tightening ✅ DONE** (`q≳d²`→`q≥256`, `ScratchTBoundCorank.c0_le_threequarters_corank`) **and the
-> small-q "Route 0" ✅ DONE** (`q≥256→q≥16`, `ScratchTBoundCorank2.c0_le_threequarters_corank2`). **★ The small-q tail is now
-> ✅✅✅ COMPLETE (2026-06-27, Route 2):** capstone **`ScratchRoute2.c0_le_route2`** (`NS ≤ (1−1/(4q²))·|V| < |V|`, odd `|K|≥3`,
-> `d≥4`, **NO threshold**) closes the per-anchor `c₀<1` bound with no `q`-floor — 4 axiom-clean modules (`ScratchCountTight`,
-> `ScratchRoute2Arith`, `ScratchRoute2`). Coverage: odd `q∈{3,5,7,9,11,13}` → route2, `q≥16` → corank2, `q∈{4,8,16}` char-2 =
-> separate Arf track. **hK cleanup ✅DONE (2026-06-27, axiom-clean)** — the bridge's carried `hK : gaussSum²·∑ψ(Q)≠0` is
-> discharged internally (`GaussCount.gaussSum_sq_ne_zero` + `sum_addChar_quadForm_ne_zero`). **★★★ INCREMENT 5 ASSEMBLED
-> END-TO-END + q=p SEAL REACHED (2026-06-27, `AffinePolarSeal.lean`, 8 decls axiom-clean, NOT in build):** the matching assembly
-> closes the affine-polar `VO^ε` residue (q=p, `q≳32d`/`q≥256`) to the **`reachesRigidOrCameron` disjunction modulo `{G3}`,
-> Witt-free, no `hSmallAutThin`** — capstone `reachesRigidOrCameron_affinePolar`. **NON-VACUITY THREAD ✅DONE (2026-06-27):**
-> the seal now **carries** `T.card ≤ 128·(Nat.log 2 ((p^d)²) + 1) = O(d log p)` (log-free block keystone
-> `exists_pow_matching_block`), so the slice is non-vacuous — a genuine **quasipolynomial** WL-base. **PORT + RESTRUCTURE +
-> DESCRIBE ✅DONE (2026-06-27/28):** the forms-graph pair-route closure is in `build.sh`, **restructured from 27 `Scratch*`
-> files into 14 named modules** (`AffinePolarSeal`, `ObservableCountBridge{,K}`, `PencilTBound`, `PairForm`, `FieldGeneric`,
-> `BadAnchorCount`, `Coordinatization`, …; rename map in plan §1), full build green ~109s, axiom-clean; `PublicTheoremIndex`
-> re-homed with all 223 decls described. The plan doc was condensed 2225→~1000 lines (build history → the archive).
-> **██████ ★★★★★ LIVE FRONTIER (2026-07-04) — POLYNOMIAL via ROUTE C (form-recovery). AUTHORITATIVE DOC:
-> [`chain-descent-route-c-plan.md`](./chain-descent-route-c-plan.md) — read its STATUS + "▶ PICK UP HERE" to continue. ██████**
-> Route C recovers the form `Q` from the abstract graph and canonicalizes via its known automorphism group, **sidestepping
-> the node-4 WL wall** that closed the direct WL/`bᵢ=1` build (recovery doc §9.8.9 — the banners just below, incl. the
-> 2026-06-30 `T0` framing, are that stalled WL route). **★ STATE (2026-07-04): ALL FOUR FORM FAMILIES ARE SEALED**
-> (affine-polar, alternating `Alt(5,q)`, half-spin, Suzuki–Tits), each modulo one exact **scoped citation**; the Lean
-> spine is **PORTED into `build.sh` and axiom-clean (2026-07-05)** — the modules `RouteCTransport` / `RouteCFormAdapters`
-> (ex-`ScratchRouteC`) / `RouteCSeam` / `RouteCNode4`; full `build.sh` green ~68s. F1+A1 (C#, confirmed vs the real harness) → A3 refinement → spanning-base
-> discretization → **F4 iso-invariance**; **F2** (`q=pᵉ` semilinear); **F3** the `FormAdapter` engine + the generic
-> **multi-quadric bridges**; the 4 seal capstones = `affinePolarAdapter`, `Plucker.reachesRigidOrCameron_alternating`,
-> `HalfSpin.reachesRigidOrCameron_halfSpin`, `Suzuki.reachesRigidOrCameron_suzuki`. Review-flagged items resolved
-> (classical carries = exact scoped citations; meta-poly bootstrapping sound, plan §7a). **★ Lean SEAM now DONE too
-> (2026-07-04):** the post-four-seals combine landed at the honest level after a **vacuity correction** (`GroupReproduced`
-> = `∃gens,closure=group` is a tautology; non-vacuous "coarse reaches rigid" is *false* = node-4 — so Route C poly is
-> inherently the project's standard **meta** claim, not a coarse Lean predicate). Genuine content: group-pinning
-> `schemeAutGroup_coarse_eq_affineG` (coarse Aut = the known `affineG(similitude)`, all 4 families, mod the named Skresanov
-> citation `AffineSchemeTwoClosed`) + `routeC_polySupport` + the **cyclotomic dispatch branch** (all now in `RouteCSeam`),
-> all axiom-clean. **★ L1 `htransport` DISCHARGED — the seam carries NO atom** (transport ONE light predicate
-> `SeparatesAtBoundedBase` via a cross-graph `warmRefine_transport_iso`, not the 4-way `SealDisj`; capstone
-> `RouteCSeam.reachesRigidOrCameron_viaSchurianRank3Affine_proved`). **★ PORT DONE (2026-07-05):** the whole spine (5
-> scratch files) is consolidated into the 4 `RouteC*` build modules, `build.sh` green, index updated, superseded scratch
-> deleted. **★ L4 DONE (2026-07-05, `RouteCNode4.lean`):** the affine-polar node-4 residue is discharged with **no
-> `hFormCert`** (`reachesRigidOrCameron_viaAffineFormScheme_routeC` — that predicate is FALSE at bounded base §9.0a, so
-> Route C SUPERSEDES the hook via the isotropy-separation path, not by filling its hypothesis), and the multi-form families
-> get the §9.0a meta-composition (**Track B**: `routeC_polySupport_of_adapter` + `routeC_polySupport_{alternating,halfSpin,suzuki}`;
-> Suzuki via a `formConeStab` generalization for its cubic cone). **★ C# RUNTIME BUILT: C1a–C4 + family-dispatch + Suzuki
-> runtime prototype** (affine-polar + Suzuki live; alternating/half-spin DORMANT — dense-infeasible FEASIBILITY WALL, plan §9.2.7).
-> **★ NEXT: promote the scoped citations** (`NondegQuadricDeterminesForm` / `JointVarietyDeterminesFamily` /
-> `ConePreservingCollineationIsSemiSimilitude` / `AffineSchemeTwoClosed`) to full Lean proofs — or **Track A** (a
-> multi-quadric pair-route) if a per-family coarse `SealDisj` for the multi-form families is wanted. See the plan's HANDOFF
-> SNAPSHOT "NEXT TASKS". [[project_routec_csharp_build_2026-07-04]] · [[project_routec_seam_2026-07-04]].
-> **★★★★ LIVE FRONTIER (2026-06-30 v2) — the polynomial route is [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md),
-> RETARGETED to `T0` (bounded branching). READ THAT DOC FIRST.** The forms-graph residue is SEALED at **quasipoly**
-> (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in build; sub-exp floor `reachesRigidOrCameron_viaSpielman`). For
-> POLYNOMIAL: the existing canonizer canonizes `VO^ε` with a **small branch-but-resolve tree** (default mode branches —
-> `VO⁻₄(5)`: `branchingNodes=4`, `leaves=6`, `STARVED=0`; *not* a single path). So the target is **poly leaf count**
-> `∏ᵢbᵢ ≤ poly(n)` with `bᵢ ≤ poly(q)` (the # orbits per selected cell, uniform in `d`) — **strictly weaker than
-> `CellsAreOrbits`**. Plan of attack = recovery doc §6 (Phase 0 empirical gate → Phase 1 bounded-branching bridge → Phase 2
-> discharge `bᵢ≤poly(q)`). The `CellsAreOrbits`/`hFormCert`/cross-branch-harvest predicates are *stronger* (likely
-> quasipoly-adjacent) and relocated. **The 2026-06-28 banner below is SUPERSEDED** (its "SINGLE PATH" was deferral mode; the
-> default canonical-form-preserving path branches). Demoted bounded-WL-dim route: [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md).
-> **▶ PROGRESS (2026-07-02): recovery route's poly crux reduced to ONE Gauss lemma; the Lean build of it has STARTED (all
-> substrate axiom-clean, many scratch modules, NOT in build.sh).** Phases 0–2 landed (quasipoly end-to-end). Poly crux
-> `bᵢ≤poly(q)` split: **span-dim-1 `bᵢ≤q²` PROVEN** (`ScratchSpanDimBound`); **span-dim≥2 = route A (`bᵢ=1`)** reduced
-> end-to-end: geometric recovery (both branches) + Step B + the Step C reduction to "1-WL refines `zSet`" all LANDED.
-> **★ The counting mechanism was settled by probe:** plane-point pinning (`ChiProfileSeparatesPlane`/`PlanePinnable`) is
-> **REFUTED** (`pin_probe.py`); the correct observable is **ambient colour-CLASS counts**, with round structure
-> `r1=3iso → r2=seal jointIsoCountK (closed form) → r3=orbits`. **Route A now reduces to ONE Gauss lemma —
-> `GramCountsRecoverOrbit` (the K-non-degeneracy: the round-3 count profile recovers the orbit)** — and its Lean build has
-> begun: **Piece 1a–1c ALL LANDED** (`ScratchGramStratCount`: observable + crux, orbit-direct; `ScratchGramStratCharSum`:
-> character-sum identity; `ScratchGramStratEval`: inner z-sum evaluated; `ScratchGramStratInvert`: **1c(ii)** the g-profile
-> inversion `SameGramStratCounts ⟹ equal innerZ fibre sums`; `ScratchGramStratOrbit`: **1c(iii) REDUCTION** — the crux =
-> two named predicates + composition). **Piece 1 now compiles `bᵢ=1` modulo exactly two predicates, both carrying a
-> `GoodBase Q a b` antecedent** (`a,b` orth aniso + `(2:K)≠0` + `Q.polarBilin.Nondegenerate`) so they are TRUE and
-> dischargeable — NOT the FALSE bare `∀ Q a b` forms (a false predicate can never be discharged toward the unconditional
-> seal): `GramCountsRecoverGram` (GENUINELY-OPEN Gauss, must be PROVED) + `RefinedWittExtends` (a CITATION of Witt's theorem,
-> acceptable to carry). **★ SINCE (2026-07-02, cont.): `GramCountsRecoverGram` DISCHARGED to a classical isotropic-cone
-> Gauss-sum non-degeneracy, and `hψ` DISCHARGED** (`ScratchGramStratGauss`/`GaussReduce`, axiom-clean): core = the
-> factorization `countHat u t = ψ(⟨t,gramK u⟩)·isoConeSum(t₀•u+t₁•a+t₂•b)` (Gram in the phase); the reduction constructs a
-> primitive char (Mathlib `AddChar.FiniteField.primitiveChar K ℚ`) so nothing carries `hψ`. **★★★ SINCE (cont.):
-> `IsoConeSumSeparatesGram` DISCHARGED — PROVED axiom-clean** (`ScratchGramStratConeEval`/`ConeSep`). Key = `isoConeSum_eval_even`:
-> for **even** ambient dim (`VO_{2m}`) the Gauss sum is scale-invariant, giving the closed form + nowhere-vanishing
-> (`isoConeSum_ne_zero`); off-diagonal/diagonal follow from non-vanishing+primitivity, flag from the closed form.
-> **⟹ Route A Piece 1 = `bᵢ=1` modulo ONLY the Witt citation.** **★★★ SINCE (cont.): Piece 2 (WL bridge) LANDED**
-> (`ScratchGramStratWLBridge`, axiom-clean): `sameGramStratCounts_of_sameClassCounts` (colouring refines `gramK` ⟹
-> `SameClassCounts → SameGramStratCounts`) + assembly `colorEq_iff_stabOrbit_wittOnly` = **`C u=C u' ↔ StabOrbit` (`bᵢ=1`
-> for the WL colouring)** modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant, RefinedWittExtends}`. **The ENTIRE
-> Gauss/analytic content is proved axiom-clean, `hψ` constructed** (10 `ScratchGramStrat*` modules). **★★★ FRONTIER
-> STALLED → NEXT SESSION = ROUTE C (2026-07-02).** Pieces 1+2 are gated on **`ColorRefinesGramK`**, which the probes
-> showed is the DISGUISED main crux (WL refines `gramK` at *exactly* the round it hits orbits ⟹ equivalent to the goal, NOT a
-> modest residual). Route (B) [re-base the round-3 observable onto actual round-2 `Zprof` strata] tried to dissolve it, but
-> the **factorization check came back NEGATIVE** (`Zprof` incomparable to `gramK`; `χ(det)` moments `16/28/44` « orbits) and
-> stepping into the from-scratch build **STALLED**: round-2 is a `Stab`-invariant **count-of-counts** with no character-sum
-> handle, and the one clean handle (the **FLAG** lead) is also negative. Irreducible wall = **`gramK`-recovery is circular**
-> = the node-4 WL-dimension wall (open both ways). **⟹ the direct WL build of `bᵢ=1` is CLOSED** (open research problem, not
-> a tractable build); Pieces 1+2 remain correct/banked. **NEXT SESSION = ROUTE C** (recovery §7 + §9.8.9): recover `Q`
-> algebraically ⟹ `Aut=GO(Q)` known ⟹ Schreier–Sims — a *bounded* build that sidesteps the WL crux. Dead ends (don't
-> re-walk): "fibre-sum bulk recovers Gram" empty; first moment fails char `p`; plane-pinning `PlanePinnable` REFUTED;
-> the direct WL-strata build STALLED (§9.8.9). **Full verdict + evidence = recovery doc top HANDOFF + §9.8 (esp. §9.8.9);
-> cascade/stall probes `class_cascade_probe.py`/`factorization_probe.py`/`flag_stall_probe.py`.**
->
-> **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
-> [[project_formsgraph_wldim_viability_2026-06-28]].** The matching base is `O(log n)` ⟹ **quasipolynomial**, and that is
-> essentially tight for any *individualization/WL* method (frame & count base measured `= Θ(d)`, residue `d` unbounded,
-> bounded-WL-dim is open math). **BUT route #5 — running the actual canonizer — found it solves `VO⁻₄(q)` in a SINGLE PATH
-> (`leaves=1`, `BranchingNodes=0`, full `|Aut|` recovered): forms graphs are huge-`Aut`, so `n^{|T|}` is the WRONG cost
-> model and the descent tree is poly.** The polynomial route is therefore the **RECOVERY / harvest route** (`SchemeRecovered`
-> / Stage B.0 `coords_determine`), which **sidesteps the open WL-dim problem.** The real cost is the generic automorphism
-> harvest: faithfully poly in `n` at fixed `d`, but with a `d`-factor beyond `n` (infeasible at `d=8`); whether that factor
-> is super-poly (a new "Witt" harvest is NECESSARY) or high-poly (already poly, Witt = optimization) is **OPEN and gates the
-> build**. **▶ GATING NEXT STEP: analyse the cascade harvest recursion's `d`-complexity in `ChainDescent.cs`.** Floor-lowering
-> / q=pᵉ / other families are now LOWER priority (they widen the quasipoly result the recovery route would supersede).
-> `reachesRigidOrCameron_viaSpielman` = the citable sub-exp fallback.
->
-> **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
-> the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there
-> for "what's left"; the live finding is that the seal's `modulo {G3 + hSmallAutThin + hcatch + hImprim}` collapses to
-> **`modulo {G3 + one s(C)/WL-recovery core}`** — the non-G3 hypotheses are facets of one open object, not four gaps.
->
-> **★ CURRENT FRONTIER (2026-06-17, handoff) — read this first; the boxes below are older history.** The seal
-> `reachesRigidOrCameron` is assembled and axiom-clean. **A1 is DONE** (`CoherentConfig.lean §CC.11`–`§CC.19`); the **A2
-> §4c build-order is COMPLETE** (steps 1–5: kill lemma / bound / halving / `BigConfusionCover` obstruction, `§CC.22`).
-> Three things landed *this session* on top of that — **read the live frontier doc
-> [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md) STATUS + §8 + §9 first:**
-> 1. **Citation adjustment, Phases 1–2 (route-doc §8.5):** the faithful-direction capstone
->    **`reachesRigidOrCameron_viaSmallAutShatters`** carries `hSmallAutDiscretizes : ¬IsLarge → ∀ over-`B`, ¬BigConfusionCover`
->    (the *literature-true* Babai/Kivva direction) instead of the CGGP-false `hNeumaier : cover ⟹ large`; fed by the
->    citation-free bridge **`not_bigConfusionCover_of_allSingletonFiber`** (`complete ⟹ ¬cover`, `§CC.22`). Old
->    `…viaNoConfusionCover` kept, superseded.
-> 2. **Research pass DONE (route-doc §8.6):** `B(n)` is a **threshold ladder** — *polynomial = OPEN* (the rank-3 base case,
->    not even conjectured); *quasipoly* = Babai/Kivva motion (`O(log n)` group base, WL-realization open); *sub-exp `Õ(n^{1/3})`*
->    = Spielman (citable). **No citation makes the seal polynomial.** Corrected cites: Babai **ITCS 2014** (not STOC), motion
->    **n/8**; Kivva **JCTB 164 (2024)**, a *motion* bound not WL-dim; CGGP = **Cai-Guo-Gavrilyuk-Ponomarenko**. **Eberhard
->    "Hamming sandwiches" (arXiv:2203.03687) DISMISSED** — non-Schurian, can't touch the schurian seal.
-> 3. **★ THE LIVE FRONTIER = NODE 4 (route-doc §9).** The poly side decomposes by *line-system structure* into five nodes
->    (§9.0); four are carved/foreseeable, the open crux is **node 4 = a primitive, non-geometric, non-conference SRG**.
->    Anchor **`reachesRigidOrCameron_viaNoCover`** (axiom-clean) proves **node 4 (`hShatter` = `∀ over-`B`, ¬BigConfusionCover`)
->    ⟹ polynomial seal, NO largeness citation.** Node 4's best handle is the **multiplicity reframe (§9.6, user's idea):** node
->    4 ⟺ the confusion-cover *multiplicity* `L = (Σ_{|C|>ρc}|C|)/n` is bounded (`O(1)`) — a *computable* quantity (high `L` =
->    thick line system = Cameron, carved; low `L` = poly via a `1+L`-pin cleanup).
->
-> 4. **★ THE THIN-SIDE MACHINE + D1/D2/D3 ATTACK ON NODE 4 — LANDED, axiom-clean (route-doc §9.9.6 + §9.9.7; read those).**
->    The cascade is now PROVED end-to-end down to one computable predicate. Chain (`§CC.20b`, `§CC.22b–d`, `§S-gate2`):
->    **`BoundedMinMult`** (bounded `minMult` per over-`B` base) → `boundedConfusionLoad_of_boundedMinMult` (the §9.6 `(1+L)`-cleanup)
->    → `boundedConfusionMultiplicity_of_boundedMinMult` → `…viaBoundedMultiplicity` → **polynomial seal**. **D1 (cover rigidity)
->    DONE** (`§CC.22c`): confusion-set equivariance + `confusionMultiplicity_perm` — cover-load is `Aut`-invariant (`= L` on the
->    vertex-transitive bare scheme). **D3 dichotomy capstone** `reachesRigidOrCameron_viaBoundedMinMult` carries
->    `hSmallAutThin : ¬IsLarge → BoundedMinMult B M` (sharper than `…viaSmallAutShatters`'s zero-load `¬cover`, which the probe
->    showed rarely holds). Non-vacuity anchor `boundedConfusionMultiplicity_univ` (M=n). Seal `modulo {G3 + hSmallAutThin +
->    hcatch + hImprim}`.
->
-> 5. **★ ROW-4 PROBE + NODE-2 BRIDGE — LANDED (2026-06-17, route-doc §9.9.8 + §9.9.9).** (a) The **falsifier hunt**
->    (`A2MonovariantProbe.Probe_Row4Sporadics`): the Paulus `srg(25,12,5,6)`/`(26,10,3,4)` + Chang + conference SRGs from the
->    verified Hanaki catalogue, measured for the Lean `BigConfusionCover`/`minMult` on the 2-WL closure — **42 small-Aut
->    non-geometric SRGs (many `|Aut|=1`) ALL shatter at base ≪ √n; 0 falsifiers**, the sharpest support yet for `hSmallAutThin`.
->    (b) The **node-2 rung bridge** (axiom-clean): `boundedConfusionMultiplicity_of_completeBase` (`§CC.22e` — a bounded *discrete*
->    base ⟹ `BoundedConfusionMultiplicity B M`, sharpening the trivial `M=n` anchor to `M=|T₀|`) + `reachesRigidOrCameron_viaCompleteBase`
->    (`§S-gate2` — a δ′-discretizing thin family seals via `…viaBoundedMultiplicity`, no largeness guard). Honest scope: both are
->    **node 3 / pipeline-validation; node 4 (unbounded `s`) is untouched** — no probe reaches it, no constructible witness exists.
->
-> **▶ PICK UP HERE — the open content is now ONE predicate: `hSmallAutThin` = "small-Aut primitive residue ⟹ `BoundedMinMult`",
-> i.e. thick (`minMult` unbounded) ⟹ large Aut.** This is the WALL: irreducible (rook is thick, needs √n base, saved only by
-> large Aut; δ′ gives √n there) = Babai SRG-structure/CFSG = node 4, no known witness. **Method of attack = route-doc §9.9.7.**
-> **★ The DIRECT node-4 attack leads are now ALL CLOSED (2026-06-17; route-doc §9.9.10–§9.9.12) — a fresh reader should NOT
-> re-attempt these:** the D2 "stable⟹regular partial-geometry" extraction is refuted as a proof route (§9.9.10), climbing the
-> k-WL ladder cannot manufacture a gap (`base_k ≥ b(Aut)` ∀k; the c^k Hamming hypergrid's base shrinks with k, §9.9.11), and the
-> Hamming-twist/Doob falsifier hunt is negative (§9.9.12) — so the falsifier record is **0 across every constructible probe** and
-> the "engineer a thick small-Aut graph" routes (climb WL / twist Hamming) are exhausted. The wall is now sharply "is the WL-dim
-> gap `base − b(Aut)` bounded for the small-Aut residue?", with no constructible falsifier and no current technique. The **live
-> work is the carve-around**, not a direct node-4 attack:
-> **Recommended next builds:** (a) **the remaining node-2 work — a *uniform* rainbow rank** for a parametric affine/FDF family
-> via `dominatorReachable_of_rainbowRank` (δ′→discrete→`minMult=0`; `clebschZ4` = the n=16 instance; the just-landed
-> `reachesRigidOrCameron_viaCompleteBase` is its seal-level consumer — generalize `clebschZ4_closure` off n=16); (b) **Spielman
-> floor** — a `…viaSpielman` capstone making the seal unconditional-modulo-citations at the sub-exponential threshold (Cameron-free).
-> Poly discharge of `hSmallAutThin` for the non-geometric core = long-horizon open frontier. `hcatch` → CFI-1992 exchange;
-> `hImprim` → block-tower infra (not a citation).
-> Substrate/build home:
-> [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); A2 scoping:
-> [`chain-descent-cxt-scoping.md`](./chain-descent-cxt-scoping.md); forward payoff (post-node-4):
-> [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md). The boxes below predate all of this.
->
-> **UPDATE (2026-06-11) — the live frontier moved; the build home is now
-> [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md)** (see the boxed
-> "THE LIVE BUILD" pointer at the end of this section; the module-adjoin doc referenced below is its *history*).
-> The seal's open `s(C)` content (G2-B) on the **affine cyclotomic slice is now CLOSED in Lean** modulo {G3 + a cited
-> cyclotomic 2-separability result, Ponomarenko arXiv:2006.13592 Thm 1.1} — `reachesRigidOrCameron_affineSlice` &c.,
-> axiom-clean, build green. **Key correction:** the *non-affine* residue needs **no new Lean infrastructure** — a
-> non-affine residue scheme is `orbitalScheme H` (general constructor) and plugs straight into the already-general seal
-> capstones; the lone remaining gap is the *discharge* = the open crux (G2-B, uncited for non-affine). **The destination
-> is the S-ring / coherent-configuration separability theory** (the general sufficient condition that closes the
-> crux for affine *and* non-affine) — the durable build doc is
-> [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); the affine-slice /
-> probe history is [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md) §9.
-> The prose below predates this and is the pre-affine-closure map.
+> **This section is a map. The authoritative current state is the STATUS block at the top of each linked
+> `chain-descent-*.md`, plus [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) for
+> *what is proved*. Quality bar throughout: every Lean theorem axiom-clean `[propext, Classical.choice,
+> Quot.sound]`, full build green.**
+
+**The endgame frame — "two seals, one wall."** The finished canonizer
+([`chain-descent-endgame-spec.md`](./chain-descent-endgame-spec.md) §1a; compile target
+[`Publication.lean`](../GraphCanonizationProofs/Publication.lean)) reaches **non-rigid** correctness via
+**Algorithm A** (assume-VT / confinement — the Lean-provable ① proof) and the **rigid** residue via **Algorithm
+R** (the F₂ / ring solver). Both isolate the *same* wall, `hSmallAutThin` (≡ rigid-GI∈P), collapsing the open
+remainder to one named residue.
+
+**What is sealed** (built, axiom-clean, in `build.sh`). The canonizer-correctness substrate
+(direction-invariance, the descent spine); **Route C** — all four form families sealed
+(`reachesRigidOrCameron_{affinePolar,alternating,halfSpin,suzuki}`, modulo scoped citations;
+`NondegQuadricDeterminesForm` discharged); the forms-graph residue at **quasipolynomial**
+(`AffinePolarSeal.reachesRigidOrCameron_affinePolar`), with the fully-citable sub-exp floor `…viaSpielman`. Route C
+is a genuine result but **parked off the headline path** (endgame §1a): the headline `canonizer` runs on Algorithm A,
+not form recovery.
+
+**The live frontier — the Seal Phase (Algorithm A / confinement).** ① (`canon_sound` + `canon_complete`) is done and
+axiom-clean for the index-free `descentCanon`, modulo the confinement citation bundle. Finishing it to
+*unconditional-modulo-citations* is the current work, and **the authoritative "what's left" is
+[`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) — read its TOP "⭐ SEAL-PHASE WRAP-UP
+CHECKLIST".** In brief: `hImprim` is wall-free (the flag's dichotomy routes each branch to `FrameSelectorTransitive`,
+never through `BlockRefinementVisible` = the wall); the residue-scheme seam's primitivity + count legs are built
+(the Skresanov 2-closure citation was eliminated); what remains is a base-identification + a faithfulness
+(`isotropic_span`) discharge, the recovery witness (carried as a *classification* citation, exactly as Route C carries
+`hreal`), a bundle simplification, and the mechanical PORT into `build.sh`.
+
+**The one genuine wall.** `hSmallAutThin` — "small-Aut primitive residue ⟹ bounded WL-recovery" — is open at the
+*polynomial* threshold (there it *is* GI ∈ P) and is quarantined behind the flag: by design the canonizer is
+**polynomial-or-flag**, and the flag set is exactly the non-schurian IR-solver "row 4"
+([`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §11). "Isolate, don't close" (§1)
+describes where this sits — the live target, never a verdict that it cannot close.
+
+> **Deeper history is intentionally not repeated here.** The older WL-dimension / node-4 / `s(C)`-core framing, the
+> affine-slice closure, and the per-increment forms-graph build history live in the deep-dive docs' STATUS blocks, in
+> `chain-descent-remaining-work.md`'s lower sections, and in the changelog/archive. The prose below (de-classing, the
+> "single open proposition G2-B") predates the Algorithm-A frame and is retained only as architectural background.
 
 **The architecture pivot — "de-classing."** Orbit recovery and oracle firing were
 being proved *class by class* (CFI odd-degree, then even; schemes rank 2, 3, 4…).
