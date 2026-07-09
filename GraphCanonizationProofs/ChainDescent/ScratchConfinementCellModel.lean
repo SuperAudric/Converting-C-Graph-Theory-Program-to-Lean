@@ -29,11 +29,13 @@ Axiom target `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in 
 -/
 import ChainDescent.ScratchConfinementSchurianModel
 import ChainDescent.ScratchConfinementP4
+import ChainDescent.ScratchConfinementX3Sel
 
 namespace ChainDescent.ConfinementCellModel
 
 open ChainDescent
 open ChainDescent.ConfinementP1
+open ChainDescent.ConfinementX3Sel
 
 variable {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
 
@@ -66,6 +68,38 @@ def cellRestrictHom {T C : Finset (Fin n)} (hinv : CellInvariant adj P T C) :
 TRUE for the forms/Cameron family (`isotropic_span`), carried here and discharged per-family downstream. -/
 def CellActionFaithful {T C : Finset (Fin n)} (hinv : CellInvariant adj P T C) : Prop :=
   Function.Injective (cellRestrictHom hinv)
+
+/-! ## Discharging `CellInvariant` — colour-invariance (step (1), the last "should-be-free" input)
+
+`CellInvariant` for the descent's selected cell `selCell χ` reduces to `χ` being `g`-invariant, via the W1 core
+`selCell_transport`. For the canonical selection colouring `χ = warmRefine adj P (individualizedColouring n T)` (= the
+confinement's `indivχ`), `g`-invariance is `warmRefine_invariant_of_isAut` composed with `individualizedColouring_invariant`
+(`g ∈ StabilizerAt adj P T` is an automorphism fixing `T` pointwise). So `CellInvariant` is FULLY discharged — not carried
+— for the standard cell selector. -/
+
+/-- **The generic reduction:** `CellInvariant (selCell χ)` from `g`-invariance of `χ`. Direct from the W1 core
+`selCell_transport` (with `χ₁ = χ₂ = χ`). -/
+theorem cellInvariant_selCell_of_gInvariant {T : Finset (Fin n)} {χ : Colouring n}
+    (hginv : ∀ (g : StabilizerAt adj P T) (v : Fin n), χ ((g : Equiv.Perm (Fin n)) v) = χ v) :
+    CellInvariant adj P T (selCell χ) :=
+  fun g x => (selCell_transport (fun v => hginv g v) x).symm
+
+/-- **The canonical selection colouring is `g`-invariant** — `warmRefine adj P (individualizedColouring n T)` is fixed
+by every `g ∈ StabilizerAt adj P T` (automorphism fixing `T` pointwise): `warmRefine_invariant_of_isAut` on the
+`individualizedColouring_invariant` seed. -/
+theorem stabilizerAt_indivWarmRefine_invariant {T : Finset (Fin n)}
+    (g : StabilizerAt adj P T) (v : Fin n) :
+    warmRefine adj P (individualizedColouring n T) ((g : Equiv.Perm (Fin n)) v)
+      = warmRefine adj P (individualizedColouring n T) v :=
+  warmRefine_invariant_of_isAut g.2.1 g.2.2.1
+    (fun w => individualizedColouring_invariant g.2.2.2 w) v
+
+/-- **★ `CellInvariant` DISCHARGED for the standard selector** — the selected cell of the canonical individualization
+colouring is preserved setwise by the residual group, with NO carried hypothesis. This supplies `hinv` to the cell
+model for `χsel T := warmRefine adj P (individualizedColouring n T)`. -/
+theorem cellInvariant_selCell_indivWarmRefine (T : Finset (Fin n)) :
+    CellInvariant adj P T (selCell (warmRefine adj P (individualizedColouring n T))) :=
+  cellInvariant_selCell_of_gInvariant (fun g v => stabilizerAt_indivWarmRefine_invariant g v)
 
 /-! ## Pretransitivity on the cell (from Witt) -/
 
