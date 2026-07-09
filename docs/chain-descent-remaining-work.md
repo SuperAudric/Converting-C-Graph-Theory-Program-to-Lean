@@ -40,8 +40,16 @@ ResidueSchemeModel`; (b) the 2-closure citation for `hcard` (`|SchemeAutGroup| =
 needs the residue PRIMITIVE rank-3 first ⟹ depends on item 1.** Not a wall: one citation + a constructor + a bridge.
 
 **3. Citations — audit exact Lean statements for reviewer-faithfulness.** The carried citations {G3 (`hClassify`),
-Witt+Liebeck (`hCitation`), Skresanov 2-closure (`AffineSchemeTwoClosed`)} stay cited, but each hypothesis's Lean
-*statement* must be checked to match a true, correctly-scoped external theorem (no accidental over-strength / vacuity).
+Liebeck, Witt, Skresanov 2-closure (`AffineSchemeTwoClosed`)} stay cited, but each hypothesis's Lean *statement* must be
+checked to match a true, correctly-scoped external theorem (no accidental over-strength / vacuity).
+  - **3a. Classicality threading — DONE (2026-07-09).** §7c gap (b), the silent-correctness guard: Witt applies only to
+    *classical* residues, but the old compound `hCitation : PrimRank3Classical (Cameron) → WittCellTransitive` bore the
+    classicality step implicitly (a non-classical Cameron residue could be silently Witt-pruned). Split into two faithful
+    citations with an explicit `IsClassicalScheme` predicate: **`hLiebeck` (Cameron ⟹ classical; largeness baked into
+    `IsCameronScheme`)** + **`hWitt` (classical ⟹ cell-transitive)**. Capstone
+    `ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt_classical` (axiom-clean) composes them; the
+    `ConfinementCitations` bundle now carries the split, so it reads {G3, Liebeck, Witt, hImprim, D0} — the true citation
+    set. The old compound capstone is kept (still valid).
 
 **4. PORT to `build.sh`.** The WIP scratch cluster (`ScratchConfinement*` + `ScratchConfinementX3{Sel,Recon,Complete}` +
 the cost-model substrate) is NOT yet in `build.sh`. Mechanical.

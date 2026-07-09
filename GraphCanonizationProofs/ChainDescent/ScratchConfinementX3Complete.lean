@@ -113,21 +113,23 @@ colouring, by contrast, depends on the *ordered* list `done`. The mismatch disso
 `χsel` at the **constant** function returning the descent colouring of `done`, and take `S := done.toFinset`. Then
 `χsel S` beta-reduces (definitionally) to exactly the list-indexed colouring — so the capstone's conclusion IS the
 `DescentConfinement` per-`done` statement, with no reindexing. What remains are the capstone's *carried citations*
-(`hClassify` = G3, `M` = the D0 model, `hprim` = hImprim, `hCitation` = Witt+Liebeck, `hflag` = the flagging-regime
+(`hClassify` = G3, `M` = the D0 model, `hprim` = hImprim, `hLiebeck`+`hWitt` = the classicality-split Liebeck+Witt
+citation, `hflag` = the flagging-regime
 witness) — i.e. `DescentConfinement` reduces to supplying these at each descent node, exactly the named residual, not a
 reindexing obstruction. -/
 
 /-- **★ W4.3 — the adaptor.** The Finset-indexed confinement capstone, instantiated at the constant `χsel` and
 `S := done.toFinset`, yields the list-indexed per-`done` `SelectedCellIsOrbit` that `DescentConfinement` /
-`reconcile_descent` consume. Proof: a direct call to `confinement_selectedCellIsOrbit_spine_witt` with
+`reconcile_descent` consume. Proof: a direct call to `confinement_selectedCellIsOrbit_spine_witt_classical` with
 `χsel := fun _ => (the descent colouring of done)`; the conclusion beta-reduces to the target. The remaining
 hypotheses are precisely the confinement citations {G3, D0 model, hImprim, Witt+Liebeck} + the flag witness. -/
 theorem selectedCellIsOrbit_done_of_capstone (H : AdjMatrix n) (done : List (Fin n)) (k : Nat) (hn : 2 ≤ n)
-    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    {IsCameronScheme IsClassicalScheme : ∀ (m : Nat), SchurianScheme m → Prop}
     (hClassify : PrimitiveCCClassification (confinementLargeScheme n) IsCameronScheme)
     (M : ResidueSchemeModel H defaultP₀ defaultχι₀ selCell k)
     (hprim : M.S.toAssociationScheme.IsPrimitive)
-    (hCitation : PrimRank3Classical H defaultP₀ defaultχι₀ selCell IsCameronScheme k →
+    (hLiebeck : ∀ T : SchurianScheme n, IsCameronScheme n T → IsClassicalScheme n T)
+    (hWitt : PrimRank3Classical H defaultP₀ defaultχι₀ selCell IsClassicalScheme k →
       WittCellTransitive H defaultP₀ selCell
         (fun _ => warmRefine H defaultP₀ (descentColouring H defaultP₀ defaultχι₀ done)) done.toFinset)
     (hflag : flagsAt
@@ -136,9 +138,9 @@ theorem selectedCellIsOrbit_done_of_capstone (H : AdjMatrix n) (done : List (Fin
           (spineBaseAt H defaultP₀ defaultχι₀ selCell)).w n) k = true) :
     SelectedCellIsOrbit H defaultP₀ selCell
       (warmRefine H defaultP₀ (descentColouring H defaultP₀ defaultχι₀ done)) done.toFinset :=
-  confinement_selectedCellIsOrbit_spine_witt H defaultP₀ defaultχι₀ selCell
+  confinement_selectedCellIsOrbit_spine_witt_classical H defaultP₀ defaultχι₀ selCell
     (fun _ => warmRefine H defaultP₀ (descentColouring H defaultP₀ defaultχι₀ done))
-    done.toFinset k hn hClassify M hprim hCitation hflag
+    done.toFinset k hn hClassify M hprim hLiebeck hWitt hflag
 
 /-! ## W4.4 — assembling `DescentConfinement`, and the ① completeness showcase
 
@@ -147,7 +149,8 @@ conclusion is a property of `H` and the base alone). By the W4.3 adaptor, each `
 firing of the confinement capstone at level `k := done.length`, with `χsel` the constant descent colouring. So
 `DescentConfinement` assembles from an **`H`-indexed supply of the capstone's citations** — the named results the
 confinement lemma carries: `hClassify` (G3 at `confinementLargeScheme`), `M` (the D0 non-schurian model), `hprim`
-(hImprim / primitivity), `hCitation` (Witt + Liebeck), and `hflag` (the flagging-regime witness). This is the honest
+(hImprim / primitivity), `hLiebeck` (Cameron ⟹ classical) + `hWitt` (classical ⟹ cell-transitive), and `hflag` (the
+flagging-regime witness). This is the honest
 residual: no open math, exactly the citation base of Algorithm A. Composing it into `descentCanon_complete` yields the
 ① completeness showcase for the index-free descent canonizer. -/
 
@@ -157,14 +160,15 @@ given the carried citations. Direct per-node application of the W4.3 adaptor. Th
 base {G3, D0, hImprim, Witt+Liebeck} + the flag witness; assembling them here is the "supply the citations" step, not
 new math. -/
 theorem descentConfinement_of_citations (hn : 2 ≤ n)
-    (IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop)
+    (IsCameronScheme IsClassicalScheme : ∀ (m : Nat), SchurianScheme m → Prop)
     (hClassify : PrimitiveCCClassification (confinementLargeScheme n) IsCameronScheme)
     (M : ∀ (H : AdjMatrix n) (done : List (Fin n)),
       ResidueSchemeModel H defaultP₀ defaultχι₀ selCell done.length)
     (hprim : ∀ (H : AdjMatrix n) (done : List (Fin n)),
       (M H done).S.toAssociationScheme.IsPrimitive)
-    (hCitation : ∀ (H : AdjMatrix n) (done : List (Fin n)),
-      PrimRank3Classical H defaultP₀ defaultχι₀ selCell IsCameronScheme done.length →
+    (hLiebeck : ∀ T : SchurianScheme n, IsCameronScheme n T → IsClassicalScheme n T)
+    (hWitt : ∀ (H : AdjMatrix n) (done : List (Fin n)),
+      PrimRank3Classical H defaultP₀ defaultχι₀ selCell IsClassicalScheme done.length →
         WittCellTransitive H defaultP₀ selCell
           (fun _ => warmRefine H defaultP₀ (descentColouring H defaultP₀ defaultχι₀ done)) done.toFinset)
     (hflag : ∀ (H : AdjMatrix n) (done : List (Fin n)),
@@ -175,21 +179,22 @@ theorem descentConfinement_of_citations (hn : 2 ≤ n)
     DescentConfinement (n := n) :=
   fun _G H _π _hadj done =>
     selectedCellIsOrbit_done_of_capstone H done done.length hn hClassify
-      (M H done) (hprim H done) (hCitation H done) (hflag H done)
+      (M H done) (hprim H done) hLiebeck (hWitt H done) (hflag H done)
 
 /-- **★ ① COMPLETENESS SHOWCASE (`canon_complete`, index-free descent).** The descent canonizer is a complete
 iso-invariant — `GraphIso G H ↔ descentCanon G = descentCanon H` — resting only on the named confinement citations
 (supplied per-node). The ← direction is unconditional (①a); the → direction is the whole W3 reconciliation fed by
 confinement. This is the ①b half of the ① showcase, now on the correct (index-free) canonical object. -/
 theorem descentCanon_complete_of_citations (hn : 2 ≤ n)
-    (IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop)
+    (IsCameronScheme IsClassicalScheme : ∀ (m : Nat), SchurianScheme m → Prop)
     (hClassify : PrimitiveCCClassification (confinementLargeScheme n) IsCameronScheme)
     (M : ∀ (H : AdjMatrix n) (done : List (Fin n)),
       ResidueSchemeModel H defaultP₀ defaultχι₀ selCell done.length)
     (hprim : ∀ (H : AdjMatrix n) (done : List (Fin n)),
       (M H done).S.toAssociationScheme.IsPrimitive)
-    (hCitation : ∀ (H : AdjMatrix n) (done : List (Fin n)),
-      PrimRank3Classical H defaultP₀ defaultχι₀ selCell IsCameronScheme done.length →
+    (hLiebeck : ∀ T : SchurianScheme n, IsCameronScheme n T → IsClassicalScheme n T)
+    (hWitt : ∀ (H : AdjMatrix n) (done : List (Fin n)),
+      PrimRank3Classical H defaultP₀ defaultχι₀ selCell IsClassicalScheme done.length →
         WittCellTransitive H defaultP₀ selCell
           (fun _ => warmRefine H defaultP₀ (descentColouring H defaultP₀ defaultχι₀ done)) done.toFinset)
     (hflag : ∀ (H : AdjMatrix n) (done : List (Fin n)),
@@ -200,7 +205,7 @@ theorem descentCanon_complete_of_citations (hn : 2 ≤ n)
     {G H : AdjMatrix n} :
     GraphIso G H ↔ descentCanon G = descentCanon H :=
   descentCanon_complete
-    (descentConfinement_of_citations hn IsCameronScheme hClassify M hprim hCitation hflag)
+    (descentConfinement_of_citations hn IsCameronScheme IsClassicalScheme hClassify M hprim hLiebeck hWitt hflag)
 
 /-! ## W4.5 — the ① showcase (Publication shape): sound + complete, on the concrete index-free canonizer
 
@@ -211,19 +216,26 @@ modulo the confinement citations) in exactly the Publication binder shape (`Iso 
 The seven per-node citations are bundled into `ConfinementCitations` so the showcase reads cleanly. This is the ① half
 of the endgame, sorry-free, resting only on the named citation base of Algorithm A. -/
 
-/-- **The confinement citation bundle** — the named results Algorithm A carries, packaged per `H`/base: `hClassify`
-(G3), `M` (D0 non-schurian model), `hprim` (hImprim/primitivity), `hCitation` (Witt + Liebeck), `hflag` (the
-flagging-regime witness). Bundling keeps the ① showcase signature readable; the honest residual is exactly these. -/
+/-- **The confinement citation bundle** — the named results Algorithm A carries, with the Witt citation
+**classicality-threaded** (route-c-plan §7c gap (b)): `hClassify` (G3), `M` (D0 non-schurian model), `hprim`
+(hImprim/primitivity), **`hLiebeck` (Cameron ⟹ classical) + `hWitt` (classical ⟹ cell-transitive)** — the two
+faithful halves of the old compound `Witt+Liebeck` — and `hflag` (the flagging-regime witness). `IsClassicalScheme`
+is the explicit classicality predicate threaded between Liebeck and Witt. So the bundle reads as the TRUE citation set
+{G3, Liebeck, Witt, hImprim, D0}. `hLiebeck` is `H`/`done`-independent (one group-theoretic theorem). -/
 structure ConfinementCitations (n : Nat) where
   hn : 2 ≤ n
   IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop
+  IsClassicalScheme : ∀ (m : Nat), SchurianScheme m → Prop
   hClassify : PrimitiveCCClassification (confinementLargeScheme n) IsCameronScheme
   M : ∀ (H : AdjMatrix n) (done : List (Fin n)),
     ResidueSchemeModel H defaultP₀ defaultχι₀ selCell done.length
   hprim : ∀ (H : AdjMatrix n) (done : List (Fin n)),
     (M H done).S.toAssociationScheme.IsPrimitive
-  hCitation : ∀ (H : AdjMatrix n) (done : List (Fin n)),
-    PrimRank3Classical H defaultP₀ defaultχι₀ selCell IsCameronScheme done.length →
+  /-- **Liebeck** — a Cameron (large primitive rank-3) scheme is classical. -/
+  hLiebeck : ∀ T : SchurianScheme n, IsCameronScheme n T → IsClassicalScheme n T
+  /-- **Witt** — a *classical* residue's selected cell is transitive. -/
+  hWitt : ∀ (H : AdjMatrix n) (done : List (Fin n)),
+    PrimRank3Classical H defaultP₀ defaultχι₀ selCell IsClassicalScheme done.length →
       WittCellTransitive H defaultP₀ selCell
         (fun _ => warmRefine H defaultP₀ (descentColouring H defaultP₀ defaultχι₀ done)) done.toFinset
   hflag : ∀ (H : AdjMatrix n) (done : List (Fin n)),
@@ -234,7 +246,8 @@ structure ConfinementCitations (n : Nat) where
 
 /-- `DescentConfinement` from the bundle — the W4.4 assembly, packaged. -/
 theorem descentConfinement_of_bundle (C : ConfinementCitations n) : DescentConfinement (n := n) :=
-  descentConfinement_of_citations C.hn C.IsCameronScheme C.hClassify C.M C.hprim C.hCitation C.hflag
+  descentConfinement_of_citations C.hn C.IsCameronScheme C.IsClassicalScheme C.hClassify C.M C.hprim
+    C.hLiebeck C.hWitt C.hflag
 
 /-- **The concrete index-free canonizer output.** In the confined regime the descent always reaches a leaf and answers
 (`some`), never flagging — the flag is the Phase-2/rigid escape, absent here. So `canonForm?` is `some (descentCanon)`. -/

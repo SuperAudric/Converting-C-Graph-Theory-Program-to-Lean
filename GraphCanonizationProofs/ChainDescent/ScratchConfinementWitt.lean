@@ -108,4 +108,42 @@ theorem confinement_selectedCellIsOrbit_spine_witt (adj : AdjMatrix n) (P₀ : P
   exact confinement_selectedCellIsOrbit_spine_P3_discharged adj P₀ χι₀ sel χsel S k hn hClassify M hprim
     (fun h => frameSelectorTransitive_of_wittCellTransitive (hCitation h)) hflag
 
+/-! ## Classicality-threaded form — the compound Witt citation split into Liebeck + Witt
+
+**Why (route-c-plan §7c gap (b) — the silent-correctness guard).** Witt's cell-transitivity theorem applies to
+**classical** residues, but the compound `hCitation : PrimRank3Classical → WittCellTransitive` above jumps straight
+from *Cameron* (`IsCameronScheme`) to cell-transitive, bearing the classicality step implicitly. A Cameron-but-non-
+classical primitive rank-3 residue would then be assume-VT-pruned as if handled, yet Witt need not apply — a silent
+correctness risk. The honest form threads classicality explicitly as **two** faithful citations:
+  · `hLiebeck` — **Liebeck**: a Cameron (large primitive rank-3) scheme is **classical** (`IsCameronScheme n T →
+    IsClassicalScheme n T`). Largeness is baked into `IsCameronScheme` (the G3-classification output), which is what
+    rules out the bounded-order non-classical rank-3 exceptions.
+  · `hWitt` — **Witt**: a *classical* residue's cell is transitive (`PrimRank3Classical … IsClassicalScheme k →
+    WittCellTransitive`). Reuses `PrimRank3Classical` at the classical predicate — its Witt-faithful antecedent.
+So the `ConfinementCitations` bundle reads {G3, **Liebeck**, **Witt**, hImprim, D0} — the true citation set — rather
+than a compound. Same conclusion, composed internally from the split. -/
+
+/-- **★ Confinement, classicality-threaded (the reviewer-faithful citation split).** Identical conclusion to
+`confinement_selectedCellIsOrbit_spine_witt`, but the compound Witt citation is split into Liebeck
+(`hLiebeck : Cameron ⟹ classical`) + Witt (`hWitt : classical ⟹ cell-transitive`), with an explicit
+`IsClassicalScheme` predicate threaded between. Closes the §7c gap (b): classicality is a *checked* step (via
+Liebeck, using the largeness inside `IsCameronScheme`), not a bundled assumption, so a non-classical Cameron residue
+cannot be silently Witt-pruned. -/
+theorem confinement_selectedCellIsOrbit_spine_witt_classical (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (χsel : Finset (Fin n) → Colouring n)
+    (S : Finset (Fin n)) (k : Nat) (hn : 2 ≤ n)
+    {IsCameronScheme IsClassicalScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (confinementLargeScheme n) IsCameronScheme)
+    (M : ResidueSchemeModel adj P₀ χι₀ sel k)
+    (hprim : M.S.toAssociationScheme.IsPrimitive)
+    (hLiebeck : ∀ T : SchurianScheme n, IsCameronScheme n T → IsClassicalScheme n T)
+    (hWitt : PrimRank3Classical adj P₀ χι₀ sel IsClassicalScheme k →
+      WittCellTransitive adj P₀ sel χsel S)
+    (hflag : flagsAt
+        (spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).step
+        ((spineCappedCanonizerO adj P₀ χι₀ sel (spineBaseAt adj P₀ χι₀ sel)).w n) k = true) :
+    SelectedCellIsOrbit adj P₀ sel (χsel S) S :=
+  confinement_selectedCellIsOrbit_spine_witt adj P₀ χι₀ sel χsel S k hn hClassify M hprim
+    (fun hCam => hWitt (hCam.imp (fun M' hM' => hLiebeck M'.S hM'))) hflag
+
 end ChainDescent.ConfinementWitt
