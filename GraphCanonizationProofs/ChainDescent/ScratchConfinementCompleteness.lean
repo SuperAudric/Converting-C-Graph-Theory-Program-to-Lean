@@ -44,7 +44,7 @@ below is superseded scaffolding; see that file for the live route.
 Imports `ScratchCanonFormCapped` (the shared `canonForm?` + ①a `canonForm?_sound`). Axiom target `[propext,
 Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
 -/
-import ChainDescent.ScratchCanonFormCapped
+import ChainDescent.CanonForm
 
 namespace ChainDescent.ConfinementCompleteness
 

@@ -28,7 +28,7 @@ construction, so the orders correspond and the per-level `a_k`'s compose into on
 Axiom target `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
 -/
 import ChainDescent.ScratchConfinementX3Sel
-import ChainDescent.ScratchConfinementWitt
+import ChainDescent.Confinement
 
 namespace ChainDescent.ConfinementX3Recon
 

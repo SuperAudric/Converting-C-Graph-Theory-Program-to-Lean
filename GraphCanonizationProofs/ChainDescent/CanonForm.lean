@@ -1,32 +1,20 @@
 /-
-# ScratchCanonSound.lean — ①a `canon_sound` discharged on the REAL spine (WIP, NOT in build.sh)
+# ChainDescent.CanonForm — ①a soundness + the ② capped canonizer object (ported)
 
-**The first `Publication.lean` obligation crossed into the real runtime.** `Publication.lean` states
-`canon_sound`: whenever the canonizer answers `some cG`, that `cG` is a genuine relabelling of the input
-(`∃ π, cG = labelledAdj π G`). Today `Publication.canonForm?` is `opaque … := none`, so the obligation is a
-`sorry`. This module *defines* a real spine-level `canonForm?` off `defaultSpineChain` and proves the
-soundness obligation against it — turning ①a from a stub into a proof, and connecting the runtime object to
-the descent substrate (the "value-side IS descended" direction of the cost/runtime co-development).
+The soundness content (`canonForm_isLabelledAdj`: a descent leaf's `canonAdj` IS a `labelledAdj`),
+the parameter-free canonizer `canonFormOf`, and the SHARED capped object `CanonForm.canonForm?`
+(gated by the real capped descent, carrying `descentCost_le : cost ≤ n⁴` for ②).
+These are the objects `Publication.{canon_sound, canon_poly_or_flag}` will plug into.
 
-**Two pieces.**
-  · `canonForm_isLabelledAdj` — the soundness CONTENT, at the value level: the spine's leaf lex-min
-    `canonForm` equals `labelledAdj π adj`. It is *definitional* — `SpineChain.canonAdj` is literally
-    `labelledAdj (rankPerm …) adj`, and the lex-min `canonForm` is one of those `canonAdj` images
-    (`canonForm_mem_image`). Independent of how the runtime extracts the leaf / wraps `Option`.
-  · `canonForm?` + `canonForm?_sound` — the runtime wrapper: extract the leaf reached by the default descent
-    (`defaultSpineChain_reaches_leaf`, classical choice), emit `some (canonForm at that leaf)`, and discharge
-    the `canon_sound` shape. This `canonForm?` never flags — flagging is the *cost* side (the budget cap of
-    `ScratchCostModelPerNode`); ①a is only about the `some` case, so soundness is complete here.
-
-**Remaining wiring to Publication (noted, not this increment).** `Publication.canonForm?` takes only `(n, G)`;
-this one carries the descent parameters `(P₀, χι₀, sel)` + their well-formedness (`hcell`, `hne`, `hP₀`).
-Replacing the opaque = fixing canonical choices of those parameters from `G` and discharging the three
-hypotheses for them. The soundness *content* proved here is reused verbatim.
-
-Axiom target `[propext, Classical.choice, Quot.sound]` (uses `Classical.choose` for leaf extraction).
-Imports the Mathlib spine — slower compiles. `lake env lean`, NOT in `build.sh`.
+Axiom-clean `[propext, Classical.choice, Quot.sound]`. Ported 2026-07-09 from
+ScratchCanonSound, ScratchCanonFormCapped.
 -/
 import ChainDescent.Spine
+import ChainDescent.CostModel
+
+
+/- ═══════════════════════════ (was ScratchCanonSound.lean) ═══════════════════════════ -/
+
 
 namespace ChainDescent.CanonSound
 
@@ -159,3 +147,79 @@ cost-model cap, added over this by the shared object). Lets the capped wrapper p
 theorem canonFormOf_isSome (adj : AdjMatrix n) : (canonFormOf adj).isSome = true := rfl
 
 end ChainDescent.CanonSound
+
+/- ═══════════════════════════ (was ScratchCanonFormCapped.lean) ═══════════════════════════ -/
+
+
+namespace ChainDescent.CanonForm
+
+open ChainDescent
+open ChainDescent.CanonSound
+open ChainDescent.CostModel
+open ChainDescent.CostModel.PerNode
+open ChainDescent.CostModel.SpineInstance
+
+variable {n : Nat}
+
+/-! ## The capped descent — the ② cost object -/
+
+/-- The per-node-capped spine descent over the canonical parameters (`defaultP₀`/`defaultχι₀`/`nonDiscreteSel`),
+run from level `0` with node budget `n`. Its `.1` is the leaf/flag signal, its `.2` the cost. **Computable**
+(Tier A): `spineCappedCanonizer` + `budgetedIterate` all reduce, so the descent runs. -/
+def descent (adj : AdjMatrix n) : CostM (Option Nat) :=
+  (spineCappedCanonizer adj defaultP₀ defaultχι₀ nonDiscreteSel).run n 0
+
+/-- The descent's leaf/flag signal: `some k` = a leaf reached within the node budget; `none` = flag
+(node budget exhausted). Computable. -/
+def descentResult (adj : AdjMatrix n) : Option Nat := (descent adj).1
+
+/-- The descent's cost — the ② operation count (`ℕ`), from the actual capped run. Computable. -/
+def descentCost (adj : AdjMatrix n) : Nat := (descent adj).2
+
+/-- **② — the descent cost is `≤ n⁴`, unconditional.** Directly the per-node-cap bound
+`spineCappedCanonizer_cost_le`; no per-node-cost hypothesis (a later quasipoly oracle summand of `w` would
+*flag*, not break this). This is the `cost n G ≤ costConst·n^costDeg` side of `Publication.canon_poly_or_flag`. -/
+theorem descentCost_le (adj : AdjMatrix n) : descentCost adj ≤ n * (n * n * n) := by
+  unfold descentCost descent
+  exact spineCappedCanonizer_cost_le adj defaultP₀ defaultχι₀ nonDiscreteSel 0
+
+/-! ## The shared `canonForm?` object -/
+
+/-- **The shared `canonForm?`** — the capped descent's output: `some (canonical form)` if the descent reaches a
+leaf within budget, else `none` (flag). The `some` value is the sound `canonFormOf adj`; cost + flag come from
+the real capped run (`descent`). This is the single object `Publication.canonForm?`/`cost` will be. -/
+noncomputable def canonForm? (adj : AdjMatrix n) : Option (Fin n → Fin n → Nat) :=
+  match descentResult adj with
+  | some _ => canonFormOf adj
+  | none => none
+
+/-- **①a `canon_sound` on the shared (flagging) object.** A `some cG` answer is a genuine relabelling of `G` —
+`canonFormOf_sound` transferred through the budget gate (the gated value IS `canonFormOf`'s). This is the
+`Publication.canon_sound` body, now against the capped object rather than a never-flagging stand-in. -/
+theorem canonForm?_sound (adj : AdjMatrix n) (cG : Fin n → Fin n → Nat)
+    (h : canonForm? adj = some cG) :
+    ∃ π : Equiv.Perm (Fin n), cG = labelledAdj π adj := by
+  unfold canonForm? at h
+  split at h
+  · exact canonFormOf_sound adj cG h
+  · simp at h
+
+/-- **The flag IS budget exhaustion.** `canonForm? adj = none` exactly when the capped descent flags
+(`descentResult adj = none`) — because the gated value `canonFormOf adj` is always `some`
+(`canonFormOf_isSome`). The ③ hook: characterizes the flag as a real descent event, and shows `canonForm?` is
+neither always-`some` nor always-`none` by construction (it tracks `descentResult`). -/
+theorem canonForm?_eq_none_iff (adj : AdjMatrix n) :
+    canonForm? adj = none ↔ descentResult adj = none := by
+  unfold canonForm?
+  cases h : descentResult adj with
+  | none => simp
+  | some k =>
+    have hs : canonFormOf adj ≠ none := by
+      intro hc
+      have hi := canonFormOf_isSome adj
+      rw [hc] at hi
+      simp at hi
+    simp only [reduceCtorEq, iff_false]
+    exact hs
+
+end ChainDescent.CanonForm

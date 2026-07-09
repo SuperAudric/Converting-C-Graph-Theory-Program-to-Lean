@@ -70,3 +70,18 @@ Full verdict: recovery-route §9.8.9. **Do not re-walk.**
 - `ScratchSimilitudeCap` — proves the **exact form value is NOT a graph invariant**, so any in-architecture
   *exact*-value recovery is closed-as-unviable. This is *why* Route C recovers `Q` **up to similitude**, not
   exactly. Keep as the rationale record.
+
+## Group 5 — Superseded confinement scaffolds (archived 2026-07-09 during the confinement port)
+
+Archived when the stable confinement/cost/canon substrate was ported into the named modules
+`ChainDescent.CostModel` / `ChainDescent.CanonForm` / `ChainDescent.Confinement`. Both reference modules
+that were removed in that port; they are frozen records, not maintained.
+
+- `ScratchConfinementX3Reconcile` — the ii-b **iso-CONVERGENCE / C2 confluence-diamond** framing of the ①b→
+  cut. **SUPERSEDED — do not build C2.** The W-plan (W1–W4, in `ScratchConfinementX3Complete`) closed ①b→ via
+  fixed-schedule iso-invariance + per-level McKay reconciliation instead. Nothing imported it.
+- `ScratchConfinementResidual` — the **whole-complement** faithful-model reframe (`ResidualSchemeModel` on
+  `{x // x ∉ D}`). Refuted as the model: the residual group is transitive within a colour class but **not
+  across** the complement's several cells, so `{x // x∉D}` is intransitive and not a single orbital scheme. The
+  live model is CELL-based (`ScratchConfinementCellModel`). Kept only for its faithful-embedding / count-bridge
+  substrate patterns.

@@ -17,7 +17,7 @@ Home for "raise the Lean canonizer to executable form" (docs/chain-descent-execu
 Still deferred: the lex-min over σ (Tier C — exponential enumeration or, poly, the orbit-pruned form = the wall).
 `canonOutput` emits the leaf's *single* labelling (a valid relabelling), not yet the iso-invariant canonical min.
 -/
-import ChainDescent.ScratchCanonFormCapped
+import ChainDescent.CanonForm
 
 namespace ChainDescent.Executable
 

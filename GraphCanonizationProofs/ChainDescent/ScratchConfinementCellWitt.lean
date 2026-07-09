@@ -10,7 +10,7 @@ at the cell arity `cellCard C` inside the `∃`.
 Axiom target `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
 -/
 import ChainDescent.ScratchConfinementCellP3
-import ChainDescent.ScratchConfinementWitt
+import ChainDescent.Confinement
 
 namespace ChainDescent.ConfinementCellWitt
 

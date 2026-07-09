@@ -1,3 +1,7 @@
+/- ARCHIVED 2026-07-09 — DEAD END, not ported, not built. References modules that were
+   removed/renamed during the 2026-07-09 confinement port (see Archive README). Kept as a
+   failure/substrate record only. -/
+
 /-
 # ScratchConfinementX3Reconcile.lean — X3 step (ii), the confinement reconciliation (WIP, NOT in build.sh)
 

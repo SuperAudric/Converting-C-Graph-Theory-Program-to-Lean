@@ -27,8 +27,7 @@ decomposition (the accepted fallback), never drop to an unfaithful model.
 
 Axiom target `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
 -/
-import ChainDescent.ScratchConfinementSchurianModel
-import ChainDescent.ScratchConfinementP4
+import ChainDescent.Confinement
 import ChainDescent.ScratchConfinementX3Sel
 import ChainDescent.ScratchOrbitalSchemeAutLower
 

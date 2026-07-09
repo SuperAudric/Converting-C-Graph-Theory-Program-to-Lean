@@ -45,6 +45,8 @@ VERBOSE=0
 MODULES=(
   ChainDescent              # base / Core (POE, warmRefine, samePartition, §6.2 direction-invariance)
   ChainDescent.Spine        # ← base (§15 descent spine + canonicalization; split from ChainDescent 2026-07-06)
+  ChainDescent.CostModel    # ← base, Spine (Runtime-Phase cost model: CostM, per-node cap, spine ② cost≤n⁴; ported 2026-07-09 from ScratchCostModel*)
+  ChainDescent.CanonForm    # ← Spine, CostModel (①a soundness + ② capped canonForm? object; ported 2026-07-09 from ScratchCanon{Sound,FormCapped})
   ChainDescent.OrbitRecovery # ← Spine (§16–18 orbit recovery; split from ChainDescent 2026-07-06)
   ChainDescent.ClosureCalculus # ← base (§13/§14 propagation-closure investigation — leaf; split from ChainDescent 2026-07-06)
   ChainDescent.Saturation   # ← Mathlib only (generic; shared by Scheme + Cascade)
@@ -57,6 +59,7 @@ MODULES=(
   ChainDescent.LinearOracle # ← CascadeOracle
   ChainDescent.Group        # ← CascadeOracle
   ChainDescent.Cascade      # ← CascadeOracle, Group
+  ChainDescent.Confinement  # ← Cascade, CostModel (confinement lemma / Algorithm A core: P1–P4 + Witt → SelectedCellIsOrbit; ported 2026-07-09 from ScratchNodeCountBridge + ScratchConfinement{,P1,P4,P3,Witt,SchurianModel})
   ChainDescent.CascadeAffine # ← Cascade, Scheme (§13b/§13c engine + Phase-2 affine beachhead)
   ChainDescent.ClebschConcrete # ← CascadeAffine (concrete ℤ₄² Clebsch scheme + first non-affine δ′ closure, by decide)
   ChainDescent.FormsGraphConcrete # ← CascadeAffine, GaussCount (node-4 forms-graph discharge: IsotropySeparatesAtBase for VO^ε)
