@@ -160,6 +160,22 @@ the cost-model substrate) is NOT yet in `build.sh`. Mechanical.
 **5. (Testbed, not Lean-Seal) C# switch to Algorithm A.** The C# runs Algorithm R + a *global* flag; aligning it to the
 per-node flag / assume-VT-prune is validation, not part of the Seal correctness *proof*.
 
+**6. ★ THE RRU PHASE-TRANSFER THEOREM — the switch-over gate to the Rigid Phase (NEW 2026-07-09, the real Phase-1
+deliverable; not yet built).** Phase 1 (Algorithm A) **never emits `none`** by design: a Phase-1 flag is the *trigger*
+for the assume-VT step (flagging residue is VT ⟹ the flag is *consumable* — prune the orbit, recover the symmetry, step
+forward), so each flag **strictly consumes a symmetry**. Iterating drives every input to a **rigid** residue `R(G)`. The
+Seal Phase's handoff object is therefore the theorem **RRU: for every input, Phase 1 terminates at a rigid, iso-invariant
+residue `R(G)`** — a *proven* object (per-step = `SelectedCellIsOrbit`; iterated to a rigid fixpoint + endpoint
+iso-invariance), NOT an `opaque` predicate a Phase-2 flag certifies. `R(G)` is exactly what **Phase 2 (the rigid solver)
+consumes**; Phase 2 has no recovery for its own flag yet ⟹ **Phase 2 is the sole source of `none`.** Consequences for the
+Publication objects: (a) ① / ② being proven against a **total, never-`none`** object is *by design* (Phase-1 totality),
+NOT a vacuity — the `∨ none` disjunct is reserved for Phase 2; (b) `Publication.canonForm?`/`cost` should **unify ① and ②
+onto one object** (today ①'s `descentCanonForm? := some (descentCanon)` is structurally always-`some`, while ②'s
+`CanonForm.canonForm?` is a separate capped object — both total, but distinct). **State:** the per-step brick is built
+(`SelectedCellIsOrbit`, confinement ①, axiom-clean); the RRU assembly (iterate-to-rigid-fixpoint + `R(G)` as an explicit
+iso-invariant + termination via strictly-decreasing residual order) is the unbuilt switch-over gate. Endgame frame =
+`chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU". Scoping in progress.
+
 **Detail:** confinement thread = [[project_confinement_lemma_2026-07-07]]; ① showcase =
 `GraphCanonizationProofs/ChainDescent/ScratchConfinementX3Complete.lean`; endgame frame = `chain-descent-endgame-spec.md` §1a.
 

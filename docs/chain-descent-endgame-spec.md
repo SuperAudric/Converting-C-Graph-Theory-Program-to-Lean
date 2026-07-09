@@ -145,6 +145,21 @@ residue**.
   `UnhandledResidue` (the firewall forbids axiomatizing it). On the **rigid** side, recovery is the *only* option
   (trivial `Aut` ⟹ assume-VT is vacuous), so the rigid seal is built on Algorithm R.
 
+**★ The Phase-1 deliverable is "Reaches Rigid Unconditionally" (RRU) — the handoff object Phase 2 works forward from.**
+Phase 1 (Algorithm A) **never emits `none`**: a Phase-1 flag is *not* a handoff, it is the *trigger* for the assume-VT
+step. A flagging residue is vertex-transitive (P1: flag ⟹ large `Aut` ⟹ VT), so the flag is always **consumable** —
+assume-VT prunes the orbit, recovers the symmetry, and steps forward, *strictly consuming a symmetry each time*.
+Iterating drives every input down to a **rigid** residue `R(G)`. So the Seal Phase's real deliverable is the theorem
+**RRU: for every input, Phase 1 terminates at a rigid, iso-invariant residue `R(G)`** — a **proven Seal object** (per-step
+soundness = `SelectedCellIsOrbit` / the confinement ①; iterated to a rigid fixpoint, plus endpoint iso-invariance), NOT
+an `opaque` predicate that a Phase-2 flag certifies. `R(G)` is exactly what **Phase 2 (Algorithm R, the rigid solver)
+consumes**; Phase 2 has no recovery for *its own* flag yet, so **Phase 2 is the sole source of `none`**. Corollary: ①
+(correctness) and ② (`cost ≤ n⁴`, `descentCost_le`) being proven against a **total, never-`none`** object is *by design*
+— Phase-1 totality is the point, not a vacuity; the `∨ none` disjunct of `canon_poly_or_flag` is reserved for Phase 2.
+RRU is the true **switch-over gate**: until it is an explicit proven object, Phase 2 has nothing to forward-reference.
+(Do NOT reframe RRU as "a Phase-1 flag hands a `none` to Phase 2" — that inverts the polarity; the flag is consumed, the
+handoff is the *proven* rigid residue.)
+
 **The two seals (mirror table, IR §11.12).**
 
 | | handles | the escape | wall |
