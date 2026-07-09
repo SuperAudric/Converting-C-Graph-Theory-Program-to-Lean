@@ -38,6 +38,13 @@ ResidueSchemeModel`; (b) the 2-closure citation for `hcard` (`|SchemeAutGroup| =
 (c) the group-supply / faithfulness bridge (exhibit the residue's residual `Aut` — the piece the source called the
 "faithfulness gap"; either recovered à la Route C, or via the pretransitive assume-VT group). **CRUCIAL COUPLING: 2-closure
 needs the residue PRIMITIVE rank-3 first ⟹ depends on item 1.** Not a wall: one citation + a constructor + a bridge.
+**BUILT (axiom-clean, 2026-07-09):** (a) `ScratchConfinementSchurianModel.residueModel_of_orbitalGroup` (schurian +
+`hne` FREE); the D_k-restriction (`ScratchConfinementResidual.lean`) — ★ FINDING: schurian ⟹ vertex-transitive `Aut`,
+so the current `ResidueSchemeModel : SchurianScheme n` is only inhabitable at `D=∅` ⟹ the residue must be modelled on
+the base-complement `{x//x∉D}` (`SchurianScheme (residualCard D)`). Foundation (`residualRestrict`, faithful) + step 1
+(`residualRange_pretransitive`) + step 2 count bridge (`residualGroupFin_card : |residualGroupFin| = |StabilizerAt|`)
+DONE; the `orbitalScheme`-on-`Fin m` + the structural reframe of `ResidueSchemeModel` PENDING. Detail =
+[[project_seal_phase_wrapup_2026-07-09]].
 
 **3. Citations — audit exact Lean statements for reviewer-faithfulness.** The carried citations {G3 (`hClassify`),
 Liebeck, Witt, Skresanov 2-closure (`AffineSchemeTwoClosed`)} stay cited, but each hypothesis's Lean *statement* must be

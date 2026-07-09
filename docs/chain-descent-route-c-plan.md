@@ -1174,14 +1174,26 @@ corresponding, the per-level reconcilers compose into one `b` because each `aₖ
   `confinement_selectedCellIsOrbit_spine_witt` now yields `SelectedCellIsOrbit adj P₀ sel (χsel S) S` — instantiate
   `sel:=selCell`, `χsel:=` the descent's own colouring ⟹ confinement reads the descent's colouring (matches the C#, one
   `WarmPartition`). The Witt citation becomes the honest runtime obligation. **The samePartition bridge is OBVIATED.**
-- **W3 🟡 IN PROGRESS (`ScratchConfinementX3Recon.lean`):** **W3a ✅** (`descentPicks` = selCell-driven pick list +
-  `descentColouring` connection). **W3c-core ✅** `reconcile_extend` (single-step accumulation `bₖ₊₁=aₖ∘bₖ`; crux =
-  `aₖ∈Stab` fixes earlier `psH` ⟹ `psH.map aₖ=psH` ⟹ single global `b` works). **Remaining:** W3b direct termination
-  (selCell non-PI ⟹ direct growth proof from `targets`+`nonempty`, not `eq_default`); the full induction folding
-  `reconcile_extend` (discharge the per-level orbit from `SelectedCellIsOrbit`+`selCellRep_both_in_target`+`descentColouring_transport`).
-- **W4:** feed `b`/`hrec` to `ifCanon_iso_invariant_of_reconcile`; re-instantiate `oneStepSpineChain` with `selCellRep`;
-  rewire `canonForm?`/①b. NB the old `CanonFormImagesIsoInvariant` is FALSE and abandoned; ii-a (`oneStep_cell_refines_setIndiv`)
-  is retained but no longer load-bearing (the colouring generalization made the set-indiv bridge unnecessary).
+- **W3 ✅ DONE (`ScratchConfinementX3Recon.lean`, axiom-clean):** `reconcile_extend` + `descentColouring_fixed_of_aut`
+  (the reconciler fixes the descent colouring — the discharged risk) + `reconcile_one_level` + **`reconcile_descent`/
+  `reconcile_descent_top`** (the global `b`: `descentPicks H P fuel χι = ((descentPicks G P fuel χι).map π).map b`) +
+  **W3b `descentPicks_leaf_univ`** (termination: discrete `warmRefine` leaf within `n`, the direct singleton-growth proof).
+- **W4 ✅ DONE (`ScratchConfinementX3{Recon,Complete}.lean`, axiom-clean):** `descentLeaf_canonForm_iso_invariant`
+  (assembly via `ifCanon_iso_invariant_of_reconcile`) → **`descentCanon` + `descentCanon_complete`** (①b for the
+  index-free descent) → the list⇐Finset adaptor `selectedCellIsOrbit_done_of_capstone` (χsel-const) →
+  `descentConfinement_of_citations` → **the ① SHOWCASE `descentCanon_showcase`** (sound ∧ complete, sorry-free, modulo
+  the `ConfinementCitations` bundle {G3, Liebeck, Witt, hImprim, D0}). The old `CanonFormImagesIsoInvariant` is FALSE and
+  abandoned; `descentCanon` (index-free) is the correct object.
+
+**▶▶▶ ①b→ IS CLOSED (no open math). The live work is now the SEAL-PHASE WRAP-UP** — making ① unconditional/portable.
+Authoritative tracker = [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) TOP "⭐ SEAL-PHASE WRAP-UP
+CHECKLIST"; detail = [[project_seal_phase_wrapup_2026-07-09]]. Five items: (1) **hImprim** not discharged (in-scope
+theorem, `Cascade.lean:3278`); (2) **SchurianScheme `M`** = a MODELLING gap NOT an UnhandledResidue (Phase-1 recovers,
+node-4 is schurian+Cameron) — scoped + `residueModel_of_orbitalGroup` (`ScratchConfinementSchurianModel`) +
+`ScratchConfinementResidual` (the D_k-restriction: residue on the base-complement `{x//x∉D}`; foundation + step 1
+pretransitivity + step 2 count bridge `residualGroupFin_card` DONE; the `SchurianScheme (residualCard D)` reframe
+pending); (3) citation faithfulness audit (classicality-threading hWitt/hLiebeck split DONE); (4) PORT to build.sh;
+(5) C# switch (testbed).
 
 **A tuning fact, not a proof step.** `w` must sit above every small-`Aut` oracle cost and below the large-`Aut` exact
 harvest; over-large only costs speed, too-small is a correctness bug (P1). Tuning fixes *which* inputs flag; P1 is the
