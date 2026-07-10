@@ -179,6 +179,19 @@ namespace Canonizer
         // the defer-all-reals harvest reached a stuck residue rather than a leaf.
         public bool StuckResidual { get; private set; }
 
+        // DIAGNOSTIC (RruDepthProbe): the individualized path at the node where a
+        // RecoveryOnly run stopped. RRU predicts Aut_{StuckPath} is trivial there.
+        public IReadOnlyList<int> StuckPath { get; private set; } = [];
+
+        // DIAGNOSTIC (RruDepthProbe). RecoveryOnly stops at the first node with no
+        // SINGLE-ORBIT cell — which is NOT the rigid core (a cell with 1 < k < |C|
+        // orbits still has consumable pairs). RigidCoreProbe instead records the first
+        // node at which NO cell has any mergeable pair (survivors == |cell| for every
+        // cell) — the pairwise-consumption fixpoint, where RRU predicts Aut_D = 1.
+        internal bool RigidCoreProbe { get; set; } = false;
+        public bool RigidCoreFound { get; private set; }
+        public IReadOnlyList<int> RigidCorePath { get; private set; } = [];
+
         // The residual automorphism group, grown by leaf-collision harvesting.
         public PermutationGroup Automorphisms { get; }
 
@@ -276,6 +289,21 @@ namespace Canonizer
                 cacheAdded = new List<long>();
                 target = -1;
                 int firstNonSingleton = -1, fallback = -1, fallbackClass = -1;
+
+                // DIAGNOSTIC: the pairwise-consumption fixpoint — no cell has a mergeable
+                // pair. Recorded once, on the first such node in DFS order.
+                if (RigidCoreProbe && !RigidCoreFound)
+                {
+                    bool anyMergeable = false;
+                    for (int c = 0; c < numCells && !anyMergeable; c++)
+                    {
+                        if (cellMembers[c].Count < 2) continue;
+                        ClassifyCell(p, partition, cellMembers[c], cacheAdded, out int sv);
+                        if (sv < cellMembers[c].Count) anyMergeable = true;
+                    }
+                    if (!anyMergeable) { RigidCoreFound = true; RigidCorePath = _path.ToArray(); }
+                }
+
                 for (int c = 0; c < numCells; c++)
                 {
                     if (cellMembers[c].Count < 2) continue;
@@ -293,6 +321,7 @@ namespace Canonizer
                     // Path-scoped cleanup of this node's real-cache entries first.
                     if (RecoveryOnly)
                     {
+                        if (!StuckResidual) StuckPath = _path.ToArray();
                         StuckResidual = true;
                         foreach (long k in cacheAdded) _knownReal.Remove(k);
                         return;

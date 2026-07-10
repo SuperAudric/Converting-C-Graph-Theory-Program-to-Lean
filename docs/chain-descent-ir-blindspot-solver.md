@@ -19,6 +19,26 @@
 
 ## STATUS (read first)
 
+> **▶ SEPARATION MEASURED — "SUM NOT PRODUCT" (2026-07-10, C# probe `RruSeparationProbe`; detail
+> `[[project_rru_cost_probe_2026-07-10]]`).** The premise of this whole two-phase architecture — that the rigid work
+> (Phase 2, node-count / 2^k leaves) and the symmetric work (Phase 1, per-node harvest) can be separated so **neither's
+> exponential leaks into the other before it is resolved** — is now measured, not assumed. On `A ⊔ B` (A = rigid
+> multipede, 16 leaves; B = symmetric forms graph, 113 harvested generators): with the deferral scheduler ON, the union
+> harvests **113 = the SUM** (B's symmetry consumed once, hoisted above A's rigid branching); with it OFF, the union
+> harvests **1808 = exactly A_leaves × B_harv, the PRODUCT** (B re-consumed inside every rigid branch), ~100× slower.
+> So deferral (`real_stays_real` + hoist-symmetry-above-reals) provably converts product→sum. This holds on the
+> refinement-**separable** case; the only way it fails is symmetry+rigidity **entangled in one cell**.
+> **The biconditional `no-fusion ⟺ hSmallAutThin` is FALSE (resolved from source 2026-07-10; detail in
+> `chain-descent-remaining-work.md` §6 note + `[[project_rru_cost_probe_2026-07-10]]`).** `NoFusion` (defer-all-reals
+> harvest = full `Aut`, zero conditional symmetry) ⟹ `hSmallAutThin` (small-Aut ⟹ bounded base) **strictly**; the
+> converse fails — Chang-A satisfies `hSmallAutThin` (recovers |Aut|=384 at bounded base) yet violates NoFusion (needs
+> ~2 real decisions to do so). So clean separation needs the WEAKER "conditional symmetry bounded", which is **two
+> faces**: (small-Aut) `hSmallAutThin` [this §11.11 wall] + (large-Aut) *no hidden-Johnson* [a large Cameron scheme the
+> cascade cannot certify at bounded base] — distinct corners, not one predicate. Corollary for the flag: the sound
+> trigger is **positive** (`|certified harvested subgroup| > 2^baseMax(n)`, Schreier–Sims-computable, lower-bounds
+> |Aut|), NOT the negative "took too long / starved" signal (measured dead: `ClassifyStarved = 0` everywhere; harvest
+> depth does not separate rigid from Cameron — CFI(K7) depth 8 > every VO family).
+
 > **▶▶▶ THIS DOC IS THE RIGID HALF OF THE "TWO SEALS, ONE WALL" ENDGAME (frame recorded 2026-07-08).** The
 > canonizer has two mirror seals: the **symmetry seal** (non-rigid, handled by **Algorithm A / confinement** —
 > route-c-plan §7c) and the **rigid seal** built here (**Algorithm R** — recover the F₂/ring system, solve, flag

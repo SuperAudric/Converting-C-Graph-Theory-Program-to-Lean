@@ -160,6 +160,55 @@ the cost-model substrate) is NOT yet in `build.sh`. Mechanical.
 **5. (Testbed, not Lean-Seal) C# switch to Algorithm A.** The C# runs Algorithm R + a *global* flag; aligning it to the
 per-node flag / assume-VT-prune is validation, not part of the Seal correctness *proof*.
 
+> **⚠️ CORRECTION (2026-07-10 audit — supersedes the "GAP DISSOLVES / NO GAP PERSISTS" and "① DONE mod citations"
+> claims in this item; full detail `[[project_confinement_bundle_vacuity_2026-07-10]]` + `[[project_rru_cost_probe_2026-07-10]]`).**
+> Three source-checked corrections, all machine-verified:
+> 1. **The ① showcase is VACUOUS.** `ConfinementCitations.hflag : ∀ H done, flagsAt … = true` asserts *every node of
+>    every graph flags*; via the built P2 (`flag_imp_symmetric_spine`) it gives `∀ H, ¬ IsBase H P₀ ∅` = "no graph is
+>    rigid" (false for n≥6). Proved axiom-clean: `ConfinementCitations 2 → False`. So `descentCanon_showcase{,_cell,_cell_total,_cell_affine}`
+>    are vacuously true. The modulo-set `{G3,Liebeck,Witt,hImprim,D0}` **omits `hflag`**, which is why it looked done.
+>    Root cause: the Lean descent has **no deferral and never calls `matchOracle`** — with no consume/defer disposition,
+>    completeness could only be pushed through by assuming every node flags.
+> 2. **"GAP DISSOLVES" is RETRACTED.** It argued from `exists_orbitPartition_of_not_isBase` (*existence* of a consumable
+>    pair); `CascadeOracle.lean:99-109` states the open obligation is **discovery** (the oracle *recognising* the pair),
+>    not existence. The C# leak witness (Chang-A: cascade certifies order 24 of |Aut|=384, small-Aut non-VT, no flag)
+>    shows existence ≠ discovery concretely.
+> 3. **`rigidResidue`/`RRU.rru` are content-free as stated.** `rigidResidue = movedSet(∅)` = support of `Aut(G)` (NOT the
+>    ordered base Phase 1 outputs); `rigidResidue_isBase` is a tautology; the VT discharge proves `univ=univ`;
+>    `ComputesResidue` for a poly `p1` ≡ Graph-Automorphism ∈ P ≡ GI ∈ P, with no `UnhandledResidue` escape (firewall
+>    violation). `RRU.rru` is inhabited by `p1:=rigidResidue, cost:=0` (both obligations discharged by `rfl`/`zero_le`).
+>
+> **The FIX (design, not yet built):** (a) replace `hflag` with the built per-node dichotomy `hWitness` (¬flag ⟹
+> `SelectedCellIsOrbit`) — the honest split `singlePathDisposition_of_confinement` already has; (b) make the flag a
+> **positive certified-order trigger** `|⟨harvested path-fixing gens⟩| > 2^baseMax(n)` (computable via Schreier–Sims,
+> sound because subgroup order lower-bounds |Aut_D|) instead of keying `flagsAt` on the noncomputable greedy *group*
+> base — this converts P1 from a `flagsAt`-definitional identity into a real certificate; (c) state RRU **conditionally**:
+> `phase1 adj = D ∧ ¬IsBase adj P₀ D → UnhandledResidue adj` (firewall-clean, lands the wall in `UnhandledResidue`); (d)
+> the handoff object is the descent **node** at oracle-saturation (ordered `D`+`P`+colouring), and `Phase2.Solver` must
+> *take* it with `Sound`/`IsoInvariant` conditional on `IsBase`.
+>
+> **What DID hold up (2026-07-10 C# probes, `[[project_rru_cost_probe_2026-07-10]]`):** the clean rigid/symmetric
+> separation the whole design targets is **measured as SUM-not-PRODUCT**. On A⊔B (A rigid multipede, 2^k leaves; B
+> symmetric forms graph, 113 gens): deferral ON → union harvested = **113 = sum** (B consumed once, not re-harvested in
+> A's branches); deferral OFF → **1808 = exactly A_leaves×B_harv** (the product), ~100× slower. So Phase 1's symmetry
+> work does not multiply Phase 2's rigid branching, and vice-versa — on the refinement-separable case.
+>
+> **⚠️ BICONDITIONAL RESOLVED FROM SOURCE (2026-07-10, was flagged "to confirm"): `no-fusion ⟺ hSmallAutThin` is FALSE.
+> The direction that holds is `no-fusion ⟹ hSmallAutThin`, strictly (NoFusion is STRONGER).** Verbatim defs:
+> `NoFusion` (fusion-battery-plan §PP1 / decisive signal l.170-178) = the defer-all-reals harvest reproduces the **full**
+> `Aut` with **no** real decision; falsifier = harvest `⊊ Aut` while `|Aut|` small (any conditional symmetry, even a
+> bounded amount). `hSmallAutThin` (`CascadeAffine.lean:1320`) = `¬IsLarge → BoundedMinMult` = small-Aut ⟹ **bounded
+> recovery base**; falsifier = small-Aut **unbounded** base. NoFusion (zero conditional symmetry) ⟹ all residues thin ⟹
+> hSmallAutThin (its small-Aut restriction) ∧ no-hidden-Johnson (its large-Aut restriction). **Converse FAILS —
+> empirical witness = Chang-A** (`[[project_rru_cost_probe_2026-07-10]]`): it satisfies hSmallAutThin (full canonizer
+> recovers |Aut|=384 at bounded base, 4 leaves) but violates NoFusion (that recovery REQUIRED ~2 real decisions — 360
+> of the 384 automorphisms are *conditional* symmetry). So Chang is `hSmallAutThin ∧ ¬NoFusion`.
+> **Consequence for the design: clean separation does NOT need NoFusion (too strong — Chang violates it yet canonizes
+> fine); it needs the weaker "conditional symmetry is BOUNDED", which splits into TWO distinct faces —** (small-Aut)
+> `hSmallAutThin` + (large-Aut) *the certified-order flag catches every large symmetry* = **no hidden-Johnson** (a
+> large-Aut Cameron scheme the cascade cannot certify at bounded base). These are different corners of the
+> (|Aut| × thickness) square, not one predicate. Picking up `hSmallAutThin` closes the small-Aut face only.
+
 **6. ★ THE RRU PHASE-TRANSFER THEOREM — the switch-over gate to the Rigid Phase (NEW 2026-07-09, the real Phase-1
 deliverable; not yet built).** Phase 1 (Algorithm A) **never emits `none`** by design: a Phase-1 flag is the *trigger*
 for the assume-VT step (flagging residue is VT ⟹ the flag is *consumable* — prune the orbit, recover the symmetry, step

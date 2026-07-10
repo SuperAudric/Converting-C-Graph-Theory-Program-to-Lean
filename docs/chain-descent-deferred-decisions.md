@@ -15,6 +15,18 @@ polynomial (the exponential is confined to an oracle-free phase), and
 the rigid residue is handed off *whole* to a potential global solver
 rather than guessed at layer-by-layer.
 
+> **▶ §3 HOISTING NOW MEASURED (2026-07-10, `RruSeparationProbe`; `[[project_rru_cost_probe_2026-07-10]]`).** The
+> "sum not product" claim of §3 is confirmed on a graph forcing both kinds of work at once (rigid multipede ⊔ symmetric
+> forms graph): deferral ON → symmetric harvest done **once** (union harvested = sum, 113); deferral OFF → symmetric
+> harvest **re-run in every rigid branch** (union = product, 1808 = A_leaves × B_harv), ~100× slower. The mechanism
+> works exactly as §3 describes. **Two corrections found while measuring (`ChainDescent.cs`):** (1) `RecoveryOnly`'s
+> `StuckResidual` stops at the first node with no single-orbit **cell** (`survivors <= 1`), which is `|D|=0` (the root)
+> for CFI/Chang — **not** the pairwise rigid core; the consumption unit in code is a cell, but the concept's unit is a
+> **pair** (a cell with `1<k<|C|` orbits still has consumable pairs). So `StuckResidual`/`Phase2Nodes` currently mark
+> the first real *cell*, not the phase boundary — worth fixing. (2) The `cls == 2` "starvation" breaker is **dead code**
+> (`ClassifyStarved = 0` on the whole battery: `DeepenAnchor` individualizes a fresh vertex per level so `depth == _n`
+> is unreachable). The sound flag is therefore **positive** (certified harvested-subgroup order), never "starved".
+
 > **Status: BUILT — complex version, default ON 2026-05-28.** Implemented as
 > the `EnableDeferral` flag on `ChainDescent` (**default true**): target-cell
 > selection prefers a cell the a-priori oracle collapses to one orbit (consume),
