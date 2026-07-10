@@ -257,8 +257,7 @@ Run these after the `sorry`s are filled. TARGET (endgame) output for each:
 CURRENT output includes `sorryAx` — the visible "remaining work" marker. -/
 
 #print axioms canonizer
--- #print axioms canon_complete
--- #print axioms canon_poly_or_flag
--- #print axioms residue_if_flag
+#print axioms unhandledResidue_nonvacuous
+
 
 end Showcase

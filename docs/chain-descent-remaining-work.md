@@ -208,8 +208,22 @@ at the handoff" fact = Phase 2 is a genuinely rigid search) + `handoffBase_relab
 contract** `Solver`/`Sound`/`IsoInvariant` (stated in `labelledAdj`/`relabelAdj` shape to compose with Publication ①a/①b/①c).
 Algorithm R is the future witness of `Sound`/`IsoInvariant`; (c) **connect to Publication** — `rigidResidue` is the Phase-2
 input, distinct from `descentCanon`'s discrete leaf, so the ①/② object-unification must account for the handoff.
-**NEXT = the Phase-2 solver (Algorithm R) as a `Phase2.Solver` witnessing `Sound`+`IsoInvariant`, OR (a) the
-descent↔`forcedNode` recovery bridge, OR (c) the Publication object-unification.**
+**★★★ RRU SKELETON LANDED (2026-07-10, `Phase2Handoff.lean` `namespace RRU`, axiom-clean, in `build.sh`) — the
+reachability obligation is now ON THE BOARD as a reduction.** Proposed central architecture (user): `canonForm? =
+phase2 ∘ phase1`, RRU = the Phase-1 deliverable. The three RRU guarantees are STATED and REDUCED to two named
+obligations (statements, not discharge): `reachesRigid` (③-side, nothing non-`IsBase`) + `isoInvariant` (①b/①c-side)
+both reduce to **`ComputesResidue p1 := ∀ adj, p1 adj = rigidResidue adj`** (the descent's handoff base IS the
+iso-invariant `R(G)` — THE open recovery/confinement content, `movedSet_eq_nonsingletonCells_of_recoverable` = its
+recoverable-node half); `Poly cost := ∀ adj, cost adj ≤ n` (witness `defaultSpineChain_reaches_leaf`). Capstone
+**`RRU.rru`**: `{ComputesResidue, Poly} ⟹ (∀ adj IsBase) ∧ (poly) ∧ (iso-invariant)`. **KEY CLARIFICATION recorded:** the
+built `rigidResidue`/`handoffBase` is the *target object* (rigid + iso-invariant, DONE); the missing "it is REACHED" =
+exactly `ComputesResidue`, and for ② it must be the *algorithmic* descent (semantic `forcedNode` is GI-hard) whose
+correctness IS the confinement payoff (the algorithm can't test `IsBase` — GI-hard — so it stops at oracle-saturation;
+"saturated ⟹ `IsBase`" = the seal/Cameron content). RRU is NOT one of the 6 Publication obligations — it's the Phase-1
+half they bundle away; surfacing it factors ②/③ cleanly.
+**NEXT = discharge `ComputesResidue` for a concrete `phase1` (the recovery theorem = option (a), the descent↔`forcedNode`
+bridge — unifies with the RRU reduction), then factor `canonForm? = phase2 ∘ phase1` (option (c)). The Phase-2 solver
+(Algorithm R) witnessing `Sound`+`IsoInvariant` is the other independent thread.**
 Original items (superseded by the above): (1) progress lemma; (2) `R(G)` explicit object; (3) iso-invariance; (4)
 termination-at-rigid. Endgame frame = `chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU";
 full scoping = [[project_rru_phase_transfer_2026-07-09]].

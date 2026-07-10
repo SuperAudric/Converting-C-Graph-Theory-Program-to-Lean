@@ -1,7 +1,12 @@
 import ChainDescent.Cascade
 
 /-!
-# Phase-2 handoff — the rigid-residue interface
+# The Phase-1 → Phase-2 seam — RRU handoff + rigid-residue interface
+
+This module carries **both sides of the phase boundary**: the `RRU` namespace (the Phase-1 deliverable
+— "Reaches Rigid Unconditionally", stated as a reduction to named obligations) and the `Phase2`
+namespace (the rigid solver's input object + correctness contract). They meet at `rigidResidue adj` =
+`R(G)`, the object `canonForm? = phase2 ∘ phase1` factors through.
 
 The Seal Phase (Algorithm A / confinement) consumes symmetry and hands **Phase 2** (the rigid solver —
 Algorithm R / the IR-blind-spot solver) a *rigid, iso-invariant residue* `R(G) = rigidResidue adj`
@@ -81,4 +86,69 @@ def IsoInvariant (sol : Solver n) : Prop :=
   ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n), sol (relabelAdj σ adj) = sol adj
 
 end Phase2
+
+/-! ## RRU — Reaches Rigid Unconditionally (the Phase-1 deliverable, skeleton)
+
+The Phase-1 half of the endgame, as the proposed central object: `canonForm? = phase2 ∘ phase1`, with
+`phase1` the deferral descent that consumes symmetry and stops at the rigid residue `R(G)`. The three
+RRU guarantees — **reaches rigid** (nothing non-`IsBase` remains for Phase 1; the ③-side), **poly / no
+Phase-1 flag** (②-side), **iso-invariant** (①b/①c-side) — are stated here and **reduced to two named
+obligations**, mirroring how the confinement capstones reduce to citations. The statements are
+axiom-clean NOW: they are the *reduction*, not the discharge.
+
+  · `ComputesResidue p1` — the deferral descent's handoff base **is** the iso-invariant `rigidResidue`.
+    THE open recovery/confinement content (`movedSet_eq_nonsingletonCells_of_recoverable` is its
+    recoverable-node half; the intended `phase1` = "individualize the visible support"). Note
+    `rigidResidue adj = Phase2.handoffBase adj`, so `RRU.reachesRigid` ≡ `Phase2.handoff_isRigid` and
+    `RRU.isoInvariant` ≡ `Phase2.handoffBase_relabel` — the two sides of the seam are the same facts.
+  · `Poly p1 cost` — the descent reaches the handoff within a polynomial node budget (witness:
+    `Spine.defaultSpineChain_reaches_leaf` ≤ n; per-node work: `CanonForm.descentCost_le` ≤ n⁴).
+
+**NEXT (separate brick):** discharge `ComputesResidue` for a concrete `phase1` (the recovery theorem),
+and factor `canonForm? = phase2 ∘ phase1`. -/
+
+namespace RRU
+
+variable {n : ℕ}
+
+/-- A **Phase-1 canonizer**: maps a graph to the base its deferral descent reaches — the rigid residue
+it hands to Phase 2. (Data-only skeleton; a concrete `phase1` is the next brick.) -/
+abbrev Phase1 (n : ℕ) : Type := AdjMatrix n → Finset (Fin n)
+
+/-- **The Phase-1 recovery obligation** — the ONE open input RRU-correctness reduces to: the deferral
+descent's handoff base is the iso-invariant rigid residue `R(G) = rigidResidue adj`. The refinement-
+recovery content (gated on confinement); `movedSet_eq_nonsingletonCells_of_recoverable` is its
+recoverable-node half. -/
+def ComputesResidue (p1 : Phase1 n) : Prop := ∀ adj : AdjMatrix n, p1 adj = rigidResidue adj
+
+/-- **The Phase-1 cost obligation**: the descent reaches the handoff within a polynomial node budget
+(`cost` is the phase-1 descent's cost function). Witness: `defaultSpineChain_reaches_leaf` (≤ n
+levels). -/
+def Poly (cost : AdjMatrix n → ℕ) : Prop := ∀ adj : AdjMatrix n, cost adj ≤ n
+
+/-- **RRU — reaches rigid (the ③-side: nothing non-`IsBase` remains after Phase 1).** Reduces to
+`ComputesResidue` + `rigidResidue_isBase`. -/
+theorem reachesRigid (p1 : Phase1 n) (h : ComputesResidue p1) (adj : AdjMatrix n) :
+    IsBase adj (fun _ _ => POE.unknown) (p1 adj) := by
+  rw [h adj]; exact rigidResidue_isBase adj
+
+/-- **RRU — iso-invariant (the ①b/①c-side).** The handoff residue transports under relabelling, so
+Phase 2's input — hence the canonical form — is iso-invariant. Reduces to `ComputesResidue` +
+`rigidResidue_relabel`. -/
+theorem isoInvariant (p1 : Phase1 n) (h : ComputesResidue p1) (σ : Equiv.Perm (Fin n))
+    (adj : AdjMatrix n) : p1 (relabelAdj σ adj) = (p1 adj).image σ := by
+  rw [h (relabelAdj σ adj), h adj]; exact rigidResidue_relabel σ adj
+
+/-- **RRU — Reaches Rigid Unconditionally (the Phase-1 deliverable).** Given the recovery obligation
+(`ComputesResidue`) and the cost obligation (`Poly`), Phase 1 on EVERY input reaches a rigid
+(`IsBase`) residue, within budget, iso-invariantly. The Phase-1 half of the endgame, reduced to the
+two named obligations — the skeleton the discharge bricks fill in. -/
+theorem rru (p1 : Phase1 n) (cost : AdjMatrix n → ℕ)
+    (hrec : ComputesResidue p1) (hpoly : Poly cost) :
+    (∀ adj, IsBase adj (fun _ _ => POE.unknown) (p1 adj))
+      ∧ (∀ adj, cost adj ≤ n)
+      ∧ (∀ (σ : Equiv.Perm (Fin n)) adj, p1 (relabelAdj σ adj) = (p1 adj).image σ) :=
+  ⟨fun adj => reachesRigid p1 hrec adj, hpoly, fun σ adj => isoInvariant p1 hrec σ adj⟩
+
+end RRU
 end ChainDescent
