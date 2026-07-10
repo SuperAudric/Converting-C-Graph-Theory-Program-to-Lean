@@ -36,8 +36,13 @@ The active library is this `ChainDescent/` split plus the top-level
 > This table is the **core** substrate only. The forms-graph node-4 work is further modules in `build.sh` (not listed
 > here): `CascadeAffine` + the ~14 pair-route modules (`…AffinePolarSeal`, the quasipoly `VO^ε` seal) and the **Route C**
 > spine `RouteCTransport` / `RouteCFormAdapters` / `RouteCSeam` / `RouteCNode4` (form-recovery poly route — recover `Q`,
-> canonicalize via its known Aut). The authoritative complete list is `scripts/build.sh` MODULES + `PublicTheoremIndex.md`;
-> the Route-C narrative + decl homes are in [`docs/chain-descent-route-c-plan.md`](../../docs/chain-descent-route-c-plan.md).
+> canonicalize via its known Aut). The **endgame / Algorithm-A** modules are also in `build.sh` (ported 2026-07-09/10):
+> `CostModel` (Runtime-Phase cost, `cost ≤ n⁴`), `CanonForm` (①a soundness + the capped `canonForm?` object), `Confinement`
+> (the confinement lemma / Algorithm A core, P1–P4 + Witt → `SelectedCellIsOrbit`), and `Phase2Handoff` (the Phase-1↔Phase-2
+> seam: `rigidResidue = R(G)`, the `RRU` reduction, the `Phase2` solver contract). The authoritative complete list is
+> `scripts/build.sh` MODULES + `PublicTheoremIndex.md`; the RRU / handoff state is in
+> [`docs/chain-descent-remaining-work.md`](../../docs/chain-descent-remaining-work.md) item 6; the Route-C narrative is in
+> [`docs/chain-descent-route-c-plan.md`](../../docs/chain-descent-route-c-plan.md).
 
 ---
 

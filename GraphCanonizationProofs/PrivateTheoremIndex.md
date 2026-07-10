@@ -13,206 +13,202 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `applyGuess_swap` | 155-176 | Applying `(a, b, swap dir)` to the σ-swapped matrix equals σ-swapping after `applyGuess P a b dir` (needs `a ≠ b`); links the two guess directions through σ. | — |
-| `closeStep_keeps_less` | 245-248 | `closeStep` never demotes a decided `less` entry. | — |
-| `iterate_closeStep_keeps_less` | 250-260 | Iterating `closeStep` preserves any `less` entry — once decided, frozen. | — |
-| `transitiveClose_conflict_less` | 273-280 | `transitiveClose conflictMatrix 0 1 = .less` (the `less`-chain wins the first `if`). | — |
-| `transitiveClose_swap_conflict_less` | 282-290 | `transitiveClose (swap conflictMatrix) 0 1 = .less` — the σ-swap fails to flip the tie-break. | — |
-| `POE.toNat_injective` | 328-330 | `POE.toNat` is injective. | — |
-| `encTuple_injective` | 340-345 | `encTuple` is injective. | — |
-| `iterate_closeStep_fix` | 500-506 | Iterating `closeStep` from a fixpoint of itself stays at that fixpoint. | — |
-| `witnessAdj` | 508-510 | Witness adjacency: the empty graph on 5 vertices (the `cell_split_uniform_false` discrepancy lives entirely in `P`). | Definition |
-| `witnessP0` | 512-521 | Witness pre-guess matrix (`0 < 2`, `1 < 3`): cell-mates `0,1` relate symmetrically to the cell `{2,3}` but asymmetrically to vertices `2`, `3`. | Definition |
-| `witnessChi` | 523-530 | Witness colouring with cells `{0,1}`, `{2,3}`, `{4}`. | Definition |
-| `witnessTC` | 532-544 | Explicit `closeStep`-fixpoint of `applyGuess witnessP0 2 4 less` (`witnessP0` plus `2 < 4` plus the closure entry `0 < 4`). | Definition |
-| `witnessTC_eq` | 546-558 | `transitiveClose (applyGuess witnessP0 2 4 less) = witnessTC`. | — |
-| `witnessChi_stable` | 560-569 | `witnessChi` is 1-WL-stable for `(witnessAdj, witnessP0)`. | — |
+| `applyGuess_swap` | 145-166 | Applying `(a, b, swap dir)` to the σ-swapped matrix equals σ-swapping after `applyGuess P a b dir` (needs `a ≠ b`); links the two guess directions through σ. | — |
+| `transitiveClose_conflict_less` | 263-270 | `transitiveClose conflictMatrix 0 1 = .less` (the `less`-chain wins the first `if`). | — |
+| `transitiveClose_swap_conflict_less` | 272-280 | `transitiveClose (swap conflictMatrix) 0 1 = .less` — the σ-swap fails to flip the tie-break. | — |
+| `POE.toNat_injective` | 318-320 | `POE.toNat` is injective. | — |
+| `encTuple_injective` | 330-335 | `encTuple` is injective. | — |
+| `witnessAdj` | 498-500 | Witness adjacency: the empty graph on 5 vertices (the `cell_split_uniform_false` discrepancy lives entirely in `P`). | Definition |
+| `witnessP0` | 502-511 | Witness pre-guess matrix (`0 < 2`, `1 < 3`): cell-mates `0,1` relate symmetrically to the cell `{2,3}` but asymmetrically to vertices `2`, `3`. | Definition |
+| `witnessChi` | 513-520 | Witness colouring with cells `{0,1}`, `{2,3}`, `{4}`. | Definition |
+| `witnessTC` | 522-534 | Explicit `closeStep`-fixpoint of `applyGuess witnessP0 2 4 less` (`witnessP0` plus `2 < 4` plus the closure entry `0 < 4`). | Definition |
+| `witnessTC_eq` | 536-548 | `transitiveClose (applyGuess witnessP0 2 4 less) = witnessTC`. | — |
+| `witnessChi_stable` | 550-559 | `witnessChi` is 1-WL-stable for `(witnessAdj, witnessP0)`. | — |
 
-| `refineStep_preserves_singleton` | 618-625 | One refinement round preserves a singleton: if no vertex shares `a`'s colour, none does after `refineStep`. | — |
-| `signature_applyGuess_off` | 642-656 | Off the guessed pair, the guess is invisible: for `x ∉ {a,b}` the signature under `applyGuess P₀ a b dir` equals the signature under `P₀`. | — |
-| `signature_swap` | 768-778 | σ-swapping `P` relabels each signature's `POE` component by `POE.swap`, leaving colour and adjacency components untouched. | — |
-| `warmRefine_applyGuess_swap` | 824-834 | Warm refinement after `a < b` on `P₀` and after `b < a` on the σ-swapped `P₀` induce the same partition. | — |
-| `signature_agree_off` | 862-873 | If `P` and `Q` agree on every entry with an endpoint outside `D`, then off `D` they yield the same signature. | — |
-| `mem_Egnd` | 1037-1038 | Membership in `Egnd n` is exactly `p.1 < p.2`. | — |
-| `Egnd_ne` | 1040-1041 | Pairs in `Egnd n` have distinct endpoints: `p.1 ≠ p.2`. | — |
-| `Pof_mono_entry_of_unknown` | 1122-1146 | Entry-wise monotonicity of `Pof` from the all-unknown base: for canonical `S ⊆ T`, each entry of `Pof _ S` is either `unknown` or equal to the corresponding `Pof _ T` entry (does not lift to a `cl` monotonicity result). | — |
-| `closeStep_unknown` | 1427-1431 | `closeStep` returns `.unknown` at every entry of the all-unknown matrix. | — |
-| `closeStep_unknown_fixpoint` | 1433-1436 | The all-unknown matrix is a fixpoint of `closeStep`. | — |
-| `transitiveClose_unknown` | 1438-1450 | `transitiveClose` of the all-unknown matrix is the all-unknown matrix. | — |
-| `canConsistent_no_conflict` | 1541-1551 | Under canonical-consistency, no pair simultaneously hosts both a `.less`-chain and a `.greater`-chain. | — |
-| `commitsToP_classify` | 1553-1570 | Three-way classification of `commitsToP S i j` by `S`-membership of `(i,j)` and `(j,i)`. | — |
-| `commitsToP_canConsistent` | 1572-1586 | `commitsToP` of a canonical `S` is canonical-consistent. | — |
-| `closeStep_keeps_greater` | 1590-1593 | `closeStep` never demotes a decided `.greater` entry. | — |
-| `iterate_closeStep_keeps_greater` | 1595-1605 | Iterating `closeStep` preserves any `.greater` entry — once decided, frozen. | — |
-| `closeStep_decided` | 1607-1613 | `closeStep` preserves any decided entry (`.less` or `.greater`). | — |
-| `closeStep_unknown_eq` | 1615-1627 | Expansion of `closeStep P i j` when `P i j = .unknown`, exposing the explicit `if`-chain. | — |
-| `closeStep_eq_less_iff` | 1629-1663 | `closeStep P i j = .less` iff `P i j` was already `.less`, or it was `.unknown` with a `.less`-chain through some intermediate vertex. | — |
-| `closeStep_eq_greater_iff` | 1665-1717 | `closeStep P i j = .greater` iff `P i j` was already `.greater`, or it was `.unknown` with no `.less`-chain but a `.greater`-chain. | — |
-| `closeStep_canConsistent` | 1719-1730 | `closeStep` preserves canonical-consistency. | — |
-| `iterate_closeStep_canConsistent` | 1732-1740 | Iterating `closeStep` preserves canonical-consistency. | — |
-| `transitiveClose_canConsistent` | 1742-1745 | `transitiveClose` preserves canonical-consistency. | — |
-| `closeStep_lessMono` | 1747-1773 | Joint inductive step: under canonical-consistency of `Q` and `LessMono P Q`, `closeStep` preserves `.less`-mono. | — |
-| `iterate_closeStep_lessMono` | 1775-1784 | Iterating `closeStep` preserves `.less`-mono under joint canonical-consistency. | — |
-| `transitiveClose_lessMono` | 1786-1790 | `transitiveClose` preserves `.less`-mono under joint canonical-consistency. | — |
-| `commitsToP_lessMono` | 1792-1805 | Base case for CL3: canonical `S ⊆ T` gives `LessMono (commitsToP S) (commitsToP T)`. | — |
-| `numUnknown_le` | 1848-1853 | `numUnknown P ≤ n * n`. | — |
-| `closeStep_unknown_subset` | 1855-1864 | The unknown-entry set of `closeStep P` is contained in that of `P`. | — |
-| `closeStep_numUnknown_lt` | 1866-1891 | If `closeStep P ≠ P`, then `numUnknown` strictly drops under one closure round. | — |
-| `iterate_closeStep_progress` | 1893-1920 | After `k` `closeStep` iterations, either a fixpoint has been reached at some step `≤ k`, or `numUnknown` has dropped by at least `k`. | — |
-| `transitiveClose_is_fixpoint` | 1922-1972 | After `n*n` iterations of `closeStep`, the result is a fixpoint: `closeStep (transitiveClose P) = transitiveClose P`. | — |
-| `cl_prov_canonical` | 1984-1989 | Every pair in `cl_prov S` is canonical (`p.1.val < p.2.val`). | — |
-| `commitsToP_cl_prov_lessMono` | 1991-2009 | `commitsToP (cl_prov S)` is `.less`-bounded by `transitiveClose (commitsToP S)` for canonical `S`. | — |
-| `IndivStep.samePartition_of_samePartition` | 2179-2209 | Two `IndivStep`s applied to `samePartition`-equal colourings with the same target `T` produce `samePartition`-equal results — the inductive engine of the spine theorem. | — |
-| `IndivStep.samePartition_het` | 2371-2384 | Heterogeneous `samePartition_of_samePartition`: accepts separate targets `T₁, T₂` with an equality hypothesis. Used at the spine induction's level-`k+1` step. | — |
-| `Discrete.warmRefine_preserves` | 2588-2597 | Warm refinement preserves discreteness: if `χ` is injective, so is `warmRefine adj P χ`. | — |
-| `SpineChain.isLeaf_iff_default` | 2609-2618 | `IsLeaf` is spine-invariant: a chain is a leaf iff `defaultSpineChain` at the same level is. | — |
-| `DirAssignment.eq_of_σ_eq` | 2855-2865 | `DirAssignment` equality is determined by the matrix field — propositional fields subsumed by proof irrelevance. | — |
-| `Colouring.vertexRankNat_lt_n` | 3021-3035 | `vertexRankNat χ v < n` for every `v` (the rank is a valid `Fin n` value). | — |
-| `Colouring.vertexRank_strict_mono` | 3041-3060 | `vertexRank` is strictly monotonic in the colour value: `χ v < χ w` implies `vertexRank χ v < vertexRank χ w`. | — |
-| `Colouring.vertexRank_injective` | 3062-3072 | On a `Discrete` colouring, `vertexRank` is injective. | — |
-| `Colouring.vertexRank_bijective` | 3074-3077 | On a `Discrete` colouring, `vertexRank` is bijective. | — |
-| `matrixLT_irrefl` | 3186-3189 | `matrixLT` is irreflexive: no matrix is `<` itself. | — |
-| `matrixLT_asymm` | 3191-3212 | `matrixLT` is asymmetric: `M₁ < M₂` implies `¬ M₂ < M₁` (strict-order fact). | — |
-| `toMatrixLex_injective` | 3272-3276 | `toMatrixLex` is injective. | — |
-| `canonFormImages_nonempty` | 3289-3295 | `canonFormImages chain isLeaf` is non-empty when `DirAssignment P₀ chain.D` is. | — |
-| `signature_invariant_of_isAut` | 3488-3525 | An automorphism preserving `(adj, P, χ)` pointwise preserves the signature multiset at every vertex. | — |
-| `refineStep_invariant_of_isAut` | 3527-3540 | An automorphism preserving `(adj, P, χ)` pointwise preserves one round of `refineStep`. | — |
-| `iterate_refineStep_invariant_of_isAut` | 3542-3558 | Iterated refinement preserves automorphism invariance for any number of rounds. | — |
-| `CascadesAt.mono` | 3907-3912 | Monotonicity: a cascade at depth `k₁` is a cascade at every depth `k₂ ≥ k₁`. | — |
+| `refineStep_preserves_singleton` | 608-615 | One refinement round preserves a singleton: if no vertex shares `a`'s colour, none does after `refineStep`. | — |
+| `signature_applyGuess_off` | 632-646 | Off the guessed pair, the guess is invisible: for `x ∉ {a,b}` the signature under `applyGuess P₀ a b dir` equals the signature under `P₀`. | — |
+| `signature_swap` | 758-768 | σ-swapping `P` relabels each signature's `POE` component by `POE.swap`, leaving colour and adjacency components untouched. | — |
+| `warmRefine_applyGuess_swap` | 814-824 | Warm refinement after `a < b` on `P₀` and after `b < a` on the σ-swapped `P₀` induce the same partition. | — |
+| `signature_agree_off` | 852-863 | If `P` and `Q` agree on every entry with an endpoint outside `D`, then off `D` they yield the same signature. | — |
+| `mem_Egnd` | 43-44 | Membership in `Egnd n` is exactly `p.1 < p.2`. | — |
+| `Egnd_ne` | 46-47 | Pairs in `Egnd n` have distinct endpoints: `p.1 ≠ p.2`. | — |
+| `Pof_mono_entry_of_unknown` | 128-152 | Entry-wise monotonicity of `Pof` from the all-unknown base: for canonical `S ⊆ T`, each entry of `Pof _ S` is either `unknown` or equal to the corresponding `Pof _ T` entry (does not lift to a `cl` monotonicity result). | — |
+| `closeStep_unknown` | 433-437 | `closeStep` returns `.unknown` at every entry of the all-unknown matrix. | — |
+| `closeStep_unknown_fixpoint` | 439-442 | The all-unknown matrix is a fixpoint of `closeStep`. | — |
+| `transitiveClose_unknown` | 444-456 | `transitiveClose` of the all-unknown matrix is the all-unknown matrix. | — |
+| `canConsistent_no_conflict` | 547-557 | Under canonical-consistency, no pair simultaneously hosts both a `.less`-chain and a `.greater`-chain. | — |
+| `commitsToP_classify` | 559-576 | Three-way classification of `commitsToP S i j` by `S`-membership of `(i,j)` and `(j,i)`. | — |
+| `commitsToP_canConsistent` | 578-592 | `commitsToP` of a canonical `S` is canonical-consistent. | — |
+| `closeStep_keeps_greater` | 596-599 | `closeStep` never demotes a decided `.greater` entry. | — |
+| `iterate_closeStep_keeps_greater` | 601-611 | Iterating `closeStep` preserves any `.greater` entry — once decided, frozen. | — |
+| `closeStep_decided` | 613-619 | `closeStep` preserves any decided entry (`.less` or `.greater`). | — |
+| `closeStep_unknown_eq` | 621-633 | Expansion of `closeStep P i j` when `P i j = .unknown`, exposing the explicit `if`-chain. | — |
+| `closeStep_eq_less_iff` | 635-669 | `closeStep P i j = .less` iff `P i j` was already `.less`, or it was `.unknown` with a `.less`-chain through some intermediate vertex. | — |
+| `closeStep_eq_greater_iff` | 671-723 | `closeStep P i j = .greater` iff `P i j` was already `.greater`, or it was `.unknown` with no `.less`-chain but a `.greater`-chain. | — |
+| `closeStep_canConsistent` | 725-736 | `closeStep` preserves canonical-consistency. | — |
+| `iterate_closeStep_canConsistent` | 738-746 | Iterating `closeStep` preserves canonical-consistency. | — |
+| `transitiveClose_canConsistent` | 748-751 | `transitiveClose` preserves canonical-consistency. | — |
+| `closeStep_lessMono` | 753-779 | Joint inductive step: under canonical-consistency of `Q` and `LessMono P Q`, `closeStep` preserves `.less`-mono. | — |
+| `iterate_closeStep_lessMono` | 781-790 | Iterating `closeStep` preserves `.less`-mono under joint canonical-consistency. | — |
+| `transitiveClose_lessMono` | 792-796 | `transitiveClose` preserves `.less`-mono under joint canonical-consistency. | — |
+| `commitsToP_lessMono` | 798-811 | Base case for CL3: canonical `S ⊆ T` gives `LessMono (commitsToP S) (commitsToP T)`. | — |
+| `numUnknown_le` | 854-859 | `numUnknown P ≤ n * n`. | — |
+| `closeStep_unknown_subset` | 861-870 | The unknown-entry set of `closeStep P` is contained in that of `P`. | — |
+| `closeStep_numUnknown_lt` | 872-897 | If `closeStep P ≠ P`, then `numUnknown` strictly drops under one closure round. | — |
+| `iterate_closeStep_progress` | 899-926 | After `k` `closeStep` iterations, either a fixpoint has been reached at some step `≤ k`, or `numUnknown` has dropped by at least `k`. | — |
+| `transitiveClose_is_fixpoint` | 928-978 | After `n*n` iterations of `closeStep`, the result is a fixpoint: `closeStep (transitiveClose P) = transitiveClose P`. | — |
+| `cl_prov_canonical` | 990-995 | Every pair in `cl_prov S` is canonical (`p.1.val < p.2.val`). | — |
+| `commitsToP_cl_prov_lessMono` | 997-1015 | `commitsToP (cl_prov S)` is `.less`-bounded by `transitiveClose (commitsToP S)` for canonical `S`. | — |
+| `IndivStep.samePartition_of_samePartition` | 123-153 | Two `IndivStep`s applied to `samePartition`-equal colourings with the same target `T` produce `samePartition`-equal results — the inductive engine of the spine theorem. | — |
+| `IndivStep.samePartition_het` | 315-328 | Heterogeneous `samePartition_of_samePartition`: accepts separate targets `T₁, T₂` with an equality hypothesis. Used at the spine induction's level-`k+1` step. | — |
+| `SpineChain.isLeaf_iff_default` | 553-562 | `IsLeaf` is spine-invariant: a chain is a leaf iff `defaultSpineChain` at the same level is. | — |
+| `DirAssignment.eq_of_σ_eq` | 799-809 | `DirAssignment` equality is determined by the matrix field — propositional fields subsumed by proof irrelevance. | — |
+| `Colouring.vertexRankNat_lt_n` | 965-979 | `vertexRankNat χ v < n` for every `v` (the rank is a valid `Fin n` value). | — |
+| `Colouring.vertexRank_strict_mono` | 985-1004 | `vertexRank` is strictly monotonic in the colour value: `χ v < χ w` implies `vertexRank χ v < vertexRank χ w`. | — |
+| `Colouring.vertexRank_injective` | 1006-1016 | On a `Discrete` colouring, `vertexRank` is injective. | — |
+| `Colouring.vertexRank_bijective` | 1018-1021 | On a `Discrete` colouring, `vertexRank` is bijective. | — |
+| `matrixLT_irrefl` | 1130-1133 | `matrixLT` is irreflexive: no matrix is `<` itself. | — |
+| `matrixLT_asymm` | 1135-1156 | `matrixLT` is asymmetric: `M₁ < M₂` implies `¬ M₂ < M₁` (strict-order fact). | — |
+| `toMatrixLex_injective` | 1216-1220 | `toMatrixLex` is injective. | — |
+| `canonFormImages_nonempty` | 1233-1239 | `canonFormImages chain isLeaf` is non-empty when `DirAssignment P₀ chain.D` is. | — |
+| `signature_invariant_of_isAut` | 85-122 | An automorphism preserving `(adj, P, χ)` pointwise preserves the signature multiset at every vertex. | — |
+| `refineStep_invariant_of_isAut` | 124-137 | An automorphism preserving `(adj, P, χ)` pointwise preserves one round of `refineStep`. | — |
+| `iterate_refineStep_invariant_of_isAut` | 139-155 | Iterated refinement preserves automorphism invariance for any number of rounds. | — |
+| `CascadesAt.mono` | 504-509 | Monotonicity: a cascade at depth `k₁` is a cascade at every depth `k₂ ≥ k₁`. | — |
 ## ChainDescent/CFI.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `CFIBase.degree_ge_two` | 88-89 | The structural CFI invariant: every base vertex has degree at least 2. | — |
-| `CFIBase.edgeCountOrdered` | 102-104 | Ordered-pair edge count of the base graph, `∑ v, H.degree v`. | Definition |
-| `CFIBase.gadgetSize_ge_six` | 125-136 | Every CFI gadget contains at least 6 vertices (`degree v ≥ 2` gives `2^1 + 2*2 = 6`). | — |
-| `CFIBase.cfiVertexCount_pos` | 138-145 | The CFI vertex count is positive whenever the base has at least one vertex (`0 < m`). | — |
-| `CFIBase.empty_mem_evenSubsetsOfNeighbors` | 158-161 | The empty set belongs to `evenSubsetsOfNeighbors v` (cardinality 0 is even) — supplies the `a_∅^v` seed witness. | — |
-| `triangleBase_degree` | 190-192 | Every vertex of `triangleBase` has degree 2. | — |
-| `triangleBase_cfiVertexCount` | 194-196 | `triangleBase.cfiVertexCount = 18` — three gadgets of size 6. | — |
-| `CFIBase.cfiAdj_symm` | 333-352 | `cfiAdj` is symmetric: `H.cfiAdj x y = H.cfiAdj y x`. | — |
-| `CFIBase.cfiAdj_loopless` | 354-371 | `cfiAdj` is loopless: `H.cfiAdj x x = 0` for every CFI vertex `x`. | — |
-| `CFIBase.cfiAdjMatrix_symm` | 445-449 | `cfiAdjMatrix` is symmetric. | — |
-| `CFIBase.cfiAdjMatrix_loopless` | 451-455 | `cfiAdjMatrix` is loopless. | — |
-| `Finset.card_powerset_filter_even` | 603-655 | Even-cardinality subsets of a nonempty finset count `2^(card−1)` — the classical combinatorial identity underlying `card_SubsetVertex`. | — |
-| `CFIBase.card_evenSubsetsOfNeighbors` | 663-673 | `(H.evenSubsetsOfNeighbors v).card = 2^(H.degree v − 1)`. | — |
-| `CFIBase.card_SubsetVertex` | 675-682 | `Fintype.card H.SubsetVertex = ∑ v, 2^(H.degree v − 1)`. | — |
-| `CFIBase.card_EndpointVertex` | 684-693 | `Fintype.card H.EndpointVertex = ∑ v, 2 * H.degree v`. | — |
-| `CFIBase.cfiAdj_aEmpty_endpoint_false` | 792-797 | §13.2 `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=false endpoint is not adjacent to the empty-subset seed. | — |
-| `CFIBase.cfiAdj_aEmpty_endpoint_true` | 799-804 | §13.2 `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=true endpoint is adjacent to the empty-subset seed. | — |
-| `CFIBase.aEmpty_ne_endpoint` | 806-813 | `H.aEmpty v ≠ H.endpoint hw b`: subset and endpoint vertices are distinct (different `Sum` tags). | — |
-| `IsCFI'.seedVertex_ne_endpointVertex` | 888-898 | Seed and endpoint vertices are distinct in `Fin n` (their abstract counterparts have different `Sum` tags). | — |
-| `IsCFI'.adj_seed_endpoint_false` | 913-919 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w false) = 0`. | — |
-| `IsCFI'.adj_seed_endpoint_true` | 921-927 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w true) = 1`. | — |
-| `IsCFI'.adj_endpoint_seed_false` | 929-935 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w false) (seedVertex v) = 0`. | — |
-| `IsCFI'.adj_endpoint_seed_true` | 937-943 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w true) (seedVertex v) = 1`. | — |
-| `IsCFI'.adj_seed_endpoint_diff_gadget` | 945-953 | Cross-gadget non-adjacency: a seed and an endpoint in different gadgets (v ≠ v') are never adjacent. | — |
-| `IsCFI'.adj_endpoint_seed_diff_gadget` | 955-962 | Cross-gadget non-adjacency (symmetric form): `adj (endpointVertex v' w b) (seedVertex v) = 0` when v ≠ v'. | — |
-| `IsCFI'.adj_bridge` | 964-972 | An endpoint `e^b_{v→w}` is adjacent to its bridge partner `e^b_{w→v}` (Fin-n level). | — |
-| `IsCFI'.endpointVertex_ne_bridge` | 974-996 | An endpoint and its bridge partner are distinct `Fin n` vertices. | — |
-| `individualizedColouring_singleton_self_pos` | 1020-1024 | The individualized seed's colour is nonzero. | — |
-| `individualizedColouring_singleton_eq_seed_iff` | 1026-1039 | Under a singleton individualization, a vertex shares the seed's colour iff it is the seed — only the seed carries the fresh colour. | — |
-| `IsCFI'.signature_endpoint_false_ne_true` | 1058-1104 | §13.6 M2.4 — under the single-seed individualization, the b=0 and b=1 endpoints at gadget v toward w have distinct signature multisets. | — |
-| `IsCFI'.refineStep_endpoint_false_ne_true` | 1112-1128 | §13.7 M2.5 — one `refineStep` round on a single-seed individualization gives gadget v's b=0 and b=1 endpoints distinct colours. | — |
-| `IsCFI'.seedVertex_injective` | 1176-1194 | `seedVertex` is injective: distinct base vertices map to distinct `Fin n` indices. | — |
-| `IsCFI'.seedVertex_mem_allSeeds` | 1196-1199 | Every `seedVertex v` lies in `allSeeds`. | — |
-| `IsCFI'.allSeeds_card_le_baseSize` | 1209-1212 | `|allSeeds| ≤ h.baseSize` (convenience inequality form). | — |
-| `IsCFI'.signature_endpoint_false_ne_true_allSeeds` | 1231-1279 | §13.9 M3.B — multi-seed analogue of M2.4: under `χ_{allSeeds}` the b=0 and b=1 endpoints at gadget v have distinct signatures. | — |
-| `IsCFI'.refineStep_endpoint_false_ne_true_allSeeds` | 1281-1295 | §13.9 M3.B — one `refineStep` round on `χ_{allSeeds}` splits gadget v's b=0 and b=1 endpoints by parity. | — |
-| `IsCFI'.signature_endpoint_true_inter_gadget` | 1324-1369 | §13.10 M3.C — inter-gadget signature distinction: b=true endpoints at different gadgets (v ≠ v') differ under `χ_{allSeeds}`. | — |
-| `IsCFI'.refineStep_endpoint_true_inter_gadget` | 1371-1389 | §13.10 M3.C — one `refineStep` round on `χ_{allSeeds}` gives b=true endpoints at different gadgets distinct colours. | — |
-| `IsCFI'.signature_bridge_step` | 1415-1466 | §13.11 M3.D — bridge-propagation signature step: if bridge partners are χ-distinguished and that colour is absent from the second endpoint's adj=1 reach, the two endpoints' signatures differ. | — |
-| `IsCFI'.refineStep_bridge_step` | 1468-1492 | §13.11 M3.D Phase 1 — the local bridge-propagation step: under the no-match precondition, one `refineStep` distinguishes an endpoint pair from their distinguished bridge partners. The reusable inductive engine for the cascade. | — |
-| `IsCFI'.adj_seedVertex_eq_one_iff` | 1530-1605 | §13.12 Seed-adjacency characterisation: a vertex is adjacent to `seedVertex w` iff it is a b=true endpoint in gadget w. Key structural fact for the cascade's no-match preconditions. | — |
-| `IsCFI'.refineStep_endpoint_true_intra_gadget_partner` | 1638-1702 | §13.13 Phase 2.1 — at round 2 on `χ_{allSeeds}`, b=true endpoints at the same gadget toward different partners (w ≠ w') get distinct colours. | — |
-| `CFIBase.aEmpty_eq_subset_empty` | 1734-1736 | `aEmpty v` is the empty-subset case of `subset`. | — |
-| `CFIBase.cfiAdj_subset_endpoint_same_gadget_true_of_not_mem` | 1738-1748 | `cfiAdj (a_S^v) (e^1_{v→w}) = 1` when w ∉ S — a non-saturated subset is adjacent to some b=1 endpoint. | — |
-| `CFIBase.cfiAdj_subset_endpoint_same_gadget_false_of_mem` | 1750-1760 | `cfiAdj (a_S^v) (e^0_{v→w}) = 1` when w ∈ S. | — |
-| `CFIBase.cfiAdj_subset_endpoint_diff_gadget` | 1762-1772 | Cross-gadget non-adjacency: `subset hS` at v is not adjacent to an endpoint at v' ≠ v. | — |
-| `CFIBase.subset_ne_endpoint` | 1774-1781 | A subset vertex and an endpoint vertex are distinct CFI vertices. | — |
-| `IsCFI'.seedVertex_eq_subsetVertex_empty` | 1805-1808 | `seedVertex v` is the empty-subset case of `subsetVertex`. | — |
-| `IsCFI'.subsetVertex_ne_endpointVertex` | 1810-1818 | Subset and endpoint vertices are distinct in `Fin n`. | — |
-| `IsCFI'.adj_subsetVertex_endpoint_same_gadget_true_of_not_mem` | 1820-1828 | Fin-n witness adjacency: `adj (subsetVertex hS) (endpointVertex hw true) = 1` when w ∉ S. | — |
-| `IsCFI'.adj_subsetVertex_endpoint_same_gadget_false_of_mem` | 1830-1838 | Fin-n witness adjacency: `adj (subsetVertex hS) (endpointVertex hw false) = 1` when w ∈ S. | — |
-| `IsCFI'.adj_subsetVertex_endpoint_diff_gadget` | 1840-1849 | Fin-n cross-gadget non-adjacency between a subset vertex and an endpoint at a different gadget. | — |
-| `IsCFI'.signature_endpoint_b0_ne_b1_general_allSeeds` | 1926-1977 | §13.15 M3.B+ — a b=0 endpoint at any gadget has a different signature from a b=1 endpoint at gadget v under `χ_{allSeeds}`. | — |
-| `IsCFI'.refineStep_endpoint_b0_ne_b1_general_allSeeds` | 1979-1993 | §13.15 M3.B+ — one `refineStep` round on `χ_{allSeeds}` distinguishes any b=0 endpoint from a b=1 endpoint at gadget v. | — |
-| `IsCFI'.signature_subset_step` | 2017-2062 | §13.16 Subset-step signature distinction: given a within-gadget b=1 witness endpoint whose colour is absent from the second subset's adj=1 reach, the two subsets' signatures differ. | — |
-| `IsCFI'.refineStep_subset_step` | 2064-2084 | §13.16 The generic subset-propagation step (Approach 3 primitive): under the no-match precondition one `refineStep` distinguishes two subset vertices, ready to instantiate at any cascade round. | — |
-| `IsCFI'.signature_subset_inter_gadget_round2` | 2137-2172 | §13.17 Phase 2.3 — at round 2 on `χ_{allSeeds}`, two subset vertices at different gadgets have distinct signatures, given the LHS subset has a witness w ∈ N(v) \ S. | — |
-| `IsCFI'.refineStep_subset_inter_gadget_round2` | 2174-2196 | §13.17 Phase 2.3 — at round 2, subset vertices at different gadgets get distinct colours (LHS subset needs a witness w ∈ N(v) \ S). | — |
-| `IsCFI'.adj_subsetVertex_seedVertex` | 2220-2230 | Subset-subset non-adjacency: a subset vertex and a seed vertex are never adjacent. | — |
-| `IsCFI'.signature_subsetVertex_ne_endpoint_true_allSeeds` | 2232-2278 | §13.18 M3.B++ — a subset vertex (any gadget) and a b=1 endpoint at gadget v have distinct signatures at round 1 under `χ_{allSeeds}`. | — |
-| `IsCFI'.refineStep_subsetVertex_ne_endpoint_true_allSeeds` | 2280-2293 | §13.18 M3.B++ — one `refineStep` round on `χ_{allSeeds}` distinguishes a subset vertex from a b=1 endpoint at gadget v. | — |
-| `IsCFI'.signature_subsetVertex_ne_endpoint_false_round2` | 2319-2426 | §13.19 Cross-type round-2 signature distinction: a witnessed subset vertex and a b=0 endpoint (any gadget) differ at χ_1. | — |
-| `IsCFI'.refineStep_subsetVertex_ne_endpoint_false_round2` | 2428-2445 | §13.19 Cross-type round-2 — at χ_2 a witnessed subset vertex and a b=0 endpoint (any gadget) get distinct colours. | — |
-| `IsCFI'.signature_endpoint_false_inter_gadget_round3` | 2476-2576 | §13.20 Phase 2.2 — at χ_2, two b=0 endpoints at different gadgets have distinct signatures, given a witness subset at the LHS gadget. | — |
-| `IsCFI'.refineStep_endpoint_false_inter_gadget_round3` | 2578-2605 | §13.20 Phase 2.2 — at round 3, b=0 endpoints at different gadgets get distinct colours, given a witness subset (exists when deg(v) ≥ 3). | — |
-| `IsCFI'.exists_witness_of_oddDegree` | 2638-2659 | §13.21 Under `OddDegree`, every even subset of N(v) has a strict non-element y ∈ N(v) \ S — the subset-distinction witness. | — |
-| `IsCFI'.exists_phase22_witness` | 2661-2710 | §13.21 Under `OddDegree`, for any v ∈ N(w) builds an even subset S ⊆ N(w) with v ∈ S plus a witness x ∈ N(w) \ S; used to invoke Phase 2.2 at a bridge-partner gadget. | — |
-| `IsCFI'.refineStep_endpoint_false_intra_gadget_partner_round4` | 2734-2840 | §13.22 Phase 2.X — under `OddDegree`, at round 4 b=0 endpoints at the same gadget toward different partners (w ≠ w') get distinct colours. | — |
-| `IsCFI'.refineStep_subset_intra_gadget_S_round5` | 2866-2951 | §13.23 Phase 2.4 — under `OddDegree`, at round 5 two subset vertices at the same gadget with S ≠ S' get distinct colours. | — |
-| `card_symmDiff_mod_two` | 3225-3235 | **Parity helper.** `|S ∆ T| ≡ |S| + |T| (mod 2)` — the fact behind "an even subgraph preserves the even-subset invariant." | — |
-| `xor_eq_xor_iff` | 3237-3239 | Xor right-cancellation on `Bool` (`(a⊕c) = (b⊕c) ↔ a = b`, and the `≠` form). | — |
-| `xor_ne_xor_iff` | 3241-3243 | Xor right-cancellation on `Bool`, `≠` form: `(a ⊕ c) ≠ (b ⊕ c) ↔ a ≠ b` (companion to `xor_eq_xor_iff`). | — |
-| `CFIBase.flipSet_subset` | 3257-3260 | The flip set is a set of neighbours: `flipSet F v ⊆ N(v)`. | — |
-| `CFIBase.cfiFlip_involutive` | 3344-3352 | The gadget flip is an involution (`(S ∆ F) ∆ F = S`; `(b⊕c)⊕c = b`). | — |
-| `CFIBase.triEdge_eq_true` | 3525-3531 | Characterisation (membership, source-grouped), symmetry, cyclic invariance `{v,w,u}={w,u,v}`, and `F v w = true`. | — |
-| `CFIBase.triEdge_symm` | 3533-3535 | The triangle even-subgraph indicator is symmetric in its edge endpoints: `triEdge v w u p q = triEdge v w u q p`. | — |
-| `CFIBase.triEdge_apex` | 3537-3539 | The decision edge lies in its triangle: `triEdge v w u v w = true`. | — |
-| `CFIBase.triEdge_cyclic` | 3541-3543 | Cyclic invariance of the triangle even-subgraph: `triEdge v w u = triEdge w u v` (so `{v,w,u}` is unordered). | — |
-| `CFIBase.triEdge_iff` | 3545-3549 | Membership characterisation of the triangle even-subgraph indicator `triEdge v w u`. | — |
-| `CFIBase.flipSet_triEdge` | 3551-3566 | The triangle's flip set is `{w,u}` at base vertex `v` (degree 2), and `∅` off `{v,w,u}` (the avoidance → D-locality). | — |
-| `CFIBase.triEdge_even` | 3580-3597 | The triangle is an even subgraph (every vertex F-degree 2 or 0). | — |
-| `CFIBase.evenPermEdge_eq_true` | 3626-3629 | Membership characterisation, symmetry, and the moved-vertex F-neighbours `= {σ p, σ⁻¹ p}`. | — |
-| `CFIBase.evenPermEdge_symm` | 3631-3634 | The permutation-cycle even-subgraph indicator is symmetric: `evenPermEdge σ p q = evenPermEdge σ q p`. | — |
-| `CFIBase.evenPermEdge_iff_of_mem` | 3636-3650 | At a moved vertex (`σ p ≠ p`), the cycle's F-neighbours are exactly `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | — |
-| `CFIBase.flipSet_evenPermEdge_of_mem` | 3652-3662 | Flip set `= {σ p, σ⁻¹ p}` at a moved vertex (degree 2), `∅` at a fixed point (avoidance). | — |
-| `CFIBase.evenPermEdge_even` | 3675-3697 | The permutation-cycle is an even subgraph (degree 2 on the cycle via no-2-cycle, 0 off it). | — |
-| `triFlip_even` | 3883-3884 | — | — |
+| `CFIBase.degree_ge_two` | 80-81 | The structural CFI invariant: every base vertex has degree at least 2. | — |
+| `CFIBase.edgeCountOrdered` | 94-96 | Ordered-pair edge count of the base graph, `∑ v, H.degree v`. | Definition |
+| `CFIBase.gadgetSize_ge_six` | 117-128 | Every CFI gadget contains at least 6 vertices (`degree v ≥ 2` gives `2^1 + 2*2 = 6`). | — |
+| `CFIBase.cfiVertexCount_pos` | 130-137 | The CFI vertex count is positive whenever the base has at least one vertex (`0 < m`). | — |
+| `CFIBase.empty_mem_evenSubsetsOfNeighbors` | 150-153 | The empty set belongs to `evenSubsetsOfNeighbors v` (cardinality 0 is even) — supplies the `a_∅^v` seed witness. | — |
+| `triangleBase_degree` | 182-184 | Every vertex of `triangleBase` has degree 2. | — |
+| `triangleBase_cfiVertexCount` | 186-188 | `triangleBase.cfiVertexCount = 18` — three gadgets of size 6. | — |
+| `CFIBase.cfiAdj_symm` | 325-344 | `cfiAdj` is symmetric: `H.cfiAdj x y = H.cfiAdj y x`. | — |
+| `CFIBase.cfiAdj_loopless` | 346-363 | `cfiAdj` is loopless: `H.cfiAdj x x = 0` for every CFI vertex `x`. | — |
+| `CFIBase.cfiAdjMatrix_symm` | 437-441 | `cfiAdjMatrix` is symmetric. | — |
+| `CFIBase.cfiAdjMatrix_loopless` | 443-447 | `cfiAdjMatrix` is loopless. | — |
+| `Finset.card_powerset_filter_even` | 595-647 | Even-cardinality subsets of a nonempty finset count `2^(card−1)` — the classical combinatorial identity underlying `card_SubsetVertex`. | — |
+| `CFIBase.card_evenSubsetsOfNeighbors` | 655-665 | `(H.evenSubsetsOfNeighbors v).card = 2^(H.degree v − 1)`. | — |
+| `CFIBase.card_SubsetVertex` | 667-674 | `Fintype.card H.SubsetVertex = ∑ v, 2^(H.degree v − 1)`. | — |
+| `CFIBase.card_EndpointVertex` | 676-685 | `Fintype.card H.EndpointVertex = ∑ v, 2 * H.degree v`. | — |
+| `CFIBase.cfiAdj_aEmpty_endpoint_false` | 784-789 | §13.2 `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=false endpoint is not adjacent to the empty-subset seed. | — |
+| `CFIBase.cfiAdj_aEmpty_endpoint_true` | 791-796 | §13.2 `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=true endpoint is adjacent to the empty-subset seed. | — |
+| `CFIBase.aEmpty_ne_endpoint` | 798-805 | `H.aEmpty v ≠ H.endpoint hw b`: subset and endpoint vertices are distinct (different `Sum` tags). | — |
+| `IsCFI'.seedVertex_ne_endpointVertex` | 880-890 | Seed and endpoint vertices are distinct in `Fin n` (their abstract counterparts have different `Sum` tags). | — |
+| `IsCFI'.adj_seed_endpoint_false` | 905-911 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w false) = 0`. | — |
+| `IsCFI'.adj_seed_endpoint_true` | 913-919 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w true) = 1`. | — |
+| `IsCFI'.adj_endpoint_seed_false` | 921-927 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w false) (seedVertex v) = 0`. | — |
+| `IsCFI'.adj_endpoint_seed_true` | 929-935 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w true) (seedVertex v) = 1`. | — |
+| `IsCFI'.adj_seed_endpoint_diff_gadget` | 937-945 | Cross-gadget non-adjacency: a seed and an endpoint in different gadgets (v ≠ v') are never adjacent. | — |
+| `IsCFI'.adj_endpoint_seed_diff_gadget` | 947-954 | Cross-gadget non-adjacency (symmetric form): `adj (endpointVertex v' w b) (seedVertex v) = 0` when v ≠ v'. | — |
+| `IsCFI'.adj_bridge` | 956-964 | An endpoint `e^b_{v→w}` is adjacent to its bridge partner `e^b_{w→v}` (Fin-n level). | — |
+| `IsCFI'.endpointVertex_ne_bridge` | 966-988 | An endpoint and its bridge partner are distinct `Fin n` vertices. | — |
+| `individualizedColouring_singleton_self_pos` | 1012-1016 | The individualized seed's colour is nonzero. | — |
+| `individualizedColouring_singleton_eq_seed_iff` | 1018-1031 | Under a singleton individualization, a vertex shares the seed's colour iff it is the seed — only the seed carries the fresh colour. | — |
+| `IsCFI'.signature_endpoint_false_ne_true` | 1050-1096 | §13.6 M2.4 — under the single-seed individualization, the b=0 and b=1 endpoints at gadget v toward w have distinct signature multisets. | — |
+| `IsCFI'.refineStep_endpoint_false_ne_true` | 1104-1120 | §13.7 M2.5 — one `refineStep` round on a single-seed individualization gives gadget v's b=0 and b=1 endpoints distinct colours. | — |
+| `IsCFI'.seedVertex_injective` | 1168-1186 | `seedVertex` is injective: distinct base vertices map to distinct `Fin n` indices. | — |
+| `IsCFI'.seedVertex_mem_allSeeds` | 1188-1191 | Every `seedVertex v` lies in `allSeeds`. | — |
+| `IsCFI'.allSeeds_card_le_baseSize` | 1201-1204 | `|allSeeds| ≤ h.baseSize` (convenience inequality form). | — |
+| `IsCFI'.signature_endpoint_false_ne_true_allSeeds` | 1223-1271 | §13.9 M3.B — multi-seed analogue of M2.4: under `χ_{allSeeds}` the b=0 and b=1 endpoints at gadget v have distinct signatures. | — |
+| `IsCFI'.refineStep_endpoint_false_ne_true_allSeeds` | 1273-1287 | §13.9 M3.B — one `refineStep` round on `χ_{allSeeds}` splits gadget v's b=0 and b=1 endpoints by parity. | — |
+| `IsCFI'.signature_endpoint_true_inter_gadget` | 1316-1361 | §13.10 M3.C — inter-gadget signature distinction: b=true endpoints at different gadgets (v ≠ v') differ under `χ_{allSeeds}`. | — |
+| `IsCFI'.refineStep_endpoint_true_inter_gadget` | 1363-1381 | §13.10 M3.C — one `refineStep` round on `χ_{allSeeds}` gives b=true endpoints at different gadgets distinct colours. | — |
+| `IsCFI'.signature_bridge_step` | 1407-1458 | §13.11 M3.D — bridge-propagation signature step: if bridge partners are χ-distinguished and that colour is absent from the second endpoint's adj=1 reach, the two endpoints' signatures differ. | — |
+| `IsCFI'.refineStep_bridge_step` | 1460-1484 | §13.11 M3.D Phase 1 — the local bridge-propagation step: under the no-match precondition, one `refineStep` distinguishes an endpoint pair from their distinguished bridge partners. The reusable inductive engine for the cascade. | — |
+| `IsCFI'.adj_seedVertex_eq_one_iff` | 1522-1597 | §13.12 Seed-adjacency characterisation: a vertex is adjacent to `seedVertex w` iff it is a b=true endpoint in gadget w. Key structural fact for the cascade's no-match preconditions. | — |
+| `IsCFI'.refineStep_endpoint_true_intra_gadget_partner` | 1630-1694 | §13.13 Phase 2.1 — at round 2 on `χ_{allSeeds}`, b=true endpoints at the same gadget toward different partners (w ≠ w') get distinct colours. | — |
+| `CFIBase.aEmpty_eq_subset_empty` | 1726-1728 | `aEmpty v` is the empty-subset case of `subset`. | — |
+| `CFIBase.cfiAdj_subset_endpoint_same_gadget_true_of_not_mem` | 1730-1740 | `cfiAdj (a_S^v) (e^1_{v→w}) = 1` when w ∉ S — a non-saturated subset is adjacent to some b=1 endpoint. | — |
+| `CFIBase.cfiAdj_subset_endpoint_same_gadget_false_of_mem` | 1742-1752 | `cfiAdj (a_S^v) (e^0_{v→w}) = 1` when w ∈ S. | — |
+| `CFIBase.cfiAdj_subset_endpoint_diff_gadget` | 1754-1764 | Cross-gadget non-adjacency: `subset hS` at v is not adjacent to an endpoint at v' ≠ v. | — |
+| `CFIBase.subset_ne_endpoint` | 1766-1773 | A subset vertex and an endpoint vertex are distinct CFI vertices. | — |
+| `IsCFI'.seedVertex_eq_subsetVertex_empty` | 1797-1800 | `seedVertex v` is the empty-subset case of `subsetVertex`. | — |
+| `IsCFI'.subsetVertex_ne_endpointVertex` | 1802-1810 | Subset and endpoint vertices are distinct in `Fin n`. | — |
+| `IsCFI'.adj_subsetVertex_endpoint_same_gadget_true_of_not_mem` | 1812-1820 | Fin-n witness adjacency: `adj (subsetVertex hS) (endpointVertex hw true) = 1` when w ∉ S. | — |
+| `IsCFI'.adj_subsetVertex_endpoint_same_gadget_false_of_mem` | 1822-1830 | Fin-n witness adjacency: `adj (subsetVertex hS) (endpointVertex hw false) = 1` when w ∈ S. | — |
+| `IsCFI'.adj_subsetVertex_endpoint_diff_gadget` | 1832-1841 | Fin-n cross-gadget non-adjacency between a subset vertex and an endpoint at a different gadget. | — |
+| `IsCFI'.signature_endpoint_b0_ne_b1_general_allSeeds` | 1918-1969 | §13.15 M3.B+ — a b=0 endpoint at any gadget has a different signature from a b=1 endpoint at gadget v under `χ_{allSeeds}`. | — |
+| `IsCFI'.refineStep_endpoint_b0_ne_b1_general_allSeeds` | 1971-1985 | §13.15 M3.B+ — one `refineStep` round on `χ_{allSeeds}` distinguishes any b=0 endpoint from a b=1 endpoint at gadget v. | — |
+| `IsCFI'.signature_subset_step` | 2009-2054 | §13.16 Subset-step signature distinction: given a within-gadget b=1 witness endpoint whose colour is absent from the second subset's adj=1 reach, the two subsets' signatures differ. | — |
+| `IsCFI'.refineStep_subset_step` | 2056-2076 | §13.16 The generic subset-propagation step (Approach 3 primitive): under the no-match precondition one `refineStep` distinguishes two subset vertices, ready to instantiate at any cascade round. | — |
+| `IsCFI'.signature_subset_inter_gadget_round2` | 2129-2164 | §13.17 Phase 2.3 — at round 2 on `χ_{allSeeds}`, two subset vertices at different gadgets have distinct signatures, given the LHS subset has a witness w ∈ N(v) \ S. | — |
+| `IsCFI'.refineStep_subset_inter_gadget_round2` | 2166-2188 | §13.17 Phase 2.3 — at round 2, subset vertices at different gadgets get distinct colours (LHS subset needs a witness w ∈ N(v) \ S). | — |
+| `IsCFI'.adj_subsetVertex_seedVertex` | 2212-2222 | Subset-subset non-adjacency: a subset vertex and a seed vertex are never adjacent. | — |
+| `IsCFI'.signature_subsetVertex_ne_endpoint_true_allSeeds` | 2224-2270 | §13.18 M3.B++ — a subset vertex (any gadget) and a b=1 endpoint at gadget v have distinct signatures at round 1 under `χ_{allSeeds}`. | — |
+| `IsCFI'.refineStep_subsetVertex_ne_endpoint_true_allSeeds` | 2272-2285 | §13.18 M3.B++ — one `refineStep` round on `χ_{allSeeds}` distinguishes a subset vertex from a b=1 endpoint at gadget v. | — |
+| `IsCFI'.signature_subsetVertex_ne_endpoint_false_round2` | 2311-2418 | §13.19 Cross-type round-2 signature distinction: a witnessed subset vertex and a b=0 endpoint (any gadget) differ at χ_1. | — |
+| `IsCFI'.refineStep_subsetVertex_ne_endpoint_false_round2` | 2420-2437 | §13.19 Cross-type round-2 — at χ_2 a witnessed subset vertex and a b=0 endpoint (any gadget) get distinct colours. | — |
+| `IsCFI'.signature_endpoint_false_inter_gadget_round3` | 2468-2568 | §13.20 Phase 2.2 — at χ_2, two b=0 endpoints at different gadgets have distinct signatures, given a witness subset at the LHS gadget. | — |
+| `IsCFI'.refineStep_endpoint_false_inter_gadget_round3` | 2570-2597 | §13.20 Phase 2.2 — at round 3, b=0 endpoints at different gadgets get distinct colours, given a witness subset (exists when deg(v) ≥ 3). | — |
+| `IsCFI'.exists_witness_of_oddDegree` | 2630-2651 | §13.21 Under `OddDegree`, every even subset of N(v) has a strict non-element y ∈ N(v) \ S — the subset-distinction witness. | — |
+| `IsCFI'.exists_phase22_witness` | 2653-2702 | §13.21 Under `OddDegree`, for any v ∈ N(w) builds an even subset S ⊆ N(w) with v ∈ S plus a witness x ∈ N(w) \ S; used to invoke Phase 2.2 at a bridge-partner gadget. | — |
+| `IsCFI'.refineStep_endpoint_false_intra_gadget_partner_round4` | 2726-2832 | §13.22 Phase 2.X — under `OddDegree`, at round 4 b=0 endpoints at the same gadget toward different partners (w ≠ w') get distinct colours. | — |
+| `IsCFI'.refineStep_subset_intra_gadget_S_round5` | 2858-2943 | §13.23 Phase 2.4 — under `OddDegree`, at round 5 two subset vertices at the same gadget with S ≠ S' get distinct colours. | — |
+| `card_symmDiff_mod_two` | 3217-3227 | **Parity helper.** `|S ∆ T| ≡ |S| + |T| (mod 2)` — the fact behind "an even subgraph preserves the even-subset invariant." | — |
+| `xor_eq_xor_iff` | 3229-3231 | Xor right-cancellation on `Bool` (`(a⊕c) = (b⊕c) ↔ a = b`, and the `≠` form). | — |
+| `xor_ne_xor_iff` | 3233-3235 | Xor right-cancellation on `Bool`, `≠` form: `(a ⊕ c) ≠ (b ⊕ c) ↔ a ≠ b` (companion to `xor_eq_xor_iff`). | — |
+| `CFIBase.flipSet_subset` | 3249-3252 | The flip set is a set of neighbours: `flipSet F v ⊆ N(v)`. | — |
+| `CFIBase.cfiFlip_involutive` | 3336-3344 | The gadget flip is an involution (`(S ∆ F) ∆ F = S`; `(b⊕c)⊕c = b`). | — |
+| `CFIBase.triEdge_eq_true` | 3517-3523 | Characterisation (membership, source-grouped), symmetry, cyclic invariance `{v,w,u}={w,u,v}`, and `F v w = true`. | — |
+| `CFIBase.triEdge_symm` | 3525-3527 | The triangle even-subgraph indicator is symmetric in its edge endpoints: `triEdge v w u p q = triEdge v w u q p`. | — |
+| `CFIBase.triEdge_apex` | 3529-3531 | The decision edge lies in its triangle: `triEdge v w u v w = true`. | — |
+| `CFIBase.triEdge_cyclic` | 3533-3535 | Cyclic invariance of the triangle even-subgraph: `triEdge v w u = triEdge w u v` (so `{v,w,u}` is unordered). | — |
+| `CFIBase.triEdge_iff` | 3537-3541 | Membership characterisation of the triangle even-subgraph indicator `triEdge v w u`. | — |
+| `CFIBase.flipSet_triEdge` | 3543-3558 | The triangle's flip set is `{w,u}` at base vertex `v` (degree 2), and `∅` off `{v,w,u}` (the avoidance → D-locality). | — |
+| `CFIBase.triEdge_even` | 3572-3589 | The triangle is an even subgraph (every vertex F-degree 2 or 0). | — |
+| `CFIBase.evenPermEdge_eq_true` | 3618-3621 | Membership characterisation, symmetry, and the moved-vertex F-neighbours `= {σ p, σ⁻¹ p}`. | — |
+| `CFIBase.evenPermEdge_symm` | 3623-3626 | The permutation-cycle even-subgraph indicator is symmetric: `evenPermEdge σ p q = evenPermEdge σ q p`. | — |
+| `CFIBase.evenPermEdge_iff_of_mem` | 3628-3642 | At a moved vertex (`σ p ≠ p`), the cycle's F-neighbours are exactly `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | — |
+| `CFIBase.flipSet_evenPermEdge_of_mem` | 3644-3654 | Flip set `= {σ p, σ⁻¹ p}` at a moved vertex (degree 2), `∅` at a fixed point (avoidance). | — |
+| `CFIBase.evenPermEdge_even` | 3667-3689 | The permutation-cycle is an even subgraph (degree 2 on the cycle via no-2-cycle, 0 off it). | — |
+| `triFlip_even` | 3875-3876 | — | — |
 ## ChainDescent/Cascade.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `refineStep_mono` | 179-185 | One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁) (refineStep χ₂)`. | — |
+| `refineStep_mono` | 166-172 | One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁) (refineStep χ₂)`. | — |
 
-| `iterate_refineStep_refines` | 187-195 | warm refinement monotone in the initial colouring's partition order. | — |
-| `ResidualAut.mul` | 500-510 | The residual group is closed under composition: composing two `P`-preserving automorphisms fixing `S` pointwise yields another. | — |
-| `visiblyRecoverable_bound_mono` | 2288-2292 | `VisiblyRecoverable` is monotone in the depth bound (a looser bound is easier). | — |
-| `symmetryOnlyStep_of_cellsAreOrbits` | 2353-2363 | `CellsAreOrbits` upgrades any non-singleton cell to a `SymmetryOnlyStep` — the bridge from the recovery predicate to the screen primitive, and why `Discrete` (not bare `CellsAreOrbits`) is a non-false-walling stop (§6.11 F1). | — |
-| `findable_of_findableWithin` | 2460-2469 | Forgetting the bound (and the abelian recoverability witness) collapses `FindableWithin` to the bound-free `Findable` classification; the reverse needs the D2 bridge, so `FindableWithin` is strictly stronger. | — |
-| `soStep_extensive` | 2553-2557 | The symmetry-only closure round is extensive — it only ever adds the chosen vertex. | — |
-| `soStep_pos` | 2570-2573 | When a symmetry-only step exists, the closure round takes it (inserts the chosen vertex). | — |
-| `movedAt_not_mem` | 2610-2612 | A moved vertex is not committed (`v ∉ S`), since a residual automorphism fixes `S` pointwise. | — |
-| `movedStep_extensive` | 2631-2634 | The moved-vertex closure round is extensive. | — |
-| `movedStep_pos` | 2636-2638 | When a moved vertex exists, the closure round takes it. | — |
-| `individualizedColouring_singleton_sep` | 3178-3185 | The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v` from every other vertex. Used in `cellsAreOrbits_schemeAdj_singleton`'s `w=v`/`u=v` cases. | — |
+| `iterate_refineStep_refines` | 174-182 | warm refinement monotone in the initial colouring's partition order. | — |
+| `ResidualAut.mul` | 487-497 | The residual group is closed under composition: composing two `P`-preserving automorphisms fixing `S` pointwise yields another. | — |
+| `visiblyRecoverable_bound_mono` | 2327-2331 | `VisiblyRecoverable` is monotone in the depth bound (a looser bound is easier). | — |
+| `symmetryOnlyStep_of_cellsAreOrbits` | 2392-2402 | `CellsAreOrbits` upgrades any non-singleton cell to a `SymmetryOnlyStep` — the bridge from the recovery predicate to the screen primitive, and why `Discrete` (not bare `CellsAreOrbits`) is a non-false-walling stop (§6.11 F1). | — |
+| `findable_of_findableWithin` | 2499-2508 | Forgetting the bound (and the abelian recoverability witness) collapses `FindableWithin` to the bound-free `Findable` classification; the reverse needs the D2 bridge, so `FindableWithin` is strictly stronger. | — |
+| `soStep_extensive` | 2592-2596 | The symmetry-only closure round is extensive — it only ever adds the chosen vertex. | — |
+| `soStep_pos` | 2609-2612 | When a symmetry-only step exists, the closure round takes it (inserts the chosen vertex). | — |
+| `movedAt_not_mem` | 2649-2651 | A moved vertex is not committed (`v ∉ S`), since a residual automorphism fixes `S` pointwise. | — |
+| `movedStep_extensive` | 2670-2673 | The moved-vertex closure round is extensive. | — |
+| `movedStep_pos` | 2675-2677 | When a moved vertex exists, the closure round takes it. | — |
+| `individualizedColouring_singleton_sep` | 3263-3270 | The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v` from every other vertex. Used in `cellsAreOrbits_schemeAdj_singleton`'s `w=v`/`u=v` cases. | — |
 | `affV_card` | 2087-2090 | (Phase 2, M0.3) `card (F_p^d) = p^d` (via `Fintype.card_fun` + `ZMod.card`). | — |
 | `instNonemptyAffV` | 2258-2262 | (Phase 2, M1.1 helper) `Nonempty (Fin (p^d))` (`p` prime ⟹ `p^d ≥ 1`). Needed for `orbitalIdx`/diagonal facts used outside the `affineScheme` definition. | Instance |
-| `reachesRigidOrCameron_viaRecovery` | 3454-3505 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL CAPSTONE — both non-Cameron branches reduce to visible recovery, NON-VACUOUS)** Every rank-≥3 schurian scheme residual `SchemeRecovered ∨ IsCameronScheme`: cascades (`¬NonCascade`) or imprimitive (`¬IsPrimitive`) ⟹ **recovered** (visible harvest reproduces `SchemeAutGroup`), else **Cameron** (cited classification). Both branches discharged *identically* via `schemeRecovered_of_visibleRealizers` — the imprimitivity/cascade split is only which descent observation triggers the recovery obligation (the orbit-level block decomposition that previously distinguished them was the vacuous detour, now retired). `SchemeRecovered` is genuinely false for a non-recovering scheme, so this disjunction is **not** trivially true — an arbitrary residual needs the open "non-recovering ⟹ Cameron" leak (the `s(C)` frontier). | — |
-| `reachesRigidOrCameron_viaRecoveryOrAbelian` | 3562-3598 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL CAPSTONE with leg B — `(legA ∨ legB) ∨ Cameron`, NON-VACUOUS)** Widens `reachesRigidOrCameron_viaRecovery` so each non-Cameron branch discharges via **either** visible recovery (`SchemeRecovered`, leg A) **or** a hidden-abelian residual (`ResidualAbelian ∧ ¬IsBase`, leg B — routed to `AbelianConsumed` by `abelianConsumed_of_residualAbelian`). Branch hypotheses are strictly *weaker* than the recovery-only form: an abelian-but-not-visibly-recovering residual now satisfies them via the abelian disjunct. Conclusion `(SchemeRecovered ∨ AbelianConsumed) ∨ IsCameronScheme` = the seal's honest dichotomy on the symmetric case. Residual open content = the same `s(C)` leak (G2): a non-abelian non-recovering non-Cameron residual still cannot be placed. Axiom-clean. | — |
-| `reachesRigidOrCameron_viaDepthRecovery` | 4081-4099 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL CAPSTONE, depth-graded, G1a)** `reachesRigidOrCameron_viaRecovery` with the rigid side widened from per-level `SchemeRecovered` to `SchemeRecoveredByDepth … bound`: every rank-≥3 schurian scheme residual is *recovered by bounded depth* or is a Cameron section. Each non-Cameron branch may discharge via a depth-graded harvest (CFI at `tw`, Shrikhande at 2) where the per-level capstone required depth-1 visibility. Subsumes `reachesRigidOrCameron_viaRecovery` (via `schemeRecoveredByDepth_of_schemeRecovered`); carried content = the same `s(C)` leak (G2) + the localisation (shallow ∅→S₀ coverage). Axiom-clean. | — |
-| `reachesRigidOrCameron_viaDepthRecovery'` | 4101-4118 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(depth-graded seal capstone, primitive-floor form)** `reachesRigidOrCameron_viaDepthRecovery` with the cascade obligation sharpened to carry `IsPrimitive`: `hCascade : IsPrimitive ∧ ¬ IsLargeSchemeViaAut → SchemeRecoveredByDepth`. So `hCascade` is *exactly* the self-detection lemma (primitive small ⟹ recovers at bounded depth); the imprimitive branch stays on landed block recovery. Wires `reachesRigidOrCameron'`. Axiom-clean. | — |
-| `reachesRigidOrCameron_viaSelfDetection` | 4133-4148 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL REDUCED TO SELF-DETECTION)** Given the cited classification (G3), the **self-detection** proposition `SelfDetectsAtDepth` (cascade branch = primitive floor), and the landed **imprimitive block recovery** (`hImprim`, G2-A), every rank-≥3 schurian residual is `SchemeRecoveredByDepth ∨ Cameron`. The seal with its *entire* open content concentrated into the single hypothesis `SelfDetectsAtDepth`, with `IsPrimitive` honestly carried into the cascade branch. Proving `SelfDetectsAtDepth` for all primitive small residuals makes the seal unconditional modulo only G3. Axiom-clean. | — |
-| `reachesRigidOrCameron_viaStableRecovery` | 4160-4176 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL REDUCED TO SEMANTIC SELF-DETECTION — Increment 2 capstone)** The seal with its entire open content concentrated into `SelfDetectsStably` — *primitive small residuals recover stably above a bounded set* (cells = orbits above `base + O(1)`). The form the affine module-theory argument (Phase 2 §5.1) produces and the catalogue probe measures: the crux is now a statement about `CellsAreOrbits` (separability), not the harvest-witness `SchemeRecoveredByDepth`. Imprimitive branch on landed block recovery; modulo only cited G3. Axiom-clean. | — |
-| `reachesRigidOrCameron_viaSymmetricRecovery` | 4248-4266 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(The rewired seal — IR-core dropped, CONDITIONAL.)** `reachesRigidOrCameron'` instantiated with the IR-core-free `SchemeRecoveredWhileSymmetric`: `SchemeRecoveredWhileSymmetric ∨ IsCameronScheme`, carrying `hClassify` (G3), `hImprim`, and the open `hSelfDetect` (now the bounded G2-B residue). Strictly weaker than `…_viaStableRecovery` (subsumes it); the IR-core moves to the second guarantee. Axiom-clean. | — |
-| `reachesRigidOrCameron_viaBlockRecovery` | 4373-4393 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`; imprimitive branch now carried as `hImprim`). **(THE SEAL CAPSTONE — imprimitive branch folded into the visible block decomposition)** `(SchemeBlockRecovered ∨ AbelianConsumed) ∨ IsCameronScheme`: every rank-≥3 schurian residual is block-recovered, hidden-abelian-consumed, or Cameron. The imprimitive branch (`hImprim`) no longer carries an opaque "imprimitive ⟹ recovered" — its target is `SchemeBlockRecovered`, *earned* from the fully-visible block decomposition. **Sole irreducible carried content = `hCascade`** (small-primitive = **G2-B**, the open `s(C)` leak) + cited classification (G3): the honest conditional seal `modulo {G3 + G2-B}`. Axiom-clean. | — |
-| `reachesRigidOrCameron_viaDepthOneSeparable` | 4439-4465 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(Phase 2, M2-B — the seal closed for the depth-1-separable slice; A CONDITIONAL CAPSTONE, NOT THE CLOSED SEAL)** Specializes `reachesRigidOrCameron_viaFusedSeal` by discharging `hSelfDetect` via `selfDetectsStably_of_depthOneSeparable`. **Still carries** `hClassify` (G3) + `hImprim` + **`hDepthOne`** (depth-1 separability) — manifestly conditional. **⚠️ Closes the seal ONLY for `s(C)=1`; `s(C)≥2` (cyclotomic) is open — do not read as "seal closed for primitives."** The engine slot: a sibling `…_viaBoundedDepthSeparable` carrying a weaker iterated hypothesis. | — |
-| `reachesRigidOrCameron_viaIntraCellBlock` | 4819-4836 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(Deepest primitive-floor reduction — CONDITIONAL.)** The seal with the crux discharged to the sharper `PersistentTwinGivesIntraCellBlock`. Carries `hClassify` (G3), `hImprim`, and the open `hCrux` (now only nontriviality of the intra-cell block). The converse's algebraic core landed; residue = the isolated nontriviality kernel. Axiom-clean. | — |
+| `reachesRigidOrCameron_viaRecovery` | 3539-3590 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL CAPSTONE — both non-Cameron branches reduce to visible recovery, NON-VACUOUS)** Every rank-≥3 schurian scheme residual `SchemeRecovered ∨ IsCameronScheme`: cascades (`¬NonCascade`) or imprimitive (`¬IsPrimitive`) ⟹ **recovered** (visible harvest reproduces `SchemeAutGroup`), else **Cameron** (cited classification). Both branches discharged *identically* via `schemeRecovered_of_visibleRealizers` — the imprimitivity/cascade split is only which descent observation triggers the recovery obligation (the orbit-level block decomposition that previously distinguished them was the vacuous detour, now retired). `SchemeRecovered` is genuinely false for a non-recovering scheme, so this disjunction is **not** trivially true — an arbitrary residual needs the open "non-recovering ⟹ Cameron" leak (the `s(C)` frontier). | — |
+| `reachesRigidOrCameron_viaRecoveryOrAbelian` | 3647-3683 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL CAPSTONE with leg B — `(legA ∨ legB) ∨ Cameron`, NON-VACUOUS)** Widens `reachesRigidOrCameron_viaRecovery` so each non-Cameron branch discharges via **either** visible recovery (`SchemeRecovered`, leg A) **or** a hidden-abelian residual (`ResidualAbelian ∧ ¬IsBase`, leg B — routed to `AbelianConsumed` by `abelianConsumed_of_residualAbelian`). Branch hypotheses are strictly *weaker* than the recovery-only form: an abelian-but-not-visibly-recovering residual now satisfies them via the abelian disjunct. Conclusion `(SchemeRecovered ∨ AbelianConsumed) ∨ IsCameronScheme` = the seal's honest dichotomy on the symmetric case. Residual open content = the same `s(C)` leak (G2): a non-abelian non-recovering non-Cameron residual still cannot be placed. Axiom-clean. | — |
+| `reachesRigidOrCameron_viaDepthRecovery` | 4166-4184 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL CAPSTONE, depth-graded, G1a)** `reachesRigidOrCameron_viaRecovery` with the rigid side widened from per-level `SchemeRecovered` to `SchemeRecoveredByDepth … bound`: every rank-≥3 schurian scheme residual is *recovered by bounded depth* or is a Cameron section. Each non-Cameron branch may discharge via a depth-graded harvest (CFI at `tw`, Shrikhande at 2) where the per-level capstone required depth-1 visibility. Subsumes `reachesRigidOrCameron_viaRecovery` (via `schemeRecoveredByDepth_of_schemeRecovered`); carried content = the same `s(C)` leak (G2) + the localisation (shallow ∅→S₀ coverage). Axiom-clean. | — |
+| `reachesRigidOrCameron_viaDepthRecovery'` | 4186-4203 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(depth-graded seal capstone, primitive-floor form)** `reachesRigidOrCameron_viaDepthRecovery` with the cascade obligation sharpened to carry `IsPrimitive`: `hCascade : IsPrimitive ∧ ¬ IsLargeSchemeViaAut → SchemeRecoveredByDepth`. So `hCascade` is *exactly* the self-detection lemma (primitive small ⟹ recovers at bounded depth); the imprimitive branch stays on landed block recovery. Wires `reachesRigidOrCameron'`. Axiom-clean. | — |
+| `reachesRigidOrCameron_viaSelfDetection` | 4218-4233 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL REDUCED TO SELF-DETECTION)** Given the cited classification (G3), the **self-detection** proposition `SelfDetectsAtDepth` (cascade branch = primitive floor), and the landed **imprimitive block recovery** (`hImprim`, G2-A), every rank-≥3 schurian residual is `SchemeRecoveredByDepth ∨ Cameron`. The seal with its *entire* open content concentrated into the single hypothesis `SelfDetectsAtDepth`, with `IsPrimitive` honestly carried into the cascade branch. Proving `SelfDetectsAtDepth` for all primitive small residuals makes the seal unconditional modulo only G3. Axiom-clean. | — |
+| `reachesRigidOrCameron_viaStableRecovery` | 4245-4261 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(THE SEAL REDUCED TO SEMANTIC SELF-DETECTION — Increment 2 capstone)** The seal with its entire open content concentrated into `SelfDetectsStably` — *primitive small residuals recover stably above a bounded set* (cells = orbits above `base + O(1)`). The form the affine module-theory argument (Phase 2 §5.1) produces and the catalogue probe measures: the crux is now a statement about `CellsAreOrbits` (separability), not the harvest-witness `SchemeRecoveredByDepth`. Imprimitive branch on landed block recovery; modulo only cited G3. Axiom-clean. | — |
+| `reachesRigidOrCameron_viaSymmetricRecovery` | 4333-4351 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(The rewired seal — IR-core dropped, CONDITIONAL.)** `reachesRigidOrCameron'` instantiated with the IR-core-free `SchemeRecoveredWhileSymmetric`: `SchemeRecoveredWhileSymmetric ∨ IsCameronScheme`, carrying `hClassify` (G3), `hImprim`, and the open `hSelfDetect` (now the bounded G2-B residue). Strictly weaker than `…_viaStableRecovery` (subsumes it); the IR-core moves to the second guarantee. Axiom-clean. | — |
+| `reachesRigidOrCameron_viaBlockRecovery` | 4458-4478 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`; imprimitive branch now carried as `hImprim`). **(THE SEAL CAPSTONE — imprimitive branch folded into the visible block decomposition)** `(SchemeBlockRecovered ∨ AbelianConsumed) ∨ IsCameronScheme`: every rank-≥3 schurian residual is block-recovered, hidden-abelian-consumed, or Cameron. The imprimitive branch (`hImprim`) no longer carries an opaque "imprimitive ⟹ recovered" — its target is `SchemeBlockRecovered`, *earned* from the fully-visible block decomposition. **Sole irreducible carried content = `hCascade`** (small-primitive = **G2-B**, the open `s(C)` leak) + cited classification (G3): the honest conditional seal `modulo {G3 + G2-B}`. Axiom-clean. | — |
+| `reachesRigidOrCameron_viaDepthOneSeparable` | 4524-4550 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(Phase 2, M2-B — the seal closed for the depth-1-separable slice; A CONDITIONAL CAPSTONE, NOT THE CLOSED SEAL)** Specializes `reachesRigidOrCameron_viaFusedSeal` by discharging `hSelfDetect` via `selfDetectsStably_of_depthOneSeparable`. **Still carries** `hClassify` (G3) + `hImprim` + **`hDepthOne`** (depth-1 separability) — manifestly conditional. **⚠️ Closes the seal ONLY for `s(C)=1`; `s(C)≥2` (cyclotomic) is open — do not read as "seal closed for primitives."** The engine slot: a sibling `…_viaBoundedDepthSeparable` carrying a weaker iterated hypothesis. | — |
+| `reachesRigidOrCameron_viaIntraCellBlock` | 4904-4921 | ⊘ **SUPERSEDED** (live: `…_viaBoundedMinMult`). **(Deepest primitive-floor reduction — CONDITIONAL.)** The seal with the crux discharged to the sharper `PersistentTwinGivesIntraCellBlock`. Carries `hClassify` (G3), `hImprim`, and the open `hCrux` (now only nontriviality of the intra-cell block). The converse's algebraic core landed; residue = the isolated nontriviality kernel. Axiom-clean. | — |
 ## ChainDescent/CascadeOracle.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `orbitRecoverable_cfi` | 237-245 | Odd-degree CFI graphs are orbit-recoverable at depth ≤ `cfi_depth_bound h` (axiom-free). | — |
-| `refineStep_singleton_pair_eq` | 472-497 | After individualizing a singleton `s`, two other vertices sharing a colour one refinement round later have identical adjacency and order-relation to `s`. Arbitrary-singleton generalisation of `Scheme.refineStep_round1_pair_eq`. | — |
+| `orbitRecoverable_cfi` | 236-244 | Odd-degree CFI graphs are orbit-recoverable at depth ≤ `cfi_depth_bound h` (axiom-free). | — |
+| `refineStep_singleton_pair_eq` | 471-496 | After individualizing a singleton `s`, two other vertices sharing a colour one refinement round later have identical adjacency and order-relation to `s`. Arbitrary-singleton generalisation of `Scheme.refineStep_round1_pair_eq`. | — |
 
-| `recoverableByDepth_of_cascade` | 808-814 | Cascading at depth `k` gives `RecoverableByDepth … k` — the cascade-class foundation in oracle-contract form. | — |
-| `matchOracle_fires` | 1112-1133 | §C.4 Evaluation lemma: given discreteness + the four verification facts about `colourMatchPerm`, `matchOracle` returns `some`. The engine of the completeness proof. | — |
-| `matchOracleSet_fires` | 1453-1478 | §C.6 Evaluation lemma: discreteness + the four checks on `colourMatchPermSet` ⟹ `matchOracleSet` fires. | — |
-| `indivWithRep_eq_indivWithSeq_singleton` | 1701-1708 | §C.8 `indivWithRep n S r = indivWithSeq n S [r]` — the singleton-sequence case (`n+1+0 = n+1`). | — |
-| `colourMatchPermSeq_eq_of_orbit` | 1865-1875 | §C.8 `colourMatchPermSeq = g` at a recoverable level-coloured footprint (`rankPerm_inv_mul_eq_of_match` + `colourMatchSeq_complete`). | — |
-| `matchOracleSeq_fires` | 1925-1949 | §C.8 Evaluation lemma: discreteness + the four checks on `colourMatchPermSeq` ⟹ `matchOracleSeq` fires. | — |
-| `fixedPointwise_of_map_self` | 2065-2073 | §C.8 A list equal to its own image under `g` is fixed pointwise by `g`: `l.map g = l → ∀ x ∈ l, g x = x`. | — |
+| `recoverableByDepth_of_cascade` | 807-813 | Cascading at depth `k` gives `RecoverableByDepth … k` — the cascade-class foundation in oracle-contract form. | — |
+| `matchOracle_fires` | 1111-1132 | §C.4 Evaluation lemma: given discreteness + the four verification facts about `colourMatchPerm`, `matchOracle` returns `some`. The engine of the completeness proof. | — |
+| `matchOracleSet_fires` | 1452-1477 | §C.6 Evaluation lemma: discreteness + the four checks on `colourMatchPermSet` ⟹ `matchOracleSet` fires. | — |
+| `indivWithRep_eq_indivWithSeq_singleton` | 1700-1707 | §C.8 `indivWithRep n S r = indivWithSeq n S [r]` — the singleton-sequence case (`n+1+0 = n+1`). | — |
+| `colourMatchPermSeq_eq_of_orbit` | 1864-1874 | §C.8 `colourMatchPermSeq = g` at a recoverable level-coloured footprint (`rankPerm_inv_mul_eq_of_match` + `colourMatchSeq_complete`). | — |
+| `matchOracleSeq_fires` | 1924-1948 | §C.8 Evaluation lemma: discreteness + the four checks on `colourMatchPermSeq` ⟹ `matchOracleSeq` fires. | — |
+| `fixedPointwise_of_map_self` | 2064-2072 | §C.8 A list equal to its own image under `g` is fixed pointwise by `g`: `l.map g = l → ∀ x ∈ l, g x = x`. | — |
 ## ChainDescent/Scheme.lean
 
 | Name | Line | Description | Notes |
@@ -318,12 +314,12 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `relabelMatrix_labelledAdj` | 141-150 | Relabelling composes: `relabelMatrix t (labelledAdj s adj) = labelledAdj (t * s) adj` — the `Equiv.Perm` group action on labelled matrices. | — |
-| `canonAdj_eq_labelledAdj` | 152-157 | `canonAdj σ = labelledAdj (rankPerm π_σ) adj` for any discreteness proof; holds by `rfl`. | — |
-| `branch_discrete` | 176-182 | A branch's warm-refined colouring is discrete at a leaf, derived exactly as `canonAdj` derives it so the rank permutations match definitionally. | — |
-| `candidateTwist_mul_rankPerm` | 319-327 | The forced candidate satisfies the rank-alignment equation `candidate · π_σ = π_flip` (the inverse cancels). | — |
-| `isAut_candidateTwist_of_rankPerm_eq` | 437-445 | The absorbed decision fires: the forced candidate (the identity) is an automorphism. | — |
-| `configSwap_rankPerm_flip` | 618-625 | `π_flip = π_σ · g⁻¹` — the rearrangement of `configSwap_rankPerm`. | — |
+| `relabelMatrix_labelledAdj` | 140-149 | Relabelling composes: `relabelMatrix t (labelledAdj s adj) = labelledAdj (t * s) adj` — the `Equiv.Perm` group action on labelled matrices. | — |
+| `canonAdj_eq_labelledAdj` | 151-156 | `canonAdj σ = labelledAdj (rankPerm π_σ) adj` for any discreteness proof; holds by `rfl`. | — |
+| `branch_discrete` | 175-181 | A branch's warm-refined colouring is discrete at a leaf, derived exactly as `canonAdj` derives it so the rank permutations match definitionally. | — |
+| `candidateTwist_mul_rankPerm` | 318-326 | The forced candidate satisfies the rank-alignment equation `candidate · π_σ = π_flip` (the inverse cancels). | — |
+| `isAut_candidateTwist_of_rankPerm_eq` | 436-444 | The absorbed decision fires: the forced candidate (the identity) is an automorphism. | — |
+| `configSwap_rankPerm_flip` | 617-624 | `π_flip = π_σ · g⁻¹` — the rearrangement of `configSwap_rankPerm`. | — |
 ## ChainDescent/Separability.lean
 
 | Name | Line | Description | Notes |
@@ -345,3 +341,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 |------|------|-------------|-------|
 | `WLGeneric.toNat_injective` | 57-59 | — | — |
 | `WLGeneric.encTuple_injective` | 61-66 | — | — |
+## ChainDescent/ScratchConfinementCompleteness.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ConfinementCompleteness.min'_eq_of_eq` | 131-138 | — | — |
