@@ -221,9 +221,20 @@ exactly `ComputesResidue`, and for ② it must be the *algorithmic* descent (sem
 correctness IS the confinement payoff (the algorithm can't test `IsBase` — GI-hard — so it stops at oracle-saturation;
 "saturated ⟹ `IsBase`" = the seal/Cameron content). RRU is NOT one of the 6 Publication obligations — it's the Phase-1
 half they bundle away; surfacing it factors ②/③ cleanly.
-**NEXT = discharge `ComputesResidue` for a concrete `phase1` (the recovery theorem = option (a), the descent↔`forcedNode`
-bridge — unifies with the RRU reduction), then factor `canonForm? = phase2 ∘ phase1` (option (c)). The Phase-2 solver
-(Algorithm R) witnessing `Sound`+`IsoInvariant` is the other independent thread.**
+**★★★ `ComputesResidue` — FIRST DISCHARGE LANDED (2026-07-10, root/WL-1 case, `Phase2Handoff.lean` `namespace RRU`,
+axiom-clean, in `build.sh`).** Concrete `phase1Root adj := Finset.univ.filter (non-singleton 1-WL cells at ∅)` (the
+visible support at the root, refinement-computable) + **`computesResidue_phase1Root_of_recoverable`**: `(∀ adj,
+OrbitRecoverableAt adj P₀ ∅) → ComputesResidue phase1Root`, via `movedSet_eq_nonsingletonCells_of_recoverable` (+
+`rigidResidue = movedSet` at `∅`). So `ComputesResidue` is REDUCED to the project's existing recovery predicate
+`OrbitRecoverableAt`. Payoff corollaries `phase1Root_{reachesRigid,isoInvariant}_of_recoverable` (the RRU guarantees hold
+for the concrete `phase1Root` on the recoverable domain). **HONEST SCOPE: this is the `k=0`/WL-1 base case** —
+`∀ adj, OrbitRecoverableAt … ∅` FAILS at node-4/CFI/multipedes (1-WL cells coarser than orbits), where `phase1Root`
+over-approximates the support and the ITERATIVE descent (individualize–refine–repeat + per-level recovery backed by
+confinement) is required.
+**NEXT = the ITERATIVE `phase1` (the real recovery theorem): individualize–refine to a fixpoint, per-node recovery via
+confinement, computing `rigidResidue` on the confinement domain (CFI included) — the general discharge of `ComputesResidue`
+beyond WL-1. Then factor `canonForm? = phase2 ∘ phase1` (option (c)). The Phase-2 solver (Algorithm R) witnessing
+`Sound`+`IsoInvariant` is the independent thread.**
 Original items (superseded by the above): (1) progress lemma; (2) `R(G)` explicit object; (3) iso-invariance; (4)
 termination-at-rigid. Endgame frame = `chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU";
 full scoping = [[project_rru_phase_transfer_2026-07-09]].

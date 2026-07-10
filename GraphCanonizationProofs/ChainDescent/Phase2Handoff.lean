@@ -150,5 +150,60 @@ theorem rru (p1 : Phase1 n) (cost : AdjMatrix n → ℕ)
       ∧ (∀ (σ : Equiv.Perm (Fin n)) adj, p1 (relabelAdj σ adj) = (p1 adj).image σ) :=
   ⟨fun adj => reachesRigid p1 hrec adj, hpoly, fun σ adj => isoInvariant p1 hrec σ adj⟩
 
+/-! ### First discharge of `ComputesResidue` — the root (single-shot) Phase-1
+
+The first, degenerate (`k = 0`) instance of the recovery obligation: a concrete `phase1` that
+individualizes the *visible support at the root* — the union of the non-singleton 1-WL cells of the
+initial colouring — and the theorem that its `ComputesResidue` **reduces to the project's existing
+recovery predicate** `OrbitRecoverableAt … ∅`. This establishes the reduction pattern and inhabits the
+RRU interface, on the WL-dimension-1-recoverable domain.
+
+Honest scope: `∀ adj, OrbitRecoverableAt adj P₀ ∅` is the strong WL-1 condition — it FAILS at node 4 /
+CFI / multipedes (where 1-WL cells are coarser than orbits). There `phase1Root` over-approximates the
+support, and the *iterative* descent (individualize–refine–repeat, with per-level recovery backed by
+the confinement lemma) is required — the next brick. This root case is that story's base level. -/
+
+open Classical in
+/-- **The root Phase-1 (single-shot).** Individualize the visible support at the root: the non-singleton
+1-WL cells of the initial colouring. Refinement-computable (polynomial). -/
+noncomputable def phase1Root (adj : AdjMatrix n) : Finset (Fin n) :=
+  Finset.univ.filter (fun v => ∃ w, w ≠ v ∧
+    warmRefine adj (fun _ _ => POE.unknown) (individualizedColouring n ∅) v =
+      warmRefine adj (fun _ _ => POE.unknown) (individualizedColouring n ∅) w)
+
+/-- **`ComputesResidue` for the root Phase-1, reduced to root recoverability.** If 1-WL at the root
+recovers the automorphism orbits (`OrbitRecoverableAt adj P₀ ∅`, the WL-dimension-1 condition), the
+visible support IS `R(G) = rigidResidue adj`, so `phase1Root` satisfies the RRU recovery obligation.
+Via `movedSet_eq_nonsingletonCells_of_recoverable` (`rigidResidue = movedSet` at `∅`). The residual
+gap (recoverability fails at CFI) is exactly where the iterative descent + confinement enter. -/
+theorem computesResidue_phase1Root_of_recoverable
+    (hrec : ∀ adj : AdjMatrix n, OrbitRecoverableAt adj (fun _ _ => POE.unknown) ∅) :
+    ComputesResidue (phase1Root (n := n)) := by
+  intro adj
+  have hms : rigidResidue adj = movedSet adj (fun _ _ => POE.unknown) ∅ := by
+    unfold rigidResidue forcedNode; rw [Finset.empty_union]
+  rw [hms]
+  ext v
+  rw [mem_movedSet_iff_nonsingleton_cell_of_recoverable ∅ (hrec adj)]
+  unfold phase1Root
+  rw [Finset.mem_filter]
+  simp only [Finset.mem_univ, true_and]
+
+/-- **Payoff (root domain): `phase1Root` reaches rigid.** Under root recoverability, the root Phase-1
+always lands on a rigid (`IsBase`) residue. -/
+theorem phase1Root_reachesRigid_of_recoverable
+    (hrec : ∀ adj : AdjMatrix n, OrbitRecoverableAt adj (fun _ _ => POE.unknown) ∅)
+    (adj : AdjMatrix n) :
+    IsBase adj (fun _ _ => POE.unknown) (phase1Root adj) :=
+  reachesRigid _ (computesResidue_phase1Root_of_recoverable hrec) adj
+
+/-- **Payoff (root domain): `phase1Root` is iso-invariant.** Under root recoverability, the root
+Phase-1's handoff transports under relabelling. -/
+theorem phase1Root_isoInvariant_of_recoverable
+    (hrec : ∀ adj : AdjMatrix n, OrbitRecoverableAt adj (fun _ _ => POE.unknown) ∅)
+    (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) :
+    phase1Root (relabelAdj σ adj) = (phase1Root adj).image σ :=
+  isoInvariant _ (computesResidue_phase1Root_of_recoverable hrec) σ adj
+
 end RRU
 end ChainDescent
