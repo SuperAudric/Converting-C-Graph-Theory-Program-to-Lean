@@ -231,10 +231,22 @@ for the concrete `phase1Root` on the recoverable domain). **HONEST SCOPE: this i
 `∀ adj, OrbitRecoverableAt … ∅` FAILS at node-4/CFI/multipedes (1-WL cells coarser than orbits), where `phase1Root`
 over-approximates the support and the ITERATIVE descent (individualize–refine–repeat + per-level recovery backed by
 confinement) is required.
-**NEXT = the ITERATIVE `phase1` (the real recovery theorem): individualize–refine to a fixpoint, per-node recovery via
-confinement, computing `rigidResidue` on the confinement domain (CFI included) — the general discharge of `ComputesResidue`
-beyond WL-1. Then factor `canonForm? = phase2 ∘ phase1` (option (c)). The Phase-2 solver (Algorithm R) witnessing
-`Sound`+`IsoInvariant` is the independent thread.**
+**★★★ `ComputesResidue` — VERTEX-TRANSITIVE DISCHARGE LANDED (2026-07-10, NO recovery citation, axiom-clean).**
+Refactored to a per-graph core **`phase1Root_eq_rigidResidue_of_recoverableAt`** (`OrbitRecoverableAt adj P₀ ∅ →
+phase1Root adj = rigidResidue adj`), then the key new result **`phase1Root_eq_rigidResidue_of_pretransitive`**: if the
+`P₀`-automorphism group is transitive at `∅` (orbit relation total), root recovery is **VACUOUS** (`cell=cell → orbit`
+conclusion always true ⟹ `CellsAreOrbits` free), so `phase1Root` computes `R(G)` UNCONDITIONALLY. This closes
+`ComputesResidue` (per-graph) on the entire **vertex-transitive-at-root slice** — DRGs, schemes, Cayley graphs, and
+Cameron residues realised as whole graphs — with no recovery hypothesis. **Machinery survey finding (recorded so it isn't
+re-walked):** `theorem_1_HOR_at_depth`/`RecoverableByDepth`/`recoverableByDepth_{cfi,scheme}` give recovery at a
+*discrete* base (free but trivial — `cellsAreOrbits_of_discrete`), NOT root orbits; so computing `movedSet(∅)` for a
+NON-transitive, non-WL-1 graph (CFI/multipede) is genuinely the WL-dim wall — it needs the cross-branch harvest
+(`coversOrbits_of_realizers` reproduces root orbits from deeper recovery), a separate large build.
+**NEXT = the CFI/non-transitive case via the cross-branch harvest (`coversOrbits_of_realizers` / `matchOracleSeq`) — the
+genuinely-hard remainder of `ComputesResidue`; OR reframe: the assume-VT canonizer never computes `movedSet(∅)` exactly
+(it prunes) so `ComputesResidue = p1 = rigidResidue` may be STRONGER than the assume-VT route needs (its iso-invariance
+comes from reconciliation/X3, not from a canonical base) — worth deciding before the big harvest build. Then factor
+`canonForm? = phase2 ∘ phase1` (c). Phase-2 solver (Algorithm R) = independent thread.**
 Original items (superseded by the above): (1) progress lemma; (2) `R(G)` explicit object; (3) iso-invariance; (4)
 termination-at-rigid. Endgame frame = `chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU";
 full scoping = [[project_rru_phase_transfer_2026-07-09]].

@@ -176,18 +176,39 @@ recovers the automorphism orbits (`OrbitRecoverableAt adj P₀ ∅`, the WL-dime
 visible support IS `R(G) = rigidResidue adj`, so `phase1Root` satisfies the RRU recovery obligation.
 Via `movedSet_eq_nonsingletonCells_of_recoverable` (`rigidResidue = movedSet` at `∅`). The residual
 gap (recoverability fails at CFI) is exactly where the iterative descent + confinement enter. -/
-theorem computesResidue_phase1Root_of_recoverable
-    (hrec : ∀ adj : AdjMatrix n, OrbitRecoverableAt adj (fun _ _ => POE.unknown) ∅) :
-    ComputesResidue (phase1Root (n := n)) := by
-  intro adj
+theorem phase1Root_eq_rigidResidue_of_recoverableAt (adj : AdjMatrix n)
+    (hrec : OrbitRecoverableAt adj (fun _ _ => POE.unknown) ∅) :
+    phase1Root adj = rigidResidue adj := by
   have hms : rigidResidue adj = movedSet adj (fun _ _ => POE.unknown) ∅ := by
     unfold rigidResidue forcedNode; rw [Finset.empty_union]
   rw [hms]
   ext v
-  rw [mem_movedSet_iff_nonsingleton_cell_of_recoverable ∅ (hrec adj)]
+  rw [mem_movedSet_iff_nonsingleton_cell_of_recoverable ∅ hrec]
   unfold phase1Root
   rw [Finset.mem_filter]
   simp only [Finset.mem_univ, true_and]
+
+/-- **`ComputesResidue` for the root Phase-1, reduced to root recoverability** (the ∀-graph form):
+`phase1Root` satisfies the RRU recovery obligation on the WL-dimension-1-recoverable domain. -/
+theorem computesResidue_phase1Root_of_recoverable
+    (hrec : ∀ adj : AdjMatrix n, OrbitRecoverableAt adj (fun _ _ => POE.unknown) ∅) :
+    ComputesResidue (phase1Root (n := n)) :=
+  fun adj => phase1Root_eq_rigidResidue_of_recoverableAt adj (hrec adj)
+
+/-- **Discharge on the vertex-transitive class — no recovery citation.** If the `P₀`-automorphism
+group is transitive on vertices (the orbit relation at `∅` is total — every DRG / scheme / Cayley
+graph / Cameron residue is such), then root recovery is **vacuous**: the `cell = cell → orbit`
+conclusion is always true, so `CellsAreOrbits` holds for free and `phase1Root` computes `R(G)`
+UNCONDITIONALLY. This closes `ComputesResidue` on the vertex-transitive slice — exactly the "or
+Cameron" / confinement domain — without any recovery hypothesis. (For such a graph `R(G) = univ`:
+the whole graph is the support; a correct, if maximal, base.) The complement — non-transitive graphs
+where 1-WL cells are strictly coarser than orbits (CFI / multipedes) — is where the cross-branch
+harvest is genuinely needed (the WL-dimension wall). -/
+theorem phase1Root_eq_rigidResidue_of_pretransitive (adj : AdjMatrix n)
+    (htrans : ∀ v w, OrbitPartition adj (fun _ _ => POE.unknown) ∅ v w) :
+    phase1Root adj = rigidResidue adj :=
+  phase1Root_eq_rigidResidue_of_recoverableAt adj
+    (fun v w => ⟨fun ho => OrbitPartition.subset_warmRefine ho, fun _ => htrans v w⟩)
 
 /-- **Payoff (root domain): `phase1Root` reaches rigid.** Under root recoverability, the root Phase-1
 always lands on a rigid (`IsBase`) residue. -/
