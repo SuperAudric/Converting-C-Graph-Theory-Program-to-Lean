@@ -974,21 +974,40 @@ linear-over-a-ring, flags non-linear*, open content isolated into one hypothesis
 By the node-4 unification (§11.11) the two flag floors are the **same object**; §11.14 argues the rigid seal's escape is
 *strictly tighter* (no "or Cameron" at all). Combined, the two seals isolate **one** wall.
 
-**BUILD track (C#) — empirical validity.** *(The hook is `ChainDescent.Search` `target == -1`, `ChainDescent.cs:243-257`,
-replacing the `target = fallback` exhaustive branch; rigidity is guaranteed there by Phase 1, see §11.11.)*
-- **B1 Productionize** — lift D1/D2/D4/D5 from `Option2ExtractionProbe.cs` into an `Option2Solver` class; robust D1
-  (general arity via the segment/middle bipartition); **ring-aware from the start** (§11.13); behind a config flag.
-- **B2 Wire** at `target == -1`: solver succeeds + verifies → set `_bestMatrix`, return; else fall through to the
-  existing exhaustive branch. Compose the labelling with the pinned path.
-- **B3 Verify-or-flag (D7)** — reconstruct the graph from `(base, H, c, orientation)`, compare to input; mismatch → fall
-  through. Makes the succeed/flag **verdict iso-invariant** (the one soundness-critical piece; the reduced "item 4").
+**BUILD track (C#) — empirical validity.** *(The hook is `ChainDescent.Search` `target == -1` (`ChainDescent.cs:315`,
+the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11.11.)*
+
+> **▶ RE-BASED 2026-07-11 after the RM probes (RM-1..6, 30 tests, `RingWlExtractionProbe`/`RingSolveProbe`).** The full
+> **recover → solve → emit → verify** pipeline is validated ring-general on the real refinement, so B1 lifts from the
+> **RM** probes (not the F₂ `Option2ExtractionProbe`); **B3 and B6 are done** (verify = the self-verifying emit; ring
+> built into RM-3/4/5). Remaining real build = **B1 (port) → B2 (wire) → B5 (cross-checks)**, B4 (fold) deferred.
+
+- **B1 Productionize (the current step)** — create `Option2Solver` (namespace `Canonizer`) porting the RM pipeline:
+  - **B1a Recover — LANDED (2026-07-11, `Option2Solver.cs` + `Option2SolverTests.cs`, 4 tests green).** `Recover(adj,
+    n, cellOf, numCells)` → `(segments, ring order-profile, incidence M)` or null (flag), recognition-free. Segments
+    found **structurally** (no synthetic type-colouring in the solver): the multipede's **bipartition** + the
+    higher-**average**-per-vertex-degree side (segments touch many gadget-tuples; total degree per side is equal in a
+    bipartite graph, so the average — not the sum — is the discriminator). Ring `A` via the RM-3 degree-3 Latin-square
+    order-profile; incidence `M` via RM-4. Validated on native `Z4/Z2²/Z3` multipedes driven through the real
+    `WarmPartition` (segment-separating seed = the descent's `target==-1` partition, since bare 1-WL is blind on the
+    rigid multipede), scramble-invariant; a non-multipede (path graph) flags.
+  - **B1b Solve** — kernel/rigidity + `SolveA`/`CosetMinA` over `A`; **production = extended Smith** (transform-tracking;
+    the invariant-factor half is validated, RM-4) replacing the probe's brute `A^nW`.
+  - **B1c Emit+verify** — the self-verifying canonical labelling (RM-5/6): search a state-labelling making every gadget
+    sum to the (coset-canonical) twist; success = canonical form, failure = flag. **Production = greedy resolving base
+    + `SolveA`** replacing the probe's brute base-enumeration.
+  - **B1d D2-general** — the recognition-free extraction via **minimal forcing-circuits over `A`** (Option2 `ExtractRows`
+    generalized) for residues that aren't pristine gadget-grouped multipedes (the ⚠ item, §11.13a).
+- **B2 Wire** at `target == -1`: solver succeeds + self-verifies → set `_bestMatrix` (composed with the pinned path),
+  return; else fall through to the existing exhaustive branch. Behind a config flag.
+- **B3 Verify-or-flag — DONE** (RM-6): unified with the emit (a consistent labelling exists ⟺ the structure
+  reconstructs). Iso-invariant succeed/flag verdict by construction; keep as the gate.
 - **B4 Fold (D6)** — use harvested `σ` in `Automorphisms` to quotient onto one copy before solving (doubled/`Aut_base`);
-  the iso-invariant `σ`-fold. The one non-mechanical C# piece; off the single-multipede path.
+  the iso-invariant `σ`-fold. The one non-mechanical piece; off the single-multipede path; the mixed-residue bridge.
 - **B5 Cross-checks** — scramble-invariance, exhaustive size-5/6 unique-canonical counts, Even≠Odd, the multipede
   battery (canonizes + scramble-invariant + agrees with the existing canonizer where it already handles), a speedup
   measurement, flag-set-shrink on a flagging fixture. "Prove it works" empirically.
-- **B6 Ring** — already designed in (§11.13); the Smith-normal-form solve + ring inference. *Not separately deferred —
-  per the decision, built into B1–B5 as the ring-general path.*
+- **B6 Ring — DONE** (built into RM-3/4/5; the Smith solve + relational ring inference, §11.13a).
 
 **PROVE track (Lean) — the rigid seal.** *New infrastructure: the rigid residue is a NON-schurian coherent configuration,
 so the seal's `AssociationScheme`/`CoherentConfig` machinery does not apply (§11.10 L2).*
