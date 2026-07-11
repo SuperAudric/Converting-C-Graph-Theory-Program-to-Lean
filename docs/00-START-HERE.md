@@ -114,6 +114,17 @@ close it — is set out in
 R** (the F₂ / ring solver). Both isolate the *same* wall, `hSmallAutThin` (≡ rigid-GI∈P), collapsing the open
 remainder to one named residue.
 
+> **▶ PRIORITY TRACK (2026-07-10): MIXED rigid + symmetric handling — [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md).**
+> A 2026-07-10 source audit found the Lean canonizer is a **single deterministic path** (no branching, no oracle
+> call, no consume/defer phases) — it models only the all-symmetric pole, and its `canonForm?` is not yet
+> iso-invariant. It also found the ①-showcase citation bundle **vacuous** (`ConfinementCitations.hflag`
+> uninhabited) and the `RRU.rru` object content-free (`[[project_confinement_bundle_vacuity_2026-07-10]]`,
+> machine-checked). Since almost every real residue is **mixed**, the priority is the composition
+> `canonForm? = phase2 ∘ phase1` on the **min-over-leaves spec** (consume symmetry → solve the rigid residue),
+> which the C# already achieves (measured **sum-not-product**, `[[project_rru_cost_probe_2026-07-10]]`). FIRST
+> STEP = build the branching `canonMin` spec (Stage 0). The certified-order flag + the conditional RRU object are
+> stepping stones; the Cameron-visible forms families are deprioritized.
+
 **What is sealed** (built, axiom-clean, in `build.sh`). The canonizer-correctness substrate
 (direction-invariance, the descent spine); **Route C** — all four form families sealed
 (`reachesRigidOrCameron_{affinePolar,alternating,halfSpin,suzuki}`, modulo scoped citations;

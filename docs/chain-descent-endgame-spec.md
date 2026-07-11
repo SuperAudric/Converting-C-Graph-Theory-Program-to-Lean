@@ -166,6 +166,24 @@ to the `¬IsBase` side (P2 `flag_imp_symmetric_spine`), NOT the boundary — so 
 substrate is all built; RRU is an assembly whose first brick is the progress lemma `¬IsBase → ∃` a consumable
 `OrbitPartition` pair. Full scoping: `chain-descent-remaining-work.md` item 6 + `[[project_rru_phase_transfer_2026-07-09]]`.
 
+> **⚠️ CORRECTION (2026-07-10 audit) + RE-POINTING to the MIXED-COMPOSITION track.** Three parts of the RRU
+> paragraph above are superseded by a source audit (`[[project_confinement_bundle_vacuity_2026-07-10]]` +
+> `[[project_rru_cost_probe_2026-07-10]]`; machine-checked): (i) the ① showcase's `ConfinementCitations.hflag`
+> is UNINHABITED (`ConfinementCitations 2 → False`) ⟹ `descentCanon_showcase*` are vacuous — the Lean descent
+> has **no deferral and never calls the oracle**, so completeness was only pushed through by assuming every node
+> flags; (ii) "no small-Aut/trivial-Aut gap / boundary is not the flag" is RETRACTED — existence of a consumable
+> pair ≠ the oracle *discovering* it (`CascadeOracle.lean:99-109`); the Chang-A leak is a concrete small-Aut
+> witness; (iii) `rigidResidue`/`RRU.rru` are content-free (`rigidResidue` = support of `Aut`, not the ordered
+> base; `RRU.rru` inhabited by `rfl`). **The deeper re-pointing (this is the priority the user set 2026-07-10):**
+> the Lean canonizer is a **single deterministic path with no branching, no oracle, no phases** — it models only
+> the all-symmetric pole. Since *almost every real residue is MIXED* (consume some symmetry, branch the rest),
+> the priority Lean track is the **composition `canonForm? = phase2 ∘ phase1` against the min-over-leaves spec** —
+> scoped in **[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md)** (Stages 0–4; Stage 0
+> = build the branching lex-min spec, which also makes ①b/①c nearly free). The flag + the RRU object are useful
+> **stepping stones** (Phase-1 side + safety valve), not the deliverable. The Cameron-visible forms families
+> (Route C / certified-assume-VT) are **deprioritized** — they widen what Phase 1 consumes, but the composition
+> must hold regardless.
+
 **The two seals (mirror table, IR §11.12).**
 
 | | handles | the escape | wall |
@@ -294,9 +312,14 @@ non-empty residual; "residual empty" is the optimistic case (= closing the share
 
 ### Runtime Phase — the Lean runtime and cost model (the biggest conceptual leap)
 Builds the objects `Publication.lean` currently stubs `opaque`, and the bridge that makes ② true:
-- **Define `canonForm?`** — the Lean descent model producing `Option (canonical adjacency)` (the flag = `none`).
-  Much of the descent model exists (`defaultSpineChain`, `SpineChain.canonAdj`, leaf existence); this wires it
-  into the `Option`-valued output and connects it to ①.
+- **Define `canonForm?` = the MIXED composition `phase2 ∘ phase1`** — scoped in
+  **[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md)** (the priority track, 2026-07-10).
+  **Correction to the old note:** the existing `defaultSpineChain`/`SpineChain.canonAdj` model is a **single
+  deterministic path with no branching, no oracle, no consume/defer** (source-verified) — it is only the
+  all-symmetric pole and cannot represent a mixed residue. The real target is the **min-over-leaves spec
+  `canonMin`** factored as consume (Phase 1) → solve (Phase 2, the rigid solver); Stage 0 builds the branching
+  spec, which also makes ①b/①c nearly free (the current single-path `canonForm?` is *not* iso-invariant — the X3
+  cut). See the mixed-composition doc §1, §5.
 - **Define `cost`** and the **cost model** — the operation-count of the descent (# nodes × per-node work) as a
   `ℕ`, with an explicit polynomial bound `costConst · n^costDeg`. **Granularity is a decision to make early**
   (operation-count proxy, each step separately poly-size). *This piece is a candidate to split into its own
@@ -418,6 +441,16 @@ lives:
 3. **Tighten the escape** — prove IR §11.14 (no rigid Cameron) ⟹ `UnhandledResidue` collapses to one atom.
 4. **Runtime/Publication** — the cost-model consumption bridge (pilotable now on the quasipoly seal, independent),
    the `UnhandledResidue` definition (= the shared wall), non-vacuity, the Publication swap, the headline.
+
+**▶ RE-POINTED (2026-07-10) — the MIXED composition is the priority Lean track.** The audit
+(`[[project_confinement_bundle_vacuity_2026-07-10]]`) found the Lean canonizer is single-path with no
+branching/oracle/phases, so step 1's `CertifiedSinglePath` is only the all-symmetric pole. Since almost every
+real residue is mixed, the priority is the composition `canonForm? = phase2 ∘ phase1` on the min-over-leaves
+spec — **[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md)** Stages 0–4.
+**FIRST STEP = Stage 0** (build the branching `canonMin` spec; self-contained, and it relocates ①b/①c off the
+false single-path iso-invariance onto the genuine composition/②). Stage 3's `phase2` = the rigid solver (step 2
+above, IR §11.12), dropped into the abstract `Phase2.Solver` contract when built. Cameron-visible families
+(Route C) deprioritized.
 
 ```
 Non-rigid (Algorithm A): confinement → CertifiedSinglePath + X3 residual ─→ ① + symmetric obstruction ─┐
