@@ -1177,11 +1177,16 @@ what remains for a working canonizer is the *emit-and-verify* half (below) and p
 **Pre-B1 readiness audit (2026-07-11).** What is proven vs. what B1 still needs:
 - ✅ **Recovery half (RM-1..4):** segments, forcing/support, ring `A`, kernel/rigidity — all recognition-free +
   scramble-invariant on the real refinement; integer SNF validated.
-- ⬜ **RM-5 — the EMIT half (the D-M2/D-M3 twin; the real gap).** RM-1..4 *recover* structure but emit no
-  canonical form. Needed: solve `Mx = c` over `A` (unique when rigid), the canonical **coset/twist** rep over the
-  module (`coker_A`, generalizing `coset_min`), the canonical **state-ordering** (states by solved-value-as-identity,
-  D5), then emit the canonical labelling. Has real iso-invariance subtleties (as D-M2/D-M3 did for F₂) — worth a probe
-  before B1.
+- ◑ **RM-5 — the EMIT half (the D-M2/D-M3 twin).** *Algebraic core DONE* (`RingSolveProbe.cs`, 4 tests green):
+  the ring twins of `SolveF2`/`CosetMin` — **`SolveA`** (`Mo=target` over `A`, the gauge-fix solve), **`CosetMinA`**
+  (canonical rep of `c + im_A(M)` = the iso-invariant twist-class, the translation-gauge quotient), and
+  **`TwistClassA`** (further quotiented by the unit/Aut gauge) — validated for solve-correctness, coset-invariance,
+  coset-**separation** (nontrivial coker exercised via the triangle incidence), and unit-gauge invariance (`Z2, Z4,
+  Z2², Z6`). Brute over `A^nW` in the probe; **production = extended Smith** (transform-tracking, the invariant-factor
+  half already validated in RM-4). *Remaining RM-5 = graph integration:* read `c` recognition-free via RM-3's
+  per-segment group labelling (aligned to the extracted `M`), then emit the **state-ordered canonical adjacency**
+  (states by solved-value-as-identity, gadgets by tuple) — the D-M3 assembly. This is now mechanical given the core +
+  RM-1..4; no unknowns remain, just the labelling plumbing.
 - ⬜ **RM-6 / B3 — verify-by-reconstruction (the soundness gate).** Rebuild the graph from `(base, M, A, solution)`,
   compare to input; mismatch → flag. Mechanical but soundness-critical; the succeed/flag verdict's iso-invariance
   rides on it.
