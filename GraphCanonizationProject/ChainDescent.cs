@@ -192,6 +192,16 @@ namespace Canonizer
         public bool RigidCoreFound { get; private set; }
         public IReadOnlyList<int> RigidCorePath { get; private set; } = [];
 
+        // B2 (IR §11.12): at the Phase-1/Phase-2 boundary (`target == -1`, rigid residue),
+        // try the Option-2 rigid ring solver — recover the A-linear system, solve, and emit a
+        // self-verified canonical labelling — INSTEAD of branching the reals exhaustively.
+        // Defaults ON: the C# is coupled to the Lean rigid seal (P-track); its iso-invariance is
+        // the empirical claim B5 validates and P3/P4 prove. A non-pristine / non-linear residue
+        // returns null from the solver and falls through to the exhaustive branch (sound).
+        internal bool EnableRigidSolver { get; set; } = true;
+        // DIAGNOSTIC: how many `target == -1` nodes the rigid solver canonicalized directly.
+        public int RigidSolverCanonicalized { get; private set; }
+
         // The residual automorphism group, grown by leaf-collision harvesting.
         public PermutationGroup Automorphisms { get; }
 
@@ -260,6 +270,32 @@ namespace Canonizer
                 HandleLeaf(cellOf);
                 _subtreeBranchDepth = 0; // a leaf has no branching below it
                 return;
+            }
+
+            // B2 (IR §11.12): the rigid ring solver, fired at the ROOT only (depth 0).
+            // If the whole-graph residue is a clean full native-A multipede, canonicalize it
+            // directly (recover the A-linear system → solve → emit a self-verified canonical
+            // order) instead of running the IR descent. Gated at depth 0 — NOT at the deferral
+            // boundary `target == -1` — because that boundary is reached at a labelling-DEPENDENT
+            // node (the oracle's consume/branch choice is not traversal-invariant), and B2's
+            // canonical form (φ-based) differs from the exhaustive branch's (global lex-min): mixing
+            // them per-labelling breaks iso-invariance (empirically, Z3 gave two forms). The root
+            // partition `refine(seed)` IS iso-invariant, so firing here fires for every labelling of
+            // a B2-eligible graph, or none — one spec, iso-invariant. `TryCanonicalOrder` returns
+            // null (⟹ fall through to the normal descent, sound) unless every vertex is covered:
+            // a mixed / partially-symmetric residue is NOT a full multipede at the root (that is B4).
+            if (EnableRigidSolver && depth == 0)
+            {
+                int[]? order = Option2Solver.TryCanonicalOrder(_adj, _n, cellOf, numCells);
+                if (order != null)
+                {
+                    int[] perm = new int[_n];
+                    for (int rank = 0; rank < _n; rank++) perm[order[rank]] = rank;
+                    _bestMatrix = BuildPermutedMatrix(perm);   // the canonical form; rigid ⟹ unique
+                    RigidSolverCanonicalized++;
+                    _subtreeBranchDepth = 0;
+                    return;
+                }
             }
 
             var cellMembers = new List<List<int>>(numCells);

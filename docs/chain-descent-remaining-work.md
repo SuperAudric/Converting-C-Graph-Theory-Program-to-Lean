@@ -768,12 +768,16 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   **flags** ("polynomial-or-flag"). So §3a's reduction does **not** cover the IR-solver's case; the genuinely-uncited
   open research is **this non-schurian row 4**, which was never the seal's obligation (it is `DiscretizesAtBases`, split
   off by `stablyRecoverable_iff_symmetric_and_bases`). Closing it = closing the *overall*-canonizer poly wall.
-- **Status (2026-07-11):** the **ring-general rigid solver is BUILT in production** — `GraphCanonizationProject/Option2Solver.cs`,
+- **Status (2026-07-11):** the **ring-general rigid solver is BUILT + WIRED in production** — `GraphCanonizationProject/Option2Solver.cs`,
   the full recover→solve→emit→verify pipeline (B1a `Recover`, B1b `SolveOverA`/extended-Smith/`RecoverRing`/kernel,
-  B1c `TryCanonicalForm` self-verifying emit), **10 tests green** (`Option2SolverTests.cs`) + the RM-1..6 validation
-  chain (5 `Ring*Probe.cs` files, 30 tests). **NEXT = B2: wire at `ChainDescent.cs:315`** (replace `target = fallback`
-  with `Option2Solver.TryCanonicalForm`; success → `_bestMatrix`, else fall through). Then B5 cross-checks. B3/B6 done,
-  B4 (fold) deferred. Full build plan + gotchas: IR doc §11.12 + the STATUS handoff banner.
+  B1c `TryCanonicalForm`/`TryCanonicalOrder` self-verifying emit), **B2 LANDED** (wired in `ChainDescent.Search` behind
+  `EnableRigidSolver`, default ON). **14 tests green** (`Option2SolverTests.cs`) + the RM-1..6 validation chain (5
+  `Ring*Probe.cs`, 30 tests); regression-clean on LinearOracle/CFI (18), Multipede/Cameron/Twist/Footprint (81).
+  **★ B2 fires at the ROOT (`depth == 0`), NOT at `target == -1`:** the boundary node is labelling-dependent and B2's
+  φ-form ≠ the exhaustive global-lex-min form, so mixing them there broke iso-invariance (Z3 → two forms); the root
+  partition is iso-invariant, so B2 fires uniformly or not at all. v1 scope = pristine whole-graph multipede (mixed =
+  B4). **NEXT = B5** (multipede battery + speedup + flag-shrink) **then B1d** (arity/side-selection/large-`|A|`
+  completeness). B3/B6 done. Full plan + the iso-invariance finding: IR doc §11.12 + the STATUS banner.
 - **★ ROW 4 IS NOW UNDER ACTIVE ATTACK — "option 2" (2026-06-20, IR doc §11).** The flag set is *attackable*, not just
   acceptable: the multipede is **F₂-linear**, and the descent (WL) = F₂ **unit-propagation**, which stalls where
   **Gaussian elimination** does not. **Layers A–C DONE** (probe-/prototype-clean): the rigid gap is real & constructible

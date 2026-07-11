@@ -143,6 +143,51 @@ public sealed class Option2SolverTests
         Assert.NotEqual(good, other);
     }
 
+    // ── B2: the rigid solver WIRED into the descent (ChainDescent.cs target==-1) ──
+    // Drives the FULL descent (not just Recover/TryCanonicalForm) and asserts the B2 hook
+    // (i) actually FIRES (RigidSolverCanonicalized > 0 — not silently falling through), (ii)
+    // canonicalizes instead of flagging, and (iii) the emitted canonical matrix is
+    // scramble-invariant. The spec is NOT the global lex-min (deferral fixes a different but
+    // iso-invariant form), so we do NOT compare against the exhaustive branch — invariance is
+    // the correctness claim. This is the B5 firing-slice bundled with B2, per the plan.
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z4", 4)]
+    [InlineData("Z2^2", 4)]
+    [InlineData("Z3", 3)]
+    public void B2_RigidSolver_FiresAndCanonicalizes_ScrambleInvariant(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z4" => new Ab(4), "Z2^2" => new Ab(2, 2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var (g0, t0) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+
+        var matrices = new List<string>();
+        int totalFired = 0;
+        for (int s = -1; s < 3; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = g0; t = (int[])t0.Clone(); }
+            else (g, t) = ScrambleWithTypes(g0, t0, 15000 + s);
+            int n = g.VertexCount; var adj = Flat(g);
+
+            var descent = new ChainDescent(n, adj, new CascadeOracle(), 100_000);
+            var result = descent.Canonize(SeedFromTypes(n, t), new WarmPartition(n));
+
+            _out.WriteLine($"[{name} s={s}] n={n} flagged={result.Flagged} fired={descent.RigidSolverCanonicalized} " +
+                           $"nodes={result.Stats.NodeCount} phase2={result.Stats.Cascade.Phase2Nodes}");
+
+            Assert.True(descent.RigidSolverCanonicalized > 0, "B2 hook did not fire");
+            Assert.False(result.Flagged);                       // rigid solver canonicalizes — no flag
+            Assert.NotNull(result.Matrix);
+            totalFired += descent.RigidSolverCanonicalized;
+            matrices.Add(string.Concat(result.Matrix!.Select(x => x == 0 ? '0' : '1')));
+        }
+        Assert.True(totalFired > 0);
+        Assert.True(matrices.Distinct().Count() == 1);          // canonical form scramble-invariant
+        _out.WriteLine($"{name,-6} B2 fired ({totalFired}×), |A|={asz}, canonical scramble-inv=True");
+    }
+
     [Fact]
     public void B1b_RecoverRing_Solve_Kernel_MatchGroundTruth()
     {

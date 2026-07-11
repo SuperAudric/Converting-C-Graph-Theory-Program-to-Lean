@@ -38,8 +38,22 @@
 > (the footing the deferral machinery already stands on), so a bad schedule costs only an *unnecessary-but-sound*
 > branch, never correctness. The **fusion-severity bound** ("no harder fusion case can arise"; instrument
 > `FusionHarvestProbe`, A_stall vs A_full) is the **efficiency guarantee** for that schedule. **STATUS 2026-07-11: the
-> ring solver is BUILT + validated in production** (`Option2Solver.cs`, recover→solve→emit→verify, B1a/b/c LANDED, 10
-> tests) — **NEXT = B2 (wire at `ChainDescent.cs:315`).** See the PICK-UP-HERE handoff banner below + §11.12.
+> ring solver is BUILT + WIRED + validated in production** (`Option2Solver.cs`, recover→solve→emit→verify, B1a/b/c +
+> **B2 LANDED**) — **NEXT = B5 (multipede battery + speedup) then B1d completeness.** See the PICK-UP-HERE handoff below + §11.12.
+>
+> **▶ B2 WIRING — THE ISO-INVARIANCE FINDING (2026-07-11, empirically forced).** B2 must fire at the **ROOT (depth 0)**,
+> NOT at the deferral boundary `target == -1`. The first (naive) wiring at `target == -1` **broke iso-invariance**: on
+> Z3 it produced TWO canonical forms. Cause — `target == -1` is reached at a **labelling-dependent** node (the oracle's
+> consume/branch *choice* is not traversal-invariant, only its verdict is); on some scramblings B2 fired at a pristine
+> node (its φ-based form), on others `target == -1` was first reached at a **pinned** node where `TryCanonicalOrder`
+> returns null (pinned singletons ⟹ order not a full permutation) → fall-through to the exhaustive branch (the
+> **global-lex-min** form). Two specs → two forms for isomorphic inputs. **Fix:** gate B2 to `depth == 0`, fired purely
+> on "is the root residue a clean full multipede" (`refine(seed)` at the root IS iso-invariant), so it fires for **every**
+> labelling of a B2-eligible graph or **none** — one spec, iso-invariant. This confirms (and, for the mixed/pinned case,
+> *falsifies*) the standing "B2 iso-invariance is empirical" caveat: **v1 scope = the pristine whole-graph multipede
+> only**; the mixed / pinned-prefix residue is B4 (the σ-fold) and needs a separate iso-invariance proof. Verified: B2
+> fires + canonicalizes + scramble-invariant matrix on Z2/Z4/Z2²/Z3; CFI is untouched (its 1-WL cells span both
+> bipartition sides ⟹ `Recover` null ⟹ fall-through; orbit-pruning/harvest intact).
 
 > **▶ SEPARATION MEASURED — "SUM NOT PRODUCT" (2026-07-10, C# probe `RruSeparationProbe`; detail
 > `[[project_rru_cost_probe_2026-07-10]]`).** The premise of this whole two-phase architecture — that the rigid work
@@ -125,19 +139,21 @@
 > - **B1c `TryCanonicalForm`** — the self-verifying canonical emit (RM-5/6): a consistent labelling exists ⟺ the residue
 >   reconstructs, so **success = canonical form, failure = flag**. Scramble-invariant; flags corruption; separates rings.
 >
-> **THE NEXT ACTION IS B2 (§11.12): WIRE the solver at `ChainDescent.cs:315`** — the `target = fallback` line (the
-> Phase-1/Phase-2 boundary). Replace it: call the solver on `(_adj, _n, partition.CellOf, numCells)`; on a non-null
-> result set `_bestMatrix` and return; else fall through to the exhaustive branch. Behind a config flag. **⚠ Return-shape
-> adaptation:** `_bestMatrix` (`int[]`) is built by `HandleLeaf` from a **vertex ordering** via `BuildPermutedMatrix(perm)`
-> (`ChainDescent.cs:699-706`), but `TryCanonicalForm` currently returns the *serialized adjacency string* (for probe
-> byte-comparison). So B2 needs a solver entry that returns the **canonical vertex order `int[]`** — it is already computed
-> inside `EmitForm` as the `order` list; expose it (e.g. `TryCanonicalOrder`) and feed it through `BuildPermutedMatrix`
-> (composed with the pinned `_path`). The lex-min over base labellings should then min the *permuted matrix* (as
-> `HandleLeaf` does), not the string, to agree with the descent's canonical form. **Then B5** (cross-checks: multipede battery, scramble-invariance, speedup). B3+B6 are
-> DONE; B4 (fold, mixed residue) deferred. **Key B2 gotchas:** (i) the descent's `target==-1` partition already separates
-> segments (the RM probes seed this; production gets it from the pinned path) — 1-WL alone is blind on the rigid multipede;
-> (ii) the residue may be non-pristine (mixed/partially-consumed cells) → `Recover` flags → falls through (sound); the
-> clean-multipede case is what's validated (the DQ1 / §11.13a ⚠ items).
+> **B2 IS LANDED (2026-07-11).** The solver is WIRED into `ChainDescent.Search`, fired at the **root** (`depth == 0`)
+> behind `EnableRigidSolver` (default ON): `Option2Solver.TryCanonicalOrder(_adj, _n, cellOf, numCells)` returns the
+> canonical vertex order (or null = flag/fall-through); on success `_bestMatrix = BuildPermutedMatrix(inverse(order))`
+> and return. **Why the root, not `target == -1` (the originally-planned hook):** `target == -1` is a labelling-DEPENDENT
+> node (the oracle's consume/branch choice is not traversal-invariant), and B2's φ-based canonical form differs from the
+> exhaustive branch's global-lex-min form — mixing them per-labelling **broke iso-invariance** (empirically, Z3 gave two
+> forms). The root partition is iso-invariant, so B2 fires uniformly (every labelling or none). The return-shape
+> adaptation (order → `BuildPermutedMatrix(inverse(order))`, string vs matrix) is done and the two conventions agree
+> byte-for-byte (row-major, 0/1). **THE NEXT ACTION IS B5** (multipede battery: canonizes + scramble-invariant + speedup
+> measurement + flag-set-shrink; CFI/Cameron non-firing already confirmed) **then B1d** (the three completeness/generality
+> items: general arity via pin-`d−3`, try-both-sides side-selection, large-`|A|` `SolveOverA` gauge-fix). B3+B6 DONE; B4
+> (σ-fold, mixed / pinned-prefix residue — the case B2 v1 deliberately does NOT handle) deferred. **Key facts:** (i) B2
+> fires only when the root residue is a clean FULL native-A multipede (`TryCanonicalOrder` covers all n vertices); a mixed
+> / partially-symmetric graph is not, so it falls through (sound); (ii) CFI does not trigger it (1-WL cells span both
+> bipartition sides ⟹ `Recover` null), so the linear-oracle harvest is untouched.
 >
 > **Validation lives in 5 ring probe files** (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
 > `RingSolveProbe`, all in the Tests project) — the RM-1..6 chain that grounds each piece; run `dotnet test --filter
@@ -1023,12 +1039,28 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
     labelling (RM-5/6): search a `φ` making every gadget sum to 0 from a 2-segment base, emit the min canonical
     adjacency; a consistent complete labelling exists ⟺ the residue reconstructs, so **success = canonical form,
     failure = flag** (verify unified with emit). Validated scramble-invariant (`Z2/Z4/Z2²/Z3`), flags a corrupted
-    gadget, separates `Z4` vs `Z2²`. Base-labelling enumeration is brute (`|A|!²`, fine for bounded `|A|`); the
-    `SolveOverA`-based gauge-fix (B1b) is the large-`|A|`/twisted optimisation (needs the per-segment torsor extraction).
-  - **B1d D2-general** — the recognition-free extraction via **minimal forcing-circuits over `A`** (Option2 `ExtractRows`
-    generalized) for residues that aren't pristine gadget-grouped multipedes (the ⚠ item, §11.13a).
-- **B2 Wire** at `target == -1`: solver succeeds + self-verifies → set `_bestMatrix` (composed with the pinned path),
-  return; else fall through to the existing exhaustive branch. Behind a config flag.
+    gadget, separates `Z4` vs `Z2²`.
+    - **⚠ SCOPE (not a footnote — the honest guarantee): the landed emit is poly-or-flag only for BOUNDED `|A|`.** The
+      base-labelling enumeration is brute `|A|!²`, which is not poly in `n` if `|A|` grows (`|A|` may be up to `n`). The
+      poly closure is **B1b's `SolveOverA`/`CosetMin` gauge-fix**, deferred to B1d — larger `|A|` still FLAGS today (sound),
+      it just isn't canonicalised. So the current solver's poly reach is narrower than "ring-general" suggests.
+  - **B1d — completeness & generality (the three post-handoff scope items).** (i) **General arity** — `InferOrderProfile`
+    needs a degree-3 gadget to *exist*; for all-higher-arity residues, **pin `d−3` segments** to reduce a degree-`d` gadget
+    to a degree-3 sum-zero (constant) relation — the cycle-structure read is translation-invariant so `A` is still recovered
+    (do NOT marginalise: a projected cube is all of `A³`). (ii) **Side-selection** — replace the average-degree *heuristic*
+    with **try-both-sides + self-verify selects** (2×, removes the completeness risk; the φ-search backstop makes the current
+    heuristic *sound* but a mis-pick flags a canonicalisable residue). (iii) **Large-`|A|` poly** — wire the `SolveOverA`
+    gauge-fix (concern above). Plus the general **minimal-forcing-circuit** extraction over `A` (Option2 `ExtractRows`
+    generalized) for non-pristine residues (the ⚠ items, §11.13a).
+- **B2 Wire — LANDED (2026-07-11, `ChainDescent.cs`).** Solver exposes `TryCanonicalOrder` (the canonical vertex order;
+  `_bestMatrix = BuildPermutedMatrix(inverse(order))`, agreeing byte-for-byte with the descent's leaf convention),
+  wired in `ChainDescent.Search` behind `EnableRigidSolver` (**default ON**). On a full-permutation order → set
+  `_bestMatrix` and return; on null (non-pristine / non-linear) → fall through (sound). **★ Fired at the ROOT (`depth
+  == 0`), NOT at `target == -1`** — the boundary node is labelling-dependent, and mixing B2's φ-form with the exhaustive
+  global-lex-min form there breaks iso-invariance (empirically, Z3 → two forms; see the STATUS "ISO-INVARIANCE FINDING").
+  The root partition `refine(seed)` is iso-invariant, so B2 fires for every labelling of a B2-eligible graph or none.
+  Test `B2_RigidSolver_FiresAndCanonicalizes_ScrambleInvariant` (Z2/Z4/Z2²/Z3, all green); CFI/Cameron/multipede suites
+  regress-clean. **v1 scope = pristine whole-graph multipede** (mixed / pinned-prefix residue = B4).
 - **B3 Verify-or-flag — DONE** (RM-6): unified with the emit (a consistent labelling exists ⟺ the structure
   reconstructs). Iso-invariant succeed/flag verdict by construction; keep as the gate.
 - **B4 Fold (D6)** — use harvested `σ` in `Automorphisms` to quotient onto one copy before solving (doubled/`Aut_base`);

@@ -58,6 +58,11 @@ namespace Canonizer
             double avg0 = count[0] > 0 ? (double)totalDeg[0] / count[0] : 0;
             double avg1 = count[1] > 0 ? (double)totalDeg[1] / count[1] : 0;
             int segSide = avg0 >= avg1 ? 0 : 1;
+            // NB this side choice is a HEURISTIC. It is sound because a wrong pick makes the
+            // downstream φ-search (TryCanonicalForm) find no consistent labelling ⟹ FLAG — never
+            // a wrong answer. But a mis-pick on a genuine multipede costs COMPLETENESS (flags what
+            // it could have canonicalised). B1d fix: drop the heuristic — try BOTH sides (and both
+            // candidate cell-sizes) and let the φ-search self-verify SELECT the right one (2× cost).
 
             // Segments = non-singleton cells wholly on the segment side, all of one size |A| ≥ 2.
             var segCells = new List<int[]>();
@@ -95,10 +100,39 @@ namespace Canonizer
         // labelling exists IFF the residue reconstructs ⟹ success is the verification, failure
         // is the flag (verify-by-reconstruction unified with the emit). Returns null = FLAG.
         //
-        // Base-labelling enumeration is brute (|A|!² over the 2-segment base) — fine for the
-        // bounded-|A| tractable cases; the SolveOverA-based gauge-fix (B1b) is the large-|A|
-        // optimisation (needs the per-segment torsor extraction; the twisted case uses CosetMin).
+        // ⚠ SCOPE: this emit is poly-or-flag only for BOUNDED |A|. The base-labelling enumeration is
+        // brute (|A|!² over the 2-segment base), which is not polynomial in n if |A| grows with n
+        // (the design allows |A| up to n). The B1b primitives (SolveOverA/CosetMin, both poly) are the
+        // poly path: extract the per-segment torsor (from RM-3's Latin-square translations), fix the
+        // translation gauge by SolveOverA, min over the global Aut(A) — collapsing the |A|! enumeration.
+        // Until that is wired, the poly guarantee is bounded-|A|; larger |A| still FLAGS (sound).
         public static string? TryCanonicalForm(int[] adj, int n, int[] cellOf, int numCells)
+            => SearchCanonical(adj, n, cellOf, numCells)?.Form;
+
+        /// <summary>
+        /// B2 entry: the canonical vertex ORDER (<c>order[rank]</c> = original vertex) that the descent's
+        /// <c>BuildPermutedMatrix</c> consumes, or null (= FLAG) if this is not a clean full-graph
+        /// native-A residue. Returns null unless the emitted order covers ALL n vertices — i.e. every
+        /// vertex is a segment-state or a gadget (the pristine whole-graph multipede the RM/D-M probes
+        /// validate). A mixed / partially-pinned residue (pinned singletons left over) is NOT handled
+        /// here: it returns null and the caller falls through to the exhaustive branch (sound; the σ-fold
+        /// for mixed residues is B4). The emitted form agrees byte-for-byte with the descent's leaf
+        /// convention (row-major, 0/1), so the caller can lex-min the permuted matrix against `_bestMatrix`.
+        /// </summary>
+        public static int[]? TryCanonicalOrder(int[] adj, int n, int[] cellOf, int numCells)
+        {
+            var best = SearchCanonical(adj, n, cellOf, numCells);
+            if (best == null || best.Order.Length != n) return null;   // not a clean full-graph residue ⟹ flag
+            return best.Order;
+        }
+
+        /// <summary>The min self-verified labelling's vertex order + its serialized canonical form.</summary>
+        private sealed class CanonCandidate { public int[] Order = Array.Empty<int>(); public string Form = ""; }
+
+        // Shared core of B1c: recover → RecoverRing → search a state-labelling φ making every gadget sum
+        // to 0 from a 2-segment base, keeping the labelling whose canonical form is lexicographically
+        // least. A consistent complete φ exists IFF the residue reconstructs ⟹ success is the verification.
+        private static CanonCandidate? SearchCanonical(int[] adj, int n, int[] cellOf, int numCells)
         {
             var res = Recover(adj, n, cellOf, numCells);
             if (res == null) return null;
@@ -122,7 +156,7 @@ namespace Canonizer
 
             int Asz = res.ASize;
             var perms = Permutations(Asz);
-            string? best = null;
+            CanonCandidate? best = null;
             foreach (var p0 in perms)
                 foreach (var p1 in perms)
                 {
@@ -130,8 +164,10 @@ namespace Canonizer
                     for (int k = 0; k < Asz; k++) { phi[segCells[0][k]] = p0[k]; phi[segCells[1][k]] = p1[k]; }
                     if (!PropagateSumZero(phi, gVerts, gNbr, A)) continue;
                     if (!LabellingComplete(phi, segCells, Asz)) continue;
-                    var form = EmitForm(n, adj, segCells, gVerts, gNbr, phi);
-                    if (best == null || string.CompareOrdinal(form, best) < 0) best = form;
+                    var order = EmitOrder(segCells, gVerts, gNbr, phi);
+                    var form = EmitForm(n, adj, order);
+                    if (best == null || string.CompareOrdinal(form, best.Form) < 0)
+                        best = new CanonCandidate { Order = order, Form = form };
                 }
             return best;
         }
@@ -163,19 +199,26 @@ namespace Canonizer
             return true;
         }
 
-        private static string EmitForm(int n, int[] adj, List<int[]> segCells, List<int> gVerts,
+        // The canonical vertex order under labelling φ: segments (states by φ-value), then gadgets
+        // (by their φ-tuple key). Full permutation of [0,n) iff every vertex is a segment or a gadget.
+        private static int[] EmitOrder(List<int[]> segCells, List<int> gVerts,
                                        List<List<(int seg, int v)>> gNbr, int[] phi)
         {
-            var order = new List<int>(n);
+            var order = new List<int>();
             foreach (var seg in segCells) order.AddRange(seg.OrderBy(v => phi[v]));
             var keyed = new List<(string key, int v)>();
             for (int gi = 0; gi < gVerts.Count; gi++)
                 keyed.Add((string.Join("|", gNbr[gi].OrderBy(x => x.seg).Select(x => $"{x.seg}:{phi[x.v]}")), gVerts[gi]));
             foreach (var kv in keyed.OrderBy(x => x.key, StringComparer.Ordinal)) order.Add(kv.v);
+            return order.ToArray();
+        }
 
-            var sb = new System.Text.StringBuilder(order.Count * order.Count);
-            for (int i = 0; i < order.Count; i++)
-                for (int j = 0; j < order.Count; j++)
+        // Serialize adj under a vertex order (row-major, 0/1) = BuildPermutedMatrix(inverse(order)).
+        private static string EmitForm(int n, int[] adj, int[] order)
+        {
+            var sb = new System.Text.StringBuilder(order.Length * order.Length);
+            for (int i = 0; i < order.Length; i++)
+                for (int j = 0; j < order.Length; j++)
                     sb.Append(adj[order[i] * n + order[j]] != 0 ? '1' : '0');
             return sb.ToString();
         }
@@ -215,6 +258,12 @@ namespace Canonizer
         }
 
         // ── RM-3: ring order-profile from one degree-3 gadget's sum-zero Latin square ─
+        // ⚠ SCOPE: requires a degree-3 gadget line to EXIST (a full |A|² sum-zero relation). A residue
+        // whose constraints are all higher-arity has no such line ⟹ returns null ⟹ FLAG, even though it
+        // is a legitimate linear residue. B1d fix: reduce a degree-d gadget to degree-3 by PINNING d−3 of
+        // its segments to fixed states (NOT marginalising — a projected sum-zero cube is all of A³). The
+        // residual 3-relation sums to a constant, which the cycle-structure read tolerates (R_x∘R_x'⁻¹ =
+        // translation by x'−x, independent of the constant), so it still recovers A exactly.
         private static string? InferOrderProfile(int[] adj, int n, int[] segOf, int[] localOf, int Asz)
         {
             var byLine = new Dictionary<string, List<int>>();
