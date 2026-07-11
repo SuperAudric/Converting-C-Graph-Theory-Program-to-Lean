@@ -160,6 +160,13 @@ the cost-model substrate) is NOT yet in `build.sh`. Mechanical.
 **5. (Testbed, not Lean-Seal) C# switch to Algorithm A.** The C# runs Algorithm R + a *global* flag; aligning it to the
 per-node flag / assume-VT-prune is validation, not part of the Seal correctness *proof*.
 
+> **▶▶ PRIORITY TRACK now = [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) (the MIXED
+> rigid+symmetric composition — almost every real residue is mixed). Stage 0a LANDED 2026-07-11
+> (`ChainDescent/CanonicalForm.lean`, in build.sh, axiom-clean): the canonical-form correctness framework
+> `complete_of_isCanonicalForm` (sound ∧ iso-invariant ⟹ complete — ①b free) + the `lexMin` selection combinator.
+> NEXT = Stage 0b (the branching descent model). The RRU/confinement material in this item 6 is now historical
+> context for that track.**
+>
 > **⚠️ CORRECTION (2026-07-10 audit — supersedes the "GAP DISSOLVES / NO GAP PERSISTS" and "① DONE mod citations"
 > claims in this item; full detail `[[project_confinement_bundle_vacuity_2026-07-10]]` + `[[project_rru_cost_probe_2026-07-10]]`).**
 > Three source-checked corrections, all machine-verified:

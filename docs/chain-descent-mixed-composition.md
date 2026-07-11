@@ -150,9 +150,14 @@ Rigid solver (IR §11.12) ─┴────────────────
   soundness, `chain-descent-ir-blindspot-solver.md` §11.12).
 - **Gated:** Stage 2 on Stages 0+1; Stage 3 on the rigid solver; Stage 4 on the cost bridge + the certified
   flag.
-- **FIRST STEP (recommended):** Stage 0 — the `canonMin` spec + its iso-invariance/completeness. It is
-  foundational, self-contained, and it *simplifies* ①b/①c (see §5), de-risking the correctness trio before the
-  heavy composition. It also gives the true target for `Publication.canonForm?` (today an `opaque` stub).
+- **Stage 0a DONE (2026-07-11), NEXT STEP = Stage 0b.** 0a (the correctness framework: `IsCanonicalForm`,
+  `complete_of_isCanonicalForm`, `lexMin`/`isCanonicalForm_lexMin`) is landed in `ChainDescent/CanonicalForm.lean`
+  (namespace `ChainDescent.CanonSpec`), in `build.sh`, axiom-clean — it *simplifies* ①b/①c (see §5) and gives the
+  true spec surface for `Publication.canonForm?` (an `opaque` stub today). **0b** = build the branching
+  consume/branch descent so its reached-leaf matrix set instantiates the `cand G` of `isCanonicalForm_lexMin`,
+  then discharge its two hypotheses: (i) each reached leaf is a relabelling [easy, via `labelledAdj (rankPerm χ)`,
+  cf. `SpineChain.canonAdj`], and (ii) `cand (relabelAdj σ G) = cand G` [the X3-hard iso-invariance — holds
+  because a leaf's matrix is a function of the σ-invariant abstract refinement colouring, not the input labelling].
 
 ## 5. Strategic note — the min-over-leaves spec makes ①b/①c nearly free
 

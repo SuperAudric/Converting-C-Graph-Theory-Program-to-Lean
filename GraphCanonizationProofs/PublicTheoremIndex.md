@@ -2547,21 +2547,21 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `ConfinementX3Complete.descentCanon` | 52-58 | — | Definition, `noncomputable` |
-| `ConfinementX3Complete.descentCanon_sound` | 60-64 | — | — |
-| `ConfinementX3Complete.descentCanon_iso_of_eq` | 66-70 | — | — |
-| `ConfinementX3Complete.DescentConfinement` | 72-81 | — | Definition |
-| `ConfinementX3Complete.descentCanon_eq_of_iso` | 83-98 | — | — |
-| `ConfinementX3Complete.descentCanon_complete` | 100-106 | — | — |
-| `ConfinementX3Complete.selectedCellIsOrbit_done_of_capstone` | 121-143 | — | — |
-| `ConfinementX3Complete.descentConfinement_of_citations` | 157-182 | — | — |
-| `ConfinementX3Complete.descentCanon_complete_of_citations` | 184-208 | — | — |
-| `ConfinementX3Complete.ConfinementCitations` | 219-245 | — | Structure |
-| `ConfinementX3Complete.descentConfinement_of_bundle` | 247-250 | — | — |
-| `ConfinementX3Complete.descentCanonForm?` | 252-255 | — | Definition, `noncomputable` |
-| `ConfinementX3Complete.canon_sound` | 257-264 | — | — |
-| `ConfinementX3Complete.canon_complete` | 266-275 | — | — |
-| `ConfinementX3Complete.descentCanon_showcase` | 277-286 | — | — |
+| `ConfinementX3Complete.descentCanon` | 62-68 | — | Definition, `noncomputable` |
+| `ConfinementX3Complete.descentCanon_sound` | 70-74 | — | — |
+| `ConfinementX3Complete.descentCanon_iso_of_eq` | 76-80 | — | — |
+| `ConfinementX3Complete.DescentConfinement` | 82-91 | — | Definition |
+| `ConfinementX3Complete.descentCanon_eq_of_iso` | 93-108 | — | — |
+| `ConfinementX3Complete.descentCanon_complete` | 110-116 | — | — |
+| `ConfinementX3Complete.selectedCellIsOrbit_done_of_capstone` | 131-153 | — | — |
+| `ConfinementX3Complete.descentConfinement_of_citations` | 167-192 | — | — |
+| `ConfinementX3Complete.descentCanon_complete_of_citations` | 194-218 | — | — |
+| `ConfinementX3Complete.ConfinementCitations` | 229-255 | — | Structure |
+| `ConfinementX3Complete.descentConfinement_of_bundle` | 257-260 | — | — |
+| `ConfinementX3Complete.descentCanonForm?` | 262-265 | — | Definition, `noncomputable` |
+| `ConfinementX3Complete.canon_sound` | 267-274 | — | — |
+| `ConfinementX3Complete.canon_complete` | 276-285 | — | — |
+| `ConfinementX3Complete.descentCanon_showcase` | 287-296 | — | — |
 
 ## ChainDescent/ScratchConfinementX3Recon.lean
 
@@ -2728,3 +2728,28 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 | `Showcase.residue_if_flag` | 217-226 | — | — |
 | `Showcase.unhandledResidue_nonvacuous` | 228-234 | — | — |
 | `Showcase.canonizer` | 241-251 | — | — |
+## ChainDescent/CanonicalForm.lean
+
+**Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
+The spec is **sound ∧ iso-invariant**, deliberately NOT the global lex-min (the deferral schedule yields a
+*different* iso-invariant canonical form). `complete_of_isCanonicalForm` makes ①b/①c free; the only real
+obligation is iso-invariance of the construction. `lexMin` + `isCanonicalForm_lexMin` reduce a canonizer's
+correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G) = cand G` (candidate-SET equality).
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `CanonSpec.Labelled` | 35-36 | A candidate canonical output — a labelled adjacency matrix. | `abbrev` |
+| `CanonSpec.GraphIso` | 40-42 | Graph isomorphism: some relabelling of `G` is `H` (matches `Publication.Iso`). | Definition |
+| `CanonSpec.GraphIso.refl` | 44-45 | Reflexivity of `GraphIso` (via the identity permutation). | — |
+| `CanonSpec.iso_of_labelledAdj_eq` | 47-55 | A common labelled image ⟹ isomorphic (`labelledAdj πG G = labelledAdj πH H → GraphIso G H`). | — |
+| `CanonSpec.relabelAdj_eq_of_labelledAdj` | 57-64 | `labelledAdj π G = H.adj → relabelAdj π G = H` (structure-level restatement of `GraphIso`). | — |
+| `CanonSpec.Sound` | 68-70 | The canonizer's output on `G` is a genuine relabelling of `G`. | Definition |
+| `CanonSpec.IsoInvariant` | 72-74 | Relabelling the input leaves the output unchanged: `C (relabelAdj σ G) = C G`. | Definition |
+| `CanonSpec.IsCanonicalForm` | 76-78 | A canonical form = `Sound ∧ IsoInvariant`. | Definition |
+| `CanonSpec.complete_of_isCanonicalForm` | 80-93 | **THE payoff — completeness is FREE:** sound ∧ iso-invariant ⟹ `C G = C H ↔ GraphIso G H`. | — |
+| `CanonSpec.lexMin` | 100-102 | The lex-least labelling in a nonempty finite candidate set (via `MatrixLex`). | Definition, `noncomputable` |
+| `CanonSpec.lexMin_mem` | 104-110 | `lexMin` returns a genuine member of the candidate set. | — |
+| `CanonSpec.lexMin_congr` | 112-115 | `lexMin` depends only on the candidate SET (nonemptiness proof irrelevant). | — |
+| `CanonSpec.sound_lexMin` | 117-123 | Soundness of a lex-min canonizer, from: each candidate is a relabelling. | — |
+| `CanonSpec.isoInvariant_lexMin` | 125-133 | Iso-invariance of a lex-min canonizer, reduced to `cand (relabelAdj σ G) = cand G`. | — |
+| `CanonSpec.isCanonicalForm_lexMin` | 135-144 | Stage-0 assembly: a lex-min over a sound, set-iso-invariant candidate family is a canonical form. | — |

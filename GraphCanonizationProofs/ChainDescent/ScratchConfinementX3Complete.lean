@@ -1,6 +1,16 @@
 /-
 # ScratchConfinementX3Complete.lean — W4 pieces 2+3: ①b on the index-free descent (WIP, NOT in build.sh)
 
+**⚠️ VACUITY WARNING (2026-07-10 audit — do NOT read `descentCanon_showcase` as "① is done").** The
+`ConfinementCitations` bundle below carries a field `hflag : ∀ H done, flagsAt … = true` ("every node of every
+graph flags"), which is **UNINHABITED** — machine-checked (`ConfinementCitations 2 → False`; via the built P2
+`flag_imp_symmetric_spine` it gives "no graph on n≥6 vertices is rigid"). So `descentCanon_showcase` and the
+`_cell{,_total,_affine}` variants are **vacuously true** and do NOT establish ①. Root cause: the Lean descent has
+no deferral and never calls the oracle, so completeness was pushed through only by assuming every node flags. The
+live replacement is the MIXED-composition track (`docs/chain-descent-mixed-composition.md`,
+`ChainDescent/CanonicalForm.lean`). Detail: memory `project_confinement_bundle_vacuity_2026-07-10` +
+`chain-descent-remaining-work.md` §6 correction banner.
+
 **What this file does.** W3 produced the two exports the assembly needs — `reconcile_descent_top` (the reconciling
 automorphism) and `descentPicks_leaf_univ` (leaf discreteness) — and W4.1 (`descentLeaf_canonForm_iso_invariant`, in
 `ScratchConfinementX3Recon`) composed them through `ifCanon_iso_invariant_of_reconcile` into "iso ⟹ equal descent-leaf
