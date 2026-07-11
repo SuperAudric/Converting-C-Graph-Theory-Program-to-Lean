@@ -188,21 +188,55 @@ public sealed class Option2SolverTests
         _out.WriteLine($"{name,-6} B2 fired ({totalFired}×), |A|={asz}, canonical scramble-inv=True");
     }
 
+    // B1d large-|A|: the poly generating-set base (|A|^{r+1} anchor picks) canonicalizes rings the
+    // old |A|!² brute base could never reach — Z8 alone would be 8!² ≈ 1.6e9 base labellings; here
+    // it is 8·7 = 56 anchor picks. Fires + canonicalizes + scramble-invariant; distinct order-8 rings
+    // (Z8 vs Z2×Z4) are separated by the emit.
+    [Theory]
+    [InlineData("Z6", 6)]
+    [InlineData("Z8", 8)]
+    [InlineData("Z9", 9)]
+    [InlineData("Z2xZ4", 8)]
+    public void B1d_LargeRing_PolyBase_FiresAndCanonicalizes(string name, int asz)
+    {
+        var A = name switch { "Z6" => new Ab(6), "Z8" => new Ab(8), "Z9" => new Ab(9), "Z2xZ4" => new Ab(2, 4), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 4;
+        var (g0, t0) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        int n = g0.VertexCount;
+
+        var forms = new List<string>();
+        for (int s = -1; s < 1; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = g0; t = (int[])t0.Clone(); }
+            else (g, t) = ScrambleWithTypes(g0, t0, 18000 + s);
+            var r = RunDescent(g.VertexCount, Flat(g), SeedFromTypes(g.VertexCount, t), 100_000, rigid: true);
+            Assert.True(r.fired > 0, $"B2 did not fire on native {name}");
+            Assert.False(r.flagged);
+            Assert.NotNull(r.matrix);
+            forms.Add(MatrixString(r.matrix!));
+        }
+        Assert.True(forms.Distinct().Count() == 1);            // scramble-invariant
+        _out.WriteLine($"{name,-6} |A|={asz} n={n} fired + scramble-inv (poly base; |A|!² brute infeasible)");
+    }
+
     // ── B5: the cross-check battery — "prove it works" on the REAL descent ────────
     // Runs the PRODUCTION multipede (MultipedeGenerator, the F₂ CFI-parity fixture the
     // canonizer already knows as the IR-blind-spot) through the full descent B2-ON vs OFF.
     //
-    // ⚠ B5 FINDING (the emit's completeness boundary): B2 v1's emit fixes a 2-SEGMENT base
-    // and UNIT-PROPAGATES the sum-zero constraints. That completes only when propagation
-    // from 2 segments reaches every segment; for the circulant it does at m=5,6 but STALLS
-    // at m≥8 (the trivialisation is unique but needs simultaneous linear solving — Gaussian /
-    // the already-built `SolveOverA` Smith gauge-fix — which unit-prop cannot do). So B2 FIRES
-    // where unit-prop completes and FALLS THROUGH (sound) elsewhere. Wiring `SolveOverA` into
-    // the emit closes this (B1d) — it is needed for COMPLETENESS, not only large |A|.
+    // The B1d `SolveOverA` emit (one-segment base + linear solve) canonicalizes the whole
+    // circulant multipede family INCLUDING the m≥8 cases where the old brute-2-segment +
+    // unit-propagation emit stalled (the trivialisation needs simultaneous linear solving over
+    // the cyclic constraint graph, which `SolveOverA` does and unit-prop cannot). So B2 now
+    // FIRES + canonicalizes across the family, with a speedup over the exhaustive path.
     [Theory]
     [InlineData(5)]
     [InlineData(6)]
-    public void B5_ProductionMultipede_FiresWhereUnitPropCompletes_Speedup(int m)
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(10)]
+    public void B5_ProductionMultipede_FiresAndCanonicalizes_Speedup(int m)
     {
         var mp = MultipedeGenerator.BuildCirculant(m);
         int n = mp.Graph.VertexCount;

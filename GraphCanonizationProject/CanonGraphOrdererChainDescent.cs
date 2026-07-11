@@ -79,6 +79,11 @@ namespace Canonizer
         // uses ChainDescent.DefaultBudget(n).
         public long? BudgetOverride { get; set; }
 
+        // Passthrough for the Phase-2 rigid ring solver (IR §11.12 B2); default ON. Off restores the
+        // pre-B2 exhaustive/flag behaviour (e.g. to exercise the IrBlindSpot flag path a rigid multipede
+        // now canonizes instead of flagging).
+        public bool EnableRigidSolver { get; set; } = true;
+
         // Route C — option-ii wire (docs/chain-descent-route-c-plan.md §9.2.2 C3): when enabled, a
         // connected component that the (single) descent harvest recognizes as a forms-graph family is
         // canonicalized by RECOVERING its defining form and emitting the STANDARD graph of its
@@ -124,7 +129,7 @@ namespace Canonizer
             var partition = new WarmPartition(n);
 
             long budget = BudgetOverride ?? ChainDescent.DefaultBudget(n);
-            var descent = new ChainDescent(n, adj, new CascadeOracle(), budget);
+            var descent = new ChainDescent(n, adj, new CascadeOracle(), budget) { EnableRigidSolver = EnableRigidSolver };
             CanonResult result = descent.Canonize(p, partition);
 
             LastNodeCount = result.Stats.NodeCount;

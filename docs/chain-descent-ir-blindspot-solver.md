@@ -39,7 +39,9 @@
 > branch, never correctness. The **fusion-severity bound** ("no harder fusion case can arise"; instrument
 > `FusionHarvestProbe`, A_stall vs A_full) is the **efficiency guarantee** for that schedule. **STATUS 2026-07-11: the
 > ring solver is BUILT + WIRED + validated in production** (`Option2Solver.cs`, recover→solve→emit→verify, B1a/b/c +
-> **B2 + B5 LANDED**) — **NEXT = B1d (wire the `SolveOverA` gauge-fix into the emit — needed for COMPLETENESS, see below).**
+> **B2 + B5 + the B1d `SolveOverA` emit LANDED** — the emit now closes the m≥8 completeness stall AND the large-`|A|`
+> exponential (affine-frame base + linear solve; poly for bounded rank; 28 Option2Solver tests, native Z6/Z8/Z9/Z2×Z4).
+> **NEXT = the remaining B1d items (general-arity pin-`d−3`, try-both-sides side-selection) + the solve-speed follow-on.**
 > See the PICK-UP-HERE handoff below + §11.12.
 >
 > **▶ B2 WIRING — THE ISO-INVARIANCE FINDING (2026-07-11, empirically forced).** B2 must fire at the **ROOT (depth 0)**,
@@ -1064,6 +1066,23 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
     `A` directly (base-independent, complete), pick the iso-invariant coset rep (`CosetMin`) for the gauge, apply. This
     also closes the bounded-`|A|` poly gap above (collapses the `|A|!²` enumeration). Plus the general
     **minimal-forcing-circuit** extraction over `A` (Option2 `ExtractRows` generalized) for non-pristine residues (§11.13a).
+    - **▶ LANDED (2026-07-11): the `SolveOverA` emit — generating-set base + LINEAR solve. Both the m≥8 completeness
+      stall AND the large-`|A|` exponential are RESOLVED** (`Option2Solver.SearchCanonicalViaSolve`, wired via
+      `TryCanonicalOrder`; 28 Option2Solver tests green). Mechanism: **pin an AFFINE FRAME on the lowest-cell-id segment
+      — `r+1` of its states → `{0, e_0..e_{r-1}}` (the generators of `A ≅ ⊕Z/Inv[i]`, `r = Inv.Length`) — then LINEAR-solve
+      every other state value over `A` via `SolveOverA`** (middles×states incidence, pinned states to the RHS). One
+      affine-anchored bijective segment forces every connected segment to a bijection (the gadget Latin structure), and the
+      linear solve CLOSES the cyclic constraint graph that unit-propagation stalled on (production circulant m≥8; verified
+      m=5,6,8,9,10). **The base enumeration is over ordered `(r+1)`-subsets of the base segment's states — `|A|^{r+1}`,
+      POLY for bounded rank `r` (was `|A|!²` brute), and it sweeps every affine frame (which states are `0/e_i`) so the min
+      stays iso-invariant.** Validated on native Z6/Z8/Z9/Z2×Z4 multipedes — **infeasible under the old `|A|!²`** (Z8:
+      8!²≈1.6e9). A cheap `VerifyGadgets` (every middle sums to 0) guards the emit. **Overflow fix:** `SmithWithTransforms`
+      uses `BigInteger` (the all-middles system's transform entries explode past `long`; entries are reduced mod `|A|` when
+      applied to `A`). **PERF FOLLOW-ON (not an exponential — the algorithm is poly):** the exact `BigInteger` Smith runs on
+      the full (redundant `|A|²`-middles-per-line) system, so it is poly-time but slow-constant on large instances; a
+      torsion-safe row reduction (independent over `Z/|A|`, NOT over ℚ — the ℚ reduction dropped torsion constraints and
+      broke iso-invariance) or a component-wise Gaussian mod each prime power would make it fast. Left as the noted speed
+      optimisation.
 - **B2 Wire — LANDED (2026-07-11, `ChainDescent.cs`).** Solver exposes `TryCanonicalOrder` (the canonical vertex order;
   `_bestMatrix = BuildPermutedMatrix(inverse(order))`, agreeing byte-for-byte with the descent's leaf convention),
   wired in `ChainDescent.Search` behind `EnableRigidSolver` (**default ON**). On a full-permutation order → set

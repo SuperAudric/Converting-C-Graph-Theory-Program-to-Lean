@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Canonizer
 {
@@ -121,7 +122,7 @@ namespace Canonizer
         /// </summary>
         public static int[]? TryCanonicalOrder(int[] adj, int n, int[] cellOf, int numCells)
         {
-            var best = SearchCanonical(adj, n, cellOf, numCells);
+            var best = SearchCanonicalViaSolve(adj, n, cellOf, numCells);
             if (best == null || best.Order.Length != n) return null;   // not a clean full-graph residue ⟹ flag
             return best.Order;
         }
@@ -170,6 +171,109 @@ namespace Canonizer
                         best = new CanonCandidate { Order = order, Form = form };
                 }
             return best;
+        }
+
+        // B1d: the SolveOverA emit — pin an AFFINE-FRAME base on the lowest-cell-id segment (r+1 of its
+        // states → {0, e_0..e_{r-1}}, the generators of A ≅ ⊕Z/Inv[i]), then LINEAR-solve every other
+        // state value over A via `SolveOverA`. Anchoring an affine frame + one bijective segment forces
+        // every connected segment to a bijection (the gadget Latin structure), and the linear solve CLOSES
+        // cyclic constraint graphs that unit-propagation stalls on (the production circulant at m≥8).
+        // The base enumeration is over ordered (r+1)-subsets of the base segment's states — `|A|^{r+1}`,
+        // POLY for bounded rank r (was `|A|!²` brute), and it sweeps every affine frame (which states are
+        // 0/e_0/…) so the min stays iso-invariant.
+        private static CanonCandidate? SearchCanonicalViaSolve(int[] adj, int n, int[] cellOf, int numCells)
+        {
+            var res = Recover(adj, n, cellOf, numCells);
+            if (res == null) return null;
+            var A = RecoverRing(res.ASize, res.OrderProfile);
+            if (A == null) return null;
+            var segCells = res.Segments;
+            int nW = segCells.Count;
+            if (nW < 1) return null;
+            int Asz = res.ASize;
+
+            var segOf = new int[n]; Array.Fill(segOf, -1);
+            for (int si = 0; si < nW; si++) foreach (int v in segCells[si]) segOf[v] = si;
+
+            var gVerts = new List<int>(); var gNbr = new List<List<(int seg, int v)>>();
+            for (int v = 0; v < n; v++)
+            {
+                if (segOf[v] != -1) continue;
+                var nb = new List<(int, int)>();
+                for (int w = 0; w < n; w++) if (adj[v * n + w] == 1 && segOf[w] != -1) nb.Add((segOf[w], w));
+                if (nb.Count >= 2) { gVerts.Add(v); gNbr.Add(nb); }
+            }
+            if (gVerts.Count == 0) return null;
+
+            // Anchor values: {0} ∪ generators e_0..e_{r-1}. Pin one distinct base-segment state to each.
+            var anchors = new List<int> { 0 }; anchors.AddRange(A.Generators());
+            var seg0 = segCells[0];
+            if (seg0.Length < anchors.Count) return null;      // segment too small to anchor the frame
+
+            int rows = gVerts.Count;
+            CanonCandidate? best = null;
+            foreach (var pick in OrderedSubsets(seg0.Length, anchors.Count))
+            {
+                // pinned states = seg0[pick[t]] → anchors[t]; unknowns = all other states.
+                var pinVal = new int[n]; var isPinned = new bool[n];
+                for (int t = 0; t < anchors.Count; t++) { int v = seg0[pick[t]]; pinVal[v] = anchors[t]; isPinned[v] = true; }
+
+                var colOf = new int[n]; Array.Fill(colOf, -1);
+                int cols = 0;
+                for (int si = 0; si < nW; si++) foreach (int v in segCells[si]) if (!isPinned[v]) colOf[v] = cols++;
+                var M = new long[rows, cols];
+                var rhs = new int[rows];
+                for (int gi = 0; gi < rows; gi++)
+                {
+                    int s = 0;
+                    foreach (var (seg, v) in gNbr[gi])
+                        if (isPinned[v]) s = A.Add(s, pinVal[v]); else M[gi, colOf[v]] += 1;
+                    rhs[gi] = A.Neg(s);
+                }
+                var sol = SolveOverA(M, rhs, A);
+                if (sol == null) continue;                       // anchor frame inconsistent ⟹ skip
+
+                var phi = new int[n]; Array.Fill(phi, -1);
+                for (int v = 0; v < n; v++) phi[v] = isPinned[v] ? pinVal[v] : (colOf[v] != -1 ? sol[colOf[v]] : -1);
+                if (!VerifyGadgets(phi, gVerts, gNbr, A)) continue;   // every gadget sums to 0 (belt-and-braces)
+                if (!LabellingComplete(phi, segCells, Asz)) continue;
+                var order = EmitOrder(segCells, gVerts, gNbr, phi);
+                var form = EmitForm(n, adj, order);
+                if (best == null || string.CompareOrdinal(form, best.Form) < 0)
+                    best = new CanonCandidate { Order = order, Form = form };
+            }
+            return best;
+        }
+
+        // Every gadget middle's incident state values sum to 0 in A — the untwisted trivialisation check.
+        private static bool VerifyGadgets(int[] phi, List<int> gVerts, List<List<(int seg, int v)>> gNbr, Ring A)
+        {
+            for (int gi = 0; gi < gVerts.Count; gi++)
+            {
+                int s = 0;
+                foreach (var (seg, v) in gNbr[gi]) { if (phi[v] == -1) return false; s = A.Add(s, phi[v]); }
+                if (s != 0) return false;
+            }
+            return true;
+        }
+
+
+        // All ordered k-subsets (injective k-tuples) of {0..m-1}; count m·(m−1)···(m−k+1).
+        private static IEnumerable<int[]> OrderedSubsets(int m, int k)
+        {
+            var cur = new int[k]; var used = new bool[m];
+            IEnumerable<int[]> Rec(int d)
+            {
+                if (d == k) { yield return (int[])cur.Clone(); yield break; }
+                for (int v = 0; v < m; v++)
+                {
+                    if (used[v]) continue;
+                    used[v] = true; cur[d] = v;
+                    foreach (var r in Rec(d + 1)) yield return r;
+                    used[v] = false;
+                }
+            }
+            return Rec(0);
         }
 
         private static bool PropagateSumZero(int[] phi, List<int> gVerts, List<List<(int seg, int v)>> gNbr, Ring A)
@@ -345,6 +449,9 @@ namespace Canonizer
             public Ring(int[] inv) { Inv = inv; N = inv.Aggregate(1, (a, b) => a * b); }
             public int[] Tuple(int idx) { var t = new int[Inv.Length]; for (int i = Inv.Length - 1; i >= 0; i--) { t[i] = idx % Inv[i]; idx /= Inv[i]; } return t; }
             private int Ix(int[] t) { int x = 0; for (int i = 0; i < Inv.Length; i++) { int c = ((t[i] % Inv[i]) + Inv[i]) % Inv[i]; x = x * Inv[i] + c; } return x; }
+            // The r generators e_0..e_{r-1} (e_i = 1 in invariant-factor slot i, 0 elsewhere); together with 0 they
+            // anchor an affine frame for the emit's base segment. Rank r = Inv.Length.
+            public int[] Generators() { var g = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) { var t = new int[Inv.Length]; t[i] = 1; g[i] = Ix(t); } return g; }
             public int Add(int a, int b) { var ta = Tuple(a); var tb = Tuple(b); var tc = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) tc[i] = ta[i] + tb[i]; return Ix(tc); }
             public int Neg(int a) { var ta = Tuple(a); var tc = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) tc[i] = -ta[i]; return Ix(tc); }
             public int ScalarMul(int a, long k) { var ta = Tuple(a); var tc = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) tc[i] = (int)(((k % Inv[i]) * ta[i]) % Inv[i]); return Ix(tc); }
@@ -386,10 +493,13 @@ namespace Canonizer
         }
 
         // U·M·V = D (diagonal invariant factors d[0]|d[1]|…), U ∈ GL_m(Z), V ∈ GL_nW(Z).
-        internal static (long[,] U, long[,] V, long[] d, int rank) SmithWithTransforms(long[,] M0)
+        // BigInteger arithmetic: integer Smith's transform entries can explode past `long` on the large
+        // (all-middles) constraint systems the ring emit builds; they are reduced mod |A| only when applied.
+        internal static (BigInteger[,] U, BigInteger[,] V, BigInteger[] d, int rank) SmithWithTransforms(long[,] M0)
         {
             int m = M0.GetLength(0), nn = M0.GetLength(1);
-            var M = (long[,])M0.Clone();
+            var M = new BigInteger[m, nn];
+            for (int i = 0; i < m; i++) for (int j = 0; j < nn; j++) M[i, j] = M0[i, j];
             var U = Identity(m); var V = Identity(nn);
             int t = 0;
             while (t < Math.Min(m, nn))
@@ -407,7 +517,7 @@ namespace Canonizer
                     for (int i = t + 1; i < m; i++)
                         if (M[i, t] != 0)
                         {
-                            long q = M[i, t] / M[t, t];
+                            BigInteger q = M[i, t] / M[t, t];
                             for (int k = 0; k < nn; k++) M[i, k] -= q * M[t, k];
                             for (int k = 0; k < m; k++) U[i, k] -= q * U[t, k];
                             if (M[i, t] != 0) { SwapRows(M, t, i, nn); SwapRows(U, t, i, m); clean = false; }
@@ -415,7 +525,7 @@ namespace Canonizer
                     for (int j = t + 1; j < nn; j++)
                         if (M[t, j] != 0)
                         {
-                            long q = M[t, j] / M[t, t];
+                            BigInteger q = M[t, j] / M[t, t];
                             for (int k = 0; k < m; k++) M[k, j] -= q * M[k, t];
                             for (int k = 0; k < nn; k++) V[k, j] -= q * V[k, t];
                             if (M[t, j] != 0) { SwapCols(M, t, j, m); SwapCols(V, t, j, nn); clean = false; }
@@ -433,8 +543,8 @@ namespace Canonizer
                 if (!div) continue;
                 t++;
             }
-            var d = new long[t];
-            for (int i = 0; i < t; i++) d[i] = Math.Abs(M[i, i]);
+            var d = new BigInteger[t];
+            for (int i = 0; i < t; i++) d[i] = BigInteger.Abs(M[i, i]);
             // fold sign of |d[i]| back into U so U·M·V = D exactly with nonneg diagonal.
             for (int i = 0; i < t; i++) if (M[i, i] < 0) for (int k = 0; k < m; k++) U[i, k] = -U[i, k];
             return (U, V, d, t);
@@ -447,7 +557,7 @@ namespace Canonizer
             var (_, _, d, rank) = SmithWithTransforms(M);
             long size = 1;
             for (int i = 0; i < nW - rank; i++) size *= A.N;
-            foreach (var di in d) size *= A.Annih(di);
+            foreach (var di in d) size *= A.Annih((long)di);
             return size;
         }
 
@@ -460,7 +570,7 @@ namespace Canonizer
             var y = new int[nW];
             for (int i = 0; i < rank; i++)
             {
-                var yi = A.SolveScalar(d[i], tprime[i]);
+                var yi = A.SolveScalar((long)d[i], tprime[i]);
                 if (yi == null) return null;
                 y[i] = yi.Value;
             }
@@ -468,18 +578,29 @@ namespace Canonizer
             return MatVecZ(V, y, A);                      // x = V·y ∈ A^nW
         }
 
-        // integer-matrix × A-vector (Σ scalar-muls); Z is columns of Mz.
-        private static int[] MatVecZ(long[,] Mz, int[] x, Ring A)
+        // integer-matrix × A-vector (Σ scalar-muls); entries reduced mod |A| (safe: scalar-mult in A
+        // depends only on the coefficient mod each invariant factor, and Inv[i] | N).
+        private static int[] MatVecZ(BigInteger[,] Mz, int[] x, Ring A)
         {
             int r = Mz.GetLength(0), c = Mz.GetLength(1);
             var res = new int[r];
-            for (int i = 0; i < r; i++) { int s = 0; for (int j = 0; j < c; j++) if (Mz[i, j] != 0) s = A.Add(s, A.ScalarMul(x[j], Mz[i, j])); res[i] = s; }
+            for (int i = 0; i < r; i++)
+            {
+                int s = 0;
+                for (int j = 0; j < c; j++)
+                {
+                    if (Mz[i, j].IsZero) continue;
+                    long k = (long)(((Mz[i, j] % A.N) + A.N) % A.N);
+                    if (k != 0) s = A.Add(s, A.ScalarMul(x[j], k));
+                }
+                res[i] = s;
+            }
             return res;
         }
 
-        private static long[,] Identity(int k) { var a = new long[k, k]; for (int i = 0; i < k; i++) a[i, i] = 1; return a; }
-        private static void SwapRows(long[,] M, int a, int b, int cols) { for (int k = 0; k < cols; k++) (M[a, k], M[b, k]) = (M[b, k], M[a, k]); }
-        private static void SwapCols(long[,] M, int a, int b, int rows) { for (int k = 0; k < rows; k++) (M[k, a], M[k, b]) = (M[k, b], M[k, a]); }
+        private static BigInteger[,] Identity(int k) { var a = new BigInteger[k, k]; for (int i = 0; i < k; i++) a[i, i] = 1; return a; }
+        private static void SwapRows(BigInteger[,] M, int a, int b, int cols) { for (int k = 0; k < cols; k++) (M[a, k], M[b, k]) = (M[b, k], M[a, k]); }
+        private static void SwapCols(BigInteger[,] M, int a, int b, int rows) { for (int k = 0; k < rows; k++) (M[k, a], M[k, b]) = (M[k, b], M[k, a]); }
         private static int ModInv(int a, int m) { if (m == 1) return 0; int g = m, x = 0, x1 = 1, aa = a; while (aa > 1) { int q = aa / g; (aa, g) = (g, aa - q * g); (x1, x) = (x, x1 - q * x); } return (x1 % m + m) % m; }
 
         // abelian groups of order N, as invariant-factor sequences (d_0 | d_1 | …).

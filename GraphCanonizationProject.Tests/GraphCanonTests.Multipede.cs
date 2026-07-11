@@ -85,7 +85,10 @@ public partial class GraphCanonTests
         MultipedeGenerator.AssertRigid(mp);
         const long budget = 5;   // below the ~15 nodes these instances naturally use
 
-        var r0 = RunMultipede(mp.Graph, mp.VertexTypes, budget);
+        // The IrBlindSpot flag path (rigidSolver: false = the pre-B2 exhaustive/flag behaviour). With the
+        // Phase-2 rigid solver ON (below) these very instances now CANONIZE — the flag-set shrink — so the
+        // classifier is exercised here with the solver off.
+        var r0 = RunMultipede(mp.Graph, mp.VertexTypes, budget, rigidSolver: false);
         Assert.Equal("flagged", r0.Verdict);
         Assert.Equal(FlagKind.IrBlindSpot, r0.Kind);
         Assert.Equal(BigInteger.One, r0.Residual);     // rigid ⟹ nothing harvested
@@ -95,19 +98,24 @@ public partial class GraphCanonTests
         for (int s = 0; s < 4; s++)
         {
             var (g2, t2) = ScrambleWithTypes(mp.Graph, mp.VertexTypes, seed: 7001 + s);
-            var r = RunMultipede(g2, t2, budget);
+            var r = RunMultipede(g2, t2, budget, rigidSolver: false);
             Assert.Equal("flagged", r.Verdict);
             Assert.Equal(FlagKind.IrBlindSpot, r.Kind);
             Assert.Equal(BigInteger.One, r.Residual);
         }
+
+        // ★ Flag-set shrink: with the Phase-2 rigid solver ON (B2 default), the SAME rigid multipede is
+        // CANONIZED at the root (poly, budget-independent) instead of flagging as the IR blind spot.
+        var solved = RunMultipede(mp.Graph, mp.VertexTypes, budget, rigidSolver: true);
+        Assert.Equal("canonical", solved.Verdict);
     }
 
     private readonly record struct MultipedeRun(
         string Verdict, FlagKind Kind, long Nodes, int Depth, int Leaves, BigInteger Residual);
 
-    private static MultipedeRun RunMultipede(AdjMatrix g, int[] types, long budget)
+    private static MultipedeRun RunMultipede(AdjMatrix g, int[] types, long budget, bool rigidSolver = true)
     {
-        var cd = new CanonGraphOrdererChainDescent { BudgetOverride = budget };
+        var cd = new CanonGraphOrdererChainDescent { BudgetOverride = budget, EnableRigidSolver = rigidSolver };
         string verdict;
         try
         {
