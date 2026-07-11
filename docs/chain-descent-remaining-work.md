@@ -772,9 +772,13 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   acceptable: the multipede is **F₂-linear**, and the descent (WL) = F₂ **unit-propagation**, which stalls where
   **Gaussian elimination** does not. **Layers A–C DONE** (probe-/prototype-clean): the rigid gap is real & constructible
   (var-regular meager expander: `dim ker = 0` but descent forcing `Θ(n)`); WL = unit-prop verified on real multipedes;
-  the F₂ system `H` is **soundly extractable from the descent alone** (no gadget recognition). **Layer D PLANNED**
-  (IR doc §11.10, **C# first**) = the row-space generalization of the *deferred/unbuilt* C# `LinearOracle`
-  (`TwistConstruction.cs` is the `ker`-half), a Phase-2 F₂-Gaussian pre-processor. **Scope/flag floor** (honest): option
+  the F₂ system `H` is **soundly extractable from the descent alone** (no gadget recognition). **Layer D
+  milestones D-M0–D-M4 DONE as probes** (2026-06-20, `Option2ExtractionProbe.cs`: extract → twist-solve →
+  canonical adjacency, scramble-invariant + complete on rigid multipedes; Z₂ composition via cascade) — but
+  **entirely inside the Tests project; production has NO rigid solver and no Smith normal form**, `ChainDescent`
+  still brute-force-branches or flags at `target == -1`. **Productionization = the roadmap §11.12 (B1–B6 C# / P1–P4
+  Lean), the next planned step**, C# first, wiring at `ChainDescent.Search target == -1`. The row-space read
+  generalizes the *deferred/unbuilt* `LinearOracle` (`TwistConstruction.cs` is the `ker`-half). **Scope/flag floor** (honest): option
   2 absorbs the canonical **F₂-multipede**; the **ring-varying** residue (Lichter, FPC+rank ≠ P) + unbounded-arity +
   non-WL-easy-base stay the flag floor. Memory: [[project_option2_f2_gap_2026-06-20]].
 

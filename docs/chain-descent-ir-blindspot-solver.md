@@ -109,10 +109,13 @@ rigid (trivial residual `Aut`), yet 1-WL refinement does **not** discretize it a
 (multipedes are the canonical example). Cameron sections are **not** the target here — they carry symmetry
 and are consumed or flagged in Phase 1; what reaches this solver is genuinely rigid.
 
-**Gating.** The engine's polynomiality is delivered by **A2** (bounded WL-dimension of the residue:
-`c(X_{T₀}), k(X_{T₀}) = O(1)` at an `O(1)` base). **Until A2 lands the solver has no polynomial guarantee** —
-it degrades to the current exhaustive Phase-2 branching (sound, budget-bounded, may flag). This doc is the
-plan to *shrink the flag set to exactly A2's open core* the moment A2 is available.
+**Gating — ONLY of the superseded §1–§10 plan (read this).** The §1–§10 plan below delivers polynomiality via
+**A2** (bounded WL-dimension: `c(X_{T₀}), k(X_{T₀}) = O(1)` at an `O(1)` base), so *for that plan* "until A2
+lands there is no poly guarantee." **The LIVE route is §11 (option 2) and it is NOT A2-gated:** it canonizes the
+rigid residue by **exact F₂/ring linear algebra** (Gaussian / Smith), polynomial by **bounded gadget arity**, not
+by A2's bounded-WL-dim. A2 is stalled at the node-4 wall; option 2 does not wait on it. A fresh reader should
+treat §1–§10 as the *original potential-drop plan* (valid for the bounded-WL-dim residue) and **§11 as the current
+attack**; the A2 unification (§2) is a *reformulation* insight, not a blocker on the live build.
 
 **State.** *Solver not built.* The prerequisites are landed: the deferral architecture (C#, `EnableDeferral`,
 default on; `real_stays_real` proved), the direction-blind canonizer substrate (`warm_6_2`,
