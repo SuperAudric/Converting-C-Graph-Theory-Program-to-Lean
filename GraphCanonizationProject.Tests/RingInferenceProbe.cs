@@ -186,8 +186,9 @@ public sealed class RingInferenceProbe
         Log($"Z8 | Z2xZ4     split at budget {sep_8} (early: 2-torsion, << exp 8)");
         Log($"Z2xZ8 | Z4xZ4  split at budget {sep_16} = exp(Z4xZ4) (agree on c_1..c_3, split only at c_4)");
         Log($"Z9 | Z3^2      split at budget {sep_9} = exp(Z3^2) (no 2-torsion signal; needs the 3-torsion)");
-        Log("FINDING: the WORST-CASE observation budget to canonically pin A is its EXPONENT => gadget degree ~ exp(A)+1.");
-        Log("         Bounded gadget degree => only bounded-exponent rings inferable (= §11.6 ring-varying / unbounded-arity");
-        Log("         flag floor). For a FIXED ring (bounded exp) it is bounded degree = poly.");
+        Log("FINDING: worst-case SINGLE-GADGET budget to pin A is its EXPONENT => native gadget degree ~ exp(A)+1.");
+        Log("         BUT a bounded-degree TOWER reaches the same budget in depth ~log2(exp) (observe 2a, feed forward).");
+        Log("         Native exp<=|A|<=n (a value of order e needs e vertices); tower depth<=n. So ring inference is POLY");
+        Log("         for ANY linear ring — exp(A) sets arity-vs-depth, not a flag. Genuine floor = NON-LINEAR (open).");
     }
 }

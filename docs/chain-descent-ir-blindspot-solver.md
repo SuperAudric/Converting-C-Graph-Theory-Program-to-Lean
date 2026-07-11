@@ -1106,13 +1106,27 @@ annihilator counts `c_m = |{a : m·a = 0}|` for `m ≤ B`. The probe measures th
 - ⟹ **the worst-case observation budget to canonically pin `A` is its exponent `exp(A)`, i.e. gadget degree
   `≈ exp(A)+1`.**
 
-**Design consequence (sharpens §11.6's flag floor).** Ring inference is bounded-degree — hence *poly* — **iff `exp(A)`
-is bounded**. Unbounded-exponent rings need unbounded gadget degree = exactly the §11.6 *ring-varying / unbounded-arity*
-flag floor (the Lichter FPC+rank≠P frontier), now with a **quantitative handle**: the D1 extraction arity B1 must
-reach is `exp(A)+1`, and the honest flag fires when the residue's exponent exceeds the arity budget. For a **fixed**
-ring (bounded `exp`) it is bounded degree ⟹ poly, matching the option-2 poly guarantee. **Next (deeper, graph-level):**
-confirm the degree⟺budget bridge on a *native `A`-multipede* (build the generator; verify D1 recovers `c_m` up to the
-gadget degree present, recognition-free) — the ring twin of D-M1, and the concrete B1 D1 spec.
+**Design consequence — `exp(A)` is a COST, not a flag floor (corrected 2026-07-11, after the "can `exp(A)` exceed
+`n`?" analysis).** Budget `exp(A)` can be reached two ways, and the graph provides whichever its construction uses:
+(a) a **single degree-`exp(A)` gadget** (the *native* encoding); (b) a **composition path of depth `≈ log₂ exp(A)`
+through bounded-degree gadgets** (the F₂/ring **tower** — observe `2a`, feed it forward to read `4a`, …). **Both are
+polynomial:**
+- A **native** ring has **`exp(A) ≤ |A| ≤ n`** — a value of order `e` occupies `e` distinct fiber states = `e`
+  vertices, so *the exponent cannot exceed the vertex count* (the user's intuition, confirmed). Degree `≤ n`, poly.
+  Unbounded *across the family* (Lichter `Z/2^k`, `exp = 2^k`) but every instance has `exp ≤ n`, and large `exp`
+  forces a *small base / fiber-heavy* graph (`exp ≤ |A| ≤ n / #base-edges`).
+- A **tower** ("compressed" `Z/2^k` as a `k`-bit register, `~2k` vertices) can have `|A| = 2^k > n`, but then the
+  graph's *gauge* is elementary-abelian `(Z/2)^k` (exponent 2) — the large exponent lives only in the **solver's
+  arithmetic** (Smith over `Z`), and the iterative engine peels it in `depth ≤ n` rounds (§11.11 — "`Z_{2^k}` is
+  *inside* the engine, not the floor").
+
+So **ring inference is poly for *any* linear-over-a-ring residue**; `exp(A)` only decides whether the cost appears as
+*arity* (native) or *depth* (tower). The `Z/2^k` / ring-*varying* case is a floor only against a **fixed-ring** solver
+(Lichter's FPC+rank, which *cannot individualize*); the ring-**general** adaptive solver here handles it, so its
+genuine flag floor is the **non-linear** residue (§11.11 pt 3 — open, *no constructible witness*), **NOT** the ring
+exponent. (The probe's "budget = exponent" is the correct *single-gadget* cost; the tower is what keeps it poly.)
+**Next (deeper, graph-level):** confirm the degree/depth ⟺ budget bridge on a *native `A`-multipede* (build the
+generator; verify D1 recovers `c_m` recognition-free) — the ring twin of D-M1, the concrete B1 D1 spec.
 
 ### 11.14 The rigid medium negates the hidden-Johnson/Cameron construction (2026-06-21 lead)
 
