@@ -757,8 +757,10 @@ citation-reduction on the affine amorphic slice, **not** new territory and **can
 ## 4. The IR-blind-spot solver (the forward payoff)
 **Doc:** [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) (STATUS first).
 Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL cannot discretize) in polynomial time.
-- **Gating:** its polynomiality is delivered by A2 (bounded WL-dim of the residue: `c(X_T), k(X_T) = O(1)` at an
-  `O(1)` base) — the IR-solver's polynomiality and A2's last open quantity are **the same object in two languages**.
+- **Gating (⚠ applies to the §1–§10 route ONLY):** the *original* potential-drop plan's polynomiality is delivered
+  by A2 (bounded WL-dim of the residue: `c(X_T), k(X_T) = O(1)` at an `O(1)` base). **The live option-2 route (IR doc
+  §11) is NOT A2-gated** — it is exact linear algebra (F₂/ring Gaussian–Smith), poly by *bounded arity*. A2 is stalled
+  at node-4; option-2 is not waiting on it.
 - **★ POST-SKRESANOV SPLIT (2026-06-17, §9.9.18a) — this is where the genuine wall now lives.** A2 is one predicate
   (bounded WL-dim) over two residue classes. On the **schurian** residue (the seal's scope, §3a) A2 is delivered by
   the Skresanov reduction (residue is affine ⟹ affine slice, mod citations). On the **non-schurian** residue — the
@@ -777,8 +779,12 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   canonical adjacency, scramble-invariant + complete on rigid multipedes; Z₂ composition via cascade) — but
   **entirely inside the Tests project; production has NO rigid solver and no Smith normal form**, `ChainDescent`
   still brute-force-branches or flags at `target == -1`. **Productionization = the roadmap §11.12 (B1–B6 C# / P1–P4
-  Lean), the next planned step**, C# first, wiring at `ChainDescent.Search target == -1`. The row-space read
-  generalizes the *deferred/unbuilt* `LinearOracle` (`TwistConstruction.cs` is the `ker`-half). **Scope/flag floor** (honest): option
+  Lean), the next planned step**, C# first, wiring at `ChainDescent.Search target == -1` **as the stepwise
+  alternating engine** (run-instead-of-branch, consume verified kernel symmetry + refine + loop, defer only on mutual
+  stall; §11.11 + STATUS). The row-space read generalizes the *deferred/unbuilt* `LinearOracle`
+  (`TwistConstruction.cs` is the `ker`-half). **★ Immediate next (2026-07-11): design the ring FIRST** — the Z₄/ring
+  validation was ephemeral Python that evaporated, so B1's ring-awareness must be re-anchored by a fresh
+  ring-inference probe before build. **Scope/flag floor** (honest): option
   2 absorbs the canonical **F₂-multipede**; the **ring-varying** residue (Lichter, FPC+rank ≠ P) + unbounded-arity +
   non-WL-easy-base stay the flag floor. Memory: [[project_option2_f2_gap_2026-06-20]].
 

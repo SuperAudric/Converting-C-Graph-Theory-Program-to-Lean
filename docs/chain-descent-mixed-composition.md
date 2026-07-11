@@ -74,6 +74,19 @@ and they are exactly the two phases:
 `phase2 ∘ phase1`.** Phase 1's pruning preserves the min (consume-soundness); Phase 2 computes the residue's
 min; the composition equals `canonMin`. This is the object the whole track builds toward.
 
+> **Refinement (2026-07-11): the factorization is an *alternating fixpoint*, not a single two-phase split.**
+> Because almost every residue is *fused* (a real decision hides a symmetry, or vice-versa), Phase 1 and Phase 2
+> **interleave** — `… ∘ phase2 ∘ phase1 ∘ phase2 ∘ phase1 …`, resolving **one pairwise relation at a time**, the
+> rigid solve's kernel feeding *de-fused* symmetry back into Phase-1 consumption
+> (`chain-descent-ir-blindspot-solver.md` §11.11 engine + STATUS). This is **stronger** than `phase2 ∘ phase1`
+> and does **not** disturb Stage 0: `complete_of_isCanonicalForm` is construction-agnostic, so `Sound ∧
+> IsoInvariant ⟹ Complete` covers the fixpoint unchanged (it only constrains `cand G`, not how it is produced).
+> It does reshape **Stage 2** (below): the composition lemma becomes a **fold of `coversOrbits_append` over the
+> interleaving steps** — an induction on alternation depth — not one append. The operative correctness condition
+> is **local rigidity at the relation being forced** (a consume-before-force schedule); soundness + iso-invariance
+> come from per-step verification + `cl_up` confluence, so a bad schedule costs only an unnecessary-but-sound
+> branch, never correctness. A single `phase2 ∘ phase1` append is the *fusion-free special case*.
+
 ---
 
 ## 2. Why mixed is the priority (over the Cameron-visible families)
@@ -122,6 +135,10 @@ pruning to the rigid residue (a node where no cell is a consumable orbit = `IsBa
 `stabilizerAt_eq_closure_gensAt_of_coversOrbits` (`Cascade.lean:1090`) = harvest completeness;
 `Phase2Handoff.handoffBase_relabel` (`Phase2Handoff.lean:60`) = residue iso-invariance;
 `spine_branch_independent` (`Spine.lean:350`) = the partition substrate the sub-descents share.
+**Interleaving (2026-07-11):** since fused residues alternate the phases (`… ∘ phase2 ∘ phase1 …`, §1
+refinement), Stage 2 is the *iterated* form — a **fold of `coversOrbits_append` over the alternation**, inducting
+on interleaving depth; a single append is the fusion-free special case. Stage 0's completeness payoff is
+unaffected (construction-agnostic).
 
 **Stage 3 — plug in the rigid solver as the `phase2` witness (★ = the IR track, separate).** `phase2` must
 satisfy `Phase2.Sound`/`IsoInvariant` (`Phase2Handoff.lean:78,86`) — witnessed by **Algorithm R**

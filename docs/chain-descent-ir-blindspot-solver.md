@@ -19,6 +19,27 @@
 
 ## STATUS (read first)
 
+> **▶ ENGINE SETTLED + NOT A2-GATED (2026-07-11) — read before §1–§10's A2 gating.** The **live** route is
+> option-2 (§11): **exact linear algebra (F₂/ring Gaussian–Smith), poly by bounded arity — NOT gated on A2.**
+> §1–§10 is the *superseded* potential-drop plan (A2-gated, stalled at node-4); its "no A2 ⟹ no poly guarantee"
+> banner does **not** bind the live route. The engine is a **stepwise alternating fixpoint**
+> `… ∘ phase2 ∘ phase1 ∘ phase2 ∘ phase1 …`: the oracle (cascade/linear) *or* the Gaussian/Smith solve each
+> resolve **one pairwise vertex relation at a time**, alternating with a 1-WL refine to a fixpoint. At the
+> Phase-1 stall (`target == -1`) the solver runs **instead of branching**, and **its kernel is a symmetry
+> detector**: a nontrivial kernel-module (F₂, or a ring by §11.13) is a hidden *abelian/linear* symmetry the
+> cascade missed because it was fused behind a real decision — **verify it as a genuine automorphism, consume it,
+> refine, loop back to Phase 1** (de-fusion). If a relation is forced → determine it; **defer/branch only if BOTH
+> stall** (the genuine wall: ring-varying / non-linear / non-abelian-hidden). Only *abelian/linear* hidden
+> symmetry is kernel-visible; *non-abelian* fusion stays the cascade's job (§11.14). **Global rigidity is NOT
+> required** — the forcing query is local (minimal-circuit → row-space, sound regardless of global rigidity,
+> §11.4a); the operative condition is **local rigidity at the relation being forced**, supplied by a
+> **consume-before-force** schedule. Soundness + iso-invariance ride on per-step verification + `cl_up` confluence
+> (the footing the deferral machinery already stands on), so a bad schedule costs only an *unnecessary-but-sound*
+> branch, never correctness. The **fusion-severity bound** ("no harder fusion case can arise"; instrument
+> `FusionHarvestProbe`, A_stall vs A_full) is the **efficiency guarantee** for that schedule. **NEXT = design the
+> ring first** (§11.13; the F₂ path survives in `Option2ExtractionProbe.cs`, but the Z₄/ring validation was
+> ephemeral Python that evaporated — a fresh ring-inference probe anchors B1), then build B1–B3.
+
 > **▶ SEPARATION MEASURED — "SUM NOT PRODUCT" (2026-07-10, C# probe `RruSeparationProbe`; detail
 > `[[project_rru_cost_probe_2026-07-10]]`).** The premise of this whole two-phase architecture — that the rigid work
 > (Phase 2, node-count / 2^k leaves) and the symmetric work (Phase 1, per-node harvest) can be separated so **neither's
@@ -836,10 +857,37 @@ Sound (flagging is always safe), iso-invariant (deterministic), bounded. A flag 
 handled class" — Phase-1 starvation (a slipped symmetry / Cameron) or a genuinely non-handled residue — never
 "IR-blindspot we can't touch."
 
-**The engine: iterative F₂-solve ⊕ 1-WL refine, flag-on-stall.** Solve the extracted F₂ system, pin the solution
-(individualize), refine, repeat; flag only when a round adds nothing *and* the residue is non-discrete. This **extends
-scope (b)** from "WL-easy base" to "**F₂-tower base**" — a multipede whose base is itself an F₂-multipede is peeled
-layer by layer.
+**The engine: a stepwise alternating fixpoint `… ∘ phase2 ∘ phase1 …`, flag-on-mutual-stall (settled 2026-07-11).**
+The oracle (cascade/linear) *or* the Gaussian/Smith solve each resolve **one pairwise vertex relation at a time**;
+they alternate, with a 1-WL refine between, to a fixpoint. Per relation: the oracle **consumes** it if a *verified*
+automorphism moves it (symmetry); else the solve **forces** it if it lies in the current row-space (rigid); else it is
+**deferred** (a genuine free real decision → branch as today, may flag). At the Phase-1 stall (`target == -1`) the
+solver runs **instead of** the exhaustive branch, and **its kernel is a symmetry detector**: a nontrivial
+kernel-module (F₂, or a ring by §11.13) is a hidden *abelian/linear* symmetry the cascade missed because it was
+**fused** behind a real decision — verify it as an automorphism, consume it, refine, and **loop back to Phase 1**
+(de-fusion). Only *abelian/linear* hidden symmetry is kernel-visible; *non-abelian* fusion stays the cascade's job
+(§11.14).
+- **Global rigidity is NOT a precondition.** The forcing query is *local* (minimal-circuit → row-space is sound
+  regardless of global rigidity, §11.4a), so the solver never needs the residue globally rigid to attack a relation.
+  The operative condition is the weaker **local rigidity at the relation being forced**: the symmetry that relation
+  depends on must already be consumed. A **consume-before-force** schedule supplies it; getting the schedule wrong
+  forces a relation that still looks free → an *unnecessary but sound* branch (never a wrong answer — `cl_up` is
+  confluent, every step is verified). The negative probe "Chang-A's rigid core cannot be handled before its symmetry
+  is removed" is exactly this ordering fact (consume must precede force), not a failure.
+- **Iso-invariance is inherited, not new.** Each step's resolve/consume/defer verdict is a pure function of the
+  (iso-invariant) structure, and each consumed symmetry is verified as a genuine automorphism — the same footing the
+  existing deferral machinery already stands on; the fixpoint adds no new choice, hence no new obligation.
+- **Cost is polynomial.** Each oracle pass is `O(n⁴)`; ~`n` passes between successful rigid steps and ~`n` rigid steps
+  give an `O(n⁶)`-ish interleave — slow, not exponential; the deferral scheduler's product→sum win (killing the
+  *exponential* product) is untouched.
+- **The fusion-severity bound is the poly guarantee.** For a fixed residue class the fusion is *mild* and bounded
+  (`FusionHarvestProbe` A_stall vs A_full; for Chang-A the cascade already harvests the bulk, leaving a small
+  conditional remainder). A bound "no harder fusion case can arise" bounds how far consume-before-force must look
+  ahead — i.e. it *is* the schedule's polynomial guarantee. This is the deliverable that generalizes the mild Chang-A
+  measurement.
+
+This **extends scope (b)** from "WL-easy base" to "**F₂/ring-tower base**" — a multipede whose base is itself a
+multipede (of the same or a lower ring) is peeled layer by layer by the alternation.
 
 **The completeness ceiling — three distinct claims (keep them separate).**
 1. *"F₂ is the only obstruction to 1-WL"* — **FALSE** (Lichter's CFI-over-`Z_{2^k}` is rigid, 1-WL-hard, not F₂).
@@ -890,9 +938,13 @@ reduces the multipede from the high-rank side, and **both leave the identical re
 case, which §9.9.18 argues *cannot be a WL-closure residue* and relocates to this solver's flag floor. The two tracks
 meet at exactly the same open wall.
 
-**Next concrete step:** the Z₄ probe is DONE (above — Z₄ handled, route (b) validated). Remaining finer points: (i)
-whether Lichter's *specific* hard encoding is 1-WL-forcing-extractable like the natural Z₄-multipede; (ii) the C# build
-itself — productionize D1/D2/D4 and wire at `ChainDescent.Search` `target == -1` (the roadmap, §11.12).
+**Next concrete step (revised 2026-07-11): design the ring first, then build.** The Z₄/ring validation was an
+*ephemeral* Python probe that no longer exists — only the **F₂** path survives (`Option2ExtractionProbe.cs`) — so
+"ring-general from the start" (§11.12) must be re-anchored by a **fresh ring-inference probe** (§11.13 open Qs) before
+B1. Then the MVP is **B1–B3**: productionize D1/D2/D4 and wire at `ChainDescent.Search` `target == -1` **as the
+stepwise alternating engine above** (run-instead-of-branch, consume verified kernel symmetry + refine + loop, defer
+only on mutual stall), with **verify-by-reconstruction** the sound succeed/flag gate. Finer open point carried:
+whether Lichter's *specific* hard encoding is 1-WL-forcing-extractable like the natural Z₄-multipede.
 
 ### 11.12 Build + prove roadmap — the rigid seal (2026-06-21, user-approved)
 
@@ -901,6 +953,14 @@ itself — productionize D1/D2/D4 and wire at `ChainDescent.Search` `target == -
 > (not F₂-only — the ring is the analogous object; separating risks correctness); **carry the forcing-model bridge
 > temporarily** but everything is eventually discharged; **model**-level Lean (not graph); **build first**, Lean as a
 > design tool until the main proofs start.
+
+> **▶ AMENDMENT (2026-07-11): design-the-ring-first + engine reframe.** "Ring from the start" stands, but its only
+> validation (Z₄) was ephemeral Python that evaporated — so **B1 is gated on a fresh ring-inference design pass +
+> probe** (§11.13), not begun cold. B2's wiring target is the **stepwise alternating engine** (STATUS banner +
+> §11.11): run-instead-of-branch at `target == -1`, consume verified kernel symmetry + refine + loop, defer only on
+> mutual stall. B3 (verify-or-flag) is unchanged and remains the soundness lynchpin. The C# state (2026-07-11): the
+> F₂ canonizer *works end-to-end inside* `Option2ExtractionProbe.cs` (D-M3) but **nothing in production calls it**,
+> and there is **no Smith normal form** anywhere — so B1 is genuine productionization + ring, not a lift.
 
 **The target theorem — the rigid seal.** `canonizesRigidResidue_or_flags`: for a rigid Phase-2 residue, *handles
 linear-over-a-ring, flags non-linear*, open content isolated into one hypothesis. It is the mirror of the symmetry seal:
@@ -980,6 +1040,61 @@ coupling is identical). Also: the forcing oracle, base-order-from-WL-cell-ids (D
 the inferred `A` (so D5 is iso-invariant); (iii) degenerate cases (relation under-determines `A` → canonical choice or
 flag). This is the ring analog of the D-M0 separation test. Probe spec: `/tmp/ring_infer_probe.py` (rebuild from §11.8
 style) — `build(biadj, A_add, A_n)` native `A`-multipede; the 2-torsion / negation-relation read is the discriminator.
+
+### 11.13a Ring design — the settled, buildable spec + the fresh probe (2026-07-11)
+
+> Written **before B1** per "design the ring first." Supersedes §11.13's sketch as the *buildable* spec; §11.13's
+> findings (inference is **relational**, the negation-relation torsion is the discriminator) stand and are the
+> foundation. The F₂ path (`Option2ExtractionProbe.cs`) is the base case `A = Z/2`. Ring inference and
+> fusion-resolution are designed as **one object** (the kernel-*module* is the de-fusion primitive — STATUS banner).
+
+**The data model.** A rigid Phase-2 residue is an `A`-linear system **`M x = c`** over a finite abelian group `A`:
+- **variables** `x_i ∈ A` — the segments (non-singleton real-decision cells);
+- **`M`** — the integer gadget-incidence (`0/1`; each row = the segments a gadget constrains), **ring-independent**;
+- **constraint** — each gadget enforces `Σ_{i∈g} x_i = c_g` in `A` (`c=0` homogeneous / `c` = twist constants);
+- **`A = ⊕_p ⊕_j Z/p^{k}`** — the per-instance value group, inferred from the graph (piece 1 below).
+
+`F₂` = `A = Z/2`. **Rigid ⟺ `ker_A(M) = 0`.** Canonical form = the unique solution's induced labelling; a **hidden
+(fused) symmetry = a nontrivial `ker_A(M)`** — the de-fusion primitive of the stepwise engine.
+
+**Split by ring-dependence** (sharpening §11.13):
+- *Ring-INDEPENDENT — reuse F₂ machinery verbatim* (the Z₄ probe showed 1-WL forces the full ring with the **same**
+  forcing number ⟹ the coupling `M` is ring-agnostic): **D2** extraction of `M`'s support (minimal forcing-circuits,
+  §11.4a); the forcing oracle; base-order-from-WL-cell-ids (D-M2); verify-by-reconstruction (B3).
+- *Ring-SPECIFIC — the three new pieces:*
+  1. **Ring inference `A` — extract-then-infer, relational.** Cell-size/forcing histograms are *identical* for `Z/4`
+     and `Z/2²`; the discriminator is the extracted **negation relation** `N = {(a,−a)}` (from the deg-2 gadget
+     `x+y=0`) and higher gadget relations. Canonical fingerprint of `A` = the **order-profile** (`{ord(a):a∈A}`,
+     i.e. the solution-count of `m·a=0` per `m|exp A`) — a group invariant that separates *all* abelian groups of a
+     given order. Read from the extracted state addition/negation, **not** cell statistics. **Open Q (i): can the
+     available gadget relations recover the full order-profile canonically (not just 2-torsion)? — the probe below.**
+  2. **Smith-normal-form solve over `A`.** Reduce `M` to Smith form over `Z`, then per prime-power component:
+     `ker_A(M)` = the gauge/symmetry module; unique solution when `ker_A(M)=0` (rigidity over `Z/p^k` = full `F_p`
+     rank per prime, Nakayama — the Z₄ probe's move). Canonical twist-class = the `coker_A(M)` coset rep (module
+     generalization of `coset_min`). Mathlib has Smith over PIDs (`Z`); C# per-prime `F_p`-rank + mod-`p^k` lift.
+  3. **Canonical state-ordering (D5), tied to `A`.** Each segment's `|A|` states ordered by the group with the
+     *solved value as identity* (coset-canonical, iso-invariant once `A` + solution fixed); inners by value-tuple.
+     A *wrong* `A` silently mis-orders ⟹ D5's soundness rides on inference (1) being canonical.
+
+**Fusion integration.** The per-relation query over `A` is "forced (in the row-*module*) or free (a `ker_A`
+direction)?" A `ker_A(M)≠0` direction is a hidden *abelian* symmetry over `A` — verify as automorphism, consume,
+refine, loop (de-fusion). So **designing `A` designs the de-fusion**; non-abelian fusion is not a kernel-module and
+stays the cascade's job (§11.14).
+
+**Degenerate / flag (§11.13 open (iii)).** If the extracted relations *under-determine* `A`, inference must make a
+**canonical choice or flag** — never guess (a wrong `A` corrupts the ordering). Verify-by-reconstruction (B3) catches
+a wrong `A` (reconstruction mismatch → fall through to the exhaustive branch), so under-determined `A` is **sound**
+(it flags); the only open question is coverage (how often), a probe measurement.
+
+**The fresh ring-inference probe** (`RingInferenceProbe.cs`, in-repo — replaces the evaporated
+`/tmp/ring_infer_probe.py`; algebraic level, since the Z₄ probe already tied graph-forcing to this algebra). Over
+`A ∈ {Z/2, Z/4, Z/2², Z/8, Z/2×Z/4, Z/2³, Z/6, Z/9, Z/3², Z/2×Z/8, Z/4×Z/4}`: compute the **order-profile
+fingerprint** and the **2-torsion count**, and check (a) the order-profile **separates every same-order pair of
+distinct type**; (b) the classic `Z/4 ≠ Z/2²` separates by 2-torsion (2 vs 4); (c) **2-torsion is INSUFFICIENT in
+general** — `Z/2×Z/8` and `Z/4×Z/4` share order (16) *and* 2-torsion (4) yet differ in type, separated only by the
+full order-profile. **Design consequence (analytically confirmed, codified by the probe): canonical ring inference
+must read the full order-profile ⟹ D1 must extract *higher-degree* gadget relations, not just the deg-2 negation
+relation.** This is the concrete input to B1's ring-aware D1.
 
 ### 11.14 The rigid medium negates the hidden-Johnson/Cameron construction (2026-06-21 lead)
 
