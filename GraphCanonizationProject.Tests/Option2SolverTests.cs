@@ -88,6 +88,111 @@ public sealed class Option2SolverTests
         Assert.Null(Option2Solver.Recover(adj, n, part.CellOf, part.NumCells));
     }
 
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z4", 4)]
+    [InlineData("Z2^2", 4)]
+    [InlineData("Z3", 3)]
+    public void B1c_TryCanonicalForm_ScrambleInvariant_SelfVerified(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z4" => new Ab(4), "Z2^2" => new Ab(2, 2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var (g0, t0) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+
+        var forms = new List<string?>();
+        for (int s = -1; s < 3; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = g0; t = (int[])t0.Clone(); }
+            else (g, t) = ScrambleWithTypes(g0, t0, 14000 + s);
+            int n = g.VertexCount; var adj = Flat(g);
+            var part = new WarmPartition(n); part.Refine(adj, SeedFromTypes(n, t));
+            forms.Add(Option2Solver.TryCanonicalForm(adj, n, part.CellOf, part.NumCells));
+        }
+        Assert.All(forms, f => Assert.NotNull(f));                 // valid ⟹ self-verifies
+        Assert.True(forms.Distinct().Count() == 1);                // scramble-invariant
+    }
+
+    [Fact]
+    public void B1c_TryCanonicalForm_FlagsCorruption_AndSeparatesRings()
+    {
+        int nW = 6; var lines = CirculantLines(nW, new[] { 0, 1, 3 });
+        var (g0, t0) = BuildNativeMultipede(new Ab(4), lines, nW);   // Z4
+        int n = g0.VertexCount; var adj = Flat(g0);
+        var part = new WarmPartition(n); part.Refine(adj, SeedFromTypes(n, t0));
+        var good = Option2Solver.TryCanonicalForm(adj, n, part.CellOf, part.NumCells);
+        Assert.NotNull(good);
+
+        // corrupt one gadget tuple (redirect an edge to a sibling state) ⟹ no consistent labelling ⟹ FLAG.
+        var badAdj = (int[])adj.Clone();
+        int segCount = nW * 4; int gv = segCount;
+        int oldNbr = -1; for (int w = 0; w < n; w++) if (badAdj[gv * n + w] == 1) { oldNbr = w; break; }
+        int newNbr = (oldNbr / 4) * 4 + (oldNbr % 4 + 1) % 4;
+        badAdj[gv * n + oldNbr] = 0; badAdj[oldNbr * n + gv] = 0;
+        badAdj[gv * n + newNbr] = 1; badAdj[newNbr * n + gv] = 1;
+        var partBad = new WarmPartition(n); partBad.Refine(badAdj, SeedFromTypes(n, t0));
+        Assert.Null(Option2Solver.TryCanonicalForm(badAdj, n, partBad.CellOf, partBad.NumCells));
+
+        // different ring, same base/size ⟹ different canonical form.
+        var (gB, tB) = BuildNativeMultipede(new Ab(2, 2), lines, nW);   // Z2²
+        int nB = gB.VertexCount; var adjB = Flat(gB);
+        var partB = new WarmPartition(nB); partB.Refine(adjB, SeedFromTypes(nB, tB));
+        var other = Option2Solver.TryCanonicalForm(adjB, nB, partB.CellOf, partB.NumCells);
+        Assert.NotNull(other);
+        Assert.NotEqual(good, other);
+    }
+
+    [Fact]
+    public void B1b_RecoverRing_Solve_Kernel_MatchGroundTruth()
+    {
+        // ring recovery from the order-profile fingerprint.
+        Assert.Equal(new[] { 4 }, Option2Solver.RecoverRing(4, "1^1,2^1,4^2")!.Inv);       // Z4
+        Assert.Equal(new[] { 2, 2 }, Option2Solver.RecoverRing(4, "1^1,2^3")!.Inv);        // Z2²
+        Assert.Equal(new[] { 3 }, Option2Solver.RecoverRing(3, "1^1,3^2")!.Inv);           // Z3
+        Assert.Equal(new[] { 2, 4 }, Option2Solver.RecoverRing(8, "1^1,2^3,4^4")!.Inv);    // Z2×Z4
+
+        var A = Option2Solver.RecoverRing(4, "1^1,2^1,4^2")!;                                // Z4
+        long[,] M = { { 1, 1, 0 }, { 0, 1, 1 }, { 1, 0, 1 } };                              // triangle (nontrivial coker)
+
+        // SolveOverA solves M x = target (extended-Smith, poly).
+        var target = MatVecRing(M, new[] { 1, 3, 2 }, A);
+        var x = Option2Solver.SolveOverA(M, target, A);
+        Assert.NotNull(x);
+        Assert.Equal(target, MatVecRing(M, x!, A));
+
+        // KernelSizeOverA (Smith) == brute over A^nW, for the triangle and for real multipede incidences.
+        Assert.Equal(BruteKernel(M, A), Option2Solver.KernelSizeOverA(M, A));
+        foreach (var (nW, name, inv) in new[] { (6, "Z4", new[] { 4 }), (6, "Z2^2", new[] { 2, 2 }), (7, "Z4", new[] { 4 }) })
+        {
+            var R = new Ab(inv);
+            var (g, t) = BuildNativeMultipede(R, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+            var part = new WarmPartition(g.VertexCount); part.Refine(Flat(g), SeedFromTypes(g.VertexCount, t));
+            var res = Option2Solver.Recover(Flat(g), g.VertexCount, part.CellOf, part.NumCells);
+            Assert.NotNull(res);
+            var ring = Option2Solver.RecoverRing(res!.ASize, res.OrderProfile)!;
+            Assert.Equal(BruteKernel(res.Incidence, ring), Option2Solver.KernelSizeOverA(res.Incidence, ring));
+        }
+    }
+
+    private static int[] MatVecRing(long[,] M, int[] x, Option2Solver.Ring A)
+    {
+        int m = M.GetLength(0), nW = M.GetLength(1); var r = new int[m];
+        for (int i = 0; i < m; i++) { int s = 0; for (int j = 0; j < nW; j++) if (M[i, j] != 0) s = A.Add(s, A.ScalarMul(x[j], M[i, j])); r[i] = s; }
+        return r;
+    }
+    private static long BruteKernel(long[,] M, Option2Solver.Ring A)
+    {
+        int nW = M.GetLength(1); long total = 1; for (int i = 0; i < nW; i++) total *= A.N;
+        long count = 0; var x = new int[nW];
+        for (long code = 0; code < total; code++)
+        {
+            long c = code; for (int j = 0; j < nW; j++) { x[j] = (int)(c % A.N); c /= A.N; }
+            if (MatVecRing(M, x, A).All(v => v == 0)) count++;
+        }
+        return count;
+    }
+
     // ── local native-A-multipede builder + plumbing ───────────────────────────────
     private static IEnumerable<int[]> TuplesSumZero(Ab A, int d)
     {

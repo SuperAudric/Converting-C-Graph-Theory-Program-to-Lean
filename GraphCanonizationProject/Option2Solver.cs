@@ -88,6 +88,109 @@ namespace Canonizer
             return new RingResidue { ASize = aSize, OrderProfile = profile, Segments = segCells, Incidence = incidence };
         }
 
+        // ── B1c: the self-verifying canonical emit (RM-5/RM-6) ────────────────────
+        // Search a state-labelling φ (states → A) making every gadget's neighbours sum to 0
+        // (a valid trivialisation of the untwisted native-A-multipede) from a resolving base;
+        // EMIT the canonical adjacency under the min such labelling. A consistent complete
+        // labelling exists IFF the residue reconstructs ⟹ success is the verification, failure
+        // is the flag (verify-by-reconstruction unified with the emit). Returns null = FLAG.
+        //
+        // Base-labelling enumeration is brute (|A|!² over the 2-segment base) — fine for the
+        // bounded-|A| tractable cases; the SolveOverA-based gauge-fix (B1b) is the large-|A|
+        // optimisation (needs the per-segment torsor extraction; the twisted case uses CosetMin).
+        public static string? TryCanonicalForm(int[] adj, int n, int[] cellOf, int numCells)
+        {
+            var res = Recover(adj, n, cellOf, numCells);
+            if (res == null) return null;
+            var A = RecoverRing(res.ASize, res.OrderProfile);
+            if (A == null) return null;
+            var segCells = res.Segments;
+            int nW = segCells.Count;
+            if (nW < 2) return null;
+
+            var segOf = new int[n]; Array.Fill(segOf, -1);
+            for (int si = 0; si < nW; si++) foreach (int v in segCells[si]) segOf[v] = si;
+
+            var gVerts = new List<int>(); var gNbr = new List<List<(int seg, int v)>>();
+            for (int v = 0; v < n; v++)
+            {
+                if (segOf[v] != -1) continue;
+                var nb = new List<(int, int)>();
+                for (int w = 0; w < n; w++) if (adj[v * n + w] == 1 && segOf[w] != -1) nb.Add((segOf[w], w));
+                if (nb.Count >= 2) { gVerts.Add(v); gNbr.Add(nb); }
+            }
+
+            int Asz = res.ASize;
+            var perms = Permutations(Asz);
+            string? best = null;
+            foreach (var p0 in perms)
+                foreach (var p1 in perms)
+                {
+                    var phi = new int[n]; Array.Fill(phi, -1);
+                    for (int k = 0; k < Asz; k++) { phi[segCells[0][k]] = p0[k]; phi[segCells[1][k]] = p1[k]; }
+                    if (!PropagateSumZero(phi, gVerts, gNbr, A)) continue;
+                    if (!LabellingComplete(phi, segCells, Asz)) continue;
+                    var form = EmitForm(n, adj, segCells, gVerts, gNbr, phi);
+                    if (best == null || string.CompareOrdinal(form, best) < 0) best = form;
+                }
+            return best;
+        }
+
+        private static bool PropagateSumZero(int[] phi, List<int> gVerts, List<List<(int seg, int v)>> gNbr, Ring A)
+        {
+            bool changed = true;
+            while (changed)
+            {
+                changed = false;
+                for (int gi = 0; gi < gVerts.Count; gi++)
+                {
+                    int unknownV = -1, unknownCnt = 0, s = 0;
+                    foreach (var x in gNbr[gi]) { if (phi[x.v] == -1) { unknownCnt++; unknownV = x.v; } else s = A.Add(s, phi[x.v]); }
+                    if (unknownCnt == 0) { if (s != 0) return false; }
+                    else if (unknownCnt == 1) { phi[unknownV] = A.Neg(s); changed = true; }
+                }
+            }
+            return true;
+        }
+
+        private static bool LabellingComplete(int[] phi, List<int[]> segCells, int Asz)
+        {
+            foreach (var seg in segCells)
+            {
+                var vals = seg.Select(v => phi[v]).ToList();
+                if (vals.Any(x => x == -1) || vals.Distinct().Count() != Asz) return false;
+            }
+            return true;
+        }
+
+        private static string EmitForm(int n, int[] adj, List<int[]> segCells, List<int> gVerts,
+                                       List<List<(int seg, int v)>> gNbr, int[] phi)
+        {
+            var order = new List<int>(n);
+            foreach (var seg in segCells) order.AddRange(seg.OrderBy(v => phi[v]));
+            var keyed = new List<(string key, int v)>();
+            for (int gi = 0; gi < gVerts.Count; gi++)
+                keyed.Add((string.Join("|", gNbr[gi].OrderBy(x => x.seg).Select(x => $"{x.seg}:{phi[x.v]}")), gVerts[gi]));
+            foreach (var kv in keyed.OrderBy(x => x.key, StringComparer.Ordinal)) order.Add(kv.v);
+
+            var sb = new System.Text.StringBuilder(order.Count * order.Count);
+            for (int i = 0; i < order.Count; i++)
+                for (int j = 0; j < order.Count; j++)
+                    sb.Append(adj[order[i] * n + order[j]] != 0 ? '1' : '0');
+            return sb.ToString();
+        }
+
+        private static List<int[]> Permutations(int k)
+        {
+            var res = new List<int[]>(); var a = Enumerable.Range(0, k).ToArray();
+            void Rec(int i)
+            {
+                if (i == k) { res.Add((int[])a.Clone()); return; }
+                for (int j = i; j < k; j++) { (a[i], a[j]) = (a[j], a[i]); Rec(i + 1); (a[i], a[j]) = (a[j], a[i]); }
+            }
+            Rec(0); return res;
+        }
+
         // ── segment/gadget bipartition (BFS 2-colouring); null on an odd cycle ────────
         private static int[]? Bipartition(int[] adj, int n)
         {
@@ -182,6 +285,190 @@ namespace Canonizer
             var M = new long[rows.Count, nW];
             for (int r = 0; r < rows.Count; r++) foreach (int j in rows[r]) M[r, j] = 1;
             return M;
+        }
+
+        // ── B1b: the ring A + the solve primitives (extended Smith, poly) ─────────
+
+        /// <summary>A finite abelian value group A ≅ ⊕ Z/Inv[i], with the arithmetic the solve needs.</summary>
+        internal sealed class Ring
+        {
+            public readonly int[] Inv; public readonly int N;
+            public Ring(int[] inv) { Inv = inv; N = inv.Aggregate(1, (a, b) => a * b); }
+            public int[] Tuple(int idx) { var t = new int[Inv.Length]; for (int i = Inv.Length - 1; i >= 0; i--) { t[i] = idx % Inv[i]; idx /= Inv[i]; } return t; }
+            private int Ix(int[] t) { int x = 0; for (int i = 0; i < Inv.Length; i++) { int c = ((t[i] % Inv[i]) + Inv[i]) % Inv[i]; x = x * Inv[i] + c; } return x; }
+            public int Add(int a, int b) { var ta = Tuple(a); var tb = Tuple(b); var tc = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) tc[i] = ta[i] + tb[i]; return Ix(tc); }
+            public int Neg(int a) { var ta = Tuple(a); var tc = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) tc[i] = -ta[i]; return Ix(tc); }
+            public int ScalarMul(int a, long k) { var ta = Tuple(a); var tc = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) tc[i] = (int)(((k % Inv[i]) * ta[i]) % Inv[i]); return Ix(tc); }
+            public int Order(int a) { int o = 1, x = a; while (x != 0) { x = Add(x, a); o++; } return o; }
+            public int Annih(long d) { int c = 0; for (int a = 0; a < N; a++) if (d % Order(a) == 0) c++; return c; }
+            public string OrderProfile()
+            {
+                var h = new SortedDictionary<int, int>();
+                for (int a = 0; a < N; a++) { int o = Order(a); h[o] = h.TryGetValue(o, out var c) ? c + 1 : 1; }
+                return string.Join(",", h.Select(kv => $"{kv.Key}^{kv.Value}"));
+            }
+            /// <summary>The min y with d·y = b in A (componentwise), or null if unsolvable.</summary>
+            public int? SolveScalar(long d, int b)
+            {
+                var tb = Tuple(b); var ty = new int[Inv.Length];
+                for (int i = 0; i < Inv.Length; i++)
+                {
+                    int e = Inv[i]; int di = (int)(((d % e) + e) % e);
+                    int g = Gcd(di, e);
+                    if (tb[i] % g != 0) return null;
+                    int ep = e / g;
+                    int inv = ModInv(((di / g) % ep + ep) % ep, ep);
+                    ty[i] = (int)((long)(tb[i] / g % ep) * inv % ep);
+                }
+                return Ix(ty);
+            }
+        }
+
+        // recover A ≅ ⊕Z/Inv from the order-profile fingerprint (RM-3): enumerate the
+        // abelian groups of order |A| and return the one whose profile matches.
+        internal static Ring? RecoverRing(int aSize, string orderProfile)
+        {
+            foreach (var inv in AbelianGroupsOfOrder(aSize))
+            {
+                var r = new Ring(inv);
+                if (r.OrderProfile() == orderProfile) return r;
+            }
+            return null;
+        }
+
+        // U·M·V = D (diagonal invariant factors d[0]|d[1]|…), U ∈ GL_m(Z), V ∈ GL_nW(Z).
+        internal static (long[,] U, long[,] V, long[] d, int rank) SmithWithTransforms(long[,] M0)
+        {
+            int m = M0.GetLength(0), nn = M0.GetLength(1);
+            var M = (long[,])M0.Clone();
+            var U = Identity(m); var V = Identity(nn);
+            int t = 0;
+            while (t < Math.Min(m, nn))
+            {
+                int pi = -1, pj = -1;
+                for (int i = t; i < m && pi < 0; i++) for (int j = t; j < nn; j++) if (M[i, j] != 0) { pi = i; pj = j; break; }
+                if (pi < 0) break;
+                if (pi != t) { SwapRows(M, t, pi, nn); SwapRows(U, t, pi, m); }
+                if (pj != t) { SwapCols(M, t, pj, m); SwapCols(V, t, pj, nn); }
+
+                bool clean = false;
+                while (!clean)
+                {
+                    clean = true;
+                    for (int i = t + 1; i < m; i++)
+                        if (M[i, t] != 0)
+                        {
+                            long q = M[i, t] / M[t, t];
+                            for (int k = 0; k < nn; k++) M[i, k] -= q * M[t, k];
+                            for (int k = 0; k < m; k++) U[i, k] -= q * U[t, k];
+                            if (M[i, t] != 0) { SwapRows(M, t, i, nn); SwapRows(U, t, i, m); clean = false; }
+                        }
+                    for (int j = t + 1; j < nn; j++)
+                        if (M[t, j] != 0)
+                        {
+                            long q = M[t, j] / M[t, t];
+                            for (int k = 0; k < m; k++) M[k, j] -= q * M[k, t];
+                            for (int k = 0; k < nn; k++) V[k, j] -= q * V[k, t];
+                            if (M[t, j] != 0) { SwapCols(M, t, j, m); SwapCols(V, t, j, nn); clean = false; }
+                        }
+                }
+                bool div = true;
+                for (int i = t + 1; i < m && div; i++)
+                    for (int j = t + 1; j < nn && div; j++)
+                        if (M[i, j] % M[t, t] != 0)
+                        {
+                            for (int k = 0; k < nn; k++) M[t, k] += M[i, k];
+                            for (int k = 0; k < m; k++) U[t, k] += U[i, k];
+                            div = false;
+                        }
+                if (!div) continue;
+                t++;
+            }
+            var d = new long[t];
+            for (int i = 0; i < t; i++) d[i] = Math.Abs(M[i, i]);
+            // fold sign of |d[i]| back into U so U·M·V = D exactly with nonneg diagonal.
+            for (int i = 0; i < t; i++) if (M[i, i] < 0) for (int k = 0; k < m; k++) U[i, k] = -U[i, k];
+            return (U, V, d, t);
+        }
+
+        /// <summary>|{x ∈ A^nW : Mx = 0}| via Smith: Π annih_A(d_i) · |A|^(nW−rank). Rigid ⟺ 1.</summary>
+        internal static long KernelSizeOverA(long[,] M, Ring A)
+        {
+            int nW = M.GetLength(1);
+            var (_, _, d, rank) = SmithWithTransforms(M);
+            long size = 1;
+            for (int i = 0; i < nW - rank; i++) size *= A.N;
+            foreach (var di in d) size *= A.Annih(di);
+            return size;
+        }
+
+        /// <summary>Solve M x = target over A (one solution; unique when rigid), or null if unsolvable.</summary>
+        internal static int[]? SolveOverA(long[,] M, int[] target, Ring A)
+        {
+            int m = M.GetLength(0), nW = M.GetLength(1);
+            var (U, V, d, rank) = SmithWithTransforms(M);
+            var tprime = MatVecZ(U, target, A);          // U·target ∈ A^m
+            var y = new int[nW];
+            for (int i = 0; i < rank; i++)
+            {
+                var yi = A.SolveScalar(d[i], tprime[i]);
+                if (yi == null) return null;
+                y[i] = yi.Value;
+            }
+            for (int i = rank; i < m; i++) if (tprime[i] != 0) return null;   // inconsistent
+            return MatVecZ(V, y, A);                      // x = V·y ∈ A^nW
+        }
+
+        // integer-matrix × A-vector (Σ scalar-muls); Z is columns of Mz.
+        private static int[] MatVecZ(long[,] Mz, int[] x, Ring A)
+        {
+            int r = Mz.GetLength(0), c = Mz.GetLength(1);
+            var res = new int[r];
+            for (int i = 0; i < r; i++) { int s = 0; for (int j = 0; j < c; j++) if (Mz[i, j] != 0) s = A.Add(s, A.ScalarMul(x[j], Mz[i, j])); res[i] = s; }
+            return res;
+        }
+
+        private static long[,] Identity(int k) { var a = new long[k, k]; for (int i = 0; i < k; i++) a[i, i] = 1; return a; }
+        private static void SwapRows(long[,] M, int a, int b, int cols) { for (int k = 0; k < cols; k++) (M[a, k], M[b, k]) = (M[b, k], M[a, k]); }
+        private static void SwapCols(long[,] M, int a, int b, int rows) { for (int k = 0; k < rows; k++) (M[k, a], M[k, b]) = (M[k, b], M[k, a]); }
+        private static int ModInv(int a, int m) { if (m == 1) return 0; int g = m, x = 0, x1 = 1, aa = a; while (aa > 1) { int q = aa / g; (aa, g) = (g, aa - q * g); (x1, x) = (x, x1 - q * x); } return (x1 % m + m) % m; }
+
+        // abelian groups of order N, as invariant-factor sequences (d_0 | d_1 | …).
+        private static IEnumerable<int[]> AbelianGroupsOfOrder(int N)
+        {
+            var primePowers = new List<(int p, int e)>();
+            int nn = N;
+            for (int p = 2; p * p <= nn; p++) { int e = 0; while (nn % p == 0) { nn /= p; e++; } if (e > 0) primePowers.Add((p, e)); }
+            if (nn > 1) primePowers.Add((nn, 1));
+            // per prime: each partition of e ⟹ a descending list of exponents.
+            var perPrime = primePowers.Select(pe => Partitions(pe.e).Select(part => (pe.p, part)).ToList()).ToList();
+            foreach (var combo in CartesianProduct(perPrime))
+            {
+                // merge into invariant factors: d_k = Π_p p^{k-th largest part of p} (pad with 0).
+                int len = combo.Max(c => c.part.Count);
+                var d = new int[len];
+                for (int k = 0; k < len; k++) { int f = 1; foreach (var (p, part) in combo) { int ex = k < part.Count ? part[k] : 0; for (int t = 0; t < ex; t++) f *= p; } d[k] = f; }
+                Array.Reverse(d);   // invariant factors ascending (d_0 | d_1 | …)
+                yield return d.Where(x => x > 1).DefaultIfEmpty(N).ToArray();
+            }
+        }
+        private static IEnumerable<List<int>> Partitions(int e) => PartitionsFrom(e, e);
+        private static IEnumerable<List<int>> PartitionsFrom(int e, int max)
+        {
+            if (e == 0) { yield return new List<int>(); yield break; }
+            for (int first = Math.Min(e, max); first >= 1; first--)
+                foreach (var rest in PartitionsFrom(e - first, first)) { var l = new List<int> { first }; l.AddRange(rest); yield return l; }
+        }
+        private static IEnumerable<List<(int p, List<int> part)>> CartesianProduct(List<List<(int p, List<int> part)>> lists)
+        {
+            var acc = new List<List<(int, List<int>)>> { new List<(int, List<int>)>() };
+            foreach (var list in lists)
+            {
+                var next = new List<List<(int, List<int>)>>();
+                foreach (var a in acc) foreach (var item in list) { var l = new List<(int, List<int>)>(a) { item }; next.Add(l); }
+                acc = next;
+            }
+            return acc;
         }
 
         private static int PermOrder(int[] perm)

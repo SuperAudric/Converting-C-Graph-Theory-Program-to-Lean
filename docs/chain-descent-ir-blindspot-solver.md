@@ -991,11 +991,18 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
     order-profile; incidence `M` via RM-4. Validated on native `Z4/Z2²/Z3` multipedes driven through the real
     `WarmPartition` (segment-separating seed = the descent's `target==-1` partition, since bare 1-WL is blind on the
     rigid multipede), scramble-invariant; a non-multipede (path graph) flags.
-  - **B1b Solve** — kernel/rigidity + `SolveA`/`CosetMinA` over `A`; **production = extended Smith** (transform-tracking;
-    the invariant-factor half is validated, RM-4) replacing the probe's brute `A^nW`.
-  - **B1c Emit+verify** — the self-verifying canonical labelling (RM-5/6): search a state-labelling making every gadget
-    sum to the (coset-canonical) twist; success = canonical form, failure = flag. **Production = greedy resolving base
-    + `SolveA`** replacing the probe's brute base-enumeration.
+  - **B1b Solve — LANDED (2026-07-11).** `RecoverRing` (order-profile → invariant factors, by enumerating the abelian
+    groups of order `|A|`), **extended Smith** `SmithWithTransforms` (poly, `U·M·V = D`), `SolveOverA` (`Mx=target` via
+    Smith, poly), `KernelSizeOverA` (`Π annih_A(d_i)·|A|^(nW−rank)`) — all validated **against brute over `A^nW`** and
+    ground truth (Z4/Z2²/Z3/Z2×Z4 recovered; triangle + real multipede incidences; Circulant-6 rigid ker 1, Circulant-7
+    ker 8). `CosetMin` (lex-min twist rep) stays the brute `RingSolveProbe` version for now — only the *twisted* case
+    needs it; the poly greedy-coordinate version is the noted refinement.
+  - **B1c Emit+verify — LANDED (2026-07-11).** `TryCanonicalForm(adj,n,cellOf,numCells)` — the self-verifying canonical
+    labelling (RM-5/6): search a `φ` making every gadget sum to 0 from a 2-segment base, emit the min canonical
+    adjacency; a consistent complete labelling exists ⟺ the residue reconstructs, so **success = canonical form,
+    failure = flag** (verify unified with emit). Validated scramble-invariant (`Z2/Z4/Z2²/Z3`), flags a corrupted
+    gadget, separates `Z4` vs `Z2²`. Base-labelling enumeration is brute (`|A|!²`, fine for bounded `|A|`); the
+    `SolveOverA`-based gauge-fix (B1b) is the large-`|A|`/twisted optimisation (needs the per-segment torsor extraction).
   - **B1d D2-general** — the recognition-free extraction via **minimal forcing-circuits over `A`** (Option2 `ExtractRows`
     generalized) for residues that aren't pristine gadget-grouped multipedes (the ⚠ item, §11.13a).
 - **B2 Wire** at `target == -1`: solver succeeds + self-verifies → set `_bestMatrix` (composed with the pinned path),
