@@ -1161,9 +1161,44 @@ by forcing alone; `Z/2×Z/8` vs `Z/4×Z/4` split under forcing exactly at degree
   degree 3 suffices for *any* `A` (with `exp ≤ n`), poly (`|A|² ≤ n²` tuples). The budget=`exp` bound (RM /
   `RingInferenceProbe`) governs only the weaker *pin-a-peer* observation; the full-relation read beats it — further
   confirming `exp(A)` is a non-obstruction.
-- **Next: RM-4 (kernel-module / rigidity from forcing = the `dim ker` twin).** With segments (RM-1), support/forcing
-  (RM-2), and ring `A` (RM-3) recovered on the real graph, RM-4 recovers the kernel-module (rigidity / the hidden-
-  symmetry de-fusion detector), completing the D1→D4 chain and handing off to B1 (productionize as `Option2Solver`).
+- **RM-4 (kernel-module / rigidity = the `dim ker` twin) — DONE (5 tests).** The incidence `M` is extracted
+  recognition-free, then the kernel-module `{x ∈ A^nW : Mx=0}` via **integer Smith normal form**
+  (`ker = Π annih_A(d_i)·|A|^(nW−rank)`), validated against brute force over `A^nW`, scramble-invariant.
+  Circulant(6,{0,1,3}) is **rigid** (ker 1) over `Z2/Z4/Z2²`; Circulant(7,{0,1,3}) is **non-rigid** (ker 8) over
+  `Z2` (matching the F₂ `dim ker 3 = 2³`) and `Z4` — so the rigid/non-rigid split is genuinely exercised. The
+  integer SNF is now a **validated production component** (B1's D4 solve); the nontrivial kernel is exactly the
+  hidden abelian symmetry the stepwise engine consumes (de-fusion).
+
+**Ring D1→D4 validated end-to-end (16 tests, `RingWlExtractionProbe.cs`).** On the real refinement, from a raw
+scrambled native-`A`-multipede: **D1 segments (RM-1) → forcing/support (RM-2) → ring `A` (RM-3) → kernel/rigidity
+via Smith (RM-4)**, all recognition-free + scramble-invariant. The ring-solver *recovery* half is proven on graphs;
+what remains for a working canonizer is the *emit-and-verify* half (below) and productionization (B1).
+
+**Pre-B1 readiness audit (2026-07-11).** What is proven vs. what B1 still needs:
+- ✅ **Recovery half (RM-1..4):** segments, forcing/support, ring `A`, kernel/rigidity — all recognition-free +
+  scramble-invariant on the real refinement; integer SNF validated.
+- ⬜ **RM-5 — the EMIT half (the D-M2/D-M3 twin; the real gap).** RM-1..4 *recover* structure but emit no
+  canonical form. Needed: solve `Mx = c` over `A` (unique when rigid), the canonical **coset/twist** rep over the
+  module (`coker_A`, generalizing `coset_min`), the canonical **state-ordering** (states by solved-value-as-identity,
+  D5), then emit the canonical labelling. Has real iso-invariance subtleties (as D-M2/D-M3 did for F₂) — worth a probe
+  before B1.
+- ⬜ **RM-6 / B3 — verify-by-reconstruction (the soundness gate).** Rebuild the graph from `(base, M, A, solution)`,
+  compare to input; mismatch → flag. Mechanical but soundness-critical; the succeed/flag verdict's iso-invariance
+  rides on it.
+- ⚠ **D2-general (robustness):** RM-4 read `M` by grouping gadget vertices (clean-construction shortcut); the general
+  recognition-free extraction is **minimal forcing-circuits over `A`** (the Layer-C method, Option2 `ExtractRows`
+  generalized to read `A`-coefficients, not just incidence). Needed when the residue isn't a pristine native-`A`
+  multipede.
+- ⚠ **Degree / coefficient generality:** RM-3 infers `A` from a **degree-3** gadget (sufficient — fix all-but-3 to
+  reduce higher degree; degree-2 is featureless). Non-unit coefficients (e.g. `2x+y+z=0`) need `D2` to read
+  coefficients, not just support — fine for sum-zero multipedes, a note for the general ring construction.
+- ⚠ **Integration bridge (DQ1 / the mixed case):** the RM probes run on a *pristine* scrambled native-`A` multipede
+  (so DQ1 = recognize-it-from-raw-adjacency is covered for that case); the residue the *descent* hands at
+  `target == -1` may have mixed/partially-consumed cells (the fold/`Aut_base` concern, §11.10 D6/B4) — the stepwise
+  engine's consume-before-force is what keeps that clean, but it's the real integration risk to watch.
+
+**Verdict:** the recovery half is done; **RM-5 (emit) + RM-6/B3 (verify)** are the remaining probe-level pieces before
+B1 is pure productionization. RM-5 is the priority — without it there is no canonical output.
 
 ### 11.14 The rigid medium negates the hidden-Johnson/Cameron construction (2026-06-21 lead)
 

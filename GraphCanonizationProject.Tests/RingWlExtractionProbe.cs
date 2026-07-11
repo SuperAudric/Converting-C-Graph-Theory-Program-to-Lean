@@ -35,6 +35,7 @@ public sealed class RingWlExtractionProbe
         public int Add(int a, int b) { var ta = T(a); var tb = T(b); var tc = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) tc[i] = (ta[i] + tb[i]) % Inv[i]; return Ix(tc); }
         public int Neg(int a) { var ta = T(a); var tc = new int[Inv.Length]; for (int i = 0; i < Inv.Length; i++) tc[i] = (Inv[i] - ta[i]) % Inv[i]; return Ix(tc); }
         public int Order(int a) { int o = 1, x = a; while (x != 0) { x = Add(x, a); o++; } return o; }
+        public int Annih(long d) { int c = 0; for (int a = 0; a < N; a++) if (d % Order(a) == 0) c++; return c; }
         public string TrueOrderProfile()
         {
             var h = new SortedDictionary<int, int>();
@@ -133,6 +134,155 @@ public sealed class RingWlExtractionProbe
         Assert.True(counts.Distinct().Count() == 1);
 
         _out.WriteLine($"{name,-6} |A|={A.N} nW={nW} n={g0.VertexCount,4}  segments(size-|A| cells)={counts[0]} (== nW) scramble-inv={counts.Distinct().Count() == 1}");
+    }
+
+    // ── RM-4: kernel-module / rigidity from the extracted incidence (dim ker twin) ──
+    // Extract the incidence M (which segments each gadget constrains) recognition-free,
+    // then the kernel-module {x ∈ A^nW : Mx=0} via integer SMITH NORMAL FORM:
+    //   ker size = Π_i annih_A(d_i) · |A|^(nW−rank),  d_i = invariant factors of M.
+    // Rigid ⟺ ker size = 1. The nontrivial kernel is the hidden abelian symmetry the
+    // stepwise engine consumes (de-fusion). Validated against brute force over A^nW,
+    // scramble-invariant. Smith is the production D4 solve, exercised here.
+    [Theory]
+    [InlineData("Z2", 2, 6)]      // Circulant(6,{0,1,3}) — F₂-rigid ⟹ ker 1
+    [InlineData("Z4", 4, 6)]
+    [InlineData("Z2^2", 4, 6)]
+    [InlineData("Z2", 2, 7)]      // Circulant(7,{0,1,3}) — F₂ non-rigid (ker > 1), a contrast
+    [InlineData("Z4", 4, 7)]
+    public void RM4_KernelModule_RigidityFromForcing_ScrambleInvariant(string name, int asz, int nW)
+    {
+        var A = name switch
+        {
+            "Z2" => new Ab("Z2", 2),
+            "Z4" => new Ab("Z4", 4),
+            "Z2^2" => new Ab("Z2^2", 2, 2),
+            _ => throw new ArgumentException(name)
+        };
+        Assert.Equal(asz, A.N);
+        var lines = CirculantLines(nW, new[] { 0, 1, 3 });
+        var (g0, t0, _) = BuildNativeMultipede(A, lines, nW);
+
+        var kers = new List<long>();
+        for (int s = -1; s < 3; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = g0; t = (int[])t0.Clone(); }
+            else (g, t) = ScrambleWithTypes(g0, t0, seed: 10500 + s);
+            int n = g.VertexCount;
+            var M = ExtractIncidence(n, ExtractAdj(g), t, nW, A.N);
+
+            long viaSmith = KerSizeOverA(A, SmithInvariantFactors(M), nW);
+            long viaBrute = BruteKerSizeOverA(A, M, nW);
+            Assert.Equal(viaBrute, viaSmith);          // Smith solve == ground truth on the extracted M
+            kers.Add(viaSmith);
+        }
+
+        // (RM-4 deliverable) recovered kernel-module size scramble-invariant.
+        Assert.True(kers.Distinct().Count() == 1);
+        _out.WriteLine($"{name,-6} nW={nW} ker-module size={kers[0],4} rigid={kers[0] == 1} scramble-inv={kers.Distinct().Count() == 1}");
+    }
+
+    // incidence M (nLines × nW), recognition-free: gadget vertices grouped by their segment set.
+    private static long[,] ExtractIncidence(int n, int[] adj, int[] types, int nW, int Asz)
+    {
+        var pBase = SeedFromTypes(n, types);
+        var segs = RecoverSegmentsA(n, adj, pBase, types, nW, Asz);
+        var segOf = new int[n]; Array.Fill(segOf, -1);
+        for (int si = 0; si < segs.Count; si++) foreach (int v in segs[si]) segOf[v] = si;
+
+        var seen = new HashSet<string>();
+        var rows = new List<int[]>();
+        for (int v = 0; v < n; v++)
+        {
+            if (segOf[v] != -1) continue;
+            var set = new SortedSet<int>();
+            for (int w = 0; w < n; w++) if (adj[v * n + w] == 1 && segOf[w] != -1) set.Add(segOf[w]);
+            if (set.Count < 2) continue;
+            var key = string.Join(",", set);
+            if (seen.Add(key)) rows.Add(set.ToArray());
+        }
+        var M = new long[rows.Count, nW];
+        for (int r = 0; r < rows.Count; r++) foreach (int j in rows[r]) M[r, j] = 1;
+        return M;
+    }
+
+    // integer Smith normal form → nonzero invariant factors (|d_1|,…,|d_r|), d_i | d_{i+1}.
+    private static List<long> SmithInvariantFactors(long[,] M0)
+    {
+        int m = M0.GetLength(0), nn = M0.GetLength(1);
+        var M = (long[,])M0.Clone();
+        var factors = new List<long>();
+        int t = 0;
+        while (t < Math.Min(m, nn))
+        {
+            // pivot: any nonzero entry in the [t..,t..] submatrix.
+            int pi = -1, pj = -1;
+            for (int i = t; i < m && pi < 0; i++) for (int j = t; j < nn; j++) if (M[i, j] != 0) { pi = i; pj = j; break; }
+            if (pi < 0) break;
+            SwapRows(M, t, pi, nn); SwapCols(M, t, pj, m);
+
+            bool clean = false;
+            while (!clean)
+            {
+                clean = true;
+                for (int i = t + 1; i < m; i++)
+                    if (M[i, t] != 0)
+                    {
+                        long q = M[i, t] / M[t, t];
+                        for (int k = 0; k < nn; k++) M[i, k] -= q * M[t, k];
+                        if (M[i, t] != 0) { SwapRows(M, t, i, nn); clean = false; }   // smaller residual ⟹ re-pivot
+                    }
+                for (int j = t + 1; j < nn; j++)
+                    if (M[t, j] != 0)
+                    {
+                        long q = M[t, j] / M[t, t];
+                        for (int k = 0; k < m; k++) M[k, j] -= q * M[k, t];
+                        if (M[t, j] != 0) { SwapCols(M, t, j, m); clean = false; }
+                    }
+            }
+            // ensure M[t,t] divides the rest; else fold an offending row in and redo.
+            bool div = true;
+            for (int i = t + 1; i < m && div; i++)
+                for (int j = t + 1; j < nn && div; j++)
+                    if (M[i, j] % M[t, t] != 0) { for (int k = 0; k < nn; k++) M[t, k] += M[i, k]; div = false; }
+            if (!div) continue;
+
+            factors.Add(Math.Abs(M[t, t]));
+            t++;
+        }
+        return factors;
+    }
+    private static void SwapRows(long[,] M, int a, int b, int cols) { if (a == b) return; for (int k = 0; k < cols; k++) (M[a, k], M[b, k]) = (M[b, k], M[a, k]); }
+    private static void SwapCols(long[,] M, int a, int b, int rows) { if (a == b) return; for (int k = 0; k < rows; k++) (M[k, a], M[k, b]) = (M[k, b], M[k, a]); }
+
+    private static long KerSizeOverA(Ab A, List<long> factors, int nW)
+    {
+        long size = 1;
+        for (int i = 0; i < nW - factors.Count; i++) size *= A.N;
+        foreach (var d in factors) size *= A.Annih(d);
+        return size;
+    }
+
+    // brute force |{x ∈ A^nW : Mx = 0 over A}| (ground truth; small nW,|A|).
+    private static long BruteKerSizeOverA(Ab A, long[,] M, int nW)
+    {
+        int rows = M.GetLength(0);
+        long total = 1; for (int i = 0; i < nW; i++) total *= A.N;
+        long count = 0;
+        var x = new int[nW];
+        for (long code = 0; code < total; code++)
+        {
+            long c = code; for (int j = 0; j < nW; j++) { x[j] = (int)(c % A.N); c /= A.N; }
+            bool ok = true;
+            for (int r = 0; r < rows && ok; r++)
+            {
+                int s = 0;
+                for (int j = 0; j < nW; j++) if (M[r, j] != 0) s = A.Add(s, x[j]);
+                if (s != 0) ok = false;
+            }
+            if (ok) count++;
+        }
+        return count;
     }
 
     // ── RM-3: ring inference recognition-free from a degree-3 gadget relation ──
