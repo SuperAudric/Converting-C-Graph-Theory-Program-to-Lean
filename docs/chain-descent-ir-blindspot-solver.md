@@ -1133,9 +1133,37 @@ exposes the multiples `{(0..k-1)·v}` and recovers `c_m` for `m ≤ k−1`. Veri
 by forcing alone; `Z/2×Z/8` vs `Z/4×Z/4` split under forcing exactly at degree 5 = `exp+1` (indistinguishable at 4);
 `Z/9` vs `Z/3²` at degree 4 = `exp+1`. The **native-`A`-multipede graph generator** is also built + well-formed
 (segment-state + gadget-tuple vertices, every tuple sums to 0 in `A`) — the substrate B1's D1 runs on; `F₂` is the
-`MultipedeGenerator` case. **Remaining (the true D-M1 twin):** drive the *real* `WarmPartition` (1-WL) on the
-generated graph — as `Option2ExtractionProbe` does for `F₂` — to confirm WL surfaces the gadget relations at the
-degree present, recognition-free, on the scrambled graph. That closes the ring D1 spec and hands off to B1.
+`MultipedeGenerator` case.
+
+**The D-M1 twin — WL-driven extraction, staged (`RingWlExtractionProbe.cs`, RM-1 + RM-2 DONE, 8 tests green,
+2026-07-11).** Drives the *real* `WarmPartition` (1-WL) on the scrambled native-`A`-multipede, generalizing
+`Option2ExtractionProbe` from F₂ (2-state segments, size-2 cells) to `A` (`|A|`-state segments, size-`|A|` cells):
+- **RM-1 (segment recognition + cold fusion):** the `|A|` states of each segment **cold-fuse into one size-`|A|`
+  cell** under the genuine refinement (the ring twin of the "cold 1-WL sees fused `|A|`-cells" finding), recovered
+  recognition-free as the size-`|A|` cells among segment-coloured vertices, count `= nW`, scramble-invariant
+  (`Z2, Z4, Z2², Z3`). Non-vacuous — had WL discretized, the count would be 0.
+- **RM-2 (forcing == A-unit-propagation, Layer B over `A`):** pinning a base `S` (individualize one state per
+  pinned segment) discretizes the graph's segments **iff** unit-propagation resolves every segment from `S`
+  (base `{0,1}` resolves all on the deg-3 circulant; `{0}` resolves only itself), scramble-invariant. Confirms
+  resolution is **ring-independent at the support level** (the ring-design split: extraction/support ⊥ ring).
+- **★ Finding that shapes D1 (from RM-2):** for `|A| > 2` a *forced* segment shows up as a **broken `|A|`-cell** —
+  1-WL singles out the *value* state but leaves the `|A|−1` non-value states symmetric (fused), so "resolved" is
+  "the fused cell split", NOT "all states singleton" (which only coincides at F₂). D1 reads the value = *which*
+  state singletons out; the residual `(|A|−1)`-cell is expected, not a failure.
+- **RM-3 (ring inference recognition-free) — DONE (3 tests).** The ring `A` is recovered from **one degree-3
+  gadget's full sum-zero relation** on the real scrambled graph: `Z4`→`1²·4²` (profile `1^1,2^1,4^2`), `Z2²`→
+  `1^1,2^3`, `Z2×Z4`→its profile — **exact order-profile, scramble-invariant**, distinguishing `Z4` from `Z2²`.
+  **★ Design refinement (stronger than the forcing budget=exp bound):** a degree-3 gadget's tuple-relation is a
+  group Latin square, so by **Albert's theorem** (isotopic groups are isomorphic) it determines `A` up to iso, and
+  the **order-profile falls out of the row-permutation cycle structure** — `R_x ∘ R_{x'}⁻¹` = translation by
+  `(x'−x)`, cycle length `= ord(x'−x)`, an isotopy invariant (hence recognition-free + scramble-invariant by
+  construction). So **D1 should infer `A` by reading one gadget's full relation, NOT by forcing-observation**:
+  degree 3 suffices for *any* `A` (with `exp ≤ n`), poly (`|A|² ≤ n²` tuples). The budget=`exp` bound (RM /
+  `RingInferenceProbe`) governs only the weaker *pin-a-peer* observation; the full-relation read beats it — further
+  confirming `exp(A)` is a non-obstruction.
+- **Next: RM-4 (kernel-module / rigidity from forcing = the `dim ker` twin).** With segments (RM-1), support/forcing
+  (RM-2), and ring `A` (RM-3) recovered on the real graph, RM-4 recovers the kernel-module (rigidity / the hidden-
+  symmetry de-fusion detector), completing the D1→D4 chain and handing off to B1 (productionize as `Option2Solver`).
 
 ### 11.14 The rigid medium negates the hidden-Johnson/Cameron construction (2026-06-21 lead)
 
