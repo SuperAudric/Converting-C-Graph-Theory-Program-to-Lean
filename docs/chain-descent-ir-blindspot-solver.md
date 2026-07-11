@@ -29,7 +29,8 @@
 > detector**: a nontrivial kernel-module (F₂, or a ring by §11.13) is a hidden *abelian/linear* symmetry the
 > cascade missed because it was fused behind a real decision — **verify it as a genuine automorphism, consume it,
 > refine, loop back to Phase 1** (de-fusion). If a relation is forced → determine it; **defer/branch only if BOTH
-> stall** (the genuine wall: ring-varying / non-linear / non-abelian-hidden). Only *abelian/linear* hidden
+> stall** (the genuine wall: **non-linear / non-abelian-hidden**; ring-varying is *handled* — `exp(A) ≤ n` native or
+> a tower peeled in ≤ n rounds, §11.13a). Only *abelian/linear* hidden
 > symmetry is kernel-visible; *non-abelian* fusion stays the cascade's job (§11.14). **Global rigidity is NOT
 > required** — the forcing query is local (minimal-circuit → row-space, sound regardless of global rigidity,
 > §11.4a); the operative condition is **local rigidity at the relation being forced**, supplied by a
@@ -1125,8 +1126,16 @@ So **ring inference is poly for *any* linear-over-a-ring residue**; `exp(A)` onl
 (Lichter's FPC+rank, which *cannot individualize*); the ring-**general** adaptive solver here handles it, so its
 genuine flag floor is the **non-linear** residue (§11.11 pt 3 — open, *no constructible witness*), **NOT** the ring
 exponent. (The probe's "budget = exponent" is the correct *single-gadget* cost; the tower is what keeps it poly.)
-**Next (deeper, graph-level):** confirm the degree/depth ⟺ budget bridge on a *native `A`-multipede* (build the
-generator; verify D1 recovers `c_m` recognition-free) — the ring twin of D-M1, the concrete B1 D1 spec.
+**Graph-level bridge — CONFIRMED on the forcing mechanism (2026-07-11, `RingMultipedeProbe.cs`, 2 tests green).**
+The mechanism is now explicit, not assumed: in a degree-`k` gadget `Σ x_i = 0`, pinning `j` peers to a common value
+`v` and the rest to `0` **forces** the last `= −(j·v)` (pure sum-zero propagation, recognition-free) — so forcing
+exposes the multiples `{(0..k-1)·v}` and recovers `c_m` for `m ≤ k−1`. Verified: `Z4` recovered `c_1..c_4 = 1,2,1,4`
+by forcing alone; `Z/2×Z/8` vs `Z/4×Z/4` split under forcing exactly at degree 5 = `exp+1` (indistinguishable at 4);
+`Z/9` vs `Z/3²` at degree 4 = `exp+1`. The **native-`A`-multipede graph generator** is also built + well-formed
+(segment-state + gadget-tuple vertices, every tuple sums to 0 in `A`) — the substrate B1's D1 runs on; `F₂` is the
+`MultipedeGenerator` case. **Remaining (the true D-M1 twin):** drive the *real* `WarmPartition` (1-WL) on the
+generated graph — as `Option2ExtractionProbe` does for `F₂` — to confirm WL surfaces the gadget relations at the
+degree present, recognition-free, on the scrambled graph. That closes the ring D1 spec and hands off to B1.
 
 ### 11.14 The rigid medium negates the hidden-Johnson/Cameron construction (2026-06-21 lead)
 
