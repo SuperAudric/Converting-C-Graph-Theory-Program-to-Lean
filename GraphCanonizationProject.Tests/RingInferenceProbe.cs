@@ -129,4 +129,65 @@ public sealed class RingInferenceProbe
         Log("FINDING: 2-torsion (deg-2 negation relation) is NOT a sufficient ring discriminator in general;");
         Log("         canonical inference needs the FULL order-profile => D1 must extract higher-degree gadget relations.");
     }
+
+    // Annihilator count c_m(A) = |{ a : m·a = 0 }| = |{ a : ord(a) | m }|.
+    // This is exactly what an "observe m·a" probe reads: at observation budget B you know c_1..c_B.
+    // A degree-d gadget observes the multiple (d-1) [force d-1 peers equal, read the sum], so budget B <-> degree B+1.
+    private static int Annih(Ab g, int m) { int c = 0; for (int i = 0; i < g.N; i++) if (m % g.Order(i) == 0) c++; return c; }
+    private static int Exponent(Ab g) { int e = 1; for (int i = 0; i < g.N; i++) e = Lcm(e, g.Order(i)); return e; }
+
+    // First budget m at which the annihilator sequences of two groups diverge (-1 = never, up to max exponent).
+    private static int MinSepBudget(Ab x, Ab y)
+    {
+        int hi = Math.Max(Exponent(x), Exponent(y));
+        for (int m = 1; m <= hi; m++) if (Annih(x, m) != Annih(y, m)) return m;
+        return -1;
+    }
+
+    [Fact]
+    public void RingInference_ObservationBudget_WorstCaseIsTheExponent()
+    {
+        Log("");
+        Log("=== RING-INFERENCE PROBE (2026-07-11) — observation budget (gadget degree) to pin A ===");
+        Log("annihilator sequence c_m = |{a : m·a=0}|, m=1..exp; budget B <-> gadget degree B+1.");
+        Log(string.Format("{0,-10} {1,4} {2,4}   {3}", "group", "|A|", "exp", "c_1 c_2 c_3 ... c_exp"));
+        Log(new string('-', 66));
+
+        var z4 = new Ab("Z4", 4); var z22 = new Ab("Z2^2", 2, 2);
+        var z8 = new Ab("Z8", 8); var z2z4 = new Ab("Z2xZ4", 2, 4);
+        var z2z8 = new Ab("Z2xZ8", 2, 8); var z4z4 = new Ab("Z4xZ4", 4, 4);
+        var z9 = new Ab("Z9", 9); var z33 = new Ab("Z3^2", 3, 3);
+
+        foreach (var g in new[] { z4, z22, z8, z2z4, z2z8, z4z4, z9, z33 })
+        {
+            int e = Exponent(g);
+            var seq = string.Join(" ", Enumerable.Range(1, e).Select(m => Annih(g, m).ToString()));
+            Log(string.Format("{0,-10} {1,4} {2,4}   {3}", g.Name, g.N, e, seq));
+        }
+        Log("");
+
+        // Some same-order pairs separate EARLY (well below the exponent) — bounded budget suffices there.
+        int sep_8 = MinSepBudget(z8, z2z4);         // Z8 vs Z2xZ4: 2-torsion already differs (2 vs 4)
+        Assert.Equal(2, sep_8);
+        Assert.True(sep_8 < Math.Min(Exponent(z8), Exponent(z2z4)));  // 2 < 4 < 8
+
+        // But there are WORST-CASE pairs that agree on every c_m below the exponent and split only AT it:
+        int sep_16 = MinSepBudget(z2z8, z4z4);       // agree through c_3, split at c_4
+        Assert.Equal(4, sep_16);
+        Assert.Equal(Exponent(z4z4), sep_16);        // = the lower exponent (4)
+
+        int sep_9 = MinSepBudget(z9, z33);           // odd groups: NO 2-torsion signal at all; split at c_3
+        Assert.Equal(3, sep_9);
+        Assert.Equal(Exponent(z33), sep_9);          // = the lower exponent (3)
+
+        int sep_4 = MinSepBudget(z4, z22);           // the classic order-4 pair, at c_2
+        Assert.Equal(2, sep_4);
+
+        Log($"Z8 | Z2xZ4     split at budget {sep_8} (early: 2-torsion, << exp 8)");
+        Log($"Z2xZ8 | Z4xZ4  split at budget {sep_16} = exp(Z4xZ4) (agree on c_1..c_3, split only at c_4)");
+        Log($"Z9 | Z3^2      split at budget {sep_9} = exp(Z3^2) (no 2-torsion signal; needs the 3-torsion)");
+        Log("FINDING: the WORST-CASE observation budget to canonically pin A is its EXPONENT => gadget degree ~ exp(A)+1.");
+        Log("         Bounded gadget degree => only bounded-exponent rings inferable (= §11.6 ring-varying / unbounded-arity");
+        Log("         flag floor). For a FIXED ring (bounded exp) it is bounded degree = poly.");
+    }
 }

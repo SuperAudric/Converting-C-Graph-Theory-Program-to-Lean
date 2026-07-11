@@ -1096,6 +1096,24 @@ full order-profile. **Design consequence (analytically confirmed, codified by th
 must read the full order-profile ⟹ D1 must extract *higher-degree* gadget relations, not just the deg-2 negation
 relation.** This is the concrete input to B1's ring-aware D1.
 
+**Which gadget degree? — the observation-budget = exponent result (probe test 2, 2026-07-11).** A degree-`d` gadget
+`Σ_{i=1}^d x_i = 0` can *observe* the multiple `(d−1)·a` (force `d−1` of its slots to a common value via shared base
+incidence, read the last) — so **gadget degree `d` ⟺ observation budget `B = d−1`**, at which D1 knows the
+annihilator counts `c_m = |{a : m·a = 0}|` for `m ≤ B`. The probe measures the minimum budget that pins `A`:
+- Some same-order pairs split **early** — `Z/8` vs `Z/2×Z/4` differ already at `c_2` (2-torsion), budget 2 ≪ exp 8.
+- But **worst-case pairs agree on every `c_m` below the exponent and split only *at* it**: `Z/2×Z/8` vs `Z/4×Z/4`
+  (agree `c_1..c_3`, split at `c_4 = exp`); `Z/9` vs `Z/3²` (odd — *no* 2-torsion signal at all, split at `c_3 = exp`).
+- ⟹ **the worst-case observation budget to canonically pin `A` is its exponent `exp(A)`, i.e. gadget degree
+  `≈ exp(A)+1`.**
+
+**Design consequence (sharpens §11.6's flag floor).** Ring inference is bounded-degree — hence *poly* — **iff `exp(A)`
+is bounded**. Unbounded-exponent rings need unbounded gadget degree = exactly the §11.6 *ring-varying / unbounded-arity*
+flag floor (the Lichter FPC+rank≠P frontier), now with a **quantitative handle**: the D1 extraction arity B1 must
+reach is `exp(A)+1`, and the honest flag fires when the residue's exponent exceeds the arity budget. For a **fixed**
+ring (bounded `exp`) it is bounded degree ⟹ poly, matching the option-2 poly guarantee. **Next (deeper, graph-level):**
+confirm the degree⟺budget bridge on a *native `A`-multipede* (build the generator; verify D1 recovers `c_m` up to the
+gadget degree present, recognition-free) — the ring twin of D-M1, and the concrete B1 D1 spec.
+
 ### 11.14 The rigid medium negates the hidden-Johnson/Cameron construction (2026-06-21 lead)
 
 > A theoretical lead (user's insight): does the rigid setting *exclude* a hidden Johnson/Cameron, tightening the rigid
