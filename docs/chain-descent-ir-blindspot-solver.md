@@ -1177,33 +1177,34 @@ what remains for a working canonizer is the *emit-and-verify* half (below) and p
 **Pre-B1 readiness audit (2026-07-11).** What is proven vs. what B1 still needs:
 - ✅ **Recovery half (RM-1..4):** segments, forcing/support, ring `A`, kernel/rigidity — all recognition-free +
   scramble-invariant on the real refinement; integer SNF validated.
-- ◑ **RM-5 — the EMIT half (the D-M2/D-M3 twin).** *Algebraic core DONE* (`RingSolveProbe.cs`, 4 tests green):
-  the ring twins of `SolveF2`/`CosetMin` — **`SolveA`** (`Mo=target` over `A`, the gauge-fix solve), **`CosetMinA`**
-  (canonical rep of `c + im_A(M)` = the iso-invariant twist-class, the translation-gauge quotient), and
-  **`TwistClassA`** (further quotiented by the unit/Aut gauge) — validated for solve-correctness, coset-invariance,
-  coset-**separation** (nontrivial coker exercised via the triangle incidence), and unit-gauge invariance (`Z2, Z4,
-  Z2², Z6`). Brute over `A^nW` in the probe; **production = extended Smith** (transform-tracking, the invariant-factor
-  half already validated in RM-4). *Remaining RM-5 = graph integration:* read `c` recognition-free via RM-3's
-  per-segment group labelling (aligned to the extracted `M`), then emit the **state-ordered canonical adjacency**
-  (states by solved-value-as-identity, gadgets by tuple) — the D-M3 assembly. This is now mechanical given the core +
-  RM-1..4; no unknowns remain, just the labelling plumbing.
-- ⬜ **RM-6 / B3 — verify-by-reconstruction (the soundness gate).** Rebuild the graph from `(base, M, A, solution)`,
-  compare to input; mismatch → flag. Mechanical but soundness-critical; the succeed/flag verdict's iso-invariance
-  rides on it.
+- ✅ **RM-5 — the EMIT half (the D-M2/D-M3 twin).** *Algebraic core* (`RingSolveProbe.cs`, 4 tests): the ring twins of
+  `SolveF2`/`CosetMin` — **`SolveA`** (gauge-fix solve), **`CosetMinA`** (canonical rep of `c + im_A(M)` = the
+  iso-invariant twist-class, translation-gauge quotient), **`TwistClassA`** (+ unit/Aut gauge) — solve-correctness,
+  coset-invariance, coset-**separation** (nontrivial coker via the triangle), unit-gauge invariance (`Z2, Z4, Z2², Z6`).
+  Brute over `A^nW` in the probe; **production = extended Smith**. *Graph emit* (`RingWlExtractionProbe.cs`, 4 tests):
+  the **canonical adjacency** — segments by cell-id, states by solved value, gadgets by φ-tuple — is **scramble-invariant**
+  (`Z2, Z4, Z2², Z3`), untwisted case (twisted fixes the per-gadget constant via `CosetMinA`).
+- ✅ **RM-6 / B3 — verify-by-reconstruction (the soundness gate) — unified with the emit.** The emit searches for a
+  state-labelling `φ` making every gadget sum to 0 (a valid trivialisation); **success IS the reconstruction
+  certificate, failure FLAGS.** Validated: valid multipede → verifies (non-null); a corrupted gadget (tuple no longer
+  sums to 0) → **flags (null)**; non-isomorphic rings (`Z4` vs `Z2²`) → different canonical forms. So the succeed/flag
+  verdict is iso-invariant and sound by construction.
 - ⚠ **D2-general (robustness):** RM-4 read `M` by grouping gadget vertices (clean-construction shortcut); the general
   recognition-free extraction is **minimal forcing-circuits over `A`** (the Layer-C method, Option2 `ExtractRows`
-  generalized to read `A`-coefficients, not just incidence). Needed when the residue isn't a pristine native-`A`
-  multipede.
-- ⚠ **Degree / coefficient generality:** RM-3 infers `A` from a **degree-3** gadget (sufficient — fix all-but-3 to
-  reduce higher degree; degree-2 is featureless). Non-unit coefficients (e.g. `2x+y+z=0`) need `D2` to read
-  coefficients, not just support — fine for sum-zero multipedes, a note for the general ring construction.
+  generalized to read `A`-coefficients). Needed when the residue isn't a pristine native-`A` multipede.
+- ⚠ **Degree / coefficient generality:** RM-3 infers `A` from a **degree-3** gadget (sufficient — fix all-but-3;
+  degree-2 is featureless). Non-unit coefficients need `D2` to read coefficients, not just support.
+- ⚠ **Rigid-only + resolving base:** the emit uses a fixed 2-segment base (resolves rigid Circulant-6); a non-rigid or
+  higher-base residue flags (correct — the kernel symmetry is consumed upstream by the stepwise engine). Production:
+  greedy resolving base + `SolveA` in place of the brute base-labelling enumeration.
 - ⚠ **Integration bridge (DQ1 / the mixed case):** the RM probes run on a *pristine* scrambled native-`A` multipede
-  (so DQ1 = recognize-it-from-raw-adjacency is covered for that case); the residue the *descent* hands at
-  `target == -1` may have mixed/partially-consumed cells (the fold/`Aut_base` concern, §11.10 D6/B4) — the stepwise
-  engine's consume-before-force is what keeps that clean, but it's the real integration risk to watch.
+  (DQ1 covered for that case); the descent's residue at `target == -1` may have mixed/partially-consumed cells (the
+  fold/`Aut_base` concern, §11.10 D6/B4) — consume-before-force keeps it clean, the real integration risk to watch.
 
-**Verdict:** the recovery half is done; **RM-5 (emit) + RM-6/B3 (verify)** are the remaining probe-level pieces before
-B1 is pure productionization. RM-5 is the priority — without it there is no canonical output.
+**Verdict:** the full **recover → solve → emit → verify** chain is validated on the real refinement (30 ring tests, 4
+probe files, all green). **No conceptual gaps remain** — B1 is now pure productionization: lift the RM-1..6 pieces into
+an `Option2Solver` (with brute base-enumeration → `SolveA`/extended-Smith), wire at `ChainDescent.Search target == -1`
+as the stepwise engine, and keep the emit's self-verify as the sound succeed/flag gate.
 
 ### 11.14 The rigid medium negates the hidden-Johnson/Cameron construction (2026-06-21 lead)
 

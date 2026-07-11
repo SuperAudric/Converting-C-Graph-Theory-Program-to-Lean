@@ -567,4 +567,185 @@ public sealed class RingWlExtractionProbe
         }
         return (new AdjMatrix(m), t);
     }
+
+    // ── RM-5 + RM-6: canonical-form emit == verify-by-reconstruction ───────────
+    // A state-labelling φ (states → A) that makes every gadget's neighbours sum to 0
+    // is exactly a valid trivialisation of the (untwisted) native-A-multipede. Search
+    // for one from a resolving base (rigid ⟹ the base determines the rest by unit-prop);
+    // EMIT the canonical adjacency under the min such labelling. If NO consistent
+    // complete labelling exists, the input is not that multipede structure → FLAG (null).
+    // So the emit is self-verifying: success is the reconstruction certificate (B3).
+    // (Untwisted case; the twisted case fixes the per-gadget constant via CosetMinA — RingSolveProbe.)
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z4", 4)]
+    [InlineData("Z2^2", 4)]
+    [InlineData("Z3", 3)]
+    public void RM5_CanonicalForm_EmitAndSelfVerify_ScrambleInvariant(string name, int asz)
+    {
+        var A = name switch
+        {
+            "Z2" => new Ab("Z2", 2), "Z4" => new Ab("Z4", 4),
+            "Z2^2" => new Ab("Z2^2", 2, 2), "Z3" => new Ab("Z3", 3),
+            _ => throw new ArgumentException(name)
+        };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var lines = CirculantLines(nW, new[] { 0, 1, 3 });
+        var (g0, t0, _) = BuildNativeMultipede(A, lines, nW);
+
+        var forms = new List<string?>();
+        for (int s = -1; s < 3; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = g0; t = (int[])t0.Clone(); }
+            else (g, t) = ScrambleWithTypes(g0, t0, seed: 12000 + s);
+            forms.Add(BuildCanonicalFormOrFlag(g.VertexCount, ExtractAdj(g), t, nW, A));
+        }
+
+        Assert.All(forms, f => Assert.NotNull(f));          // valid multipede ⟹ self-verifies (non-flag)
+        Assert.True(forms.Distinct().Count() == 1);         // canonical form is scramble-invariant
+        _out.WriteLine($"{name,-6} canonical-form len={forms[0]!.Length} scramble-inv={forms.Distinct().Count() == 1} (self-verified)");
+    }
+
+    [Fact]
+    public void RM6_VerifyByReconstruction_FlagsCorruptedStructure_AndSeparatesTwins()
+    {
+        var A = new Ab("Z4", 4);
+        int nW = 6;
+        var lines = CirculantLines(nW, new[] { 0, 1, 3 });
+        var (g0, t0, _) = BuildNativeMultipede(A, lines, nW);
+        int n = g0.VertexCount;
+
+        // valid ⟹ verifies (non-null).
+        var good = BuildCanonicalFormOrFlag(n, ExtractAdj(g0), (int[])t0.Clone(), nW, A);
+        Assert.NotNull(good);
+
+        // corrupt: redirect one gadget-vertex edge to a different state of the same segment,
+        // so its tuple no longer sums to 0 ⟹ NO consistent labelling ⟹ verify FLAGS (null).
+        var adj = ExtractAdj(g0);
+        int segCount = nW * A.N;
+        int gv = segCount;                                   // first gadget vertex
+        int oldNbr = -1; for (int w = 0; w < n; w++) if (adj[gv * n + w] == 1) { oldNbr = w; break; }
+        int seg = oldNbr / A.N; int newNbr = seg * A.N + (oldNbr % A.N + 1) % A.N;  // sibling state, same segment
+        adj[gv * n + oldNbr] = 0; adj[oldNbr * n + gv] = 0;
+        adj[gv * n + newNbr] = 1; adj[newNbr * n + gv] = 1;
+        var flagged = BuildCanonicalFormOrFlag(n, adj, (int[])t0.Clone(), nW, A);
+        Assert.Null(flagged);                                // verify-by-reconstruction rejects it
+
+        // completeness: same base + same |A| but a DIFFERENT ring (Z4 vs Z2²) is a
+        // non-isomorphic graph ⟹ a different canonical form (both rigid, both verify).
+        var B = new Ab("Z2^2", 2, 2);
+        var (gB, tB, _) = BuildNativeMultipede(B, lines, nW);
+        var other = BuildCanonicalFormOrFlag(gB.VertexCount, ExtractAdj(gB), tB, nW, B);
+        Assert.NotNull(other);
+        Assert.NotEqual(good, other);                        // Z4-multipede ≠ Z2²-multipede
+
+        _out.WriteLine($"RM-6: valid✓ corrupt→FLAG✓ (self-verify rejects non-multipede) ring-separation(Z4≠Z2²)✓");
+    }
+
+    // canonical form or flag (null) — the untwisted D-M3 assembly, self-verifying.
+    private static string? BuildCanonicalFormOrFlag(int n, int[] adj, int[] types, int nW, Ab A)
+    {
+        int Asz = A.N;
+        var pBase = SeedFromTypes(n, types);
+        var part = new WarmPartition(n); part.Refine(adj, pBase);
+        var byCell = new Dictionary<int, List<int>>();
+        for (int v = 0; v < n; v++)
+        {
+            if (types[v] >= nW) continue;
+            if (!byCell.TryGetValue(part.CellOf[v], out var l)) byCell[part.CellOf[v]] = l = new List<int>();
+            l.Add(v);
+        }
+        var segCells = byCell.Where(kv => kv.Value.Count == Asz).OrderBy(kv => kv.Key)
+                             .Select(kv => { kv.Value.Sort(); return kv.Value; }).ToList();
+        if (segCells.Count != nW) return null;
+        var segOf = new int[n]; Array.Fill(segOf, -1);
+        for (int si = 0; si < nW; si++) foreach (int v in segCells[si]) segOf[v] = si;
+
+        var gVerts = new List<int>(); var gNbr = new List<List<(int seg, int v)>>();
+        for (int v = 0; v < n; v++)
+        {
+            if (segOf[v] != -1) continue;
+            var nb = new List<(int, int)>();
+            for (int w = 0; w < n; w++) if (adj[v * n + w] == 1 && segOf[w] != -1) nb.Add((segOf[w], w));
+            if (nb.Count >= 2) { gVerts.Add(v); gNbr.Add(nb); }
+        }
+
+        // resolving base = the first 2 segments (cell-id order); enumerate labellings, propagate.
+        var perms = Permutations(Asz);
+        string? best = null;
+        foreach (var p0 in perms)
+            foreach (var p1 in perms)
+            {
+                var phi = new int[n]; Array.Fill(phi, -1);
+                for (int k = 0; k < Asz; k++) { phi[segCells[0][k]] = p0[k]; phi[segCells[1][k]] = p1[k]; }
+                if (!Propagate(phi, gVerts, gNbr, A)) continue;
+                if (!LabellingComplete(phi, segCells, Asz)) continue;
+                var form = EmitForm(n, adj, segCells, gVerts, gNbr, phi, nW);
+                if (best == null || string.CompareOrdinal(form, best) < 0) best = form;
+            }
+        return best;
+    }
+
+    // unit-propagation of φ: a gadget with one unknown neighbour forces it = −(sum); all-known must sum to 0.
+    private static bool Propagate(int[] phi, List<int> gVerts, List<List<(int seg, int v)>> gNbr, Ab A)
+    {
+        bool changed = true;
+        while (changed)
+        {
+            changed = false;
+            for (int gi = 0; gi < gVerts.Count; gi++)
+            {
+                var nb = gNbr[gi];
+                int unknownV = -1, unknownCnt = 0, s = 0;
+                foreach (var x in nb) { if (phi[x.v] == -1) { unknownCnt++; unknownV = x.v; } else s = A.Add(s, phi[x.v]); }
+                if (unknownCnt == 0) { if (s != 0) return false; }
+                else if (unknownCnt == 1) { phi[unknownV] = A.Neg(s); changed = true; }
+            }
+        }
+        return true;
+    }
+
+    private static bool LabellingComplete(int[] phi, List<List<int>> segCells, int Asz)
+    {
+        foreach (var seg in segCells)
+        {
+            var vals = seg.Select(v => phi[v]).ToList();
+            if (vals.Any(x => x == -1) || vals.Distinct().Count() != Asz) return false;
+        }
+        return true;
+    }
+
+    // canonical vertex order: segments (cell-id) × states (by φ-value), then gadgets by φ-tuple key.
+    private static string EmitForm(int n, int[] adj, List<List<int>> segCells, List<int> gVerts,
+                                   List<List<(int seg, int v)>> gNbr, int[] phi, int nW)
+    {
+        var order = new List<int>(n);
+        foreach (var seg in segCells) order.AddRange(seg.OrderBy(v => phi[v]));
+        var keyed = new List<(string key, int v)>();
+        for (int gi = 0; gi < gVerts.Count; gi++)
+        {
+            var key = string.Join("|", gNbr[gi].OrderBy(x => x.seg).Select(x => $"{x.seg}:{phi[x.v]}"));
+            keyed.Add((key, gVerts[gi]));
+        }
+        foreach (var kv in keyed.OrderBy(x => x.key, StringComparer.Ordinal)) order.Add(kv.v);
+
+        var sb = new System.Text.StringBuilder(order.Count * order.Count);
+        for (int i = 0; i < order.Count; i++)
+            for (int j = 0; j < order.Count; j++)
+                sb.Append(adj[order[i] * n + order[j]] != 0 ? '1' : '0');
+        return sb.ToString();
+    }
+
+    private static List<int[]> Permutations(int k)
+    {
+        var res = new List<int[]>(); var a = Enumerable.Range(0, k).ToArray();
+        void Rec(int i)
+        {
+            if (i == k) { res.Add((int[])a.Clone()); return; }
+            for (int j = i; j < k; j++) { (a[i], a[j]) = (a[j], a[i]); Rec(i + 1); (a[i], a[j]) = (a[j], a[i]); }
+        }
+        Rec(0); return res;
+    }
 }
