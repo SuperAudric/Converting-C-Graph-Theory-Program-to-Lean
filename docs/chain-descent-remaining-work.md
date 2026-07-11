@@ -768,20 +768,23 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   **flags** ("polynomial-or-flag"). So §3a's reduction does **not** cover the IR-solver's case; the genuinely-uncited
   open research is **this non-schurian row 4**, which was never the seal's obligation (it is `DiscretizesAtBases`, split
   off by `stablyRecoverable_iff_symmetric_and_bases`). Closing it = closing the *overall*-canonizer poly wall.
-- **Status:** *solver not built;* prerequisites landed (deferral architecture, direction-blind canonizer substrate,
-  the potential-descent engine `exists_potential_descent`, A2's consumer chain).
+- **Status (2026-07-11):** the **ring-general rigid solver is BUILT in production** — `GraphCanonizationProject/Option2Solver.cs`,
+  the full recover→solve→emit→verify pipeline (B1a `Recover`, B1b `SolveOverA`/extended-Smith/`RecoverRing`/kernel,
+  B1c `TryCanonicalForm` self-verifying emit), **10 tests green** (`Option2SolverTests.cs`) + the RM-1..6 validation
+  chain (5 `Ring*Probe.cs` files, 30 tests). **NEXT = B2: wire at `ChainDescent.cs:315`** (replace `target = fallback`
+  with `Option2Solver.TryCanonicalForm`; success → `_bestMatrix`, else fall through). Then B5 cross-checks. B3/B6 done,
+  B4 (fold) deferred. Full build plan + gotchas: IR doc §11.12 + the STATUS handoff banner.
 - **★ ROW 4 IS NOW UNDER ACTIVE ATTACK — "option 2" (2026-06-20, IR doc §11).** The flag set is *attackable*, not just
   acceptable: the multipede is **F₂-linear**, and the descent (WL) = F₂ **unit-propagation**, which stalls where
   **Gaussian elimination** does not. **Layers A–C DONE** (probe-/prototype-clean): the rigid gap is real & constructible
   (var-regular meager expander: `dim ker = 0` but descent forcing `Θ(n)`); WL = unit-prop verified on real multipedes;
   the F₂ system `H` is **soundly extractable from the descent alone** (no gadget recognition). **Layer D
   milestones D-M0–D-M4 DONE as probes** (2026-06-20, `Option2ExtractionProbe.cs`: extract → twist-solve →
-  canonical adjacency, scramble-invariant + complete on rigid multipedes; Z₂ composition via cascade) — but
-  **entirely inside the Tests project; production has NO rigid solver and no Smith normal form**, `ChainDescent`
-  still brute-force-branches or flags at `target == -1`. **Productionization = the roadmap §11.12 (B1–B6 C# / P1–P4
-  Lean), the next planned step**, C# first, wiring at `ChainDescent.Search target == -1` **as the stepwise
-  alternating engine** (run-instead-of-branch, consume verified kernel symmetry + refine + loop, defer only on mutual
-  stall; §11.11 + STATUS). The row-space read generalizes the *deferred/unbuilt* `LinearOracle`
+  canonical adjacency, scramble-invariant + complete on rigid multipedes; Z₂ composition via cascade). **The F₂ probes
+  were then generalized to a ring-general solver and PRODUCTIONIZED** (2026-07-11, `Option2Solver.cs` + extended Smith;
+  see the Status line above and §11.13a for the RM-1..6 ring validation). `ChainDescent` still brute-force-branches at
+  `target == -1` **until B2 wires the solver in** — as the stepwise alternating engine (run-instead-of-branch, consume
+  verified kernel symmetry + refine + loop, defer only on mutual stall; §11.11 + STATUS). The row-space read generalizes the *deferred/unbuilt* `LinearOracle`
   (`TwistConstruction.cs` is the `ker`-half). **★ Immediate next (2026-07-11): design the ring FIRST** — the Z₄/ring
   validation was ephemeral Python that evaporated, so B1's ring-awareness must be re-anchored by a fresh
   ring-inference probe before build. **Scope/flag floor** (honest): option

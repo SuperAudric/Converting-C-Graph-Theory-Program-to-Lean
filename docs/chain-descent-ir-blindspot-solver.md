@@ -37,9 +37,9 @@
 > **consume-before-force** schedule. Soundness + iso-invariance ride on per-step verification + `cl_up` confluence
 > (the footing the deferral machinery already stands on), so a bad schedule costs only an *unnecessary-but-sound*
 > branch, never correctness. The **fusion-severity bound** ("no harder fusion case can arise"; instrument
-> `FusionHarvestProbe`, A_stall vs A_full) is the **efficiency guarantee** for that schedule. **NEXT = design the
-> ring first** (§11.13; the F₂ path survives in `Option2ExtractionProbe.cs`, but the Z₄/ring validation was
-> ephemeral Python that evaporated — a fresh ring-inference probe anchors B1), then build B1–B3.
+> `FusionHarvestProbe`, A_stall vs A_full) is the **efficiency guarantee** for that schedule. **STATUS 2026-07-11: the
+> ring solver is BUILT + validated in production** (`Option2Solver.cs`, recover→solve→emit→verify, B1a/b/c LANDED, 10
+> tests) — **NEXT = B2 (wire at `ChainDescent.cs:315`).** See the PICK-UP-HERE handoff banner below + §11.12.
 
 > **▶ SEPARATION MEASURED — "SUM NOT PRODUCT" (2026-07-10, C# probe `RruSeparationProbe`; detail
 > `[[project_rru_cost_probe_2026-07-10]]`).** The premise of this whole two-phase architecture — that the rigid work
@@ -115,14 +115,36 @@
 > model-level, build-first); the **ring design** is §11.13; the **rigid-medium-negates-hidden-Johnson** lead is §11.14
 > (abelian hiding vs non-abelian Johnson ⟹ rigid seal may carry *no* "or Cameron").
 >
-> **▶▶ PICK UP HERE (fresh reader).** All mechanism is validated (D-M0–D-M4 + Z₄), nothing is integrated, no Lean exists.
-> The single next action is **B1+B2+B3** (§11.12) — productionize the ring-aware solver and wire it at
-> `ChainDescent.Search` `target == -1`, with verify-by-reconstruction; **P1** (L1 extraction-soundness, F₂) can start in
-> parallel. **Before D1's ring inference is built**, run the focused **group-recovery sub-probe** (§11.13 open questions:
-> recover full `A` from a general-degree gadget relation, iso-invariantly). Reading order for onboarding: this STATUS →
-> §11.0–§11.6 (wall + mechanism) → §11.10 (D-M0–D-M4 build) → §11.11 (obstruction/engine/ceiling) → **§11.12 (roadmap) →
-> §11.13 (ring) → §11.14 (hidden-Johnson lead)**. Probes: `Option2ExtractionProbe.cs` (12 tests, the C# fixtures);
-> `/tmp/*.py` ephemeral (rebuild from §11.8 + §11.11 + §11.13).**
+> **▶▶ PICK UP HERE (fresh reader) — HANDOFF 2026-07-11.** The **ring-general rigid solver is BUILT in production and
+> validated** — `GraphCanonizationProject/Option2Solver.cs` (namespace `Canonizer`, internal), the full
+> **recover → solve → emit → verify** pipeline, **10 tests green** in `GraphCanonizationProject.Tests/Option2SolverTests.cs`:
+> - **B1a `Recover`** — (segments, ring `A`, incidence `M`) from a refined partition, recognition-free (segments via the
+>   multipede **bipartition + higher-*average*-degree side**; ring via a degree-3 Latin-square order-profile; `M` = incidence).
+> - **B1b solve** — `RecoverRing` (order-profile → invariant factors), **extended Smith** `SmithWithTransforms`,
+>   `SolveOverA`, `KernelSizeOverA` (rigidity) — all poly, validated vs brute over `A^nW`.
+> - **B1c `TryCanonicalForm`** — the self-verifying canonical emit (RM-5/6): a consistent labelling exists ⟺ the residue
+>   reconstructs, so **success = canonical form, failure = flag**. Scramble-invariant; flags corruption; separates rings.
+>
+> **THE NEXT ACTION IS B2 (§11.12): WIRE the solver at `ChainDescent.cs:315`** — the `target = fallback` line (the
+> Phase-1/Phase-2 boundary). Replace it: call the solver on `(_adj, _n, partition.CellOf, numCells)`; on a non-null
+> result set `_bestMatrix` and return; else fall through to the exhaustive branch. Behind a config flag. **⚠ Return-shape
+> adaptation:** `_bestMatrix` (`int[]`) is built by `HandleLeaf` from a **vertex ordering** via `BuildPermutedMatrix(perm)`
+> (`ChainDescent.cs:699-706`), but `TryCanonicalForm` currently returns the *serialized adjacency string* (for probe
+> byte-comparison). So B2 needs a solver entry that returns the **canonical vertex order `int[]`** — it is already computed
+> inside `EmitForm` as the `order` list; expose it (e.g. `TryCanonicalOrder`) and feed it through `BuildPermutedMatrix`
+> (composed with the pinned `_path`). The lex-min over base labellings should then min the *permuted matrix* (as
+> `HandleLeaf` does), not the string, to agree with the descent's canonical form. **Then B5** (cross-checks: multipede battery, scramble-invariance, speedup). B3+B6 are
+> DONE; B4 (fold, mixed residue) deferred. **Key B2 gotchas:** (i) the descent's `target==-1` partition already separates
+> segments (the RM probes seed this; production gets it from the pinned path) — 1-WL alone is blind on the rigid multipede;
+> (ii) the residue may be non-pristine (mixed/partially-consumed cells) → `Recover` flags → falls through (sound); the
+> clean-multipede case is what's validated (the DQ1 / §11.13a ⚠ items).
+>
+> **Validation lives in 5 ring probe files** (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
+> `RingSolveProbe`, all in the Tests project) — the RM-1..6 chain that grounds each piece; run `dotnet test --filter
+> "FullyQualifiedName~Ring"` (30 tests) + `~Option2SolverTests` (10). **Reading order:** this STATUS → §11.11 (the settled
+> **stepwise alternating engine** + consume-before-force) → §11.13a (**the ring design + RM-1..6 validation**) → §11.12
+> (**build roadmap, B1a/b/c LANDED, B2 next**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are background;
+> the ephemeral `/tmp/*.py` probes are superseded by the in-repo `Ring*Probe.cs`.
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are

@@ -142,9 +142,12 @@ unaffected (construction-agnostic).
 
 **Stage 3 — plug in the rigid solver as the `phase2` witness (★ = the IR track, separate).** `phase2` must
 satisfy `Phase2.Sound`/`IsoInvariant` (`Phase2Handoff.lean:78,86`) — witnessed by **Algorithm R**
-(`chain-descent-ir-blindspot-solver.md` §11.12: Lean P1–P4 + C# B1–B6). This is a *dependency*, not part of
-this framework: the composition is stated against the `Phase2.Solver` **contract**, so Stages 0–2 proceed
-with `phase2` abstract and the solver drops in when built.
+(`chain-descent-ir-blindspot-solver.md` §11.12). This is a *dependency*, not part of this framework: the
+composition is stated against the `Phase2.Solver` **contract**, so Stages 0–2 proceed with `phase2` abstract
+and the solver drops in when built. **Status (2026-07-11): the C# side is BUILT** — `Option2Solver.cs`
+(recover→solve→emit→verify, ring-general, 10 tests; §11.12 B1a/b/c LANDED), pending B2 (wire at
+`ChainDescent.cs:315`). The **Lean witness (P1–P4) is not started** — that is the Stage-3 Lean obligation
+proper (the C# solver is its runtime reference, per build-first).
 
 **Stage 4 — poly-or-flag for the composition (★, = the cost bridge).** `phase1` poly (bounded consume path:
 `defaultSpineChain_reaches_leaf` ≤ n nodes, per-node `descentCost_le` ≤ n⁴) + `phase2` poly-or-flag ⟹ the
