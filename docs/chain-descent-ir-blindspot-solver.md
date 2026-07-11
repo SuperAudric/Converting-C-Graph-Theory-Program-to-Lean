@@ -39,7 +39,8 @@
 > branch, never correctness. The **fusion-severity bound** ("no harder fusion case can arise"; instrument
 > `FusionHarvestProbe`, A_stall vs A_full) is the **efficiency guarantee** for that schedule. **STATUS 2026-07-11: the
 > ring solver is BUILT + WIRED + validated in production** (`Option2Solver.cs`, recover→solve→emit→verify, B1a/b/c +
-> **B2 LANDED**) — **NEXT = B5 (multipede battery + speedup) then B1d completeness.** See the PICK-UP-HERE handoff below + §11.12.
+> **B2 + B5 LANDED**) — **NEXT = B1d (wire the `SolveOverA` gauge-fix into the emit — needed for COMPLETENESS, see below).**
+> See the PICK-UP-HERE handoff below + §11.12.
 >
 > **▶ B2 WIRING — THE ISO-INVARIANCE FINDING (2026-07-11, empirically forced).** B2 must fire at the **ROOT (depth 0)**,
 > NOT at the deferral boundary `target == -1`. The first (naive) wiring at `target == -1` **broke iso-invariance**: on
@@ -147,13 +148,17 @@
 > exhaustive branch's global-lex-min form — mixing them per-labelling **broke iso-invariance** (empirically, Z3 gave two
 > forms). The root partition is iso-invariant, so B2 fires uniformly (every labelling or none). The return-shape
 > adaptation (order → `BuildPermutedMatrix(inverse(order))`, string vs matrix) is done and the two conventions agree
-> byte-for-byte (row-major, 0/1). **THE NEXT ACTION IS B5** (multipede battery: canonizes + scramble-invariant + speedup
-> measurement + flag-set-shrink; CFI/Cameron non-firing already confirmed) **then B1d** (the three completeness/generality
-> items: general arity via pin-`d−3`, try-both-sides side-selection, large-`|A|` `SolveOverA` gauge-fix). B3+B6 DONE; B4
-> (σ-fold, mixed / pinned-prefix residue — the case B2 v1 deliberately does NOT handle) deferred. **Key facts:** (i) B2
-> fires only when the root residue is a clean FULL native-A multipede (`TryCanonicalOrder` covers all n vertices); a mixed
-> / partially-symmetric graph is not, so it falls through (sound); (ii) CFI does not trigger it (1-WL cells span both
-> bipartition sides ⟹ `Recover` null), so the linear-oracle harvest is untouched.
+> byte-for-byte (row-major, 0/1). **B5 IS ALSO LANDED (2026-07-11, 21 Option2Solver tests, regressions clean).** It
+> validated firing + speedup + scramble-invariance on the ring and small-circulant multipedes, ring separation, CFI
+> non-firing, and the sound-across-the-boundary safety guarantee — AND surfaced the emit's **completeness boundary**: the
+> brute-2-segment-base + unit-propagation emit stalls at m≥8 (the trivialisation needs simultaneous linear solving), so
+> B2 fires at m=5,6 and falls through (sound) at m≥8. **THE NEXT ACTION IS B1d — wire the already-built B1b `SolveOverA`
+> Smith gauge-fix into the emit** (per-segment gauge variables → `M·g = twist` over `A` → iso-invariant `CosetMin`),
+> which closes BOTH the unit-prop completeness stall and the bounded-`|A|` `|A|!²` poly gap; then arity pin-`d−3` and
+> try-both-sides side-selection. B3+B6 DONE; B4 (σ-fold, mixed / pinned-prefix residue — the case B2 v1 deliberately does
+> NOT handle) deferred. **Key facts:** (i) B2 fires only when the root residue is a clean FULL native-A multipede AND a
+> 2-segment base unit-propagates to all of it; (ii) CFI does not trigger it (1-WL cells span both bipartition sides ⟹
+> `Recover` null), so the linear-oracle harvest is untouched.
 >
 > **Validation lives in 5 ring probe files** (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
 > `RingSolveProbe`, all in the Tests project) — the RM-1..6 chain that grounds each piece; run `dotnet test --filter
@@ -1049,9 +1054,16 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
     to a degree-3 sum-zero (constant) relation — the cycle-structure read is translation-invariant so `A` is still recovered
     (do NOT marginalise: a projected cube is all of `A³`). (ii) **Side-selection** — replace the average-degree *heuristic*
     with **try-both-sides + self-verify selects** (2×, removes the completeness risk; the φ-search backstop makes the current
-    heuristic *sound* but a mis-pick flags a canonicalisable residue). (iii) **Large-`|A|` poly** — wire the `SolveOverA`
-    gauge-fix (concern above). Plus the general **minimal-forcing-circuit** extraction over `A` (Option2 `ExtractRows`
-    generalized) for non-pristine residues (the ⚠ items, §11.13a).
+    heuristic *sound* but a mis-pick flags a canonicalisable residue). (iii) **`SolveOverA` gauge-fix — now the TOP B1d
+    item, needed for COMPLETENESS (not only large `|A|` poly).** ▶ B5 FINDING (2026-07-11): the brute-2-segment-base +
+    **unit-propagation** emit only completes when propagation from 2 segments reaches every segment. On the production
+    circulant multipede it does at m=5,6 (B2 fires) but **STALLS at m≥8** — `Recover` still succeeds (Z2, segments
+    recovered identically) but `TryCanonicalOrder` → null because the unique trivialisation needs simultaneous linear
+    solving over the cyclic constraint graph that unit-prop cannot do. Sound (m≥8 fall through), but incomplete. The fix
+    is the already-built B1b `SolveOverA` Smith solve: extract the per-segment gauge variables, solve `M·g = twist` over
+    `A` directly (base-independent, complete), pick the iso-invariant coset rep (`CosetMin`) for the gauge, apply. This
+    also closes the bounded-`|A|` poly gap above (collapses the `|A|!²` enumeration). Plus the general
+    **minimal-forcing-circuit** extraction over `A` (Option2 `ExtractRows` generalized) for non-pristine residues (§11.13a).
 - **B2 Wire — LANDED (2026-07-11, `ChainDescent.cs`).** Solver exposes `TryCanonicalOrder` (the canonical vertex order;
   `_bestMatrix = BuildPermutedMatrix(inverse(order))`, agreeing byte-for-byte with the descent's leaf convention),
   wired in `ChainDescent.Search` behind `EnableRigidSolver` (**default ON**). On a full-permutation order → set
@@ -1065,9 +1077,15 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
   reconstructs). Iso-invariant succeed/flag verdict by construction; keep as the gate.
 - **B4 Fold (D6)** — use harvested `σ` in `Automorphisms` to quotient onto one copy before solving (doubled/`Aut_base`);
   the iso-invariant `σ`-fold. The one non-mechanical piece; off the single-multipede path; the mixed-residue bridge.
-- **B5 Cross-checks** — scramble-invariance, exhaustive size-5/6 unique-canonical counts, Even≠Odd, the multipede
-  battery (canonizes + scramble-invariant + agrees with the existing canonizer where it already handles), a speedup
-  measurement, flag-set-shrink on a flagging fixture. "Prove it works" empirically.
+- **B5 Cross-checks — LANDED (2026-07-11, `Option2SolverTests`, 21 green; regressions clean).** The battery: B2 fires +
+  canonicalizes + scramble-invariant matrix on the native ring multipedes (Z2/Z4/Z2²/Z3) and the production circulant at
+  m=5,6, with a speedup (`on.nodes ≤ off.nodes`); distinct rings (Z4 vs Z2²) separate; **CFI does NOT trigger B2** (its
+  1-WL cells span both bipartition sides ⟹ `Recover` null, harvest/orbit-pruning intact — LinearOracle/CFI 18 green);
+  Multipede/Cameron/Twist/Footprint 81 + core GraphCanonTests 69 regress-clean. **The safety guarantee across the firing
+  boundary is tested (`B5_ProductionMultipede_SoundAcrossFiringBoundary`, m=5,6,8,9): verdict + canonical matrix are
+  scramble-invariant whether or not B2 fires** (firing is uniform per graph, root-gated). The B5 FINDING (the unit-prop
+  completeness stall at m≥8) is the top B1d item — see B1d (iii). Deferred B5 extras: exhaustive size-5/6 unique-canonical
+  counts, Even≠Odd on a CFI-style twin, a dedicated flag-set-shrink fixture.
 - **B6 Ring — DONE** (built into RM-3/4/5; the Smith solve + relational ring inference, §11.13a).
 
 **PROVE track (Lean) — the rigid seal.** *New infrastructure: the rigid residue is a NON-schurian coherent configuration,

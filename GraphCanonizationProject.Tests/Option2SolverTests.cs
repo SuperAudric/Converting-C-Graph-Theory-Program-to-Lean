@@ -188,6 +188,110 @@ public sealed class Option2SolverTests
         _out.WriteLine($"{name,-6} B2 fired ({totalFired}×), |A|={asz}, canonical scramble-inv=True");
     }
 
+    // ── B5: the cross-check battery — "prove it works" on the REAL descent ────────
+    // Runs the PRODUCTION multipede (MultipedeGenerator, the F₂ CFI-parity fixture the
+    // canonizer already knows as the IR-blind-spot) through the full descent B2-ON vs OFF.
+    //
+    // ⚠ B5 FINDING (the emit's completeness boundary): B2 v1's emit fixes a 2-SEGMENT base
+    // and UNIT-PROPAGATES the sum-zero constraints. That completes only when propagation
+    // from 2 segments reaches every segment; for the circulant it does at m=5,6 but STALLS
+    // at m≥8 (the trivialisation is unique but needs simultaneous linear solving — Gaussian /
+    // the already-built `SolveOverA` Smith gauge-fix — which unit-prop cannot do). So B2 FIRES
+    // where unit-prop completes and FALLS THROUGH (sound) elsewhere. Wiring `SolveOverA` into
+    // the emit closes this (B1d) — it is needed for COMPLETENESS, not only large |A|.
+    [Theory]
+    [InlineData(5)]
+    [InlineData(6)]
+    public void B5_ProductionMultipede_FiresWhereUnitPropCompletes_Speedup(int m)
+    {
+        var mp = MultipedeGenerator.BuildCirculant(m);
+        int n = mp.Graph.VertexCount;
+        const long budget = 5000;
+
+        var on = RunDescent(n, Flat(mp.Graph), SeedFromTypes(n, mp.VertexTypes), budget, rigid: true);
+        var off = RunDescent(n, Flat(mp.Graph), SeedFromTypes(n, mp.VertexTypes), budget, rigid: false);
+
+        Assert.True(on.fired > 0, $"B2 did not fire on production Circulant{m}");
+        Assert.False(on.flagged);                          // B2 canonicalizes the IR-blind-spot residue
+        Assert.NotNull(on.matrix);
+        Assert.True(on.nodes <= off.nodes);                // speedup: never costs more than the exhaustive path
+        _out.WriteLine($"Circulant{m} n={n}: ON[fired={on.fired} nodes={on.nodes}]  " +
+                       $"OFF[flag={off.flagged} nodes={off.nodes}]  flagShrink={(off.flagged && !on.flagged)}");
+
+        // the B2 canonical matrix is scramble-invariant (the real correctness claim).
+        string? form0 = MatrixString(on.matrix!);
+        for (int s = 0; s < 4; s++)
+        {
+            var (g2, t2) = ScrambleWithTypes(mp.Graph, mp.VertexTypes, 16000 + s);
+            var r = RunDescent(n, Flat(g2), SeedFromTypes(n, t2), budget, rigid: true);
+            Assert.True(r.fired > 0);
+            Assert.False(r.flagged);
+            Assert.Equal(form0, MatrixString(r.matrix!));
+        }
+    }
+
+    // The SAFETY guarantee across the firing boundary: whether or not B2 fires, the full
+    // descent's verdict AND (when canonical) its canonical matrix are SCRAMBLE-INVARIANT.
+    // B2 fires uniformly per graph (root-gated on the iso-invariant partition), so no graph
+    // mixes the two forms; m≥8 (unit-prop stalls ⟹ B2 does not fire) exercises the sound
+    // fall-through. This test stays green when B1d makes m≥8 fire (it asserts invariance, not
+    // firing) — a regression guard for the boundary, not a freeze of it.
+    [Theory]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(8)]
+    [InlineData(9)]
+    public void B5_ProductionMultipede_SoundAcrossFiringBoundary(int m)
+    {
+        var mp = MultipedeGenerator.BuildCirculant(m);
+        int n = mp.Graph.VertexCount;
+        const long budget = 5000;
+
+        (bool flagged, string? form, int fired)? baseline = null;
+        for (int s = -1; s < 4; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = mp.Graph; t = mp.VertexTypes; }
+            else (g, t) = ScrambleWithTypes(mp.Graph, mp.VertexTypes, 17000 + s);
+            var r = RunDescent(n, Flat(g), SeedFromTypes(n, t), budget, rigid: true);
+            (bool flagged, string? form, int fired) cur = (r.flagged, r.matrix == null ? null : MatrixString(r.matrix), r.fired);
+            baseline ??= cur;
+            Assert.Equal(baseline.Value.flagged, cur.flagged);   // verdict scramble-invariant
+            Assert.Equal(baseline.Value.form, cur.form);         // canonical matrix scramble-invariant (or both null)
+            Assert.Equal(baseline.Value.fired > 0, cur.fired > 0); // firing is uniform per graph
+        }
+        _out.WriteLine($"Circulant{m}: verdict+form scramble-invariant; B2 fired={baseline!.Value.fired > 0} " +
+                       $"(m≥8 unit-prop stall ⟹ sound fall-through)");
+    }
+
+    // B5 separation: two DIFFERENT rings (same size/base) ⟹ DISTINCT canonical forms
+    // through the full descent — the canonizer distinguishes non-isomorphic residues.
+    [Fact]
+    public void B5_DistinctRings_ProduceDistinctCanonicalForms()
+    {
+        int nW = 6; var lines = CirculantLines(nW, new[] { 0, 1, 3 });
+        var (g4, t4) = BuildNativeMultipede(new Ab(4), lines, nW);       // Z4
+        var (gv, tv) = BuildNativeMultipede(new Ab(2, 2), lines, nW);    // Z2²  (same |A|=4, same base)
+        int n4 = g4.VertexCount, nv = gv.VertexCount;
+
+        var r4 = RunDescent(n4, Flat(g4), SeedFromTypes(n4, t4), 5000, rigid: true);
+        var rv = RunDescent(nv, Flat(gv), SeedFromTypes(nv, tv), 5000, rigid: true);
+        Assert.True(r4.fired > 0 && rv.fired > 0);
+        Assert.False(r4.flagged); Assert.False(rv.flagged);
+        Assert.Equal(n4, nv);                                // same vertex count
+        Assert.NotEqual(MatrixString(r4.matrix!), MatrixString(rv.matrix!));   // different ring ⟹ different form
+    }
+
+    private (int fired, bool flagged, long nodes, int[]? matrix) RunDescent(
+        int n, int[] adj, sbyte[] seed, long budget, bool rigid)
+    {
+        var d = new ChainDescent(n, adj, new CascadeOracle(), budget) { EnableRigidSolver = rigid };
+        var res = d.Canonize((sbyte[])seed.Clone(), new WarmPartition(n));
+        return (d.RigidSolverCanonicalized, res.Flagged, res.Stats.NodeCount, res.Matrix);
+    }
+
+    private static string MatrixString(int[] m) => string.Concat(m.Select(x => x == 0 ? '0' : '1'));
+
     [Fact]
     public void B1b_RecoverRing_Solve_Kernel_MatchGroundTruth()
     {

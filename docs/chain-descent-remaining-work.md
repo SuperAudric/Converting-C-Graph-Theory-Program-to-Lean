@@ -776,8 +776,12 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   **★ B2 fires at the ROOT (`depth == 0`), NOT at `target == -1`:** the boundary node is labelling-dependent and B2's
   φ-form ≠ the exhaustive global-lex-min form, so mixing them there broke iso-invariance (Z3 → two forms); the root
   partition is iso-invariant, so B2 fires uniformly or not at all. v1 scope = pristine whole-graph multipede (mixed =
-  B4). **NEXT = B5** (multipede battery + speedup + flag-shrink) **then B1d** (arity/side-selection/large-`|A|`
-  completeness). B3/B6 done. Full plan + the iso-invariance finding: IR doc §11.12 + the STATUS banner.
+  B4). **B5 LANDED** (21 Option2Solver tests): fires + speedup + scramble-inv on ring/small-circulant multipedes, ring
+  separation, CFI non-firing, sound-across-the-boundary. **B5 FINDING:** the brute-2-seg-base + **unit-propagation** emit
+  stalls on larger multipedes (production circulant m≥8 — `Recover` OK but `TryCanonicalOrder` null, unit-prop can't solve
+  the cyclic trivialisation); sound (falls through) but incomplete. **NEXT = B1d — wire the built B1b `SolveOverA` Smith
+  gauge-fix into the emit** (needed for COMPLETENESS, not only large `|A|`), then arity pin-`d−3` + try-both-sides.
+  B3/B6 done. Full plan + findings: IR doc §11.12 + the STATUS banner.
 - **★ ROW 4 IS NOW UNDER ACTIVE ATTACK — "option 2" (2026-06-20, IR doc §11).** The flag set is *attackable*, not just
   acceptable: the multipede is **F₂-linear**, and the descent (WL) = F₂ **unit-propagation**, which stalls where
   **Gaussian elimination** does not. **Layers A–C DONE** (probe-/prototype-clean): the rigid gap is real & constructible
