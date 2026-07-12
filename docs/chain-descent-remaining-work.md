@@ -32,127 +32,20 @@
 > single deterministic path with no branching/oracle/phases, and its completeness pushed through only by assuming every
 > node flags (`hflag` uninhabited ⟹ `descentCanon_showcase*` vacuous). The reusable confinement substrate:
 
-**1. hImprim / primitivity — SILENT `hprim` REMOVED, WALL-FREE + AXIOM-CLEAN (2026-07-09; NOT the wall).**
-**★★★ LANDED (`ScratchConfinementCellImprim.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, additive,
-NOT in build.sh):** the confinement is now **total in primitivity** — the silent `hprim` is gone. Capstone
-`confinement_selectedCellIsOrbit_spine_cell_total` composes Piece 1's proved dichotomy (`¬IsPrimitive ∨ Cameron`)
-with the wall-free `FrameSelectorTransitive → SelectedCellIsOrbit` tail, routing **each** branch to `FST`: Cameron via
-`hWitt`, imprimitive via the new explicit `hImprimTrans : ¬IsPrimitive → FrameSelectorTransitive` (transitivity, NEVER
-`BlockRefinementVisible`). Threaded end-to-end to the **total ① showcase** `descentCanon_showcase_cell_total` (sound ∧
-complete, no silent `hprim`; bundle `ConfinementCitationsCellTotal` reads {G3, Liebeck, Witt, `hImprimTrans`, D0}).
-`hImprimTrans` is a CARRIED family input with the same downstream status as `hWitt` (vacuous on the primitive rank-3
-forms families; per-family/generic discharge is downstream, off the critical path, never the wall). Confinement carried
-`hprim : IsPrimitive`. **★★ KEY VERIFICATION (2026-07-09): discharging it does NOT require the wall.** The soundness need
-is `SelectedCellIsOrbit` = "the selected cell is ONE `R`-orbit (vertex-transitive)". **Imprimitive is STILL VT** (transitive
-*with* a finer invariant partition INSIDE the orbit — blocks do NOT split the orbit into several orbits; confirmed:
-`schemeBlock_fiber_transitive`/`schemeBlocks_transitive` both open with `haveI := schemeAutGroup_isPretransitive S`, i.e.
-they describe block structure INSIDE an already-transitive scheme). So an imprimitive residue SATISFIES `SelectedCellIsOrbit`
-and assume-VT-pruning it is SOUND — imprimitivity is **not a soundness concern at all**. `hprim` is a *certification* fact
-(it routes VT-certification through G3 → Cameron → Witt), not a soundness requirement.
-  - **★ PRIMARY discharge (generic, wall-free): block-tower transitivity-PRESERVATION.** A large-imprimitive residue stays
-    vertex-transitive: `schemeBlocks_transitive` (quotient transitive, `Scheme.lean:3963`) + `schemeBlock_fiber_transitive`
-    (fiber transitive, `Scheme.lean:3949`) — **both proved, both open with `haveI := schemeAutGroup_isPretransitive S`** ⟹
-    whole scheme transitive ⟹ the cell is one orbit ⟹ `SelectedCellIsOrbit`. NO `BlockRefinementVisible`, no WL-dimension,
-    no per-family case-work. This is the recommended primary route (2026-07-09 correction — see the next bullet for why the
-    former "primary" is not wiring). Remaining build = a **bridge lemma** "scheme block-tower transitivity ⟹ `SelectedCellIsOrbit`",
-    which shares the descent-`Aut`↔`SchemeAutGroup` identification (cell-faithfulness / `IsBase(T∪C)`) with checklist item 2 —
-    so items 1 and 2 are ONE work-front here, not two.
-  - **◐ SECONDARY (per-family vacuity): `G₀Irreducible ⟹ IsPrimitive` — FORWARD-M1 NOW BUILT (2026-07-09, axiom-clean).**
-    `ScratchAffinePrimitive.irreducible_imp_isPrimitive_affineScheme` proves the genuine **dual** of the pre-existing
-    `isPrimitive_affineScheme_imp_irreducible` (which was the *converse* `IsPrimitive → G₀Irreducible`; the doc/memory had
-    mis-cited it — orientation corrected). Proof = the block-system `I` ⟹ `G₀`-invariant subspace `W = {v | orbital(v) ∈ I}`
-    construction (closure = the intersection-number step of `schemeEquiv_trans` run additively), then irreducibility forces
-    `W ∈ {⊥,⊤}` ⟹ `I ∈ {{0},univ}`. Completes the intended `IsPrimitive ⟺ G₀Irreducible` (`CascadeAffine.lean:2203`). This
-    discharges `hImprimTrans` **vacuously** for the entire affine residue class: `G₀Irreducible` (checkable — `G0cyc_irreducible`
-    `:3434`, `G0pow` field-generation) → `IsPrimitive(affineScheme G₀)` → (via the `M.S`↔`affineScheme` seam = item 2)
-    `M.S.IsPrimitive` → `hImprimTrans := fun himp => absurd hprim himp`. **Remaining coupling:** the `M.S`↔`affineScheme` seam
-    (item 2). So `hImprimTrans` is discharged for affine residues **modulo the seam** — no longer a carried assumption for that
-    class, and the generic backstop (block-tower transitivity-preservation) covers any hypothetical non-affine imprimitive.
-  - **★ DEAD ROUTE — do NOT use `cell_splits_of_imprimitive` / `BlockRefinementVisible`.** That is the SEAL's
-    (`reachesRigidOrCameron` `hImprimitive`, `Cascade.lean:3278`) WL-VISIBILITY / recovery mechanism — `BlockRefinementVisible`
-    is literally "the WL-dimension boundary" = `hSmallAutThin` = THE WALL. Algorithm A assume-VT-PRUNES (needs only VT, which
-    the block tower PRESERVES); it never RECOVERS/splits, so it never needs visibility. **A 2026-07-09 mis-scoping routed the
-    confinement's imprimitive case through this seal mechanism and thereby REINTRODUCED the wall; that routing is discarded.**
-    Algorithm A stays unconditional-modulo-citations because P1 (flag ⟹ large `Aut`) excludes every small-`Aut` residue —
-    the entire regime where the wall lives — from flagging. Detail = [[project_seal_phase_wrapup_2026-07-09]].
-
-**2. SchurianScheme / `M` — a MODELLING gap, NOT an UnhandledResidue (corrected 2026-07-09).**
-**★★★ PRIMITIVITY LEG BUILT (2026-07-09, axiom-clean).** The seam has three legs — (primitivity), (2-closure/`hcard` count),
-(the recovery `SchemeRealizes f S (affineScheme G₀)` itself). The **primitivity leg is DONE end-to-end**:
-`ScratchSchemeRealizesPrimitive.isPrimitive_of_schemeRealizes` (`IsPrimitive` transports along `SchemeRealizes`, via the
-conjugation iso `S.SchemeAutGroup ≅ X.SchemeAutGroup` + `MulAction.isPreprimitive_congr` + `isPreprimitive_iff_isPrimitive`
-— no `Fin (rank+1)` dependent types), composed with forward-M1 into `isPrimitive_of_realizes_affineScheme`: **recovery
-`SchemeRealizes f S (affineScheme G₀)` (carried like Route C's `hreal`) + `G₀Irreducible` ⟹ `S.IsPrimitive`.** This closes
-item-1's `M.S.IsPrimitive` need (hence `hImprimTrans`) for the affine class.
-**★★★ LEG (b) — SKRESANOV 2-CLOSURE CITATION ELIMINATED (2026-07-09, axiom-clean).** The count bridge `hcard` was
-weakened from the Skresanov **equality** `|SchemeAutGroup(M.S)| = spineResidualCard` to a **lower bound**
-`hcard_le : spineResidualCard ≤ |SchemeAutGroup(M.S)|` — sound because `confinementLargeScheme` is a strict lower bound
-(`2^baseMax n < |SchemeAutGroup|`) and `hcard` is consumed ONLY there. The lower bound is **provable from the FREE
-direction alone** (`ScratchOrbitalSchemeAutLower.{le,card_le}_schemeAutGroup_orbitalScheme`: `G ≤ SchemeAutGroup(orbitalScheme G)`
-via `orbMk_smul`) — **no `AffineSchemeTwoClosed`/`h2c`**. `cellSchemeModel_of_group` no longer takes `h2c`; the whole
-cell cluster + total showcase re-verified axiom-clean. **Remaining for (b) (all PROVABLE, no citations, per the
-no-carried-hypotheses discipline):** `hT` (base identification `|StabilizerAt T| = spineResidualCard`, definitional at
-the spine `D_k`) + `hf : CellActionFaithful` (⟸ `IsBase(T∪C)` ⟸ `isotropic_span`, a form fact). **Remaining leg (c):**
-the actual recovery witness `SchemeRealizes f S (affineScheme G₀)` (the deep, Route-C-shared form-recovery content) —
-**RESOLVED as a carried CITATION (2026-07-09): leg (c) is a known-true classification fact in a known-true form, not a
-project-internal claim, so it is carried in the same firewall slot as G3/Liebeck (exactly as Route C carries `hreal`),
-NOT proven in-project.**
-**★★★ AFFINE INSTANTIATION LANDED — THE REBUNDLE, CONCRETE (2026-07-09, `ScratchConfinementCellAffine.lean`, all
-axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build.sh).** The abstract `ConfinementCitationsCellTotal`
-carries `hImprimTrans` as the honest "supplied-at-instantiation" slot; the abstract 3-item collapse is **not** cleanly
-available (the redundancy is arity-dependent: `SchemeRealizes f M.S (affineScheme G₀)` only typechecks at
-`cellCard C = p^d`, so it resolves only at per-family instantiation — confirming pick-up item 3). This file is the FIRST
-such instantiation and makes the collapse concrete for the affine forms family:
-  - `AffineRealizedResidue M G₀ hneg := ∃ (hC : cellCard C = p^d) f, SchemeRealizes f (hC ▸ M.S) (affineScheme G₀ hneg)`
-    — the leg-(c) citation, concretely (Route C's `hreal` for the cell model). Arity handled by two subst-based cast
-    helpers (`hne_cast`/`isPrimitive_uncast`, bound-variable casts).
-  - `isPrimitive_of_affineRealizedResidue` — **`M.S.IsPrimitive` DERIVED** from the citation (forward-M1 via
-    `isPrimitive_of_realizes_affineScheme` + transport); `hImprimTrans_of_affineRealizedResidue` — **`hImprimTrans`
-    DERIVED** (vacuous via `hImprimTrans_of_primitive`). So both the silent `hprim` and the carried `hImprimTrans` are
-    **gone — replaced by the single honest realization citation.**
-  - `ConfinementCitationsCellAffine` bundle (drops the `hImprimTrans` field for global `hirr` + per-node `hRealize`) +
-    `descentCanon_showcase_cell_affine` — the ① showcase (sound ∧ complete) with the collapse at the ① level,
-    reusing CellImprim's `_total` adaptor. Citation base reads {G3, Liebeck, Witt, **realization-citation**, D0}.
-So for the affine class the seam's imprimitive-branch obligation is now discharged by an honest external citation, not a
-carried project-assumption.
-**★★★ LEG (b) `hT` DISCHARGED (2026-07-09, axiom-clean, `cellSchemeModel_of_group_spine`).** `spineResidualCard adj P₀
-χι₀ sel k` is *defined* as `Nat.card (StabilizerAt adj (defaultSpineChain … k).P (defaultSpineChain … k).D)`
-(`ScratchConfinementP1`), so fixing the model's base to the level-`k` spine prefix (`T := (defaultSpineChain … k).D`,
-`P := (defaultSpineChain … k).P`) makes `hT` **definitional** — discharged by `rfl` in the spine-specialized constructor.
-`hT` drops out of the carried inputs; the constructor now takes only the family facts (`hf`/faithfulness, `hsymm`,
-`hrank`) + the Witt-supplied `htrans_cell`. **Remaining for leg (b):** only `hf : CellActionFaithful` ⟸ `IsBase(T∪C)`
-[`cellActionFaithful_of_isBase`, DONE] ⟸ `isotropic_span` (the form fact, form-recovery-coupled, DOWNSTREAM). **State is
-now PORT-ready** modulo that one form-coupled discharge. Confinement carries
-`M : ResidueSchemeModel` (a faithful schurian scheme of the residue). This is **not** a D0/`residueNonSchurian` flag:
-Phase-1 **recovers** (assume-VT prune), never emits `none` (`none` is Phase-2/rigid only), and the residue it handles is
-**node-4 = schurian + Cameron**. So `M` is a Lean modelling task. **Resolution (scoped 2026-07-09): the Skresanov 2-closure
-citation IS usable** — `affineScheme G₀ := orbitalScheme(affineG G₀)` (`CascadeAffine.lean:2204`) is `SchurianScheme` **by
-construction**, and `AffineSchemeTwoClosed` (`RouteCSeam.lean:196`) gives `SchemeAutGroup(affineScheme G₀) = affineG G₀`
-(the known classical group). So resolving `M` = (a) a scheme-extraction constructor `orbitalScheme(residual group) →
-ResidueSchemeModel`; (b) the 2-closure citation for `hcard` (`|SchemeAutGroup| = |StabilizerAt| = spineResidualCard`);
-(c) the group-supply / faithfulness bridge (exhibit the residue's residual `Aut` — the piece the source called the
-"faithfulness gap"; either recovered à la Route C, or via the pretransitive assume-VT group). **CRUCIAL COUPLING: 2-closure
-needs the residue PRIMITIVE rank-3 first ⟹ depends on item 1.** Not a wall: one citation + a constructor + a bridge.
-**★★ FAITHFUL CELL MODEL — BUILT + RETHREADED END-TO-END (2026-07-09, all axiom-clean, additive; old cardinality showcase
-preserved).** The model lives on the SELECTED CELL `sel (χsel T) ≅ Fin (cellCard C)` (NOT the whole complement — the residual
-is transitive within a colour class but not across it, `FrameSelectorTransitive`; the earlier whole-complement `{x//x∉D}`
-construction in `ScratchConfinementResidual.lean` is faithful-but-intransitive SUBSTRATE, not the model). Cluster (5 files):
-  - `ScratchConfinementCellModel.lean` — `CellSchemeModel` (S : `SchurianScheme (cellCard C)`, faithful) + constructor
-    `cellSchemeModel_of_group`; Witt bridge `htrans_cell_of_frameSelectorTransitive` (transitivity IS supplied by Witt,
-    non-vacuous); `CellInvariant` DISCHARGED (`cellInvariant_selCell_indivWarmRefine`, colour-invariance); **`CellActionFaithful`
-    reduced to `IsBase`** (`cellActionFaithful_of_isBase` — `K=1 ⟺ StabilizerAt(T∪C) trivial = IsBase(T∪C)`, the descent's
-    discretization predicate; forms discharge = `isotropic_span`, downstream).
-  - `ScratchConfinementCellP3.lean` — `PrimRank3ClassicalCell` + `residue_primRank3ClassicalCell` + the largeness bridge +
-    `confinement_selectedCellIsOrbit_spine_cell_discharged` (plugs into the generic assembly, which is abstract in the
-    predicate — so the rethread is ADDITIVE); plus item-1 Piece 1 `cellResidue_imprimitive_or_cameron`.
-  - `ScratchConfinementCellWitt.lean` — `confinement_selectedCellIsOrbit_spine_witt{,_classical}_cell` (Liebeck arity-poly).
-  - `ScratchConfinementCellComplete.lean` — `ConfinementCitationsCell` bundle (per-node `M : ∀ H done, Σ C, CellSchemeModel`)
-    + **`descentCanon_showcase_cell`** = the ① showcase (sound ∧ complete) on the FAITHFUL model, sorry-free.
-  - `ScratchConfinementSchurianModel.residueModel_of_orbitalGroup` (the on-`Fin n` constructor; superseded by the cell one).
-So G3 now genuinely classifies the residue CELL (`Aut(S) =` the residual cell action). **REMAINING:** (i) the forms
-`IsBase(T∪C)` discharge via `isotropic_span` (couples to form-recovery, downstream); (ii) a minor cleanliness item — the
-faithful `M`'s construction already presupposes `htrans_cell` (= Witt-transitivity), so `M`-existence and the carried `hWitt`
-overlap (redundancy, not unsoundness; resolve at per-family instantiation). Detail = [[project_seal_phase_wrapup_2026-07-09]].
+**1–2. Confinement substrate (hImprim wall-free + the SchurianScheme model seam) — RETAINED as the interleaved consume
+step's large-Aut classification machinery; the per-leg build-log is condensed here (math intact, architecture subsumed).**
+- **hImprim is wall-free — NOT the wall.** An imprimitive residue stays vertex-transitive (block-tower transitivity:
+  `schemeBlocks_transitive` + `schemeBlock_fiber_transitive`, `Scheme.lean`), so each branch routes to
+  `FrameSelectorTransitive`, never through `BlockRefinementVisible` (= the WL-dimension wall). Discharged vacuously for
+  the affine class (`irreducible_imp_isPrimitive_affineScheme`, `ScratchAffinePrimitive.lean`); generic backstop =
+  block-tower transitivity-preservation. File: `ScratchConfinementCellImprim.lean`.
+- **The SchurianScheme model `M` = the D0 MODELLING GAP** (endgame §4.1, `Publication.lean` D0), not an unhandled
+  residue. Seam = 3 legs: primitivity (built, `isPrimitive_of_schemeRealizes`); the 2-closure count (the Skresanov
+  `AffineSchemeTwoClosed` citation was **eliminated from this leg** — weakened to the free lower bound `hcard_le`,
+  `ScratchOrbitalSchemeAutLower`); the recovery witness (carried as a classification citation, like Route C's `hreal`).
+  Faithful cell model = `ScratchConfinementCellModel.lean` (`cellSchemeModel_of_group`). **The one open discharge** =
+  `IsBase(T∪C)` faithfulness via `isotropic_span` (a form fact, form-recovery-coupled, downstream). Detail =
+  [[project_seal_phase_wrapup_2026-07-09]].
 
 **3. Citations — audit exact Lean statements for reviewer-faithfulness.** The carried citations {G3 (`hClassify`),
 Liebeck, Witt, Skresanov 2-closure (`AffineSchemeTwoClosed`)} stay cited, but each hypothesis's Lean *statement* must be
@@ -242,90 +135,12 @@ per-node flag / assume-VT-prune is validation, not part of the Seal correctness 
 > (`ComputesResidue`/`reachesRigid`/`rru`) — do not build on it. **The Phase-1 correctness obligation is now the FUSION
 > obligation** (delta-5a): *no rigid residue interferes with symmetry consumption for non-`residueRigidObstruction`
 > cases* — narrowed from "bound how mild fusion must be" (no theorem) to "**no non-abelian fusion survives into a rigid
-> medium**" (IR §11.14 / `chain-descent-cameron-entanglement.md` Route A), carried like "or Cameron". The build-log
-> below is **retained as history** — the `rigidResidue`/`handoffBase`/`Phase2Handoff.lean` bricks are real Lean objects;
-> only their RRU *framing* (one-shot reachability handoff) is retired.
-**★ SCOPED + RESOLVED (2026-07-09) — the boundary is DEFERRAL / `IsBase`, NOT the flag threshold; RRU is an ASSEMBLY of
-built parts.** The phase boundary is the **deferred-decisions** scheduler (`docs/chain-descent-deferred-decisions.md`): at
-each cell the oracle **consumes** symmetry (a pair with `OrbitPartition adj P S v w` = a path-fixing automorphism swaps
-them) or **defers** a **real decision** (`¬OrbitPartition`); soundness = **`real_stays_real`** (`CascadeOracle.lean:74`,
-reals stay real under more individualization). "Oracle has nothing left to consume" = only reals remain = **rigid** =
-**`IsBase`** (`spineResidualCard = 1`, `card_stabilizerAt_eq_one_iff_isBase`) = definition **(b) literally rigid**
-(user-confirmed). `R(G)` = the **first `IsBase` residue** reached. **THE `[small-Aut, trivial-Aut]` GAP DISSOLVES:**
-consumption is **orbit-based** (any automorphism), not size/threshold-based — `¬IsBase` always yields a consumable
-`OrbitPartition` pair, so the boundary is exactly trivial-`Aut`; the **flag is a COST mechanism**, confined to the `¬IsBase`
-symmetric side by **P2** (`flag_imp_symmetric_spine`, `ScratchConfinement.lean:266`), NOT the boundary. **Substrate ALL
-BUILT** (rigid=`IsBase`; `real_stays_real`+`OrbitPartition.mono`; P2; consumption sound large-`Aut`=confinement
-`SelectedCellIsOrbit` / small-`Aut`=`matchOracle`/`coversOrbits_of_realizers`; termination backbone
-`defaultSpineChain_reaches_leaf`).
-**★★★ BRICKS 1+2 LANDED (2026-07-10, `Cascade.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, IN
-`build.sh`).** **Brick 1 (progress lemma):** `exists_orbitPartition_of_not_isBase` (`¬IsBase → ∃ v w, OrbitPartition ∧
-v ≠ w`) + corollaries `exists_nontrivial_residualAut_of_not_isBase` (the generator), `one_lt_card_stabilizerAt_of_not_isBase`
-(bridge to `spineResidualCard`), `exists_warmRefine_cell_pair_of_not_isBase` (same-cell). **Brick 2 (`R(G)` object) —
-KEY FINDING: R(G) SUBSTANTIALLY ALREADY EXISTED as `forcedNode`; the memory's items (2)+(3)+(4) below were mostly built,
-not open.** `forcedNode adj P S₀ := S₀ ∪ movedSet` is a choice-free, deterministic base with `forcedNode_isBase` (rigid) +
-`forcedNode_relabel` (FULL cross-graph iso-invariance under arbitrary `σ`, not just `Aut`) + `exists_isBase_saturated`
-(iterative termination). Banked as the named RRU handoff: **`rigidResidue adj := forcedNode adj (fun _ _ => .unknown) ∅`**
-(the support of `Aut(G)`), with **`rigidResidue_isBase`** (rigid, unconditional) + **`rigidResidue_relabel`** (iso-invariant)
-+ **`exists_movedAt_of_not_isBase`** (brick-1 → `MovedAt`/`forcedNode` bridge, = converse of `isBase_of_no_moved`).
-**RE-SCOPED REMAINING RRU work (the four items below are NOT from-scratch builds):** (1)✅ progress lemma = brick 1;
-(2)✅ `R(G)` object = `rigidResidue`; (3)✅ iso-invariance = `rigidResidue_relabel`; (4) termination-at-rigid:
-`forcedNode_isBase` gives a base in ONE forced step (over-individualizes the whole support — CORRECT for the handoff,
-choice-free/iso-invariant; the efficiency-optimal one-rep-per-orbit base is smaller = the open recovery layer).
-**What is GENUINELY still open (the real RRU frontier):** (a) **wire the descent to *compute* `rigidResidue`** —
-refinement-recovery of `forcedNode` (`movedSet_eq_nonsingletonCells_of_recoverable` is the recoverable-node half; general
-computation is the open recovery content, declassing §5 item 3); (b)✅ **hand `R(G)` to Phase 2** as its typed input —
-**DONE 2026-07-10, new module `ChainDescent/Phase2Handoff.lean` (in `build.sh`, axiom-clean):** `handoffBase adj :=
-rigidResidue adj` + `handoff_isRigid` (rigid, unconditional) + `orbitPartition_handoff_iff_eq` (the "no residual symmetry
-at the handoff" fact = Phase 2 is a genuinely rigid search) + `handoffBase_relabel` (iso-invariant) + the **Phase-2 solver
-contract** `Solver`/`Sound`/`IsoInvariant` (stated in `labelledAdj`/`relabelAdj` shape to compose with Publication ①a/①b/①c).
-Algorithm R is the future witness of `Sound`/`IsoInvariant`; (c) **connect to Publication** — `rigidResidue` is the Phase-2
-input, distinct from `descentCanon`'s discrete leaf, so the ①/② object-unification must account for the handoff.
-**★★★ RRU SKELETON LANDED (2026-07-10, `Phase2Handoff.lean` `namespace RRU`, axiom-clean, in `build.sh`) — the
-reachability obligation is now ON THE BOARD as a reduction.** Proposed central architecture (user): `canonForm? =
-phase2 ∘ phase1`, RRU = the Phase-1 deliverable. The three RRU guarantees are STATED and REDUCED to two named
-obligations (statements, not discharge): `reachesRigid` (③-side, nothing non-`IsBase`) + `isoInvariant` (①b/①c-side)
-both reduce to **`ComputesResidue p1 := ∀ adj, p1 adj = rigidResidue adj`** (the descent's handoff base IS the
-iso-invariant `R(G)` — THE open recovery/confinement content, `movedSet_eq_nonsingletonCells_of_recoverable` = its
-recoverable-node half); `Poly cost := ∀ adj, cost adj ≤ n` (witness `defaultSpineChain_reaches_leaf`). Capstone
-**`RRU.rru`**: `{ComputesResidue, Poly} ⟹ (∀ adj IsBase) ∧ (poly) ∧ (iso-invariant)`. **KEY CLARIFICATION recorded:** the
-built `rigidResidue`/`handoffBase` is the *target object* (rigid + iso-invariant, DONE); the missing "it is REACHED" =
-exactly `ComputesResidue`, and for ② it must be the *algorithmic* descent (semantic `forcedNode` is GI-hard) whose
-correctness IS the confinement payoff (the algorithm can't test `IsBase` — GI-hard — so it stops at oracle-saturation;
-"saturated ⟹ `IsBase`" = the seal/Cameron content). RRU is NOT one of the 6 Publication obligations — it's the Phase-1
-half they bundle away; surfacing it factors ②/③ cleanly.
-**★★★ `ComputesResidue` — FIRST DISCHARGE LANDED (2026-07-10, root/WL-1 case, `Phase2Handoff.lean` `namespace RRU`,
-axiom-clean, in `build.sh`).** Concrete `phase1Root adj := Finset.univ.filter (non-singleton 1-WL cells at ∅)` (the
-visible support at the root, refinement-computable) + **`computesResidue_phase1Root_of_recoverable`**: `(∀ adj,
-OrbitRecoverableAt adj P₀ ∅) → ComputesResidue phase1Root`, via `movedSet_eq_nonsingletonCells_of_recoverable` (+
-`rigidResidue = movedSet` at `∅`). So `ComputesResidue` is REDUCED to the project's existing recovery predicate
-`OrbitRecoverableAt`. Payoff corollaries `phase1Root_{reachesRigid,isoInvariant}_of_recoverable` (the RRU guarantees hold
-for the concrete `phase1Root` on the recoverable domain). **HONEST SCOPE: this is the `k=0`/WL-1 base case** —
-`∀ adj, OrbitRecoverableAt … ∅` FAILS at node-4/CFI/multipedes (1-WL cells coarser than orbits), where `phase1Root`
-over-approximates the support and the ITERATIVE descent (individualize–refine–repeat + per-level recovery backed by
-confinement) is required.
-**★★★ `ComputesResidue` — VERTEX-TRANSITIVE DISCHARGE LANDED (2026-07-10, NO recovery citation, axiom-clean).**
-Refactored to a per-graph core **`phase1Root_eq_rigidResidue_of_recoverableAt`** (`OrbitRecoverableAt adj P₀ ∅ →
-phase1Root adj = rigidResidue adj`), then the key new result **`phase1Root_eq_rigidResidue_of_pretransitive`**: if the
-`P₀`-automorphism group is transitive at `∅` (orbit relation total), root recovery is **VACUOUS** (`cell=cell → orbit`
-conclusion always true ⟹ `CellsAreOrbits` free), so `phase1Root` computes `R(G)` UNCONDITIONALLY. This closes
-`ComputesResidue` (per-graph) on the entire **vertex-transitive-at-root slice** — DRGs, schemes, Cayley graphs, and
-Cameron residues realised as whole graphs — with no recovery hypothesis. **Machinery survey finding (recorded so it isn't
-re-walked):** `theorem_1_HOR_at_depth`/`RecoverableByDepth`/`recoverableByDepth_{cfi,scheme}` give recovery at a
-*discrete* base (free but trivial — `cellsAreOrbits_of_discrete`), NOT root orbits; so computing `movedSet(∅)` for a
-NON-transitive, non-WL-1 graph (CFI/multipede) is genuinely the WL-dim wall — it needs the cross-branch harvest
-(`coversOrbits_of_realizers` reproduces root orbits from deeper recovery), a separate large build.
-**NEXT = the CFI/non-transitive case via the cross-branch harvest (`coversOrbits_of_realizers` / `matchOracleSeq`) — the
-genuinely-hard remainder of `ComputesResidue`; OR reframe: the assume-VT canonizer never computes `movedSet(∅)` exactly
-(it prunes) so `ComputesResidue = p1 = rigidResidue` may be STRONGER than the assume-VT route needs (its iso-invariance
-comes from reconciliation/X3, not from a canonical base) — worth deciding before the big harvest build. Then factor
-`canonForm? = phase2 ∘ phase1` (c). Phase-2 solver (Algorithm R) = independent thread.**
-Original items (superseded by the above): (1) progress lemma; (2) `R(G)` explicit object; (3) iso-invariance; (4)
-termination-at-rigid. Endgame frame = `chain-descent-endgame-spec.md` §1a "The Phase-1 deliverable is RRU";
-full scoping = [[project_rru_phase_transfer_2026-07-09]].
-
-**Detail:** confinement thread = [[project_confinement_lemma_2026-07-07]]; ① showcase =
-`GraphCanonizationProofs/ChainDescent/ScratchConfinementX3Complete.lean`; endgame frame = `chain-descent-endgame-spec.md` §1a.
+> medium**" (IR §11.14 / `chain-descent-cameron-entanglement.md` Route A), carried like "or Cameron". The detailed
+> RRU build-log was trimmed 2026-07-12 (superseded); the surviving real Lean objects are listed just below.
+**Surviving Lean objects (real, in `build.sh`; only the RRU *framing* — the one-shot reachability handoff — is retired):**
+`rigidResidue` / `handoffBase` / `forcedNode` + `handoffBase_relabel` (iso-invariance), and the `Phase2.Solver` /
+`Sound` / `IsoInvariant` contract, in `Cascade.lean` + `Phase2Handoff.lean`. Endgame frame:
+`chain-descent-endgame-spec.md` §1a; mixed-composition track: `chain-descent-mixed-composition.md`.
 
 ---
 
