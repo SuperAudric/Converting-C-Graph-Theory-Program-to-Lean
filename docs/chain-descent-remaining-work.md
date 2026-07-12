@@ -768,20 +768,22 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   **flags** ("polynomial-or-flag"). So §3a's reduction does **not** cover the IR-solver's case; the genuinely-uncited
   open research is **this non-schurian row 4**, which was never the seal's obligation (it is `DiscretizesAtBases`, split
   off by `stablyRecoverable_iff_symmetric_and_bases`). Closing it = closing the *overall*-canonizer poly wall.
-- **Status (2026-07-11):** the **ring-general rigid solver is BUILT + WIRED in production** — `GraphCanonizationProject/Option2Solver.cs`,
-  the full recover→solve→emit→verify pipeline (B1a `Recover`, B1b `SolveOverA`/extended-Smith/`RecoverRing`/kernel,
-  B1c `TryCanonicalForm`/`TryCanonicalOrder` self-verifying emit), **B2 LANDED** (wired in `ChainDescent.Search` behind
-  `EnableRigidSolver`, default ON). **14 tests green** (`Option2SolverTests.cs`) + the RM-1..6 validation chain (5
-  `Ring*Probe.cs`, 30 tests); regression-clean on LinearOracle/CFI (18), Multipede/Cameron/Twist/Footprint (81).
-  **★ B2 fires at the ROOT (`depth == 0`), NOT at `target == -1`:** the boundary node is labelling-dependent and B2's
-  φ-form ≠ the exhaustive global-lex-min form, so mixing them there broke iso-invariance (Z3 → two forms); the root
-  partition is iso-invariant, so B2 fires uniformly or not at all. v1 scope = pristine whole-graph multipede (mixed =
-  B4). **B5 LANDED** (21 Option2Solver tests): fires + speedup + scramble-inv on ring/small-circulant multipedes, ring
-  separation, CFI non-firing, sound-across-the-boundary. **B5 FINDING:** the brute-2-seg-base + **unit-propagation** emit
-  stalls on larger multipedes (production circulant m≥8 — `Recover` OK but `TryCanonicalOrder` null, unit-prop can't solve
-  the cyclic trivialisation); sound (falls through) but incomplete. **NEXT = B1d — wire the built B1b `SolveOverA` Smith
-  gauge-fix into the emit** (needed for COMPLETENESS, not only large `|A|`), then arity pin-`d−3` + try-both-sides.
-  B3/B6 done. Full plan + findings: IR doc §11.12 + the STATUS banner.
+- **Status (2026-07-11):** the **ring-general rigid solver is BUILT + WIRED + validated end-to-end** —
+  `GraphCanonizationProject/Option2Solver.cs` (solver) + `ChainDescent.cs` (wire) + `CanonGraphOrdererChainDescent.cs`
+  (`EnableRigidSolver` passthrough, default ON). **B1a/b/c + B2 + B5 + the B1d `SolveOverA` emit all LANDED. 28
+  Option2Solver tests green** + RM-1..6 (5 `Ring*Probe.cs`, 30); regression-clean (Multipede 50, LinearOracle/CFI 18).
+  **★ B2 fires at the ROOT (`depth == 0`), NOT at `target == -1`** (the boundary node is labelling-dependent; mixing B2's
+  φ-form with the exhaustive global-lex-min form broke iso-invariance, Z3 → two forms; the root partition is iso-invariant
+  ⟹ uniform firing). **★ B1d `SolveOverA` emit = the current emit** (`SearchCanonicalViaSolve`, via `TryCanonicalOrder`):
+  pin an AFFINE FRAME on the base segment (`r+1` states → `{0, e_0..e_{r-1}}`, generators of `A=⊕Z/Inv[i]`), then
+  LINEAR-solve every other state over `A`. **RESOLVED both** the m≥8 completeness stall (linear solve closes the cyclic
+  constraint graph unit-prop stalled on; m=5,6,8,9,10 canonicalize) AND the large-`|A|` exponential (base `|A|^{r+1}`, poly
+  for bounded rank, was `|A|!²`; native Z6/Z8/Z9/Z2×Z4 canonicalize, infeasible before). Overflow fixed by `BigInteger`
+  Smith. **⚠ Two dead ends (don't re-walk):** `target==-1` wiring breaks iso-invariance (use root); ℚ-independent row
+  reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k). **NEXT = remaining B1d:
+  (i) general arity (pin `d−3`), (ii) try-both-sides side-selection, (iii) solve-speed follow-on (perf-opt, poly already);
+  plus B4 (σ-fold, mixed/pinned-prefix residue — B2 returns null ⟹ sound fall-through).** B3/B6 done. Full plan + findings:
+  IR doc §11.12 + the PICK-UP-HERE banner.
 - **★ ROW 4 IS NOW UNDER ACTIVE ATTACK — "option 2" (2026-06-20, IR doc §11).** The flag set is *attackable*, not just
   acceptable: the multipede is **F₂-linear**, and the descent (WL) = F₂ **unit-propagation**, which stalls where
   **Gaussian elimination** does not. **Layers A–C DONE** (probe-/prototype-clean): the rigid gap is real & constructible

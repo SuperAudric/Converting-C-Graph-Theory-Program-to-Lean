@@ -132,42 +132,56 @@
 > model-level, build-first); the **ring design** is §11.13; the **rigid-medium-negates-hidden-Johnson** lead is §11.14
 > (abelian hiding vs non-abelian Johnson ⟹ rigid seal may carry *no* "or Cameron").
 >
-> **▶▶ PICK UP HERE (fresh reader) — HANDOFF 2026-07-11.** The **ring-general rigid solver is BUILT in production and
-> validated** — `GraphCanonizationProject/Option2Solver.cs` (namespace `Canonizer`, internal), the full
-> **recover → solve → emit → verify** pipeline, **10 tests green** in `GraphCanonizationProject.Tests/Option2SolverTests.cs`:
+> **▶▶ PICK UP HERE (fresh reader) — HANDOFF 2026-07-11.** The **ring-general rigid solver is BUILT, WIRED, and
+> validated end-to-end in production.** Files: `GraphCanonizationProject/Option2Solver.cs` (the solver, namespace
+> `Canonizer`, internal) + `ChainDescent.cs` (the wire) + `CanonGraphOrdererChainDescent.cs` (the `EnableRigidSolver`
+> passthrough). **28 tests in `Option2SolverTests.cs`, all green** (+ regression-clean: Multipede 50, LinearOracle/CFI 18).
+> What is DONE:
 > - **B1a `Recover`** — (segments, ring `A`, incidence `M`) from a refined partition, recognition-free (segments via the
 >   multipede **bipartition + higher-*average*-degree side**; ring via a degree-3 Latin-square order-profile; `M` = incidence).
-> - **B1b solve** — `RecoverRing` (order-profile → invariant factors), **extended Smith** `SmithWithTransforms`,
->   `SolveOverA`, `KernelSizeOverA` (rigidity) — all poly, validated vs brute over `A^nW`.
-> - **B1c `TryCanonicalForm`** — the self-verifying canonical emit (RM-5/6): a consistent labelling exists ⟺ the residue
->   reconstructs, so **success = canonical form, failure = flag**. Scramble-invariant; flags corruption; separates rings.
+> - **B1b solve primitives** — `RecoverRing` (order-profile → invariant factors), **extended Smith** `SmithWithTransforms`
+>   (now **`BigInteger`** — see below), `SolveOverA`, `KernelSizeOverA` (rigidity) — validated vs brute over `A^nW`.
+> - **B1c `TryCanonicalForm`** — the self-verifying brute emit (2-segment base + unit-propagation), kept for its unit tests.
+> - **B2 wire (LANDED)** — `TryCanonicalOrder` fired at the **ROOT (`depth == 0`)** in `ChainDescent.Search`, behind
+>   `EnableRigidSolver` (default ON), success → `_bestMatrix = BuildPermutedMatrix(inverse(order))`. **★ Fired at the root,
+>   NOT at `target == -1` (the originally-planned hook):** that boundary node is labelling-DEPENDENT (the oracle's
+>   consume/branch choice is not traversal-invariant), and B2's φ-form ≠ the exhaustive global-lex-min form, so mixing them
+>   per-labelling **broke iso-invariance** (empirically, Z3 → two forms). The root partition is iso-invariant ⟹ B2 fires
+>   uniformly for every labelling or none.
+> - **B5 cross-check battery (LANDED)** — fires + speedup + scramble-invariant matrix on ring + circulant multipedes, ring
+>   separation, CFI non-firing (its 1-WL cells span both bipartition sides ⟹ `Recover` null ⟹ harvest untouched), and the
+>   sound-across-the-firing-boundary guarantee.
+> - **★ B1d `SolveOverA` emit (LANDED) — the current emit.** `TryCanonicalOrder` now uses `SearchCanonicalViaSolve`:
+>   **pin an AFFINE FRAME on the base segment** (`r+1` states → `{0, e_0..e_{r-1}}`, the generators of `A ≅ ⊕Z/Inv[i]`,
+>   `r = Inv.Length`; `Ring.Generators()`), **then LINEAR-solve every other state value over `A`** via `SolveOverA`.
+>   This closed BOTH open problems: the **m≥8 completeness stall** (the linear solve closes the cyclic constraint graph
+>   unit-propagation stalled on — m=5,6,8,9,10 all canonicalize) AND the **large-`|A|` exponential** (base enumeration is
+>   `|A|^{r+1}`, POLY for bounded rank, was `|A|!²` — validated on native Z6/Z8/Z9/Z2×Z4, infeasible before). Overflow on
+>   the huge all-middles system fixed by `BigInteger` in `SmithWithTransforms` (entries reduced mod `|A|` on apply). A
+>   `VerifyGadgets` check (every middle sums to 0) guards the emit.
 >
-> **B2 IS LANDED (2026-07-11).** The solver is WIRED into `ChainDescent.Search`, fired at the **root** (`depth == 0`)
-> behind `EnableRigidSolver` (default ON): `Option2Solver.TryCanonicalOrder(_adj, _n, cellOf, numCells)` returns the
-> canonical vertex order (or null = flag/fall-through); on success `_bestMatrix = BuildPermutedMatrix(inverse(order))`
-> and return. **Why the root, not `target == -1` (the originally-planned hook):** `target == -1` is a labelling-DEPENDENT
-> node (the oracle's consume/branch choice is not traversal-invariant), and B2's φ-based canonical form differs from the
-> exhaustive branch's global-lex-min form — mixing them per-labelling **broke iso-invariance** (empirically, Z3 gave two
-> forms). The root partition is iso-invariant, so B2 fires uniformly (every labelling or none). The return-shape
-> adaptation (order → `BuildPermutedMatrix(inverse(order))`, string vs matrix) is done and the two conventions agree
-> byte-for-byte (row-major, 0/1). **B5 IS ALSO LANDED (2026-07-11, 21 Option2Solver tests, regressions clean).** It
-> validated firing + speedup + scramble-invariance on the ring and small-circulant multipedes, ring separation, CFI
-> non-firing, and the sound-across-the-boundary safety guarantee — AND surfaced the emit's **completeness boundary**: the
-> brute-2-segment-base + unit-propagation emit stalls at m≥8 (the trivialisation needs simultaneous linear solving), so
-> B2 fires at m=5,6 and falls through (sound) at m≥8. **THE NEXT ACTION IS B1d — wire the already-built B1b `SolveOverA`
-> Smith gauge-fix into the emit** (per-segment gauge variables → `M·g = twist` over `A` → iso-invariant `CosetMin`),
-> which closes BOTH the unit-prop completeness stall and the bounded-`|A|` `|A|!²` poly gap; then arity pin-`d−3` and
-> try-both-sides side-selection. B3+B6 DONE; B4 (σ-fold, mixed / pinned-prefix residue — the case B2 v1 deliberately does
-> NOT handle) deferred. **Key facts:** (i) B2 fires only when the root residue is a clean FULL native-A multipede AND a
-> 2-segment base unit-propagates to all of it; (ii) CFI does not trigger it (1-WL cells span both bipartition sides ⟹
-> `Recover` null), so the linear-oracle harvest is untouched.
+> **THE NEXT ACTIONS (remaining B1d):** **(i) general arity** — `InferOrderProfile` needs a degree-3 gadget to *exist*;
+> for all-higher-arity residues, **pin `d−3` segments** to reduce a degree-`d` gadget to a degree-3 constant-sum relation
+> (the cycle-structure read is translation-invariant, so `A` is still recovered — do NOT marginalise). **(ii) try-both-sides
+> side-selection** — replace the average-degree *heuristic* (in `Recover`) with try-both-sides + let the self-verify select
+> (2×, removes the completeness risk; the heuristic is currently sound-but-may-flag). **(iii) solve-speed follow-on (a
+> perf-opt, NOT an exponential — the algorithm is poly):** the exact `BigInteger` Smith runs on the redundant
+> `|A|²`-middles-per-line system; a **torsion-safe row reduction** (independent over `Z/|A|`, **NOT over ℚ** — the ℚ
+> reduction drops torsion congruences and broke iso-invariance; **dead end, do not retry**) or a component-wise Gaussian
+> mod each prime power would make it fast. Also still open: **B4 (σ-fold, the mixed / pinned-prefix residue)** — the case
+> B2 v1 deliberately does NOT handle (`TryCanonicalOrder` returns null when the emitted order doesn't cover all n vertices,
+> ⟹ sound fall-through). B3+B6 DONE.
 >
-> **Validation lives in 5 ring probe files** (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
-> `RingSolveProbe`, all in the Tests project) — the RM-1..6 chain that grounds each piece; run `dotnet test --filter
-> "FullyQualifiedName~Ring"` (30 tests) + `~Option2SolverTests` (10). **Reading order:** this STATUS → §11.11 (the settled
-> **stepwise alternating engine** + consume-before-force) → §11.13a (**the ring design + RM-1..6 validation**) → §11.12
-> (**build roadmap, B1a/b/c LANDED, B2 next**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are background;
-> the ephemeral `/tmp/*.py` probes are superseded by the in-repo `Ring*Probe.cs`.
+> **★ Two dead ends recorded (do not re-walk):** (a) wiring B2 at `target == -1` breaks iso-invariance (use the root);
+> (b) ℚ-independent row reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k).
+>
+> **Validation lives in:** the 5 ring probe files (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
+> `RingSolveProbe`, `RingInferenceProbe` — the RM-1..6 chain, 30 tests, `dotnet test --filter "FullyQualifiedName~Ring"`)
+> + **`Option2SolverTests.cs` (28 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
+> §11.11 (the settled **stepwise alternating engine** + consume-before-force) → §11.13a (**the ring design + RM-1..6
+> validation**) → §11.12 (**build roadmap: B1a/b/c + B2 + B5 + the B1d SolveOverA emit all LANDED; remaining = B1d arity /
+> side-selection + solve-speed + B4**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are background; the
+> ephemeral `/tmp/*.py` probes are superseded by the in-repo `Ring*Probe.cs`.
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -1023,9 +1037,11 @@ By the node-4 unification (§11.11) the two flag floors are the **same object**;
 the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11.11.)*
 
 > **▶ RE-BASED 2026-07-11 after the RM probes (RM-1..6, 30 tests, `RingWlExtractionProbe`/`RingSolveProbe`).** The full
-> **recover → solve → emit → verify** pipeline is validated ring-general on the real refinement, so B1 lifts from the
+> **recover → solve → emit → verify** pipeline is validated ring-general on the real refinement, so B1 lifted from the
 > **RM** probes (not the F₂ `Option2ExtractionProbe`); **B3 and B6 are done** (verify = the self-verifying emit; ring
-> built into RM-3/4/5). Remaining real build = **B1 (port) → B2 (wire) → B5 (cross-checks)**, B4 (fold) deferred.
+> built into RM-3/4/5). **DONE: B1a/b/c + B2 (wire) + B5 (cross-checks) + the B1d `SolveOverA` affine-frame emit** (28
+> Option2Solver tests). **Remaining: B1d (general arity pin-`d−3` + try-both-sides side-selection + solve-speed) + B4
+> (σ-fold, mixed/pinned-prefix residue).** See the PICK-UP-HERE banner for the full state.
 
 - **B1 Productionize (the current step)** — create `Option2Solver` (namespace `Canonizer`) porting the RM pipeline:
   - **B1a Recover — LANDED (2026-07-11, `Option2Solver.cs` + `Option2SolverTests.cs`, 4 tests green).** `Recover(adj,
