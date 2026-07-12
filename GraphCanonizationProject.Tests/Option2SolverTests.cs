@@ -547,6 +547,76 @@ public sealed class Option2SolverTests
         _out.WriteLine($"{name,-4} nested-double n={N} (s=4): general fold canonicalizes, scramble-inv=True");
     }
 
+    // Q1 (recursive doubling peel): a TRIPLE-nested double (Z₂³ tower, fiber size s=8 > MaxFoldMultiplicity).
+    // The copies are vertex-transitive, so the flat s! is both capped and exponential; the fold instead PEELS
+    // an s=2 matched-double factor recursively (each level fully symmetric ⟹ poly), closing the distinguishable
+    // s>6 case. A successful, scramble-invariant canonicalization PROVES the peel engaged (the s! path is off).
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z3", 3)]
+    public void B4_TripleTower_DoublingPeel_ScrambleInvariant(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (d1, t1) = DoubleAndMatch(core, ct);
+        var (d2, t2) = DoubleAndMatch(d1, t1);
+        var (d3, t3) = DoubleAndMatch(d2, t2);        // triple double: 8 copies, fiber size 8 > cap
+        int N = d3.VertexCount;
+        Assert.Equal(8 * core.VertexCount, N);
+
+        var forms = new List<string?>();
+        for (int scr = -1; scr < 3; scr++)
+        {
+            AdjMatrix g; int[] t;
+            if (scr < 0) { g = d3; t = (int[])t3.Clone(); }
+            else (g, t) = ScrambleWithTypes(d3, t3, 24000 + scr);
+            var adj = Flat(g);
+            var part = new WarmPartition(N); part.Refine(adj, SeedFromTypes(N, t));
+
+            var order = Option2Solver.TryCanonicalOrderWithFold(adj, N, part.CellOf, part.NumCells);
+            Assert.NotNull(order);                                          // the doubling peel canonicalizes s=8
+            Assert.Equal(Enumerable.Range(0, N), order!.OrderBy(x => x));   // genuine permutation
+            forms.Add(EmitFromOrder(adj, N, order));
+        }
+        Assert.True(forms.Distinct().Count() == 1);                          // scramble-invariant
+        _out.WriteLine($"{name,-4} triple-tower n={N} (s=8>cap): doubling peel canonicalizes, scramble-inv=True");
+    }
+
+    // Q1 (recursion depth): a QUADRUPLE-nested double (Z₂⁴ tower, s=16). Confirms the peel recurses through
+    // TryCanonicalOrderWithFold: peel s=2 → s=8 half → peel s=2 → s=4 → s! — i.e. it handles towers deeper
+    // than the s=8 case, canonicalizing scramble-invariantly.
+    [Fact]
+    public void B4_QuadTower_DeepDoublingPeel_ScrambleInvariant()
+    {
+        var A = new Ab(2);
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (d1, t1) = DoubleAndMatch(core, ct);
+        var (d2, t2) = DoubleAndMatch(d1, t1);
+        var (d3, t3) = DoubleAndMatch(d2, t2);
+        var (d4, t4) = DoubleAndMatch(d3, t3);        // 16 copies, fiber size 16
+        int N = d4.VertexCount;
+        Assert.Equal(16 * core.VertexCount, N);
+
+        var forms = new List<string?>();
+        for (int scr = -1; scr < 2; scr++)
+        {
+            AdjMatrix g; int[] t;
+            if (scr < 0) { g = d4; t = (int[])t4.Clone(); }
+            else (g, t) = ScrambleWithTypes(d4, t4, 25000 + scr);
+            var adj = Flat(g);
+            var part = new WarmPartition(N); part.Refine(adj, SeedFromTypes(N, t));
+            var order = Option2Solver.TryCanonicalOrderWithFold(adj, N, part.CellOf, part.NumCells);
+            Assert.NotNull(order);                                          // deep recursion canonicalizes s=16
+            Assert.Equal(Enumerable.Range(0, N), order!.OrderBy(x => x));
+            forms.Add(EmitFromOrder(adj, N, order));
+        }
+        Assert.True(forms.Distinct().Count() == 1);
+        _out.WriteLine($"Z2   quad-tower n={N} (s=16): deep doubling peel canonicalizes, scramble-inv=True");
+    }
+
     // B4 UNBOUNDED s: a FULLY-SYMMETRIC s-fold cover (each fiber = a clique K_s among the s copies, so
     // S_s acts). With s = 8 > MaxFoldMultiplicity(6), the s!-fallback is DISABLED, so a successful
     // canonicalization PROVES the poly symmetric path (identity order, verified by copy-swap automorphism)

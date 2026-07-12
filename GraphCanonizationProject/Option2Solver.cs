@@ -246,8 +246,11 @@ namespace Canonizer
             }
 
             // Distinguishable / partially-symmetric copies: take the EXACT lex-min over the s! orderings
-            // for bounded s; a larger such fold falls through to the descent (null, sound) rather than pay s!.
-            if (s > MaxFoldMultiplicity) return null;
+            // for bounded s. For LARGE s (a Z₂ᵏ tower — the copies are vertex-transitive, so neither refinement
+            // nor the flat s-quotient can order them in poly), recursively PEEL an s=2 matched-double factor
+            // (each level is fully-symmetric ⟹ poly); only if no factor is found do we fall through (null, sound).
+            if (s > MaxFoldMultiplicity)
+                return TryDoublingPeel(adj, n, cellOf, numCells, vertexAt, nFibers, s);
             int[]? best = null; string? bestForm = null;
             foreach (var rho in Permutations(s))
             {
@@ -277,6 +280,158 @@ namespace Canonizer
                 for (int v = 0; v < n; v++)
                     if (adj[pi[u] * n + pi[v]] != adj[u * n + v]) return null;
             return pi;
+        }
+
+        // Q1: peel an s=2 matched-double factor from a large DISTINGUISHABLE cover (a Z₂ᵏ tower). The copies are
+        // vertex-transitive, so neither refinement nor the flat s-quotient orders them in poly and the s! lex-min is
+        // exponential. Instead, find a "direction" — a parallel class of same-cell edges (opposite edges of induced
+        // 4-cycles) in the fiber graph — whose removal halves the copies into two s=2 super-copies matched by a
+        // verified involution σ; recurse on one half; lift s=2 (fully symmetric). Lex-min over the distinct
+        // directions (≤ log₂ s of them, all tried ⟹ iso-invariant; each peel is poly) ⟹ canonical + poly. Soundness
+        // automatic: σ is a verified automorphism ⟹ the emitted order is a genuine relabelling.
+        //
+        // RECURSION is *mutual*: the recursed half re-enters `TryCanonicalOrderWithFold`, which routes a still-large
+        // half back here — so depth-k 2-towers (s = 16, 32, …) peel level by level (validated `DoubleAndMatch⁴`).
+        // SCOPE: this is the s=2 (matched-double) peel, so a tower of multiplicity `s` is handled iff its ODD PART
+        // ≤ MaxFoldMultiplicity (peel every factor of 2, then the odd residual `m` fits under the s! cap). So
+        // s = 2ᵃ·m with m ∈ {1,3,5} works; a **pure odd-base tower** (s = 3² = 9, 15, 2·7 = 14, …) has odd part ≥ 7,
+        // hits `s % 2 != 0` at the residual, and returns null (sound fall-through). Base-p peeling (p ≥ 3) is a
+        // genuinely different, construction-dependent primitive — the parallel-class trick that halves a Z₂ᵏ fiber
+        // does NOT split a base-3 fiber (its rook's-graph K_p□K_p has matching-shaped parallel classes, not the
+        // clique-coordinate one would remove) — so it is deliberately out of scope here (a separate build, not this).
+        // Returns null (sound fall-through) whenever no clean s=2 factor is found.
+        private static int[]? TryDoublingPeel(
+            int[] adj, int n, int[] cellOf, int numCells, int[] vertexAt, int nFibers, int s)
+        {
+            if (s % 2 != 0) return null;
+            // fiber-0 copy graph: F[a,b] ⟺ copies a,b are same-cell-adjacent within fiber 0.
+            var F = new bool[s, s];
+            for (int a = 0; a < s; a++)
+                for (int b = 0; b < s; b++)
+                    F[a, b] = a != b && adj[vertexAt[a] * n + vertexAt[b]] != 0;
+
+            var copyOfVertex = new int[n];
+            for (int f = 0; f < nFibers; f++)
+                for (int c = 0; c < s; c++)
+                    copyOfVertex[vertexAt[f * s + c]] = c;
+
+            int[]? best = null; string? bestForm = null;
+            var seenDir = new HashSet<string>();
+            for (int a = 0; a < s; a++)
+                for (int b = 0; b < s; b++)
+                {
+                    if (a == b || !F[a, b]) continue;
+                    var tau = BuildParallelMatching(F, s, a, b);
+                    if (tau == null) continue;
+                    if (!seenDir.Add(string.Join(",", tau))) continue;   // dedup: same direction from another edge
+
+                    var half = TwoColorAcrossMatching(F, s, tau);
+                    if (half == null) continue;
+
+                    // σ swaps copy c ↔ τ[c] in every fiber; must be a genuine automorphism of G.
+                    var sigma = new int[n];
+                    for (int i = 0; i < n; i++) sigma[i] = i;
+                    for (int f = 0; f < nFibers; f++)
+                        for (int c = 0; c < s; c++)
+                            sigma[vertexAt[f * s + c]] = vertexAt[f * s + tau[c]];
+                    if (!IsAutomorphism(adj, n, sigma)) continue;
+
+                    // Recurse on half-0 (the sub-cover of size n/2), then lift s=2 (σ pairs the two halves).
+                    var subVerts = new List<int>();
+                    for (int v = 0; v < n; v++) if (half[copyOfVertex[v]] == 0) subVerts.Add(v);
+                    subVerts.Sort();
+                    int subN = subVerts.Count;
+                    var subAdj = new int[subN * subN];
+                    for (int i = 0; i < subN; i++)
+                        for (int j = 0; j < subN; j++)
+                            subAdj[i * subN + j] = adj[subVerts[i] * n + subVerts[j]];
+                    var subCellOf = new int[subN];
+                    for (int i = 0; i < subN; i++) subCellOf[i] = cellOf[subVerts[i]];
+
+                    var subOrder = TryCanonicalOrderWithFold(subAdj, subN, subCellOf, numCells);
+                    if (subOrder == null) continue;
+
+                    var whole = new int[n];
+                    for (int i = 0; i < subN; i++)
+                    {
+                        int v = subVerts[subOrder[i]];
+                        whole[i] = v;                 // super-copy 0, in the sub-cover's canonical order
+                        whole[subN + i] = sigma[v];   // super-copy 1 = its σ-image (fully symmetric)
+                    }
+                    var form = EmitForm(n, adj, whole);
+                    if (bestForm == null || string.CompareOrdinal(form, bestForm) < 0) { bestForm = form; best = whole; }
+                }
+            return best;
+        }
+
+        // Build the perfect matching τ on copies that is the "direction" (parallel class) of the seed edge
+        // (a0,b0): τ pairs each copy with its partner across that class. Propagated via induced 4-cycles
+        // (x—y a rung, x—c a side ⟹ c—τ[c] the parallel rung, τ[c] the F-neighbour d of both c and y with
+        // x—d and y—c non-edges). Returns null if the propagation is ambiguous/incomplete (not a clean tower).
+        private static int[]? BuildParallelMatching(bool[,] F, int s, int a0, int b0)
+        {
+            var tau = new int[s];
+            Array.Fill(tau, -1);
+            tau[a0] = b0; tau[b0] = a0;
+            var q = new Queue<int>();
+            q.Enqueue(a0); q.Enqueue(b0);
+            while (q.Count > 0)
+            {
+                int x = q.Dequeue(), y = tau[x];
+                for (int c = 0; c < s; c++)
+                {
+                    if (c == x || c == y || !F[x, c]) continue;      // c a within-half F-neighbour of x
+                    int found = -1; bool amb = false;
+                    for (int d = 0; d < s; d++)
+                    {
+                        if (d == x || d == y || d == c) continue;
+                        if (F[c, d] && F[y, d] && !F[x, d])
+                        {
+                            if (found == -1) found = d; else { amb = true; break; }
+                        }
+                    }
+                    if (amb || found == -1) return null;
+                    if (tau[c] == -1) { tau[c] = found; tau[found] = c; q.Enqueue(c); q.Enqueue(found); }
+                    else if (tau[c] != found) return null;
+                }
+            }
+            for (int c = 0; c < s; c++) if (tau[c] == -1 || tau[tau[c]] != c) return null;
+            return tau;
+        }
+
+        // Two-color the copies by the components of F with the τ-edges removed; require exactly two components
+        // of equal size that τ matches across (the s=2 doubling bipartition). Null otherwise.
+        private static int[]? TwoColorAcrossMatching(bool[,] F, int s, int[] tau)
+        {
+            var color = new int[s]; Array.Fill(color, -1);
+            int comps = 0;
+            for (int start = 0; start < s; start++)
+            {
+                if (color[start] != -1) continue;
+                if (comps == 2) return null;
+                var q = new Queue<int>(); q.Enqueue(start); color[start] = comps;
+                while (q.Count > 0)
+                {
+                    int x = q.Dequeue();
+                    for (int y = 0; y < s; y++)
+                        if (F[x, y] && tau[x] != y && color[y] == -1) { color[y] = comps; q.Enqueue(y); }
+                }
+                comps++;
+            }
+            if (comps != 2) return null;
+            int c0 = 0; for (int i = 0; i < s; i++) if (color[i] == 0) c0++;
+            if (c0 != s / 2) return null;
+            for (int i = 0; i < s; i++) if (color[i] == color[tau[i]]) return null;  // τ must match across
+            return color;
+        }
+
+        // Is `sigma` (an image array) an automorphism of the graph `adj`? O(n²).
+        private static bool IsAutomorphism(int[] adj, int n, int[] sigma)
+        {
+            for (int u = 0; u < n; u++)
+                for (int v = 0; v < n; v++)
+                    if (adj[sigma[u] * n + sigma[v]] != adj[u * n + v]) return false;
+            return true;
         }
 
         // Connected components under a caller-supplied adjacency predicate; returns comp[v] ∈ [0,count).

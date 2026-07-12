@@ -41,8 +41,8 @@
 > ring solver is BUILT + WIRED + validated in production, and ROBUST** (`Option2Solver.cs`, recover→solve→emit→verify;
 > **B1a/b/c + B2 + B3 + B4 + B5 + B6 + all three B1d items LANDED** — the SolveOverA affine-frame emit closes the m≥8
 > completeness stall AND the large-`|A|` exponential (poly for bounded rank; native Z6/Z8/Z9/Z2×Z4); general-arity handles
-> any arity ≥ 3; try-both-sides removes the side heuristic; **47 Option2Solver tests** (incl. the fold-`Aut` harvest seam;
-> regression-clean — GraphCanonTests 74/1-skip, Multipede 24, LinearOracle 14, Ring 44)).
+> any arity ≥ 3; try-both-sides removes the side heuristic; **50 Option2Solver tests** (incl. the fold-`Aut` harvest seam +
+> the Q1 recursive doubling peel for Z₂ᵏ towers; regression-clean — GraphCanonTests 74/1-skip, Multipede 24, LinearOracle 14, Ring 44)).
 > **B4 σ-fold LANDED 2026-07-12, incl. the GENERAL `s`-fold — POLY for UNBOUNDED `s`** (matched double s=2 + nested Z₂² s=4
 > + fully-symmetric `K_s` cover s=8,12; fiber-quotient, identity order for symmetric covers via a poly copy-swap
 > automorphism check, `s!` only for the bounded distinguishable case, CFI-safe) — see the B4 entry in §11.12. The
@@ -206,10 +206,18 @@
 > (b) ℚ-independent row reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k).
 >
 > **OPEN / NEXT (all bounded, off the critical path — the rigid solver is otherwise complete):**
-> - **Fold covers of multiplicity `s > 6` — RESOLVED for the FULLY-SYMMETRIC case (2026-07-12): poly, any `s`** (identity
->   order via the copy-swap automorphism check; validated `K_s` cover s=8,12). Only the DISTINGUISHABLE / partially-symmetric
->   cover with `s > 6` still falls through (sound) — it would need a canonical copy-ordering (graph-canonization of the
->   copy-relation), which for those covers is a smaller GI instance; off the critical path.
+> - **Fold covers of multiplicity `s > 6` — RESOLVED, poly, any `s` (2026-07-12).** (a) FULLY-SYMMETRIC: identity order via
+>   the copy-swap automorphism check (validated `K_s` cover s=8,12). (b) DISTINGUISHABLE (a **Z₂ᵏ tower** — the only
+>   distinguishable case, and vertex-transitive on copies, so refinement can't order them and the flat `s!` is exponential):
+>   **recursive s=2 doubling peel** (`TryDoublingPeel`) — a "direction" (parallel class of same-cell edges via induced
+>   4-cycles) halves the copies into two s=2 super-copies matched by a verified involution σ; recurse on one half, lift s=2
+>   (fully symmetric); lex-min over the ≤ log₂s directions ⟹ canonical + poly. **Recursion is MUTUAL** (the recursed half
+>   re-enters `TryCanonicalOrderWithFold` → back to the peel), so depth-k 2-towers peel level by level — validated
+>   `DoubleAndMatch³` (s=8) AND `DoubleAndMatch⁴` (s=16), Z2/Z3, scramble-inv. Soundness automatic (σ verified). **SCOPE = the
+>   s=2 peel: handled iff odd-part(`s`) ≤ 6** (i.e. `s = 2ᵃ·m`, m ∈ {1,3,5}: peel the 2's, m fits the s! cap). A **pure
+>   odd-base tower** (s = 3² = 9, 14 = 2·7, …) has odd part ≥ 7 ⟹ null (sound fall-through). Base-p peeling (p ≥ 3) is a
+>   different, construction-dependent primitive (a base-3 fiber is the rook's graph K_p□K_p, whose parallel classes are
+>   matchings not the clique-coordinate to remove) — a separate build, NOT done;
 > - **Harvest the fold `Aut` — SUB-STEP 1 LANDED (2026-07-12): the harvest/consume seam.** `TryCanonicalOrderWithFold`
 >   now emits its verified copy-swap automorphisms (`out coverAuts`, via `CopySwapAut` — each checked edge-by-edge), and the
 >   descent's `depth==0` hook feeds them to `Automorphisms`. For a fully-symmetric cover of a RIGID core (exactly when the
@@ -222,9 +230,12 @@
 >   multipede core stays in the descent's blind spot) needs the fold/solver run on a **sub-residue AT A DESCENT NODE**,
 >   canonicalizing its core there and harvesting its `Aut` — the alternating-engine integration (§11.11). Sub-step 1 is the
 >   load-bearing seam that integration consumes.
-> - **Q1 dead-end recorded:** the distinguishable-cover fallback is a genuine `s!` lex-min; **replacing `MaxFoldMultiplicity`
->   with `n` gives `n!` (exponential), NOT poly** — the poly-in-`s` path is the *fully-symmetric* branch only (no cap there).
->   Distinguishable `s>6` is closed by the ring-quotient recursion (canonize the copy-relation via the solver), not a bigger cap.
+> - **Q1 CLOSED (2026-07-12) + dead-end recorded:** distinguishable `s>6` is closed by the **recursive doubling peel** above
+>   (NOT by raising `MaxFoldMultiplicity` — **`cap→n` gives `n!`**, since the `s!` lex-min only guards the *bounded distinguishable*
+>   fallback and the poly-in-`s` paths are the fully-symmetric branch + the peel). Key finding: the copies are WL-invisible
+>   (same cell) so refinement can't order them, and the natural case (Z₂ᵏ tower) is vertex-transitive — hence the *peel*
+>   (reduce to fully-symmetric s=2 levels), not a copy-refinement. Still open: harvesting the tower's Z₂ᵏ group into
+>   `Automorphisms` (the peel canonicalizes the FORM but under-reports |Aut| for towers, like the fully-symmetric harvest gap).
 > - **B1d (iii) solve-speed perf (DEFERRED by the user)** — a constant-factor speedup only (the algorithm is already poly);
 >   torsion-safe `Z/|A|` reduction or component-wise mod `p^k`. A `BigInteger→long` fast-track was tried and *slowed* it
 >   (doubled work) — parked.
@@ -232,7 +243,7 @@
 >
 > **Validation lives in:** the 5 ring probe files (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
 > `RingSolveProbe`, `RingSolveProbe` — the RM-1..6 chain, 30 tests, `dotnet test --filter "FullyQualifiedName~Ring"`)
-> + **`Option2SolverTests.cs` (47 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
+> + **`Option2SolverTests.cs` (50 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
 > §11.11 (the settled **stepwise alternating engine** + consume-before-force) → §11.13a (**the ring design + RM-1..6
 > validation**) → §11.12 (**build roadmap: B1a/b/c + B2 + B3 + B4 (incl. general `s`-fold) + B5 + B6 + all three B1d items
 > ALL LANDED; only the bounded OPEN items above remain**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are
