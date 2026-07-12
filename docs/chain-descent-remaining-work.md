@@ -771,8 +771,8 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
 - **Status (2026-07-11):** the **ring-general rigid solver is BUILT + WIRED + validated end-to-end** —
   `GraphCanonizationProject/Option2Solver.cs` (solver) + `ChainDescent.cs` (wire) + `CanonGraphOrdererChainDescent.cs`
   (`EnableRigidSolver` passthrough, default ON). **B1a/b/c + B2 + B5 + the B1d `SolveOverA` emit + B1d general-arity
-  (pin-`d−3`) + B1d try-both-sides + B4 σ-fold (incl. GENERAL `s`-fold) ALL LANDED. 39 Option2Solver tests green** + RM-1..6
-  (5 `Ring*Probe.cs`, 30); regression-clean (94 combined w/ Multipede/LinearOracle/CFI).
+  (pin-`d−3`) + B1d try-both-sides + B4 σ-fold (incl. GENERAL `s`-fold) ALL LANDED. 42 Option2Solver tests green** + RM-1..6
+  (5 `Ring*Probe.cs`, 30); regression-clean (97 combined w/ Multipede/LinearOracle/CFI).
   **★ B2 fires at the ROOT (`depth == 0`), NOT at `target == -1`** (the boundary node is labelling-dependent; mixing B2's
   φ-form with the exhaustive global-lex-min form broke iso-invariance, Z3 → two forms; the root partition is iso-invariant
   ⟹ uniform firing). **★ B1d `SolveOverA` emit = the current emit** (`SearchCanonicalViaSolve`, via `TryCanonicalOrder`):
@@ -784,15 +784,17 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k). **★ B1d general-arity
   (`InferOrderProfile` reduces a degree-`d` line to degree-3 by pinning `d−3` segments to local-0; degree-4 Z2/Z3 validated)
   + try-both-sides (`Recover(forceSide)`; `SearchCanonicalViaSolve` runs both classes, min-form) LANDED 2026-07-12.**
-  **★ B4 σ-FOLD LANDED 2026-07-12, incl. the GENERAL `s`-fold** (`TryCanonicalOrderWithFold`, depth-0 hook): canonizes a
-  clean multipede's `s`-fold COVER (`s` copies + symmetric linking, `s∈[2,6]`) — FIBERS = same-cell-neighbour components,
-  COPIES = `G` minus same-cell edges; require a clean cover, canonize ONE core RECURSIVELY, lift by (fiber-rank, copy-pos)
-  taking the **lex-min over `s!` copy-orderings** (iso-inv by construction). SOUNDNESS AUTOMATIC (order = a permutation of
-  `[0,n)` ⟹ relabelling; no automorphism check). Matched double (s=2) + nested Z₂² (s=4); CFI-safe (18-cycle fiber > cap /
-  core fails ⟹ fall-through). (Bug fixed during s=2 build: keep the doubled partition's original canonical cell-ids, not a
-  first-occurrence renumber.) **NEXT = (open) covers of multiplicity `s > 6`; harvest the fold `Aut` (|Aut| under-report);
-  the B1d (iii) solve-speed follow-on is DEFERRED (user: BigInteger→long fast-track doubled work).** B3/B6 done. Full plan:
-  IR doc §11.12 + the PICK-UP-HERE banner.
+  **★ B4 σ-FOLD LANDED 2026-07-12, incl. the GENERAL `s`-fold — POLY for UNBOUNDED `s`** (`TryCanonicalOrderWithFold`,
+  depth-0 hook): canonizes a clean multipede's `s`-fold COVER — FIBERS = same-cell-neighbour components, COPIES = `G` minus
+  same-cell edges; require a clean cover, canonize ONE core RECURSIVELY, lift by (fiber-rank, copy-pos). **Copy layout is
+  POLY for ANY `s` when the cover is FULLY SYMMETRIC** (every copy-swap is an automorphism — poly `O(s·n²)` check ⟹
+  `S_s ≤ Aut(G)` ⟹ identity order); only a DISTINGUISHABLE / partially-symmetric cover (nested `Z₂²`'s `C_4` fiber) uses the
+  exact `s!` lex-min, capped `s ≤ 6`. SOUNDNESS AUTOMATIC (order = permutation ⟹ relabelling). **★ NOT redundant with the
+  oracle** (user Q1): the oracle consumes symmetry by leaf-collision = needs canonizing a copy = the IR blind spot it can't
+  discretize; the fold canonizes the core with the RIGID solver first, then the poly local automorphism check orders copies.
+  Matched double (s=2) + nested Z₂² (s=4) + `K_s` cover s=8,12 (poly path); CFI-safe. **NEXT = (open) DISTINGUISHABLE covers
+  `s > 6` (GI on copy-relation); harvest the fold `Aut` (|Aut| under-report); the ENTANGLED symmetry+rigidity-in-one-cell
+  case (real frontier, NOT folded); B1d (iii) solve-speed = DEFERRED.** B3/B6 done. Full plan: IR doc §11.12 + PICK-UP-HERE.
 - **★ ROW 4 IS NOW UNDER ACTIVE ATTACK — "option 2" (2026-06-20, IR doc §11).** The flag set is *attackable*, not just
   acceptable: the multipede is **F₂-linear**, and the descent (WL) = F₂ **unit-propagation**, which stalls where
   **Gaussian elimination** does not. **Layers A–C DONE** (probe-/prototype-clean): the rigid gap is real & constructible

@@ -41,11 +41,13 @@
 > ring solver is BUILT + WIRED + validated in production, and ROBUST** (`Option2Solver.cs`, recover→solve→emit→verify;
 > **B1a/b/c + B2 + B3 + B4 + B5 + B6 + all three B1d items LANDED** — the SolveOverA affine-frame emit closes the m≥8
 > completeness stall AND the large-`|A|` exponential (poly for bounded rank; native Z6/Z8/Z9/Z2×Z4); general-arity handles
-> any arity ≥ 3; try-both-sides removes the side heuristic; **39 Option2Solver tests, 94 combined**).
-> **B4 σ-fold LANDED 2026-07-12, incl. the GENERAL `s`-fold** (matched double s=2 + nested Z₂² s=4; fiber-quotient +
-> lex-min over copy-orderings, CFI-safe) — see the B4 entry in §11.12. The rigid-solver track is COMPLETE for handoff;
-> **NEXT = the mixed-composition Lean track (Stage 0b), which this unblocks.** Bounded rigid-side OPEN items (`s > 6`
-> covers, harvesting the fold `Aut`, the deferred B1d solve-speed perf) are listed at the end of the PICK-UP-HERE banner.
+> any arity ≥ 3; try-both-sides removes the side heuristic; **42 Option2Solver tests, 97 combined**).
+> **B4 σ-fold LANDED 2026-07-12, incl. the GENERAL `s`-fold — POLY for UNBOUNDED `s`** (matched double s=2 + nested Z₂² s=4
+> + fully-symmetric `K_s` cover s=8,12; fiber-quotient, identity order for symmetric covers via a poly copy-swap
+> automorphism check, `s!` only for the bounded distinguishable case, CFI-safe) — see the B4 entry in §11.12. The
+> rigid-solver track is COMPLETE for handoff; **NEXT = the mixed-composition Lean track (Stage 0b), which this unblocks.**
+> Bounded rigid-side OPEN items (DISTINGUISHABLE `s > 6` covers, harvesting the fold `Aut`, the deferred B1d solve-speed
+> perf) are listed at the end of the PICK-UP-HERE banner.
 > See the PICK-UP-HERE handoff below + §11.12.
 >
 > **▶ B2 WIRING — THE ISO-INVARIANCE FINDING (2026-07-11, empirically forced).** B2 must fire at the **ROOT (depth 0)**,
@@ -140,7 +142,7 @@
 > validated end-to-end in production, and is now ROBUST** (any ring, any arity ≥ 3, either bipartition side, and `s`-fold
 > covers). Files: `GraphCanonizationProject/Option2Solver.cs` (the solver, namespace `Canonizer`, internal) +
 > `ChainDescent.cs` (the wire) + `CanonGraphOrdererChainDescent.cs` (the `EnableRigidSolver` passthrough). **39 tests in
-> `Option2SolverTests.cs`, all green** (+ regression-clean: **94 combined** with Multipede/LinearOracle/CFI; and the RM-1..6
+> `Option2SolverTests.cs`, all green** (+ regression-clean: **97 combined** with Multipede/LinearOracle/CFI; and the RM-1..6
 > ring probes, 30). **★ THE RIGID-SOLVER TRACK IS COMPLETE FOR HANDOFF** — every planned B-step (B1a/b/c, B2, B3, B4 incl.
 > the general `s`-fold, B5, B6, and all three B1d items) is LANDED. The only rigid-side items left are **bounded and
 > off-the-critical-path** (see "OPEN / NEXT" at the end of this banner). The natural next move is the **mixed-composition
@@ -180,10 +182,19 @@
 > (`B1d_TryBothSides_SelectsSegmentSide`). NB the heuristic is never wrong on the circulant fixtures (segments always denser,
 > `#middles ≫ nW`), so this is a proven-correct safety net, not a fix for an observed failure.
 >
-> **B4 σ-fold LANDED 2026-07-12, incl. the GENERAL `s`-fold** — `TryCanonicalOrderWithFold`, wired at the same depth-0
-> hook; detects the cover structurally (FIBERS = same-cell-neighbour components, COPIES = `G` minus same-cell edges),
-> canonizes the core recursively, lifts by lex-min over the `s!` copy-orderings. Matched double (s=2) + nested Z₂² (s=4);
-> CFI-safe. See the B4 entry in §11.12. Open: covers of multiplicity `s > 6`; harvesting the fold `Aut`. B3+B6 DONE.
+> **B4 σ-fold LANDED 2026-07-12, incl. the GENERAL `s`-fold + POLY for UNBOUNDED `s`** — `TryCanonicalOrderWithFold`, wired
+> at the same depth-0 hook; detects the cover structurally (FIBERS = same-cell-neighbour components, COPIES = `G` minus
+> same-cell edges), canonizes the core recursively, then lifts. **The copy layout is now canonicalized in POLY time for
+> ANY `s` when the cover is FULLY SYMMETRIC** (every copy-swap is an automorphism ⟹ `S_s ≤ Aut(G)` ⟹ all orderings give the
+> same form ⟹ identity order; the swap-is-automorphism check is poly and LOCAL, sound because the core is already canonized —
+> the oracle can't reach it, so it is NOT redundant with Phase 1). Only a DISTINGUISHABLE / partially-symmetric cover (e.g.
+> the nested Z₂² double's `C_4` fiber) falls back to the exact `s!` lex-min, capped at `MaxFoldMultiplicity = 6`. Validated:
+> matched double (s=2) + nested Z₂² (s=4) + **fully-symmetric `K_s` cover s=8,12 (poly path, beyond the `s!` cap)**;
+> CFI-safe. See the B4 entry in §11.12. **★ ARCHITECTURE NOTE (2026-07-12, user):** the fold is NOT redundant with the
+> oracle — the oracle consumes symmetry by leaf-collision, which needs canonizing a copy, and a copy is the IR blind spot
+> the oracle can't discretize; the fold canonizes the core with the *rigid solver* first, then orders copies (a poly local
+> automorphism check), doing what the oracle provably cannot. Open: harvesting the fold `Aut`; entangled (non-separable)
+> symmetry+rigidity in one cell (NOT handled by the fold — the real frontier). B3+B6 DONE.
 > **DEFERRED (user, 2026-07-12): the B1d (iii) solve-speed follow-on** (a perf-opt, NOT an exponential — the algorithm is
 > poly): the exact `BigInteger` Smith runs on the redundant `|A|²`-middles-per-line system; a torsion-safe row reduction
 > (independent over `Z/|A|`, **NOT over ℚ** — the ℚ reduction drops torsion congruences and broke iso-invariance; **dead
@@ -194,8 +205,10 @@
 > (b) ℚ-independent row reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k).
 >
 > **OPEN / NEXT (all bounded, off the critical path — the rigid solver is otherwise complete):**
-> - **Fold covers of multiplicity `s > 6`** — capped by `MaxFoldMultiplicity` (we lex-min over `s!` copy-orderings); today
->   they fall through to the descent (sound). Raise the cap or replace the `s!` min with a canonical copy-ordering.
+> - **Fold covers of multiplicity `s > 6` — RESOLVED for the FULLY-SYMMETRIC case (2026-07-12): poly, any `s`** (identity
+>   order via the copy-swap automorphism check; validated `K_s` cover s=8,12). Only the DISTINGUISHABLE / partially-symmetric
+>   cover with `s > 6` still falls through (sound) — it would need a canonical copy-ordering (graph-canonization of the
+>   copy-relation), which for those covers is a smaller GI instance; off the critical path.
 > - **Harvest the fold `Aut`** — B4 produces the correct canonical *form* but does NOT add the fold group to
 >   `Automorphisms`, so |Aut| is under-reported for folded inputs. The fold knows the fibers/copies (= the group); thread
 >   it into the descent's `PermutationGroup`.
@@ -1069,8 +1082,9 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
 > **recover → solve → emit → verify** pipeline is validated ring-general on the real refinement, so B1 lifted from the
 > **RM** probes (not the F₂ `Option2ExtractionProbe`); **B3 and B6 are done** (verify = the self-verifying emit; ring
 > built into RM-3/4/5). **DONE: B1a/b/c + B2 (wire) + B5 (cross-checks) + the B1d `SolveOverA` affine-frame emit + B1d
-> general-arity (pin-`d−3`) + B1d try-both-sides side-selection + B4 σ-fold (incl. GENERAL s-fold)** (39 Option2Solver
-> tests, 94 combined). **Every planned B-step is LANDED. Remaining (bounded, off critical path): fold covers `s > 6`,
+> general-arity (pin-`d−3`) + B1d try-both-sides side-selection + B4 σ-fold (incl. GENERAL s-fold)** (42 Option2Solver
+> tests, 97 combined). **Every planned B-step is LANDED; the σ-fold is now POLY for unbounded `s` on fully-symmetric
+> covers. Remaining (bounded, off critical path): DISTINGUISHABLE fold covers `s > 6` (GI on the copy-relation),
 > harvesting the fold `Aut`, and the (deferred) B1d solve-speed perf.** See the PICK-UP-HERE banner for full state.
 
 - **B1 Productionize (the current step)** — create `Option2Solver` (namespace `Canonizer`) porting the RM pipeline:
@@ -1119,7 +1133,7 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
     **minimal-forcing-circuit** extraction over `A` (Option2 `ExtractRows` generalized) for non-pristine residues (§11.13a).
     - **▶ LANDED (2026-07-11): the `SolveOverA` emit — generating-set base + LINEAR solve. Both the m≥8 completeness
       stall AND the large-`|A|` exponential are RESOLVED** (`Option2Solver.SearchCanonicalViaSolve`, wired via
-      `TryCanonicalOrder`; 28 Option2Solver tests green at that landing, 39 now). Mechanism: **pin an AFFINE FRAME on the lowest-cell-id segment
+      `TryCanonicalOrder`; 28 Option2Solver tests green at that landing, 42 now). Mechanism: **pin an AFFINE FRAME on the lowest-cell-id segment
       — `r+1` of its states → `{0, e_0..e_{r-1}}` (the generators of `A ≅ ⊕Z/Inv[i]`, `r = Inv.Length`) — then LINEAR-solve
       every other state value over `A` via `SolveOverA`** (middles×states incidence, pinned states to the RHS). One
       affine-anchored bijective segment forces every connected segment to a bijection (the gadget Latin structure), and the
@@ -1153,20 +1167,29 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
   · **FIBERS** = connected components of the *same-cell-neighbour* graph (`adj=1` ∧ same cell) — the group orbits (a matched
   double's matching pairs; a nested `Z₂²` cover's size-4 hypercube fibers);
   · **COPIES** = components of `G` MINUS the same-cell edges — the `s` covers.
-  Require a clean cover (uniform fiber size `s = |copies| ∈ [2, MaxFoldMultiplicity=6]`, `(fiber,copy)↦vertex` a bijection),
-  canonize ONE copy (the core) **RECURSIVELY** (nested folds peel), then lift: order by (core-canonical fiber rank, copy
-  position), **lex-min over the `s!` copy-orderings** (makes the symmetric copy layout iso-invariant by construction).
-  **★ SOUNDNESS IS AUTOMATIC + no automorphism check needed:** the emitted order is always a genuine permutation of `[0,n)`,
-  so the form is a relabelling of `G` ⟹ sound AND complete iff iso-invariant; iso-invariance holds because fibers/copies are
-  iso-invariant partitions + the recursive core order is iso-invariant + the min over `ρ`. **CFI-safe:** its 18-cycle is one
+  Require a clean cover (uniform fiber size `s = |copies| ≥ 2`, `(fiber,copy)↦vertex` a bijection — **no `s` cap on the
+  poly path**), canonize ONE copy (the core) **RECURSIVELY** (nested folds peel), then lift: order by (core-canonical fiber
+  rank, copy position). **★ POLY COPY-LAYOUT FOR ANY `s` (2026-07-12, replacing the old `s!` lex-min):** if the cover is
+  **fully symmetric** — every copy-0↔copy-`c` swap is an automorphism of `G` (`CopySwapIsAutomorphism`, poly `O(s·n²)`) ⟹
+  those transpositions generate `S_s ≤ Aut(G)` ⟹ **all copy orderings give the same form** ⟹ use the identity order
+  (iso-invariant, unbounded `s`). This local automorphism check is **sound precisely because the core is already canonized**
+  (the oracle cannot reach a rigid core — the IR blind spot — so the fold is NOT redundant with Phase 1). Only a
+  DISTINGUISHABLE / partially-symmetric cover (e.g. the nested `Z₂²` double's `C_4` fiber) falls back to the exact `s!`
+  lex-min, and there `MaxFoldMultiplicity = 6` caps `s` (a larger such fold falls through, sound).
+  **★ SOUNDNESS IS AUTOMATIC** for the emitted order (always a genuine permutation of `[0,n)` ⟹ a relabelling of `G` ⟹ sound,
+  complete iff iso-invariant); iso-invariance holds because fibers/copies are iso-invariant partitions + the recursive core
+  order is iso-invariant + the copy-layout choice is iso-invariant (identity for symmetric covers = all-orderings-equal; the
+  `s!` min for the bounded distinguishable case). **CFI-safe:** its 18-cycle is one
   fiber of size 18 > cap (and any non-multipede core fails to canonize ⟹ `coreOrder==null`) ⟹ fall-through, harvest
   untouched. **Iso-invariance bug found+fixed during the s=2 build:** first version renumbered the core cell-ids by
   first-occurrence (labelling-dependent ⟹ Recover orders segments by cell-id ⟹ non-invariant); fix = keep the doubled
   WarmPartition's ORIGINAL canonical ids (each cell is σ-fused ⟹ all ids present in each copy). Tests
   `B4_MatchedDouble_{FoldsAndCanonicalizes, CanonicalizesThroughDescent, DistinctCores}` (Z2/Z3/Z4, s=2) +
-  `B4_NestedDouble_GeneralFold` (Z2/Z3, s=4 = double-of-double). **NOTE:** B4 canonizes correctly but does not yet harvest
-  the fold `Aut` into `Automorphisms` (|Aut| under-reported for the folded case — the fold knows the group and could report
-  it; a follow-on). **Still open:** covers of multiplicity `s > 6` (fall through today), and the `Aut` reporting.
+  `B4_NestedDouble_GeneralFold` (Z2/Z3, s=4 = double-of-double) + **`B4_SymmetricCover_UnboundedS_PolyFold` (Z2 s=8,12; Z3
+  s=8 — `K_s` cover, `s` beyond the `s!` cap ⟹ success proves the poly symmetric path)**. **NOTE:** B4 canonizes correctly
+  but does not yet harvest the fold `Aut` into `Automorphisms` (|Aut| under-reported for the folded case — the fold knows the
+  group and could report it; a follow-on). **Still open:** DISTINGUISHABLE covers of multiplicity `s > 6` (fall through
+  today — would need a canonical copy-ordering / GI on the copy-relation), and the `Aut` reporting.
 - **B5 Cross-checks — LANDED (2026-07-11, `Option2SolverTests`, 21 green; regressions clean).** The battery: B2 fires +
   canonicalizes + scramble-invariant matrix on the native ring multipedes (Z2/Z4/Z2²/Z3) and the production circulant at
   m=5,6, with a speedup (`on.nodes ≤ off.nodes`); distinct rings (Z4 vs Z2²) separate; **CFI does NOT trigger B2** (its

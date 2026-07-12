@@ -489,6 +489,63 @@ public sealed class Option2SolverTests
         _out.WriteLine($"{name,-4} nested-double n={N} (s=4): general fold canonicalizes, scramble-inv=True");
     }
 
+    // B4 UNBOUNDED s: a FULLY-SYMMETRIC s-fold cover (each fiber = a clique K_s among the s copies, so
+    // S_s acts). With s = 8 > MaxFoldMultiplicity(6), the s!-fallback is DISABLED, so a successful
+    // canonicalization PROVES the poly symmetric path (identity order, verified by copy-swap automorphism)
+    // engaged. Handles any s.
+    [Theory]
+    [InlineData("Z2", 8)]
+    [InlineData("Z3", 8)]
+    [InlineData("Z2", 12)]
+    public void B4_SymmetricCover_UnboundedS_PolyFold_ScrambleInvariant(string name, int s)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        Assert.True(s > 6, "the point is s beyond the s!-fallback cap");
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (cov, cvt) = SymmetricCover(core, ct, s);
+        int N = cov.VertexCount;
+        Assert.Equal(s * core.VertexCount, N);
+
+        var forms = new List<string?>();
+        for (int scr = -1; scr < 3; scr++)
+        {
+            AdjMatrix g; int[] t;
+            if (scr < 0) { g = cov; t = (int[])cvt.Clone(); }
+            else (g, t) = ScrambleWithTypes(cov, cvt, 23000 + scr);
+            var adj = Flat(g);
+            var part = new WarmPartition(N); part.Refine(adj, SeedFromTypes(N, t));
+
+            Assert.Null(Option2Solver.TryCanonicalOrder(adj, N, part.CellOf, part.NumCells));   // plain flags
+            var order = Option2Solver.TryCanonicalOrderWithFold(adj, N, part.CellOf, part.NumCells);
+            Assert.NotNull(order);                                          // poly symmetric fold canonicalizes
+            Assert.Equal(Enumerable.Range(0, N), order!.OrderBy(x => x));   // genuine permutation
+            forms.Add(EmitFromOrder(adj, N, order));
+        }
+        Assert.True(forms.Distinct().Count() == 1);                          // scramble-invariant
+        _out.WriteLine($"{name,-4} symmetric cover n={N} (s={s} > cap): POLY fold canonicalizes, scramble-inv=True");
+    }
+
+    // s isomorphic copies of `g`, glued fiber-wise: for each core-vertex i the s copies
+    // {i, n+i, …, (s−1)n+i} share a colour AND form a clique K_s of same-cell edges (so every copy-swap
+    // is an automorphism = S_s symmetry). COPIES = the s cores (G minus same-cell edges).
+    private static (AdjMatrix, int[]) SymmetricCover(AdjMatrix g, int[] types, int s)
+    {
+        int n = g.VertexCount, N = s * n;
+        var adj = new int[N, N];
+        for (int c = 0; c < s; c++)
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (g[i, j] != 0) adj[c * n + i, c * n + j] = g[i, j];   // each copy = the core
+        for (int i = 0; i < n; i++)
+            for (int a = 0; a < s; a++)
+                for (int b = a + 1; b < s; b++)
+                { adj[a * n + i, b * n + i] = 1; adj[b * n + i, a * n + i] = 1; }   // K_s fiber per core-vertex
+        var t = new int[N];
+        for (int c = 0; c < s; c++) for (int i = 0; i < n; i++) t[c * n + i] = types[i];
+        return (new AdjMatrix(adj), t);
+    }
+
     // B4 separation: matched doubles of DIFFERENT cores get DISTINCT canonical forms.
     [Fact]
     public void B4_MatchedDouble_DistinctCores_ProduceDistinctForms()

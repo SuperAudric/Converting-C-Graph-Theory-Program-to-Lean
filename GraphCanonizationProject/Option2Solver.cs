@@ -130,8 +130,8 @@ namespace Canonizer
             return best.Order;
         }
 
-        // B4 general fold: cap on the fold multiplicity `s` (we lex-min over s! copy-orderings, so keep it
-        // bounded — a larger symmetric fold falls through to the descent, sound).
+        // B4 fold: cap on `s` for the DISTINGUISHABLE-copy fallback ONLY (there we lex-min over s! copy
+        // orderings). A FULLY-SYMMETRIC cover (S_s acts) is handled in POLY time for ANY s — see the lift.
         private const int MaxFoldMultiplicity = 6;
 
         /// <summary>
@@ -143,12 +143,15 @@ namespace Canonizer
         ///   · COPIES = connected components of `G` MINUS the same-cell edges; the `s` isomorphic covers.
         /// It requires a clean cover — every fiber size `s = |copies|`, and `(fiber, copy) ↦ vertex` a bijection —
         /// then canonizes ONE copy (the rigid core) RECURSIVELY (so nested folds / `Z₂ᵏ` towers peel level by level),
-        /// and lifts: vertices ordered by (core-canonical fiber rank, copy position), taking the LEX-MIN over the
-        /// `s!` copy-orderings. The min-over-orderings makes the copy layout iso-invariant by construction (the
-        /// copies are symmetric); the emitted order is always a genuine relabelling of `G`, so the form is sound;
-        /// fibers/copies are iso-invariant partitions + the recursive core order is iso-invariant ⟹ the whole is
-        /// iso-invariant. Anything that isn't a clean single multipede or clean cover ⟹ null (fall-through, sound).
-        /// (Matched double = the `s = 2` case; `MaxFoldMultiplicity` caps `s` so `s!` stays bounded.)
+        /// and lifts: vertices ordered by (core-canonical fiber rank, copy position). The copy layout is
+        /// canonicalised in **POLY time for ANY s** when the cover is FULLY SYMMETRIC — every copy-swap is an
+        /// automorphism, so `S_s ≤ Aut(G)` and all orderings give the same form ⟹ use the identity order. Only a
+        /// DISTINGUISHABLE / partially-symmetric cover falls back to the exact lex-min over the `s!` orderings, and
+        /// there `MaxFoldMultiplicity` caps `s` (a larger such fold falls through to the descent, sound). The
+        /// emitted order is always a genuine relabelling of `G` (sound); fibers/copies are iso-invariant partitions,
+        /// the recursive core order is iso-invariant, and the copy-layout choice is iso-invariant ⟹ the whole is.
+        /// Anything that isn't a clean single multipede or clean cover ⟹ null (fall-through, sound).
+        /// (Matched double = the fully-symmetric `s = 2` case.)
         /// </summary>
         public static int[]? TryCanonicalOrderWithFold(int[] adj, int n, int[] cellOf, int numCells)
         {
@@ -160,7 +163,7 @@ namespace Canonizer
             var fiberSize = new int[nFibers];
             for (int v = 0; v < n; v++) fiberSize[fiberOf[v]]++;
             int s = fiberSize.Length > 0 ? fiberSize[0] : 0;
-            if (s < 2 || s > MaxFoldMultiplicity) return null;
+            if (s < 2) return null;                          // no cap here — the poly path handles any s
             for (int f = 0; f < nFibers; f++) if (fiberSize[f] != s) return null;
 
             // COPIES = components of G minus the same-cell edges; require exactly s of equal size.
@@ -201,7 +204,28 @@ namespace Canonizer
             var fiberRank = new int[coreN];
             for (int r = 0; r < coreN; r++) fiberRank[r] = fiberOf[coreVerts[coreOrder[r]]];
 
-            // lift: order by (fiber rank, copy position), taking the lex-min over the s! copy-orderings.
+            // ── LIFT: order by (core-canonical fiber rank, copy position); canonicalize the copy layout.
+            // POLY path (ANY s): if the s copies are mutually interchangeable — every copy-0 ↔ copy-c swap
+            // (fiber-wise) is an automorphism of G — then those transpositions generate S_s ≤ Aut(G), so
+            // EVERY copy ordering yields the same form; use the identity order (iso-invariant, unbounded s).
+            // The swap-is-automorphism check is poly and LOCAL, and is sound HERE precisely because the core
+            // is already canonized (the oracle can't reach it — the IR blind spot — so this is not redundant
+            // with Phase 1). This is the symmetric cover (the matched-double generalization).
+            bool fullySymmetric = true;
+            for (int c = 1; c < s && fullySymmetric; c++)
+                if (!CopySwapIsAutomorphism(adj, n, vertexAt, nFibers, s, c)) fullySymmetric = false;
+            if (fullySymmetric)
+            {
+                var whole = new int[n];
+                for (int r = 0; r < coreN; r++)
+                    for (int p = 0; p < s; p++)
+                        whole[r * s + p] = vertexAt[fiberRank[r] * s + p];
+                return whole;
+            }
+
+            // Distinguishable / partially-symmetric copies: take the EXACT lex-min over the s! orderings
+            // for bounded s; a larger such fold falls through to the descent (null, sound) rather than pay s!.
+            if (s > MaxFoldMultiplicity) return null;
             int[]? best = null; string? bestForm = null;
             foreach (var rho in Permutations(s))
             {
@@ -213,6 +237,23 @@ namespace Canonizer
                 if (bestForm == null || string.CompareOrdinal(form, bestForm) < 0) { bestForm = form; best = whole; }
             }
             return best;
+        }
+
+        // Is the involution swapping copy 0 ↔ copy c within EVERY fiber (fixing all other copies) an
+        // automorphism of G? (`vertexAt[fiber*s + copy]` is the cover's (fiber,copy) bijection.) O(s·n²).
+        private static bool CopySwapIsAutomorphism(int[] adj, int n, int[] vertexAt, int nFibers, int s, int c)
+        {
+            var pi = new int[n];
+            for (int v = 0; v < n; v++) pi[v] = v;
+            for (int f = 0; f < nFibers; f++)
+            {
+                int a = vertexAt[f * s + 0], b = vertexAt[f * s + c];
+                pi[a] = b; pi[b] = a;
+            }
+            for (int u = 0; u < n; u++)
+                for (int v = 0; v < n; v++)
+                    if (adj[pi[u] * n + pi[v]] != adj[u * n + v]) return false;
+            return true;
         }
 
         // Connected components under a caller-supplied adjacency predicate; returns comp[v] ∈ [0,count).
