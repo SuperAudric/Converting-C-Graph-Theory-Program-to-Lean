@@ -453,6 +453,64 @@ public sealed class Option2SolverTests
         _out.WriteLine($"{name,-4} matched-double n={N}: descent σ-fold canonicalizes, scramble-inv=True");
     }
 
+    // B4 harvest seam (sub-step 1 of the fold↔engine integration): the fold emits its verified cover
+    // automorphisms. A matched double of a RIGID multipede has Aut = Z₂ (the copy-swap), so the fold
+    // harvests exactly that one generator — a genuine, non-identity involution automorphism.
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z3", 3)]
+    [InlineData("Z4", 4)]
+    public void B4_MatchedDouble_HarvestsCoverAutomorphism(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), "Z4" => new Ab(4), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (dg, dt) = DoubleAndMatch(core, ct);
+        int N = dg.VertexCount;
+
+        var adj = Flat(dg);
+        var part = new WarmPartition(N); part.Refine(adj, SeedFromTypes(N, dt));
+        var order = Option2Solver.TryCanonicalOrderWithFold(adj, N, part.CellOf, part.NumCells, out var coverAuts);
+        Assert.NotNull(order);
+        Assert.Single(coverAuts);                                             // exactly the copy-swap generator
+        var sigma = coverAuts[0];
+        Assert.False(sigma.SequenceEqual(Enumerable.Range(0, N)));            // non-identity
+        for (int v = 0; v < N; v++) Assert.Equal(v, sigma[sigma[v]]);        // an involution
+        for (int u = 0; u < N; u++)                                          // a genuine automorphism of G
+            for (int v = 0; v < N; v++)
+                Assert.Equal(adj[u * N + v], adj[sigma[u] * N + sigma[v]]);
+        _out.WriteLine($"{name,-4} matched-double n={N}: harvested 1 verified cover automorphism (Z₂ copy-swap).");
+    }
+
+    // B4 harvest through the descent: the terminal fold now reports the COMPLETE automorphism group
+    // (Aut = Z₂ for a matched double of a rigid core) via ResidualGroup — it was the trivial group before
+    // the harvest seam (under-reported |Aut|). Scramble-invariant.
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z3", 3)]
+    public void B4_MatchedDouble_ReportsCompleteAut_ThroughDescent(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (dg, dt) = DoubleAndMatch(core, ct);
+        int N = dg.VertexCount;
+
+        for (int scr = -1; scr < 3; scr++)
+        {
+            AdjMatrix g; int[] t;
+            if (scr < 0) { g = dg; t = (int[])dt.Clone(); }
+            else (g, t) = ScrambleWithTypes(dg, dt, 23000 + scr);
+            var d = new ChainDescent(N, Flat(g), new CascadeOracle(), 5000) { EnableRigidSolver = true };
+            var res = d.Canonize(SeedFromTypes(N, t), new WarmPartition(N));
+            Assert.True(d.RigidSolverCanonicalized > 0, "fold did not fire");
+            Assert.Equal(2, (int)res.ResidualGroup.Order);                    // Aut = Z₂, reported completely
+        }
+        _out.WriteLine($"{name,-4} matched-double n={N}: descent reports |Aut|=2 (complete) via the harvest seam.");
+    }
+
     // B4 GENERAL fold: a NESTED double (double-of-double, Aut ⊇ Z₂², fiber size s=4). The general
     // fiber-quotient fold peels the whole Z₂² fiber in one shot (same-cell-neighbour graph → size-4
     // fibers; G∖H → 4 copies), canonizes the core, and lex-mins over the 4! copy-orderings.

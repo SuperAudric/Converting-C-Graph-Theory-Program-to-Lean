@@ -290,7 +290,14 @@ namespace Canonizer
             // an order; anything else ⟹ null (fall through, sound).
             if (EnableRigidSolver && depth == 0)
             {
-                int[]? order = Option2Solver.TryCanonicalOrderWithFold(_adj, _n, cellOf, numCells);
+                int[]? order = Option2Solver.TryCanonicalOrderWithFold(_adj, _n, cellOf, numCells, out var coverAuts);
+                // Harvest the fold's verified cover automorphisms (the IR blind-spot symmetry the oracle cannot
+                // reach) into `Automorphisms` — for |Aut| reporting when the fold fires terminally (a
+                // fully-symmetric cover of a rigid core has Aut = S_s, exactly these generators), and so the
+                // descent's CoveredByPathFixingAut prunes copy-branches when it does not. Sound by construction:
+                // each entry was verified edge-by-edge, and path-fixing-aut pruning only removes isomorphic
+                // siblings, so the emitted canonical form is unchanged.
+                foreach (var aut in coverAuts) Automorphisms.AddGenerator(aut);
                 if (order != null)
                 {
                     int[] perm = new int[_n];

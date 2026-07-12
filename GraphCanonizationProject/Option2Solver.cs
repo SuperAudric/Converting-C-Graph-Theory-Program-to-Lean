@@ -154,7 +154,22 @@ namespace Canonizer
         /// (Matched double = the fully-symmetric `s = 2` case.)
         /// </summary>
         public static int[]? TryCanonicalOrderWithFold(int[] adj, int n, int[] cellOf, int numCells)
+            => TryCanonicalOrderWithFold(adj, n, cellOf, numCells, out _);
+
+        /// <summary>
+        /// As <see cref="TryCanonicalOrderWithFold(int[],int,int[],int,out System.Collections.Generic.List{int[]})"/>,
+        /// additionally emitting the verified cover automorphisms (the copy-swap `S_s` generators) in
+        /// <paramref name="coverAuts"/> — harvested whenever a clean cover is detected, INDEPENDENT of whether an
+        /// order can be emitted. So a fold that fires terminally reports its `Aut` (for a fully-symmetric cover of
+        /// a RIGID core the copy-swaps ARE the full `Aut(G) = S_s`), and a fold that cannot canonicalize its core
+        /// still hands the descent the cover symmetry to consume. Each entry is a genuine automorphism of `G`
+        /// (verified edge-by-edge in <see cref="CopySwapAut"/>), so consuming them is sound by construction — the
+        /// descent's path-fixing-aut pruning only removes isomorphic siblings, leaving the emitted form unchanged.
+        /// </summary>
+        public static int[]? TryCanonicalOrderWithFold(
+            int[] adj, int n, int[] cellOf, int numCells, out List<int[]> coverAuts)
         {
+            coverAuts = new List<int[]>();
             var plain = TryCanonicalOrder(adj, n, cellOf, numCells);
             if (plain != null) return plain;
 
@@ -181,6 +196,15 @@ namespace Canonizer
                 seen[key] = true; vertexAt[key] = v;
             }
             for (int k = 0; k < nFibers * s; k++) if (!seen[k]) return null;
+
+            // ── HARVEST the cover automorphisms (the verified copy-0↔c swaps) NOW — before core canonization —
+            // so they are reported/consumed even when the core cannot be canonicalized (`order == null` below).
+            // These are the `S_s` generators; for a fully-symmetric cover of a RIGID core they ARE the full Aut(G).
+            for (int c = 1; c < s; c++)
+            {
+                var swap = CopySwapAut(adj, n, vertexAt, nFibers, s, c);
+                if (swap != null) coverAuts.Add(swap);
+            }
 
             // Canonize ONE copy (the rigid core), recursively (nested folds peel here). Core cell ids kept
             // AS-IS from the doubled partition (iso-invariant WarmPartition ids; each cover shares them since
@@ -211,9 +235,7 @@ namespace Canonizer
             // The swap-is-automorphism check is poly and LOCAL, and is sound HERE precisely because the core
             // is already canonized (the oracle can't reach it — the IR blind spot — so this is not redundant
             // with Phase 1). This is the symmetric cover (the matched-double generalization).
-            bool fullySymmetric = true;
-            for (int c = 1; c < s && fullySymmetric; c++)
-                if (!CopySwapIsAutomorphism(adj, n, vertexAt, nFibers, s, c)) fullySymmetric = false;
+            bool fullySymmetric = coverAuts.Count == s - 1;   // every copy-0↔c swap verified ⟹ S_s ≤ Aut(G)
             if (fullySymmetric)
             {
                 var whole = new int[n];
@@ -239,9 +261,10 @@ namespace Canonizer
             return best;
         }
 
-        // Is the involution swapping copy 0 ↔ copy c within EVERY fiber (fixing all other copies) an
-        // automorphism of G? (`vertexAt[fiber*s + copy]` is the cover's (fiber,copy) bijection.) O(s·n²).
-        private static bool CopySwapIsAutomorphism(int[] adj, int n, int[] vertexAt, int nFibers, int s, int c)
+        // The involution swapping copy 0 ↔ copy c within EVERY fiber (fixing all other copies), returned as an
+        // image array IF it is an automorphism of G, else null. (`vertexAt[fiber*s + copy]` is the (fiber,copy)
+        // bijection.) O(s·n²). These verified swaps are the S_s generators of the cover — sound to harvest.
+        private static int[]? CopySwapAut(int[] adj, int n, int[] vertexAt, int nFibers, int s, int c)
         {
             var pi = new int[n];
             for (int v = 0; v < n; v++) pi[v] = v;
@@ -252,8 +275,8 @@ namespace Canonizer
             }
             for (int u = 0; u < n; u++)
                 for (int v = 0; v < n; v++)
-                    if (adj[pi[u] * n + pi[v]] != adj[u * n + v]) return false;
-            return true;
+                    if (adj[pi[u] * n + pi[v]] != adj[u * n + v]) return null;
+            return pi;
         }
 
         // Connected components under a caller-supplied adjacency predicate; returns comp[v] ∈ [0,count).

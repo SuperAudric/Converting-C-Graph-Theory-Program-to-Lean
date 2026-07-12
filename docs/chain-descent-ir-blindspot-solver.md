@@ -41,7 +41,8 @@
 > ring solver is BUILT + WIRED + validated in production, and ROBUST** (`Option2Solver.cs`, recover→solve→emit→verify;
 > **B1a/b/c + B2 + B3 + B4 + B5 + B6 + all three B1d items LANDED** — the SolveOverA affine-frame emit closes the m≥8
 > completeness stall AND the large-`|A|` exponential (poly for bounded rank; native Z6/Z8/Z9/Z2×Z4); general-arity handles
-> any arity ≥ 3; try-both-sides removes the side heuristic; **42 Option2Solver tests, 97 combined**).
+> any arity ≥ 3; try-both-sides removes the side heuristic; **47 Option2Solver tests** (incl. the fold-`Aut` harvest seam;
+> regression-clean — GraphCanonTests 74/1-skip, Multipede 24, LinearOracle 14, Ring 44)).
 > **B4 σ-fold LANDED 2026-07-12, incl. the GENERAL `s`-fold — POLY for UNBOUNDED `s`** (matched double s=2 + nested Z₂² s=4
 > + fully-symmetric `K_s` cover s=8,12; fiber-quotient, identity order for symmetric covers via a poly copy-swap
 > automorphism check, `s!` only for the bounded distinguishable case, CFI-safe) — see the B4 entry in §11.12. The
@@ -209,9 +210,21 @@
 >   order via the copy-swap automorphism check; validated `K_s` cover s=8,12). Only the DISTINGUISHABLE / partially-symmetric
 >   cover with `s > 6` still falls through (sound) — it would need a canonical copy-ordering (graph-canonization of the
 >   copy-relation), which for those covers is a smaller GI instance; off the critical path.
-> - **Harvest the fold `Aut`** — B4 produces the correct canonical *form* but does NOT add the fold group to
->   `Automorphisms`, so |Aut| is under-reported for folded inputs. The fold knows the fibers/copies (= the group); thread
->   it into the descent's `PermutationGroup`.
+> - **Harvest the fold `Aut` — SUB-STEP 1 LANDED (2026-07-12): the harvest/consume seam.** `TryCanonicalOrderWithFold`
+>   now emits its verified copy-swap automorphisms (`out coverAuts`, via `CopySwapAut` — each checked edge-by-edge), and the
+>   descent's `depth==0` hook feeds them to `Automorphisms`. For a fully-symmetric cover of a RIGID core (exactly when the
+>   fold FIRES) the copy-swaps ARE `Aut(G) = S_s`, so |Aut| is now reported **completely** for the folded case (was the
+>   trivial group). Sound by construction: verified generators + path-fixing-aut pruning only removes isomorphic siblings, so
+>   the emitted form is unchanged (47 Option2Solver tests; regression-clean). **Two completeness gaps remain:** **(i)** `Z₂ᵏ`
+>   / distinguishable covers, where the true copy symmetry is a fixed-point-free element not a transposition — harvesting it =
+>   canonizing the copy-relation (= the Q1 recursion, below); **(ii)** the DEEP half (the family-EXPANSION) is NOT this seam —
+>   the runtime win for *composite* residues (a cover fused with other structure: the fold does not fire globally, so the
+>   multipede core stays in the descent's blind spot) needs the fold/solver run on a **sub-residue AT A DESCENT NODE**,
+>   canonicalizing its core there and harvesting its `Aut` — the alternating-engine integration (§11.11). Sub-step 1 is the
+>   load-bearing seam that integration consumes.
+> - **Q1 dead-end recorded:** the distinguishable-cover fallback is a genuine `s!` lex-min; **replacing `MaxFoldMultiplicity`
+>   with `n` gives `n!` (exponential), NOT poly** — the poly-in-`s` path is the *fully-symmetric* branch only (no cap there).
+>   Distinguishable `s>6` is closed by the ring-quotient recursion (canonize the copy-relation via the solver), not a bigger cap.
 > - **B1d (iii) solve-speed perf (DEFERRED by the user)** — a constant-factor speedup only (the algorithm is already poly);
 >   torsion-safe `Z/|A|` reduction or component-wise mod `p^k`. A `BigInteger→long` fast-track was tried and *slowed* it
 >   (doubled work) — parked.
@@ -219,7 +232,7 @@
 >
 > **Validation lives in:** the 5 ring probe files (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
 > `RingSolveProbe`, `RingSolveProbe` — the RM-1..6 chain, 30 tests, `dotnet test --filter "FullyQualifiedName~Ring"`)
-> + **`Option2SolverTests.cs` (39 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
+> + **`Option2SolverTests.cs` (47 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
 > §11.11 (the settled **stepwise alternating engine** + consume-before-force) → §11.13a (**the ring design + RM-1..6
 > validation**) → §11.12 (**build roadmap: B1a/b/c + B2 + B3 + B4 (incl. general `s`-fold) + B5 + B6 + all three B1d items
 > ALL LANDED; only the bounded OPEN items above remain**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are
@@ -1082,8 +1095,8 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
 > **recover → solve → emit → verify** pipeline is validated ring-general on the real refinement, so B1 lifted from the
 > **RM** probes (not the F₂ `Option2ExtractionProbe`); **B3 and B6 are done** (verify = the self-verifying emit; ring
 > built into RM-3/4/5). **DONE: B1a/b/c + B2 (wire) + B5 (cross-checks) + the B1d `SolveOverA` affine-frame emit + B1d
-> general-arity (pin-`d−3`) + B1d try-both-sides side-selection + B4 σ-fold (incl. GENERAL s-fold)** (42 Option2Solver
-> tests, 97 combined). **Every planned B-step is LANDED; the σ-fold is now POLY for unbounded `s` on fully-symmetric
+> general-arity (pin-`d−3`) + B1d try-both-sides side-selection + B4 σ-fold (incl. GENERAL s-fold)** (Includes tests)
+> **Every planned B-step is LANDED; the σ-fold is now POLY for unbounded `s` on fully-symmetric
 > covers. Remaining (bounded, off critical path): DISTINGUISHABLE fold covers `s > 6` (GI on the copy-relation),
 > harvesting the fold `Aut`, and the (deferred) B1d solve-speed perf.** See the PICK-UP-HERE banner for full state.
 
