@@ -1,5 +1,11 @@
 # Chain descent — the de-classing turn: non-class-specific orbit recovery via the saturation engine
 
+> **⚠ FOUNDATIONAL SUBSTRATE, not current architecture (flagged 2026-07-12).** The de-classing *mechanism* (non-class-specific
+> recovery via the saturation engine; one unified recovery-based harvest) is real and reused. But this doc's
+> architectural framing — and its §9 "live frontier" — predate the current model (the **interleaved stepwise alternating
+> fixpoint**; RRU/sequential seals retired). Read it for the recovery/oracle mechanics, not for "where the project is".
+> Current state: `00-START-HERE.md` §2 + `chain-descent-endgame-spec.md` §1a.
+
 > **STATUS (2026-06-02): the organizing strategy for orbit recovery *and* oracle firing.** Read this
 > **after** the overview/strategy/calculator and **before** the per-class material in
 > [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md). It reframes that doc's

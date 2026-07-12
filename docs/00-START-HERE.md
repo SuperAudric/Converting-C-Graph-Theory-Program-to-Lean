@@ -100,59 +100,68 @@ close it — is set out in
 
 ---
 
-## 2. Where the project is now (2026-07-09)
+## 2. Where the project is now (2026-07-12)
 
 > **This section is a map. The authoritative current state is the STATUS block at the top of each linked
 > `chain-descent-*.md`, plus [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) for
 > *what is proved*. Quality bar throughout: every Lean theorem axiom-clean `[propext, Classical.choice,
 > Quot.sound]`, full build green.**
 
-**The endgame frame — "two seals, one wall."** The finished canonizer
-([`chain-descent-endgame-spec.md`](./chain-descent-endgame-spec.md) §1a; compile target
-[`Publication.lean`](../GraphCanonizationProofs/Publication.lean)) reaches **non-rigid** correctness via
-**Algorithm A** (assume-VT / confinement — the Lean-provable ① proof) and the **rigid** residue via **Algorithm
-R** (the F₂ / ring solver). Both isolate the *same* wall, `hSmallAutThin` (≡ rigid-GI∈P), collapsing the open
-remainder to one named residue.
+**The model — one INTERLEAVED engine, not two sequential seals.** The canonizer is a **stepwise alternating fixpoint**
+`…∘phase2∘phase1…` ([`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §11.11; compile
+target [`Publication.lean`](../GraphCanonizationProofs/Publication.lean)): at each pairwise vertex relation the **oracle
+consumes** it via a *verified* automorphism, or the **rigid solver forces** it if it lies in the current linear
+row-space, or it is **deferred**; 1-WL refine between; the solver's kernel feeds *de-fused* symmetry back to the oracle.
+The run is **done at mutual stall** — neither move applies — and the flag fires exactly there. The two "seals" are the
+two *moves* of this one engine (symmetry consume / rigid force), isolating the **same wall** `hSmallAutThin` (≡
+rigid-GI∈P). A purely sequential `phase2 ∘ phase1` is only the **fusion-free special case**.
 
-> **▶ PRIORITY TRACK (2026-07-10): MIXED rigid + symmetric handling — [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md).**
-> A 2026-07-10 source audit found the Lean canonizer is a **single deterministic path** (no branching, no oracle
-> call, no consume/defer phases) — it models only the all-symmetric pole, and its `canonForm?` is not yet
-> iso-invariant. It also found the ①-showcase citation bundle **vacuous** (`ConfinementCitations.hflag`
-> uninhabited) and the `RRU.rru` object content-free (`[[project_confinement_bundle_vacuity_2026-07-10]]`,
-> machine-checked). Since almost every real residue is **mixed**, the priority is the composition
-> `canonForm? = phase2 ∘ phase1` on the **min-over-leaves spec** (consume symmetry → solve the rigid residue),
-> which the C# already achieves (measured **sum-not-product**, `[[project_rru_cost_probe_2026-07-10]]`). FIRST
-> STEP = build the branching `canonMin` spec (Stage 0). The certified-order flag + the conditional RRU object are
-> stepping stones; the Cameron-visible forms families are deprioritized.
+> **▶ Why the model is interleaved, not sequential (2026-07-12).** The earlier plan ran a standalone **Algorithm A**
+> (assume-VT / confinement) to a rigid residue, then handed it to **Algorithm R** — the "RRU" one-shot handoff. That
+> **crash-landed on fusion**: Algorithm A pruned on a *threshold-gated* flag without verifying an automorphism, so a
+> conditional symmetry *fused* with a rigid decision (Chang-A) could be mispruned — and its soundness needed a
+> fusion-mildness theorem that does not exist. Interleaving fixes this structurally (consumption is verify-gated ⟹ a
+> rigid residue *stalls*, it is never harvested), de-fuses the abelian case constructively via the solver kernel, and
+> narrows the residual risk to "**no non-abelian fusion in a rigid medium**" (IR §11.14) — carried like the seal's "or
+> Cameron", not load-bearing on a missing theorem. **RRU is retired** (superseded by the mutual-stall fixpoint); the
+> typed `Phase2.Solver` contract in `Phase2Handoff.lean` survives, its `RRU` reachability apparatus does not.
 
-**What is sealed** (built, axiom-clean, in `build.sh`). The canonizer-correctness substrate
-(direction-invariance, the descent spine); **Route C** — all four form families sealed
-(`reachesRigidOrCameron_{affinePolar,alternating,halfSpin,suzuki}`, modulo scoped citations;
-`NondegQuadricDeterminesForm` discharged); the forms-graph residue at **quasipolynomial**
-(`AffinePolarSeal.reachesRigidOrCameron_affinePolar`), with the fully-citable sub-exp floor `…viaSpielman`. Route C
-is a genuine result but **parked off the headline path** (endgame §1a): the headline `canonizer` runs on Algorithm A,
-not form recovery.
+> **▶ PRIORITY LEAN TRACK: the MIXED composition — [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md).**
+> Almost every real residue is **mixed** (consume some symmetry, force/branch the rest). The current Lean `canonForm?`
+> is a single deterministic path with no branching/oracle/phases (source-verified) — so the priority is building the
+> **branching, interleaved descent** and proving its spec **sound ∧ iso-invariant** (Stage 0a landed: `complete_of_isCanonicalForm`
+> makes completeness free; NEXT = Stage 0b, the branching descent + its X3 iso-invariance obligation). Composition =
+> a **fold over alternation depth**, not one append.
 
-**The live frontier — the Seal Phase (Algorithm A / confinement).** ① (`canon_sound` + `canon_complete`) is done and
-axiom-clean for the index-free `descentCanon`, modulo the confinement citation bundle. Finishing it to
-*unconditional-modulo-citations* is the current work, and **the authoritative "what's left" is
-[`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) — read its TOP "⭐ SEAL-PHASE WRAP-UP
-CHECKLIST".** In brief: `hImprim` is wall-free (the flag's dichotomy routes each branch to `FrameSelectorTransitive`,
-never through `BlockRefinementVisible` = the wall); the residue-scheme seam's primitivity + count legs are built
-(the Skresanov 2-closure citation was eliminated); what remains is a base-identification + a faithfulness
-(`isotropic_span`) discharge, the recovery witness (carried as a *classification* citation, exactly as Route C carries
-`hreal`), a bundle simplification, and the mechanical PORT into `build.sh`.
+**What is built, axiom-clean, in `build.sh`.** The canonizer-correctness substrate (direction-invariance `warm_6_2`,
+the descent spine `spine_branch_independent`); the **cross-branch harvest** machinery (Part A stabilizer-chain object,
+`coversOrbits_of_realizers`, the CFI exponent-2 discharge); **Route C** — all four form families sealed
+(`reachesRigidOrCameron_{affinePolar,alternating,halfSpin,suzuki}`, modulo scoped citations), the forms-graph residue at
+**quasipolynomial** (`…affinePolar`) with sub-exp floor `…viaSpielman` — a genuine result, **parked off the headline
+path**; the mixed-composition **Stage 0a** framework (`ChainDescent.CanonicalForm`); ①a `canon_sound` + the ② cost side
+(`descentCost_le`, `≤ n⁴`) against the shared capped object; the `Phase2.Solver`/`Sound`/`IsoInvariant` **contract**
+skeleton (`Phase2Handoff.lean`). The **C# rigid solver is complete for handoff** (`Option2Solver.cs`, recover→solve→emit→verify,
+ring-general; every B-step landed) — its Lean witness (P1–P4) is the remaining rigid work.
+
+**The live Lean frontier** (authoritative "what's left" = [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)):
+(1) the **branching interleaved descent** (mixed-composition Stage 0b) so `canonForm?` rides the real object, and its
+**X3 iso-invariance** obligation (the one thing Stage 0a reduces ①b/①c to); (2) the **rigid seal P1–P4** (IR §11.12) as
+the `Phase2.Solver` witness — P1 (extraction soundness) first, standalone; (3) re-base the cost bound onto the fixpoint.
 
 **The one genuine wall.** `hSmallAutThin` — "small-Aut primitive residue ⟹ bounded WL-recovery" — is open at the
-*polynomial* threshold (there it *is* GI ∈ P) and is quarantined behind the flag: by design the canonizer is
-**polynomial-or-flag**, and the flag set is exactly the non-schurian IR-solver "row 4"
-([`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §11). "Isolate, don't close" (§1)
-describes where this sits — the live target, never a verdict that it cannot close.
+*polynomial* threshold (there it *is* GI ∈ P) and is quarantined behind the mutual-stall flag: by design the canonizer is
+**polynomial-or-flag**. The live `UnhandledResidue` is `residueHiddenJohnson ∨ residueRigidObstruction` (D1 ∨ D2);
+`residueNonSchurian` (D0) is a **modelling gap, not a genuine unhandled residue** (every symmetry-only residue is
+node-4/Schurian or Cameron). "Isolate, don't close" (§1) describes where this sits — the live target, never a verdict
+that it cannot close.
 
-> **Deeper history is intentionally not repeated here.** The older WL-dimension / node-4 / `s(C)`-core framing, the
-> affine-slice closure, and the per-increment forms-graph build history live in the deep-dive docs' STATUS blocks, in
-> `chain-descent-remaining-work.md`'s lower sections, and in the changelog/archive. The prose below (de-classing, the
-> "single open proposition G2-B") predates the Algorithm-A frame and is retained only as architectural background.
+> **⚠ EVERYTHING BELOW THIS LINE IS SUPERSEDED ARCHITECTURAL BACKGROUND — do not read it as current state.** The
+> de-classing framing, the "single open proposition G2-B", the seal-handoff / general-CC-separability route, and the
+> per-increment WL-dimension / node-4 / `s(C)`-core history all predate **both** the Algorithm-A frame **and** its
+> successor, the interleaved-fixpoint model above. They are retained only for provenance. The current state is §2 above;
+> the authoritative "what's left" is [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md). The
+> recovery/harvest machinery these docs describe is still real and in-build (summarized in §2's "what is built"); their
+> *architecture* (sequential seals, G2-B as the single open object) is not.
 
 **The architecture pivot — "de-classing."** Orbit recovery and oracle firing were
 being proved *class by class* (CFI odd-degree, then even; schemes rank 2, 3, 4…).
@@ -276,21 +285,16 @@ handoff sharpens** ([`chain-descent-seal-handoff.md`](./chain-descent-seal-hando
 
 Read in this sequence; each doc has a STATUS block (its current state) at the top.
 
-**Core (read in full, in order):**
+**Core (read in full, in order) — the CURRENT frame:**
 1. **This doc** — the idea + current state.
-2. [`chain-descent-strategy.md`](./chain-descent-strategy.md) — the algorithm as a
-   whole and the correctness/polynomiality requirements; the propagation substrate.
-3. [`chain-descent-calculator.md`](./chain-descent-calculator.md) — the **oracle**
-   (the hardest component): the stabilizer-chain model, the hardness map, the
-   T-A/T-B/T-C decomposition. *Its §5–§7 describe the pre-declassing two-oracle
-   design and are explicitly legacy — read them for the soundness story, not for
-   how the oracle now fires.*
-4. [`chain-descent-declassing.md`](./chain-descent-declassing.md) — **the current
-   architecture**: de-classed recovery + the unified oracle. This supersedes the
-   two-oracle / order-model framing in docs 2–3 where they differ. Its §9 is the
-   live frontier.
-5. [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) — **Part A**,
-   the cross-branch stabilizer-chain object and the current work thread.
+2. [`chain-descent-endgame-spec.md`](./chain-descent-endgame-spec.md) — the endgame frame (§1a: the interleaved
+   fixpoint = two moves, one wall), the six `Publication.lean` obligations, and the sequencing (§5).
+3. [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) — the **authoritative living tracker** of
+   what's left; read its TOP section.
+4. [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) — the **priority Lean track**: the
+   branching interleaved descent (Stage 0a landed; Stage 0b next) and the sound∧iso-invariant spec.
+5. [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §11 — the **rigid solver**: the
+   §11.11 interleaved engine, the §11.12 rigid-seal P1–P4 roadmap, §11.13 ring design, §11.14 no-Cameron lead.
 6. [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) —
    the theorem index; densest file, the ground truth for *what is proved*. Read in
    full. **It is well over 1000 lines — too large for one `Read` call (and even
@@ -299,6 +303,16 @@ Read in this sequence; each doc has a STATUS block (its current state) at the to
    during onboarding: a prior summary or this onboarding's prose is exactly the lossy
    compression this file is the ground truth for — confirming a few names with
    `grep` is not reading it, and the gap is invisible unless you read it.**
+
+**Algorithm substrate (foundational; predates the current frame — read for the correctness/oracle/recovery MECHANICS,
+not the architecture, which §2's superseded-background note covers):**
+- [`chain-descent-strategy.md`](./chain-descent-strategy.md) — the algorithm as a whole; correctness/polynomiality
+  requirements; the propagation substrate.
+- [`chain-descent-calculator.md`](./chain-descent-calculator.md) — the **oracle**: the stabilizer-chain model, the
+  hardness map, the T-A/T-B/T-C decomposition (§5–§7 are pre-declassing legacy).
+- [`chain-descent-declassing.md`](./chain-descent-declassing.md) — de-classed recovery + the unified oracle (its §9
+  "live frontier" framing is superseded; read for the de-classing mechanism).
+- [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) — **Part A**, the cross-branch stabilizer-chain object.
 
 **Side reading, pulled in as the core docs point to it** (each is a deep-dive or
 witness layer, not onboarding):

@@ -17,7 +17,35 @@
 
 ## STATUS (read first)
 
-**The framework is landed and axiom-clean; the pilot is the live frontier.**
+> **▶ CURRENT MODEL (2026-07-12) — the cost account is on the INTERLEAVED fixpoint; the threshold-gated assume-VT flag is
+> retired.** The big build-log below predates the model change and is retained as history; this banner is the current
+> state. Live Lean source is [`ChainDescent/CostModel.lean`](../GraphCanonizationProofs/ChainDescent/CostModel.lean)
+> (the `ScratchCostModel*` pointers below are stale — that cluster was ported into `CostModel.lean` 2026-07-09).
+> - **What is reusable, unchanged:** the cost monad + budgeted process + per-node cap ⟹ **② unconditional by
+>   construction** (`cost ≤ budget` with no hypothesis; all poly content in ③-forward); ①a `canon_sound`; the co-defined
+>   `warmRefine` summand. The **abstract** cap mechanism survives a rigid solver (it charges `min(trueCost, w)` for *any*
+>   `step`).
+> - **What does NOT carry:** the concrete degree (`n⁴` / quasipoly) was proven with `nbud = n` = the **single-path,
+>   assume-VT `leaves = 1`** justification (`spineCappedCanonizer`). The canonizer is now the **interleaved stepwise
+>   alternating fixpoint** (`…∘phase2∘phase1…`; IR §11.11), so the node count must be re-established against the
+>   branching/interleaved object — the poly guarantee is the **verify-consume monovariant** (each verified consumption
+>   strictly reduces residual symmetry; each rigid force reduces free relations) + the **fusion-severity look-ahead
+>   bound** (IR §11.11), not a single `n`-deep path. Cost composes as a **fold over alternation depth**; the abelian
+>   fused case is an inline poly interleave (measured **sum-not-product**, `[[project_rru_cost_probe_2026-07-10]]`), so
+>   Phase-1 symmetry work does not multiply Phase-2 rigid branching.
+> - **The flag is the MUTUAL STALL, not `base > baseMax`.** Consumption is **verify-gated** (a rigid residue stalls, it
+>   is never harvested), so the threshold-gated assume-VT prune (§7a) — which could misprune a *fused* rigid residue
+>   (Chang-A) — is retired. `none` fires exactly when neither the oracle nor the rigid solver can take a step.
+> - **The carried hypothesis shrinks from `NoFusion` to "no non-abelian fusion in a rigid medium"** (IR §11.14 /
+>   `chain-descent-cameron-entanglement.md` Route A): the abelian half of fusion is discharged constructively by the
+>   solver kernel (Smith solve), so no fusion-mildness theorem is needed; the remaining risk is carried like the
+>   symmetric seal's "or Cameron". See `chain-descent-endgame-spec.md` §1a and `chain-descent-deferred-decisions.md`.
+> - **Live cost frontier:** re-base the node-count bound onto the interleaved object (mixed-composition Stage 4); the
+>   quasipoly-seal pilot below still validates the per-node `w` machinery and is unaffected.
+
+*(Historical build-log follows; see the banner above for what is current.)*
+
+**The framework is landed and axiom-clean; the pilot was the live frontier (pre-2026-07-12).**
 [`ChainDescent/ScratchCostModel.lean`](../GraphCanonizationProofs/ChainDescent/ScratchCostModel.lean)
 (core-only, WIP, not in `build.sh`) builds the cost monad + the budgeted process + the ② mechanism. The
 three framework theorems verify axiom-clean — in fact tighter than the project bar: `[propext, Quot.sound]`,
@@ -376,7 +404,18 @@ This is the exact mechanism by which the firewall bites: a *meta*-poly family (R
 a real `cost ≤ poly` proof (via this cost model) or goes into the excluded residue. It cannot be axiomatized.
 The cost model is thus the instrument that decides, per family, "handled at poly" vs "excluded."
 
-### 7a. Per-node flag, witness-or-flag, and the assume-VT poly mode (2026-07-07)
+### 7a. Per-node flag, witness-or-flag, and the assume-VT poly mode (2026-07-07) — SUPERSEDED (2026-07-12)
+
+> **⚠ SUPERSEDED — the threshold-gated assume-VT prune is retired.** This section flagged on `base > baseMax` and then
+> **assume-VT-pruned** the flagging (Phase-1) residue *without verifying an automorphism*. That crash-landed on fusion:
+> a conditional symmetry fused with a rigid decision (Chang-A) is not vertex-transitive, so assume-VT-pruning it is
+> unsound, and the guard needed a fusion-mildness theorem that does not exist. The current engine is **interleaved** and
+> **verify-gated** (IR §11.11): the oracle consumes only via a verified automorphism, so a rigid/fused residue **stalls**
+> instead of being pruned; the abelian fused case is de-fused constructively by the rigid solver's kernel; `none` fires
+> at **mutual stall**. Correctness ① is therefore conditional on the **fusion obligation** ("no non-abelian fusion in a
+> rigid medium", carried like "or Cameron"), NOT on a threshold-gated confinement lemma. Read the rest of this section
+> for the per-node-cap mechanics (still valid: a node cannot exceed `w`, so ② stays unconditional) and the phase-tagged
+> `UnhandledResidue` idea (still valid) — but NOT for the assume-VT-prune-on-threshold soundness story.
 
 Refining the flag from a **global** to a **per-node** budget (a small `budgetedIterate` variant: flag the moment one
 node's work hits `w`, recording *which phase* flagged) yields two consequences. Authoritative writeup:

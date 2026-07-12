@@ -31,65 +31,42 @@ where **"poly" stops being a meta-argument** — and **③ (flag ⟹ obstruction
 `UnhandledResidue` definition plus consuming both the Seal-Phase and IR-Phase results.
 
 Below should be no more than one progress update entry to prevent this file from reducing to a build increment log. Other changes should be filtered into stable state documentation if needed.
-**Progress (the Runtime-Phase cost model + the non-rigid correctness ARCHITECTURE have STARTED).**
-Two coupled threads, both in [`chain-descent-cost-model.md`](./chain-descent-cost-model.md) STATUS + route-c-plan
-§7b/§7c ([[project_confinement_lemma_2026-07-07]]):
 
-- **The correctness architecture — witness-or-assume-VT (SUPERSEDES R1).** ① on the non-rigid residue is now a real
-  algorithm: refine the flag to a **per-node** budget; a Phase-1 over-budget flag ⟹ (confinement lemma) the residue is
-  primitive rank-3 ⟹ VT ⟹ assume-VT-prune-and-continue (node-4/Cameron *handled*, single-path poly; `none` only in
-  rigid Phase 2). This makes the flag/budget mechanism **load-bearing for correctness** — the cost model shifted from a
-  *demonstration* to a *prerequisite*. The whole non-rigid ① reduces to the **confinement lemma** (route-c §7c) —
-  **CORE COMPLETE (2026-07-08), all axiom-clean:** P1 (super-poly threshold), P2 (deferral), P3 (real seal), P4 (→ Witt),
-  Witt (factored) **ALL WIRED** — `ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt` reduces the ①b core
-  `SelectedCellIsOrbit` to ONLY named citations {G3, model=D0, `hImprim`, Witt+Liebeck}. `UnhandledResidue` atoms made
-  structural (issue-#1 firewall). Detail: the CURRENT STATE block atop [[project_confinement_lemma_2026-07-07]].
+**Progress (2026-07-12) — the model is now the INTERLEAVED fixpoint; the sequential Algorithm-A seal crash-landed on fusion; RRU is retired.**
+The single durable statement, superseding the earlier sequential/RRU/confinement build-log (that history is in
+[`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md), the doc STATUS blocks, and the changelogs):
 
-- **The cost model.** Framework landed axiom-clean (`ScratchCostModel.lean`: `CostM` + `budgetedIterate` + `cost_budgetedIterate_le`),
-  settling **② unconditional by construction** (all poly content in ③-forward). The **per-node cap** variant
-  (`ScratchCostModelPerNode.lean`) gives ② with NO `hstep`. The instance is attached to **`defaultSpineChain`** (proven
-  node bound): `spineCappedCanonizer_cost_le` proves **`cost ≤ n⁴` concretely on the real descent** (matches C#
-  `16n⁴`), and the cost is **co-defined** (`ScratchCostModelCostedWarmRefine.lean`: `value=warmRefine`,
-  `cost=warmRefineCost n`, not a fiat literal — the D1 seam closed).
+- **The canonizer is the interleaved stepwise alternating fixpoint** `…∘phase2∘phase1…` — one pairwise relation at a
+  time (the oracle **consumes** it via a *verified* automorphism; the rigid solver **forces** it if it lies in the current
+  row-space; else it is **deferred**), 1-WL refine between, the rigid solver's kernel feeding *de-fused* symmetry back to
+  Phase 1. Sequential `phase2 ∘ phase1` is only the **fusion-free special case**. The run is **done at MUTUAL STALL** —
+  neither the oracle nor the rigid solver has a step left; **the flag fires exactly at mutual stall**, not at a base
+  threshold. Engine spec: [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §11.11;
+  Lean composition track: [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md).
+- **Why the model changed (the crash-landing).** The sequential **Algorithm A** seal pruned on a *threshold-gated* flag
+  (`base > baseMax ⟹ assume-VT`) **without verifying an automorphism**. Its soundness was "completeness of deferral ⟺ no
+  fusion," and **no theorem bounds how mild fusion must be** — so a conditional symmetry *fused* with a real (rigid)
+  decision (Chang-A) could be assume-VT-pruned, pruning the rigid residue. Interleaving fixes this structurally:
+  consumption is **verify-gated**, so a rigid residue (no automorphism) presents as a *stall*, never a harvestable orbit,
+  and the mechanism that could misprune it is gone. The abelian/linear fused case is then **de-fused constructively** by
+  the solver kernel (nontrivial kernel-module → verify → consume → refine → loop); the residual risk narrows to
+  **non-abelian fusion in a rigid medium**, excluded by IR §11.14 and **carried like "or Cameron"** (empirically solid,
+  not load-bearing on a missing theorem). See [`chain-descent-cost-model.md`](./chain-descent-cost-model.md) STATUS and
+  [`chain-descent-deferred-decisions.md`](./chain-descent-deferred-decisions.md) top banner.
+- **RRU is retired.** The Phase-1 deliverable is no longer "Reaches Rigid Unconditionally" (a one-shot `R(G)` handoff);
+  it is the **iterative fixpoint object** above. The typed **`Phase2.Solver` / `Sound` / `IsoInvariant` contract** (+
+  `handoffBase_relabel`) in `ChainDescent/Phase2Handoff.lean` survives as the seam the rigid solver fills; the `RRU`
+  reachability apparatus (`ComputesResidue`/`rru`, built on `rigidResidue = supp Aut`) is content-free and abandoned.
+- **What is proven and reusable.** ①a `canon_sound` and the ② cost side (`descentCost_le`, `≤ n⁴`) are proven axiom-clean
+  against the shared capped object (`ChainDescent.CostModel` / `CanonForm`); the mixed-composition Stage 0a framework
+  (`ChainDescent.CanonicalForm`: `complete_of_isCanonicalForm`, `lexMin`) makes ①b/①c free given one iso-invariance
+  obligation. These transfer to the interleaved object; the concrete `n⁴`/quasipoly *degree* must be re-established
+  against it (the `nbud = n` single-path justification does not carry — see cost-model STATUS).
 
-**Correctness ① state (2026-07-08):** **①a `canon_sound` DONE** (shared object `ScratchCanonFormCapped.CanonForm.canonForm?`,
-also carrying ② `descentCost_le`). **①b `canon_complete`: ← direction DONE** (`ScratchConfinementCompleteness.canonForm?_complete_mpr`,
-from ①a); **→ direction = X3 = THE INDEX-FREE CUT (2026-07-08 cont.), after three dead routes.** The lex-min reduction
-to `CanonFormImagesIsoInvariant` landed but that residual is **FALSE** for the current `canonForm`: `DirAssignment` `σ`
-breaks ties only between *equal-colour* vertices, and individualization gives committed vertices *distinct index colours*
-(`v.val`), so `σ` never re-orders them ⟹ the lex-min cannot wash out the index ⟹ current `canonForm` is genuinely not
-iso-invariant when `D ≠ ∅`. **THE CUT:** commit ONE vertex at a time with an **index-free** colour, ordering the
-committed set by canonical descent *level* (not `v.val`). Then the seed transports **literally** under a relabel
-(`indivOne (g r) ∘ g = indivOne r`, a function equality — NOT `samePartition`), dissolving the samePartition-vs-literal
-gap, and the banked `labelledAdj_rankPerm` value-lift closes it. **`ScratchConfinementX3.lean` P1–P6 all landed
-axiom-clean** (`indivOne`/`indivStep1` + literal equivariance, `descentColouring_transport` cross-graph, the value-lift
-`labelledAdj_rankPerm_cross`, and `ifCanon_iso_invariant_of_reconcile` for `H = π·G`) — **the invariance mechanism is
-proved end-to-end (same-order)**. **(i) DONE** — `oneStepSpineChain` (`ScratchConfinementX3Spine.lean`): index-free
-`SpineChain` (via `indivStepOne`+`pickOne`), `oneStepSpineChain_reaches_leaf` (termination transferred off
-`defaultSpineChain`), `oneStep_canonForm_isLabelledAdj` (①a free). **(ii-a) DONE** — `oneStep_cell_refines_setIndiv`
-(retained but no longer load-bearing after W2). **(ii-b) RESOLVED — the CONVERGENCE/C2-confluence framing is SUPERSEDED
-(do NOT build C2); the route is the W-plan (2026-07-08).** The C# selects the *lowest cell-id* (lex-rank of WL-signature)
-non-singleton cell — an EQUIVARIANT cell rule — and a FIXED schedule is iso-invariant (deferral = a different schedule
-gives a different-but-valid canonical ⟹ cross-schedule confluence is NOT the target). The assume-VT descent runs one
-fixed schedule, so ①b→ = **fixed-schedule iso-invariance via a per-level McKay reconciliation with an equivariant CELL
-selector**. **W1 ✅** (`ScratchConfinementX3Sel.lean`, axiom-clean): equivariant `selCell`/`selCellRep` + `selCell_transport`
-(literal cross-graph cell image) + `selCellRep_both_in_target`; replaces the WRONG `pickOne` (min-index, non-equivariant
-cell). **W2 ✅ by GENERALIZATION** (whole confinement chain axiom-clean, 1284 jobs green): the confinement chain's
-cell-selection colouring is now an abstract parameter (`χ`/`χsel`) across `ScratchNodeCountBridge`/`ConfinementP4`/`Witt`/`P3`/`Confinement`
-(default `indivχ`) — instantiate `sel:=selCell`, `χsel:=` the descent's own colouring ⟹ confinement reads the descent's
-colouring (matches the C#, one `WarmPartition`); the samePartition bridge is OBVIATED. **W3 🟡** (`ScratchConfinementX3Recon.lean`):
-W3a ✅ (`descentPicks` + `descentColouring` link), W3c-core ✅ (`reconcile_extend` — the single-`b` accumulation crux:
-`aₖ∈Stab` fixes earlier picks so one global `b` reconciles, reviving `ifCanon_iso_invariant_of_reconcile`); remaining =
-W3b direct termination + the full induction folding `reconcile_extend`. **W4** = feed `hrec` to `ifCanon_iso_invariant_of_reconcile`,
-re-instantiate `oneStepSpineChain` with `selCellRep`, rewire `canonForm?`/①b. The old `CanonFormImagesIsoInvariant` is ABANDONED.
-
-**Still unbuilt for done:** **X3 W3/W4** (the ①b → piece — algebraic crux `reconcile_extend` in hand); wire the
-witness-case/`nodeOf` into `singlePathDisposition_of_confinement`; discharge the confinement carriers (model=D0,
-`hImprim`); assemble full ①; ③-forward (run returns `some`) + the `UnhandledResidue` disjunct *definitions* + the
-Publication swap (`canonForm? := CanonForm.canonForm?` onto the FIREABLE `spineCappedCanonizerO`, once, with ③); then
-**port the confinement/cost cluster into build.sh**. **Separate BONUS deliverable (option B, not on the `#print axioms`
-path):** a *runnable* Lean canonizer — see [`chain-descent-executable-track.md`](./chain-descent-executable-track.md)
-(output `#eval`s + ①a-sound; still slow — OPEN).
+**The live Lean frontier:** (1) the mixed-composition **branching descent** (Stage 0b) so `canonForm?` rides the real
+interleaved object, and its X3 iso-invariance obligation; (2) the **rigid seal P1–P4** (IR §11.12) as the `Phase2.Solver`
+witness; (3) re-base the cost accounting onto the fixpoint. **Separate BONUS (option B, off the `#print axioms` path):** a
+*runnable* Lean canonizer — [`chain-descent-executable-track.md`](./chain-descent-executable-track.md) (①a-sound; slow — OPEN).
 
 ---
 
@@ -132,57 +109,48 @@ a faithful external source (§ the citation register in
 the same single wall**. `UnhandledResidue` therefore collapses from three opaque atoms toward **one named
 residue**.
 
-**Two algorithms are in play; be explicit about which is the deliverable.**
-- **Algorithm A — assume-VT / confinement** (what the Lean ① *proves*, the NON-RIGID deliverable). Per-node
-  budget flag; a Phase-1 over-budget flag ⟹ (confinement lemma) primitive rank-3 ⟹ vertex-transitive ⟹
-  *assume-VT-prune-and-continue* — node-4/Cameron become **handled** (single-path poly, complete), `none` only in
-  the rigid phase. **Lean-provable / axiom-clean**; citation base {G3, Liebeck, Witt, hImprim, D0}. Does **not**
-  need Route C or any per-family form recovery.
-- **Algorithm R — recovery** (what the C# main currently *runs*, and the RIGID plan's mechanism). Recognize the family,
-  recover the structure (Route-C form on the symmetric side; the F₂/ring constraint system on the rigid side),
-  canonicalize via the known/solved group. Empirically fast and complete, but its poly-ness is **meta**
-  (per-family) — so at the Lean level it either becomes a real `cost ≤ poly` proof or falls into
-  `UnhandledResidue` (the firewall forbids axiomatizing it). On the **rigid** side, recovery is the *only* option
-  (trivial `Aut` ⟹ assume-VT is vacuous), so the rigid seal is built on Algorithm R.
+**Two algorithms are in play; they INTERLEAVE (they are not two sequential phases).**
+- **Algorithm A — symmetry consumption** (the oracle side; cascade/linear). Consumes a pairwise relation via a
+  **verified automorphism**, reducing the residual symmetry. As a *standalone sequential seal* (assume-VT / confinement,
+  the earlier "prune the whole flagging residue" plan) it **crash-landed on fusion** — its threshold-gated prune could
+  misprune a rigid residue fused with a real decision (Chang-A), and its soundness needed a fusion-mildness theorem that
+  does not exist. It survives **only** as the verify-gated consume step *inside* the interleaved engine, where a rigid
+  residue simply stalls rather than being pruned. Symmetric machinery it still carries: {G3, Liebeck, Witt, hImprim} for
+  classifying the *large-Aut* Cameron case.
+- **Algorithm R — the rigid solver** (the force side; F₂/ring → Smith). Recovers the linear constraint system of the
+  rigid residue and solves it (row-space force / canonical coset), **de-fusing** any abelian symmetry hidden behind a
+  real decision (its kernel is a symmetry detector) and flagging the non-linear residue. It is the mechanism for the
+  rigid domain (trivial `Aut` ⟹ consumption is vacuous there) and, via interleaving, for the mixed residue too.
+  **No new citations** (unlike G3 on the symmetric side). Detail: IR §11.11–§11.14. *(Route-C form recovery on the
+  symmetric side is a separate, parked poly result — not on the headline path.)*
 
-**★ The Phase-1 deliverable is "Reaches Rigid Unconditionally" (RRU) — the handoff object Phase 2 works forward from.**
-Phase 1 (Algorithm A) **never emits `none`**: a Phase-1 flag is *not* a handoff, it is the *trigger* for the assume-VT
-step. A flagging residue is vertex-transitive (P1: flag ⟹ large `Aut` ⟹ VT), so the flag is always **consumable** —
-assume-VT prunes the orbit, recovers the symmetry, and steps forward, *strictly consuming a symmetry each time*.
-Iterating drives every input down to a **rigid** residue `R(G)`. So the Seal Phase's real deliverable is the theorem
-**RRU: for every input, Phase 1 terminates at a rigid, iso-invariant residue `R(G)`** — a **proven Seal object** (per-step
-soundness = `SelectedCellIsOrbit` / the confinement ①; iterated to a rigid fixpoint, plus endpoint iso-invariance), NOT
-an `opaque` predicate that a Phase-2 flag certifies. `R(G)` is exactly what **Phase 2 (Algorithm R, the rigid solver)
-consumes**; Phase 2 has no recovery for *its own* flag yet, so **Phase 2 is the sole source of `none`**. Corollary: ①
-(correctness) and ② (`cost ≤ n⁴`, `descentCost_le`) being proven against a **total, never-`none`** object is *by design*
-— Phase-1 totality is the point, not a vacuity; the `∨ none` disjunct of `canon_poly_or_flag` is reserved for Phase 2.
-RRU is the true **switch-over gate**: until it is an explicit proven object, Phase 2 has nothing to forward-reference.
-(Do NOT reframe RRU as "a Phase-1 flag hands a `none` to Phase 2" — that inverts the polarity; the flag is consumed, the
-handoff is the *proven* rigid residue.) **The boundary is the DEFERRAL scheduler, not the flag threshold** (scoped +
-resolved 2026-07-09): a cell is *consumed* (`OrbitPartition` = a path-fixing automorphism relates a pair) or a real
-decision is *deferred* (`¬OrbitPartition`), sound by `real_stays_real` (`CascadeOracle.lean`); "nothing left to consume"
-= **rigid = `IsBase`** (trivial residual, `card_stabilizerAt_eq_one_iff_isBase`). The flag is a *cost* mechanism confined
-to the `¬IsBase` side (P2 `flag_imp_symmetric_spine`), NOT the boundary — so there is no small-Aut/trivial-Aut gap. The
-substrate is all built; RRU is an assembly whose first brick is the progress lemma `¬IsBase → ∃` a consumable
-`OrbitPartition` pair. Full scoping: `chain-descent-remaining-work.md` item 6 + `[[project_rru_phase_transfer_2026-07-09]]`.
-
-> **⚠️ CORRECTION (2026-07-10 audit) + RE-POINTING to the MIXED-COMPOSITION track.** Three parts of the RRU
-> paragraph above are superseded by a source audit (`[[project_confinement_bundle_vacuity_2026-07-10]]` +
-> `[[project_rru_cost_probe_2026-07-10]]`; machine-checked): (i) the ① showcase's `ConfinementCitations.hflag`
-> is UNINHABITED (`ConfinementCitations 2 → False`) ⟹ `descentCanon_showcase*` are vacuous — the Lean descent
-> has **no deferral and never calls the oracle**, so completeness was only pushed through by assuming every node
-> flags; (ii) "no small-Aut/trivial-Aut gap / boundary is not the flag" is RETRACTED — existence of a consumable
-> pair ≠ the oracle *discovering* it (`CascadeOracle.lean:99-109`); the Chang-A leak is a concrete small-Aut
-> witness; (iii) `rigidResidue`/`RRU.rru` are content-free (`rigidResidue` = support of `Aut`, not the ordered
-> base; `RRU.rru` inhabited by `rfl`). **The deeper re-pointing (this is the priority the user set 2026-07-10):**
-> the Lean canonizer is a **single deterministic path with no branching, no oracle, no phases** — it models only
-> the all-symmetric pole. Since *almost every real residue is MIXED* (consume some symmetry, branch the rest),
-> the priority Lean track is the **composition `canonForm? = phase2 ∘ phase1` against the min-over-leaves spec** —
-> scoped in **[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md)** (Stages 0–4; Stage 0
-> = build the branching lex-min spec, which also makes ①b/①c nearly free). The flag + the RRU object are useful
-> **stepping stones** (Phase-1 side + safety valve), not the deliverable. The Cameron-visible forms families
-> (Route C / certified-assume-VT) are **deprioritized** — they widen what Phase 1 consumes, but the composition
-> must hold regardless.
+**★ The two algorithms INTERLEAVE; the Phase-1 deliverable is the ITERATIVE FIXPOINT OBJECT, not a one-shot handoff (RRU is retired).**
+The earlier plan had Phase 1 (Algorithm A) run to a rigid residue `R(G)` and hand it *whole* to Phase 2 — the "RRU"
+switch-over gate. **That sequential split is retired**, because it required Phase 1 to consume every symmetry *before* any
+rigid work, which is exactly "completeness of deferral ⟺ no fusion" — an open question with **no theorem bounding how mild
+fusion must be**. The current model **interleaves**: at each pairwise relation the oracle consumes it (verified
+automorphism), or the rigid solver forces it (row-space), or it is deferred; 1-WL refine between; the solver kernel feeds
+*de-fused* symmetry back to Phase 1. The Phase-1 deliverable is therefore the **iterative fixpoint object** — the descent
+run to **mutual stall** (neither oracle nor rigid solver can take a step). This is strictly stronger than RRU: the rigid
+solver does **not** need a purely-rigid residue to start, so fusion (Chang-A) never has to be shown mild. **`none` fires
+exactly at mutual stall**, and the residual it names is the shared wall.
+- **Why interleaving restores viability (the fusion resolution).** Consumption is **verify-gated, not threshold-gated**:
+  the oracle merges a pair only via a verified automorphism (`real_stays_real`, `CascadeOracle.lean`), so a rigid residue
+  — which *has* no such automorphism — presents as a **stall, never a harvestable orbit**, and the threshold-prune that
+  crashed Algorithm A is gone. Abelian/linear symmetry *fused* behind a real decision is **de-fused constructively** by
+  the solver's kernel (a nontrivial kernel-module is the hidden linear symmetry → verify → consume → refine → loop). Only
+  **non-abelian fusion in a rigid medium** could survive both, and IR §11.14 argues a rigid medium admits none (hiding is
+  abelian/linear; Johnson/Cameron is non-abelian) — carried like the symmetric seal's "or Cameron", empirically solid,
+  **not** load-bearing on a missing fusion-mildness theorem. Full argument: cost-model STATUS + IR §11.11/§11.14.
+- **The typed seam that survives.** `ChainDescent/Phase2Handoff.lean` keeps the **`Phase2.Solver` / `Sound` /
+  `IsoInvariant` contract** (+ `handoffBase_relabel`) — the interface Algorithm R witnesses. The `RRU` namespace's
+  *reachability* apparatus (`ComputesResidue`/`rru`, built on `rigidResidue = supp Aut`, a `rfl`-inhabited content-free
+  object per the 2026-07-10 audit) is abandoned; do not build on it.
+- **Consequence for the Lean objects.** ① and ② are established against the mixed-composition object
+  ([`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md)), whose spec is **sound ∧ iso-invariant**
+  (Stage 0a `complete_of_isCanonicalForm` makes completeness free); composition is a **fold over alternation depth**, not
+  one append. The `∨ none` disjunct of `canon_poly_or_flag` is the mutual-stall flag. The Cameron-visible forms families
+  (Route C) are **deprioritized** — they widen what the oracle consumes, but the composition must hold regardless.
 
 **The two seals (mirror table, IR §11.12).**
 
@@ -193,10 +161,13 @@ substrate is all built; RRU is an assembly whose first brick is the progress lem
 
 **The target — minimize `UnhandledResidue`, do NOT concede the rigid side.** The goal is the *best* headline, not
 the shortest line. Concretely:
-- **`UnhandledResidue` → one named residue.** The two seals' flag floors are the **same object** (IR §11.11
-  node-4 unification: the symmetry seal reduces node-4 from the rank-3 side, the rigid solver reduces the
-  multipede from the high-rank side, both leave the identical **non-schurian / non-linear** residue). So the
-  three `Publication` atoms (D0 non-schurian, D1 hidden-Johnson, D2 rigid) collapse toward **one** predicate.
+- **`UnhandledResidue` → one named residue.** Every symmetry-only residue is believed to be **node-4 (Schurian by
+  definition) or Cameron**, so `residueNonSchurian` (D0) is a **modelling gap, not a genuine unhandled residue** (see §4.1)
+  — the live atoms are **D1 (hidden-Johnson, symmetric) and D2 (rigid obstruction)**. The two seals' flag floors are the
+  **same object** (IR §11.11 node-4 unification: the symmetry seal reduces node-4 from the rank-3 side, the rigid solver
+  reduces the multipede from the high-rank side, both leave the identical residue), so D1 and D2 collapse toward **one**
+  predicate. (D2 itself later splits into rigid-Cameron-equivalent / rigid-node-4-equivalent — a downstream refinement,
+  the mirror of the Cameron→hidden-Johnson shrink, off the immediate critical path.)
 - **`UnhandledResidue → ⊥` is exactly closing that shared wall** (`hSmallAutThin` = "small-Aut ⟹ bounded WL-dim"
   = rigid-GI ∈ P). That is the project's central open problem — **not reachable with current techniques**, but it
   has **zero constructible falsifiers**, so the honest best headline is "*poly-time complete canonizer whose only
@@ -261,12 +232,16 @@ either built or a citation.
 Five workstreams reach the obligations. Names are for this doc's organization only (they are deliberately
 absent from `Publication.lean`, whose statements are independent of the route taken).
 
-### Seal Phase — the symmetric-domain seal (Algorithm A), finished and reusable
-The `reachesRigidOrCameron` seal is in build. For the **headline**, the non-rigid poly + completeness come from
-**Algorithm A (assume-VT / confinement)**, not from Route-C form recovery — the confinement chain consumes
-`exhaustiveObstruction_scheme` + **G3** (§1a). So the live non-rigid work is **finishing the confinement /
-Algorithm A path** (STATUS block: X3 = the index-free cut — SpineChain-ify + `hrec` + rewire; wire
-`nodeOf`/witness-case → `CertifiedSinglePath`; discharge D0/`hImprim`), *not* R1 and *not* Route C:
+### Seal Phase — the symmetric-domain seal, now the interleaved CONSUME step (not a standalone sequential phase)
+> **⚠ SUPERSEDED FRAMING (2026-07-12).** This subsection described **Algorithm A** as a standalone assume-VT/confinement
+> seal that *finishes the non-rigid half first*. That plan **crash-landed on fusion** (§1a): its threshold-gated prune
+> could misprune a fused rigid residue, and its soundness needed a fusion-mildness theorem that does not exist. The
+> `reachesRigidOrCameron` seal and its {G3, Liebeck, Witt, hImprim} machinery are **retained**, but only as the
+> **verify-gated consume step inside the interleaved engine** (classify/consume the large-Aut Cameron case); they no
+> longer carry the whole non-rigid correctness. The X3 / `CertifiedSinglePath` single-path work below is superseded by
+> the mixed-composition **branching** descent (Stage 0b). Read the rest of this subsection for the reusable substrate
+> only. The `reachesRigidOrCameron` seal is in build; its symmetric machinery consumes
+`exhaustiveObstruction_scheme` + **G3** (§1a). Substrate notes (still valid):
 - **R1 (the Aut-free coordinatizer) is SUPERSEDED** by witness-or-assume-VT (§1a / cost-model §7a): assume-VT is
   single-path poly with no `Aut`-computation, so the meta-circularity R1 was fixing does not arise on the
   headline path.
@@ -387,17 +362,19 @@ UnhandledResidue G  :=  residueNonSchurian G  ∨  residueHiddenJohnson G  ∨  
 
 | Atom | Domain | What it is | Delivered by | Status |
 |---|---|---|---|---|
-| **(D0) `residueNonSchurian`** | scope | reached residue is **not schurian** ⟹ outside the seal, honestly flagged | Runtime Phase (define the reached residue + its schurian test) | **NEW — but it DISSOLVES the `SchurianScheme` gap** |
-| **(D1) `residueHiddenJohnson`** | symmetric | reached residue is the **un-shrinkable Cameron core** (= the concrete `IsCameronScheme` instance minus its handled sub-classes) | **Seal Phase — the Cameron shrink** | **NEW — research; the shrink defines it** |
-| **(D2) `residueRigidObstruction`** | rigid | the **IR residual** ("rigid-Cameron-equivalent") | **IR Phase** | **NEW — research; `⊥` if "no rigid-Cameron"** |
+| **(D0) `residueNonSchurian`** | scope | reached residue is **not schurian** | **modelling artifact to DISCHARGE, not a live atom** | **A MODELLING GAP — see below; every symmetry-only residue is node-4/Cameron ⟹ Schurian or Cameron** |
+| **(D1) `residueHiddenJohnson`** | symmetric | reached residue is the **un-shrinkable Cameron core** (= the concrete `IsCameronScheme` instance minus its handled sub-classes) | **Seal Phase — the Cameron shrink** | **LIVE — research; the shrink defines it** |
+| **(D2) `residueRigidObstruction`** | rigid | the **IR residual** ("rigid-Cameron-equivalent"; later splits rigid-Cameron / rigid-node-4-equivalent) | **IR Phase (Algorithm R)** | **LIVE — research; `⊥` if "no rigid-Cameron"** |
 
-**Why (D0) is the important insight.** The `SchurianScheme` model-faithfulness gap ("is the canonizer's actual
-2-WL-closure residue equal to the `orbitalScheme H` model?") is flagged project-wide as *documented-infeasible*
-to discharge. The endgame **does not need to close it**: if the reached residue is not schurian, it is outside
-the seal's scope, so the honest thing is to flag it — which (D0) does by construction. A scary open gap becomes
-an honest exclusion (and it coincides with the IR-solver's row-4 non-schurian residue, which is *by design* a
-flag, never a seal obligation). The cost is only that non-schurian inputs are "unhandled" — which they
-genuinely are.
+**Why (D0) is a MODELLING GAP, not an unhandled residue (2026-07-12 correction).** It is *believed* that every
+symmetry-only residue is **node-4 (Schurian by definition) or Cameron** — so a "non-schurian reached residue" is not a
+genuine class of hard graph, it is the `SchurianScheme` model-faithfulness question ("is the canonizer's actual
+2-WL-closure residue equal to the `orbitalScheme H` model?"). That is a **modelling obligation to discharge**, on par with
+the other modelling assumptions the seal carries — *not* an honest flag for a real obstruction. So the **live**
+`UnhandledResidue` is `residueHiddenJohnson ∨ residueRigidObstruction` (D1 ∨ D2); D0 stays in the `Publication.lean`
+disjunction for now as a documented placeholder (see the note there), but the intended end shape drops it once the
+schurian-faithfulness modelling gap is closed. *(Superseded framing: D0 was previously treated as "the important
+absorber" that dissolves the SchurianScheme gap by flagging — that conflated a modelling gap with a genuine residue.)*
 
 **Why (D1) is lighter than it looks: the seal is already parameterized on `IsCameronScheme`.** In the library,
 `IsCameronScheme : ∀ m, SchurianScheme m → Prop` is a **parameter** threaded through every seal capstone
@@ -427,46 +404,43 @@ actually claims something. Treat it as a hard obligation, not a formality.
 
 ## 5. Ordering and dependencies
 
-**The approved sequencing (2026-07-08, §1a frame; best headline, not shortest line).** Two mirror seals meeting
-at one wall; finish the provable non-rigid half, then throw weight at the rigid seal where the headline ceiling
-lives:
+**The sequencing (2026-07-12; interleaved-fixpoint frame; best headline, not shortest line).** The sequential
+"finish the non-rigid half first, then the rigid seal" plan is retired — the non-rigid seal (Algorithm A) crash-landed on
+fusion and is now the verify-gated consume step *inside* the interleaved engine (§1a). The critical path is the
+mixed-composition Lean track plus the rigid seal, which run in parallel (the composition proceeds with `phase2` abstract):
 
-1. **Finish the non-rigid half (Algorithm A / confinement)** — nearly done, Lean-provable-clean. Close X3 (the
-   index-free cut: SpineChain-ify the single-vertex descent, discharge `hrec` from confinement, rewire
-   `canonForm?`); wire `nodeOf`/witness-case → `CertifiedSinglePath`; discharge D0 / `hImprim`; assemble full ①.
-   Banks the symmetric milestone and lets the Publication skeleton compile with the rigid seal as the sole hole.
-2. **Build the rigid seal (Algorithm R, IR §11.12 roadmap)** — the big thrust. Lean **P1** first (extraction
-   soundness, standalone) alongside C# **B1–B3** (the MVP solver wired at `target == -1`, verify-by-reconstruction).
-   Then B4/B5 + P3/P4.
-3. **Tighten the escape** — prove IR §11.14 (no rigid Cameron) ⟹ `UnhandledResidue` collapses to one atom.
-4. **Runtime/Publication** — the cost-model consumption bridge (pilotable now on the quasipoly seal, independent),
-   the `UnhandledResidue` definition (= the shared wall), non-vacuity, the Publication swap, the headline.
-
-**▶ RE-POINTED (2026-07-10) — the MIXED composition is the priority Lean track.** The audit
-(`[[project_confinement_bundle_vacuity_2026-07-10]]`) found the Lean canonizer is single-path with no
-branching/oracle/phases, so step 1's `CertifiedSinglePath` is only the all-symmetric pole. Since almost every
-real residue is mixed, the priority is the composition `canonForm? = phase2 ∘ phase1` on the min-over-leaves
-spec — **[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md)** Stages 0–4.
-**FIRST STEP = Stage 0** (build the branching `canonMin` spec; self-contained, and it relocates ①b/①c off the
-false single-path iso-invariance onto the genuine composition/②). Stage 3's `phase2` = the rigid solver (step 2
-above, IR §11.12), dropped into the abstract `Phase2.Solver` contract when built. Cameron-visible families
-(Route C) deprioritized.
+1. **Build the interleaved/branching descent in Lean (mixed-composition, the priority track).**
+   [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md), **Stage 0b next** — model the
+   consume/force/defer branching descent so `canonForm?` rides the real object and its reached-leaf set instantiates
+   `cand G` in Stage 0a's `isCanonicalForm_lexMin`. Discharge the two hypotheses: each reached leaf is a relabelling
+   (easy) and the **X3 iso-invariance** `cand (relabelAdj σ G) = cand G` (the one real obligation; Stage 0a made ①b/①c
+   free given it). Then Stage 1 (consume-soundness) → Stage 2 (composition = a **fold over alternation depth**).
+2. **Build the rigid seal (Algorithm R, IR §11.12 roadmap)** — the `Phase2.Solver` witness that Stage 3 plugs in. Lean
+   **P1** first (extraction soundness, standalone F₂/matroid) alongside the (already-built) C# solver; then P3 (the
+   Smith solve + canonical-form iso-invariance) + P4 (the capstone `canonizesRigidResidue_or_flags`, isolating
+   `LinearObstruction`). P2 (forcing = unit-propagation) carried as a hypothesis. No new citations.
+3. **Tighten the escape** — prove IR §11.14 (no non-abelian fusion survives into a rigid medium ⟹ no rigid Cameron) ⟹
+   `UnhandledResidue` collapses toward one atom (carried like "or Cameron" until then).
+4. **Re-base cost + Publication** — re-establish the cost bound (Stage 4) against the interleaved object (the `nbud = n`
+   single-path degree does **not** carry — cost-model STATUS), define `UnhandledResidue` (= D1 ∨ D2, the shared wall),
+   non-vacuity, the Publication swap, the headline.
 
 ```
-Non-rigid (Algorithm A): confinement → CertifiedSinglePath + X3 residual ─→ ① + symmetric obstruction ─┐
-                                                                                                        │
-Rigid seal (Algorithm R, IR §11.12): P1..P4 + B1..B6 + §11.14 no-Cameron ─→ rigid obstruction ─────────┤
-                                                                                                        ├─→ one named UnhandledResidue ─→ ③ ─┐
-Runtime Phase: canonForm?/cost + consumption bridge ─→ ② (pilot on quasipoly seal, independent) ────────┘                                   ├─→ canonizer
-Seal substrate (warm_6_2, spine) ─→ ①a/①b/①c ──────────────────────────────────────────────────────────────────────────────────────────────┘
+Interleaved descent (mixed-composition Stages 0b→2): branching canonForm? + X3 iso-invariance ─→ ①a/①b/①c ─┐
+                                                                                                            │
+Rigid seal (Algorithm R, IR §11.12): P1..P4 + §11.14 no-Cameron ─→ Phase2.Solver witness + D2 rigid residue ┤
+                                                                                                            ├─→ D1∨D2 UnhandledResidue ─→ ③ ─┐
+Cost (Stage 4): re-base cost on the fixpoint + mutual-stall flag ─→ ② ───────────────────────────────────────┘                              ├─→ canonizer
+                                                                                                                                             │
+Seal substrate (warm_6_2, spine, Stage 0a complete_of_isCanonicalForm) ─→ correctness scaffolding ───────────────────────────────────────────┘
 ```
 
-- **Independent, start-anytime:** the cost-model pilot on the quasipoly seal; the correctness trio assembly;
-  the rigid P1 (extraction soundness).
-- **Gated:** ③ waits on the `UnhandledResidue` definition = both seals' structural residues (which unify, §1a).
-  ② waits on the cost model + consumption bridge.
-- **Do before IR builds on it:** the Seal-Phase substrate consolidation.
-- **Parked (not on the critical path):** Route C Lean; the C# main's global-flag + Route-C dispatch (§1a).
+- **Independent, start-anytime:** the rigid P1 (extraction soundness, standalone); the cost-model pilot on the
+  quasipoly seal.
+- **Gated:** ①b/①c wait on Stage 0b's branching descent + X3 (mixed-composition); ③ waits on the `UnhandledResidue`
+  definition = D1 ∨ D2, the shared wall (§1a/§4.1); ② (re-based) waits on the interleaved cost accounting (Stage 4).
+- **Parked (not on the critical path):** Route C Lean; the RRU reachability apparatus; the C# main's global-flag +
+  Route-C dispatch (§1a).
 
 ---
 

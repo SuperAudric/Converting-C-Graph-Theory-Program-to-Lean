@@ -69,9 +69,12 @@ The obstruction is a property of the **residue scheme the descent reaches** on `
 via the spine, hence well-defined and NOT "the algorithm flagged"). It is a disjunction of three structural
 atoms, one per open source of hardness — so that everything on the *handled* side needs only real citations:
 
-  · (D0) `residueNonSchurian`      — the reached residue is outside the seal's scope (not schurian). This
-        disjunct **absorbs the `SchurianScheme` model-faithfulness gap**: rather than prove the reached
-        residue is schurian (documented-infeasible), we honestly flag it. It is the IR-solver "row 4".
+  · (D0) `residueNonSchurian`      — the reached residue is not schurian. **This is a MODELLING GAP, not a genuine
+        unhandled residue (2026-07-12).** Every symmetry-only residue is believed to be node-4 (schurian by
+        definition) or Cameron, so "non-schurian reached residue" is the `SchurianScheme` model-faithfulness question
+        (is the actual 2-WL-closure residue the `orbitalScheme H` model?), a modelling obligation to discharge — NOT
+        an honest flag for a real obstruction. Kept in the disjunction as a documented placeholder; the intended end
+        shape drops it, leaving `residueHiddenJohnson ∨ residueRigidObstruction`. See endgame-spec §4.1.
   · (D1) `residueHiddenJohnson`    — SYMMETRIC domain: the reached residue is a Cameron scheme of a
         **structurally named** hard type (the hidden-Johnson / un-coordinatizable geometric family — e.g. a
         classical GQ if `d = 4` recognition stalls). **Defined by geometric type, NOT by "the handled
@@ -84,18 +87,19 @@ atoms, one per open source of hardness — so that everything on the *handled* s
 Each atom is `opaque` (a Seal/IR/Runtime-Phase deliverable). Its definition is deferred, but the *shape* — a
 three-way disjunction with an explicit non-schurian absorber — is fixed here.
 
-**PHASE-DISCRIMINATED FLAG (cost-model §7a / route-c-plan §7b).** With a *per-node* budget, the descent's flag
-records *which phase* fired: a **Phase-1** flag ⟹ (confinement lemma) the residue is node-4/Cameron (⟹ (D0)/(D1));
-a **Phase-2** flag ⟹ rigid (⟹ (D2)). The phase is thus the *structural* selector into these atoms — which is what
-keeps `residue_if_flag` (③) firewall-clean rather than tautological.
+**THE FLAG IS THE INTERLEAVED-ENGINE MUTUAL STALL (2026-07-12).** The canonizer is a stepwise alternating fixpoint
+`…∘phase2∘phase1…` (IR §11.11): at each pairwise relation the oracle **consumes** it (verified automorphism), or the
+rigid solver **forces** it (row-space), or it is **deferred**; the run flags exactly at **mutual stall** — neither move
+applies. Consumption is **verify-gated, not threshold-gated**, so a rigid residue (no automorphism) simply stalls and is
+never mispruned; abelian symmetry fused behind a real decision is de-fused constructively by the solver kernel. The
+residual the stall names is (D2) `residueRigidObstruction` (with any surviving symmetric Cameron core = (D1)); (D0) is a
+modelling gap, not a stall residue. This keeps `residue_if_flag` (③) firewall-clean: the flag ⟹ a *structural* residue,
+not "the algorithm gave up".
 
-**FLAG ACTION IS PHASE-DISCRIMINATED (one canonizer).** A Phase-1 flag ⟹ (confinement lemma) the residue is primitive
-rank-3 (node-4/Cameron) ⟹ vertex-transitive ⟹ assume-the-harvest-and-prune (node-4/Cameron become HANDLED, single-path
-poly). A flag emits `none` only in **Phase 2** (the rigid residue, (D2)). So the canonizer is poly-time and COMPLETE on
-the non-rigid residue; its CORRECTNESS ① on that residue is **conditional on the confinement lemma**
-`Phase-1 flag ⟹ primitive rank-3 / VT residue`, carried as a hypothesis (never an axiom — a project obligation; plan:
-route-c-plan §7c, sub-obligations P1–P4). The sporadic-node-4 soundness worry = the `SchurianScheme` gap, killed on the
-flagged subset by the *largeness* clause (small-`Aut` non-Schurian SRGs don't flag). -/
+*Superseded framing (kept for provenance): the earlier plan flagged per-phase on a `base > baseMax` threshold and
+assume-VT-pruned Phase-1 flags. That standalone-Algorithm-A seal crash-landed on fusion (a threshold prune can misprune
+a fused rigid residue), and is replaced by the verify-gated interleaved engine above. The Phase-1 correctness obligation
+is now "no non-abelian fusion survives into a rigid medium" (IR §11.14), carried like "or Cameron". -/
 opaque residueNonSchurian       (n : ℕ) (G : AdjMatrix n) : Prop
 opaque residueHiddenJohnson     (n : ℕ) (G : AdjMatrix n) : Prop
 opaque residueRigidObstruction  (n : ℕ) (G : AdjMatrix n) : Prop

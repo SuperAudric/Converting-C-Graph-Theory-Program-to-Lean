@@ -1,12 +1,21 @@
 # Chain descent — deferred decisions and the rigid-residue hand-off
 
-> **▶ This doc is the mechanism substrate for the LEAN "RRU phase-transfer theorem" (2026-07-09) — the proven Seal→Rigid
-> handoff object.** The deferral scheduler here (consume `OrbitPartition` symmetry / defer `¬OrbitPartition` reals,
-> sound by `real_stays_real` §2) *is* the phase boundary: "nothing left to consume" = rigid = `IsBase` (trivial
-> residual). RRU = "Phase 1 unconditionally reaches the first `IsBase` residue `R(G)`, iso-invariantly"; Phase 2 (§7)
-> consumes `R(G)` and is the sole source of `none`. Scoped + resolved (substrate all built; first brick = the progress
-> lemma `¬IsBase → ∃` a consumable `OrbitPartition` pair): `chain-descent-remaining-work.md` item 6 + endgame §1a +
-> memory `project_rru_phase_transfer_2026-07-09`.
+> **⚠ SUPERSEDED FRAMING (2026-07-12) — the clean SEQUENTIAL two-phase (consume all symmetry, THEN enumerate the rigid
+> residue) is retired; the model is the INTERLEAVED fixpoint. RRU is retired.** This doc's core insight — deferral
+> hoists symmetry above real branching (sum-not-product, §3, measured `[[project_rru_cost_probe_2026-07-10]]`) — is
+> intact and reused. What changed: the clean two-phase form was *conditional on decomposability* (§5), i.e. **"all
+> symmetry is unconditional" = "completeness of deferral ⟺ no fusion"** (§5, and the largeness banner below) — an open
+> question with **no fusion-mildness theorem**. The current engine **dissolves** that requirement by **interleaving**
+> (`…∘phase2∘phase1…`; IR §11.11): at each pairwise relation the oracle **consumes** (verified automorphism), or the
+> rigid solver **forces** it (row-space), or it is **deferred** — done at **mutual stall**. The rigid solver does not
+> need a purely-rigid residue, so fusion need never be shown mild; abelian *conditional* symmetry fused behind a real
+> decision (the §5 crux) is **de-fused constructively** by the solver's kernel and looped back to consumption; only
+> non-abelian fusion could survive, excluded by IR §11.14 and carried like "or Cameron". So the §7 "rigid-residue
+> hand-off" is no longer a one-shot RRU object (`ChainDescent/Phase2Handoff.lean`'s `RRU` reachability apparatus is
+> retired); the surviving seam is the `Phase2.Solver` contract. Read this doc for the deferral *mechanism*
+> (consume/defer/`real_stays_real`, §2–§4) — **not** for the sequential two-phase architecture or the
+> completeness-of-deferral ⟺ no-fusion framing (§5, §8). Current state: `chain-descent-endgame-spec.md` §1a +
+> `chain-descent-mixed-composition.md` + `chain-descent-cost-model.md` STATUS.
 
 A scheduling architecture for the descent: **consume all symmetric
 decisions first (deferring the real ones), then enumerate the rigid

@@ -1,5 +1,12 @@
 # Chain descent — THE SEAL HANDOFF: current state and the gaps to "consumed-or-Cameron"
 
+> **⚠ HISTORICAL / SUPERSEDED ARCHITECTURE (flagged 2026-07-12). Not the current state.** This doc's frame — a
+> *sequential* symmetric seal reaching "consumed-or-Cameron", with G2-B / extension-separability as the single open
+> object — predates both the Algorithm-A confinement frame and its successor, the **interleaved stepwise alternating
+> fixpoint** (the sequential seal crash-landed on fusion; see `chain-descent-endgame-spec.md` §1a). The recovery/harvest
+> and separability math here is real and partly in-build, but the *architecture* is superseded. Current state:
+> `00-START-HERE.md` §2 + `chain-descent-remaining-work.md`. Read below for provenance only.
+
 > **UPDATE (2026-06-12) — THE LIVE BUILD DOC IS NOW
 > [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); read its STATUS block
 > for the current state of G2-B.** The 2026-06-11 pointer below to `chain-descent-module-adjoin-plan.md` is itself

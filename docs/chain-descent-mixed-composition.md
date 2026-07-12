@@ -8,6 +8,12 @@
 > mixed*, so neither the pure-symmetric pole (the confinement `CertifiedSinglePath`) nor the pure-rigid pole
 > (the multipede) is representative. Companion measurements + design corrections:
 > `[[project_rru_cost_probe_2026-07-10]]`, `[[project_confinement_bundle_vacuity_2026-07-10]]`.
+>
+> **Note (2026-07-12): `phase2 ∘ phase1` is the fusion-free special case; the general model is the INTERLEAVED
+> fixpoint** `…∘phase2∘phase1…` (§1 Refinement box; IR §11.11), so Stage 2's composition is a **fold over alternation
+> depth**, not one append. **RRU is retired** (the sequential one-shot handoff is superseded by the mutual-stall
+> fixpoint): Stage 3 plugs the rigid solver into the surviving **`Phase2.Solver` contract** (`Phase2Handoff.lean`); the
+> `RRU` reachability apparatus in that file is abandoned.
 
 ---
 

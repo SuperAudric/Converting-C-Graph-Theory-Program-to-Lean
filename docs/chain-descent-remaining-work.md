@@ -10,15 +10,27 @@
 
 ---
 
-## ⭐ SEAL-PHASE WRAP-UP CHECKLIST (2026-07-09) — the CURRENT authoritative "what's left for the Seal Phase"
+## ⭐ SEAL-PHASE WRAP-UP CHECKLIST — SUPERSEDED (2026-07-12): the sequential Algorithm-A seal crash-landed on fusion
 
-> Everything BELOW this section is organized around the older WL-dimension route. THIS section is the current
-> **Algorithm-A / confinement / "two seals"** framing and supersedes the older "what's left" prose for the headline.
-> **Seal Phase = the symmetric-domain seal = Algorithm A (confinement) = the ① correctness proof for the non-rigid
-> residue.** ① (`canon_sound` + `canon_complete`) is **DONE and axiom-clean (sorry-free)** for the index-free descent
-> canonizer `descentCanon` (`ScratchConfinementX3Complete.lean`; `descentCanon_showcase` = sound ∧ complete), modulo the
-> confinement citation bundle `ConfinementCitations`. The whole W-plan (W1–W4) that closed ①b→ is done. What remains to
-> make the Seal Phase **unconditional / portable**:
+> **⚠ READ THIS FIRST — the whole "Seal Phase = standalone Algorithm A" framing below is superseded.** The sequential
+> plan (Algorithm A consumes all symmetry to a rigid residue via a *threshold-gated* assume-VT prune, then hands off)
+> **crash-landed on fusion**: the prune fired without verifying an automorphism, so a conditional symmetry *fused* with
+> a rigid decision (Chang-A) could be mispruned, and its soundness required a fusion-mildness theorem that does not
+> exist. The current model is the **interleaved stepwise alternating fixpoint** (`…∘phase2∘phase1…`, consumption
+> **verify-gated**, done at **mutual stall**) — see `chain-descent-endgame-spec.md` §1a, `chain-descent-mixed-composition.md`,
+> and `chain-descent-ir-blindspot-solver.md` §11.11. Algorithm A survives **only** as the verify-gated *consume step*
+> inside that engine; the {G3, Liebeck, Witt, hImprim} machinery and the ①a/② proofs are **retained and reused**, but
+> the "① is DONE mod citations for the whole non-rigid residue" claim below is **not** current (it rested on the vacuous
+> `hflag`; 2026-07-10 audit). Read items 1–5 below for the reusable confinement-substrate detail (block-tower
+> transitivity, the scheme-model seam, the citation set) — that math is intact — **not** for the sequential
+> architecture. **Item 6 (RRU) is RETIRED — see its banner.** The live Lean frontier is the mixed-composition branching
+> descent (Stage 0b) + the rigid seal P1–P4; authoritative "what's left" = the STATUS block at the top of this file's
+> companion docs and the `▶▶ PRIORITY TRACK` pointer below.
+>
+> *(Historical:)* ① (`canon_sound` + `canon_complete`) was proved axiom-clean for the index-free single-path descent
+> `descentCanon` (`ScratchConfinementX3Complete.lean`) modulo the `ConfinementCitations` bundle — but that object is a
+> single deterministic path with no branching/oracle/phases, and its completeness pushed through only by assuming every
+> node flags (`hflag` uninhabited ⟹ `descentCanon_showcase*` vacuous). The reusable confinement substrate:
 
 **1. hImprim / primitivity — SILENT `hprim` REMOVED, WALL-FREE + AXIOM-CLEAN (2026-07-09; NOT the wall).**
 **★★★ LANDED (`ScratchConfinementCellImprim.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, additive,
@@ -216,18 +228,23 @@ per-node flag / assume-VT-prune is validation, not part of the Seal correctness 
 > large-Aut Cameron scheme the cascade cannot certify at bounded base). These are different corners of the
 > (|Aut| × thickness) square, not one predicate. Picking up `hSmallAutThin` closes the small-Aut face only.
 
-**6. ★ THE RRU PHASE-TRANSFER THEOREM — the switch-over gate to the Rigid Phase (NEW 2026-07-09, the real Phase-1
-deliverable; not yet built).** Phase 1 (Algorithm A) **never emits `none`** by design: a Phase-1 flag is the *trigger*
-for the assume-VT step (flagging residue is VT ⟹ the flag is *consumable* — prune the orbit, recover the symmetry, step
-forward), so each flag **strictly consumes a symmetry**. Iterating drives every input to a **rigid** residue `R(G)`. The
-Seal Phase's handoff object is therefore the theorem **RRU: for every input, Phase 1 terminates at a rigid, iso-invariant
-residue `R(G)`** — a *proven* object (per-step = `SelectedCellIsOrbit`; iterated to a rigid fixpoint + endpoint
-iso-invariance), NOT an `opaque` predicate a Phase-2 flag certifies. `R(G)` is exactly what **Phase 2 (the rigid solver)
-consumes**; Phase 2 has no recovery for its own flag yet ⟹ **Phase 2 is the sole source of `none`.** Consequences for the
-Publication objects: (a) ① / ② being proven against a **total, never-`none`** object is *by design* (Phase-1 totality),
-NOT a vacuity — the `∨ none` disjunct is reserved for Phase 2; (b) `Publication.canonForm?`/`cost` should **unify ① and ②
-onto one object** (today ①'s `descentCanonForm? := some (descentCanon)` is structurally always-`some`, while ②'s
-`CanonForm.canonForm?` is a separate capped object — both total, but distinct).
+**6. ⊘ THE RRU PHASE-TRANSFER THEOREM — RETIRED (2026-07-12). Replaced by the interleaved iterative-fixpoint object.**
+> **RRU is no longer the Phase-1 deliverable.** RRU modelled a *one-shot sequential handoff*: Phase 1 (Algorithm A)
+> consumes every symmetry to a rigid residue `R(G)`, then hands it whole to Phase 2. That requires Phase 1 to finish
+> *before* any rigid work — exactly "completeness of deferral ⟺ no fusion", an open question with **no fusion-mildness
+> theorem**. The current model **interleaves** (`…∘phase2∘phase1…`, one relation at a time, consume-verify-gated / force
+> / defer, done at **mutual stall**): the rigid solver does **not** need a purely-rigid residue, so fusion (Chang-A)
+> never has to be shown mild, and the abelian fused case is *de-fused constructively* by the solver kernel (IR §11.11).
+> The audit (`[[project_confinement_bundle_vacuity_2026-07-10]]`) also found the built `RRU`/`rigidResidue` objects
+> **content-free** (`rigidResidue = supp Aut`, not the ordered base; `RRU.rru` inhabited by `rfl`). **What survives:**
+> the typed **`Phase2.Solver` / `Sound` / `IsoInvariant` contract** + `handoffBase_relabel` in `Phase2Handoff.lean`
+> (the seam the rigid solver fills). **What is abandoned:** the `RRU` namespace's *reachability* apparatus
+> (`ComputesResidue`/`reachesRigid`/`rru`) — do not build on it. **The Phase-1 correctness obligation is now the FUSION
+> obligation** (delta-5a): *no rigid residue interferes with symmetry consumption for non-`residueRigidObstruction`
+> cases* — narrowed from "bound how mild fusion must be" (no theorem) to "**no non-abelian fusion survives into a rigid
+> medium**" (IR §11.14 / `chain-descent-cameron-entanglement.md` Route A), carried like "or Cameron". The build-log
+> below is **retained as history** — the `rigidResidue`/`handoffBase`/`Phase2Handoff.lean` bricks are real Lean objects;
+> only their RRU *framing* (one-shot reachability handoff) is retired.
 **★ SCOPED + RESOLVED (2026-07-09) — the boundary is DEFERRAL / `IsBase`, NOT the flag threshold; RRU is an ASSEMBLY of
 built parts.** The phase boundary is the **deferred-decisions** scheduler (`docs/chain-descent-deferred-decisions.md`): at
 each cell the oracle **consumes** symmetry (a pair with `OrbitPartition adj P S v w` = a path-fixing automorphism swaps
