@@ -453,6 +453,42 @@ public sealed class Option2SolverTests
         _out.WriteLine($"{name,-4} matched-double n={N}: descent σ-fold canonicalizes, scramble-inv=True");
     }
 
+    // B4 GENERAL fold: a NESTED double (double-of-double, Aut ⊇ Z₂², fiber size s=4). The general
+    // fiber-quotient fold peels the whole Z₂² fiber in one shot (same-cell-neighbour graph → size-4
+    // fibers; G∖H → 4 copies), canonizes the core, and lex-mins over the 4! copy-orderings.
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z3", 3)]
+    public void B4_NestedDouble_GeneralFold_ScrambleInvariant(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (d1, t1) = DoubleAndMatch(core, ct);
+        var (d2, t2) = DoubleAndMatch(d1, t1);        // double-of-double: 4 copies, fiber size 4
+        int N = d2.VertexCount;
+        Assert.Equal(4 * core.VertexCount, N);
+
+        var forms = new List<string?>();
+        for (int scr = -1; scr < 3; scr++)
+        {
+            AdjMatrix g; int[] t;
+            if (scr < 0) { g = d2; t = (int[])t2.Clone(); }
+            else (g, t) = ScrambleWithTypes(d2, t2, 22000 + scr);
+            var adj = Flat(g);
+            var part = new WarmPartition(N); part.Refine(adj, SeedFromTypes(N, t));
+
+            Assert.Null(Option2Solver.TryCanonicalOrder(adj, N, part.CellOf, part.NumCells));   // plain flags
+            var order = Option2Solver.TryCanonicalOrderWithFold(adj, N, part.CellOf, part.NumCells);
+            Assert.NotNull(order);                                          // general fold canonicalizes
+            Assert.Equal(Enumerable.Range(0, N), order!.OrderBy(x => x));   // genuine permutation
+            forms.Add(EmitFromOrder(adj, N, order));
+        }
+        Assert.True(forms.Distinct().Count() == 1);                          // scramble-invariant
+        _out.WriteLine($"{name,-4} nested-double n={N} (s=4): general fold canonicalizes, scramble-inv=True");
+    }
+
     // B4 separation: matched doubles of DIFFERENT cores get DISTINCT canonical forms.
     [Fact]
     public void B4_MatchedDouble_DistinctCores_ProduceDistinctForms()

@@ -37,12 +37,15 @@
 > **consume-before-force** schedule. Soundness + iso-invariance ride on per-step verification + `cl_up` confluence
 > (the footing the deferral machinery already stands on), so a bad schedule costs only an *unnecessary-but-sound*
 > branch, never correctness. The **fusion-severity bound** ("no harder fusion case can arise"; instrument
-> `FusionHarvestProbe`, A_stall vs A_full) is the **efficiency guarantee** for that schedule. **STATUS 2026-07-11: the
-> ring solver is BUILT + WIRED + validated in production** (`Option2Solver.cs`, recover→solve→emit→verify, B1a/b/c +
-> **B2 + B5 + the B1d `SolveOverA` emit LANDED** — the emit now closes the m≥8 completeness stall AND the large-`|A|`
-> exponential (affine-frame base + linear solve; poly for bounded rank; 28 Option2Solver tests, native Z6/Z8/Z9/Z2×Z4).
-> **B4 (σ-fold, matched double) LANDED 2026-07-12 — see the B4 entry in §11.12.** NEXT = (open) general fold beyond one
-> matched `Z₂`, or the deferred B1d solve-speed perf follow-on. general-arity + try-both-sides also LANDED 2026-07-12.
+> `FusionHarvestProbe`, A_stall vs A_full) is the **efficiency guarantee** for that schedule. **STATUS 2026-07-12: the
+> ring solver is BUILT + WIRED + validated in production, and ROBUST** (`Option2Solver.cs`, recover→solve→emit→verify;
+> **B1a/b/c + B2 + B3 + B4 + B5 + B6 + all three B1d items LANDED** — the SolveOverA affine-frame emit closes the m≥8
+> completeness stall AND the large-`|A|` exponential (poly for bounded rank; native Z6/Z8/Z9/Z2×Z4); general-arity handles
+> any arity ≥ 3; try-both-sides removes the side heuristic; **39 Option2Solver tests, 94 combined**).
+> **B4 σ-fold LANDED 2026-07-12, incl. the GENERAL `s`-fold** (matched double s=2 + nested Z₂² s=4; fiber-quotient +
+> lex-min over copy-orderings, CFI-safe) — see the B4 entry in §11.12. The rigid-solver track is COMPLETE for handoff;
+> **NEXT = the mixed-composition Lean track (Stage 0b), which this unblocks.** Bounded rigid-side OPEN items (`s > 6`
+> covers, harvesting the fold `Aut`, the deferred B1d solve-speed perf) are listed at the end of the PICK-UP-HERE banner.
 > See the PICK-UP-HERE handoff below + §11.12.
 >
 > **▶ B2 WIRING — THE ISO-INVARIANCE FINDING (2026-07-11, empirically forced).** B2 must fire at the **ROOT (depth 0)**,
@@ -133,10 +136,15 @@
 > model-level, build-first); the **ring design** is §11.13; the **rigid-medium-negates-hidden-Johnson** lead is §11.14
 > (abelian hiding vs non-abelian Johnson ⟹ rigid seal may carry *no* "or Cameron").
 >
-> **▶▶ PICK UP HERE (fresh reader) — HANDOFF 2026-07-11.** The **ring-general rigid solver is BUILT, WIRED, and
-> validated end-to-end in production.** Files: `GraphCanonizationProject/Option2Solver.cs` (the solver, namespace
-> `Canonizer`, internal) + `ChainDescent.cs` (the wire) + `CanonGraphOrdererChainDescent.cs` (the `EnableRigidSolver`
-> passthrough). **28 tests in `Option2SolverTests.cs`, all green** (+ regression-clean: Multipede 50, LinearOracle/CFI 18).
+> **▶▶ PICK UP HERE (fresh reader) — HANDOFF 2026-07-12.** The **ring-general rigid solver is BUILT, WIRED, and
+> validated end-to-end in production, and is now ROBUST** (any ring, any arity ≥ 3, either bipartition side, and `s`-fold
+> covers). Files: `GraphCanonizationProject/Option2Solver.cs` (the solver, namespace `Canonizer`, internal) +
+> `ChainDescent.cs` (the wire) + `CanonGraphOrdererChainDescent.cs` (the `EnableRigidSolver` passthrough). **39 tests in
+> `Option2SolverTests.cs`, all green** (+ regression-clean: **94 combined** with Multipede/LinearOracle/CFI; and the RM-1..6
+> ring probes, 30). **★ THE RIGID-SOLVER TRACK IS COMPLETE FOR HANDOFF** — every planned B-step (B1a/b/c, B2, B3, B4 incl.
+> the general `s`-fold, B5, B6, and all three B1d items) is LANDED. The only rigid-side items left are **bounded and
+> off-the-critical-path** (see "OPEN / NEXT" at the end of this banner). The natural next move is the **mixed-composition
+> Lean track (Stage 0b)** — the rigid solver was its blocker and now unblocks it (`docs/chain-descent-mixed-composition.md`).
 > What is DONE:
 > - **B1a `Recover`** — (segments, ring `A`, incidence `M`) from a refined partition, recognition-free (segments via the
 >   multipede **bipartition + higher-*average*-degree side**; ring via a degree-3 Latin-square order-profile; `M` = incidence).
@@ -172,9 +180,10 @@
 > (`B1d_TryBothSides_SelectsSegmentSide`). NB the heuristic is never wrong on the circulant fixtures (segments always denser,
 > `#middles ≫ nW`), so this is a proven-correct safety net, not a fix for an observed failure.
 >
-> **B4 (σ-fold, matched double) LANDED 2026-07-12** — `TryCanonicalOrderWithFold`, wired at the same depth-0 hook; detects
-> the copy-swap `σ` structurally (`σ(v)` = unique same-cell neighbour), folds to the core, canonizes, lifts. See the B4
-> entry in §11.12. Open: general fold beyond one matched `Z₂`. B3+B6 DONE.
+> **B4 σ-fold LANDED 2026-07-12, incl. the GENERAL `s`-fold** — `TryCanonicalOrderWithFold`, wired at the same depth-0
+> hook; detects the cover structurally (FIBERS = same-cell-neighbour components, COPIES = `G` minus same-cell edges),
+> canonizes the core recursively, lifts by lex-min over the `s!` copy-orderings. Matched double (s=2) + nested Z₂² (s=4);
+> CFI-safe. See the B4 entry in §11.12. Open: covers of multiplicity `s > 6`; harvesting the fold `Aut`. B3+B6 DONE.
 > **DEFERRED (user, 2026-07-12): the B1d (iii) solve-speed follow-on** (a perf-opt, NOT an exponential — the algorithm is
 > poly): the exact `BigInteger` Smith runs on the redundant `|A|²`-middles-per-line system; a torsion-safe row reduction
 > (independent over `Z/|A|`, **NOT over ℚ** — the ℚ reduction drops torsion congruences and broke iso-invariance; **dead
@@ -184,13 +193,24 @@
 > **★ Two dead ends recorded (do not re-walk):** (a) wiring B2 at `target == -1` breaks iso-invariance (use the root);
 > (b) ℚ-independent row reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k).
 >
+> **OPEN / NEXT (all bounded, off the critical path — the rigid solver is otherwise complete):**
+> - **Fold covers of multiplicity `s > 6`** — capped by `MaxFoldMultiplicity` (we lex-min over `s!` copy-orderings); today
+>   they fall through to the descent (sound). Raise the cap or replace the `s!` min with a canonical copy-ordering.
+> - **Harvest the fold `Aut`** — B4 produces the correct canonical *form* but does NOT add the fold group to
+>   `Automorphisms`, so |Aut| is under-reported for folded inputs. The fold knows the fibers/copies (= the group); thread
+>   it into the descent's `PermutationGroup`.
+> - **B1d (iii) solve-speed perf (DEFERRED by the user)** — a constant-factor speedup only (the algorithm is already poly);
+>   torsion-safe `Z/|A|` reduction or component-wise mod `p^k`. A `BigInteger→long` fast-track was tried and *slowed* it
+>   (doubled work) — parked.
+> - **Lean P1–P4** (the rigid-seal proofs) — not started; independent of the above.
+>
 > **Validation lives in:** the 5 ring probe files (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
-> `RingSolveProbe`, `RingInferenceProbe` — the RM-1..6 chain, 30 tests, `dotnet test --filter "FullyQualifiedName~Ring"`)
-> + **`Option2SolverTests.cs` (37 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
+> `RingSolveProbe`, `RingSolveProbe` — the RM-1..6 chain, 30 tests, `dotnet test --filter "FullyQualifiedName~Ring"`)
+> + **`Option2SolverTests.cs` (39 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
 > §11.11 (the settled **stepwise alternating engine** + consume-before-force) → §11.13a (**the ring design + RM-1..6
-> validation**) → §11.12 (**build roadmap: B1a/b/c + B2 + B5 + the B1d SolveOverA emit + general-arity + try-both-sides all
-> LANDED; remaining = B1d solve-speed perf + B4**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are background; the
-> ephemeral `/tmp/*.py` probes are superseded by the in-repo `Ring*Probe.cs`.
+> validation**) → §11.12 (**build roadmap: B1a/b/c + B2 + B3 + B4 (incl. general `s`-fold) + B5 + B6 + all three B1d items
+> ALL LANDED; only the bounded OPEN items above remain**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are
+> background; the ephemeral `/tmp/*.py` probes are superseded by the in-repo `Ring*Probe.cs`.
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -1049,8 +1069,9 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
 > **recover → solve → emit → verify** pipeline is validated ring-general on the real refinement, so B1 lifted from the
 > **RM** probes (not the F₂ `Option2ExtractionProbe`); **B3 and B6 are done** (verify = the self-verifying emit; ring
 > built into RM-3/4/5). **DONE: B1a/b/c + B2 (wire) + B5 (cross-checks) + the B1d `SolveOverA` affine-frame emit + B1d
-> general-arity (pin-`d−3`) + B1d try-both-sides side-selection + B4 σ-fold** (37 Option2Solver tests). **Remaining: (deferred) B1d solve-speed
-> perf follow-on (NOT exponential) + B4 (σ-fold, mixed/pinned-prefix residue).** See the PICK-UP-HERE banner for full state.
+> general-arity (pin-`d−3`) + B1d try-both-sides side-selection + B4 σ-fold (incl. GENERAL s-fold)** (39 Option2Solver
+> tests, 94 combined). **Every planned B-step is LANDED. Remaining (bounded, off critical path): fold covers `s > 6`,
+> harvesting the fold `Aut`, and the (deferred) B1d solve-speed perf.** See the PICK-UP-HERE banner for full state.
 
 - **B1 Productionize (the current step)** — create `Option2Solver` (namespace `Canonizer`) porting the RM pipeline:
   - **B1a Recover — LANDED (2026-07-11, `Option2Solver.cs` + `Option2SolverTests.cs`, 4 tests green).** `Recover(adj,
@@ -1098,7 +1119,7 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
     **minimal-forcing-circuit** extraction over `A` (Option2 `ExtractRows` generalized) for non-pristine residues (§11.13a).
     - **▶ LANDED (2026-07-11): the `SolveOverA` emit — generating-set base + LINEAR solve. Both the m≥8 completeness
       stall AND the large-`|A|` exponential are RESOLVED** (`Option2Solver.SearchCanonicalViaSolve`, wired via
-      `TryCanonicalOrder`; 28 Option2Solver tests green). Mechanism: **pin an AFFINE FRAME on the lowest-cell-id segment
+      `TryCanonicalOrder`; 28 Option2Solver tests green at that landing, 39 now). Mechanism: **pin an AFFINE FRAME on the lowest-cell-id segment
       — `r+1` of its states → `{0, e_0..e_{r-1}}` (the generators of `A ≅ ⊕Z/Inv[i]`, `r = Inv.Length`) — then LINEAR-solve
       every other state value over `A` via `SolveOverA`** (middles×states incidence, pinned states to the RHS). One
       affine-anchored bijective segment forces every connected segment to a bijection (the gadget Latin structure), and the
@@ -1124,21 +1145,28 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
   regress-clean. **v1 scope = pristine whole-graph multipede** (mixed / pinned-prefix residue = B4).
 - **B3 Verify-or-flag — DONE** (RM-6): unified with the emit (a consistent labelling exists ⟺ the structure
   reconstructs). Iso-invariant succeed/flag verdict by construction; keep as the gate.
-- **B4 Fold (D6) — LANDED (2026-07-12, `Option2Solver.TryCanonicalOrderWithFold` + `ChainDescent.cs` hook).** Canonizes a
-  **matched double** (two copies + a perfect matching, `Aut = Z₂` copy-swap), which B2's plain path flags (segments fuse to
-  size-`2|A|` cells). **★ KEY: `σ` is detected STRUCTURALLY at the same iso-invariant root as B2 — `σ(v)` = `v`'s UNIQUE
-  same-cell neighbour** (a matched double's only same-colour edge per vertex is its matching edge). So NO Phase-1 `Aut`
-  harvest is needed (side-stepping the doc's original "use harvested `σ`" plan and its deeper-node iso-invariance worry).
-  Recipe: try plain → else detect `σ`, verify it's a free automorphism, split into the two σ-swapped copies (remove intra-σ
-  matching edges), canonize ONE copy (the rigid core) via B2, lift to `[core-order] ++ σ(core-order)`. Emitted matrix
-  `[[Core, D],[D, Core]]` is fixed by the core's iso-invariant form ⟹ whole iso-invariant; sound (σ verified + clean split,
-  else null → fall-through). **Iso-invariance bug found+fixed during build:** first version renumbered the core cell-ids by
+- **B4 Fold (D6) — LANDED, incl. the GENERAL fold (2026-07-12, `Option2Solver.TryCanonicalOrderWithFold` + `ChainDescent.cs`
+  hook).** Canonizes a clean multipede's **`s`-fold cover** (`s` isomorphic copies of the rigid core joined by a symmetric
+  linking), which B2's plain path flags (segments fuse to size-`s|A|` cells). **★ KEY: the fold is detected STRUCTURALLY at
+  the same iso-invariant root as B2 — no Phase-1 `Aut` harvest** (side-stepping the doc's original "use harvested `σ`" plan
+  and its deeper-node iso-invariance worry):
+  · **FIBERS** = connected components of the *same-cell-neighbour* graph (`adj=1` ∧ same cell) — the group orbits (a matched
+  double's matching pairs; a nested `Z₂²` cover's size-4 hypercube fibers);
+  · **COPIES** = components of `G` MINUS the same-cell edges — the `s` covers.
+  Require a clean cover (uniform fiber size `s = |copies| ∈ [2, MaxFoldMultiplicity=6]`, `(fiber,copy)↦vertex` a bijection),
+  canonize ONE copy (the core) **RECURSIVELY** (nested folds peel), then lift: order by (core-canonical fiber rank, copy
+  position), **lex-min over the `s!` copy-orderings** (makes the symmetric copy layout iso-invariant by construction).
+  **★ SOUNDNESS IS AUTOMATIC + no automorphism check needed:** the emitted order is always a genuine permutation of `[0,n)`,
+  so the form is a relabelling of `G` ⟹ sound AND complete iff iso-invariant; iso-invariance holds because fibers/copies are
+  iso-invariant partitions + the recursive core order is iso-invariant + the min over `ρ`. **CFI-safe:** its 18-cycle is one
+  fiber of size 18 > cap (and any non-multipede core fails to canonize ⟹ `coreOrder==null`) ⟹ fall-through, harvest
+  untouched. **Iso-invariance bug found+fixed during the s=2 build:** first version renumbered the core cell-ids by
   first-occurrence (labelling-dependent ⟹ Recover orders segments by cell-id ⟹ non-invariant); fix = keep the doubled
-  WarmPartition's ORIGINAL canonical ids (each cell is σ-fused, so all ids are present in each copy). Tests
-  `B4_MatchedDouble_{FoldsAndCanonicalizes, CanonicalizesThroughDescent, DistinctCores}` (Z2/Z3/Z4). **NOTE:** B4 canonizes
-  correctly but does not yet harvest the `Z₂` into `Automorphisms` (|Aut| under-reported for the folded case; the fold knows
-  `σ` and could report it — a follow-on). **Still open (general fold):** `Aut_base` beyond one matched `Z₂` (nested/product
-  symmetry, harvest-driven fold for non-structural `σ`).
+  WarmPartition's ORIGINAL canonical ids (each cell is σ-fused ⟹ all ids present in each copy). Tests
+  `B4_MatchedDouble_{FoldsAndCanonicalizes, CanonicalizesThroughDescent, DistinctCores}` (Z2/Z3/Z4, s=2) +
+  `B4_NestedDouble_GeneralFold` (Z2/Z3, s=4 = double-of-double). **NOTE:** B4 canonizes correctly but does not yet harvest
+  the fold `Aut` into `Automorphisms` (|Aut| under-reported for the folded case — the fold knows the group and could report
+  it; a follow-on). **Still open:** covers of multiplicity `s > 6` (fall through today), and the `Aut` reporting.
 - **B5 Cross-checks — LANDED (2026-07-11, `Option2SolverTests`, 21 green; regressions clean).** The battery: B2 fires +
   canonicalizes + scramble-invariant matrix on the native ring multipedes (Z2/Z4/Z2²/Z3) and the production circulant at
   m=5,6, with a speedup (`on.nodes ≤ off.nodes`); distinct rings (Z4 vs Z2²) separate; **CFI does NOT trigger B2** (its
