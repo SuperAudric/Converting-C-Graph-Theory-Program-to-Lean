@@ -386,6 +386,113 @@ public sealed class Option2SolverTests
         }
     }
 
+    // ── B4 (D6): the σ-FOLD — canonize a MATCHED DOUBLE via the copy-swap involution ─────
+    // A doubled+matched multipede (two copies + a perfect matching, Aut = Z₂ copy-swap) is NOT a
+    // clean single multipede, so plain TryCanonicalOrder flags. TryCanonicalOrderWithFold detects the
+    // copy-swap σ structurally (σ(v) = v's unique same-cell neighbour = its match), folds onto one copy,
+    // canonicalizes the rigid core, and lifts. It fires at the SAME iso-invariant root as B2.
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z3", 3)]
+    [InlineData("Z4", 4)]
+    public void B4_MatchedDouble_FoldsAndCanonicalizes_ScrambleInvariant(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), "Z4" => new Ab(4), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (dg, dt) = DoubleAndMatch(core, ct);
+        int N = dg.VertexCount;
+
+        var forms = new List<string?>();
+        for (int s = -1; s < 3; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = dg; t = (int[])dt.Clone(); }
+            else (g, t) = ScrambleWithTypes(dg, dt, 20000 + s);
+            var adj = Flat(g);
+            var part = new WarmPartition(N); part.Refine(adj, SeedFromTypes(N, t));
+
+            Assert.Null(Option2Solver.TryCanonicalOrder(adj, N, part.CellOf, part.NumCells));   // plain flags (doubled)
+            var order = Option2Solver.TryCanonicalOrderWithFold(adj, N, part.CellOf, part.NumCells);
+            Assert.NotNull(order);                                        // the σ-fold canonicalizes it
+            Assert.Equal(N, order!.Length);
+            Assert.Equal(Enumerable.Range(0, N), order.OrderBy(x => x));  // a genuine permutation of [0,N)
+            forms.Add(EmitFromOrder(adj, N, order));
+        }
+        Assert.True(forms.Distinct().Count() == 1);                        // whole-graph canonical form scramble-invariant
+        _out.WriteLine($"{name,-4} matched-double n={N}: σ-fold canonicalizes, scramble-inv=True");
+    }
+
+    // B4 wired into the descent: the doubled multipede canonicalizes via the root fold hook,
+    // scramble-invariant, through the FULL ChainDescent (not just the solver call).
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z3", 3)]
+    public void B4_MatchedDouble_CanonicalizesThroughDescent_ScrambleInvariant(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        Assert.Equal(asz, A.N);
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (dg, dt) = DoubleAndMatch(core, ct);
+        int N = dg.VertexCount;
+
+        var matrices = new List<string>();
+        for (int s = -1; s < 3; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = dg; t = (int[])dt.Clone(); }
+            else (g, t) = ScrambleWithTypes(dg, dt, 21000 + s);
+            var r = RunDescent(N, Flat(g), SeedFromTypes(N, t), 5000, rigid: true);
+            Assert.True(r.fired > 0, "B4 fold hook did not fire on the matched double");
+            Assert.False(r.flagged);
+            matrices.Add(MatrixString(r.matrix!));
+        }
+        Assert.True(matrices.Distinct().Count() == 1);
+        _out.WriteLine($"{name,-4} matched-double n={N}: descent σ-fold canonicalizes, scramble-inv=True");
+    }
+
+    // B4 separation: matched doubles of DIFFERENT cores get DISTINCT canonical forms.
+    [Fact]
+    public void B4_MatchedDouble_DistinctCores_ProduceDistinctForms()
+    {
+        int nW = 6; var lines = CirculantLines(nW, new[] { 0, 1, 3 });
+        var (c4, t4) = BuildNativeMultipede(new Ab(4), lines, nW);       // Z4 core
+        var (cv, tv) = BuildNativeMultipede(new Ab(2, 2), lines, nW);    // Z2² core (same size)
+        var (d4, dt4) = DoubleAndMatch(c4, t4);
+        var (dv, dtv) = DoubleAndMatch(cv, tv);
+        int N = d4.VertexCount;
+        Assert.Equal(N, dv.VertexCount);
+
+        var f4 = FoldForm(d4, dt4);
+        var fv = FoldForm(dv, dtv);
+        Assert.NotNull(f4); Assert.NotNull(fv);
+        Assert.NotEqual(f4, fv);
+    }
+
+    private static string? FoldForm(AdjMatrix g, int[] t)
+    {
+        int N = g.VertexCount; var adj = Flat(g);
+        var part = new WarmPartition(N); part.Refine(adj, SeedFromTypes(N, t));
+        var order = Option2Solver.TryCanonicalOrderWithFold(adj, N, part.CellOf, part.NumCells);
+        return order == null ? null : EmitFromOrder(adj, N, order);
+    }
+
+    // two copies (0..n-1, n..2n-1) + a perfect matching i↔n+i; corresponding vertices share a colour.
+    private static (AdjMatrix, int[]) DoubleAndMatch(AdjMatrix g, int[] types)
+    {
+        int n = g.VertexCount, N = 2 * n;
+        var adj = new int[N, N];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (g[i, j] != 0) { adj[i, j] = g[i, j]; adj[n + i, n + j] = g[i, j]; }
+        for (int i = 0; i < n; i++) { adj[i, n + i] = 1; adj[n + i, i] = 1; }
+        var t = new int[N];
+        for (int i = 0; i < n; i++) { t[i] = types[i]; t[n + i] = types[i]; }
+        return (new AdjMatrix(adj), t);
+    }
+
     // serialize adj under a canonical vertex order (order[rank]=orig vertex), row-major 0/1.
     private static string EmitFromOrder(int[] adj, int n, int[] order)
     {

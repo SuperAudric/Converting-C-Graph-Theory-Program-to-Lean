@@ -130,6 +130,119 @@ namespace Canonizer
             return best.Order;
         }
 
+        /// <summary>
+        /// B4 entry: canonical order for a clean full multipede OR its **matched double** (σ-fold).
+        /// First tries the plain single-multipede order (B2). If that flags, it detects the copy-swap
+        /// involution `σ` STRUCTURALLY at the root — `σ(v)` = `v`'s UNIQUE same-cell neighbour (a matched
+        /// double's only same-colour edge per vertex is its matching edge) — verifies `σ` is a free
+        /// automorphism, splits the graph (minus the matching) into the two σ-swapped copies, canonicalizes
+        /// ONE copy (the rigid core) via B2, and lifts to a whole-graph order `[core-order] ++ σ(core-order)`.
+        /// The emitted matrix `[[Core, D],[D, Core]]` is fixed by the core's iso-invariant form, so the whole
+        /// is iso-invariant; sound because `σ` is a verified automorphism and the copies split cleanly. Any
+        /// deviation (σ not unique / not an automorphism / copies don't split / core flags) ⟹ null (fall-through).
+        /// Fires at the SAME iso-invariant root hook as B2 — no Phase-1 σ-harvest needed. Mixed residues that
+        /// are neither a single multipede nor a matched double still return null (B4 handles the doubled case).
+        /// </summary>
+        public static int[]? TryCanonicalOrderWithFold(int[] adj, int n, int[] cellOf, int numCells)
+        {
+            var plain = TryCanonicalOrder(adj, n, cellOf, numCells);
+            if (plain != null) return plain;
+
+            var sigma = SameCellNeighborInvolution(adj, n, cellOf);
+            if (sigma == null) return null;
+            if (!IsInvolutionAutomorphism(sigma, adj, n)) return null;      // soundness: σ must be a genuine automorphism
+
+            var copyA = SplitMatchedCopies(adj, n, sigma);                  // one σ-swapped component (matching removed)
+            if (copyA == null) return null;
+
+            int coreN = copyA.Length;
+            var coreIdxOf = new int[n]; Array.Fill(coreIdxOf, -1);
+            for (int i = 0; i < coreN; i++) coreIdxOf[copyA[i]] = i;
+
+            var coreAdj = new int[coreN * coreN];
+            for (int i = 0; i < coreN; i++)
+                for (int j = 0; j < coreN; j++)
+                    coreAdj[i * coreN + j] = adj[copyA[i] * n + copyA[j]];
+
+            // Core cell ids = the doubled partition's ids, kept AS-IS (they are iso-invariant — the
+            // WarmPartition's canonical numbering). Do NOT renumber by first-occurrence: that ordering
+            // is labelling-dependent, and Recover orders segments by cell-id, so it would de-invariant
+            // the form. Each doubled cell is σ-fused (spans both copies), so every id 0..numCells-1 is
+            // present in this copy ⟹ passing the original numCells is safe (absent ids ⟹ empty, skipped).
+            var coreCellOf = new int[coreN];
+            for (int i = 0; i < coreN; i++) coreCellOf[i] = cellOf[copyA[i]];
+
+            var coreOrder = TryCanonicalOrder(coreAdj, coreN, coreCellOf, numCells);
+            if (coreOrder == null) return null;
+
+            // lift: copy A in the core's canonical order, then their σ-partners in the same order.
+            var whole = new int[n];
+            for (int rank = 0; rank < coreN; rank++)
+            {
+                int origVertex = copyA[coreOrder[rank]];
+                whole[rank] = origVertex;
+                whole[coreN + rank] = sigma[origVertex];
+            }
+            return whole;
+        }
+
+        // σ(v) = v's unique neighbour in its own WL cell; null unless EVERY vertex has exactly one such
+        // neighbour and the resulting map is a fixed-point-free involution (the matched-double signature).
+        private static int[]? SameCellNeighborInvolution(int[] adj, int n, int[] cellOf)
+        {
+            var sigma = new int[n];
+            for (int v = 0; v < n; v++)
+            {
+                int partner = -1, cnt = 0;
+                for (int w = 0; w < n; w++)
+                    if (adj[v * n + w] != 0 && cellOf[w] == cellOf[v]) { partner = w; cnt++; }
+                if (cnt != 1 || partner == v) return null;
+                sigma[v] = partner;
+            }
+            for (int v = 0; v < n; v++) if (sigma[sigma[v]] != v) return null;   // genuine involution
+            return sigma;
+        }
+
+        private static bool IsInvolutionAutomorphism(int[] sigma, int[] adj, int n)
+        {
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (adj[i * n + j] != adj[sigma[i] * n + sigma[j]]) return false;
+            return true;
+        }
+
+        // Remove the intra-orbit (matching) edges {v, σv}; the rest must be EXACTLY two σ-swapped
+        // components of equal size. Returns the component containing vertex 0 (either works — the two
+        // are σ-isomorphic, so the lifted matrix is identical), or null if it doesn't split cleanly.
+        private static int[]? SplitMatchedCopies(int[] adj, int n, int[] sigma)
+        {
+            var comp = new int[n]; Array.Fill(comp, -1);
+            int nComp = 0;
+            var queue = new Queue<int>();
+            for (int s = 0; s < n; s++)
+            {
+                if (comp[s] != -1) continue;
+                if (nComp >= 2) return null;                       // more than two components
+                comp[s] = nComp; queue.Enqueue(s);
+                while (queue.Count > 0)
+                {
+                    int v = queue.Dequeue();
+                    for (int w = 0; w < n; w++)
+                    {
+                        if (adj[v * n + w] == 0 || w == sigma[v]) continue;   // skip the matching edge
+                        if (comp[w] == -1) { comp[w] = nComp; queue.Enqueue(w); }
+                    }
+                }
+                nComp++;
+            }
+            if (nComp != 2) return null;
+            for (int v = 0; v < n; v++) if (comp[sigma[v]] == comp[v]) return null;   // σ must swap the two copies
+            var copyA = new List<int>();
+            for (int v = 0; v < n; v++) if (comp[v] == 0) copyA.Add(v);
+            if (copyA.Count != n - copyA.Count) return null;       // equal-size copies
+            return copyA.ToArray();
+        }
+
         /// <summary>The min self-verified labelling's vertex order + its serialized canonical form.</summary>
         private sealed class CanonCandidate { public int[] Order = Array.Empty<int>(); public string Form = ""; }
 

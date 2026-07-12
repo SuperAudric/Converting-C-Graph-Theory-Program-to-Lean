@@ -284,9 +284,13 @@ namespace Canonizer
             // a B2-eligible graph, or none — one spec, iso-invariant. `TryCanonicalOrder` returns
             // null (⟹ fall through to the normal descent, sound) unless every vertex is covered:
             // a mixed / partially-symmetric residue is NOT a full multipede at the root (that is B4).
+            // B4 (§11.10 D6): `TryCanonicalOrderWithFold` ALSO handles a MATCHED DOUBLE — it detects the
+            // copy-swap σ structurally at this same iso-invariant root (σ(v)=v's unique same-cell neighbour),
+            // folds onto one copy, canonizes the rigid core, and lifts. Single multipede or matched double ⟹
+            // an order; anything else ⟹ null (fall through, sound).
             if (EnableRigidSolver && depth == 0)
             {
-                int[]? order = Option2Solver.TryCanonicalOrder(_adj, _n, cellOf, numCells);
+                int[]? order = Option2Solver.TryCanonicalOrderWithFold(_adj, _n, cellOf, numCells);
                 if (order != null)
                 {
                     int[] perm = new int[_n];
