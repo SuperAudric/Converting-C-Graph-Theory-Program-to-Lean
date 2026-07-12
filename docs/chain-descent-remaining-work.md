@@ -770,8 +770,9 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   off by `stablyRecoverable_iff_symmetric_and_bases`). Closing it = closing the *overall*-canonizer poly wall.
 - **Status (2026-07-11):** the **ring-general rigid solver is BUILT + WIRED + validated end-to-end** —
   `GraphCanonizationProject/Option2Solver.cs` (solver) + `ChainDescent.cs` (wire) + `CanonGraphOrdererChainDescent.cs`
-  (`EnableRigidSolver` passthrough, default ON). **B1a/b/c + B2 + B5 + the B1d `SolveOverA` emit all LANDED. 28
-  Option2Solver tests green** + RM-1..6 (5 `Ring*Probe.cs`, 30); regression-clean (Multipede 50, LinearOracle/CFI 18).
+  (`EnableRigidSolver` passthrough, default ON). **B1a/b/c + B2 + B5 + the B1d `SolveOverA` emit + B1d general-arity
+  (pin-`d−3`) + B1d try-both-sides ALL LANDED. 31 Option2Solver tests green** + RM-1..6 (5 `Ring*Probe.cs`, 30);
+  regression-clean (86 combined w/ Multipede/LinearOracle/CFI).
   **★ B2 fires at the ROOT (`depth == 0`), NOT at `target == -1`** (the boundary node is labelling-dependent; mixing B2's
   φ-form with the exhaustive global-lex-min form broke iso-invariance, Z3 → two forms; the root partition is iso-invariant
   ⟹ uniform firing). **★ B1d `SolveOverA` emit = the current emit** (`SearchCanonicalViaSolve`, via `TryCanonicalOrder`):
@@ -780,8 +781,10 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   constraint graph unit-prop stalled on; m=5,6,8,9,10 canonicalize) AND the large-`|A|` exponential (base `|A|^{r+1}`, poly
   for bounded rank, was `|A|!²`; native Z6/Z8/Z9/Z2×Z4 canonicalize, infeasible before). Overflow fixed by `BigInteger`
   Smith. **⚠ Two dead ends (don't re-walk):** `target==-1` wiring breaks iso-invariance (use root); ℚ-independent row
-  reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k). **NEXT = remaining B1d:
-  (i) general arity (pin `d−3`), (ii) try-both-sides side-selection, (iii) solve-speed follow-on (perf-opt, poly already);
+  reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k). **★ B1d general-arity
+  (`InferOrderProfile` reduces a degree-`d` line to degree-3 by pinning `d−3` segments to local-0; degree-4 Z2/Z3 validated)
+  + try-both-sides (`Recover(forceSide)`; `SearchCanonicalViaSolve` runs both classes, min-form) LANDED 2026-07-12.**
+  **NEXT = remaining B1d: (iii) solve-speed follow-on (perf-opt, poly already — torsion-safe `Z/|A|` reduction / mod p^k);
   plus B4 (σ-fold, mixed/pinned-prefix residue — B2 returns null ⟹ sound fall-through).** B3/B6 done. Full plan + findings:
   IR doc §11.12 + the PICK-UP-HERE banner.
 - **★ ROW 4 IS NOW UNDER ACTIVE ATTACK — "option 2" (2026-06-20, IR doc §11).** The flag set is *attackable*, not just

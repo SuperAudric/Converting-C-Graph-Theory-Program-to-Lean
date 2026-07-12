@@ -316,6 +316,86 @@ public sealed class Option2SolverTests
         Assert.NotEqual(MatrixString(r4.matrix!), MatrixString(rv.matrix!));   // different ring ⟹ different form
     }
 
+    // ── B1d (i): GENERAL ARITY — InferOrderProfile reduces a degree-d gadget to degree-3 ─────
+    // A degree-4 native multipede has NO degree-3 gadget line, so the old InferOrderProfile flagged
+    // it. The reduction (pin d−3 segments to local-0) recovers A from the constant-sum sub-square, so
+    // Recover succeeds and TryCanonicalOrder canonicalizes it, scramble-invariantly.
+    [Theory]
+    [InlineData("Z2", 2)]
+    [InlineData("Z3", 3)]
+    public void B1d_GeneralArity_DegreeFourMultipede_RecoversAndCanonicalizes(string name, int asz)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        int nW = 8;
+        var lines = CirculantLines(nW, new[] { 0, 1, 3, 5 });      // arity 4 — no degree-3 gadget exists
+        Assert.All(lines, l => Assert.Equal(4, l.Length));
+
+        var (g0, t0) = BuildNativeMultipede(A, lines, nW);
+        var forms = new List<string?>();
+        for (int s = -1; s < 3; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = g0; t = (int[])t0.Clone(); }
+            else (g, t) = ScrambleWithTypes(g0, t0, 18000 + s);
+            int n = g.VertexCount; var adj = Flat(g);
+            var part = new WarmPartition(n); part.Refine(adj, SeedFromTypes(n, t));
+
+            var res = Option2Solver.Recover(adj, n, part.CellOf, part.NumCells);
+            Assert.NotNull(res);                                   // ring recovered from the degree-4 line
+            Assert.Equal(asz, res!.ASize);
+            Assert.Equal(A.TrueOrderProfile(), res.OrderProfile);  // correct ring, via the pin-d−3 reduction
+
+            var order = Option2Solver.TryCanonicalOrder(adj, n, part.CellOf, part.NumCells);
+            Assert.NotNull(order);                                 // and the higher-arity residue canonicalizes
+            forms.Add(EmitFromOrder(adj, n, order!));
+        }
+        Assert.True(forms.Distinct().Count() == 1);                // scramble-invariant
+        _out.WriteLine($"{name,-4} arity-4 multipede: ring={A.TrueOrderProfile()} canonical scramble-inv=True");
+    }
+
+    // ── B1d (ii): TRY-BOTH-SIDES — the emit no longer depends on the avg-degree heuristic ─────
+    // The recover→solve→emit runs on BOTH bipartition classes; only the true segment side
+    // self-verifies. Here the WRONG (gadget) side fails to recover a clean uniform residue, so the
+    // both-sides TryCanonicalOrder relies on selecting the segment side — and stays scramble-invariant.
+    [Fact]
+    public void B1d_TryBothSides_SelectsSegmentSide()
+    {
+        int nW = 6; var lines = CirculantLines(nW, new[] { 0, 1, 3 });
+        var (g0, t0) = BuildNativeMultipede(new Ab(3), lines, nW);   // Z3
+        int n = g0.VertexCount; var adj = Flat(g0);
+        var part = new WarmPartition(n); part.Refine(adj, SeedFromTypes(n, t0));
+
+        // exactly one bipartition side yields a clean uniform-size segment residue.
+        var s0 = Option2Solver.Recover(adj, n, part.CellOf, part.NumCells, forceSide: 0);
+        var s1 = Option2Solver.Recover(adj, n, part.CellOf, part.NumCells, forceSide: 1);
+        Assert.True((s0 == null) ^ (s1 == null),
+            $"expected exactly one segment side; got side0={(s0 == null ? "null" : "res")} side1={(s1 == null ? "null" : "res")}");
+
+        // the both-sides emit canonicalizes regardless of which BFS label the segment side got,
+        // and stays scramble-invariant (the heuristic is bypassed).
+        string? form0 = null;
+        for (int scr = 0; scr < 4; scr++)
+        {
+            var (g, t) = ScrambleWithTypes(g0, t0, 19000 + scr);
+            int m = g.VertexCount; var a = Flat(g);
+            var p = new WarmPartition(m); p.Refine(a, SeedFromTypes(m, t));
+            var order = Option2Solver.TryCanonicalOrder(a, m, p.CellOf, p.NumCells);
+            Assert.NotNull(order);
+            var f = EmitFromOrder(a, m, order!);
+            form0 ??= f; Assert.Equal(form0, f);
+        }
+    }
+
+    // serialize adj under a canonical vertex order (order[rank]=orig vertex), row-major 0/1.
+    private static string EmitFromOrder(int[] adj, int n, int[] order)
+    {
+        var sb = new System.Text.StringBuilder(order.Length * order.Length);
+        for (int i = 0; i < order.Length; i++)
+            for (int j = 0; j < order.Length; j++)
+                sb.Append(adj[order[i] * n + order[j]] != 0 ? '1' : '0');
+        return sb.ToString();
+    }
+
     private (int fired, bool flagged, long nodes, int[]? matrix) RunDescent(
         int n, int[] adj, sbyte[] seed, long budget, bool rigid)
     {

@@ -41,7 +41,7 @@
 > ring solver is BUILT + WIRED + validated in production** (`Option2Solver.cs`, recover→solve→emit→verify, B1a/b/c +
 > **B2 + B5 + the B1d `SolveOverA` emit LANDED** — the emit now closes the m≥8 completeness stall AND the large-`|A|`
 > exponential (affine-frame base + linear solve; poly for bounded rank; 28 Option2Solver tests, native Z6/Z8/Z9/Z2×Z4).
-> **NEXT = the remaining B1d items (general-arity pin-`d−3`, try-both-sides side-selection) + the solve-speed follow-on.**
+> **NEXT = the B1d solve-speed follow-on (perf-opt, NOT exponential) + B4 (σ-fold); general-arity + try-both-sides LANDED 2026-07-12.**
 > See the PICK-UP-HERE handoff below + §11.12.
 >
 > **▶ B2 WIRING — THE ISO-INVARIANCE FINDING (2026-07-11, empirically forced).** B2 must fire at the **ROOT (depth 0)**,
@@ -160,27 +160,33 @@
 >   the huge all-middles system fixed by `BigInteger` in `SmithWithTransforms` (entries reduced mod `|A|` on apply). A
 >   `VerifyGadgets` check (every middle sums to 0) guards the emit.
 >
-> **THE NEXT ACTIONS (remaining B1d):** **(i) general arity** — `InferOrderProfile` needs a degree-3 gadget to *exist*;
-> for all-higher-arity residues, **pin `d−3` segments** to reduce a degree-`d` gadget to a degree-3 constant-sum relation
-> (the cycle-structure read is translation-invariant, so `A` is still recovered — do NOT marginalise). **(ii) try-both-sides
-> side-selection** — replace the average-degree *heuristic* (in `Recover`) with try-both-sides + let the self-verify select
-> (2×, removes the completeness risk; the heuristic is currently sound-but-may-flag). **(iii) solve-speed follow-on (a
-> perf-opt, NOT an exponential — the algorithm is poly):** the exact `BigInteger` Smith runs on the redundant
-> `|A|²`-middles-per-line system; a **torsion-safe row reduction** (independent over `Z/|A|`, **NOT over ℚ** — the ℚ
-> reduction drops torsion congruences and broke iso-invariance; **dead end, do not retry**) or a component-wise Gaussian
-> mod each prime power would make it fast. Also still open: **B4 (σ-fold, the mixed / pinned-prefix residue)** — the case
-> B2 v1 deliberately does NOT handle (`TryCanonicalOrder` returns null when the emitted order doesn't cover all n vertices,
-> ⟹ sound fall-through). B3+B6 DONE.
+> **★ B1d GENERAL-ARITY + TRY-BOTH-SIDES (LANDED 2026-07-12).** **(i) general arity** — `InferOrderProfile` now accepts any
+> line of arity ≥ 3: a degree-`d` line is reduced to degree-3 by pinning the `d−3` highest-id segments to their
+> local-index-0 state; the free-3 sub-square is a full `|A|²` constant-sum (group) Latin square, so Albert's
+> cycle-structure read (constant-independent) recovers `A` exactly. The emit (`SolveOverA`/`ExtractIncidence`/gNbr) already
+> handled any arity, so this was purely the ring-inference piece. Validated on a degree-4 native multipede (`{0,1,3,5}`,
+> nW=8) for Z2/Z3 (`B1d_GeneralArity_DegreeFourMultipede`). **(ii) try-both-sides** — `Recover` takes `int? forceSide`;
+> `SearchCanonicalViaSolve` runs recover→solve→emit on BOTH bipartition classes and takes the iso-invariant min form (only
+> the true segment side self-verifies), removing the average-degree heuristic's completeness risk
+> (`B1d_TryBothSides_SelectsSegmentSide`). NB the heuristic is never wrong on the circulant fixtures (segments always denser,
+> `#middles ≫ nW`), so this is a proven-correct safety net, not a fix for an observed failure.
+>
+> **THE NEXT ACTION (remaining B1d): (iii) solve-speed follow-on (a perf-opt, NOT an exponential — the algorithm is poly):**
+> the exact `BigInteger` Smith runs on the redundant `|A|²`-middles-per-line system; a **torsion-safe row reduction**
+> (independent over `Z/|A|`, **NOT over ℚ** — the ℚ reduction drops torsion congruences and broke iso-invariance; **dead
+> end, do not retry**) or a component-wise Gaussian mod each prime power would make it fast. Also still open: **B4 (σ-fold,
+> the mixed / pinned-prefix residue)** — the case B2 v1 deliberately does NOT handle (`TryCanonicalOrder` returns null when
+> the emitted order doesn't cover all n vertices ⟹ sound fall-through). B3+B6 DONE.
 >
 > **★ Two dead ends recorded (do not re-walk):** (a) wiring B2 at `target == -1` breaks iso-invariance (use the root);
 > (b) ℚ-independent row reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k).
 >
 > **Validation lives in:** the 5 ring probe files (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
 > `RingSolveProbe`, `RingInferenceProbe` — the RM-1..6 chain, 30 tests, `dotnet test --filter "FullyQualifiedName~Ring"`)
-> + **`Option2SolverTests.cs` (28 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
+> + **`Option2SolverTests.cs` (31 tests, `--filter "FullyQualifiedName~Option2Solver"`)**. **Reading order:** this STATUS →
 > §11.11 (the settled **stepwise alternating engine** + consume-before-force) → §11.13a (**the ring design + RM-1..6
-> validation**) → §11.12 (**build roadmap: B1a/b/c + B2 + B5 + the B1d SolveOverA emit all LANDED; remaining = B1d arity /
-> side-selection + solve-speed + B4**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are background; the
+> validation**) → §11.12 (**build roadmap: B1a/b/c + B2 + B5 + the B1d SolveOverA emit + general-arity + try-both-sides all
+> LANDED; remaining = B1d solve-speed perf + B4**). Older mechanism sections (§11.0–§11.10, D-M0–D-M4 for F₂) are background; the
 > ephemeral `/tmp/*.py` probes are superseded by the in-repo `Ring*Probe.cs`.
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
@@ -1039,9 +1045,9 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
 > **▶ RE-BASED 2026-07-11 after the RM probes (RM-1..6, 30 tests, `RingWlExtractionProbe`/`RingSolveProbe`).** The full
 > **recover → solve → emit → verify** pipeline is validated ring-general on the real refinement, so B1 lifted from the
 > **RM** probes (not the F₂ `Option2ExtractionProbe`); **B3 and B6 are done** (verify = the self-verifying emit; ring
-> built into RM-3/4/5). **DONE: B1a/b/c + B2 (wire) + B5 (cross-checks) + the B1d `SolveOverA` affine-frame emit** (28
-> Option2Solver tests). **Remaining: B1d (general arity pin-`d−3` + try-both-sides side-selection + solve-speed) + B4
-> (σ-fold, mixed/pinned-prefix residue).** See the PICK-UP-HERE banner for the full state.
+> built into RM-3/4/5). **DONE: B1a/b/c + B2 (wire) + B5 (cross-checks) + the B1d `SolveOverA` affine-frame emit + B1d
+> general-arity (pin-`d−3`) + B1d try-both-sides side-selection** (31 Option2Solver tests). **Remaining: B1d solve-speed
+> perf follow-on (NOT exponential) + B4 (σ-fold, mixed/pinned-prefix residue).** See the PICK-UP-HERE banner for full state.
 
 - **B1 Productionize (the current step)** — create `Option2Solver` (namespace `Canonizer`) porting the RM pipeline:
   - **B1a Recover — LANDED (2026-07-11, `Option2Solver.cs` + `Option2SolverTests.cs`, 4 tests green).** `Recover(adj,
@@ -1063,17 +1069,22 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
     adjacency; a consistent complete labelling exists ⟺ the residue reconstructs, so **success = canonical form,
     failure = flag** (verify unified with emit). Validated scramble-invariant (`Z2/Z4/Z2²/Z3`), flags a corrupted
     gadget, separates `Z4` vs `Z2²`.
-    - **⚠ SCOPE (not a footnote — the honest guarantee): the landed emit is poly-or-flag only for BOUNDED `|A|`.** The
-      base-labelling enumeration is brute `|A|!²`, which is not poly in `n` if `|A|` grows (`|A|` may be up to `n`). The
-      poly closure is **B1b's `SolveOverA`/`CosetMin` gauge-fix**, deferred to B1d — larger `|A|` still FLAGS today (sound),
-      it just isn't canonicalised. So the current solver's poly reach is narrower than "ring-general" suggests.
-  - **B1d — completeness & generality (the three post-handoff scope items).** (i) **General arity** — `InferOrderProfile`
-    needs a degree-3 gadget to *exist*; for all-higher-arity residues, **pin `d−3` segments** to reduce a degree-`d` gadget
-    to a degree-3 sum-zero (constant) relation — the cycle-structure read is translation-invariant so `A` is still recovered
-    (do NOT marginalise: a projected cube is all of `A³`). (ii) **Side-selection** — replace the average-degree *heuristic*
-    with **try-both-sides + self-verify selects** (2×, removes the completeness risk; the φ-search backstop makes the current
-    heuristic *sound* but a mis-pick flags a canonicalisable residue). (iii) **`SolveOverA` gauge-fix — now the TOP B1d
-    item, needed for COMPLETENESS (not only large `|A|` poly).** ▶ B5 FINDING (2026-07-11): the brute-2-segment-base +
+    - **⚠ SCOPE (historical — applies to the legacy `TryCanonicalForm`/`SearchCanonical` path only).** That path's
+      base-labelling enumeration is brute `|A|!²` (poly-or-flag only for bounded `|A|`). **SUPERSEDED for production by the
+      B1d `SolveOverA` emit (iii below): `TryCanonicalOrder` → `SearchCanonicalViaSolve` is POLY for bounded rank and closes
+      the large-`|A|` gap.** `TryCanonicalForm` is retained as the RM-5/6 reference emit; the descent uses `TryCanonicalOrder`.
+  - **B1d — completeness & generality (the three post-handoff scope items; (i)+(ii)+(iii) all LANDED).** (i) **General
+    arity — LANDED (2026-07-12).** `InferOrderProfile` now accepts any line of arity ≥ 3: a degree-`d` line is reduced to
+    degree-3 by **pinning the `d−3` highest-id segments to their local-index-0 state** — the free-3 sub-square is a full
+    `|A|²` constant-sum (group) Latin square, so Albert's cycle-structure read (constant-independent) recovers `A` exactly
+    (NOT marginalising — a projected sum-zero cube is all of `A³`). The emit already handled any arity, so this was purely
+    the ring-inference piece. Validated on a degree-4 native multipede (`{0,1,3,5}`, nW=8), Z2/Z3
+    (`B1d_GeneralArity_DegreeFourMultipede`). (ii) **Side-selection — LANDED (2026-07-12).** `Recover` takes `int?
+    forceSide`; `SearchCanonicalViaSolve` runs recover→solve→emit on **both** bipartition classes and takes the iso-invariant
+    min form (only the true segment side self-verifies), removing the average-degree heuristic's completeness risk
+    (`B1d_TryBothSides_SelectsSegmentSide`). NB the heuristic is never wrong on the circulant fixtures (segments always
+    denser, `#middles ≫ nW`), so this is a proven-correct safety net, not a fix for an observed failure. (iii) **`SolveOverA`
+    gauge-fix — LANDED (2026-07-11); was the TOP B1d item, needed for COMPLETENESS (not only large `|A|` poly).** ▶ B5 FINDING (2026-07-11): the brute-2-segment-base +
     **unit-propagation** emit only completes when propagation from 2 segments reaches every segment. On the production
     circulant multipede it does at m=5,6 (B2 fires) but **STALLS at m≥8** — `Recover` still succeeds (Z2, segments
     recovered identically) but `TryCanonicalOrder` → null because the unique trivialisation needs simultaneous linear

@@ -37,7 +37,7 @@ namespace Canonizer
         /// Recover (segments, ring A, incidence M) from a refined partition, recognition-free.
         /// Null ⟹ not a clean native-A-multipede residue (the caller flags / falls through).
         /// </summary>
-        public static RingResidue? Recover(int[] adj, int n, int[] cellOf, int numCells)
+        public static RingResidue? Recover(int[] adj, int n, int[] cellOf, int numCells, int? forceSide = null)
         {
             var side = Bipartition(adj, n);
             if (side == null) return null;                       // not bipartite ⟹ not a multipede
@@ -46,24 +46,27 @@ namespace Canonizer
             for (int c = 0; c < numCells; c++) members[c] = new List<int>();
             for (int v = 0; v < n; v++) members[cellOf[v]].Add(v);
 
-            // Segment side = the higher AVERAGE-per-vertex-degree side: segment-states touch many
-            // gadget-tuples (high degree); gadget-tuples touch only their arity of segments (low
-            // degree). NB total degree per side is equal in a bipartite graph — the average is the
-            // discriminator (fewer high-degree segments vs many low-degree tuples).
-            var totalDeg = new long[2]; var count = new long[2];
-            for (int v = 0; v < n; v++)
+            // Which bipartition class holds the segments? `forceSide` (B1d try-both-sides) fixes it;
+            // otherwise fall back to the AVERAGE-per-vertex-degree HEURISTIC (segment-states touch many
+            // gadget-tuples = high degree; gadget-tuples touch only their arity of segments = low degree;
+            // total degree per side is equal in a bipartite graph, so the average is the discriminator).
+            // The heuristic is SOUND (a wrong pick makes the φ-search find no labelling ⟹ FLAG, never a
+            // wrong answer) but can cost COMPLETENESS. B1d removes that risk: SearchCanonicalViaSolve calls
+            // Recover with BOTH forceSide values and lets the self-verifying emit select (min-form, iso-inv).
+            int segSide;
+            if (forceSide is int fs) segSide = fs;
+            else
             {
-                int d = 0; for (int w = 0; w < n; w++) d += adj[v * n + w];
-                totalDeg[side[v]] += d; count[side[v]]++;
+                var totalDeg = new long[2]; var count = new long[2];
+                for (int v = 0; v < n; v++)
+                {
+                    int d = 0; for (int w = 0; w < n; w++) d += adj[v * n + w];
+                    totalDeg[side[v]] += d; count[side[v]]++;
+                }
+                double avg0 = count[0] > 0 ? (double)totalDeg[0] / count[0] : 0;
+                double avg1 = count[1] > 0 ? (double)totalDeg[1] / count[1] : 0;
+                segSide = avg0 >= avg1 ? 0 : 1;
             }
-            double avg0 = count[0] > 0 ? (double)totalDeg[0] / count[0] : 0;
-            double avg1 = count[1] > 0 ? (double)totalDeg[1] / count[1] : 0;
-            int segSide = avg0 >= avg1 ? 0 : 1;
-            // NB this side choice is a HEURISTIC. It is sound because a wrong pick makes the
-            // downstream φ-search (TryCanonicalForm) find no consistent labelling ⟹ FLAG — never
-            // a wrong answer. But a mis-pick on a genuine multipede costs COMPLETENESS (flags what
-            // it could have canonicalised). B1d fix: drop the heuristic — try BOTH sides (and both
-            // candidate cell-sizes) and let the φ-search self-verify SELECT the right one (2× cost).
 
             // Segments = non-singleton cells wholly on the segment side, all of one size |A| ≥ 2.
             var segCells = new List<int[]>();
@@ -183,7 +186,23 @@ namespace Canonizer
         // 0/e_0/…) so the min stays iso-invariant.
         private static CanonCandidate? SearchCanonicalViaSolve(int[] adj, int n, int[] cellOf, int numCells)
         {
-            var res = Recover(adj, n, cellOf, numCells);
+            // B1d try-both-sides: run the recover+solve+emit on EACH bipartition class and take the
+            // iso-invariant min canonical form. Only the true segment side self-verifies (VerifyGadgets +
+            // LabellingComplete); the other yields null and is skipped. This removes the average-degree
+            // heuristic's completeness risk (a mis-pick no longer flags a canonicalisable residue).
+            CanonCandidate? best = null;
+            for (int forceSide = 0; forceSide < 2; forceSide++)
+            {
+                var cand = SolveEmitForSide(adj, n, cellOf, numCells, forceSide);
+                if (cand != null && (best == null || string.CompareOrdinal(cand.Form, best.Form) < 0))
+                    best = cand;
+            }
+            return best;
+        }
+
+        private static CanonCandidate? SolveEmitForSide(int[] adj, int n, int[] cellOf, int numCells, int forceSide)
+        {
+            var res = Recover(adj, n, cellOf, numCells, forceSide);
             if (res == null) return null;
             var A = RecoverRing(res.ASize, res.OrderProfile);
             if (A == null) return null;
@@ -361,47 +380,55 @@ namespace Canonizer
             return color;
         }
 
-        // ── RM-3: ring order-profile from one degree-3 gadget's sum-zero Latin square ─
-        // ⚠ SCOPE: requires a degree-3 gadget line to EXIST (a full |A|² sum-zero relation). A residue
-        // whose constraints are all higher-arity has no such line ⟹ returns null ⟹ FLAG, even though it
-        // is a legitimate linear residue. B1d fix: reduce a degree-d gadget to degree-3 by PINNING d−3 of
-        // its segments to fixed states (NOT marginalising — a projected sum-zero cube is all of A³). The
-        // residual 3-relation sums to a constant, which the cycle-structure read tolerates (R_x∘R_x'⁻¹ =
-        // translation by x'−x, independent of the constant), so it still recovers A exactly.
+        // ── RM-3: ring order-profile from a gadget line's sum-zero Latin square (any arity ≥ 3) ─
+        // For a degree-3 line, read its |A|² sum-zero relation directly. For a degree-d line (d > 3),
+        // REDUCE to degree 3 by PINNING the d−3 highest-id segments to their local-index-0 state (NOT
+        // marginalising — the sub-relation over the 3 free segments is a full |A|² constant-sum square,
+        // a group Latin square of A). The constant offset is an isotopy, so Albert's cycle-structure
+        // read (R_x∘R_x'⁻¹ = translation by x'−x, constant-independent) still recovers A exactly.
         private static string? InferOrderProfile(int[] adj, int n, int[] segOf, int[] localOf, int Asz)
         {
+            // Group gadget middles by the SET of segments they touch (a "line"); need arity ≥ 3.
             var byLine = new Dictionary<string, List<int>>();
             for (int v = 0; v < n; v++)
             {
                 if (segOf[v] != -1) continue;
                 var segSet = new SortedSet<int>();
                 for (int w = 0; w < n; w++) if (adj[v * n + w] == 1 && segOf[w] != -1) segSet.Add(segOf[w]);
-                if (segSet.Count != 3) continue;
+                if (segSet.Count < 3) continue;
                 var key = string.Join(",", segSet);
                 if (!byLine.TryGetValue(key, out var l)) byLine[key] = l = new List<int>();
                 l.Add(v);
             }
 
-            foreach (var kv in byLine)
+            foreach (var kv in byLine.OrderBy(k => k.Key, StringComparer.Ordinal))   // deterministic
             {
-                if (kv.Value.Count != Asz * Asz) continue;       // a full degree-3 line
                 var sids = kv.Key.Split(',').Select(int.Parse).ToArray();
+                // 3 FREE segments (lowest ids) read the Latin square; the rest are PINNED to local-0.
                 int s0 = sids[0], s1 = sids[1], s2 = sids[2];
+                var pinned = new HashSet<int>(sids.Skip(3));
                 var L = new int[Asz, Asz];
                 var filled = new bool[Asz, Asz];
                 bool ok = true;
                 foreach (int gv in kv.Value)
                 {
-                    int x = -1, y = -1, z = -1;
+                    int x = -1, y = -1, z = -1; bool keep = true;
                     for (int w = 0; w < n; w++)
                     {
                         if (adj[gv * n + w] != 1 || segOf[w] == -1) continue;
-                        if (segOf[w] == s0) x = localOf[w]; else if (segOf[w] == s1) y = localOf[w]; else if (segOf[w] == s2) z = localOf[w];
+                        int sg = segOf[w], lo = localOf[w];
+                        if (sg == s0) x = lo; else if (sg == s1) y = lo; else if (sg == s2) z = lo;
+                        else if (pinned.Contains(sg) && lo != 0) keep = false;   // pinned segment off local-0 ⟹ skip
                     }
+                    if (!keep) continue;
                     if (x < 0 || y < 0 || z < 0 || filled[x, y]) { ok = false; break; }
                     L[x, y] = z; filled[x, y] = true;
                 }
                 if (!ok) continue;
+                // require a FULL reduced Latin square (every (x,y) present).
+                bool full = true;
+                for (int x = 0; x < Asz && full; x++) for (int y = 0; y < Asz; y++) if (!filled[x, y]) { full = false; break; }
+                if (!full) continue;
 
                 var hist = new SortedDictionary<int, int>();
                 for (int x = 0; x < Asz; x++)
