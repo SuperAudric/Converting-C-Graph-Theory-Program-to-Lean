@@ -143,5 +143,116 @@ theorem isCanonicalForm_lexMin {cand : AdjMatrix n → Finset (Labelled n)}
     IsCanonicalForm (fun G => lexMin (cand G) (hne G)) :=
   ⟨sound_lexMin hne hrel, isoInvariant_lexMin hne htr⟩
 
+/-! ## Stage 0a (lift) — the FLAGGING (`Option`) canonizer: the shape `Publication.canonForm?` really has
+
+The real canonizer **flags**: it returns `none` at mutual stall (`docs/chain-descent-mixed-composition.md` §1).
+So the object every later stage is proved about is `AdjMatrix n → Option (Labelled n)`, not the total
+`AdjMatrix n → Labelled n` above. This section lifts the framework onto that type, and the payoff survives
+verbatim: **`Sound ∧ IsoInvariant ⟹ complete`, with the flag's iso-invariance thrown in for free.**
+
+Note the economy: `IsoInvariantOpt` is a *single* equation `C (relabelAdj σ G) = C G` on `Option`s, so it says
+"relabelling changes nothing" — the answer *and* whether it flagged. That is `Publication.canon_complete`'s
+hypothesis and `Publication.flag_iso_invariant` in one. There is no separate flag obligation. -/
+
+/-- **Soundness, flagging form.** Whenever the canonizer answers, the output is a genuine relabelling of the
+input. This is *exactly* the statement of `Publication.canon_sound`. -/
+def SoundOpt (C : AdjMatrix n → Option (Labelled n)) : Prop :=
+  ∀ (G : AdjMatrix n) (c : Labelled n), C G = some c → ∃ π : Equiv.Perm (Fin n), c = labelledAdj π G
+
+/-- **Iso-invariance, flagging form.** Relabelling the input changes nothing — *including whether it flagged*.
+Carries both the output invariance and `①c` (flag invariance). -/
+def IsoInvariantOpt (C : AdjMatrix n → Option (Labelled n)) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (G : AdjMatrix n), C (relabelAdj σ G) = C G
+
+/-- **A flagging canonical form** = sound ∧ iso-invariant. The complete spec of the mixed canonizer: nothing
+else is required of it, and in particular it is NOT required to compute any global lex-min. -/
+def IsCanonicalFormOpt (C : AdjMatrix n → Option (Labelled n)) : Prop :=
+  SoundOpt C ∧ IsoInvariantOpt C
+
+/-- Isomorphic inputs receive the **same answer** (same value, or both flagged). The engine behind both payoffs
+below: it is `IsoInvariantOpt` re-expressed against `GraphIso` instead of a literal `relabelAdj`. -/
+theorem eq_of_graphIso {C : AdjMatrix n → Option (Labelled n)} (hinv : IsoInvariantOpt C)
+    {G H : AdjMatrix n} (h : GraphIso G H) : C G = C H := by
+  obtain ⟨π, hπ⟩ := h
+  have hHrel : relabelAdj π G = H := relabelAdj_eq_of_labelledAdj hπ
+  rw [← hHrel, hinv]
+
+/-- **`①b` (`Publication.canon_complete`) — FREE.** Whenever the canonizer answers on both inputs, the outputs
+coincide iff the graphs are isomorphic. The `→` direction is iso-invariance; the `←` direction is soundness. -/
+theorem complete_of_isCanonicalFormOpt {C : AdjMatrix n → Option (Labelled n)}
+    (h : IsCanonicalFormOpt C) (G H : AdjMatrix n) (cG cH : Labelled n)
+    (hG : C G = some cG) (hH : C H = some cH) : GraphIso G H ↔ cG = cH := by
+  obtain ⟨hsound, hinv⟩ := h
+  constructor
+  · intro hiso
+    have hEq : C G = C H := eq_of_graphIso hinv hiso
+    rw [hG, hH] at hEq
+    exact Option.some.inj hEq
+  · intro hEq
+    obtain ⟨πG, hπG⟩ := hsound G cG hG
+    obtain ⟨πH, hπH⟩ := hsound H cH hH
+    exact iso_of_labelledAdj_eq (hπG.symm.trans (hEq.trans hπH))
+
+/-- **`①c` (`Publication.flag_iso_invariant`) — FREE.** Flagging is a property of the isomorphism class. -/
+theorem flag_iso_invariant_of_isoInvariantOpt {C : AdjMatrix n → Option (Labelled n)}
+    (hinv : IsoInvariantOpt C) {G H : AdjMatrix n} (h : GraphIso G H) :
+    C G = none ↔ C H = none := by
+  rw [eq_of_graphIso hinv h]
+
+/-! ### The flag mechanism — `none ⟺ stalled`, and stalled is equivariant
+
+The descent flags exactly when every resolver stalls. `guardBy` is that shape at the spec level: a total
+construction gated by a "handled" predicate. The lemma below is the doc's claim, proved: **if the construction
+is a canonical form and the handled-predicate is iso-invariant, the guarded (flagging) canonizer is a flagging
+canonical form** — so the flag contributes no new obligation beyond the equivariance of "stalled".
+
+(The real `descend` returns `Option` natively rather than being built by `guardBy`; this is the spec-level
+statement of why its flag is free. It is `noncomputable` only because of the `Classical` decidability of an
+arbitrary `P` — the real object's stall test is decidable and computable.) -/
+
+/-- An iso-invariant predicate on graphs (the "handled" / `¬stalled` side of the flag). -/
+def IsoInvariantPred (P : AdjMatrix n → Prop) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (G : AdjMatrix n), P (relabelAdj σ G) ↔ P G
+
+/-- Gate a total construction by a handled-predicate: answer when handled, flag otherwise. -/
+noncomputable def guardBy (P : AdjMatrix n → Prop) (C : AdjMatrix n → Labelled n) :
+    AdjMatrix n → Option (Labelled n) :=
+  fun G => if P G then some (C G) else none
+
+/-- **The flag is free.** A canonical form gated by an iso-invariant handled-predicate is a *flagging*
+canonical form. So `①a`+`①b`+`①c` all reduce to: the construction is sound + iso-invariant, and "stalled" is
+iso-invariant. -/
+theorem isCanonicalFormOpt_guardBy {P : AdjMatrix n → Prop} {C : AdjMatrix n → Labelled n}
+    (hC : IsCanonicalForm C) (hP : IsoInvariantPred P) :
+    IsCanonicalFormOpt (guardBy P C) := by
+  obtain ⟨hsound, hinv⟩ := hC
+  constructor
+  · intro G c hc
+    unfold guardBy at hc
+    by_cases hPG : P G
+    · rw [if_pos hPG] at hc
+      obtain ⟨π, hπ⟩ := hsound G
+      exact ⟨π, (Option.some.inj hc).symm.trans hπ⟩
+    · rw [if_neg hPG] at hc
+      simp at hc
+  · intro σ G
+    unfold guardBy
+    by_cases hPG : P G
+    · rw [if_pos ((hP σ G).mpr hPG), if_pos hPG, hinv]
+    · rw [if_neg (fun h => hPG ((hP σ G).mp h)), if_neg hPG]
+
+/-- The total theory embeds: a (never-flagging) canonical form is a flagging canonical form. Keeps the
+single-path / total objects usable against the `Option` spec. -/
+theorem isCanonicalFormOpt_some {C : AdjMatrix n → Labelled n} (h : IsCanonicalForm C) :
+    IsCanonicalFormOpt (fun G => some (C G)) := by
+  obtain ⟨hsound, hinv⟩ := h
+  constructor
+  · intro G c hc
+    obtain ⟨π, hπ⟩ := hsound G
+    exact ⟨π, (Option.some.inj hc).symm.trans hπ⟩
+  · intro σ G
+    show some (C (relabelAdj σ G)) = some (C G)
+    rw [hinv]
+
 end CanonSpec
 end ChainDescent

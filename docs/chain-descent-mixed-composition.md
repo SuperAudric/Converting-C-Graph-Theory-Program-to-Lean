@@ -39,8 +39,13 @@
 > and force unified by a single **branch-covering** contract (narrowing is sound because discarded branches are
 > *redundant*, not because they *lose* — which is exactly what lets force be proved **without knowing the answer**).
 > The **executable is a projection** of that same definition, not a separate track. `complete_of_isCanonicalForm` is
-> construction-agnostic and survives untouched. **NEXT:** Stage 0a's `Option`-lift → **Stage 0b** (define `descend`)
-> → **Stage 2** (`Sound ∧ IsoInvariant` by induction = the one hard theorem).
+> construction-agnostic and survives untouched.
+>
+> **▶ Stage 0a's `Option`-LIFT LANDED (2026-07-13, `CanonicalForm.lean`, in `build.sh`, axiom-clean, full build green).**
+> `SoundOpt` / `IsoInvariantOpt` / `IsCanonicalFormOpt` + `complete_of_isCanonicalFormOpt` (①b free) +
+> `flag_iso_invariant_of_isoInvariantOpt` (①c free) + `isCanonicalFormOpt_guardBy` (the flag costs nothing beyond
+> **"stalled" being equivariant**). **The framework is now DONE: ①a/①b/①c reduce to exactly two facts about `descend`
+> — `SoundOpt` and `IsoInvariantOpt`.** **NEXT = Stage 0b** (define `descend`), then **Stage 2** (prove those two).
 
 **The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
 from source (2026-07-10):
@@ -196,9 +201,24 @@ what Phase 1 consumes, but the composition must work regardless of how much Phas
   = sound ∧ iso-invariant; **`complete_of_isCanonicalForm`** gives completeness for free, and is
   **construction-agnostic** — it is the whole payoff and it survives the object change untouched. *(The `lexMin` /
   `isCanonicalForm_lexMin` combinator is now **optional**, not the route: §1.1 retires the reified candidate set.)*
-  **Small remaining lift:** the flagging **`Option`** version — "on the handled sub-domain, `Sound ∧ IsoInvariant ⟹
-  complete`, and `stalled` equivariant ⟹ the flag transports". Short, and it pins the `Option` type the whole object
-  rides on — do it first.
+  **★ THE `Option` LIFT — LANDED (2026-07-13, `CanonicalForm.lean`, in `build.sh`, axiom-clean, full build green).**
+  The flagging type `AdjMatrix n → Option (Labelled n)` — the shape `Publication.canonForm?` actually has — is now the
+  spec surface, so every later stage is proved against the real type:
+  - `SoundOpt C := ∀ G c, C G = some c → ∃ π, c = labelledAdj π G` — *literally* `Publication.canon_sound` (①a).
+  - `IsoInvariantOpt C := ∀ σ G, C (relabelAdj σ G) = C G` — **one** equation on `Option`s, so it carries the output
+    invariance **and** the flag invariance together. There is **no separate flag obligation.**
+  - `IsCanonicalFormOpt := SoundOpt ∧ IsoInvariantOpt` — **the complete spec of the mixed canonizer.**
+  - **`complete_of_isCanonicalFormOpt`** = `Publication.canon_complete` (**①b, FREE**);
+    **`flag_iso_invariant_of_isoInvariantOpt`** = `Publication.flag_iso_invariant` (**①c, FREE**);
+    both via `eq_of_graphIso` (isomorphic inputs get the *same answer* — value or flag).
+  - **`isCanonicalFormOpt_guardBy`** proves the flag mechanism claim: a canonical form gated by an **iso-invariant
+    "handled" predicate** is a flagging canonical form ⟹ *`none ⟺ stalled` contributes no obligation beyond the
+    **equivariance of "stalled"***. `isCanonicalFormOpt_some` embeds the total theory.
+  - Axioms: core payoffs need only `[Quot.sound]`; `guardBy` `[propext, Classical.choice, Quot.sound]` (deciding an
+    arbitrary `P`) — tighter than the project bar.
+
+  **So ①a/①b/①c now reduce, with no remaining framework work, to exactly two facts about `descend`: it is `SoundOpt`
+  and it is `IsoInvariantOpt`.** That is Stage 2.
 - **0b — the object (★, THE conceptual leap, NEXT).** Define `descend : AdjMatrix n → CostM (Option Matrix)` (§1.2):
   refine → equivariant `selCell` → branch list `B` → resolvers narrow, else defer-and-aggregate → leaf emits
   `labelledAdj (rankPerm χ) G`; flag at mutual stall. **Computable, in `CostM`, over the encode-free `refineStep`**
