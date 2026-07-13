@@ -47,16 +47,39 @@
 > **"stalled" being equivariant**). **The framework is DONE: ①a/①b/①c reduce to exactly two facts about `descend`
 > — `SoundOpt` and `IsoInvariantOpt`.**
 >
-> **▶▶▶ STAGES 0b AND 2 ARE DONE (2026-07-13, `ChainDescent/Descend.lean`, in `build.sh`, axiom-clean, no `sorry`,
-> full build green).** `descend` — the **computable, resolver-parameterized branching** descent in `CostM` — exists,
-> **runs** (`#eval`: K3/path canonize; all 9 relabellings of the path give the identical form), and is **PROVED a
-> canonical form**: **`isCanonicalFormOpt_canonForm?`** = sound ∧ iso-invariant ⟹ **①a/①b/①c all discharged for the
-> real object**, modulo exactly two carried hypotheses (`RefineEquivariant`, `Covering`).
+> **▶▶▶ STAGES 0b + 1 + 2 ARE DONE, AND THE CONTRACT IS HARDENED (2026-07-13, `ChainDescent/Descend.lean`, in
+> `build.sh`, axiom-clean, no `sorry`, full build green 98s).** `descend` — the **computable,
+> resolver-parameterized branching** descent in `CostM` — exists, **runs** (`#eval`: K3/path canonize), and is
+> **PROVED a canonical form**: **`isCanonicalFormOpt_canonForm?`** = sound ∧ iso-invariant ⟹ **①a/①b/①c all
+> discharged for the real object**, modulo exactly two carried hypotheses: **`RefineEquivariant`** (the refiner) and
+> **`NarrowTransport`** (the resolver).
 >
-> **▶ NEXT (in dependency order):** **(1) Stage 4 — ② cost + the real mutual-stall flag** (the main gap; the old `n⁴`
-> bound used the single-path `nbud = n` and does **NOT** transfer); **(2) instantiate `refine`** with the encode-free
-> round + prove its `RefineEquivariant`; **(3) Stage 3 resolver instances** — consume (`matchOracle` + covering
-> witness) and force (rigid seal P1–P4); **(4) ③**. Note (3) **cannot break ①** — resolvers only ever *narrow*.
+> **★ THE CONTRACT HARDENING (2026-07-13) — read §1.3 before touching a resolver.** The earlier single
+> **`Covering`** contract was **too strong and is retired**: `canonForm?_eq_deferAll_of_covering` *proves* a
+> covering resolver is **value-invisible** (it computes exactly the exhaustive branch-min) ⟹ covering silently
+> re-imported the retired `canonMin` anchor, and **force could satisfy it only by already knowing the answer**.
+> Replaced by the weaker **`NarrowTransport`** (fuel-graded, IH-threaded) with **two** sufficient conditions —
+> **`Covering`** (consume: non-equivariant choice, redundant discards) and **`NarrowEquivariant`** (force:
+> structural choice, genuinely-different discards, a *different but equally valid* canonical form).
+> **`narrow_eq_branches_of_orbit` proves the two routes have complementary firing domains** (equivariant narrowing
+> is *impossible* on an orbit cell) — which is why the design does **not** collapse into GI ∈ P.
+>
+> **★ NON-VACUITY EARNED (2026-07-13).** The capstone alone is satisfiable by a degenerate refiner that flags on
+> **every** graph (the constant refiner is `RefineEquivariant` by `rfl`). Now closed: **`canonForm?_ne_none`** —
+> with a genuinely-refining refiner (`RefineSplits`) and a proper resolver (`NarrowProper`), the descent **always
+> reaches a leaf**. So the object is a canonizer that *computes*, fuel-exhaustion is a pure depth bound, and `none`
+> is free for its real (Stage 4) mutual-stall meaning.
+>
+> **★ SIGNATURE HARDENING (same pass).** `Resolver` now takes the **`AdjMatrix`** (neither intended instance was
+> writable without it — `matchOracle` verifies automorphisms, the rigid solver does linear algebra), and **both**
+> `Refiner` and `Resolver` are in **`CostM`** (so `descentCost` charges refinement + resolver work, not just node
+> count — without this ② could not be a theorem about *this* definition, §1.4).
+>
+> **▶ NEXT (in dependency order):** **(1) instantiate `refine`** with the encode-free round + prove its
+> `RefineEquivariant` **and `RefineSplits`**; **(2) Stage 4 — ② cost + the real mutual-stall flag** (the old `n⁴`
+> bound used the single-path `nbud = n` and does **NOT** transfer); **(3) Stage 3 resolver instances** — consume
+> (`matchOracle`, **`Covering`** route) and force (rigid solver, **`NarrowEquivariant`** route); **(4) ③**. Note (3)
+> **cannot break ①** — but it is where the residue actually shrinks (§3 Stage 3).
 
 **The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
 from source (2026-07-10):
@@ -118,33 +141,58 @@ cell's representatives, then ask the resolvers. A resolver may **narrow** `B` to
 narrows, the node **defers** — branch over all of `B` and aggregate. Leaves emit `labelledAdj (rankPerm χ) G`.
 The run flags (`none`) at **mutual stall**.
 
-### 1.3 The `Resolver` contract — consume and force are ONE thing: **branch covering**
+### 1.3 The `Resolver` contract — **TWO routes, complementary firing domains** (HARDENED 2026-07-13)
 
-Consume and force perform the *same operation* (shrink the branch set) for *different reasons*, and the reason is
-where the earlier framing went wrong. Stating soundness as "the discarded branches lose under the aggregate"
-presupposes the aggregate-over-all-branches is the answer (= `canonMin`) and needs the answer to know which branch
-is kept. The correct statement is **redundancy, not victory**:
+> **⛔ The one-contract "branch covering" design is RETIRED — it was too strong, and provably so.**
+> `canonForm?_eq_deferAll_of_covering` (`Descend.lean` §11, axiom-clean) proves that a **covering** resolver is
+> **value-invisible**: it computes *exactly* the same answer as the exhaustive `descend deferAll`. So demanding
+> covering of every resolver **pins the object to the exhaustive branch-min — i.e. re-imports the `canonMin`
+> anchor §1 had just retired**, through the back door of the contract. And a **force** resolver in a *rigid*
+> medium narrows to a branch whose leaf differs from the discarded branches' leaves, so it can satisfy covering
+> **only if the rigid solver already computes the global lex-min — only if it KNOWS THE ANSWER.** Covering did not
+> dodge the known-answer problem; it *encoded* it. (Tell: the only resolver that satisfied it was `deferAll`,
+> by `rfl`.)
 
-> **Resolver soundness = BRANCH COVERING.** `decide node = some B'` requires `B' ⊆ B` nonempty **and** a map
-> `cov : B \ B' → B'` with `descend (cov b) = descend b` for every discarded `b`.
->
-> **Resolver equivariance.** `decide` commutes with relabelling.
+What the induction actually needs is strictly weaker — **the narrowed-branch aggregate transports**:
 
-Every output reachable through a discarded branch is *already reachable through a kept one*, so
-`aggregate (B'.map descend) = aggregate (B.map descend)` holds because the **value sets are equal** — for **any**
-deterministic aggregator, with no reference to which branch wins and **no knowledge of the final answer**.
+> **`NarrowTransport rf R`** — for every `fuel`, *given the descent's iso-invariance at that fuel* (the IH,
+> threaded in explicitly), the aggregate over the **narrowed** branches is the same at `(adj, χ)` and at
+> `(σ·adj, σ·χ)`.
 
-| resolver | narrows to | `cov` witnessed by |
-|---|---|---|
-| **consume** (oracle) | one orbit representative | a **verified path-fixing automorphism** ⟹ the discarded subproblem is isomorphic to the kept one ⟹ equal `descend` values (via `descend`'s own iso-invariance — a well-founded mutual induction, descending on undiscretized vertices). This is exactly the C#'s `CoveredByPathFixingAut`. |
-| **force** (rigid solver) | the determined choice / the swept frame set | the **solve's determinacy**: a discarded individualization yields a labelling already produced by a kept frame. This is the rigid seal's **P3** (coset-min canonicity) — an existing obligation, not a new one. |
-| **defer** | `B' = B` (no-op) | trivial |
+It does **not** demand that narrowing preserve the aggregate — only that whatever aggregate the narrowing
+produces is the *same* on `G` and `σ·G`. That is exactly what lets **force change the canonical form** (to a
+different, equally valid one) instead of having to reproduce the exhaustive min. Two independent sufficient
+conditions feed it:
 
-"Structural ⟹ always discards the same branch" is then a **consequence**, not an assumption: the covering map is
-structural (an automorphism / a solve), so it transports under σ, so narrowing is equivariant, so `descend` is.
+| route | narrowing is | discards are | aggregate | instance |
+|---|---|---|---|---|
+| **`Covering`** | *non*-equivariant (pick **any** orbit rep) | **redundant** — a verified path-fixing automorphism maps them onto a kept branch (the C#'s `CoveredByPathFixingAut`) | **preserved** | **consume** (oracle) |
+| **`NarrowEquivariant`** | **equivariant** (a structural function of `(adj, χ)`; no tie-break by vertex index) | genuinely **different** | **changes — consistently** | **force** (rigid solver) |
+| *(defer)* | `B' = B` | — | preserved | `deferAll` (both routes) |
+
+Lemmas: `narrowTransport_of_covering`, `narrowTransport_of_narrowEquivariant`. The **fuel-grading is load-bearing**:
+consume's covering witness is an automorphism `α`, so its proof *is* `descend_transport` at `σ = α`, one fuel level
+down — the hypothesis must be able to *consume* the IH or the instance is circular.
+
+**★★ WHY THIS DOES NOT COLLAPSE INTO GI ∈ P** (`narrow_eq_branches_of_orbit`, proved). If any equivariant nonempty
+narrowing were sound, why not narrow to one branch always? Because **equivariant narrowing is impossible on a cell
+that is an orbit.** Let `α` be a colouring-preserving automorphism: then `α·adj = adj` and `α·χ = χ`, so
+equivariance at `σ = α` gives `narrow = α · narrow` — the narrowed set is invariant under the *whole*
+colouring-preserving automorphism group, and a nonempty invariant subset of a single orbit **is the whole orbit**.
+So:
+
+> **force provably cannot fire on a symmetric cell, and consume fires exactly there.** The two routes have
+> **complementary, non-overlapping firing domains.** Equivariant narrowing is available only where the cell is
+> genuinely *not* an orbit **and** the resolver can structurally see the distinction (the linear/ring structure).
+> **Graphs where neither route fires are the residue.** That is the architecture, and now it is a theorem.
+
+This also makes the contract **checkable**: a narrowing is equivariant iff it is a pure function of `(adj, χ)` that
+never breaks ties by vertex index — the same discipline that makes `indivOne` index-free.
+
 A resolver that narrows too little is still sound (it only costs a branch) — the project's own "over-splitting is
-safe" rule, now a Lean contract. **A future unhandled-residue solver is just another covering witness**, and adding
-it shrinks the flagged residue *without touching ①*.
+safe" rule, now a Lean contract. **A future unhandled-residue solver is just another instance of one of the two
+routes**, and adding it shrinks the flagged residue *without touching ①*. ⚠ But *sound* is not *useful*: see
+Stage 3 — a solver that never fires is a canonizer that flags everything.
 
 ### 1.4 The executable is a PROJECTION, not a second object
 
@@ -286,14 +334,17 @@ narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov
   LITERALLY EQUAL, not merely correspondent.** The `σ` cancels because the output is indexed by colour-**ranks**, not
   by vertices. (`indivOne_transport` is where the *index-free* individualization pays: an index-dependent one would
   fail this outright.)
-- **★★ STRUCTURAL DISCOVERY — resolver EQUIVARIANCE is NOT needed, only COVERING.** Covering gives
-  `aggregate(narrowed) = aggregate(full)` on *each* side, so both rewrite to their **full**-branch aggregates, and the
-  full branch list is a function of the colouring alone ⟹ transports. **The resolver may narrow differently on `G`
-  and `σ·G` with no loss.** This is precisely what licenses **consume**'s "pick any orbit representative" — a choice
-  that is genuinely *not* equivariant (orbit members are indistinguishable to refinement); only its *result* is,
-  because the discarded branches are covered. The two carried hypotheses are now stated:
-  **`RefineEquivariant`** (the parameter's obligation) and **`Covering`** (the resolver contract, §1.3), with
-  `covering_deferAll` proved (`rfl`) ⟹ the exhaustive-branching object carries **no** resolver obligation.
+- **★★ THE TWO ROUTES (corrected 2026-07-13; supersedes the earlier "equivariance is NOT needed, only COVERING").**
+  The original discovery was half right and half fatal. **Right:** covering licenses **consume**'s "pick any orbit
+  representative" — a choice that is genuinely *not* equivariant (orbit members are indistinguishable to refinement);
+  only its *result* transports, because the discarded branches are covered. **Fatal:** covering was then imposed on
+  *every* resolver, and `canonForm?_eq_deferAll_of_covering` proves that makes a resolver **value-invisible** ⟹ it
+  pins the object to the exhaustive branch-min (= the retired `canonMin`) and **force can satisfy it only by knowing
+  the answer.** The fix is §1.3's **two routes** into the weaker **`NarrowTransport`**: `Covering` (consume) and
+  `NarrowEquivariant` (force). `narrow_eq_branches_of_orbit` proves their firing domains are **complementary** —
+  equivariant narrowing is *impossible* on an orbit cell — so the design does not collapse into GI ∈ P.
+  `covering_deferAll` **and** `narrowEquivariant_deferAll` both hold ⟹ the exhaustive object carries **no** resolver
+  obligation on either route.
 
 **★ Both remaining items CLOSED (2026-07-13):**
 - **(i) `aggregate_perm` — the aggregate is PERMUTATION-INVARIANT.** The obligation created by `branches` being an
@@ -322,15 +373,26 @@ narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov
   fold over alternation depth is subsumed by the induction. `coversOrbits_append` (`Cascade.lean:1122`) remains the
   harvest-side substrate for the consume instance's covering witness.)*
 
-**Stage 3 — the resolver INSTANCES (★, the two witnesses).**
+**Stage 3 — the resolver INSTANCES (★, the two witnesses) — one per route (§1.3).**
 - **consume** — `matchOracle` / `CascadeOracleSpec` (`CascadeOracle.lean:148,1095`) narrows to one orbit rep;
-  covering witnessed by a verified path-fixing automorphism (the C#'s `CoveredByPathFixingAut`); soundness of
-  deferral by `real_stays_real` (`CascadeOracle.lean:74`). Substrate: `Confinement.SelectedCellIsOrbit`
-  (`Confinement.lean:41`), `coversOrbits_of_realizers`.
-- **force** — **Algorithm R** (the rigid solver); covering witnessed by the solve's determinacy = the rigid seal's
-  **P3** (coset-min canonicity). This is the separate IR track (§11.12 **P1–P4**, Lean **not started**; the C# solver
-  `Option2Solver.cs` is **complete for handoff** and is its runtime reference). Stages 0–2 proceed with the resolver
-  list **abstract**, so this does not gate them.
+  takes the **`Covering`** route, witnessed by a verified path-fixing automorphism (the C#'s
+  `CoveredByPathFixingAut`); soundness of deferral by `real_stays_real` (`CascadeOracle.lean:74`). Substrate:
+  `Confinement.SelectedCellIsOrbit` (`Confinement.lean:41`), `coversOrbits_of_realizers`. **The fuel-graded
+  `NarrowTransport` is what makes this instance provable at all** — its covering witness is an automorphism `α`, so
+  its proof is `descend_transport` at `σ = α`, one fuel level down.
+- **force** — **Algorithm R** (the rigid solver); takes the **`NarrowEquivariant`** route: the narrowing is a
+  structural function of `(adj, χ)` (the linear/ring solve), so it transports — *no* covering witness, *no* global
+  lex-min, **no knowledge of the answer**. It yields a **different but equally valid** canonical form, which is
+  legitimate for exactly the reason deferral always was. This is the separate IR track (§11.12; Lean **not started**;
+  the C# `Option2Solver.cs` is **complete for handoff** and is its runtime reference).
+- ⚠ **The obligations do not vanish — they RELOCATE from ① to ②.** Under the resolver contract, a solver that
+  extracts too little or solves too weakly is *sound* (it just defers more). But **relocation is not elimination**:
+  deferring more ⟹ more branching ⟹ budget exhaustion ⟹ flag ⟹ the input lands in `UnhandledResidue`. **A solver
+  that is sound but never fires is a canonizer that flags everything: correct, and worthless.** So the rigid seal's
+  **P1** (extraction generates the row-space) and **P3** (solve/canonical-form correctness) keep their full content —
+  they are now **②/firing obligations** (how much residue is actually handled), not ① soundness obligations. That is
+  a re-basing of §11.12, not a deletion of it.
+- Stages 0–2 proceed with the resolver **abstract**, so this does not gate them.
 
 **Stage 3 — plug in the rigid solver as the `phase2` witness (★ = the IR track, separate).** `phase2` must
 satisfy `Phase2.Sound`/`IsoInvariant` (`Phase2Handoff.lean:78,86`) — witnessed by **Algorithm R**
@@ -371,10 +433,13 @@ Stage 0a (Option-lift) ─→ Stage 0b (the object: computable CostM descend) �
 Stage 3 instances (independent): consume (matchOracle + CoveredByPathFixingAut) · force (rigid seal P1–P4, IR §11.12)
 ```
 
-- **✅ DONE:** Stage 0a (spec + `Option`-lift), Stage 0b (the object), Stage 1 (the `Resolver`/`Covering` contract),
-  **Stage 2 (the whole of ①)**. Critical path 0a → 0b → 2 is complete.
-- **▶ NEXT / critical path:** **Stage 4** (② cost + the real mutual-stall flag) and **instantiating `refine`** with the
-  encode-free round (+ its `RefineEquivariant`). These two are what a fresh reader should pick up.
+- **✅ DONE:** Stage 0a (spec + `Option`-lift), Stage 0b (the object), Stage 1 (the **hardened**
+  `Refiner`/`Resolver`/`NarrowTransport` contract, §1.3), **Stage 2 (the whole of ①)**, plus **totality**
+  (`canonForm?_ne_none` ⟹ the capstone is non-vacuous) and the **non-collapse** theorem
+  (`narrow_eq_branches_of_orbit`). Critical path 0a → 0b → 2 is complete.
+- **▶ NEXT / critical path:** **instantiate `refine`** with the encode-free round (+ its `RefineEquivariant` **and**
+  `RefineSplits` — the latter is what discharges totality for the real refiner), then **Stage 4** (② cost + the real
+  mutual-stall flag). These two are what a fresh reader should pick up.
 - **Start-anytime, independent:** the rigid solver's **P1** (extraction soundness, standalone,
   `chain-descent-ir-blindspot-solver.md` §11.12).
 - **Not gating anything:** Stage 3's instances — ① is proved against the resolver **contract**, so correctness waits on

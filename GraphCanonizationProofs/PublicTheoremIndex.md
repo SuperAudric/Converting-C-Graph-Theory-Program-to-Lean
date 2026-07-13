@@ -2722,12 +2722,12 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 | `Showcase.payne_thas` | 164-172 | — | axiom |
 | `Showcase.witt_flag_transitivity` | 173 | — | axiom |
 | `Showcase.canon_sound` | 181-192 | — | — |
-| `Showcase.canon_complete` | 194-200 | — | — |
-| `Showcase.flag_iso_invariant` | 202-207 | — | — |
-| `Showcase.canon_poly_or_flag` | 209-219 | — | — |
-| `Showcase.residue_if_flag` | 221-230 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 232-238 | — | — |
-| `Showcase.canonizer` | 245-255 | — | — |
+| `Showcase.canon_complete` | 194-210 | — | — |
+| `Showcase.flag_iso_invariant` | 212-219 | — | — |
+| `Showcase.canon_poly_or_flag` | 221-237 | — | — |
+| `Showcase.residue_if_flag` | 239-248 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 250-256 | — | — |
+| `Showcase.canonizer` | 263-273 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -2767,64 +2767,96 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Descend.decidableDiscrete` | 53-55 | §Stage-0b Decidability of `Discrete`, so the descent can test `is this a leaf?` computably. | Instance |
-| `Descend.rankInv` | 64-67 | §Stage-0b Computable inverse of `vertexRank` (rank → vertex). Needed because `Colouring.rankPerm` is noncomputable, so the leaf cannot be emitted through it. | Definition |
-| `Descend.vertexRank_surj` | 69-74 | §Stage-0b On a discrete colouring `vertexRank` is surjective (it underlies the bijection `rankPerm`). | — |
-| `Descend.rankInv_spec` | 76-88 | §Stage-0b `rankInv` really inverts `vertexRank` on a discrete colouring. | — |
-| `Descend.rankInv_eq_symm` | 90-95 | §Stage-0b `rankInv` is the inverse permutation `rankPerm.symm`. | — |
-| `Descend.leafMatrix` | 97-99 | §Stage-0b The leaf matrix: relabel the input by colour-rank. Computable; the descent's output at a discrete node. | Definition |
-| `Descend.leafMatrix_eq_labelledAdj` | 101-107 | §Stage-0b The computable leaf emit EQUALS `labelledAdj (rankPerm …)` — so it is a genuine relabelling. | — |
-| `Descend.leafMatrix_sound` | 109-113 | §Stage-0b ①a at the leaf: the emitted matrix is a relabelling of the input. Base case of `SoundOpt descend`. | — |
-| `Descend.indivOne` | 122-125 | §Stage-0b INDEX-FREE individualization (the X3 cut): mark one vertex with a parity bit on its existing colour, never `v.val`. An index-dependent individualization leaks the labelling into the leaf and cannot be iso-invariant. | Definition |
-| `Descend.indivOne_singleton` | 127-133 | §Stage-0b The individualized vertex becomes a singleton (parity separates it). | — |
-| `Descend.indivOne_refines_off` | 135-141 | §Stage-0b Off the individualized vertex, `indivOne` induces the same partition as the input colouring. | — |
-| `Descend.cellOf` | 150-152 | §Stage-0b The colour class (cell) of a given colour. | Definition |
-| `Descend.nonSingletonColours` | 154-156 | §Stage-0b The branchable colours — those whose cell is not a singleton. | Definition |
-| `Descend.targetColour` | 158-160 | §Stage-0b The EQUIVARIANT target-cell selector: the least non-singleton colour value (a function of the colouring alone; no vertex index is read). `none` exactly when discrete. | Definition |
-| `Descend.branches` | 162-171 | §Stage-0b The branch list — vertices of the target cell. A `List` (not `Finset`: `Finset.toList` is noncomputable), so its ORDER is labelling-dependent; harmless because the aggregate is a permutation-invariant minimum. | Definition |
-| `Descend.Resolver` | 181-182 | §Stage-1 A branch-narrowing resolver (the computable half of the contract): narrow the branch list, or defer. Consume and force are two instances. | `abbrev` |
-| `Descend.deferAll` | 184-186 | §Stage-1 The baseline resolver: never narrows. `descend deferAll` is the honest exhaustive-branching object. | Definition |
-| `Descend.allPairs` | 202-204 | §Stage-2 All index pairs in row-major order; the basis for `flatten` (and hence for `flatten_injective`). | Definition |
-| `Descend.mem_allPairs` | 206-208 | §Stage-2 Every index pair occurs in `allPairs`. | — |
-| `Descend.flatten` | 210-214 | §Stage-2 Row-major flattening of a labelled matrix, defined over `allPairs` so that injectivity is immediate. | Definition |
-| `Descend.flatten_injective` | 216-219 | §Stage-2 A matrix is determined by its row-major entries. This is what makes `lexLe` a genuine total order, hence the aggregate a well-defined minimum. | — |
-| `Descend.lexLeList` | 221-225 | §Stage-2 Computable lexicographic ≤ on `Nat` lists. | Definition |
-| `Descend.lexLe` | 227-228 | §Stage-2 Computable row-major lexicographic ≤ on labelled matrices. | Definition |
-| `Descend.lexMin?` | 230-236 | §Stage-2 The lex-least matrix of a list (`none` on the empty list). | Definition |
-| `Descend.aggregate` | 238-240 | §Stage-0b Combine branch results: flag if any branch flagged, else take the lex-least leaf. Deterministic — which is all iso-invariance needs (the spec never asks WHICH leaf). | Definition |
-| `Descend.descend` | 252-271 | §Stage-0b THE OBJECT: the computable, resolver-parameterized branching descent, in the cost monad. Correctness (①) is theorems about its `value`, cost (②) about its `cost`, and the executable IS this definition. Fuel is PER-LAYER, never threaded, so each resolver's poly-or-flag behaviour is local. | Definition |
-| `Descend.canonForm?` | 273-278 | §Stage-0b The top-level canonizer object — the `value` projection of `descend`. This is what `SoundOpt`/`IsoInvariantOpt` are proved of and what `Publication.canonForm?` becomes. | Definition |
-| `Descend.descentCost` | 280-283 | §Stage-0b The descent's cost — the `cost` projection of the SAME definition (no separate cost object, no bridge). | Definition |
-| `Descend.lexMin?_mem` | 293-310 | §Stage-2 The lex-min of a list is a member of it. | — |
-| `Descend.aggregate_mem` | 312-322 | §Stage-2 The aggregate returns one of its inputs — the key to soundness of the branch case. | — |
-| `Descend.lexLeList_refl` | 331-335 | §Stage-2 Reflexivity of list-lex ≤. | — |
-| `Descend.lexLeList_total` | 337-349 | §Stage-2 Totality of list-lex ≤. | — |
-| `Descend.lexLeList_trans` | 351-380 | §Stage-2 Transitivity of list-lex ≤. | — |
-| `Descend.lexLeList_antisymm` | 382-395 | §Stage-2 Antisymmetry of list-lex ≤. | — |
-| `Descend.lexLe_refl` | 397 | §Stage-2 Reflexivity of matrix-lex ≤. | — |
-| `Descend.lexLe_total` | 398-399 | §Stage-2 Totality of matrix-lex ≤. | — |
-| `Descend.lexLe_trans` | 400-401 | §Stage-2 Transitivity of matrix-lex ≤. | — |
-| `Descend.lexLe_antisymm` | 402-403 | §Stage-2 Antisymmetry of matrix-lex ≤ (via `flatten_injective`). Makes `lexLe` a total order, hence the aggregate a genuine minimum. | — |
-| `Descend.lexMin?_eq_none_iff` | 405-416 | §Stage-2 `lexMin?` flags exactly on the empty list. | — |
-| `Descend.lexMin?_le` | 418-457 | §Stage-2 `lexMin?` really is the minimum: it is ≤ every member. | — |
-| `Descend.lexMin?_perm` | 459-481 | §Stage-2 `lexMin?` is permutation-invariant — it depends only on the multiset of candidates. | — |
-| `Descend.aggregate_perm` | 483-498 | §Stage-2 THE AGGREGATE IS PERMUTATION-INVARIANT. Discharges the obligation created by the index-ordered branch `List`: the labelling-dependent branch order provably never leaks into the output. | — |
-| `Descend.descend_sound` | 500-521 | §Stage-2 ①a for the descent: whenever it answers, the answer is a relabelling. Holds for ANY refinement and ANY resolver — narrowing only removes branches, so a mis-narrowing resolver costs a branch, never correctness. | — |
-| `Descend.soundOpt_canonForm?` | 523-527 | §Stage-2 `SoundOpt` for the top-level object — the `Publication.canon_sound` (①a) obligation, DISCHARGED. | — |
-| `Descend.transportColouring` | 540-542 | §Stage-2 Transport a colouring along a relabelling: χ on G becomes χ∘σ⁻¹ on `relabelAdj σ G`. | Definition |
-| `Descend.discrete_transport` | 544-554 | §Stage-2 Discreteness transports along a relabelling. | — |
-| `Descend.vertexRank_transport` | 556-562 | §Stage-2 The rank of σv under the transported colouring is the rank of v under the original — the reason the σ cancels in the leaf. | — |
-| `Descend.indivOne_transport` | 564-574 | §Stage-2 Individualization commutes with transport. This is where the INDEX-FREE choice pays: an index-dependent individualization would fail this outright. | — |
-| `Descend.cellOf_card_transport` | 576-590 | §Stage-2 Cell sizes are preserved under transport. | — |
-| `Descend.image_transport` | 592-601 | §Stage-2 The set of colour values is preserved under transport. | — |
-| `Descend.targetColour_transport` | 603-612 | §Stage-2 The target colour is the same natural number on both sides — so the branch set transports. | — |
-| `Descend.leafMatrix_transport` | 614-635 | §Stage-2 THE HEART OF ①b: the emitted leaf matrices are LITERALLY EQUAL under relabelling. The σ cancels because the output is indexed by colour-RANKS, not by vertices. | — |
-| `Descend.RefineEquivariant` | 649-655 | §Stage-2 Carried hypothesis on the refinement PARAMETER: the refinement round commutes with relabelling. (The encode-free round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not baked in.) | Definition |
-| `Descend.Covering` | 657-666 | §Stage-2 THE RESOLVER CONTRACT (branch covering): narrowing does not change the aggregate, because every discarded branch's output is ALREADY REACHABLE through a kept one. Stated where used, so it needs no knowledge of the final answer. NB resolver EQUIVARIANCE is deliberately NOT required. | Definition |
-| `Descend.covering_deferAll` | 668-673 | §Stage-2 The baseline resolver never narrows, so it is trivially covering — the exhaustive-branching object carries no resolver obligation at all. | — |
-| `Descend.branches_transport_perm` | 677-696 | §Stage-2 The branch list transports UP TO PERMUTATION (it is built in index order) — which is exactly why `aggregate_perm` is needed. | — |
-| `Descend.descend_transport` | 698-734 | §Stage-2 ①b/①c: the descent is ISO-INVARIANT, modulo `RefineEquivariant` + `Covering`. Covering lets each side be rewritten to its FULL-branch aggregate, so no resolver equivariance is needed. | — |
-| `Descend.isoInvariantOpt_canonForm?` | 736-750 | §Stage-2 `IsoInvariantOpt` for the top-level object — ①b and ①c then follow for free via Stage 0a. | — |
-| `Descend.isCanonicalFormOpt_canonForm?` | 752-759 | §Stage-2 ★ THE STAGE-2 CAPSTONE: the descent IS a canonical form (sound ∧ iso-invariant), hence a complete isomorphism invariant with an iso-invariant flag. ①a/①b/①c all discharged for the real object, modulo exactly two carried hypotheses. | — |
-| `Descend.canonForm?_complete` | 761-767 | §Stage-2 The `Publication.canon_complete` (①b) obligation, for the real object. | — |
-| `Descend.canonForm?_flag_iso_invariant` | 769-774 | §Stage-2 The `Publication.flag_iso_invariant` (①c) obligation, for the real object. | — |
+| `Descend.decidableDiscrete` | 74-76 | §Stage-0b Decidability of `Discrete`, so the descent can test `is this a leaf?` computably. | Instance |
+| `Descend.rankInv` | 80-82 | §Stage-0b Computable inverse of `vertexRank` (rank → vertex). Needed because `Colouring.rankPerm` is noncomputable, so the leaf cannot be emitted through it. | Definition |
+| `Descend.vertexRank_surj` | 84-88 | §Stage-0b On a discrete colouring `vertexRank` is surjective (it underlies the bijection `rankPerm`). | — |
+| `Descend.rankInv_spec` | 90-101 | §Stage-0b `rankInv` really inverts `vertexRank` on a discrete colouring. | — |
+| `Descend.rankInv_eq_symm` | 103-107 | §Stage-0b `rankInv` is the inverse permutation `rankPerm.symm`. | — |
+| `Descend.leafMatrix` | 109-111 | §Stage-0b The leaf matrix: relabel the input by colour-rank. Computable; the descent's output at a discrete node. | Definition |
+| `Descend.leafMatrix_eq_labelledAdj` | 113-118 | §Stage-0b The computable leaf emit EQUALS `labelledAdj (rankPerm …)` — so it is a genuine relabelling. | — |
+| `Descend.leafMatrix_sound` | 120-123 | §Stage-0b ①a at the leaf: the emitted matrix is a relabelling of the input. Base case of `SoundOpt descend`. | — |
+| `Descend.indivOne` | 127-130 | §Stage-0b INDEX-FREE individualization (the X3 cut): mark one vertex with a parity bit on its existing colour, never `v.val`. An index-dependent individualization leaks the labelling into the leaf and cannot be iso-invariant. | Definition |
+| `Descend.indivOne_singleton` | 132-137 | §Stage-0b The individualized vertex becomes a singleton (parity separates it). | — |
+| `Descend.indivOne_refines_off` | 139-144 | §Stage-0b Off the individualized vertex, `indivOne` induces the same partition as the input colouring. | — |
+| `Descend.cellOf` | 148-150 | §Stage-0b The colour class (cell) of a given colour. | Definition |
+| `Descend.nonSingletonColours` | 152-154 | §Stage-0b The branchable colours — those whose cell is not a singleton. | Definition |
+| `Descend.targetColour` | 156-158 | §Stage-0b The EQUIVARIANT target-cell selector: the least non-singleton colour value (a function of the colouring alone; no vertex index is read). `none` exactly when discrete. | Definition |
+| `Descend.branches` | 160-168 | §Stage-0b The branch list — vertices of the target cell. A `List` (not `Finset`: `Finset.toList` is noncomputable), so its ORDER is labelling-dependent; harmless because the aggregate is a permutation-invariant minimum. | Definition |
+| `Descend.mem_branches_iff` | 170-174 | §Stage-0b Membership in the branch list is exactly "carries the target colour". | — |
+| `Descend.branches_ne_nil` | 176-197 | §Stage-0b A non-discrete colouring always has a branchable cell — so the descent can always take a step. Feeds the totality theorem. | — |
+| `Descend.exists_partner_of_mem_branches` | 199-217 | §Stage-0b Every branch vertex sits in a NON-singleton cell (it has a same-coloured partner) — the engine of `ncol_lt_indivOne`, hence of totality. | — |
+| `Descend.Refiner` | 226-227 | §Stage-1 A refinement round with its cost (`CostM`), carried as a PARAMETER so the `Encodable.encode` staller is not baked into the object. | `abbrev` |
+| `Descend.Resolver` | 229-230 | §Stage-1 A branch-narrowing resolver with its cost: narrow the branch list, or defer. Takes the `AdjMatrix` (both instances need the graph). Consume and force are two instances, one per contract route. | `abbrev` |
+| `Descend.refineV` | 232-233 | §Stage-1 The refiner's `value` projection (the `cost` half is what `②` will read). | Definition |
+| `Descend.narrow` | 235-238 | §Stage-1 The NARROWED branch list — the resolver's value, defaulting to the full branch list on defer. The whole resolver contract is stated about this one object. | Definition |
+| `Descend.deferAll` | 240-242 | §Stage-1 The baseline resolver: never narrows. `descend deferAll` is the honest exhaustive-branching object. | Definition |
+| `Descend.narrow_deferAll` | 244-245 | §Stage-1 The baseline resolver narrows to the full branch list (i.e. not at all). | `@[simp]` |
+| `Descend.allPairs` | 249-251 | §Stage-2 All index pairs in row-major order; the basis for `flatten` (and hence for `flatten_injective`). | Definition |
+| `Descend.mem_allPairs` | 253-255 | §Stage-2 Every index pair occurs in `allPairs`. | — |
+| `Descend.flatten` | 257-259 | §Stage-2 Row-major flattening of a labelled matrix, defined over `allPairs` so that injectivity is immediate. | Definition |
+| `Descend.flatten_injective` | 261-263 | §Stage-2 A matrix is determined by its row-major entries. This is what makes `lexLe` a genuine total order, hence the aggregate a well-defined minimum. | — |
+| `Descend.lexLeList` | 265-269 | §Stage-2 Computable lexicographic ≤ on `Nat` lists. | Definition |
+| `Descend.lexLe` | 271-272 | §Stage-2 Computable row-major lexicographic ≤ on labelled matrices. | Definition |
+| `Descend.lexMin?` | 274-280 | §Stage-2 The lex-least matrix of a list (`none` on the empty list). | Definition |
+| `Descend.aggregate` | 282-284 | §Stage-0b Combine branch results: flag if any branch flagged, else take the lex-least leaf. Deterministic — which is all iso-invariance needs (the spec never asks WHICH leaf). | Definition |
+| `Descend.descend` | 298-311 | §Stage-0b THE OBJECT: the computable, resolver-parameterized branching descent, in the cost monad. Correctness (①) is theorems about its `value`, cost (②) about its `cost`, and the executable IS this definition. Fuel is PER-LAYER, never threaded, so each resolver's poly-or-flag behaviour is local. | Definition |
+| `Descend.canonForm?` | 313-315 | §Stage-0b The top-level canonizer object — the `value` projection of `descend`. This is what `SoundOpt`/`IsoInvariantOpt` are proved of and what `Publication.canonForm?` becomes. | Definition |
+| `Descend.descentCost` | 317-320 | §Stage-0b The descent's cost — the `cost` projection of the SAME definition (no separate cost object, no bridge). | Definition |
+| `Descend.descend_val_leaf` | 324-327 | §Stage-2 The descent emits the leaf matrix at any fuel once the colouring is discrete (discreteness is tested BEFORE fuel). | — |
+| `Descend.descend_val_zero` | 329-331 | §Stage-2 Out of fuel on a non-discrete colouring, the descent flags. (A placeholder for the real mutual-stall flag — `canonForm?_ne_none` proves it never actually fires.) | — |
+| `Descend.descend_val_succ` | 333-339 | §Stage-2 The descent's `value` at a branching node: the aggregate over the NARROWED branches. Isolates the value projection once, so every later proof is about `narrow` and nothing else. | — |
+| `Descend.lexMin?_mem` | 346-362 | §Stage-2 The lex-min of a list is a member of it. | — |
+| `Descend.aggregate_mem` | 364-372 | §Stage-2 The aggregate returns one of its inputs — the key to soundness of the branch case. | — |
+| `Descend.lexLeList_refl` | 405-409 | §Stage-2 Reflexivity of list-lex ≤. | — |
+| `Descend.lexLeList_total` | 411-423 | §Stage-2 Totality of list-lex ≤. | — |
+| `Descend.lexLeList_trans` | 425-450 | §Stage-2 Transitivity of list-lex ≤. | — |
+| `Descend.lexLeList_antisymm` | 452-465 | §Stage-2 Antisymmetry of list-lex ≤. | — |
+| `Descend.lexLe_refl` | 467 | §Stage-2 Reflexivity of matrix-lex ≤. | — |
+| `Descend.lexLe_total` | 468 | §Stage-2 Totality of matrix-lex ≤. | — |
+| `Descend.lexLe_trans` | 469-470 | §Stage-2 Transitivity of matrix-lex ≤. | — |
+| `Descend.lexLe_antisymm` | 471-472 | §Stage-2 Antisymmetry of matrix-lex ≤ (via `flatten_injective`). Makes `lexLe` a total order, hence the aggregate a genuine minimum. | — |
+| `Descend.lexMin?_eq_none_iff` | 474-484 | §Stage-2 `lexMin?` flags exactly on the empty list. | — |
+| `Descend.lexMin?_le` | 486-518 | §Stage-2 `lexMin?` really is the minimum: it is ≤ every member. | — |
+| `Descend.lexMin?_perm` | 520-538 | §Stage-2 `lexMin?` is permutation-invariant — it depends only on the multiset of candidates. | — |
+| `Descend.aggregate_perm` | 540-553 | §Stage-2 THE AGGREGATE IS PERMUTATION-INVARIANT. Discharges the obligation created by the index-ordered branch `List`: the labelling-dependent branch order provably never leaks into the output. | — |
+| `Descend.descend_sound` | 374-392 | §Stage-2 ①a for the descent: whenever it answers, the answer is a relabelling. Holds for ANY refinement and ANY resolver — narrowing only removes branches, so a mis-narrowing resolver costs a branch, never correctness. | — |
+| `Descend.soundOpt_canonForm?` | 394-398 | §Stage-2 `SoundOpt` for the top-level object — the `Publication.canon_sound` (①a) obligation, DISCHARGED. | — |
+| `Descend.aggregate_ne_none` | 555-572 | §Stage-2 The aggregate answers whenever the branch list is nonempty and no branch flagged — the step lemma of the totality theorem. | — |
+| `Descend.transportColouring` | 580-582 | §Stage-2 Transport a colouring along a relabelling: χ on G becomes χ∘σ⁻¹ on `relabelAdj σ G`. | Definition |
+| `Descend.discrete_transport` | 584-592 | §Stage-2 Discreteness transports along a relabelling. | — |
+| `Descend.vertexRank_transport` | 594-598 | §Stage-2 The rank of σv under the transported colouring is the rank of v under the original — the reason the σ cancels in the leaf. | — |
+| `Descend.indivOne_transport` | 600-609 | §Stage-2 Individualization commutes with transport. This is where the INDEX-FREE choice pays: an index-dependent individualization would fail this outright. | — |
+| `Descend.cellOf_card_transport` | 611-623 | §Stage-2 Cell sizes are preserved under transport. | — |
+| `Descend.image_transport` | 625-633 | §Stage-2 The set of colour values is preserved under transport. | — |
+| `Descend.targetColour_transport` | 635-642 | §Stage-2 The target colour is the same natural number on both sides — so the branch set transports. | — |
+| `Descend.leafMatrix_transport` | 644-662 | §Stage-2 THE HEART OF ①b: the emitted leaf matrices are LITERALLY EQUAL under relabelling. The σ cancels because the output is indexed by colour-RANKS, not by vertices. | — |
+| `Descend.RefineEquivariant` | 688-691 | §Stage-2 Carried hypothesis on the refinement PARAMETER: the refinement round commutes with relabelling. (The encode-free round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not baked in.) | Definition |
+| `Descend.TransportAt` | 693-697 | §Stage-2 The descent's iso-invariance AT A GIVEN FUEL — the graded induction statement, which the resolver contract is allowed to consume as its induction hypothesis. | Definition |
+| `Descend.NarrowTransport` | 699-716 | §Stage-2 ★ THE RESOLVER CONTRACT: the narrowed-branch aggregate TRANSPORTS under relabelling. Strictly weaker than covering — it does NOT ask narrowing to preserve the aggregate, only to produce the same one on `G` and `σ·G`, which is what lets FORCE change the canonical form instead of having to know the answer. FUEL-GRADED (the IH is threaded in), which is what makes the CONSUME instance provable without circularity. | Definition |
+| `Descend.branchVal_transport` | 718-727 | §Stage-2 The per-branch values agree under transport (`indivOne` equivariance + the refiner's equivariance + the IH). Shared by both contract routes. | — |
+| `Descend.Covering` | 734-739 | §Stage-2 SUFFICIENT CONDITION 1 (the CONSUME route): narrowing does not change the aggregate, because every discarded branch is already reachable through a kept one (a verified path-fixing automorphism). Redundancy, not victory. The choice of representative is genuinely NON-equivariant — which is exactly what covering licenses. ⚠ It is NOT the general contract: see `canonForm?_eq_deferAll_of_covering`. | Definition |
+| `Descend.narrowTransport_of_covering` | 741-748 | §Stage-2 The CONSUME route into the contract: covering ⟹ `NarrowTransport`. | — |
+| `Descend.NarrowEquivariant` | 756-758 | §Stage-2 SUFFICIENT CONDITION 2 (the FORCE route): the narrowing is a structural function of `(adj, χ)` and so transports. The discards are genuinely DIFFERENT and the aggregate CHANGES — consistently — yielding a different but equally valid canonical form. No global lex-min, no knowledge of the answer. Checkable: never break ties by vertex index. | Definition |
+| `Descend.narrowTransport_of_narrowEquivariant` | 760-766 | §Stage-2 The FORCE route into the contract: equivariant narrowing ⟹ `NarrowTransport`. This is what lets the rigid solver enter Lean at all. | — |
+| `Descend.covering_deferAll` | 768-770 | §Stage-2 The baseline resolver never narrows, so it is trivially covering. | — |
+| `Descend.branches_transport_perm` | 664-679 | §Stage-2 The branch list transports UP TO PERMUTATION (it is built in index order) — which is exactly why `aggregate_perm` is needed. | — |
+| `Descend.narrowEquivariant_deferAll` | 772-774 | §Stage-2 The baseline resolver is also trivially equivariant — `deferAll` takes BOTH contract routes. | — |
+| `Descend.narrowTransport_deferAll` | 776-778 | §Stage-2 The exhaustive-branching object satisfies the resolver contract outright, carrying no resolver obligation at all. | — |
+| `Descend.descend_transport` | 782-803 | §Stage-2 ①b/①c: the descent is ISO-INVARIANT. The branch case is EXACTLY the resolver contract — note it needs no refiner hypothesis, so `NarrowTransport` is the whole per-node obligation. | — |
+| `Descend.isoInvariantOpt_canonForm?` | 805-815 | §Stage-2 `IsoInvariantOpt` for the top-level object — ①b and ①c then follow for free via Stage 0a. | — |
+| `Descend.isCanonicalFormOpt_canonForm?` | 817-823 | §Stage-2 ★ THE STAGE-2 CAPSTONE: the descent IS a canonical form (sound ∧ iso-invariant), hence a complete isomorphism invariant with an iso-invariant flag. ①a/①b/①c all discharged for the real object, modulo exactly two carried hypotheses. | — |
+| `Descend.canonForm?_complete` | 825-831 | §Stage-2 The `Publication.canon_complete` (①b) obligation, for the real object. | — |
+| `Descend.canonForm?_flag_iso_invariant` | 833-838 | §Stage-2 The `Publication.flag_iso_invariant` (①c) obligation, for the real object. | — |
+| `Descend.canonForm?_eq_deferAll_of_covering` | 844-868 | §Stage-2 ★★ WHY COVERING WAS TOO STRONG: a COVERING resolver is VALUE-INVISIBLE — it computes exactly the same answer as the exhaustive `deferAll`, changing the cost but never the answer. So demanding covering of every resolver pins the object to the exhaustive branch-min (= the retired `canonMin` anchor), and a FORCE resolver could satisfy it only by already computing that min — i.e. only by KNOWING THE ANSWER. This is the theorem that retired the one-contract design. | — |
+| `Descend.narrow_aut_invariant` | 870-884 | §Stage-2 An EQUIVARIANT narrowing is invariant under every colouring-preserving automorphism (`α·adj = adj`, `α·χ = χ` turn equivariance into `narrow = α · narrow`). | — |
+| `Descend.narrow_eq_branches_of_orbit` | 886-909 | §Stage-2 ★★ THE NON-COLLAPSE THEOREM: an equivariant narrowing CANNOT FIRE on a cell that is a single orbit — a nonempty invariant subset of one orbit is the whole orbit. So FORCE provably cannot fire on a symmetric cell and CONSUME fires exactly there: the two contract routes have COMPLEMENTARY, NON-OVERLAPPING firing domains, and the design does not collapse into GI ∈ P. Graphs where neither fires are the residue. | — |
+| `Descend.ncol` | 919-920 | §Stage-2 The number of colour classes — the descent's progress measure (discrete ⟺ `ncol = n`). | Definition |
+| `Descend.ncol_le` | 922-924 | §Stage-2 There are at most `n` colour classes. | — |
+| `Descend.discrete_of_ncol_eq` | 926-930 | §Stage-2 `n` colour classes ⟹ the colouring is discrete (pigeonhole) — the base case of totality. | — |
+| `Descend.ncol_lt_indivOne` | 932-959 | §Stage-2 Individualizing a branch vertex STRICTLY increases the colour count: it splits a non-singleton cell (the old colour survives on the partner; the new odd colour is fresh by parity). The descent therefore makes progress at every level. | — |
+| `Descend.RefineSplits` | 961-965 | §Stage-2 The refiner genuinely REFINES — it never merges two colour classes. This is what rules out the degenerate constant refiner (which is `RefineEquivariant` by `rfl` and would flag on every graph), so it is the hypothesis that earns NON-VACUITY. | Definition |
+| `Descend.ncol_le_refine` | 967-991 | §Stage-2 A genuinely-refining round never loses colour classes. | — |
+| `Descend.NarrowProper` | 993-997 | §Stage-2 The resolver's narrowing stays inside the branch list and never empties it. Both intended instances satisfy this (consume keeps an orbit representative; force keeps the determined branch). | Definition |
+| `Descend.narrowProper_deferAll` | 999-1000 | §Stage-2 The baseline resolver is proper. | — |
+| `Descend.descend_ne_none` | 1002-1028 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
+| `Descend.canonForm?_ne_none` | 1030-1035 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |

@@ -147,18 +147,33 @@ ring-general; every B-step landed) — its Lean witness (P1–P4) is the remaini
 single deterministic path: `descend` is **the object** — a *computable*, resolver-parameterized **branching** descent in
 the cost monad — and **`isCanonicalFormOpt_canonForm?`** proves it **sound ∧ iso-invariant**, hence a *complete*
 isomorphism invariant with an iso-invariant flag. **①a, ①b, ①c all hold for the real object**, modulo exactly two carried
-hypotheses (`RefineEquivariant`, `Covering`). It **runs** (`#eval`): the executable and the cost are just the `value` /
-`cost` projections of that one definition. Read
-[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) §1 (the object + the branch-**covering**
-contract) before touching it.
+hypotheses (`RefineEquivariant`, **`NarrowTransport`**). It **runs** (`#eval`): the executable and the cost are just the
+`value` / `cost` projections of that one definition. It is also proved **NON-VACUOUS** (**`canonForm?_ne_none`** — the
+object actually *answers*; the capstone alone is satisfied by a degenerate refiner that flags on every graph).
+
+> **★ THE RESOLVER CONTRACT WAS HARDENED (2026-07-13) — the single "branch covering" contract is RETIRED.**
+> **`canonForm?_eq_deferAll_of_covering`** *proves* that a covering resolver is **value-invisible** — it computes exactly
+> the exhaustive branch-min — so a single covering contract silently re-imported the retired **`canonMin`** anchor, and
+> the **rigid solver could have satisfied it only by already knowing the answer.** The contract is now **`NarrowTransport`**
+> (*the narrowed-branch aggregate transports*), fed by **two** routes: **`Covering`** (consume — non-equivariant choice,
+> redundant discards) and **`NarrowEquivariant`** (force — structural choice, genuinely-different discards, yielding a
+> *different but equally valid* canonical form). **`narrow_eq_branches_of_orbit` proves the two routes have complementary
+> firing domains**: equivariant narrowing is *impossible* on an orbit cell, so **force cannot fire on a symmetric cell and
+> consume fires exactly there**. **Graphs where neither fires are the residue** — which is why the design does *not*
+> collapse into GI ∈ P.
+
+Read [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) §1 (the object + the **two-route**
+resolver contract) before touching it.
 
 **The live Lean frontier** (authoritative "what's left" = [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)):
-(1) **② — the cost + the flag** (the main gap): re-base the node bound onto the *branching* object (the old `n⁴` used the
-single-path `nbud = n` and does **not** transfer) and replace `descend`'s fuel placeholder with the real **mutual-stall**
-flag; (2) **instantiate `refine`** with the encode-free round + prove its `RefineEquivariant`; (3) the **resolver
-instances** — consume (`matchOracle` + covering witness) and force (**the rigid seal P1–P4**, IR §11.12); (4) **③**
-(`stalled ⟹ D1 ∨ D2`). Note (3) cannot break ① — the resolvers are only ever *narrowings*, so they shrink the flagged
-residue and nothing else.
+(1) **instantiate `refine`** with the encode-free round + prove its `RefineEquivariant` **and** `RefineSplits` (the latter
+discharges totality for the real refiner); (2) **② — the cost + the flag** (the main gap): re-base the node bound onto the
+*branching* object (the old `n⁴` used the single-path `nbud = n` and does **not** transfer) and replace `descend`'s fuel
+placeholder with the real **mutual-stall** flag; (3) the **resolver instances** — consume (`matchOracle`, the **`Covering`**
+route) and force (the rigid solver, the **`NarrowEquivariant`** route; IR §11.12, re-based); (4) **③**
+(`stalled ⟹ D1 ∨ D2`). Note (3) cannot break ① — but **relocation is not elimination**: a solver that never fires defers ⟹
+branches ⟹ exhausts the budget ⟹ flags, so the rigid seal's **P1/P3 keep their full content, moved from ① to ②** (the
+firing rate) — which is exactly where the "polynomial-**or-flag**" headline lives.
 
 **The one genuine wall.** `hSmallAutThin` — "small-Aut primitive residue ⟹ bounded WL-recovery" — is open at the
 *polynomial* threshold (there it *is* GI ∈ P) and is quarantined behind the mutual-stall flag: by design the canonizer is

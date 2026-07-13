@@ -1227,6 +1227,36 @@ the `target = fallback` line); rigidity is guaranteed there by Phase 1, see §11
 
 **PROVE track (Lean) — the rigid seal.** *New infrastructure: the rigid residue is a NON-schurian coherent configuration,
 so the seal's `AssociationScheme`/`CoherentConfig` machinery does not apply (§11.10 L2).*
+
+> **★★ RE-BASED ONTO THE RESOLVER CONTRACT (2026-07-13) — read before starting P1.** The Lean canonizer is now a
+> **branching descent over resolvers** (`ChainDescent/Descend.lean`; `chain-descent-mixed-composition.md` §1.3), and the
+> rigid solver enters it as a **`force` resolver** taking the **`NarrowEquivariant`** route. This changes what each of
+> P1–P4 *is*, though **not** how much work they are:
+>
+> - **The force resolver's ① (soundness) obligation is EXACTLY ONE THING: its narrowing is a structural function of
+>   `(adj, χ)`** (it transports under relabelling; it never breaks ties by vertex index). That is `NarrowEquivariant`.
+>   It needs **no** covering witness, **no** coset-min-against-a-global-lex-min, and crucially **no knowledge of the
+>   answer** — the forced descent yields a *different but equally valid* canonical form, which is legitimate for the
+>   same reason deferral always was. (The earlier plan routed force's soundness through P1+P2+P3 + verify-by-
+>   reconstruction; under the contract that is unnecessary. In particular **`LinearObstruction` is not a carried
+>   *soundness* hypothesis** — a non-linear residue simply makes the resolver defer.)
+> - **⚠ But the content of P1/P3 does NOT vanish — it RELOCATES from ① to ②.** Deferring more ⟹ more branching ⟹
+>   budget exhaustion ⟹ flag ⟹ the input lands in `UnhandledResidue`. **A solver that is sound but never fires is a
+>   canonizer that flags everything: correct, and worthless.** So P1 (extraction generates the row-space) and P3
+>   (solve / canonical-form correctness) keep their full weight as **firing / ②-side obligations** — they are what
+>   determines *how much rigid residue is actually handled*, which is precisely where the "polynomial-**or-flag**"
+>   headline lives. Re-base them; do not delete them.
+> - **P2** (the WL↔unit-propagation bridge) leaves the *soundness* path entirely; it survives as a **completeness**
+>   statement about which relations the resolver can see.
+> - **★ The force resolver provably cannot fire on a symmetric cell** (`narrow_eq_branches_of_orbit`): an equivariant
+>   narrowing is invariant under the colouring-preserving automorphism group, so on an orbit cell it is forced to keep
+>   the whole cell. Consume fires exactly there. The two have **complementary firing domains** — which is why the
+>   architecture does not collapse into GI ∈ P, and it also means **the "consume-before-force" schedule is an
+>   efficiency concern, never a correctness one.**
+> - **Consequently the recorded dead end "(a) wiring B2 at `target == -1` breaks iso-invariance — use the root"** is an
+>   artifact of the C#'s *emit-and-short-circuit* architecture (B2 replaces the answer with its own φ-form, bypassing
+>   the descent's aggregate), **not a law forbidding a rigid resolver at a deep node.** A *covering-or-equivariant
+>   resolver* at a deep node is fine. Re-examine before porting that constraint into Lean.
 - **P1 Extraction-soundness (L1)** — minimal forcing-circuits generate `rowspace(H)`. Pure F₂/matroid over `ZMod 2`, no
   graph; Mathlib-direct. **Do first** (concrete, standalone). *Ring version (row-MODULE, not a matroid) is harder — keep
   P1 F₂-first as the stepping stone, generalize after.*

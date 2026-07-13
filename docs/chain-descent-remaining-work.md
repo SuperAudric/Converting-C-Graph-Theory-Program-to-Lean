@@ -7,8 +7,10 @@
 > resolver-parameterized **branching** descent written in `CostM` — and proves
 > **`isCanonicalFormOpt_canonForm?`** (sound ∧ iso-invariant ⟹ complete invariant + iso-invariant flag), with
 > `soundOpt_canonForm?` / `canonForm?_complete` / `canonForm?_flag_iso_invariant` in the exact `Publication.lean`
-> shapes. **Modulo exactly two carried hypotheses:** `RefineEquivariant` (the refinement parameter) and `Covering`
-> (the resolver contract). The **executable and the cost are `value`/`cost` projections of that same definition** —
+> shapes. **Modulo exactly two carried hypotheses:** `RefineEquivariant` (the refiner) and **`NarrowTransport`**
+> (the resolver contract — HARDENED 2026-07-13; the old single `Covering` contract is retired, see the trap box).
+> Plus **totality** (`canonForm?_ne_none`: the object actually answers) and the **non-collapse** theorem
+> (`narrow_eq_branches_of_orbit`). The **executable and the cost are `value`/`cost` projections of that same definition** —
 > no second object, no bridge. Object spec + rationale: `chain-descent-mixed-composition.md` §1.
 >
 > **THE FOUR REMAINING PIECES (in dependency order):**
@@ -21,19 +23,41 @@
 > 2. **Instantiate `refine`** with the **encode-free / renumbering round** (cost-model D7 fork ii, `@[csimp]`, never
 >    `@[implemented_by]`) and prove its **`RefineEquivariant`**. `refine` is deliberately a *parameter*, so the
 >    `Encodable.encode` `#eval` staller is **not** baked in; this also makes the executable fast.
-> 3. **Resolver instances (Stage 3).** **consume** = `matchOracle` + a **covering** witness (the C#'s
->    `CoveredByPathFixingAut` is exactly it); **force** = the **rigid seal P1–P4** (IR §11.12; Lean not started, C#
->    `Option2Solver.cs` complete for handoff). **Neither can break ①** — a resolver only ever *narrows*, so it shrinks
->    the flagged residue and nothing else. This is also why a *future* unhandled-residue solver plugs in with **no
->    re-proof of ①**.
+> 3. **Resolver instances (Stage 3) — one per route.** **consume** = `matchOracle` on the **`Covering`** route (the
+>    C#'s `CoveredByPathFixingAut` is exactly the witness); **force** = the rigid solver on the **`NarrowEquivariant`**
+>    route (structural narrowing transports; *no* covering witness, *no* global lex-min, **no knowledge of the
+>    answer**) — IR §11.12, Lean not started, C# `Option2Solver.cs` complete for handoff. **Neither can break ①** ⟹ a
+>    *future* unhandled-residue solver plugs in with **no re-proof of ①**. ⚠ **But relocation is not elimination:** a
+>    solver that extracts/solves too weakly is *sound* yet defers more ⟹ more branching ⟹ budget exhaustion ⟹ flag ⟹
+>    the input lands in `UnhandledResidue`. **A solver that never fires is a canonizer that flags everything: correct,
+>    and worthless.** So the rigid seal's **P1/P3 keep their full content — they move from ① to ②** (the firing rate),
+>    which is exactly where the "poly-*or-flag*" headline lives.
 > 4. **③** — `stalled ⟹ residueHiddenJohnson ∨ residueRigidObstruction` (D1 ∨ D2), plus non-vacuity.
 >
-> **⚠ The one trap:** `Covering` (branch covering) is the resolver's soundness contract — *narrowing does not change
-> the aggregate, because every discarded branch's output is already reachable through a kept one*. It is **redundancy,
-> not victory**. Do **not** restate it as "the discarded branches lose", which presupposes a global lex-min and
-> re-introduces the *which-branch-wins* knowledge the rigid solver cannot have. Note also that resolver
-> **equivariance is deliberately NOT required** — that is precisely what lets `consume` pick an arbitrary orbit
-> representative (a choice that is genuinely non-equivariant).
+> **⚠ THE TRAP, AND THE CORRECTION (2026-07-13).** The resolver contract is **`NarrowTransport`** — *the narrowed-branch
+> aggregate transports under σ* — fed by **TWO** sufficient conditions with **complementary firing domains**
+> (`chain-descent-mixed-composition.md` §1.3):
+> - **`Covering`** → **consume**. Narrowing does not change the aggregate, because every discarded branch is already
+>   reachable through a kept one (a verified path-fixing automorphism). **Redundancy, not victory.** The choice of
+>   representative is genuinely **non**-equivariant — which is exactly what covering licenses.
+> - **`NarrowEquivariant`** → **force**. The narrowing is a structural function of `(adj, χ)`, so it transports. The
+>   discards are genuinely *different*; the aggregate **changes, consistently**, yielding a *different but equally
+>   valid* canonical form. No global lex-min, **no knowledge of the answer**.
+>
+> **⛔ Do NOT re-unify these under `Covering`.** `canonForm?_eq_deferAll_of_covering` (proved, axiom-clean) shows a
+> covering resolver is **value-invisible** — it computes exactly the exhaustive branch-min — so a single covering
+> contract silently re-imports the retired **`canonMin`** anchor, and **force could satisfy it only by already knowing
+> the answer.** (Tell: the only resolver satisfying it was `deferAll`, by `rfl`.)
+>
+> **★ Why this doesn't collapse into GI ∈ P** (`narrow_eq_branches_of_orbit`, proved): equivariant narrowing is
+> **impossible on an orbit cell** (a colouring-preserving automorphism forces `narrow = α·narrow`, and a nonempty
+> invariant subset of one orbit is the whole orbit). So **force cannot fire on a symmetric cell and consume fires
+> exactly there** — non-overlapping domains. **Graphs where neither fires are the residue.**
+>
+> **★ Non-vacuity is EARNED, not assumed** (`canonForm?_ne_none`): the capstone alone is satisfied by a degenerate
+> refiner that flags on *every* graph (the constant refiner is `RefineEquivariant` by `rfl`). A genuinely-refining
+> refiner (`RefineSplits`) + a proper resolver (`NarrowProper`) always reaches a leaf ⟹ fuel exhaustion is a pure
+> depth bound and `none` is free for its real mutual-stall meaning.
 
 > **What this is.** The single, top-level tracker for *what is left* before the seal is unconditional and the
 > canonizer is complete. It collects, in one place: the seal's current **`modulo` set** and what each hypothesis
