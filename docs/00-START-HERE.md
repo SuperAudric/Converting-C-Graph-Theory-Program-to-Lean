@@ -165,15 +165,25 @@ object actually *answers*; the capstone alone is satisfied by a degenerate refin
 Read [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) §1 (the object + the **two-route**
 resolver contract) before touching it.
 
+> **★★ THE REFINER IS INSTANTIATED (2026-07-13, `ChainDescent/Refine.lean`, in `build.sh`, axiom-clean).** The
+> **encode-free structural round** discharges *both* refiner obligations (`refineEquivariant_encodeFree`,
+> `refineSplits_encodeFree`) ⟹ **`Refine.exhaustive_canonizer`: the exhaustive descent is UNCONDITIONALLY a canonical
+> form that ANSWERS — no carried hypotheses at all.** ① is now hypothesis-free except for the resolver's
+> `NarrowTransport`. **Corrected finding:** "renumber the round's output" (cost-model D7 fork ii) is **not** the fix —
+> a *single* `refineStep` at `n = 3` already fails to `#eval`, so the encode must be **dropped entirely**, not
+> compressed. `sigKey` is already a sorted `List Nat` and `lexLeList` is already a proved total order, so the round
+> ranks the **keys themselves**.
+
 **The live Lean frontier** (authoritative "what's left" = [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)):
-(1) **instantiate `refine`** with the encode-free round + prove its `RefineEquivariant` **and** `RefineSplits` (the latter
-discharges totality for the real refiner); (2) **② — the cost + the flag** (the main gap): re-base the node bound onto the
-*branching* object (the old `n⁴` used the single-path `nbud = n` and does **not** transfer) and replace `descend`'s fuel
-placeholder with the real **mutual-stall** flag; (3) the **resolver instances** — consume (`matchOracle`, the **`Covering`**
-route) and force (the rigid solver, the **`NarrowEquivariant`** route; IR §11.12, re-based); (4) **③**
-(`stalled ⟹ D1 ∨ D2`). Note (3) cannot break ① — but **relocation is not elimination**: a solver that never fires defers ⟹
-branches ⟹ exhausts the budget ⟹ flags, so the rigid seal's **P1/P3 keep their full content, moved from ① to ②** (the
-firing rate) — which is exactly where the "polynomial-**or-flag**" headline lives.
+(1) **② — the cost + the flag** (the main gap): re-base the node bound onto the *branching* object (the old `n⁴` used the
+single-path `nbud = n` and does **not** transfer) and replace `descend`'s fuel placeholder with the real **mutual-stall**
+flag; (2) the **resolver instances** — consume (`matchOracle`, the **`Covering`** route) and force (the rigid solver, the
+**`NarrowEquivariant`** route; IR §11.12, re-based); (3) **③** (`stalled ⟹ D1 ∨ D2`). Note (2) cannot break ① — but
+**relocation is not elimination**: a solver that never fires defers ⟹ branches ⟹ exhausts the budget ⟹ flags, so the rigid
+seal's **P1/P3 keep their full content, moved from ① to ②** (the firing rate) — which is exactly where the
+"polynomial-**or-flag**" headline lives. **Open executable item:** the exhaustive descent `#eval`s only to `n = 4` —
+`Colouring n = Fin n → Nat` means each level's colouring is a closure over its parent's and Lean does not reliably share
+the materialised vector; the fix is to thread a `Vector Nat n` through `descend` (a signature change, decide deliberately).
 
 **The one genuine wall.** `hSmallAutThin` — "small-Aut primitive residue ⟹ bounded WL-recovery" — is open at the
 *polynomial* threshold (there it *is* GI ∈ P) and is quarantined behind the mutual-stall flag: by design the canonizer is

@@ -75,11 +75,33 @@
 > `Refiner` and `Resolver` are in **`CostM`** (so `descentCost` charges refinement + resolver work, not just node
 > count — without this ② could not be a theorem about *this* definition, §1.4).
 >
-> **▶ NEXT (in dependency order):** **(1) instantiate `refine`** with the encode-free round + prove its
-> `RefineEquivariant` **and `RefineSplits`**; **(2) Stage 4 — ② cost + the real mutual-stall flag** (the old `n⁴`
-> bound used the single-path `nbud = n` and does **NOT** transfer); **(3) Stage 3 resolver instances** — consume
-> (`matchOracle`, **`Covering`** route) and force (rigid solver, **`NarrowEquivariant`** route); **(4) ③**. Note (3)
-> **cannot break ①** — but it is where the residue actually shrinks (§3 Stage 3).
+> **▶▶ THE REFINER IS INSTANTIATED — ① IS NOW HYPOTHESIS-FREE EXCEPT FOR THE RESOLVER (2026-07-13,
+> `ChainDescent/Refine.lean`, in `build.sh`, axiom-clean, no `sorry`, full build green).** `encodeFree` — the
+> **encode-free structural round** — discharges **both** refiner obligations: **`refineEquivariant_encodeFree`**
+> (the hypothesis all of `①b` was carrying) and **`refineSplits_encodeFree`** (which discharges *totality*). Payoff:
+> **`Refine.exhaustive_canonizer`** — *the exhaustive descent is **unconditionally** a canonical form **and**
+> unconditionally **answers***. **No carried hypotheses whatsoever.** Every resolver added from here only narrows,
+> shrinking the flagged residue, and can never break this.
+>
+> **★ A CORRECTED FINDING — "renumber the round's output" was NOT the fix (cost-model D7).** The old diagnosis was
+> *cross-round compounding* (`encode ∘ encode ∘ …`) with the cure being rank-renumbering the output
+> (`vertexRankNat ∘ refineStep`, the `ScratchRenumber` primitive). **Measured: a SINGLE `refineStep` at `n = 3`
+> already fails to `#eval`** — the `Encodable.encode` *value* is infeasible after **one** round, before any
+> compounding, so renumbering the output cannot help. The real round **drops `Encodable.encode` entirely**: `sigKey`
+> is already a canonically-sorted `List Nat`, and `Descend.lexLeList` is already proved a **total order**, so the
+> round ranks the **keys themselves** and never forms a `Nat` encoding. Colours land in `0..n-1` by construction.
+>
+> **⚠ KNOWN EXECUTABLE LIMIT (proofs unaffected).** The refiner evaluates fine at every depth, but the **exhaustive**
+> descent completes only to `n = 4`. Cause: `Colouring n = Fin n → Nat`, so each level's colouring is a *closure*
+> over its parent's and Lean does not reliably share the materialised vector across levels (`@[noinline]` does not
+> suffice) ⟹ a depth-`d` lookup can re-run the refinement. Easy to miss — a top-level `def` colouring *is* cached, so
+> testing levels in isolation looks fine. **Fix = thread a `Vector Nat n` through `descend` instead of a
+> `Colouring n`** — a signature change to the object, to be decided deliberately.
+>
+> **▶ NEXT (in dependency order):** **(1) Stage 4 — ② cost + the real mutual-stall flag** (the old `n⁴` bound used
+> the single-path `nbud = n` and does **NOT** transfer); **(2) Stage 3 resolver instances** — consume (`matchOracle`,
+> **`Covering`** route) and force (rigid solver, **`NarrowEquivariant`** route); **(3) ③**. Note (2) **cannot break
+> ①** — but it is where the residue actually shrinks (§3 Stage 3).
 
 **The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
 from source (2026-07-10):

@@ -180,6 +180,29 @@ does). So the cost model must either (i) put "colour comparison / encode" on the
 explicitly, or (ii) have the Runtime Phase define the renumbering variant. This is a real design fork, not a
 formality — flagged here and in the brick; decide it when `canonForm?`'s `refineStep` is chosen.
 
+> **★★ D7 FORK RESOLVED — AND ITS DIAGNOSIS CORRECTED (2026-07-13, `ChainDescent/Refine.lean`, in `build.sh`,
+> axiom-clean).** The fork is closed by **(iii): drop `Encodable.encode` ENTIRELY** — an option neither (i) nor (ii)
+> below contemplated.
+>
+> **The old diagnosis was wrong.** Both (i) and (ii) assume the problem is *cross-round compounding*
+> (`encode ∘ encode ∘ …`) and that rank-renumbering the round's **output** (`vertexRankNat ∘ refineStep`, the
+> `ScratchRenumber` primitive) therefore cures it. **Measured: a SINGLE `refineStep` at `n = 3` already fails to
+> `#eval` to completion.** The `Encodable.encode` *value* is infeasible after **one** round, before any compounding —
+> so renumbering the output cannot help, because the encode is still paid once per vertex per round.
+>
+> **The encode-free structural round.** `sigKey` is *already* a canonically-sorted `List Nat`, and
+> `Descend.lexLeList` is *already* proved a **total order** (`lexLeList_{refl,total,trans,antisymm}`). So the round
+> ranks the **keys themselves** under that order and **never forms a `Nat` encoding at all**. Colours land in
+> `0..n-1` by construction (`refineRound_lt`); the partition is unchanged (`sigKey_eq_iff`). This is the **strong**
+> paper claim — no unit-cost declaration is needed for colour ops, because there is no encode to declare away.
+> `refineEquivariant_encodeFree` + `refineSplits_encodeFree` discharge both of `descend`'s refiner obligations.
+>
+> **No `@[implemented_by]`** (it can assert a false equation ⟹ `#eval` could lie): the runnable version is tied to
+> the reasoned-about one by a **proved equation**, `warmRefineMat_eq`.
+>
+> *(The (i)/(ii) analysis below is retained for provenance. (i) remains a valid fallback; (ii) is superseded — it
+> does not actually fix the executable.)*
+
 **★ D7 fork scoping (2026-07-07) — renumbering (ii) is the better target and is only *moderately* harder than the
 declaration (i), because rank-compression is order-preserving.** Costs of each:
 - **(i) declare colour-ops unit-cost** — *zero* Lean work (add one D7 list entry; the existing

@@ -20,9 +20,24 @@
 >    (cost-model STATUS; mixed-composition Stage 4). Replace `descend`'s `fuel`-exhaustion `none` (a **placeholder**)
 >    with the real **mutual-stall** flag. **Fuel is per-layer, never threaded** ⟹ each resolver is poly-or-flag
 >    *locally* (do not "optimize" this into a global budget — it would couple the resolvers' flag behaviour).
-> 2. **Instantiate `refine`** with the **encode-free / renumbering round** (cost-model D7 fork ii, `@[csimp]`, never
->    `@[implemented_by]`) and prove its **`RefineEquivariant`**. `refine` is deliberately a *parameter*, so the
->    `Encodable.encode` `#eval` staller is **not** baked in; this also makes the executable fast.
+> 2. **Instantiate `refine`** — **✅ DONE (2026-07-13, `ChainDescent/Refine.lean`, in `build.sh`, axiom-clean).**
+>    `encodeFree` discharges **both** obligations: `refineEquivariant_encodeFree` (the hypothesis all of `①b` was
+>    carrying) and `refineSplits_encodeFree` (which discharges *totality*). ⟹ **`Refine.exhaustive_canonizer`: the
+>    exhaustive descent is UNCONDITIONALLY a canonical form that ANSWERS — no carried hypotheses at all.** ① is now
+>    hypothesis-free except for the resolver's `NarrowTransport`.
+>    - **★ CORRECTED FINDING (supersedes cost-model D7 fork ii).** "Renumber the round's output"
+>      (`vertexRankNat ∘ refineStep`, the `ScratchRenumber` primitive) is **NOT** the fix. **Measured: a SINGLE
+>      `refineStep` at `n = 3` already fails to `#eval`** — the `Encodable.encode` *value* is infeasible after **one**
+>      round, before any cross-round compounding. The real round **drops `Encodable.encode` entirely**: `sigKey` is
+>      already a canonically-sorted `List Nat` and `Descend.lexLeList` is already a proved **total order**, so the
+>      round ranks the **keys themselves**; colours land in `0..n-1` by construction. No `@[implemented_by]` — the
+>      fast version is tied to the slow one by a *proved equation* (`warmRefineMat_eq`).
+>    - **⚠ KNOWN EXECUTABLE LIMIT (proofs unaffected).** The exhaustive descent `#eval`s only to `n = 4`:
+>      `Colouring n = Fin n → Nat`, so each level's colouring is a *closure* over its parent's and Lean does not
+>      reliably share the materialised vector across levels (`@[noinline]` does not suffice) ⟹ a depth-`d` lookup can
+>      re-run the refinement. (Easy to miss: a top-level `def` colouring **is** cached, so testing levels in isolation
+>      looks fine.) **Fix = thread a `Vector Nat n` through `descend` instead of a `Colouring n`** — a signature
+>      change to the object, to be decided deliberately.
 > 3. **Resolver instances (Stage 3) — one per route.** **consume** = `matchOracle` on the **`Covering`** route (the
 >    C#'s `CoveredByPathFixingAut` is exactly the witness); **force** = the rigid solver on the **`NarrowEquivariant`**
 >    route (structural narrowing transports; *no* covering witness, *no* global lex-min, **no knowledge of the

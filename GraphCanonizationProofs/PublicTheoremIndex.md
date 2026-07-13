@@ -2860,3 +2860,43 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Descend.narrowProper_deferAll` | 999-1000 | §Stage-2 The baseline resolver is proper. | — |
 | `Descend.descend_ne_none` | 1002-1028 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
 | `Descend.canonForm?_ne_none` | 1030-1035 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
+## ChainDescent/Refine.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Refine.rankNat_strict_mono` | 69-81 | §1 `vertexRankNat` is strictly monotone in the colour value. | — |
+| `Refine.vertexRankNat_eq_iff` | 83-96 | §1 Rank compression preserves the partition: two vertices share a rank iff they share a colour. This is why renumbering a colouring is canonical — same fibres, same order. | — |
+| `Refine.vertexRankNat_transport` | 98-117 | §1 Rank compression transports along a relabelling (the rank counts strictly-smaller vertices, and a permutation is a bijection of that set). | — |
+| `Refine.constP` | 133-135 | §2 The constant pair-matrix. The descent's refiner sees only `(adj, χ)`, and a constant `P` transports trivially — so the `PMatrix` layer contributes no obligation. | Definition |
+| `Refine.keyOf` | 137-139 | §2 The refinement KEY of a vertex: its old colour followed by its sorted signature. Already a `List Nat` — no `Encodable.encode` is ever formed. | Definition |
+| `Refine.keyLt` | 141-142 | §2 Strict lexicographic order on refinement keys, computable — built on `Descend.lexLeList`, which is already proved a total order. | Definition |
+| `Refine.keyLt_irrefl` | 144-145 | §2 Irreflexivity of the strict key order. | — |
+| `Refine.keyLt_trans` | 147-153 | §2 Transitivity of the strict key order. | — |
+| `Refine.keyLt_of_ne` | 155-165 | §2 Distinct keys are strictly comparable — the totality half of the order, which is what makes the rank well-defined. | — |
+| `Refine.refineRound` | 167-170 | **★ THE ENCODE-FREE ROUND.** Recolour each vertex by the RANK OF ITS KEY among all keys. No `Encodable.encode` anywhere — colours land in `0..n-1` by construction. This is the round `descend`'s `refine` parameter was left open for. | Definition |
+| `Refine.refineRound_lt` | 172-185 | §2 Colours never blow up (`< n`) — the whole point of the encode-free fork. | — |
+| `Refine.refineRound_strict_mono` | 187-200 | §2 The round's colour is strictly monotone in the key. | — |
+| `Refine.refineRound_eq_iff` | 202-213 | §2 The round has the same partition as the key: equal rank ⟺ equal key. | — |
+| `Refine.refineRound_splits` | 215-219 | §2 **The round only REFINES** — it never merges two colour classes. The per-round half of `RefineSplits`, hence of totality. | — |
+| `Refine.keyOf_transport` | 221-230 | §2 The refinement key transports along a relabelling (rides `sigKey_transport_iso`; the `PMatrix` hypothesis is `rfl` because `constP` is constant). | — |
+| `Refine.refineRound_equivariant` | 232-260 | §2 **The round is EQUIVARIANT** — it commutes with relabelling. The per-round half of `RefineEquivariant`, hence of ①b. | — |
+| `Refine.warmRefineR` | 264-266 | §3 Encode-free warm refinement: `n` encode-free rounds. The colouring the descent actually uses. | Definition |
+| `Refine.iterate_splits` | 268-277 | §3 Iterating the round still only refines — lifts `refineRound_splits` through the `n` rounds. | — |
+| `Refine.iterate_equivariant` | 279-289 | §3 Iterating the round preserves equivariance — lifts `refineRound_equivariant` through the `n` rounds. | — |
+| `Refine.encodeFree` | 291-294 | **★ THE REFINER.** The encode-free warm round packaged as `descend`'s `Refiner`, carrying the cost model's own refinement cost. This is the instance the object's `refine` parameter was left open for. | Definition |
+| `Refine.refineV_encodeFree` | 296-297 | §3 The refiner's value projection is `warmRefineR` (definitional). | `@[simp]` |
+| `Refine.refineEquivariant_encodeFree` | 299-305 | **★ OBLIGATION 1 DISCHARGED.** The refiner is EQUIVARIANT — this is the hypothesis all of `①b` (`isoInvariantOpt_canonForm?`) had been carrying. | — |
+| `Refine.refineSplits_encodeFree` | 307-311 | **★ OBLIGATION 2 DISCHARGED.** The refiner genuinely REFINES — this is what makes the descent TOTAL (`canonForm?_ne_none`), i.e. the flag is never a fuel artefact. | — |
+| `Refine.roundVec` | 326-331 | §4 One encode-free round on MATERIALISED data: every vertex's key is computed once (otherwise `sigKey`, and with it the whole signature multiset, is rebuilt `n²` times per round). | Definition |
+| `Refine.roundVec_get` | 333-335 | §4 The materialised round agrees pointwise with `refineRound`. | — |
+| `Refine.roundVec_ofFn` | 337-342 | §4 The materialised round agrees with `refineRound` as a whole vector — the step lemma for `iterate_roundVec`. | — |
+| `Refine.fromVec` | 344-345 | §4 View a materialised vector as a colouring. **`@[noinline]` is load-bearing** — see `warmRefineMat`. | Definition, `@[noinline]` |
+| `Refine.warmRefineMat` | 347-358 | §4 **The runnable warm round** — `n` rounds iterated on strict `Vector` data. The vector is passed as an ARGUMENT (Lean is call-by-value) so it is forced once rather than rebuilt per lookup; a `let`-in-lambda does NOT memoise. | Definition, `@[noinline]` |
+| `Refine.iterate_roundVec` | 360-369 | §4 Iterating the materialised round agrees with iterating `refineRound`. | — |
+| `Refine.warmRefineMat_eq` | 371-377 | §4 **The runnable version computes exactly the reasoned-about one.** The proved equation that replaces `@[implemented_by]` — so every theorem transfers and `#eval` cannot lie. | — |
+| `Refine.encodeFreeFast` | 379-382 | §4 The runnable refiner — value-equal to `encodeFree`, so it inherits every theorem; only the evaluation strategy differs. This is the one to `#eval`. | Definition |
+| `Refine.encodeFreeFast_eq` | 384-387 | §4 The runnable refiner equals the reasoned-about one. | — |
+| `Refine.refineEquivariant_encodeFreeFast` | 389-390 | §4 The runnable refiner is equivariant (transferred from `encodeFree`). | — |
+| `Refine.refineSplits_encodeFreeFast` | 392-393 | §4 The runnable refiner genuinely refines (transferred from `encodeFree`). | — |
+| `Refine.isCanonicalFormOpt_encodeFree` | 401-405 | §5 The canonizer on the encode-free refiner, modulo ONLY the resolver contract (`NarrowTransport`) — the refiner side of `①` is fully discharged. | — |
+| `Refine.exhaustive_canonizer` | 407-417 | **★★ THE EXHAUSTIVE CANONIZER IS UNCONDITIONALLY A CANONICAL FORM THAT ANSWERS.** No carried hypotheses whatsoever: `①a`/`①b`/`①c` hold AND the descent never flags. The non-vacuity anchor for the whole track — every resolver added from here only narrows, so it shrinks the flagged residue and can never break this. | — |
