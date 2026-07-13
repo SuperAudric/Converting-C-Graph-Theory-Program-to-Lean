@@ -259,8 +259,16 @@ narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov
 `descend (cov b) = descend b`) — §1.3. Consume and force are two *instances*, not two constructors. Reuse:
 `Phase2Handoff.Phase2.Solver`/`Sound`/`IsoInvariant` (`Phase2Handoff.lean:74-86`) is the shape to generalize.
 
-**Stage 2 — the ONE hard theorem: `descend` is Sound ∧ IsoInvariant (★, substrate ○). — IN PROGRESS 2026-07-13:
-`SoundOpt` DONE; the transport layer for `IsoInvariantOpt` DONE; the perm-invariance + assembly REMAIN.**
+**Stage 2 — the ONE hard theorem: `descend` is Sound ∧ IsoInvariant (★, substrate ○). — ✅ DONE (2026-07-13,
+`Descend.lean`, in `build.sh`, axiom-clean, no `sorry`, full build green).**
+
+> **★★★ CAPSTONE: `isCanonicalFormOpt_canonForm?` — the descent IS a canonical form.** Sound ∧ iso-invariant, hence
+> (Stage 0a) a *complete* isomorphism invariant with an iso-invariant flag. **`①a`, `①b`, `①c` are all discharged for
+> the real object**, modulo exactly **two carried hypotheses**: `RefineEquivariant` (the refinement parameter) and
+> `Covering` (the resolver contract). Corollaries in the `Publication.lean` shapes:
+> **`soundOpt_canonForm?`** (= `canon_sound`), **`canonForm?_complete`** (= `canon_complete`),
+> **`canonForm?_flag_iso_invariant`** (= `flag_iso_invariant`). `covering_deferAll` is proved by `rfl`, so the
+> exhaustive-branching object satisfies the whole thing with **no resolver obligation at all**.
 
 **★★ LANDED (2026-07-13, `Descend.lean`, axiom-clean, build green):**
 - **`soundOpt_canonForm?` = `①a` DISCHARGED on the real object** (via `descend_sound`, induction on fuel;
@@ -283,11 +291,16 @@ narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov
   **`RefineEquivariant`** (the parameter's obligation) and **`Covering`** (the resolver contract, §1.3), with
   `covering_deferAll` proved (`rfl`) ⟹ the exhaustive-branching object carries **no** resolver obligation.
 
-**REMAINING for Stage 2 (the next increment):** (i) **`aggregate` is permutation-invariant** — `branches (χ∘σ⁻¹)` is
-a *permutation* of `(branches χ).map σ` (the list is built in index order), so the aggregate must depend only on the
-multiset; it does, being a minimum under a total order (needs `lexLe` total/antisymmetric). (ii) assemble
-`descend_transport` (induction on fuel, using the lemmas above + the two hypotheses) ⟹ **`IsoInvariantOpt`** ⟹ ①b/①c
-free via Stage 0a.
+**★ Both remaining items CLOSED (2026-07-13):**
+- **(i) `aggregate_perm` — the aggregate is PERMUTATION-INVARIANT.** The obligation created by `branches` being an
+  index-ordered `List` (forced: `Finset.toList` is noncomputable). Discharged by making `lexLe` a genuine **total
+  order**: `flatten` was restructured over an explicit `allPairs` list so **`flatten_injective`** is a one-liner, then
+  `lexLeList_{refl,total,trans,antisymm}` ⟹ `lexLe_antisymm` ⟹ `lexMin?_le` + `lexMin?_perm` ⟹ `aggregate_perm`. So
+  the labelling-dependent branch *order* provably never leaks into the output.
+- **(ii) `descend_transport`** — induction on fuel. Leaf case: the emitted matrices are *literally equal*
+  (`leafMatrix_transport`). Branch case: **covering** rewrites each side to its FULL-branch aggregate;
+  `branches_transport_perm` makes the two full lists permutation-related; `indivOne_transport` + `RefineEquivariant`
+  + the IH make the per-branch values agree pointwise; `aggregate_perm` closes it. ⟹ **`isoInvariantOpt_canonForm?`**.
 
 *(Original plan, still the shape:)* By induction over the descent (well-founded on undiscretized vertices):
 - **Sound** (easy): leaves are `labelledAdj (rankPerm χ) G`; the aggregate of relabellings is a relabelling;

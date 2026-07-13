@@ -199,9 +199,24 @@ keep the definition **computable**.
 minimum under a total order, so it depends only on the multiset of results. That lemma is part of proving
 `IsoInvariantOpt`. -/
 
-/-- Row-major flattening of a labelled matrix. -/
+/-- All index pairs, in row-major order. -/
+def allPairs (n : Nat) : List (Fin n × Fin n) :=
+  (List.finRange n).flatMap (fun i => (List.finRange n).map (fun j => (i, j)))
+
+theorem mem_allPairs (p : Fin n × Fin n) : p ∈ allPairs n := by
+  refine List.mem_flatMap.mpr ⟨p.1, List.mem_finRange _, ?_⟩
+  exact List.mem_map.mpr ⟨p.2, List.mem_finRange _, rfl⟩
+
+/-- Row-major flattening of a labelled matrix. Defined over `allPairs` so that **injectivity is immediate**
+(equal flattenings agree at every index pair) — which is what makes `lexLe` a genuine *total order* and hence
+the aggregate a well-defined minimum. -/
 def flatten (M : Labelled n) : List Nat :=
-  (List.finRange n).flatMap (fun i => (List.finRange n).map (fun j => M i j))
+  (allPairs n).map (fun p => M p.1 p.2)
+
+/-- **`flatten` is injective** — a matrix is determined by its row-major entries. -/
+theorem flatten_injective {M N : Labelled n} (h : flatten M = flatten N) : M = N := by
+  funext i j
+  exact List.map_inj_left.mp h (i, j) (mem_allPairs (i, j))
 
 /-- Lexicographic `≤` on `Nat` lists (computable, total). -/
 def lexLeList : List Nat → List Nat → Bool
@@ -305,6 +320,182 @@ theorem aggregate_mem {rs : List (Option (Labelled n))} {c : Labelled n}
     have hmem := lexMin?_mem _ h
     obtain ⟨a, ha, hfa⟩ := List.mem_filterMap.mp hmem
     exact hfa ▸ ha
+
+/-! ### `lexLe` is a total order, so `aggregate` is a genuine minimum — hence PERMUTATION-INVARIANT
+
+This is the obligation flagged when `branches` had to become a `List` (`Finset.toList` is noncomputable): the
+branch list is built in *index* order, so under a relabelling it is only a **permutation** of the transported
+list. The aggregate must therefore depend on the *multiset* alone. It does — it is a minimum under a total
+order — and that is what the next four lemmas establish. -/
+
+theorem lexLeList_refl : ∀ a : List Nat, lexLeList a a = true
+  | [] => rfl
+  | a :: as => by
+      show (if a < a then true else if a < a then false else lexLeList as as) = true
+      simp [lexLeList_refl as]
+
+theorem lexLeList_total : ∀ a b : List Nat, lexLeList a b = true ∨ lexLeList b a = true
+  | [], _ => Or.inl rfl
+  | _ :: _, [] => Or.inr rfl
+  | a :: as, b :: bs => by
+      show (if a < b then true else if b < a then false else lexLeList as bs) = true ∨
+           (if b < a then true else if a < b then false else lexLeList bs as) = true
+      rcases lt_trichotomy a b with h | h | h
+      · exact Or.inl (by simp [h])
+      · subst h
+        rcases lexLeList_total as bs with hh | hh
+        · exact Or.inl (by simp [hh])
+        · exact Or.inr (by simp [hh])
+      · exact Or.inr (by simp [h, Nat.not_lt_of_gt h])
+
+theorem lexLeList_trans : ∀ a b c : List Nat,
+    lexLeList a b = true → lexLeList b c = true → lexLeList a c = true
+  | [], _, _, _, _ => rfl
+  | _ :: _, [], _, hab, _ => by simp [lexLeList] at hab
+  | _ :: _, _ :: _, [], _, hbc => by simp [lexLeList] at hbc
+  | a :: as, b :: bs, c :: cs, hab, hbc => by
+      show (if a < c then true else if c < a then false else lexLeList as cs) = true
+      have hab' : (if a < b then true else if b < a then false else lexLeList as bs) = true := hab
+      have hbc' : (if b < c then true else if c < b then false else lexLeList bs cs) = true := hbc
+      rcases lt_trichotomy a b with h1 | h1 | h1
+      · -- a < b
+        rcases lt_trichotomy b c with h2 | h2 | h2
+        · exact by simp [lt_trans h1 h2]
+        · subst h2; exact by simp [h1]
+        · -- c < b, and a < b: need a vs c
+          rcases lt_trichotomy a c with h3 | h3 | h3
+          · exact by simp [h3]
+          · subst h3; simp [h2, Nat.not_lt_of_gt h2] at hbc'
+          · simp [h2, Nat.not_lt_of_gt h2] at hbc'
+      · -- a = b
+        subst h1
+        simp [lt_irrefl] at hab'
+        rcases lt_trichotomy a c with h3 | h3 | h3
+        · exact by simp [h3]
+        · subst h3
+          simp [lt_irrefl] at hbc' ⊢
+          exact lexLeList_trans as bs cs hab' hbc'
+        · simp [h3, Nat.not_lt_of_gt h3] at hbc'
+      · -- b < a: then hab' is false
+        simp [h1, Nat.not_lt_of_gt h1] at hab'
+
+theorem lexLeList_antisymm : ∀ a b : List Nat,
+    lexLeList a b = true → lexLeList b a = true → a = b
+  | [], [], _, _ => rfl
+  | [], _ :: _, _, hba => by simp [lexLeList] at hba
+  | _ :: _, [], hab, _ => by simp [lexLeList] at hab
+  | a :: as, b :: bs, hab, hba => by
+      have hab' : (if a < b then true else if b < a then false else lexLeList as bs) = true := hab
+      have hba' : (if b < a then true else if a < b then false else lexLeList bs as) = true := hba
+      rcases lt_trichotomy a b with h | h | h
+      · simp [h, Nat.not_lt_of_gt h] at hba'
+      · subst h
+        simp [lt_irrefl] at hab' hba'
+        rw [lexLeList_antisymm as bs hab' hba']
+      · simp [h, Nat.not_lt_of_gt h] at hab'
+
+theorem lexLe_refl (M : Labelled n) : lexLe M M = true := lexLeList_refl _
+theorem lexLe_total (M N : Labelled n) : lexLe M N = true ∨ lexLe N M = true :=
+  lexLeList_total _ _
+theorem lexLe_trans {M N P : Labelled n} (h1 : lexLe M N = true) (h2 : lexLe N P = true) :
+    lexLe M P = true := lexLeList_trans _ _ _ h1 h2
+theorem lexLe_antisymm {M N : Labelled n} (h1 : lexLe M N = true) (h2 : lexLe N M = true) :
+    M = N := flatten_injective (lexLeList_antisymm _ _ h1 h2)
+
+/-- `lexMin?` flags exactly on the empty list. -/
+theorem lexMin?_eq_none_iff (l : List (Labelled n)) : lexMin? l = none ↔ l = [] := by
+  cases l with
+  | nil => simp [lexMin?]
+  | cons M Ms =>
+      constructor
+      · intro h
+        unfold lexMin? at h
+        cases hM : lexMin? Ms with
+        | none => rw [hM] at h; exact absurd h (by simp)
+        | some N => rw [hM] at h; exact absurd h (by simp)
+      · intro h; exact absurd h (by simp)
+
+/-- **`lexMin?` really is the minimum**: it is `≤` every member. -/
+theorem lexMin?_le : ∀ (l : List (Labelled n)) (m : Labelled n), lexMin? l = some m →
+    ∀ x ∈ l, lexLe m x = true := by
+  intro l
+  induction l with
+  | nil => intro m h; exact absurd h (by simp [lexMin?])
+  | cons M Ms ih =>
+      intro m h x hx
+      unfold lexMin? at h
+      cases hM : lexMin? Ms with
+      | none =>
+          rw [hM] at h
+          have hm : M = m := Option.some.inj h
+          have hMs : Ms = [] := (lexMin?_eq_none_iff Ms).mp hM
+          subst hMs
+          have hxM : x = M := by simpa using hx
+          subst hxM
+          exact hm ▸ lexLe_refl _
+      | some N =>
+          rw [hM] at h
+          have hm : (if lexLe M N then M else N) = m := Option.some.inj h
+          have hNle : ∀ y ∈ Ms, lexLe N y = true := ih N hM
+          rcases List.mem_cons.mp hx with hx | hx
+          · rw [hx]
+            by_cases hle : lexLe M N = true
+            · rw [if_pos hle] at hm
+              rw [← hm]
+              exact lexLe_refl M
+            · rw [if_neg hle] at hm
+              rw [← hm]
+              rcases lexLe_total M N with h1 | h1
+              · exact absurd h1 hle
+              · exact h1
+          · by_cases hle : lexLe M N = true
+            · rw [if_pos hle] at hm
+              rw [← hm]
+              exact lexLe_trans hle (hNle x hx)
+            · rw [if_neg hle] at hm
+              rw [← hm]
+              exact hNle x hx
+
+/-- **`lexMin?` is permutation-invariant** — it depends only on the multiset of candidates. (Two minima are each
+`≤` the other, hence equal by antisymmetry.) -/
+theorem lexMin?_perm {l l' : List (Labelled n)} (h : l.Perm l') : lexMin? l = lexMin? l' := by
+  cases hl : lexMin? l with
+  | none =>
+      have hlnil : l = [] := (lexMin?_eq_none_iff l).mp hl
+      have hl'nil : l' = [] := by rw [hlnil] at h; exact h.nil_eq.symm
+      rw [hl'nil]
+      rfl
+  | some m =>
+      cases hl' : lexMin? l' with
+      | none =>
+          exfalso
+          have hl'nil : l' = [] := (lexMin?_eq_none_iff l').mp hl'
+          have hlnil : l = [] := by rw [hl'nil] at h; exact h.eq_nil
+          rw [hlnil] at hl
+          exact absurd hl (by simp [lexMin?])
+      | some m' =>
+          have hm_mem : m ∈ l := lexMin?_mem l hl
+          have hm'_mem : m' ∈ l' := lexMin?_mem l' hl'
+          have h1 : lexLe m m' = true := lexMin?_le l m hl m' (h.mem_iff.mpr hm'_mem)
+          have h2 : lexLe m' m = true := lexMin?_le l' m' hl' m (h.mem_iff.mp hm_mem)
+          rw [lexLe_antisymm h1 h2]
+
+/-- **THE AGGREGATE IS PERMUTATION-INVARIANT.** The obligation created by using an index-ordered `List` of
+branches: the aggregate depends only on the *multiset* of branch results, so the labelling-dependent order of
+the branch list never leaks into the output. -/
+theorem aggregate_perm {rs rs' : List (Option (Labelled n))} (h : rs.Perm rs') :
+    aggregate rs = aggregate rs' := by
+  have hany : rs.any Option.isNone = rs'.any Option.isNone := by
+    apply Bool.eq_iff_iff.mpr
+    simp only [List.any_eq_true]
+    constructor
+    · rintro ⟨x, hx, hp⟩; exact ⟨x, h.mem_iff.mp hx, hp⟩
+    · rintro ⟨x, hx, hp⟩; exact ⟨x, h.mem_iff.mpr hx, hp⟩
+  unfold aggregate
+  by_cases hcase : rs'.any Option.isNone = true
+  · rw [if_pos hcase, if_pos (hany.trans hcase)]
+  · rw [if_neg hcase, if_neg (by rw [hany]; exact hcase)]
+    exact lexMin?_perm (h.filterMap id)
 
 /-- **`①a` for the descent** — whenever it answers, the answer is a relabelling of the input. Holds for **any**
 `refine` and **any** resolver `R`. -/
@@ -480,6 +671,107 @@ theorem covering_deferAll (refine : AdjMatrix n → Colouring n → Colouring n)
     Covering (n := n) refine deferAll := by
   intro adj fuel χ
   rfl
+
+/-! ## 10. Stage 2d — `IsoInvariantOpt descend` (the capstone) -/
+
+/-- **The branch list transports UP TO PERMUTATION.** `branches` is built in `Fin n` *index* order, so the
+transported branch list is a permutation of the `σ`-image — not equal to it. This is exactly why `aggregate`
+had to be proved permutation-invariant. -/
+theorem branches_transport_perm (σ : Equiv.Perm (Fin n)) (χ : Colouring n) :
+    (branches (transportColouring σ χ)).Perm ((branches χ).map σ) := by
+  unfold branches
+  rw [targetColour_transport σ χ]
+  cases hc : targetColour χ with
+  | none => simp
+  | some c =>
+      refine List.perm_of_nodup_nodup_toFinset_eq
+        ((List.nodup_finRange n).filter _) (((List.nodup_finRange n).filter _).map σ.injective) ?_
+      ext u
+      simp only [List.mem_toFinset, List.mem_filter, List.mem_map, List.mem_finRange,
+        transportColouring, true_and, decide_eq_true_eq]
+      constructor
+      · intro hu
+        exact ⟨σ.symm u, hu, by simp⟩
+      · rintro ⟨v, hv, rfl⟩
+        simpa using hv
+
+/-- **`①b`/`①c` — the descent is ISO-INVARIANT.** Relabelling the input leaves the output (and the flag)
+unchanged. The two carried hypotheses are `RefineEquivariant` (the refinement parameter) and `Covering` (the
+resolver contract). **No resolver equivariance is needed** — covering lets each side be rewritten to its FULL
+branch aggregate, and the full branch list is a function of the colouring alone. -/
+theorem descend_transport {refine : AdjMatrix n → Colouring n → Colouring n} {R : Resolver n}
+    (hre : RefineEquivariant refine) (hcov : Covering refine R)
+    (adj : AdjMatrix n) (σ : Equiv.Perm (Fin n)) :
+    ∀ (fuel : Nat) (χ : Colouring n),
+      (descend refine R (relabelAdj σ adj) fuel (transportColouring σ χ)).1
+        = (descend refine R adj fuel χ).1 := by
+  intro fuel
+  induction fuel with
+  | zero => intro χ; rfl
+  | succ fuel ih =>
+      intro χ
+      rw [descend, descend]
+      by_cases hd : Discrete χ
+      · -- both sides are leaves, and the emitted matrices are LITERALLY EQUAL
+        rw [dif_pos ((discrete_transport σ χ).mpr hd), dif_pos hd]
+        simp only
+        rw [leafMatrix_transport σ adj χ hd]
+      · rw [dif_neg (fun hc => hd ((discrete_transport σ χ).mp hc)), dif_neg hd]
+        simp only [List.map_map, Function.comp_def]
+        -- COVERING: rewrite each side to its FULL-branch aggregate.
+        rw [hcov (relabelAdj σ adj) fuel (transportColouring σ χ), hcov adj fuel χ]
+        -- The per-branch values agree under transport (indivOne + refine equivariance + IH).
+        have hfun : ∀ v : Fin n,
+            (descend refine R (relabelAdj σ adj) fuel
+                (refine (relabelAdj σ adj) (indivOne (transportColouring σ χ) (σ v)))).1
+              = (descend refine R adj fuel (refine adj (indivOne χ v))).1 := by
+          intro v
+          rw [indivOne_transport σ χ v, hre σ adj (indivOne χ v)]
+          exact ih (refine adj (indivOne χ v))
+        -- The FULL branch lists are permutation-related, and the values match pointwise.
+        refine aggregate_perm (((branches_transport_perm σ χ).map _).trans ?_)
+        rw [List.map_map]
+        exact List.Perm.of_eq (List.map_congr_left (fun v _ => hfun v))
+
+/-- **`IsoInvariantOpt` for the top-level object** — `Publication.canon_complete` (①b) and
+`Publication.flag_iso_invariant` (①c) now follow for FREE via Stage 0a's `complete_of_isCanonicalFormOpt` /
+`flag_iso_invariant_of_isoInvariantOpt`. -/
+theorem isoInvariantOpt_canonForm? {refine : AdjMatrix n → Colouring n → Colouring n} {R : Resolver n}
+    (hre : RefineEquivariant refine) (hcov : Covering refine R) :
+    CanonSpec.IsoInvariantOpt (canonForm? (n := n) refine R) := by
+  intro σ adj
+  show (descend refine R (relabelAdj σ adj) n (refine (relabelAdj σ adj) (fun _ => 0))).1
+      = (descend refine R adj n (refine adj (fun _ => 0))).1
+  have h0 : refine (relabelAdj σ adj) (fun _ => 0)
+      = transportColouring σ (refine adj (fun _ => 0)) := by
+    have := hre σ adj (fun _ => 0)
+    simpa [transportColouring] using this
+  rw [h0]
+  exact descend_transport hre hcov adj σ n (refine adj (fun _ => 0))
+
+/-- **★ THE STAGE-2 CAPSTONE — `descend` IS A CANONICAL FORM.** Sound ∧ iso-invariant, hence (Stage 0a) a
+*complete* isomorphism invariant with an iso-invariant flag: `①a`, `①b`, `①c` all discharged for the real
+object, modulo exactly two carried hypotheses — the refinement parameter's equivariance and the resolver's
+**covering** contract. -/
+theorem isCanonicalFormOpt_canonForm? {refine : AdjMatrix n → Colouring n → Colouring n}
+    {R : Resolver n} (hre : RefineEquivariant refine) (hcov : Covering refine R) :
+    CanonSpec.IsCanonicalFormOpt (canonForm? (n := n) refine R) :=
+  ⟨soundOpt_canonForm? refine R, isoInvariantOpt_canonForm? hre hcov⟩
+
+/-- **Completeness, free.** The `Publication.canon_complete` obligation, for the real object. -/
+theorem canonForm?_complete {refine : AdjMatrix n → Colouring n → Colouring n} {R : Resolver n}
+    (hre : RefineEquivariant refine) (hcov : Covering refine R)
+    (G H : AdjMatrix n) (cG cH : Labelled n)
+    (hG : canonForm? refine R G = some cG) (hH : canonForm? refine R H = some cH) :
+    CanonSpec.GraphIso G H ↔ cG = cH :=
+  CanonSpec.complete_of_isCanonicalFormOpt (isCanonicalFormOpt_canonForm? hre hcov) G H cG cH hG hH
+
+/-- **The flag is iso-invariant, free.** The `Publication.flag_iso_invariant` obligation. -/
+theorem canonForm?_flag_iso_invariant {refine : AdjMatrix n → Colouring n → Colouring n}
+    {R : Resolver n} (hre : RefineEquivariant refine) (hcov : Covering refine R)
+    {G H : AdjMatrix n} (h : CanonSpec.GraphIso G H) :
+    canonForm? refine R G = none ↔ canonForm? refine R H = none :=
+  CanonSpec.flag_iso_invariant_of_isoInvariantOpt (isoInvariantOpt_canonForm? hre hcov) h
 
 end Descend
 end ChainDescent
