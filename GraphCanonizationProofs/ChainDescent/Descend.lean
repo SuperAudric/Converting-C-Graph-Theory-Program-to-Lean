@@ -234,7 +234,14 @@ meaning.
 Cost is carried *with* the value (`CostM`), so `②` is a theorem about this same definition's `cost` and the
 executable is the definition itself — no second object, no bridge (§1.4). -/
 
-/-- **The descent.** `refine` is the (parameterized) refinement round; `R` the branch-narrowing resolver. -/
+/-- **The descent.** `refine` is the (parameterized) refinement round; `R` the branch-narrowing resolver.
+
+**FUEL IS PER-LAYER, NOT A THREADED BUDGET (design commitment).** Every branch at a level receives the *same*
+`fuel`, and the accumulated `cost` is summed but **never fed back into `fuel`**. There is therefore no shared
+budget that an earlier (expensive) resolver could drain, causing a later *polynomial* resolver to flag through
+no fault of its own. Consequence: **"resolver `R` never returns `none` on class `X`" is a LOCAL statement about
+`R`** — each resolver is poly-or-flag on its own, independently of what ran above it. Do not "optimize" this
+into a threaded global budget; it would couple the resolvers' flag behaviour and destroy that locality. -/
 def descend (refine : AdjMatrix n → Colouring n → Colouring n) (R : Resolver n)
     (adj : AdjMatrix n) : Nat → Colouring n → CostM (Option (Labelled n))
   | 0, _ => (none, 1)
@@ -259,6 +266,220 @@ def canonForm? (refine : AdjMatrix n → Colouring n → Colouring n) (R : Resol
 def descentCost (refine : AdjMatrix n → Colouring n → Colouring n) (R : Resolver n)
     (adj : AdjMatrix n) : Nat :=
   (descend refine R adj n (refine adj (fun _ => 0))).2
+
+/-! ## 7. Stage 2a — `SoundOpt descend`
+
+Soundness by induction on `fuel`. The leaf case is `leafMatrix_sound`; the branch case needs only that the
+aggregate returns *one of its inputs* (`aggregate_mem`), so the emitted matrix is some branch's matrix, which
+by the IH is a relabelling. Note the resolver is entirely unconstrained here: narrowing can only *remove*
+branches, and every surviving branch is still a relabelling — **soundness holds for ANY resolver**, which is
+why a mis-narrowing resolver costs a branch and never correctness. -/
+
+/-- The lex-min of a list is a member of it. -/
+theorem lexMin?_mem : ∀ (l : List (Labelled n)) {c : Labelled n}, lexMin? l = some c → c ∈ l
+  | [], c, h => by simp [lexMin?] at h
+  | M :: Ms, c, h => by
+      unfold lexMin? at h
+      cases hM : lexMin? Ms with
+      | none =>
+          rw [hM] at h
+          have hMc : M = c := Option.some.inj h
+          exact hMc ▸ List.mem_cons_self
+      | some N =>
+          rw [hM] at h
+          have hc : (if lexLe M N then M else N) = c := Option.some.inj h
+          by_cases hle : lexLe M N = true
+          · rw [if_pos hle] at hc
+            exact hc ▸ List.mem_cons_self
+          · rw [if_neg hle] at hc
+            exact List.mem_cons_of_mem _ (hc ▸ lexMin?_mem Ms hM)
+
+/-- **The aggregate returns one of its inputs.** (It flags iff some input flagged; otherwise it is the lex-min
+of the answers, hence one of them.) -/
+theorem aggregate_mem {rs : List (Option (Labelled n))} {c : Labelled n}
+    (h : aggregate rs = some c) : some c ∈ rs := by
+  unfold aggregate at h
+  by_cases hany : rs.any Option.isNone = true
+  · rw [if_pos hany] at h; exact absurd h (by simp)
+  · rw [if_neg hany] at h
+    have hmem := lexMin?_mem _ h
+    obtain ⟨a, ha, hfa⟩ := List.mem_filterMap.mp hmem
+    exact hfa ▸ ha
+
+/-- **`①a` for the descent** — whenever it answers, the answer is a relabelling of the input. Holds for **any**
+`refine` and **any** resolver `R`. -/
+theorem descend_sound (refine : AdjMatrix n → Colouring n → Colouring n) (R : Resolver n)
+    (adj : AdjMatrix n) :
+    ∀ (fuel : Nat) (χ : Colouring n) (c : Labelled n),
+      (descend refine R adj fuel χ).1 = some c → ∃ π : Equiv.Perm (Fin n), c = labelledAdj π adj := by
+  intro fuel
+  induction fuel with
+  | zero => intro χ c h; simp [descend] at h
+  | succ fuel ih =>
+      intro χ c h
+      rw [descend] at h
+      by_cases hd : Discrete χ
+      · rw [dif_pos hd] at h
+        have hc : leafMatrix adj χ = c := Option.some.inj h
+        exact hc ▸ leafMatrix_sound adj χ hd
+      · rw [dif_neg hd] at h
+        simp only at h
+        have hmem := aggregate_mem h
+        obtain ⟨x, hx, hx1⟩ := List.mem_map.mp hmem
+        obtain ⟨v, _, hv⟩ := List.mem_map.mp hx
+        exact ih (refine adj (indivOne χ v)) c (by rw [← hv] at hx1; exact hx1)
+
+/-- **`SoundOpt` for the top-level object** — the `Publication.canon_sound` obligation, discharged. -/
+theorem soundOpt_canonForm? (refine : AdjMatrix n → Colouring n → Colouring n) (R : Resolver n) :
+    CanonSpec.SoundOpt (canonForm? (n := n) refine R) := by
+  intro adj c h
+  exact descend_sound refine R adj n _ c h
+
+/-! ## 8. Stage 2b — the transport lemmas (the road to `IsoInvariantOpt`)
+
+The plan (`docs/chain-descent-mixed-composition.md` Stage 2). Write `G' = relabelAdj σ G` and transport a
+colouring `χ` on `G` to `χ ∘ σ⁻¹` on `G'` (vertex `σ v` of `G'` plays the role of `v` of `G`). Then **every
+piece of the descent transports**, and the payoff is that the emitted matrices are *literally equal*:
+
+  `leafMatrix G' (χ ∘ σ⁻¹) = leafMatrix G χ`
+
+The `σ` cancels because the output is indexed by **ranks**, not by vertices. That single fact is the heart of
+`①b`. -/
+
+/-- Transported colouring: `χ` on `G` becomes `χ ∘ σ⁻¹` on `relabelAdj σ G`. -/
+def transportColouring (σ : Equiv.Perm (Fin n)) (χ : Colouring n) : Colouring n :=
+  fun u => χ (σ.symm u)
+
+/-- **Discreteness transports.** -/
+theorem discrete_transport (σ : Equiv.Perm (Fin n)) (χ : Colouring n) :
+    Discrete (transportColouring σ χ) ↔ Discrete χ := by
+  constructor
+  · intro h i j hij
+    have := h (σ i) (σ j) (by simp [transportColouring, hij])
+    exact σ.injective this
+  · intro h i j hij
+    unfold transportColouring at hij
+    have := h _ _ hij
+    exact σ.symm.injective this
+
+/-- **Vertex rank transports**: the rank of `σ v` under `χ ∘ σ⁻¹` is the rank of `v` under `χ`. -/
+theorem vertexRank_transport (σ : Equiv.Perm (Fin n)) (χ : Colouring n) (v : Fin n) :
+    Colouring.vertexRank (transportColouring σ χ) (σ v) = Colouring.vertexRank χ v := by
+  have h : transportColouring σ χ = fun u => χ (σ.symm u) := rfl
+  rw [h]
+  have := vertexRank_comp χ σ.symm (σ v)
+  simpa using this
+
+/-- **`indivOne` transports**: individualizing `σ v` in the transported colouring is the transport of
+individualizing `v`. (This is where the *index-free* choice pays: an index-dependent individualization would
+NOT satisfy this.) -/
+theorem indivOne_transport (σ : Equiv.Perm (Fin n)) (χ : Colouring n) (v : Fin n) :
+    indivOne (transportColouring σ χ) (σ v) = transportColouring σ (indivOne χ v) := by
+  funext u
+  show (if u = σ v then 2 * χ (σ.symm u) + 1 else 2 * χ (σ.symm u))
+      = (if σ.symm u = v then 2 * χ (σ.symm u) + 1 else 2 * χ (σ.symm u))
+  by_cases h : u = σ v
+  · rw [if_pos h, if_pos (by rw [h]; simp)]
+  · rw [if_neg h, if_neg (fun hc => h (by rw [← hc]; simp))]
+
+/-- **Cells transport** (as cardinalities): the class of colour `c` in the transported colouring is the
+`σ`-image of the class in `χ`, so it has the same size. -/
+theorem cellOf_card_transport (σ : Equiv.Perm (Fin n)) (χ : Colouring n) (c : Nat) :
+    (cellOf (transportColouring σ χ) c).card = (cellOf χ c).card := by
+  unfold cellOf transportColouring
+  apply Finset.card_bij (fun v _ => σ.symm v)
+  · intro a ha
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ha ⊢
+    exact ha
+  · intro a ha b hb hab
+    exact σ.symm.injective hab
+  · intro b hb
+    refine ⟨σ b, ?_, by simp⟩
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hb ⊢
+    simpa using hb
+
+/-- **The colour value-set transports.** -/
+theorem image_transport (σ : Equiv.Perm (Fin n)) (χ : Colouring n) :
+    Finset.univ.image (transportColouring σ χ) = Finset.univ.image χ := by
+  unfold transportColouring
+  apply Finset.ext
+  intro c
+  simp only [Finset.mem_image, Finset.mem_univ, true_and]
+  constructor
+  · rintro ⟨u, hu⟩; exact ⟨σ.symm u, hu⟩
+  · rintro ⟨v, hv⟩; exact ⟨σ v, by simpa using hv⟩
+
+/-- **The target colour transports** — it is the same natural number on both sides. (Hence the branch *set*
+transports, which is what makes the aggregate comparable.) -/
+theorem targetColour_transport (σ : Equiv.Perm (Fin n)) (χ : Colouring n) :
+    targetColour (transportColouring σ χ) = targetColour χ := by
+  unfold targetColour nonSingletonColours
+  rw [image_transport σ χ]
+  congr 1
+  apply Finset.filter_congr
+  intro c _
+  rw [cellOf_card_transport σ χ c]
+
+/-- **The leaf matrix is LITERALLY EQUAL under transport** — the heart of `①b`. The `σ` cancels because the
+output matrix is indexed by colour-*ranks*, not by vertices. -/
+theorem leafMatrix_transport (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (h : Discrete χ) :
+    leafMatrix (relabelAdj σ adj) (transportColouring σ χ) = leafMatrix adj χ := by
+  have hd' : Discrete (transportColouring σ χ) := (discrete_transport σ χ).mpr h
+  -- `rankInv` of the transported colouring is the σ-image of `rankInv`.
+  have hrank : ∀ i, rankInv (transportColouring σ χ) i = σ (rankInv χ i) := by
+    intro i
+    have hσ : Colouring.vertexRank (transportColouring σ χ) (σ (rankInv χ i)) = i := by
+      rw [vertexRank_transport σ χ (rankInv χ i)]
+      exact rankInv_spec χ h i
+    have hinj : Function.Injective (Colouring.vertexRank (transportColouring σ χ)) := by
+      intro a b hab
+      exact (Colouring.rankPerm (transportColouring σ χ) hd').injective hab
+    exact hinj (by rw [rankInv_spec (transportColouring σ χ) hd' i, hσ])
+  funext i j
+  show (relabelAdj σ adj).adj (rankInv (transportColouring σ χ) i)
+        (rankInv (transportColouring σ χ) j) = adj.adj (rankInv χ i) (rankInv χ j)
+  rw [hrank i, hrank j]
+  show adj.adj (σ.symm (σ (rankInv χ i))) (σ.symm (σ (rankInv χ j))) = _
+  simp
+
+/-! ## 9. Stage 2c — the two carried hypotheses, and what remains for `IsoInvariantOpt`
+
+`IsoInvariantOpt descend` needs exactly two hypotheses plus one combinatorial lemma.
+
+**★ A structural discovery worth recording: resolver EQUIVARIANCE is NOT needed.** One might expect to have to
+assume the resolver narrows "the same way" on `G` and `σ·G`. It does not: **covering** says
+`aggregate (narrowed) = aggregate (full)` on *each* side, so both sides can be rewritten to their **full**-branch
+aggregates — and the full branch list is a function of the colouring alone, hence transports. The resolver is
+therefore free to narrow *differently* on `G` and `σ·G` with no loss. This is what licenses **consume**'s
+"pick any orbit representative", whose choice is genuinely *not* equivariant (all orbit members look alike to
+refinement) — only its *result* is, exactly because the discarded branches are covered. -/
+
+/-- **Hypothesis on the refinement parameter: equivariance.** The refinement round must commute with
+relabelling. (The encode-free round satisfies this; the obligation is carried here because `refine` is a
+parameter — see §1.4 bake-in 2.) -/
+def RefineEquivariant (refine : AdjMatrix n → Colouring n → Colouring n) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n),
+    refine (relabelAdj σ adj) (transportColouring σ χ)
+      = transportColouring σ (refine adj χ)
+
+/-- **Hypothesis on the resolver: BRANCH COVERING** (`docs/chain-descent-mixed-composition.md` §1.3).
+Narrowing the branch list does not change the aggregate — because every discarded branch's output is *already
+reachable* through a kept one. Stated exactly where it is used, so it references the descent's own values and
+needs **no knowledge of the final answer**. `deferAll` satisfies it trivially (it never narrows). -/
+def Covering (refine : AdjMatrix n → Colouring n → Colouring n) (R : Resolver n) : Prop :=
+  ∀ (adj : AdjMatrix n) (fuel : Nat) (χ : Colouring n),
+    aggregate (((R χ (branches χ)).getD (branches χ)).map
+        (fun v => (descend refine R adj fuel (refine adj (indivOne χ v))).1))
+      = aggregate ((branches χ).map
+        (fun v => (descend refine R adj fuel (refine adj (indivOne χ v))).1))
+
+/-- The baseline resolver never narrows, so it is trivially **covering**. Hence `descend deferAll` — the honest
+exhaustive-branching object — carries no resolver obligation at all. -/
+theorem covering_deferAll (refine : AdjMatrix n → Colouring n → Colouring n) :
+    Covering (n := n) refine deferAll := by
+  intro adj fuel χ
+  rfl
 
 end Descend
 end ChainDescent

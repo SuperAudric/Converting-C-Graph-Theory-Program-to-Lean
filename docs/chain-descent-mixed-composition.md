@@ -259,8 +259,37 @@ narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov
 `descend (cov b) = descend b`) — §1.3. Consume and force are two *instances*, not two constructors. Reuse:
 `Phase2Handoff.Phase2.Solver`/`Sound`/`IsoInvariant` (`Phase2Handoff.lean:74-86`) is the shape to generalize.
 
-**Stage 2 — the ONE hard theorem: `descend` is Sound ∧ IsoInvariant (★, substrate ○).** By induction over the
-descent (well-founded on undiscretized vertices):
+**Stage 2 — the ONE hard theorem: `descend` is Sound ∧ IsoInvariant (★, substrate ○). — IN PROGRESS 2026-07-13:
+`SoundOpt` DONE; the transport layer for `IsoInvariantOpt` DONE; the perm-invariance + assembly REMAIN.**
+
+**★★ LANDED (2026-07-13, `Descend.lean`, axiom-clean, build green):**
+- **`soundOpt_canonForm?` = `①a` DISCHARGED on the real object** (via `descend_sound`, induction on fuel;
+  `aggregate_mem` + `lexMin?_mem`). Note it holds for **ANY `refine` and ANY resolver** — narrowing only *removes*
+  branches and every survivor is still a relabelling. **This is why a mis-narrowing resolver costs a branch and
+  never correctness.**
+- **The transport layer** (the road to `①b`): `transportColouring σ χ := χ ∘ σ⁻¹` and
+  `discrete_transport` · `vertexRank_transport` · **`indivOne_transport`** · `cellOf_card_transport` ·
+  `image_transport` · `targetColour_transport` · **`leafMatrix_transport`**.
+- **★ THE HEART OF `①b`, PROVED: `leafMatrix (relabelAdj σ G) (χ∘σ⁻¹) = leafMatrix G χ` — the emitted matrices are
+  LITERALLY EQUAL, not merely correspondent.** The `σ` cancels because the output is indexed by colour-**ranks**, not
+  by vertices. (`indivOne_transport` is where the *index-free* individualization pays: an index-dependent one would
+  fail this outright.)
+- **★★ STRUCTURAL DISCOVERY — resolver EQUIVARIANCE is NOT needed, only COVERING.** Covering gives
+  `aggregate(narrowed) = aggregate(full)` on *each* side, so both rewrite to their **full**-branch aggregates, and the
+  full branch list is a function of the colouring alone ⟹ transports. **The resolver may narrow differently on `G`
+  and `σ·G` with no loss.** This is precisely what licenses **consume**'s "pick any orbit representative" — a choice
+  that is genuinely *not* equivariant (orbit members are indistinguishable to refinement); only its *result* is,
+  because the discarded branches are covered. The two carried hypotheses are now stated:
+  **`RefineEquivariant`** (the parameter's obligation) and **`Covering`** (the resolver contract, §1.3), with
+  `covering_deferAll` proved (`rfl`) ⟹ the exhaustive-branching object carries **no** resolver obligation.
+
+**REMAINING for Stage 2 (the next increment):** (i) **`aggregate` is permutation-invariant** — `branches (χ∘σ⁻¹)` is
+a *permutation* of `(branches χ).map σ` (the list is built in index order), so the aggregate must depend only on the
+multiset; it does, being a minimum under a total order (needs `lexLe` total/antisymmetric). (ii) assemble
+`descend_transport` (induction on fuel, using the lemmas above + the two hypotheses) ⟹ **`IsoInvariantOpt`** ⟹ ①b/①c
+free via Stage 0a.
+
+*(Original plan, still the shape:)* By induction over the descent (well-founded on undiscretized vertices):
 - **Sound** (easy): leaves are `labelledAdj (rankPerm χ) G`; the aggregate of relabellings is a relabelling;
   narrowing keeps leaves as leaves.
 - **IsoInvariant** (the real work): `selCell` is equivariant ⟹ the **branch list transports**; each resolver is
