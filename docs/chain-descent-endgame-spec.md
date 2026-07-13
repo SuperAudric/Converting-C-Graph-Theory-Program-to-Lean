@@ -287,14 +287,16 @@ non-empty residual; "residual empty" is the optimistic case (= closing the share
 
 ### Runtime Phase — the Lean runtime and cost model (the biggest conceptual leap)
 Builds the objects `Publication.lean` currently stubs `opaque`, and the bridge that makes ② true:
-- **Define `canonForm?` = the MIXED composition `phase2 ∘ phase1`** — scoped in
-  **[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md)** (the priority track, 2026-07-10).
-  **Correction to the old note:** the existing `defaultSpineChain`/`SpineChain.canonAdj` model is a **single
-  deterministic path with no branching, no oracle, no consume/defer** (source-verified) — it is only the
-  all-symmetric pole and cannot represent a mixed residue. The real target is the **min-over-leaves spec
-  `canonMin`** factored as consume (Phase 1) → solve (Phase 2, the rigid solver); Stage 0 builds the branching
-  spec, which also makes ①b/①c nearly free (the current single-path `canonForm?` is *not* iso-invariant — the X3
-  cut). See the mixed-composition doc §1, §5.
+- **Define `canonForm?` = ONE computable `CostM` descent, parameterized over `Resolver`s** — scoped in
+  **[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md)** §1 (the priority track; object
+  revised 2026-07-13). The existing `defaultSpineChain`/`SpineChain.canonAdj` model is a **single deterministic path
+  with no branching, no oracle, no consume/defer** (source-verified) — only the all-symmetric pole.
+  **The `canonMin` (min-over-all-leaves) target is RETIRED:** the spec is **`Sound ∧ IsoInvariant`, full stop**
+  (completeness + flag-invariance are then free via `complete_of_isCanonicalForm`), and the descent **defines** the
+  canonical form rather than searching for a pre-existing global lex-min. Consume and force are unified by one
+  **branch-covering** contract (a discarded branch's output is already reachable through a kept one — so force needs
+  no knowledge of the answer). **The executable and the cost are PROJECTIONS of that same definition** (`value` /
+  `cost`), not separate objects — the cost model's own D1 decision. ①b/①c reduce to a single induction (Stage 2).
 - **Define `cost`** and the **cost model** — the operation-count of the descent (# nodes × per-node work) as a
   `ℕ`, with an explicit polynomial bound `costConst · n^costDeg`. **Granularity is a decision to make early**
   (operation-count proxy, each step separately poly-size). *This piece is a candidate to split into its own
@@ -410,11 +412,14 @@ fusion and is now the verify-gated consume step *inside* the interleaved engine 
 mixed-composition Lean track plus the rigid seal, which run in parallel (the composition proceeds with `phase2` abstract):
 
 1. **Build the interleaved/branching descent in Lean (mixed-composition, the priority track).**
-   [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md), **Stage 0b next** — model the
-   consume/force/defer branching descent so `canonForm?` rides the real object and its reached-leaf set instantiates
-   `cand G` in Stage 0a's `isCanonicalForm_lexMin`. Discharge the two hypotheses: each reached leaf is a relabelling
-   (easy) and the **X3 iso-invariance** `cand (relabelAdj σ G) = cand G` (the one real obligation; Stage 0a made ①b/①c
-   free given it). Then Stage 1 (consume-soundness) → Stage 2 (composition = a **fold over alternation depth**).
+   [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) §1 + Stages 0–2. **Stage 0a's
+   `Option`-lift** (small) → **Stage 0b**: define `descend : AdjMatrix n → CostM (Option Matrix)` — computable, over
+   the **encode-free `refineStep`** (lock this now; it is definitional and it is what makes the executable a free
+   projection), parameterized over a list of `Resolver`s (computable `decide`, `Prop` fields for equivariance +
+   **covering**). → **Stage 2, the one hard theorem**: `descend` is **`Sound ∧ IsoInvariant`**, by induction over the
+   descent (`selCell` equivariant ⟹ the branch list transports; resolvers equivariant; leaf absorbs σ via `rankPerm`).
+   ①b/①c are then **free**. The resolver *instances* (consume, force) do not gate this — the descent is proved against
+   the **contract**, which is also what lets a future solver shrink the residue with no re-proof.
 2. **Build the rigid seal (Algorithm R, IR §11.12 roadmap)** — the `Phase2.Solver` witness that Stage 3 plugs in. Lean
    **P1** first (extraction soundness, standalone F₂/matroid) alongside the (already-built) C# solver; then P3 (the
    Smith solve + canonical-form iso-invariance) + P4 (the capstone `canonizesRigidResidue_or_flags`, isolating

@@ -28,9 +28,19 @@
 > `isCanonicalForm_lexMin`: a lex-min over a candidate family is a canonical form given (i) every candidate is a
 > relabelling (`sound_lexMin`) and (ii) **`cand (relabelAdj σ G) = cand G`** (`isoInvariant_lexMin`) — the honest
 > iso-invariance obligation, surfaced as candidate-**set** equality (NOT "cand = all of Perm"; for deferral it
-> holds because a reached leaf's matrix is a function of the σ-invariant abstract refinement). **NEXT (Stage 0
-> cont. → Stage 1):** instantiate `cand G` = the reached-leaf matrices of the consume/branch descent, and begin
-> discharging (i)+(ii); the branching descent model itself is the remaining Stage-0 build.
+> holds because a reached leaf's matrix is a function of the σ-invariant abstract refinement) — a valid but, as of
+> **2026-07-13, OPTIONAL** technique.
+>
+> **▶▶ OBJECT REVISED (2026-07-13) — read §1 before building; this supersedes the `cand`/`lexMin` NEXT above.** The
+> `canonMin` / reified-candidate-set route is **retired**: the spec is **`Sound ∧ IsoInvariant`, full stop**
+> (completeness free, flag-invariance free), and the descent **defines** the canonical form rather than searching for a
+> pre-existing global lex-min — chasing *which* leaf it reaches, just to prove it always reaches the same one, is a
+> rabbit hole. The object is **ONE computable `CostM` descent parameterized over a list of `Resolver`s**, with consume
+> and force unified by a single **branch-covering** contract (narrowing is sound because discarded branches are
+> *redundant*, not because they *lose* — which is exactly what lets force be proved **without knowing the answer**).
+> The **executable is a projection** of that same definition, not a separate track. `complete_of_isCanonicalForm` is
+> construction-agnostic and survives untouched. **NEXT:** Stage 0a's `Option`-lift → **Stage 0b** (define `descend`)
+> → **Stage 2** (`Sound ∧ IsoInvariant` by induction = the one hard theorem).
 
 **The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
 from source (2026-07-10):
@@ -54,44 +64,109 @@ to be wired in here.**
 
 ---
 
-## 1. The target — the min-over-leaves spec, factored through two phases
+## 1. The target — the object and its spec (REVISED 2026-07-13)
 
-**Adopt the textbook spec as the correctness anchor** (a strategic shift the mixed/branching setting makes
-natural — see §5):
+> **⚠ The `canonMin` (min-over-all-leaves) anchor is RETIRED.** The earlier target was "prove
+> `canonizer adj = canonMin adj`", i.e. show the descent computes the global lex-min over the full IR tree.
+> That is the wrong target twice over: (a) it is **not the spec** — deferral fixes each leaf's numbering, so the
+> descent produces a *different but still iso-invariant* form, which is all correctness needs; and (b) it forces
+> every pruning argument to be stated against a **pre-existing "true" answer**, which reintroduces the exponential
+> reference object and, for the rigid solver, the very "which branch wins" knowledge we cannot have. See §1.3.
+
+### 1.1 The spec — Sound ∧ IsoInvariant, and nothing else
+
+The canonizer's theorem is `C G = C H ↔ Iso G H`, and that needs exactly two things:
+
+- **(←) Sound** — the output is a relabelling of the input: `C G = some c → ∃ π, c = labelledAdj π G`.
+- **(→) IsoInvariant** — `C (relabelAdj σ G) = C G`.
+- **the flag** — `none ⟺ every resolver stalled`. Since each resolver is equivariant, "all stalled" is
+  equivariant, so **①c (flag iso-invariance) is free**.
+
+Completeness then follows with **no further work** from Stage 0a's `complete_of_isCanonicalForm`
+(`Sound ∧ IsoInvariant ⟹ complete`), which is **construction-agnostic** — it never asks *which* leaf you land on.
+**The descent DEFINES the canonical form; it does not search for a pre-existing one.** Do not reify a candidate
+set and do not chase "which answer" in order to prove "always the same answer".
+
+*(Consequence: the `lexMin`/`isCanonicalForm_lexMin` combinator of Stage 0a is a valid but **optional** technique,
+not the route. A deterministic `List` min under `MatrixLex` still appears **inside** the definition to aggregate
+deferred branches — but it is definitional, generates no separate proof obligation, and must be computable (see §1.4).)*
+
+### 1.2 The object — ONE computable descent, parameterized over resolvers
 
 ```
-canonMin adj  :=  min over all discrete leaves ℓ of the IR tree  of  labelledAdj (π_ℓ) adj
+descend : AdjMatrix n → CostM (Option Matrix)          -- one definition
 ```
 
-the IR tree branching on every non-singleton cell over all representatives. `canonMin` is **iso-invariant and
-complete BY CONSTRUCTION** (a relabelling permutes the leaf set; the min is unchanged), and obviously
-exponential. The entire algorithm is: *compute `canonMin` without enumerating all leaves.* Two moves do that,
-and they are exactly the two phases:
+At each node: refine, pick the target cell (equivariant selector `selCell`), form the branch list `B` over the
+cell's representatives, then ask the resolvers. A resolver may **narrow** `B` to a nonempty `B' ⊆ B`; if none
+narrows, the node **defers** — branch over all of `B` and aggregate. Leaves emit `labelledAdj (rankPerm χ) G`.
+The run flags (`none`) at **mutual stall**.
 
-- **Phase 1 — consume (prune orbit-related branches).** Sibling branches related by an automorphism (the
-  selected cell is one orbit) contribute the **same** value to the min, so all but one representative are
-  pruned. Sound because `labelledAdj` is Aut-invariant on an orbit. Output: the **rigid residue** — the
-  sub-tree whose remaining branches are all *real* decisions.
-- **Phase 2 — solve (min over the rigid residue's leaves).** The rigid solver (Algorithm R,
-  `chain-descent-ir-blindspot-solver.md` §11) computes that min in poly time for a **linear-over-ring**
-  residue (multipede/CFI/`Z_{2^k}`), or flags (`residueRigidObstruction`).
+### 1.3 The `Resolver` contract — consume and force are ONE thing: **branch covering**
 
-**The mixed-handling theorem is the equality `canonizer adj = canonMin adj` (or a flag), factored as
-`phase2 ∘ phase1`.** Phase 1's pruning preserves the min (consume-soundness); Phase 2 computes the residue's
-min; the composition equals `canonMin`. This is the object the whole track builds toward.
+Consume and force perform the *same operation* (shrink the branch set) for *different reasons*, and the reason is
+where the earlier framing went wrong. Stating soundness as "the discarded branches lose under the aggregate"
+presupposes the aggregate-over-all-branches is the answer (= `canonMin`) and needs the answer to know which branch
+is kept. The correct statement is **redundancy, not victory**:
 
-> **Refinement (2026-07-11): the factorization is an *alternating fixpoint*, not a single two-phase split.**
-> Because almost every residue is *fused* (a real decision hides a symmetry, or vice-versa), Phase 1 and Phase 2
-> **interleave** — `… ∘ phase2 ∘ phase1 ∘ phase2 ∘ phase1 …`, resolving **one pairwise relation at a time**, the
-> rigid solve's kernel feeding *de-fused* symmetry back into Phase-1 consumption
-> (`chain-descent-ir-blindspot-solver.md` §11.11 engine + STATUS). This is **stronger** than `phase2 ∘ phase1`
-> and does **not** disturb Stage 0: `complete_of_isCanonicalForm` is construction-agnostic, so `Sound ∧
-> IsoInvariant ⟹ Complete` covers the fixpoint unchanged (it only constrains `cand G`, not how it is produced).
-> It does reshape **Stage 2** (below): the composition lemma becomes a **fold of `coversOrbits_append` over the
-> interleaving steps** — an induction on alternation depth — not one append. The operative correctness condition
-> is **local rigidity at the relation being forced** (a consume-before-force schedule); soundness + iso-invariance
-> come from per-step verification + `cl_up` confluence, so a bad schedule costs only an unnecessary-but-sound
-> branch, never correctness. A single `phase2 ∘ phase1` append is the *fusion-free special case*.
+> **Resolver soundness = BRANCH COVERING.** `decide node = some B'` requires `B' ⊆ B` nonempty **and** a map
+> `cov : B \ B' → B'` with `descend (cov b) = descend b` for every discarded `b`.
+>
+> **Resolver equivariance.** `decide` commutes with relabelling.
+
+Every output reachable through a discarded branch is *already reachable through a kept one*, so
+`aggregate (B'.map descend) = aggregate (B.map descend)` holds because the **value sets are equal** — for **any**
+deterministic aggregator, with no reference to which branch wins and **no knowledge of the final answer**.
+
+| resolver | narrows to | `cov` witnessed by |
+|---|---|---|
+| **consume** (oracle) | one orbit representative | a **verified path-fixing automorphism** ⟹ the discarded subproblem is isomorphic to the kept one ⟹ equal `descend` values (via `descend`'s own iso-invariance — a well-founded mutual induction, descending on undiscretized vertices). This is exactly the C#'s `CoveredByPathFixingAut`. |
+| **force** (rigid solver) | the determined choice / the swept frame set | the **solve's determinacy**: a discarded individualization yields a labelling already produced by a kept frame. This is the rigid seal's **P3** (coset-min canonicity) — an existing obligation, not a new one. |
+| **defer** | `B' = B` (no-op) | trivial |
+
+"Structural ⟹ always discards the same branch" is then a **consequence**, not an assumption: the covering map is
+structural (an automorphism / a solve), so it transports under σ, so narrowing is equivariant, so `descend` is.
+A resolver that narrows too little is still sound (it only costs a branch) — the project's own "over-splitting is
+safe" rule, now a Lean contract. **A future unhandled-residue solver is just another covering witness**, and adding
+it shrinks the flagged residue *without touching ①*.
+
+### 1.4 The executable is a PROJECTION, not a second object
+
+Write the descent **once**, computably, in the cost monad; take three views of the same definition:
+
+| view | is |
+|---|---|
+| **executable** | the definition itself (`#eval`-able) |
+| **① correctness** | theorems about its `value` |
+| **② cost** | theorems about its `cost` |
+
+This is the cost model's own **D1** decision ("cost carried *with* the value, tied to the code; not a parallel
+bookkeeping function"), already realized in `costedWarmRefine`. It supersedes an earlier proposal to build a
+correctness object and a cost object separately with a bridge — that would have orphaned the executable as a
+*third* thing. Note this is **why §1.1's rejection of a reified candidate set matters structurally**: `Finset.min'`
++ `Classical` is *noncomputable*, so a set-based correctness object would be incompatible with the executable by
+construction. See [`chain-descent-executable-track.md`](./chain-descent-executable-track.md).
+
+**Five constraints to bake in NOW** (not to build now — only to not foreclose):
+1. **The definition is computable.** No `Classical.choice` / `Finset.min'` / `noncomputable` in the *definition*;
+   branch aggregation is a `List` fold under `MatrixLex`. Proofs may be as classical as they like; code may not.
+2. **`Resolver.decide` is a computable function**; `sound`/`isoInvariant` are `Prop` fields.
+3. **Use the encode-free / renumbering `refineStep` (cost-model D7 fork ii) from day one**, with `@[csimp]` — *not*
+   `@[implemented_by]` (which can assert false equations). The `Encodable.encode` colour blow-up is the known
+   `#eval` staller and it is a **definitional** choice: defining the descent over the encoding `refineStep` stalls
+   the executable *by construction*. **This is the one item to lock now** — it is the only constraint whose later
+   change means redefining the object everything else is proved about.
+4. **Decidable equality + order on the leaf type**, so the fold and the flag test compute.
+5. **Resolvers stay a first-class list**, so an added solver shrinks the residue without re-proving ①.
+
+### 1.5 The engine is an interleaved fixpoint
+
+Because almost every residue is *fused*, consumption and forcing **interleave** — `… ∘ phase2 ∘ phase1 …`, one
+pairwise relation at a time, the rigid solve's kernel feeding *de-fused* symmetry back into consumption (IR §11.11).
+A single `phase2 ∘ phase1` append is the **fusion-free special case**. Crucially the fixpoint's *dynamics never enter
+①*: correctness is a property of the terminal output, proved by induction over `descend`, so **a bad schedule costs
+an unnecessary-but-sound branch, never correctness** — which is precisely the robustness the interleaved design
+promises, and the reason the spec must be §1.1's and not `canonMin`'s.
 
 ---
 
@@ -112,39 +187,55 @@ what Phase 1 consumes, but the composition must work regardless of how much Phas
 
 ---
 
-## 3. The stages (what is new vs. reusable)
+## 3. The stages (what is new vs. reusable) — REVISED 2026-07-13 for the §1 object
 
 ★ = new build · ○ = reuse existing substrate.
 
-**Stage 0 — the correctness framework + the branching descent (★, foundational).** Two sub-parts:
+**Stage 0 — the spec + the object (★, foundational).**
 - **0a — the correctness framework (LANDED 2026-07-11, `ChainDescent/CanonicalForm.lean`).** `IsCanonicalForm`
-  = sound ∧ iso-invariant; **`complete_of_isCanonicalForm`** gives completeness for free; the `lexMin` selection
-  combinator (`isCanonicalForm_lexMin`) reduces a canonizer's correctness to (i) each candidate is a relabelling,
-  (ii) `cand (relabelAdj σ G) = cand G`. Spec is **NOT** the global lex-min (deferral gives a different
-  iso-invariant form). Supersedes the single-path `canonForm?` as the spec surface (the single-path object stays
-  valid for the all-symmetric pole / confinement).
-- **0b — the branching descent model (★, remaining).** Model the consume/branch IR descent so that its
-  reached-leaf matrix set instantiates `cand G` and (i)+(ii) become dischargeable. *This is the piece the Lean
-  has nothing like today (single-path, no branching/oracle/phases); it is the "biggest conceptual leap".*
+  = sound ∧ iso-invariant; **`complete_of_isCanonicalForm`** gives completeness for free, and is
+  **construction-agnostic** — it is the whole payoff and it survives the object change untouched. *(The `lexMin` /
+  `isCanonicalForm_lexMin` combinator is now **optional**, not the route: §1.1 retires the reified candidate set.)*
+  **Small remaining lift:** the flagging **`Option`** version — "on the handled sub-domain, `Sound ∧ IsoInvariant ⟹
+  complete`, and `stalled` equivariant ⟹ the flag transports". Short, and it pins the `Option` type the whole object
+  rides on — do it first.
+- **0b — the object (★, THE conceptual leap, NEXT).** Define `descend : AdjMatrix n → CostM (Option Matrix)` (§1.2):
+  refine → equivariant `selCell` → branch list `B` → resolvers narrow, else defer-and-aggregate → leaf emits
+  `labelledAdj (rankPerm χ) G`; flag at mutual stall. **Computable, in `CostM`, over the encode-free `refineStep`**
+  (§1.4 constraints 1–4). Reuse: `SpineChain`/`rankPerm`/`canonAdj`, `selCell` (`ScratchConfinementX3Sel`),
+  `MatrixLex` (`Spine.lean:1199`), `CostM` + `costedWarmRefine` (`CostModel.lean`), `refineStepR` (`ScratchRenumber.lean`).
 
-**Stage 1 — consume-soundness: orbit-pruning preserves the min (★, substrate ○).** If the selected cell is one
-`Aut_D`-orbit, the sibling leaf-sets are Aut-images of each other, so their mins coincide and pruning to one
-representative preserves `canonMin`. Substrate: `Confinement.SelectedCellIsOrbit` (`Confinement.lean:41`) +
-`labelledAdj` Aut-invariance + direction-invariance (`warm_6_2` `ChainDescent.lean:700`, `warmRefine_swap`
-`:789`). This is the correctness of the CONSUME disposition.
+**Stage 1 — the `Resolver` contract (★, small; generalizes `Phase2.Solver`).** One structure: computable `decide`
+narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov : B \ B' → B'` with
+`descend (cov b) = descend b`) — §1.3. Consume and force are two *instances*, not two constructors. Reuse:
+`Phase2Handoff.Phase2.Solver`/`Sound`/`IsoInvariant` (`Phase2Handoff.lean:74-86`) is the shape to generalize.
 
-**Stage 2 — the composition `canonMin = phase2 ∘ phase1` (★, substrate ○).** `phase1` iterates Stage-1
-pruning to the rigid residue (a node where no cell is a consumable orbit = `IsBase`-of-the-consumed-group);
-`phase2` is the residue's leaf-min. Prove the composition equals `canonMin`. Substrate: **`coversOrbits_append`
-(`Cascade.lean:1122`) — the base-sequence PHASE SPLIT** (partial coverage on `bs₁` glued to full coverage on
-`bs₂`) is exactly "resolve the symmetric phase, then the rigid phase" as one ordering;
-`stabilizerAt_eq_closure_gensAt_of_coversOrbits` (`Cascade.lean:1090`) = harvest completeness;
-`Phase2Handoff.handoffBase_relabel` (`Phase2Handoff.lean:60`) = residue iso-invariance;
-`spine_branch_independent` (`Spine.lean:350`) = the partition substrate the sub-descents share.
-**Interleaving (2026-07-11):** since fused residues alternate the phases (`… ∘ phase2 ∘ phase1 …`, §1
-refinement), Stage 2 is the *iterated* form — a **fold of `coversOrbits_append` over the alternation**, inducting
-on interleaving depth; a single append is the fusion-free special case. Stage 0's completeness payoff is
-unaffected (construction-agnostic).
+**Stage 2 — the ONE hard theorem: `descend` is Sound ∧ IsoInvariant (★, substrate ○).** By induction over the
+descent (well-founded on undiscretized vertices):
+- **Sound** (easy): leaves are `labelledAdj (rankPerm χ) G`; the aggregate of relabellings is a relabelling;
+  narrowing keeps leaves as leaves.
+- **IsoInvariant** (the real work): `selCell` is equivariant ⟹ the **branch list transports**; each resolver is
+  equivariant ⟹ narrowing transports; the aggregator is deterministic; the leaf matrix **absorbs σ** via `rankPerm`.
+  Substrate (built, single-path): `labelledAdj_rankPerm_cross`, `descentColouring_transport`, `selCell_transport`
+  (`ScratchConfinementX3*`), `warm_6_2` (`ChainDescent.lean:700`), `spine_branch_independent` (`Spine.lean:350`).
+  **The genuinely new part is the branch-list transport** — the set of defer-branches is iso-invariant because
+  `selCell` is and the reps are taken over an iso-invariant cell.
+- Note the **mutual induction**: consume's covering witness uses `descend`'s iso-invariance at greater depth. It is
+  well-founded (each step discretizes at least one vertex), but state the induction measure explicitly.
+- ⟹ **completeness (①b) and flag-invariance (①c) are then FREE** via 0a. *(This stage replaces the old
+  "composition = `phase2 ∘ phase1`" stage: with the covering contract, composition is not a separate theorem — the
+  fold over alternation depth is subsumed by the induction. `coversOrbits_append` (`Cascade.lean:1122`) remains the
+  harvest-side substrate for the consume instance's covering witness.)*
+
+**Stage 3 — the resolver INSTANCES (★, the two witnesses).**
+- **consume** — `matchOracle` / `CascadeOracleSpec` (`CascadeOracle.lean:148,1095`) narrows to one orbit rep;
+  covering witnessed by a verified path-fixing automorphism (the C#'s `CoveredByPathFixingAut`); soundness of
+  deferral by `real_stays_real` (`CascadeOracle.lean:74`). Substrate: `Confinement.SelectedCellIsOrbit`
+  (`Confinement.lean:41`), `coversOrbits_of_realizers`.
+- **force** — **Algorithm R** (the rigid solver); covering witnessed by the solve's determinacy = the rigid seal's
+  **P3** (coset-min canonicity). This is the separate IR track (§11.12 **P1–P4**, Lean **not started**; the C# solver
+  `Option2Solver.cs` is **complete for handoff** and is its runtime reference). Stages 0–2 proceed with the resolver
+  list **abstract**, so this does not gate them.
 
 **Stage 3 — plug in the rigid solver as the `phase2` witness (★ = the IR track, separate).** `phase2` must
 satisfy `Phase2.Sound`/`IsoInvariant` (`Phase2Handoff.lean:78,86`) — witnessed by **Algorithm R**
@@ -159,27 +250,40 @@ open items (fold covers `s > 6`, harvesting the fold `Aut`, the deferred solve-s
 PICK-UP-HERE banner "OPEN / NEXT". So **Stage 3's C# dependency is satisfied**; what remains for Stage 3 is the **Lean witness
 (P1–P4), not started** — the C# solver is its runtime reference (build-first). Detail = §11.12 + the IR-doc PICK-UP-HERE banner.
 
-**Stage 4 — poly-or-flag for the composition (★, = the cost bridge).** `phase1` poly (bounded consume path:
-`defaultSpineChain_reaches_leaf` ≤ n nodes, per-node `descentCost_le` ≤ n⁴) + `phase2` poly-or-flag ⟹ the
-composition is poly-or-flag. This is the endgame **consumption bridge** (§4.3) specialized to the composed
-object, and it is where the **certified-order flag** (`|⟨harvested path-fixing gens⟩| > 2^baseMax(n)`,
-Schreier–Sims-computable; replaces the vacuous `hflag`, `[[project_confinement_bundle_vacuity_2026-07-10]]`)
-supplies P1's largeness certificate soundly.
+**Stage 4 — poly-or-flag: the `cost` PROJECTION (★, no bridge needed).** Because `descend` is written in `CostM`
+(§1.4), ② is a theorem about the **same definition's** `cost` — *not* a separate object plus a bridge lemma. Content:
+- **Per-node work** `w`: refinement + resolver cost — reuse `costedWarmRefine` (co-defined) + the oracle summand
+  (`CostModel.lean`); the per-node **cap** keeps ② unconditional by construction (`min(trueCost, w)`).
+- **Node count**: the `nbud = n` single-path justification is **retired** (it was assume-VT `leaves = 1`). The poly
+  guarantee is the **verify-consume monovariant** — each covering-narrowing strictly reduces residual symmetry, each
+  force reduces free relations, each defer is bounded by the branching bound — plus the **fusion-severity look-ahead**
+  (IR §11.11). Measured **sum-not-product** (`[[project_rru_cost_probe_2026-07-10]]`): consume work does not multiply
+  force branching.
+- **The flag is MUTUAL STALL**, not `base > baseMax`. The threshold-gated assume-VT flag is retired (it could misprune
+  a fused rigid residue); consumption is verify-gated, so a rigid residue *stalls* rather than being pruned.
+- ⟹ ③: `stalled ⟹ residueHiddenJohnson ∨ residueRigidObstruction` (D1 ∨ D2), shrinking as resolvers are added.
 
 ---
 
 ## 4. Dependencies, sequencing, first step
 
 ```
-Stage 0 (canonMin spec) ──┬─→ Stage 1 (consume-sound) ──→ Stage 2 (composition) ──┬─→ Stage 4 (poly-or-flag) ─→ mixed canonizer
-                          │                                                        │
-Rigid solver (IR §11.12) ─┴────────────────────────────→ Stage 3 (phase2 witness)─┘
+Stage 0a (Option-lift) ─→ Stage 0b (the object: computable CostM descend) ─┬─→ Stage 2 (Sound ∧ IsoInvariant) ─→ ①a/①b/①c
+                                                                            │      (THE hard theorem)
+                          Stage 1 (Resolver contract: narrowing + covering) ┘
+                                                                            └─→ Stage 4 (cost projection) ─→ ② / ③
+
+Stage 3 instances (independent): consume (matchOracle + CoveredByPathFixingAut) · force (rigid seal P1–P4, IR §11.12)
 ```
 
-- **Start-anytime, independent:** Stage 0 (the spec is self-contained), and the rigid solver's P1 (extraction
-  soundness, `chain-descent-ir-blindspot-solver.md` §11.12).
-- **Gated:** Stage 2 on Stages 0+1; Stage 3 on the rigid solver; Stage 4 on the cost bridge + the certified
-  flag.
+- **Start-anytime, independent:** Stage 0a's `Option`-lift; the `Resolver` contract (Stage 1); the rigid solver's
+  **P1** (extraction soundness, standalone, `chain-descent-ir-blindspot-solver.md` §11.12).
+- **Critical path:** 0a → 0b → 2. Stage 2 is the whole of ①.
+- **Not gating:** Stage 3's instances — Stages 0–2 are proved against the resolver **contract**, so the descent's
+  correctness does not wait on either the oracle's or the rigid solver's Lean witness. This is also what makes the
+  residue shrinkable later (add a resolver, re-prove nothing).
+- **Lock now (§1.4 item 3):** the encode-free / renumbering `refineStep`. It is the only choice whose later change
+  means redefining the object everything else is proved about.
 - **Stage 0a DONE (2026-07-11), NEXT STEP = Stage 0b.** 0a (the correctness framework: `IsCanonicalForm`,
   `complete_of_isCanonicalForm`, `lexMin`/`isCanonicalForm_lexMin`) is landed in `ChainDescent/CanonicalForm.lean`
   (namespace `ChainDescent.CanonSpec`), in `build.sh`, axiom-clean — it *simplifies* ①b/①c (see §5) and gives the

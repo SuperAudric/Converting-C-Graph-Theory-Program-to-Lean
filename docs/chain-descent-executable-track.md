@@ -10,9 +10,35 @@
 
 ---
 
-## STATUS (read first, 2026-07-07)
+## STATUS (read first)
 
-**Where it stands:** the Lean canonizer's output **is computable, `#eval`-runs, and is ①a-sound (proven,
+> **▶▶ ARCHITECTURE CHANGE (2026-07-13) — the executable is no longer a SEPARATE TRACK; it is a PROJECTION of the main
+> object. Read [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) §1 first.** The Lean
+> canonizer is now defined **once**, computably, in the cost monad — `descend : AdjMatrix n → CostM (Option Matrix)`,
+> parameterized over a list of `Resolver`s — and three views are taken of that single definition:
+> **executable = the definition · ① correctness = theorems about its `value` · ② cost = theorems about its `cost`.**
+> Consequences for this doc:
+> - **"Executable is an optional add, downstream of the proofs" is SUPERSEDED** (see the section below). It is now
+>   *the same object*, so it cannot be "retrofitted" or "abandoned" independently — and there is nothing for it to be
+>   torn between.
+> - **Tier C-poly is NO LONGER "the wall" / an abandon-point.** C-poly (the poly, orbit-pruned, iso-invariant form) **is
+>   the main object**: orbit-pruning is exactly the **consume `Resolver`**, and its soundness is the branch-**covering**
+>   contract (a discarded branch's output is *already reachable* through a kept one — witnessed by a verified
+>   path-fixing automorphism), not a comparison against a known answer. The old table row is corrected below.
+> - **The "lex-min reframing" section below (2026-07-07) was RIGHT and is now the plan** — lex-min over all σ is not
+>   required; ①b needs only a canonical representative among alternatives; the pruned output "is the same object the
+>   main proofs build". That is now literally true. Note the spec is `Sound ∧ IsoInvariant` **only** — do **not**
+>   reintroduce a global-lex-min reference object (it is noncomputable via `Finset.min'`/`Classical`, so it would make
+>   the correctness object and the executable structurally incompatible — which is the deeper reason the reframing was
+>   correct).
+> - **★ LOCK NOW: the encode-free / renumbering `refineStep` (D7 fork ii) + `@[csimp]`.** Finding #2 below is no longer
+>   "deferred to the Runtime-Phase `refineStep` choice" — that choice **is** Stage 0b, and it is **definitional**:
+>   defining `descend` over the `Encodable.encode` `refineStep` stalls the executable *by construction*. This is the one
+>   constraint whose later change means redefining the object everything else is proved about. (`@[csimp]`, never
+>   `@[implemented_by]`.)
+> - Everything below remains accurate as the *findings record* (what runs, what hangs, and why).
+
+**Where it stands (2026-07-07):** the Lean canonizer's output **is computable, `#eval`-runs, and is ①a-sound (proven,
 axiom-clean)** — the user confirmed concrete outputs on an unconstrained machine (K₃ → `[[0,0,1],[0,0,1],[1,1,0]]`,
 path 0–1–2 → `[[0,1,1],[1,0,1],[1,1,0]]`). It is **NOT yet poly-time in practice**: n=3 takes ~10 min, and reifying
 the descent did **not** fix that — **but the cause is now RESOLVED (see finding #2): the bottleneck is the
@@ -80,9 +106,14 @@ oracle = the wall). See "Tiers" + "the wall" below.
 
 ---
 
-## The architecture decision (why executable is a separate track from the proofs)
+## ~~The architecture decision (why executable is a separate track from the proofs)~~ — SUPERSEDED 2026-07-13
 
-The Lean side is a **proof model**; the executable is C#. The endgame theorem `canonizer` + `#print axioms`
+> **⚠ This section is REVERSED by the 2026-07-13 object change (STATUS banner).** The executable is **not** a separate
+> track and **not** an optional add: it is the **same definition** the proofs are about (one computable `CostM`
+> `descend`; correctness and cost are projections of it). Keeping it separate is what would have forced a *third*
+> object and a retrofit. Retained below for provenance.
+
+*(Superseded:)* The Lean side is a **proof model**; the executable is C#. The endgame theorem `canonizer` + `#print axioms`
 never needs the Lean function to *run*. So executability is an **optional add** — pursued to close the gap
 "provably exists, and the C# is *kind of* the thing I proved" → "provably exists, and **here it is**, C# for
 normal use." The poly runnable is **downstream of the main proofs**, not parallel: see the wall.
@@ -110,11 +141,18 @@ algorithm's output", not a separate exponential artifact — but does **not** re
 | **A** | **Computable descent** (find leaf, count cost) | `done` decidability (`Classical`→real `Decidable Discrete`) | ✅ **DONE** — `#eval` runs |
 | **B** | Computable single-leaf **labelling** | `rankPerm` (`Equiv.ofBijective`) → `rankInv` by finite search; `leafLevel` (`Classical.choose`) → the loop's returned level | ✅ **DONE** — computable + proven; `#eval` needs renumbering (colour blowup) |
 | **C-exp** | Computable canonical form by **enumeration** | `Fintype (DirAssignment)` (noncomputable) → enumerate order-labels; `canonForm` = `List.min` | optional; **exponential**, runs on tiny `n` only |
-| **C-poly** | **Poly** canonical form (orbit-pruned; validated by ①a+①b directly) | orbit-pruning = the oracle/harvest, computable + correct | **⛔ the WALL — = the main open content; abandon-point** |
+| **C-poly** | **Poly** canonical form (orbit-pruned; validated by ①a+①b directly) | orbit-pruning = the **consume `Resolver`**, computable + correct | **= THE MAIN OBJECT (2026-07-13)** — no longer an abandon-point |
 
 Tiers A+B are cheap, wall-free, independently valuable (a computable verified descent + labelling). C-exp gives an
-honest end-to-end runnable reference (exponential). **C-poly ≈ implementing the whole verified poly algorithm** —
-gated on the same oracle content the proofs chase; reached only after A+B, so nothing is wasted if abandoned.
+honest end-to-end runnable reference (exponential).
+
+**★ C-poly REFRAMED (2026-07-13) — it is not a wall and not a separate build.** C-poly *is* the mixed-composition
+object: the orbit-pruning it needs **is** the consume `Resolver`, and that resolver's soundness is the branch-**covering**
+contract (`chain-descent-mixed-composition.md` §1.3) — *a discarded branch's output is already reachable through a kept
+one*, witnessed by a verified path-fixing automorphism (`CoveredByPathFixingAut`). Two things follow: (i) C-poly does
+**not** require "compute `Aut`" or any known-answer comparison, so it is not gated on the wall; (ii) building it **is**
+Stage 0b, not a follow-on. What *is* still gated on the open content is only how much the resolvers can consume/force —
+i.e. how small the flagged residue gets — never the correctness or the runnability of the object.
 
 ## The cost-model coupling this surfaced (a genuine finding)
 
@@ -180,10 +218,16 @@ are the *reasoned* form; `canonOutputMat` (via `warmRefineMat`) + `canonOutputMa
 `canonOutputMat_eq`. (A false lead along the way: the 7000-bit seed `ch.χι` looked like the cause, but the true blocker
 was recomputation — reification fixes it with NO renumbered descent needed.)
 
-## NEXT
-The fast-executable path is now **scoped and deferred** (see finding #2, RESOLVED): the speedup is `encode-free round`
-(= D7 fork (ii), fold into the Runtime-Phase `refineStep` choice) + `@[csimp]` array-backing (Publication-phase polish).
-Do **not** reify further — reification was the wrong lever (the blocker is the `Encodable.encode` *value*, not
-recomputation). Tier C (the iso-invariant canonical form) remains the wall (C-poly = orbit-pruning = the oracle).
-**Active work pivoted back to the main proofs** (the headline path): **wire the oracle summand of `w` into the
-spine-`step`'s true cost** so the flag fires on the real descent, then P1/P2 in Lean + confinement assembly ⟹ ①.
+## NEXT (revised 2026-07-13)
+**The executable no longer has its own "next" — it rides Stage 0b of
+[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md).** Concretely:
+- **Build the encode-free / renumbering `refineStep` (D7 fork ii) AS PART OF defining `descend`** — no longer
+  "deferred to the Runtime-Phase `refineStep` choice"; that choice *is* Stage 0b, and it is definitional. `@[csimp]`
+  array-backing (`signature`/`Multiset.sort`/`vertexRankNat`) stays Publication-phase polish. **Never
+  `@[implemented_by]`** (can assert false equations ⟹ `#eval` could lie — a firewall risk).
+- Do **not** reify further — reification was the wrong lever (the blocker is the `Encodable.encode` *value*, not
+  recomputation; finding #2).
+- **Tier C-poly is no longer the wall** — it is the main object (see the Tiers note). The old "pivot back to the main
+  proofs (confinement assembly ⟹ ①)" is retired along with the sequential Algorithm-A seal; ① now comes from
+  Stage 2 (`Sound ∧ IsoInvariant` of `descend`, by induction).
+- Profile on an unconstrained machine (this dev box thrashes at 2 GB); the *mechanism* was validated core-only.
