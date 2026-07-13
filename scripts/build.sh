@@ -61,7 +61,8 @@ MODULES=(
   ChainDescent.Cascade      # ← CascadeOracle, Group
   ChainDescent.Confinement  # ← Cascade, CostModel (confinement lemma / Algorithm A core: P1–P4 + Witt → SelectedCellIsOrbit; ported 2026-07-09 from ScratchNodeCountBridge + ScratchConfinement{,P1,P4,P3,Witt,SchurianModel})
   ChainDescent.Phase2Handoff # ← Cascade (RRU rigid-residue handoff interface: rigidResidue as R(G) + Phase-2 solver contract; added 2026-07-10)
-  ChainDescent.CanonicalForm # ← Cascade (mixed-composition Stage 0: canonical-form spec sound∧iso-inv⟹complete + lexMin selection combinator; added 2026-07-11)
+  ChainDescent.CanonicalForm # ← Cascade (mixed-composition Stage 0a: canonical-form spec sound∧iso-inv⟹complete + Option/flagging lift SoundOpt/IsoInvariantOpt; added 2026-07-11, lifted 2026-07-13)
+  ChainDescent.Descend      # ← Spine, CanonicalForm, CostModel (mixed-composition Stage 0b: THE OBJECT — computable branching resolver-parameterized descent in CostM; index-free indivOne; computable leaf emit; added 2026-07-13)
   ChainDescent.CascadeAffine # ← Cascade, Scheme (§13b/§13c engine + Phase-2 affine beachhead)
   ChainDescent.ClebschConcrete # ← CascadeAffine (concrete ℤ₄² Clebsch scheme + first non-affine δ′ closure, by decide)
   ChainDescent.FormsGraphConcrete # ← CascadeAffine, GaussCount (node-4 forms-graph discharge: IsotropySeparatesAtBase for VO^ε)

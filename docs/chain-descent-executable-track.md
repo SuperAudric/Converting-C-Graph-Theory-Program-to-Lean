@@ -39,8 +39,11 @@
 > - Everything below remains accurate as the *findings record* (what runs, what hangs, and why).
 
 **Where it stands (2026-07-07):** the Lean canonizer's output **is computable, `#eval`-runs, and is ①a-sound (proven,
-axiom-clean)** — the user confirmed concrete outputs on an unconstrained machine (K₃ → `[[0,0,1],[0,0,1],[1,1,0]]`,
-path 0–1–2 → `[[0,1,1],[1,0,1],[1,1,0]]`). It is **NOT yet poly-time in practice**: n=3 takes ~10 min, and reifying
+axiom-clean)** — the user confirmed concrete outputs on an unconstrained machine (K₃ → `[[0,1,1],[1,0,1],[1,1,0]]`,
+path 0–1–2 → `[[0,0,1],[0,0,1],[1,1,0]]`).
+*(⚠ Corrected 2026-07-13: these two outputs were previously recorded TRANSPOSED. `K₃` is a triangle, so every
+off-diagonal entry is 1 — it cannot canonize to a matrix containing a non-edge. Re-derived by `#eval` on the Stage-0b
+`Descend.canonForm?`, which reproduces exactly these forms.)* It is **NOT yet poly-time in practice**: n=3 takes ~10 min, and reifying
 the descent did **not** fix that — **but the cause is now RESOLVED (see finding #2): the bottleneck is the
 `Encodable.encode` VALUE (exp-bit `Nat`), not recomputation; the fix is an encode-free structural round (= cost-model
 D7 fork ii) + `@[csimp]` array-backing, DEFERRED to the Runtime-Phase `refineStep` choice (do NOT reify further).** It is

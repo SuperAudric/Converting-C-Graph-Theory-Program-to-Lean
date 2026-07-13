@@ -44,8 +44,15 @@
 > **▶ Stage 0a's `Option`-LIFT LANDED (2026-07-13, `CanonicalForm.lean`, in `build.sh`, axiom-clean, full build green).**
 > `SoundOpt` / `IsoInvariantOpt` / `IsCanonicalFormOpt` + `complete_of_isCanonicalFormOpt` (①b free) +
 > `flag_iso_invariant_of_isoInvariantOpt` (①c free) + `isCanonicalFormOpt_guardBy` (the flag costs nothing beyond
-> **"stalled" being equivariant**). **The framework is now DONE: ①a/①b/①c reduce to exactly two facts about `descend`
-> — `SoundOpt` and `IsoInvariantOpt`.** **NEXT = Stage 0b** (define `descend`), then **Stage 2** (prove those two).
+> **"stalled" being equivariant**). **The framework is DONE: ①a/①b/①c reduce to exactly two facts about `descend`
+> — `SoundOpt` and `IsoInvariantOpt`.**
+>
+> **▶ Stage 0b SKELETON LANDED (2026-07-13, `ChainDescent/Descend.lean`, in `build.sh`, axiom-clean, build green).**
+> `descend` exists, is **computable, and RUNS** (`#eval`: K3/path canonize; all 9 relabellings of the path give the
+> identical form). Computable leaf emit (`rankInv`/`leafMatrix`) with **`leafMatrix_sound` = ①a at the leaf**;
+> **index-free `indivOne`** (the X3 cut); equivariant target-cell selector; `refine` a **parameter** (encode-free
+> round drops in); resolvers **stubbed** (`deferAll`). **NEXT = Stage 2** — prove `SoundOpt descend` (induction; leaf
+> case done) and `IsoInvariantOpt descend` (the one hard theorem). Then Stage 1's `Resolver` contract + Stage 4's cost.
 
 **The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
 from source (2026-07-10):
@@ -219,11 +226,33 @@ what Phase 1 consumes, but the composition must work regardless of how much Phas
 
   **So ①a/①b/①c now reduce, with no remaining framework work, to exactly two facts about `descend`: it is `SoundOpt`
   and it is `IsoInvariantOpt`.** That is Stage 2.
-- **0b — the object (★, THE conceptual leap, NEXT).** Define `descend : AdjMatrix n → CostM (Option Matrix)` (§1.2):
-  refine → equivariant `selCell` → branch list `B` → resolvers narrow, else defer-and-aggregate → leaf emits
-  `labelledAdj (rankPerm χ) G`; flag at mutual stall. **Computable, in `CostM`, over the encode-free `refineStep`**
-  (§1.4 constraints 1–4). Reuse: `SpineChain`/`rankPerm`/`canonAdj`, `selCell` (`ScratchConfinementX3Sel`),
-  `MatrixLex` (`Spine.lean:1199`), `CostM` + `costedWarmRefine` (`CostModel.lean`), `refineStepR` (`ScratchRenumber.lean`).
+- **0b — the object (★) — SKELETON LANDED (2026-07-13, `ChainDescent/Descend.lean`, in `build.sh`, axiom-clean,
+  full build green 95s; it RUNS).**
+  `descend refine R adj fuel χ : CostM (Option (Labelled n))` — refine → equivariant target cell → branch list →
+  resolver narrows (or defers) → recurse → aggregate; leaf emits the rank-relabelled matrix; `none` on fuel
+  exhaustion (the placeholder for the stall flag). Top-level `canonForm?` + `descentCost` are the **`value` / `cost`
+  projections of the one definition**, and the definition itself is the executable. Landed pieces:
+  - **Computable leaf emit.** `Colouring.rankPerm` is `noncomputable` (`Equiv.ofBijective`), so the emit goes via
+    **`rankInv`** (rank → vertex, by search) + **`leafMatrix`**, with **`leafMatrix_eq_labelledAdj`** proving it
+    *equals* `labelledAdj (rankPerm χ h) adj` ⟹ **`leafMatrix_sound` = `①a` at the leaf** (the base case of `SoundOpt`).
+  - **Index-free individualization `indivOne`** (the X3 cut): mark the branch vertex with a **parity bit** on its
+    existing colour (`2·χv+1` vs `2·χu`), **never `v.val`** — unlike `IndivStep.default`, which encodes `χ v * n +
+    v.val` and would leak the *labelling* into the leaf, making iso-invariance impossible. `indivOne_singleton` +
+    `indivOne_refines_off` proved.
+  - **Equivariant target cell**: least non-singleton **colour value** (`targetColour`/`cellOf`) — a function of the
+    colouring alone, so the branch set transports. No vertex index is read.
+  - **Bake-ins honoured:** the definition is **computable** (no `Classical` in code; `Finset.toList` is
+    noncomputable ⟹ the branch collection is a `List`), and **`refine` is a PARAMETER** ⟹ the `Encodable.encode`
+    `refineStep` staller is *not* baked in; the encode-free round drops in as the instance (its equivariance becomes
+    a Stage-2 hypothesis).
+  - **Resolvers STUBBED**: `Resolver n := Colouring n → List (Fin n) → Option (List (Fin n))` + `deferAll` (never
+    narrows) ⟹ `descend deferAll` is the honest exhaustive-branching object. Stages 0–2 are written against the
+    **type**, so they don't wait on the instances.
+  - **It runs** (`#eval`, identity refinement): `K3 → [[0,1,1],[1,0,1],[1,1,0]]`, path `→ [[0,0,1],[0,0,1],[1,1,0]]`;
+    **all 9 relabellings of the path give the identical form** (iso-invariance smoke test) and K3/path are
+    distinguished.
+  - **Remaining for 0b:** swap the fuel-flag for the real stall test (Stage 4), and instantiate `refine` with the
+    encode-free round.
 
 **Stage 1 — the `Resolver` contract (★, small; generalizes `Phase2.Solver`).** One structure: computable `decide`
 narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov : B \ B' → B'` with
