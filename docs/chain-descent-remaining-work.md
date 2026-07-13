@@ -1,5 +1,40 @@
 # Remaining work — the living tracker (modulo set · citation replacement · IR solver)
 
+> ## ★★★ WHAT'S LEFT, AS OF 2026-07-13 (read this first; everything below is older context)
+>
+> **The correctness trio ①a/①b/①c is DISCHARGED for the real object.** `ChainDescent/Descend.lean` (in `build.sh`,
+> axiom-clean, no `sorry`, full build green) defines **the object** — `descend`: a **computable**,
+> resolver-parameterized **branching** descent written in `CostM` — and proves
+> **`isCanonicalFormOpt_canonForm?`** (sound ∧ iso-invariant ⟹ complete invariant + iso-invariant flag), with
+> `soundOpt_canonForm?` / `canonForm?_complete` / `canonForm?_flag_iso_invariant` in the exact `Publication.lean`
+> shapes. **Modulo exactly two carried hypotheses:** `RefineEquivariant` (the refinement parameter) and `Covering`
+> (the resolver contract). The **executable and the cost are `value`/`cost` projections of that same definition** —
+> no second object, no bridge. Object spec + rationale: `chain-descent-mixed-composition.md` §1.
+>
+> **THE FOUR REMAINING PIECES (in dependency order):**
+> 1. **② — cost + flag (the main gap).** Re-base the node bound onto the **branching** object: the old `n⁴`
+>    (`CanonForm.descentCost_le`) used `nbud = n`, the assume-VT **single-path** (`leaves = 1`) justification, which
+>    does **NOT** transfer. The poly guarantee is the **verify-consume monovariant** + the fusion-severity look-ahead
+>    (cost-model STATUS; mixed-composition Stage 4). Replace `descend`'s `fuel`-exhaustion `none` (a **placeholder**)
+>    with the real **mutual-stall** flag. **Fuel is per-layer, never threaded** ⟹ each resolver is poly-or-flag
+>    *locally* (do not "optimize" this into a global budget — it would couple the resolvers' flag behaviour).
+> 2. **Instantiate `refine`** with the **encode-free / renumbering round** (cost-model D7 fork ii, `@[csimp]`, never
+>    `@[implemented_by]`) and prove its **`RefineEquivariant`**. `refine` is deliberately a *parameter*, so the
+>    `Encodable.encode` `#eval` staller is **not** baked in; this also makes the executable fast.
+> 3. **Resolver instances (Stage 3).** **consume** = `matchOracle` + a **covering** witness (the C#'s
+>    `CoveredByPathFixingAut` is exactly it); **force** = the **rigid seal P1–P4** (IR §11.12; Lean not started, C#
+>    `Option2Solver.cs` complete for handoff). **Neither can break ①** — a resolver only ever *narrows*, so it shrinks
+>    the flagged residue and nothing else. This is also why a *future* unhandled-residue solver plugs in with **no
+>    re-proof of ①**.
+> 4. **③** — `stalled ⟹ residueHiddenJohnson ∨ residueRigidObstruction` (D1 ∨ D2), plus non-vacuity.
+>
+> **⚠ The one trap:** `Covering` (branch covering) is the resolver's soundness contract — *narrowing does not change
+> the aggregate, because every discarded branch's output is already reachable through a kept one*. It is **redundancy,
+> not victory**. Do **not** restate it as "the discarded branches lose", which presupposes a global lex-min and
+> re-introduces the *which-branch-wins* knowledge the rigid solver cannot have. Note also that resolver
+> **equivariance is deliberately NOT required** — that is precisely what lets `consume` pick an arbitrary orbit
+> representative (a choice that is genuinely non-equivariant).
+
 > **What this is.** The single, top-level tracker for *what is left* before the seal is unconditional and the
 > canonizer is complete. It collects, in one place: the seal's current **`modulo` set** and what each hypothesis
 > really is; the **citations** to be replaced by proofs (and the one that may stay cited); the **buildable
@@ -69,7 +104,7 @@ per-node flag / assume-VT-prune is validation, not part of the Seal correctness 
 > rigid+symmetric composition — almost every real residue is mixed). Stage 0a LANDED 2026-07-11
 > (`ChainDescent/CanonicalForm.lean`, in build.sh, axiom-clean): the canonical-form correctness framework
 > `complete_of_isCanonicalForm` (sound ∧ iso-invariant ⟹ complete — ①b free) + the `lexMin` selection combinator.
-> NEXT = Stage 0b (the branching descent model). The RRU/confinement material in this item 6 is now historical
+> ✅ Stages 0b + 2 DONE 2026-07-13 (see the ★★★ block at the very top of this file). The RRU/confinement material in this item 6 is now historical
 > context for that track.**
 >
 > **⚠️ CORRECTION (2026-07-10 audit — supersedes the "GAP DISSOLVES / NO GAP PERSISTS" and "① DONE mod citations"

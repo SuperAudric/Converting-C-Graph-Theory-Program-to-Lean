@@ -183,12 +183,12 @@ input — so equal canonical forms ⟹ isomorphic inputs. -/
 theorem canon_sound (n : ℕ) (G : AdjMatrix n) (cG : Fin n → Fin n → Nat)
     (h : canonForm? n G = some cG) :
     ∃ π : Equiv.Perm (Fin n), cG = labelledAdj π G := by
-  -- discharged by: `SpineChain.canonAdj` (leaf relabelling by the rank permutation) is a `labelledAdj`.
-  -- PROVED against the SHARED capped object, axiom-clean: `ChainDescent.CanonForm.canonForm?_sound`
-  -- (`ScratchCanonFormCapped.lean`) — `CanonForm.canonForm? : AdjMatrix n → Option …` is the capped descent
-  -- (cost + flag from the real run; `some` value = the sound `CanonSound.canonFormOf`). Its shape is EXACTLY
-  -- this obligation. Remaining = set `canonForm? n G := CanonForm.canonForm? G` (parameter-free), then this
-  -- body is `CanonForm.canonForm?_sound n G cG h`. Deferred only so the opaque swap happens once, with ②/③.
+  -- ★ DISCHARGED (2026-07-13) against the REAL branching object: `ChainDescent.Descend.soundOpt_canonForm?`
+  -- (`ChainDescent/Descend.lean`, axiom-clean, in build.sh). `Descend.canonForm? refine R : AdjMatrix n →
+  -- Option (Labelled n)` is the computable, resolver-parameterized branching descent (mixed-composition
+  -- Stage 0b); `soundOpt_canonForm?` has EXACTLY this shape, and holds for ANY `refine` and ANY resolver.
+  -- Remaining = the opaque swap `canonForm? n G := Descend.canonForm? refine R G` (done once, with ②/③,
+  -- after `refine` is instantiated with the encode-free round). Then this body is `soundOpt_canonForm? … G cG h`.
   sorry
 
 /-- **①b Completeness (UNCONDITIONAL).** Whenever it answers on both inputs, the canonical forms coincide
@@ -196,26 +196,44 @@ iff the graphs are isomorphic — a complete isomorphism invariant. "Never wrong
 theorem canon_complete (n : ℕ) (G H : AdjMatrix n) (cG cH : Fin n → Fin n → Nat)
     (hG : canonForm? n G = some cG) (hH : canonForm? n H = some cH) :
     Iso G H ↔ cG = cH := by
-  -- discharged by: `spine_branch_independent` + `warm_6_2` (direction-invariance) + `canon_sound`.
+  -- ★ DISCHARGED (2026-07-13): `ChainDescent.Descend.canonForm?_complete` — EXACTLY this shape, for the real
+  -- branching object. Completeness is FREE: `CanonSpec.complete_of_isCanonicalFormOpt` (Stage 0a) says
+  -- sound ∧ iso-invariant ⟹ complete, and `Descend.isCanonicalFormOpt_canonForm?` supplies both.
+  -- MODULO exactly two carried hypotheses (the ONLY correctness debt left in ①):
+  --   · `Descend.RefineEquivariant refine` — the refinement round commutes with relabelling (the encode-free
+  --     round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not
+  --     baked in);
+  --   · `Descend.Covering refine R` — the RESOLVER CONTRACT: narrowing the branch set does not change the
+  --     aggregate, because every discarded branch's output is already reachable through a kept one. NB
+  --     resolver *equivariance* is deliberately NOT required (that is what lets `consume` pick an arbitrary
+  --     orbit representative). `covering_deferAll` is proved by `rfl`.
   sorry
 
 /-- **①c The flag is iso-invariant (UNCONDITIONAL).** Flagging is a property of the isomorphism class, not
 of the labelling — so "flagged" is a well-defined statement about a graph up to iso. -/
 theorem flag_iso_invariant (n : ℕ) (G H : AdjMatrix n) (h : Iso G H) :
     (canonForm? n G = none) ↔ (canonForm? n H = none) := by
-  -- discharged by: the descent's selector is partition-invariant (`target_direction_blind` / spine).
+  -- ★ DISCHARGED (2026-07-13): `ChainDescent.Descend.canonForm?_flag_iso_invariant`, same two carried
+  -- hypotheses as ①b. Free, because `IsoInvariantOpt` is a single equation on `Option`s — "relabelling changes
+  -- nothing", the answer AND whether it flagged. There is no separate flag obligation.
   sorry
 
 /-- **② Poly-or-flag (the budget guarantee — the ONLY cost claim).** The descent either runs within the
 explicit polynomial budget or it emits an honest flag. No residue predicate appears here. -/
 theorem canon_poly_or_flag (n : ℕ) (G : AdjMatrix n) :
     cost n G ≤ costConst * n ^ costDeg ∨ canonForm? n G = none := by
-  -- discharged by: (Runtime Phase) reaches-rigid ⟹ discretizes in poly nodes ⟹ ¬flag ∧ cost ≤ poly;
-  --                otherwise flag. This is where "poly" stops being a meta-claim.
-  -- COST SIDE PROVED, unconditional: `ChainDescent.CanonForm.descentCost_le` (`ScratchCanonFormCapped.lean`,
-  -- axiom-clean) — `descentCost G ≤ n⁴` by the per-node cap, NO hypothesis (so `Or.inl` always; the `∨ none`
-  -- disjunct is the ③-forward completeness content, not needed for the cost bound). Remaining = set
-  -- `cost n G := CanonForm.descentCost G`, `costConst := 1`, `costDeg := 4`, then body = `Or.inl (descentCost_le …)`.
+  -- OPEN — this is now the main remaining obligation of ①/②. STATUS (2026-07-13):
+  --  · `cost` is the `cost` PROJECTION of the same definition ①a/①b ride on: `ChainDescent.Descend.descentCost`
+  --    (`descend` is written in `CostM`, so cost is co-defined with the value — no separate object, no bridge).
+  --  · The OLD `n⁴` bound (`CanonForm.descentCost_le`) does NOT transfer: it was proved with `nbud = n`, i.e.
+  --    the assume-VT single-path (`leaves = 1`) justification, which the branching/interleaved object breaks.
+  --  · The poly guarantee is now the VERIFY-CONSUME MONOVARIANT (each covering-narrowing strictly reduces
+  --    residual symmetry; each force reduces free relations; each defer is bounded by the branching bound)
+  --    plus the fusion-severity look-ahead — see `docs/chain-descent-cost-model.md` STATUS and
+  --    `docs/chain-descent-mixed-composition.md` Stage 4.
+  --  · The flag is the MUTUAL STALL, not `base > baseMax` (the threshold-gated assume-VT flag is retired —
+  --    it could misprune a fused rigid residue). `descend`'s current `fuel`-exhaustion `none` is a PLACEHOLDER
+  --    for that stall test. NB fuel is PER-LAYER, never threaded, so each resolver is poly-or-flag LOCALLY.
   sorry
 
 /-- **③ Flag characterization (where the citations live).** A flag is emitted iff the input genuinely

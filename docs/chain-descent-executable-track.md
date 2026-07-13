@@ -36,6 +36,16 @@
 >   defining `descend` over the `Encodable.encode` `refineStep` stalls the executable *by construction*. This is the one
 >   constraint whose later change means redefining the object everything else is proved about. (`@[csimp]`, never
 >   `@[implemented_by]`.)
+> - **★★ THE OBJECT NOW EXISTS AND RUNS (2026-07-13, `ChainDescent/Descend.lean`).** `descend` is the computable,
+>   resolver-parameterized branching descent; **the executable IS this definition** (`canonForm?` = its `value`
+>   projection, `descentCost` = its `cost` projection). It `#eval`s today (K3 → `[[0,1,1],[1,0,1],[1,1,0]]`, path →
+>   `[[0,0,1],[0,0,1],[1,1,0]]`; all 9 relabellings of the path give the identical form), and it is **PROVED
+>   ①a/①b/①c** (`isCanonicalFormOpt_canonForm?`). So Tier C-poly is *done as correctness*; what remains for a **fast**
+>   executable is only bake-in 3 below.
+> - **▶ THE ONE REMAINING EXECUTABLE TASK: instantiate `refine` with the encode-free / renumbering round** (+ prove its
+>   `Descend.RefineEquivariant`). `descend` takes `refine` as a **parameter** precisely so the `Encodable.encode`
+>   staller is *not* baked in — so this is now a clean, bounded build rather than a redefinition. Use `@[csimp]`;
+>   **never `@[implemented_by]`**.
 > - Everything below remains accurate as the *findings record* (what runs, what hangs, and why).
 
 **Where it stands (2026-07-07):** the Lean canonizer's output **is computable, `#eval`-runs, and is ①a-sound (proven,

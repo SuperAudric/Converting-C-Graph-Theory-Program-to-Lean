@@ -42,6 +42,16 @@
 >   symmetric seal's "or Cameron". See `chain-descent-endgame-spec.md` §1a and `chain-descent-deferred-decisions.md`.
 > - **Live cost frontier:** re-base the node-count bound onto the interleaved object (mixed-composition Stage 4); the
 >   quasipoly-seal pilot below still validates the per-node `w` machinery and is unaffected.
+> - **★ THE OBJECT TO COST NOW EXISTS (2026-07-13): `ChainDescent.Descend.descentCost`** — the `cost` projection of
+>   `descend`, the same definition ①a/①b/①c are proved of (`Descend.lean`; the D1 "cost co-defined with the value"
+>   decision, realized). **② is now the main open obligation.** Two concrete tasks: (a) prove a node bound for the
+>   **branching** descent — the **verify-consume monovariant** (each covering-narrowing strictly reduces residual
+>   symmetry; each force reduces free relations; each defer is bounded by the branching bound); (b) replace `descend`'s
+>   **`fuel`-exhaustion `none`** — a deliberate *placeholder* — with the real **mutual-stall** flag.
+>   **⚠ FUEL IS PER-LAYER AND MUST STAY THAT WAY:** every branch at a level gets the same fuel and the accumulated cost
+>   is **never fed back into it**, so no earlier resolver can drain a shared budget and make a *later, polynomial*
+>   resolver flag through no fault of its own. This keeps "resolver `R` never flags on class `X`" a **local** statement
+>   about `R`. Do not "optimize" this into a threaded global budget.
 
 **Built substrate (reusable; live source `ChainDescent/CostModel.lean` + `ChainDescent/CanonForm.lean`, axiom-clean; the
 authoritative record of what is proved is `PublicTheoremIndex.md`).**

@@ -47,12 +47,16 @@
 > **"stalled" being equivariant**). **The framework is DONE: ①a/①b/①c reduce to exactly two facts about `descend`
 > — `SoundOpt` and `IsoInvariantOpt`.**
 >
-> **▶ Stage 0b SKELETON LANDED (2026-07-13, `ChainDescent/Descend.lean`, in `build.sh`, axiom-clean, build green).**
-> `descend` exists, is **computable, and RUNS** (`#eval`: K3/path canonize; all 9 relabellings of the path give the
-> identical form). Computable leaf emit (`rankInv`/`leafMatrix`) with **`leafMatrix_sound` = ①a at the leaf**;
-> **index-free `indivOne`** (the X3 cut); equivariant target-cell selector; `refine` a **parameter** (encode-free
-> round drops in); resolvers **stubbed** (`deferAll`). **NEXT = Stage 2** — prove `SoundOpt descend` (induction; leaf
-> case done) and `IsoInvariantOpt descend` (the one hard theorem). Then Stage 1's `Resolver` contract + Stage 4's cost.
+> **▶▶▶ STAGES 0b AND 2 ARE DONE (2026-07-13, `ChainDescent/Descend.lean`, in `build.sh`, axiom-clean, no `sorry`,
+> full build green).** `descend` — the **computable, resolver-parameterized branching** descent in `CostM` — exists,
+> **runs** (`#eval`: K3/path canonize; all 9 relabellings of the path give the identical form), and is **PROVED a
+> canonical form**: **`isCanonicalFormOpt_canonForm?`** = sound ∧ iso-invariant ⟹ **①a/①b/①c all discharged for the
+> real object**, modulo exactly two carried hypotheses (`RefineEquivariant`, `Covering`).
+>
+> **▶ NEXT (in dependency order):** **(1) Stage 4 — ② cost + the real mutual-stall flag** (the main gap; the old `n⁴`
+> bound used the single-path `nbud = n` and does **NOT** transfer); **(2) instantiate `refine`** with the encode-free
+> round + prove its `RefineEquivariant`; **(3) Stage 3 resolver instances** — consume (`matchOracle` + covering
+> witness) and force (rigid seal P1–P4); **(4) ③**. Note (3) **cannot break ①** — resolvers only ever *narrow*.
 
 **The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
 from source (2026-07-10):
@@ -367,14 +371,18 @@ Stage 0a (Option-lift) ─→ Stage 0b (the object: computable CostM descend) �
 Stage 3 instances (independent): consume (matchOracle + CoveredByPathFixingAut) · force (rigid seal P1–P4, IR §11.12)
 ```
 
-- **Start-anytime, independent:** Stage 0a's `Option`-lift; the `Resolver` contract (Stage 1); the rigid solver's
-  **P1** (extraction soundness, standalone, `chain-descent-ir-blindspot-solver.md` §11.12).
-- **Critical path:** 0a → 0b → 2. Stage 2 is the whole of ①.
-- **Not gating:** Stage 3's instances — Stages 0–2 are proved against the resolver **contract**, so the descent's
-  correctness does not wait on either the oracle's or the rigid solver's Lean witness. This is also what makes the
-  residue shrinkable later (add a resolver, re-prove nothing).
-- **Lock now (§1.4 item 3):** the encode-free / renumbering `refineStep`. It is the only choice whose later change
-  means redefining the object everything else is proved about.
+- **✅ DONE:** Stage 0a (spec + `Option`-lift), Stage 0b (the object), Stage 1 (the `Resolver`/`Covering` contract),
+  **Stage 2 (the whole of ①)**. Critical path 0a → 0b → 2 is complete.
+- **▶ NEXT / critical path:** **Stage 4** (② cost + the real mutual-stall flag) and **instantiating `refine`** with the
+  encode-free round (+ its `RefineEquivariant`). These two are what a fresh reader should pick up.
+- **Start-anytime, independent:** the rigid solver's **P1** (extraction soundness, standalone,
+  `chain-descent-ir-blindspot-solver.md` §11.12).
+- **Not gating anything:** Stage 3's instances — ① is proved against the resolver **contract**, so correctness waits on
+  neither the oracle's nor the rigid solver's Lean witness, and **a resolver can only ever shrink the flagged residue,
+  never break ①**. This is what makes a future unhandled-residue solver plug in with **no re-proof**.
+- **Locked (§1.4 item 3):** `refine` is a **parameter**, so the `Encodable.encode` staller is not baked in. Instantiate
+  it with the encode-free / renumbering round; that is the only choice whose later change would mean redefining the
+  object everything else is proved about.
 - **Stage 0a DONE (2026-07-11), NEXT STEP = Stage 0b.** 0a (the correctness framework: `IsCanonicalForm`,
   `complete_of_isCanonicalForm`, `lexMin`/`isCanonicalForm_lexMin`) is landed in `ChainDescent/CanonicalForm.lean`
   (namespace `ChainDescent.CanonSpec`), in `build.sh`, axiom-clean — it *simplifies* ①b/①c (see §5) and gives the

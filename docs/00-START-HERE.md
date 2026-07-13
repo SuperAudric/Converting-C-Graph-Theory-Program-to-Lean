@@ -130,8 +130,8 @@ rigid-GI∈P). A purely sequential `phase2 ∘ phase1` is only the **fusion-free
 > Almost every real residue is **mixed** (consume some symmetry, force/branch the rest). The current Lean `canonForm?`
 > is a single deterministic path with no branching/oracle/phases (source-verified) — so the priority is building the
 > **branching, interleaved descent** and proving its spec **sound ∧ iso-invariant** (Stage 0a landed: `complete_of_isCanonicalForm`
-> makes completeness free; NEXT = Stage 0b, the branching descent + its X3 iso-invariance obligation). Composition =
-> a **fold over alternation depth**, not one append.
+> makes completeness free). **✅ DONE 2026-07-13** — the branching descent (`Descend.lean`) is built AND proved sound ∧
+> iso-invariant; see the trio note below. Composition = a **fold over alternation depth**, not one append.
 
 **What is built, axiom-clean, in `build.sh`.** The canonizer-correctness substrate (direction-invariance `warm_6_2`,
 the descent spine `spine_branch_independent`); the **cross-branch harvest** machinery (Part A stabilizer-chain object,
@@ -143,10 +143,22 @@ path**; the mixed-composition **Stage 0a** framework (`ChainDescent.CanonicalFor
 skeleton (`Phase2Handoff.lean`). The **C# rigid solver is complete for handoff** (`Option2Solver.cs`, recover→solve→emit→verify,
 ring-general; every B-step landed) — its Lean witness (P1–P4) is the remaining rigid work.
 
+**★★★ THE CORRECTNESS TRIO IS DISCHARGED (2026-07-13) — `ChainDescent/Descend.lean`.** The Lean canonizer is no longer a
+single deterministic path: `descend` is **the object** — a *computable*, resolver-parameterized **branching** descent in
+the cost monad — and **`isCanonicalFormOpt_canonForm?`** proves it **sound ∧ iso-invariant**, hence a *complete*
+isomorphism invariant with an iso-invariant flag. **①a, ①b, ①c all hold for the real object**, modulo exactly two carried
+hypotheses (`RefineEquivariant`, `Covering`). It **runs** (`#eval`): the executable and the cost are just the `value` /
+`cost` projections of that one definition. Read
+[`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) §1 (the object + the branch-**covering**
+contract) before touching it.
+
 **The live Lean frontier** (authoritative "what's left" = [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)):
-(1) the **branching interleaved descent** (mixed-composition Stage 0b) so `canonForm?` rides the real object, and its
-**X3 iso-invariance** obligation (the one thing Stage 0a reduces ①b/①c to); (2) the **rigid seal P1–P4** (IR §11.12) as
-the `Phase2.Solver` witness — P1 (extraction soundness) first, standalone; (3) re-base the cost bound onto the fixpoint.
+(1) **② — the cost + the flag** (the main gap): re-base the node bound onto the *branching* object (the old `n⁴` used the
+single-path `nbud = n` and does **not** transfer) and replace `descend`'s fuel placeholder with the real **mutual-stall**
+flag; (2) **instantiate `refine`** with the encode-free round + prove its `RefineEquivariant`; (3) the **resolver
+instances** — consume (`matchOracle` + covering witness) and force (**the rigid seal P1–P4**, IR §11.12); (4) **③**
+(`stalled ⟹ D1 ∨ D2`). Note (3) cannot break ① — the resolvers are only ever *narrowings*, so they shrink the flagged
+residue and nothing else.
 
 **The one genuine wall.** `hSmallAutThin` — "small-Aut primitive residue ⟹ bounded WL-recovery" — is open at the
 *polynomial* threshold (there it *is* GI ∈ P) and is quarantined behind the mutual-stall flag: by design the canonizer is

@@ -2712,22 +2712,22 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `Showcase.Iso` | 43-46 | — | Definition |
-| `Showcase.UnhandledResidue` | 103-110 | — | Definition |
-| `Showcase.cameron_classification` | 128-133 | — | axiom |
-| `Showcase.skresanov_two_closure` | 134-137 | — | axiom |
-| `Showcase.liebeck_rank3` | 138-141 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 142-146 | — | axiom |
-| `Showcase.ftpg` | 147-153 | — | axiom |
-| `Showcase.buekenhout_shult` | 154-159 | — | axiom |
-| `Showcase.payne_thas` | 160-168 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 169 | — | axiom |
-| `Showcase.canon_sound` | 177-188 | — | — |
-| `Showcase.canon_complete` | 190-196 | — | — |
-| `Showcase.flag_iso_invariant` | 198-203 | — | — |
-| `Showcase.canon_poly_or_flag` | 205-215 | — | — |
-| `Showcase.residue_if_flag` | 217-226 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 228-234 | — | — |
-| `Showcase.canonizer` | 241-251 | — | — |
+| `Showcase.UnhandledResidue` | 107-114 | — | Definition |
+| `Showcase.cameron_classification` | 132-137 | — | axiom |
+| `Showcase.skresanov_two_closure` | 138-141 | — | axiom |
+| `Showcase.liebeck_rank3` | 142-145 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 146-150 | — | axiom |
+| `Showcase.ftpg` | 151-157 | — | axiom |
+| `Showcase.buekenhout_shult` | 158-163 | — | axiom |
+| `Showcase.payne_thas` | 164-172 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 173 | — | axiom |
+| `Showcase.canon_sound` | 181-192 | — | — |
+| `Showcase.canon_complete` | 194-200 | — | — |
+| `Showcase.flag_iso_invariant` | 202-207 | — | — |
+| `Showcase.canon_poly_or_flag` | 209-219 | — | — |
+| `Showcase.residue_if_flag` | 221-230 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 232-238 | — | — |
+| `Showcase.canonizer` | 245-255 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -2753,3 +2753,78 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `CanonSpec.sound_lexMin` | 117-123 | Soundness of a lex-min canonizer, from: each candidate is a relabelling. | — |
 | `CanonSpec.isoInvariant_lexMin` | 125-133 | Iso-invariance of a lex-min canonizer, reduced to `cand (relabelAdj σ G) = cand G`. | — |
 | `CanonSpec.isCanonicalForm_lexMin` | 135-144 | Stage-0 assembly: a lex-min over a sound, set-iso-invariant candidate family is a canonical form. | — |
+| `CanonSpec.SoundOpt` | 157-160 | §Stage-0a Soundness for a FLAGGING canonizer: whenever it answers, the output is a relabelling of the input. Exactly the `Publication.canon_sound` (①a) statement. | Definition |
+| `CanonSpec.IsoInvariantOpt` | 162-165 | §Stage-0a Iso-invariance for a flagging canonizer: relabelling the input changes nothing — including WHETHER it flagged. One equation carrying both the output invariance and ①c. | Definition |
+| `CanonSpec.IsCanonicalFormOpt` | 167-170 | §Stage-0a THE complete spec of the mixed canonizer: sound ∧ iso-invariant. Nothing else is required — in particular no global lex-min. | Definition |
+| `CanonSpec.eq_of_graphIso` | 172-178 | §Stage-0a Isomorphic inputs receive the same answer (same value, or both flagged). The engine behind both ①b and ①c. | — |
+| `CanonSpec.complete_of_isCanonicalFormOpt` | 180-194 | §Stage-0a ①b FOR FREE: a sound, iso-invariant flagging canonizer is a complete isomorphism invariant. The `Publication.canon_complete` statement. | — |
+| `CanonSpec.flag_iso_invariant_of_isoInvariantOpt` | 196-200 | §Stage-0a ①c FOR FREE: flagging is a property of the isomorphism class. The `Publication.flag_iso_invariant` statement. | — |
+| `CanonSpec.IsoInvariantPred` | 213-215 | §Stage-0a An iso-invariant predicate on graphs — the `handled` / ¬stalled side of the flag. | Definition |
+| `CanonSpec.guardBy` | 217-220 | §Stage-0a Gate a total construction by a handled-predicate: answer when handled, flag otherwise. | Definition, `noncomputable` |
+| `CanonSpec.isCanonicalFormOpt_guardBy` | 222-242 | §Stage-0a THE FLAG IS FREE: a canonical form gated by an iso-invariant handled-predicate is a flagging canonical form. So the flag adds no obligation beyond the equivariance of `stalled`. | — |
+| `CanonSpec.isCanonicalFormOpt_some` | 244-255 | §Stage-0a The total theory embeds: a never-flagging canonical form is a flagging one. | — |
+## ChainDescent/Descend.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Descend.decidableDiscrete` | 53-55 | §Stage-0b Decidability of `Discrete`, so the descent can test `is this a leaf?` computably. | Instance |
+| `Descend.rankInv` | 64-67 | §Stage-0b Computable inverse of `vertexRank` (rank → vertex). Needed because `Colouring.rankPerm` is noncomputable, so the leaf cannot be emitted through it. | Definition |
+| `Descend.vertexRank_surj` | 69-74 | §Stage-0b On a discrete colouring `vertexRank` is surjective (it underlies the bijection `rankPerm`). | — |
+| `Descend.rankInv_spec` | 76-88 | §Stage-0b `rankInv` really inverts `vertexRank` on a discrete colouring. | — |
+| `Descend.rankInv_eq_symm` | 90-95 | §Stage-0b `rankInv` is the inverse permutation `rankPerm.symm`. | — |
+| `Descend.leafMatrix` | 97-99 | §Stage-0b The leaf matrix: relabel the input by colour-rank. Computable; the descent's output at a discrete node. | Definition |
+| `Descend.leafMatrix_eq_labelledAdj` | 101-107 | §Stage-0b The computable leaf emit EQUALS `labelledAdj (rankPerm …)` — so it is a genuine relabelling. | — |
+| `Descend.leafMatrix_sound` | 109-113 | §Stage-0b ①a at the leaf: the emitted matrix is a relabelling of the input. Base case of `SoundOpt descend`. | — |
+| `Descend.indivOne` | 122-125 | §Stage-0b INDEX-FREE individualization (the X3 cut): mark one vertex with a parity bit on its existing colour, never `v.val`. An index-dependent individualization leaks the labelling into the leaf and cannot be iso-invariant. | Definition |
+| `Descend.indivOne_singleton` | 127-133 | §Stage-0b The individualized vertex becomes a singleton (parity separates it). | — |
+| `Descend.indivOne_refines_off` | 135-141 | §Stage-0b Off the individualized vertex, `indivOne` induces the same partition as the input colouring. | — |
+| `Descend.cellOf` | 150-152 | §Stage-0b The colour class (cell) of a given colour. | Definition |
+| `Descend.nonSingletonColours` | 154-156 | §Stage-0b The branchable colours — those whose cell is not a singleton. | Definition |
+| `Descend.targetColour` | 158-160 | §Stage-0b The EQUIVARIANT target-cell selector: the least non-singleton colour value (a function of the colouring alone; no vertex index is read). `none` exactly when discrete. | Definition |
+| `Descend.branches` | 162-171 | §Stage-0b The branch list — vertices of the target cell. A `List` (not `Finset`: `Finset.toList` is noncomputable), so its ORDER is labelling-dependent; harmless because the aggregate is a permutation-invariant minimum. | Definition |
+| `Descend.Resolver` | 181-182 | §Stage-1 A branch-narrowing resolver (the computable half of the contract): narrow the branch list, or defer. Consume and force are two instances. | `abbrev` |
+| `Descend.deferAll` | 184-186 | §Stage-1 The baseline resolver: never narrows. `descend deferAll` is the honest exhaustive-branching object. | Definition |
+| `Descend.allPairs` | 202-204 | §Stage-2 All index pairs in row-major order; the basis for `flatten` (and hence for `flatten_injective`). | Definition |
+| `Descend.mem_allPairs` | 206-208 | §Stage-2 Every index pair occurs in `allPairs`. | — |
+| `Descend.flatten` | 210-214 | §Stage-2 Row-major flattening of a labelled matrix, defined over `allPairs` so that injectivity is immediate. | Definition |
+| `Descend.flatten_injective` | 216-219 | §Stage-2 A matrix is determined by its row-major entries. This is what makes `lexLe` a genuine total order, hence the aggregate a well-defined minimum. | — |
+| `Descend.lexLeList` | 221-225 | §Stage-2 Computable lexicographic ≤ on `Nat` lists. | Definition |
+| `Descend.lexLe` | 227-228 | §Stage-2 Computable row-major lexicographic ≤ on labelled matrices. | Definition |
+| `Descend.lexMin?` | 230-236 | §Stage-2 The lex-least matrix of a list (`none` on the empty list). | Definition |
+| `Descend.aggregate` | 238-240 | §Stage-0b Combine branch results: flag if any branch flagged, else take the lex-least leaf. Deterministic — which is all iso-invariance needs (the spec never asks WHICH leaf). | Definition |
+| `Descend.descend` | 252-271 | §Stage-0b THE OBJECT: the computable, resolver-parameterized branching descent, in the cost monad. Correctness (①) is theorems about its `value`, cost (②) about its `cost`, and the executable IS this definition. Fuel is PER-LAYER, never threaded, so each resolver's poly-or-flag behaviour is local. | Definition |
+| `Descend.canonForm?` | 273-278 | §Stage-0b The top-level canonizer object — the `value` projection of `descend`. This is what `SoundOpt`/`IsoInvariantOpt` are proved of and what `Publication.canonForm?` becomes. | Definition |
+| `Descend.descentCost` | 280-283 | §Stage-0b The descent's cost — the `cost` projection of the SAME definition (no separate cost object, no bridge). | Definition |
+| `Descend.lexMin?_mem` | 293-310 | §Stage-2 The lex-min of a list is a member of it. | — |
+| `Descend.aggregate_mem` | 312-322 | §Stage-2 The aggregate returns one of its inputs — the key to soundness of the branch case. | — |
+| `Descend.lexLeList_refl` | 331-335 | §Stage-2 Reflexivity of list-lex ≤. | — |
+| `Descend.lexLeList_total` | 337-349 | §Stage-2 Totality of list-lex ≤. | — |
+| `Descend.lexLeList_trans` | 351-380 | §Stage-2 Transitivity of list-lex ≤. | — |
+| `Descend.lexLeList_antisymm` | 382-395 | §Stage-2 Antisymmetry of list-lex ≤. | — |
+| `Descend.lexLe_refl` | 397 | §Stage-2 Reflexivity of matrix-lex ≤. | — |
+| `Descend.lexLe_total` | 398-399 | §Stage-2 Totality of matrix-lex ≤. | — |
+| `Descend.lexLe_trans` | 400-401 | §Stage-2 Transitivity of matrix-lex ≤. | — |
+| `Descend.lexLe_antisymm` | 402-403 | §Stage-2 Antisymmetry of matrix-lex ≤ (via `flatten_injective`). Makes `lexLe` a total order, hence the aggregate a genuine minimum. | — |
+| `Descend.lexMin?_eq_none_iff` | 405-416 | §Stage-2 `lexMin?` flags exactly on the empty list. | — |
+| `Descend.lexMin?_le` | 418-457 | §Stage-2 `lexMin?` really is the minimum: it is ≤ every member. | — |
+| `Descend.lexMin?_perm` | 459-481 | §Stage-2 `lexMin?` is permutation-invariant — it depends only on the multiset of candidates. | — |
+| `Descend.aggregate_perm` | 483-498 | §Stage-2 THE AGGREGATE IS PERMUTATION-INVARIANT. Discharges the obligation created by the index-ordered branch `List`: the labelling-dependent branch order provably never leaks into the output. | — |
+| `Descend.descend_sound` | 500-521 | §Stage-2 ①a for the descent: whenever it answers, the answer is a relabelling. Holds for ANY refinement and ANY resolver — narrowing only removes branches, so a mis-narrowing resolver costs a branch, never correctness. | — |
+| `Descend.soundOpt_canonForm?` | 523-527 | §Stage-2 `SoundOpt` for the top-level object — the `Publication.canon_sound` (①a) obligation, DISCHARGED. | — |
+| `Descend.transportColouring` | 540-542 | §Stage-2 Transport a colouring along a relabelling: χ on G becomes χ∘σ⁻¹ on `relabelAdj σ G`. | Definition |
+| `Descend.discrete_transport` | 544-554 | §Stage-2 Discreteness transports along a relabelling. | — |
+| `Descend.vertexRank_transport` | 556-562 | §Stage-2 The rank of σv under the transported colouring is the rank of v under the original — the reason the σ cancels in the leaf. | — |
+| `Descend.indivOne_transport` | 564-574 | §Stage-2 Individualization commutes with transport. This is where the INDEX-FREE choice pays: an index-dependent individualization would fail this outright. | — |
+| `Descend.cellOf_card_transport` | 576-590 | §Stage-2 Cell sizes are preserved under transport. | — |
+| `Descend.image_transport` | 592-601 | §Stage-2 The set of colour values is preserved under transport. | — |
+| `Descend.targetColour_transport` | 603-612 | §Stage-2 The target colour is the same natural number on both sides — so the branch set transports. | — |
+| `Descend.leafMatrix_transport` | 614-635 | §Stage-2 THE HEART OF ①b: the emitted leaf matrices are LITERALLY EQUAL under relabelling. The σ cancels because the output is indexed by colour-RANKS, not by vertices. | — |
+| `Descend.RefineEquivariant` | 649-655 | §Stage-2 Carried hypothesis on the refinement PARAMETER: the refinement round commutes with relabelling. (The encode-free round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not baked in.) | Definition |
+| `Descend.Covering` | 657-666 | §Stage-2 THE RESOLVER CONTRACT (branch covering): narrowing does not change the aggregate, because every discarded branch's output is ALREADY REACHABLE through a kept one. Stated where used, so it needs no knowledge of the final answer. NB resolver EQUIVARIANCE is deliberately NOT required. | Definition |
+| `Descend.covering_deferAll` | 668-673 | §Stage-2 The baseline resolver never narrows, so it is trivially covering — the exhaustive-branching object carries no resolver obligation at all. | — |
+| `Descend.branches_transport_perm` | 677-696 | §Stage-2 The branch list transports UP TO PERMUTATION (it is built in index order) — which is exactly why `aggregate_perm` is needed. | — |
+| `Descend.descend_transport` | 698-734 | §Stage-2 ①b/①c: the descent is ISO-INVARIANT, modulo `RefineEquivariant` + `Covering`. Covering lets each side be rewritten to its FULL-branch aggregate, so no resolver equivariance is needed. | — |
+| `Descend.isoInvariantOpt_canonForm?` | 736-750 | §Stage-2 `IsoInvariantOpt` for the top-level object — ①b and ①c then follow for free via Stage 0a. | — |
+| `Descend.isCanonicalFormOpt_canonForm?` | 752-759 | §Stage-2 ★ THE STAGE-2 CAPSTONE: the descent IS a canonical form (sound ∧ iso-invariant), hence a complete isomorphism invariant with an iso-invariant flag. ①a/①b/①c all discharged for the real object, modulo exactly two carried hypotheses. | — |
+| `Descend.canonForm?_complete` | 761-767 | §Stage-2 The `Publication.canon_complete` (①b) obligation, for the real object. | — |
+| `Descend.canonForm?_flag_iso_invariant` | 769-774 | §Stage-2 The `Publication.flag_iso_invariant` (①c) obligation, for the real object. | — |

@@ -63,10 +63,27 @@ The single durable statement, superseding the earlier sequential/RRU/confinement
   obligation. These transfer to the interleaved object; the concrete `n⁴`/quasipoly *degree* must be re-established
   against it (the `nbud = n` single-path justification does not carry — see cost-model STATUS).
 
-**The live Lean frontier:** (1) the mixed-composition **branching descent** (Stage 0b) so `canonForm?` rides the real
-interleaved object, and its X3 iso-invariance obligation; (2) the **rigid seal P1–P4** (IR §11.12) as the `Phase2.Solver`
-witness; (3) re-base the cost accounting onto the fixpoint. **Separate BONUS (option B, off the `#print axioms` path):** a
-*runnable* Lean canonizer — [`chain-descent-executable-track.md`](./chain-descent-executable-track.md) (①a-sound; slow — OPEN).
+**★★★ THE CORRECTNESS TRIO IS DISCHARGED (2026-07-13).** `ChainDescent/Descend.lean` (in `build.sh`, axiom-clean, no
+`sorry`) defines **the object** — `descend`, a *computable*, resolver-parameterized **branching** descent written in
+`CostM` — and proves **`isCanonicalFormOpt_canonForm?`**: it is **sound ∧ iso-invariant**, hence (Stage 0a) a complete
+isomorphism invariant with an iso-invariant flag. So **①a, ①b, ①c all hold for the real object**, modulo exactly **two
+carried hypotheses**: `RefineEquivariant` (the refinement parameter) and `Covering` (the resolver contract — *branch
+covering*; resolver **equivariance is NOT needed**). The **executable and the cost are `value`/`cost` projections of that
+same definition** — there is no second object and no bridge.
+
+**The live Lean frontier (what a fresh reader should pick up):**
+1. **② / the cost + flag (Stage 4)** — the main remaining gap. Re-base the node bound onto the branching object (the
+   old `n⁴` used `nbud = n` = the single-path assume-VT justification and does **not** transfer); replace `descend`'s
+   `fuel`-exhaustion placeholder with the real **mutual-stall** flag. Fuel is **per-layer, never threaded**, so each
+   resolver is poly-or-flag *locally*.
+2. **Instantiate `refine`** with the encode-free/renumbering round and prove its `RefineEquivariant` (a bounded build;
+   it also makes the executable fast — the `Encodable.encode` staller is *not* baked in, by design).
+3. **The resolver instances (Stage 3)** — consume (`matchOracle` + a `CoveredByPathFixingAut` covering witness) and
+   force (**the rigid seal P1–P4**, IR §11.12). Neither can break ①; they only shrink the flagged residue.
+4. **③** — `stalled ⟹ D1 ∨ D2`.
+
+**No longer a separate track:** the *runnable* Lean canonizer — the executable **is** `descend`
+([`chain-descent-executable-track.md`](./chain-descent-executable-track.md)); it `#eval`s today.
 
 ---
 
@@ -213,10 +230,10 @@ existing pieces; "new" = a genuinely unbuilt object.
 
 | Obligation | Statement (informal) | Discharged by | State |
 |---|---|---|---|
-| **①a `canon_sound`** | Output is a relabelling of the input | `SpineChain.canonAdj` (leaf relabelling by the rank permutation) is a `labelledAdj` | **Built substrate; assembly** — once `canonForm?` is defined off the descent |
-| **①b `canon_complete`** | Complete iso-invariant when it answers | `spine_branch_independent` + `warm_6_2` (direction-invariance) + `canon_sound` | **Built substrate; assembly** |
-| **①c `flag_iso_invariant`** | Flagging is a class property | partition-invariant selector (`target_direction_blind` / the spine) | **Built substrate; assembly** |
-| **② `canon_poly_or_flag`** | Poly-time or flag | **Cost model** (new) + the **consumption bridge** "reaches-rigid ⟹ poly node budget ⟹ ¬flag ∧ cost ≤ poly" (new) | **NEW — the main gap; where poly stops being meta** |
+| **①a `canon_sound`** | Output is a relabelling of the input | **`Descend.soundOpt_canonForm?`** (`ChainDescent/Descend.lean`) | **★ DISCHARGED (2026-07-13)** on the real branching object; holds for ANY `refine`/resolver |
+| **①b `canon_complete`** | Complete iso-invariant when it answers | **`Descend.canonForm?_complete`** (via `CanonSpec.complete_of_isCanonicalFormOpt` + `Descend.isCanonicalFormOpt_canonForm?`) | **★ DISCHARGED (2026-07-13)**, modulo the 2 carried hyps `RefineEquivariant` + `Covering` |
+| **①c `flag_iso_invariant`** | Flagging is a class property | **`Descend.canonForm?_flag_iso_invariant`** | **★ DISCHARGED (2026-07-13)** — free; `IsoInvariantOpt` is one equation on `Option`s, carrying output *and* flag invariance |
+| **② `canon_poly_or_flag`** | Poly-time or flag | the **`cost` projection** of the same `descend` (`Descend.descentCost`, co-defined in `CostM`) + the **verify-consume monovariant** (the old `n⁴`/`nbud = n` single-path bound does NOT transfer) | **OPEN — now the main gap.** Flag = **mutual stall**, not `base > baseMax` |
 | **③ `residue_if_flag`** | Flag → genuine obstruction | **`UnhandledResidue` definition** (new) + `reachesRigidOrCameron_*` consumed (Seal) + IR residual characterization (IR) + citations | **NEW — gated on Seal + IR completion** |
 | **non-vacuity** | Handled and unhandled graphs both exist | concrete witnesses (a forms-graph / CFI handled; a hidden-Johnson unhandled) | **NEW — small, but the anti-vacuity guard** |
 
@@ -416,10 +433,14 @@ mixed-composition Lean track plus the rigid seal, which run in parallel (the com
    `Option`-lift** (small) → **Stage 0b**: define `descend : AdjMatrix n → CostM (Option Matrix)` — computable, over
    the **encode-free `refineStep`** (lock this now; it is definitional and it is what makes the executable a free
    projection), parameterized over a list of `Resolver`s (computable `decide`, `Prop` fields for equivariance +
-   **covering**). → **Stage 2, the one hard theorem**: `descend` is **`Sound ∧ IsoInvariant`**, by induction over the
-   descent (`selCell` equivariant ⟹ the branch list transports; resolvers equivariant; leaf absorbs σ via `rankPerm`).
-   ①b/①c are then **free**. The resolver *instances* (consume, force) do not gate this — the descent is proved against
-   the **contract**, which is also what lets a future solver shrink the residue with no re-proof.
+   **covering**). → **Stage 2**: `descend` is **`Sound ∧ IsoInvariant`**, by induction over the descent (the branch
+   list transports; the leaf matrix absorbs σ via the rank permutation). ①b/①c are then **free**. The resolver
+   *instances* (consume, force) do not gate this — the descent is proved against the **contract**, which is also what
+   lets a future solver shrink the residue with no re-proof.
+   **✅ ALL OF THIS IS DONE (2026-07-13, `ChainDescent/Descend.lean`, axiom-clean, no `sorry`):** capstone
+   `isCanonicalFormOpt_canonForm?` ⟹ **①a/①b/①c discharged**, modulo `RefineEquivariant` + `Covering`. **The remaining
+   work is ② (cost + the mutual-stall flag), instantiating `refine` with the encode-free round, the resolver
+   instances, and ③** — see the STATUS block at the top of this file.
 2. **Build the rigid seal (Algorithm R, IR §11.12 roadmap)** — the `Phase2.Solver` witness that Stage 3 plugs in. Lean
    **P1** first (extraction soundness, standalone F₂/matroid) alongside the (already-built) C# solver; then P3 (the
    Smith solve + canonical-form iso-invariance) + P4 (the capstone `canonizesRigidResidue_or_flags`, isolating
@@ -431,7 +452,7 @@ mixed-composition Lean track plus the rigid seal, which run in parallel (the com
    non-vacuity, the Publication swap, the headline.
 
 ```
-Interleaved descent (mixed-composition Stages 0b→2): branching canonForm? + X3 iso-invariance ─→ ①a/①b/①c ─┐
+✅ Interleaved descent (mixed-composition 0a/0b/1/2, Descend.lean): branching canonForm?, sound ∧ iso-inv ─→ ①a/①b/①c ─┐
                                                                                                             │
 Rigid seal (Algorithm R, IR §11.12): P1..P4 + §11.14 no-Cameron ─→ Phase2.Solver witness + D2 rigid residue ┤
                                                                                                             ├─→ D1∨D2 UnhandledResidue ─→ ③ ─┐

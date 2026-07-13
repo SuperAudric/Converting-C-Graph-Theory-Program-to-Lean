@@ -32,6 +32,9 @@ The active library is this `ChainDescent/` split plus the top-level
 | `LinearOracle.lean` | the linear (abelian / CFI) oracle |
 | `CFI.lean` | CFI gadgets, gauge flips (`cfiFlipAut`), the `Z₂^β` cycle space, the CFI-cov coverage instance |
 | `Group.lean` | permutation-group scaffolding |
+| **`CanonicalForm.lean`** | **the correctness SPEC** (mixed-composition Stage 0a): `IsCanonicalFormOpt = SoundOpt ∧ IsoInvariantOpt` on the *flagging* type, and the payoff **`complete_of_isCanonicalFormOpt`** — sound ∧ iso-invariant ⟹ **complete, for free**. `flag_iso_invariant_of_isoInvariantOpt` gives ①c free too. (`lexMin` is a legacy *optional* combinator — the spec is NOT a global lex-min.) |
+| **`Descend.lean`** | **★ THE OBJECT** (Stage 0b) + **the correctness proof** (Stage 2). `descend` = a **computable**, resolver-parameterized **branching** descent in `CostM`; `canonForm?` / `descentCost` are its `value` / `cost` projections, and **the executable IS this definition**. Capstone **`isCanonicalFormOpt_canonForm?`** ⟹ **①a/①b/①c discharged**, modulo `RefineEquivariant` + `Covering`. Key internals: computable leaf emit (`rankInv`/`leafMatrix`, since `rankPerm` is noncomputable), **index-free `indivOne`** (the X3 cut), equivariant `targetColour`, and `aggregate_perm` (the branch list is index-ordered, so the aggregate must be a permutation-invariant minimum). |
+| `Phase2Handoff.lean` | the `Phase2.Solver` / `Sound` / `IsoInvariant` **contract seam** the rigid solver fills. ⚠ Its `RRU` namespace (reachability apparatus) is **RETIRED** — content-free; do not build on it. |
 
 > This table is the **core** substrate only. The forms-graph node-4 work is further modules in `build.sh` (not listed
 > here): `CascadeAffine` + the ~14 pair-route modules (`…AffinePolarSeal`, the quasipoly `VO^ε` seal) and the **Route C**
