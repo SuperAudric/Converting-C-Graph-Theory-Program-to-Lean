@@ -112,10 +112,38 @@
 > (ii) `lean` **discards all `#eval` output on timeout**, so one slow `#eval` late in a file silently swallows the
 > earlier results. Bisect with one `#eval` per file, and time the bare-import baseline.
 >
+> **▶▶▶ STAGE 3 — THE ORACLE RESOLVER IS LANDED (2026-07-14, `ChainDescent/Consume.lean`, in `build.sh`,
+> axiom-clean, no `sorry`, full build green).** `consume` keeps **one representative per orbit** of the branch cell
+> and discards the rest — the **`Covering`** route.
+>
+> **★ THE ORACLE IS UNTRUSTED — the resolver VERIFIES.** `consume` is parameterized by an arbitrary **`Supply`**
+> (in the real system: `matchOracle` / the cascade oracle / the solver kernel) which carries **no proof obligation
+> whatsoever**. The resolver filters it through a *decidable* automorphism-and-colour check (`IsColAut`) and uses
+> only the survivors. Hence **`coveringAt_consume` holds for EVERY supply — even a malicious or buggy one**, and
+> the capstone **`consume_canonizer`** gives `①a`/`①b`/`①c` **plus totality** with *no hypothesis on the oracle at
+> all*. This is the project's own rule — *never merge two vertices into one orbit without a proof, verified
+> edge-by-edge* — as a Lean contract. It puts the oracle's **completeness** entirely on the **②/firing** side of the
+> ledger and **nothing** on the ① soundness side. (⚠ Relocation is not elimination: a supply that never fires is
+> sound but useless — the descent then branches exhaustively and flags.)
+>
+> **★ `CoveringAt` — the fuel-graded covering — is what made this provable.** `consume` does *not* satisfy the
+> unconditional `Covering`: its covering witness is an automorphism `α`, and "the discarded branch and the kept one
+> have the same `descend` value" **is `descend_transport` at `σ = α`**. Not circular (it descends on fuel), but the
+> hypothesis has to be able to *use the induction hypothesis* — so `CoveringAt` threads `TransportAt rf R fuel` in,
+> exactly as `NarrowTransport` does. **This is the graded form every real resolver instance should target.** Also
+> new: **`aggregate_congr_mem`** (the aggregate depends only on the *set* of branch results, not the multiset) —
+> needed because consume genuinely *drops* branches.
+>
+> **★ IT PRUNES, AND IT STAYS RIGHT (`PerformanceTest.lean`, now a build-gating regression).** With a rotation
+> supply on cycles: `descentCost` **C₅ 2016 → 804, C₆ 4123 → 1372, C₇ 7568 → 2160**, and `#guard`s that the
+> oracle-driven form **equals the exhaustive form exactly** (the covering property — consume is *value-invisible*)
+> while still distinguishing non-isomorphic graphs and staying iso-invariant. The oracle fires at the root (constant
+> colouring ⟹ rotation verifies ⟹ one orbit ⟹ one branch instead of `n`) and correctly **defers** one level down,
+> where individualization breaks the symmetry and the rotation fails verification.
+>
 > **▶ NEXT (in dependency order):** **(1) Stage 4 — ② cost + the real mutual-stall flag** (the old `n⁴` bound used
-> the single-path `nbud = n` and does **NOT** transfer); **(2) Stage 3 resolver instances** — consume (`matchOracle`,
-> **`Covering`** route) and force (rigid solver, **`NarrowEquivariant`** route); **(3) ③**. Note (2) **cannot break
-> ①** — but it is where the residue actually shrinks (§3 Stage 3).
+> the single-path `nbud = n` and does **NOT** transfer); **(2) the FORCE resolver** — the rigid solver on the
+> **`NarrowEquivariant`** route (IR §11.12, re-based); **(3) ③**.
 
 **The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
 from source (2026-07-10):

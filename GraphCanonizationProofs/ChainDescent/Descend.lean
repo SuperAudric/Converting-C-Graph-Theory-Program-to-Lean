@@ -552,6 +552,55 @@ theorem aggregate_perm {rs rs' : List (Option (Labelled n))} (h : rs.Perm rs') :
   · rw [if_neg hcase, if_neg (by rw [hany]; exact hcase)]
     exact lexMin?_perm (h.filterMap id)
 
+/-- **`lexMin?` depends only on the SET of candidates** — a minimum under a total order does. Strictly more
+general than `lexMin?_perm`: multiplicities may differ too. -/
+theorem lexMin?_congr_mem {l l' : List (Labelled n)} (h : ∀ x, x ∈ l ↔ x ∈ l') :
+    lexMin? l = lexMin? l' := by
+  cases hl : lexMin? l with
+  | none =>
+      have hlnil : l = [] := (lexMin?_eq_none_iff l).mp hl
+      have hl'nil : l' = [] := by
+        apply List.eq_nil_iff_forall_not_mem.mpr
+        intro x hx
+        have hxl := (h x).mpr hx
+        rw [hlnil] at hxl
+        exact absurd hxl (List.not_mem_nil)
+      rw [hl'nil]; rfl
+  | some m =>
+      cases hl' : lexMin? l' with
+      | none =>
+          exfalso
+          have hl'nil : l' = [] := (lexMin?_eq_none_iff l').mp hl'
+          have hml' := (h m).mp (lexMin?_mem l hl)
+          rw [hl'nil] at hml'
+          exact absurd hml' (List.not_mem_nil)
+      | some m' =>
+          have h1 : lexLe m m' = true := lexMin?_le l m hl m' ((h m').mpr (lexMin?_mem l' hl'))
+          have h2 : lexLe m' m = true := lexMin?_le l' m' hl' m ((h m).mp (lexMin?_mem l hl))
+          rw [lexLe_antisymm h1 h2]
+
+/-- **★ THE AGGREGATE DEPENDS ONLY ON THE SET OF BRANCH RESULTS.** Stronger than `aggregate_perm`, and it is what
+the **consume** resolver needs: consume *drops* branches (it keeps one representative per orbit), so the branch
+multiset genuinely shrinks — but the *value set* is unchanged, and that is all the aggregate sees. -/
+theorem aggregate_congr_mem {rs rs' : List (Option (Labelled n))}
+    (h : ∀ x, x ∈ rs ↔ x ∈ rs') : aggregate rs = aggregate rs' := by
+  have hany : rs.any Option.isNone = rs'.any Option.isNone := by
+    apply Bool.eq_iff_iff.mpr
+    simp only [List.any_eq_true]
+    constructor
+    · rintro ⟨x, hx, hp⟩; exact ⟨x, (h x).mp hx, hp⟩
+    · rintro ⟨x, hx, hp⟩; exact ⟨x, (h x).mpr hx, hp⟩
+  unfold aggregate
+  by_cases hcase : rs'.any Option.isNone = true
+  · rw [if_pos hcase, if_pos (hany.trans hcase)]
+  · rw [if_neg hcase, if_neg (by rw [hany]; exact hcase)]
+    refine lexMin?_congr_mem ?_
+    intro x
+    simp only [List.mem_filterMap, id_eq]
+    constructor
+    · rintro ⟨a, ha, hax⟩; exact ⟨a, (h a).mp ha, hax⟩
+    · rintro ⟨a, ha, hax⟩; exact ⟨a, (h a).mpr ha, hax⟩
+
 /-- The aggregate answers whenever the branch list is nonempty and no branch flagged. -/
 theorem aggregate_ne_none {rs : List (Option (Labelled n))} (hne : rs ≠ [])
     (h : ∀ x ∈ rs, x ≠ none) : aggregate rs ≠ none := by
@@ -738,14 +787,39 @@ def Covering (rf : Refiner n) (R : Resolver n) : Prop :=
       = aggregate ((branches χ).map
         (fun v => (descend rf R adj fuel (refineV rf adj (indivOne χ v))).1))
 
-theorem narrowTransport_of_covering {rf : Refiner n} {R : Resolver n}
-    (hre : RefineEquivariant rf) (hcov : Covering rf R) : NarrowTransport rf R := by
+/-- **★ THE FUEL-GRADED COVERING — the form `consume` actually satisfies.**
+
+`Covering` (above) is *unconditional*: it asserts the narrowed aggregate equals the full one outright. But the
+**consume** resolver cannot prove that from nothing — its covering witness is a colouring-preserving automorphism
+`α`, and "the discarded branch and the kept one have the same `descend` value" **is** `descend_transport` at
+`σ = α`. That is not circular (it descends on fuel), but it means the hypothesis must be able to *use the
+induction hypothesis*. `CoveringAt` is `Covering` with `TransportAt rf R fuel` — the IH — threaded in, exactly as
+`NarrowTransport` threads it.
+
+**This is the graded form every real resolver instance should target.** `Covering ⟹ CoveringAt` trivially. -/
+def CoveringAt (rf : Refiner n) (R : Resolver n) : Prop :=
+  ∀ (fuel : Nat), TransportAt rf R fuel →
+    ∀ (adj : AdjMatrix n) (χ : Colouring n),
+      aggregate ((narrow R adj χ).map
+          (fun v => (descend rf R adj fuel (refineV rf adj (indivOne χ v))).1))
+        = aggregate ((branches χ).map
+          (fun v => (descend rf R adj fuel (refineV rf adj (indivOne χ v))).1))
+
+theorem coveringAt_of_covering {rf : Refiner n} {R : Resolver n} (h : Covering rf R) :
+    CoveringAt rf R := fun fuel _ adj χ => h adj fuel χ
+
+theorem narrowTransport_of_coveringAt {rf : Refiner n} {R : Resolver n}
+    (hre : RefineEquivariant rf) (hcov : CoveringAt rf R) : NarrowTransport rf R := by
   intro fuel ih adj σ χ _
-  rw [hcov (relabelAdj σ adj) fuel (transportColouring σ χ), hcov adj fuel χ]
+  rw [hcov fuel ih (relabelAdj σ adj) (transportColouring σ χ), hcov fuel ih adj χ]
   refine aggregate_perm (((branches_transport_perm σ χ).map _).trans ?_)
   rw [List.map_map]
   exact List.Perm.of_eq
     (List.map_congr_left (fun v _ => branchVal_transport hre ih adj σ χ v))
+
+theorem narrowTransport_of_covering {rf : Refiner n} {R : Resolver n}
+    (hre : RefineEquivariant rf) (hcov : Covering rf R) : NarrowTransport rf R :=
+  narrowTransport_of_coveringAt hre (coveringAt_of_covering hcov)
 
 /-! ### Sufficient condition 2 — **`NarrowEquivariant`** (the FORCE route)
 

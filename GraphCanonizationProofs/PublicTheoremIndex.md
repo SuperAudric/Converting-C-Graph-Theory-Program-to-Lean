@@ -2821,45 +2821,50 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Descend.aggregate_perm` | 540-553 | §Stage-2 THE AGGREGATE IS PERMUTATION-INVARIANT. Discharges the obligation created by the index-ordered branch `List`: the labelling-dependent branch order provably never leaks into the output. | — |
 | `Descend.descend_sound` | 374-392 | §Stage-2 ①a for the descent: whenever it answers, the answer is a relabelling. Holds for ANY refinement and ANY resolver — narrowing only removes branches, so a mis-narrowing resolver costs a branch, never correctness. | — |
 | `Descend.soundOpt_canonForm?` | 394-398 | §Stage-2 `SoundOpt` for the top-level object — the `Publication.canon_sound` (①a) obligation, DISCHARGED. | — |
-| `Descend.aggregate_ne_none` | 555-572 | §Stage-2 The aggregate answers whenever the branch list is nonempty and no branch flagged — the step lemma of the totality theorem. | — |
-| `Descend.transportColouring` | 580-582 | §Stage-2 Transport a colouring along a relabelling: χ on G becomes χ∘σ⁻¹ on `relabelAdj σ G`. | Definition |
-| `Descend.discrete_transport` | 584-592 | §Stage-2 Discreteness transports along a relabelling. | — |
-| `Descend.vertexRank_transport` | 594-598 | §Stage-2 The rank of σv under the transported colouring is the rank of v under the original — the reason the σ cancels in the leaf. | — |
-| `Descend.indivOne_transport` | 600-609 | §Stage-2 Individualization commutes with transport. This is where the INDEX-FREE choice pays: an index-dependent individualization would fail this outright. | — |
-| `Descend.cellOf_card_transport` | 611-623 | §Stage-2 Cell sizes are preserved under transport. | — |
-| `Descend.image_transport` | 625-633 | §Stage-2 The set of colour values is preserved under transport. | — |
-| `Descend.targetColour_transport` | 635-642 | §Stage-2 The target colour is the same natural number on both sides — so the branch set transports. | — |
-| `Descend.leafMatrix_transport` | 644-662 | §Stage-2 THE HEART OF ①b: the emitted leaf matrices are LITERALLY EQUAL under relabelling. The σ cancels because the output is indexed by colour-RANKS, not by vertices. | — |
-| `Descend.RefineEquivariant` | 688-691 | §Stage-2 Carried hypothesis on the refinement PARAMETER: the refinement round commutes with relabelling. (The encode-free round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not baked in.) | Definition |
-| `Descend.TransportAt` | 693-697 | §Stage-2 The descent's iso-invariance AT A GIVEN FUEL — the graded induction statement, which the resolver contract is allowed to consume as its induction hypothesis. | Definition |
-| `Descend.NarrowTransport` | 699-716 | §Stage-2 ★ THE RESOLVER CONTRACT: the narrowed-branch aggregate TRANSPORTS under relabelling. Strictly weaker than covering — it does NOT ask narrowing to preserve the aggregate, only to produce the same one on `G` and `σ·G`, which is what lets FORCE change the canonical form instead of having to know the answer. FUEL-GRADED (the IH is threaded in), which is what makes the CONSUME instance provable without circularity. | Definition |
-| `Descend.branchVal_transport` | 718-727 | §Stage-2 The per-branch values agree under transport (`indivOne` equivariance + the refiner's equivariance + the IH). Shared by both contract routes. | — |
-| `Descend.Covering` | 734-739 | §Stage-2 SUFFICIENT CONDITION 1 (the CONSUME route): narrowing does not change the aggregate, because every discarded branch is already reachable through a kept one (a verified path-fixing automorphism). Redundancy, not victory. The choice of representative is genuinely NON-equivariant — which is exactly what covering licenses. ⚠ It is NOT the general contract: see `canonForm?_eq_deferAll_of_covering`. | Definition |
-| `Descend.narrowTransport_of_covering` | 741-748 | §Stage-2 The CONSUME route into the contract: covering ⟹ `NarrowTransport`. | — |
-| `Descend.NarrowEquivariant` | 756-758 | §Stage-2 SUFFICIENT CONDITION 2 (the FORCE route): the narrowing is a structural function of `(adj, χ)` and so transports. The discards are genuinely DIFFERENT and the aggregate CHANGES — consistently — yielding a different but equally valid canonical form. No global lex-min, no knowledge of the answer. Checkable: never break ties by vertex index. | Definition |
-| `Descend.narrowTransport_of_narrowEquivariant` | 760-766 | §Stage-2 The FORCE route into the contract: equivariant narrowing ⟹ `NarrowTransport`. This is what lets the rigid solver enter Lean at all. | — |
-| `Descend.covering_deferAll` | 768-770 | §Stage-2 The baseline resolver never narrows, so it is trivially covering. | — |
-| `Descend.branches_transport_perm` | 664-679 | §Stage-2 The branch list transports UP TO PERMUTATION (it is built in index order) — which is exactly why `aggregate_perm` is needed. | — |
-| `Descend.narrowEquivariant_deferAll` | 772-774 | §Stage-2 The baseline resolver is also trivially equivariant — `deferAll` takes BOTH contract routes. | — |
-| `Descend.narrowTransport_deferAll` | 776-778 | §Stage-2 The exhaustive-branching object satisfies the resolver contract outright, carrying no resolver obligation at all. | — |
-| `Descend.descend_transport` | 782-803 | §Stage-2 ①b/①c: the descent is ISO-INVARIANT. The branch case is EXACTLY the resolver contract — note it needs no refiner hypothesis, so `NarrowTransport` is the whole per-node obligation. | — |
-| `Descend.isoInvariantOpt_canonForm?` | 805-815 | §Stage-2 `IsoInvariantOpt` for the top-level object — ①b and ①c then follow for free via Stage 0a. | — |
-| `Descend.isCanonicalFormOpt_canonForm?` | 817-823 | §Stage-2 ★ THE STAGE-2 CAPSTONE: the descent IS a canonical form (sound ∧ iso-invariant), hence a complete isomorphism invariant with an iso-invariant flag. ①a/①b/①c all discharged for the real object, modulo exactly two carried hypotheses. | — |
-| `Descend.canonForm?_complete` | 825-831 | §Stage-2 The `Publication.canon_complete` (①b) obligation, for the real object. | — |
-| `Descend.canonForm?_flag_iso_invariant` | 833-838 | §Stage-2 The `Publication.flag_iso_invariant` (①c) obligation, for the real object. | — |
-| `Descend.canonForm?_eq_deferAll_of_covering` | 844-868 | §Stage-2 ★★ WHY COVERING WAS TOO STRONG: a COVERING resolver is VALUE-INVISIBLE — it computes exactly the same answer as the exhaustive `deferAll`, changing the cost but never the answer. So demanding covering of every resolver pins the object to the exhaustive branch-min (= the retired `canonMin` anchor), and a FORCE resolver could satisfy it only by already computing that min — i.e. only by KNOWING THE ANSWER. This is the theorem that retired the one-contract design. | — |
-| `Descend.narrow_aut_invariant` | 870-884 | §Stage-2 An EQUIVARIANT narrowing is invariant under every colouring-preserving automorphism (`α·adj = adj`, `α·χ = χ` turn equivariance into `narrow = α · narrow`). | — |
-| `Descend.narrow_eq_branches_of_orbit` | 886-909 | §Stage-2 ★★ THE NON-COLLAPSE THEOREM: an equivariant narrowing CANNOT FIRE on a cell that is a single orbit — a nonempty invariant subset of one orbit is the whole orbit. So FORCE provably cannot fire on a symmetric cell and CONSUME fires exactly there: the two contract routes have COMPLEMENTARY, NON-OVERLAPPING firing domains, and the design does not collapse into GI ∈ P. Graphs where neither fires are the residue. | — |
-| `Descend.ncol` | 919-920 | §Stage-2 The number of colour classes — the descent's progress measure (discrete ⟺ `ncol = n`). | Definition |
-| `Descend.ncol_le` | 922-924 | §Stage-2 There are at most `n` colour classes. | — |
-| `Descend.discrete_of_ncol_eq` | 926-930 | §Stage-2 `n` colour classes ⟹ the colouring is discrete (pigeonhole) — the base case of totality. | — |
-| `Descend.ncol_lt_indivOne` | 932-959 | §Stage-2 Individualizing a branch vertex STRICTLY increases the colour count: it splits a non-singleton cell (the old colour survives on the partner; the new odd colour is fresh by parity). The descent therefore makes progress at every level. | — |
-| `Descend.RefineSplits` | 961-965 | §Stage-2 The refiner genuinely REFINES — it never merges two colour classes. This is what rules out the degenerate constant refiner (which is `RefineEquivariant` by `rfl` and would flag on every graph), so it is the hypothesis that earns NON-VACUITY. | Definition |
-| `Descend.ncol_le_refine` | 967-991 | §Stage-2 A genuinely-refining round never loses colour classes. | — |
-| `Descend.NarrowProper` | 993-997 | §Stage-2 The resolver's narrowing stays inside the branch list and never empties it. Both intended instances satisfy this (consume keeps an orbit representative; force keeps the determined branch). | Definition |
-| `Descend.narrowProper_deferAll` | 999-1000 | §Stage-2 The baseline resolver is proper. | — |
-| `Descend.descend_ne_none` | 1002-1028 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
-| `Descend.canonForm?_ne_none` | 1030-1035 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
+| `Descend.lexMin?_congr_mem` | 555-580 | §7 `lexMin?` depends only on the *set* of candidates (a minimum under a total order does). Strictly stronger than `lexMin?_perm` — multiplicities may differ. | — |
+| `Descend.aggregate_congr_mem` | 582-602 | §7 **★ The aggregate depends only on the SET of branch results.** What the **consume** resolver needs: it *drops* branches, so the branch multiset genuinely shrinks — but the value set does not, and that is all the aggregate sees. | — |
+| `Descend.aggregate_ne_none` | 604-621 | §Stage-2 The aggregate answers whenever the branch list is nonempty and no branch flagged — the step lemma of the totality theorem. | — |
+| `Descend.transportColouring` | 629-631 | §Stage-2 Transport a colouring along a relabelling: χ on G becomes χ∘σ⁻¹ on `relabelAdj σ G`. | Definition |
+| `Descend.discrete_transport` | 633-641 | §Stage-2 Discreteness transports along a relabelling. | — |
+| `Descend.vertexRank_transport` | 643-647 | §Stage-2 The rank of σv under the transported colouring is the rank of v under the original — the reason the σ cancels in the leaf. | — |
+| `Descend.indivOne_transport` | 649-658 | §Stage-2 Individualization commutes with transport. This is where the INDEX-FREE choice pays: an index-dependent individualization would fail this outright. | — |
+| `Descend.cellOf_card_transport` | 660-672 | §Stage-2 Cell sizes are preserved under transport. | — |
+| `Descend.image_transport` | 674-682 | §Stage-2 The set of colour values is preserved under transport. | — |
+| `Descend.targetColour_transport` | 684-691 | §Stage-2 The target colour is the same natural number on both sides — so the branch set transports. | — |
+| `Descend.leafMatrix_transport` | 693-711 | §Stage-2 THE HEART OF ①b: the emitted leaf matrices are LITERALLY EQUAL under relabelling. The σ cancels because the output is indexed by colour-RANKS, not by vertices. | — |
+| `Descend.RefineEquivariant` | 737-740 | §Stage-2 Carried hypothesis on the refinement PARAMETER: the refinement round commutes with relabelling. (The encode-free round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not baked in.) | Definition |
+| `Descend.TransportAt` | 742-746 | §Stage-2 The descent's iso-invariance AT A GIVEN FUEL — the graded induction statement, which the resolver contract is allowed to consume as its induction hypothesis. | Definition |
+| `Descend.NarrowTransport` | 748-765 | §Stage-2 ★ THE RESOLVER CONTRACT: the narrowed-branch aggregate TRANSPORTS under relabelling. Strictly weaker than covering — it does NOT ask narrowing to preserve the aggregate, only to produce the same one on `G` and `σ·G`, which is what lets FORCE change the canonical form instead of having to know the answer. FUEL-GRADED (the IH is threaded in), which is what makes the CONSUME instance provable without circularity. | Definition |
+| `Descend.branchVal_transport` | 767-776 | §Stage-2 The per-branch values agree under transport (`indivOne` equivariance + the refiner's equivariance + the IH). Shared by both contract routes. | — |
+| `Descend.Covering` | 783-788 | §Stage-2 SUFFICIENT CONDITION 1 (the CONSUME route): narrowing does not change the aggregate, because every discarded branch is already reachable through a kept one (a verified path-fixing automorphism). Redundancy, not victory. The choice of representative is genuinely NON-equivariant — which is exactly what covering licenses. ⚠ It is NOT the general contract: see `canonForm?_eq_deferAll_of_covering`. | Definition |
+| `Descend.CoveringAt` | 790-806 | §9 **★ The fuel-graded covering — the form a real resolver instance satisfies.** `Covering` with the induction hypothesis `TransportAt rf R fuel` threaded in. `consume` needs this: its covering witness *is* `descend_transport` at an automorphism, one fuel level down. | Definition |
+| `Descend.coveringAt_of_covering` | 808-809 | §9 Unconditional covering implies the graded form. | — |
+| `Descend.narrowTransport_of_coveringAt` | 811-818 | §9 **Sufficient condition 1 (graded).** Fuel-graded covering ⟹ the resolver contract. The entry point for `consume`. | — |
+| `Descend.narrowTransport_of_covering` | 820-822 | §Stage-2 The CONSUME route into the contract: covering ⟹ `NarrowTransport`. | — |
+| `Descend.NarrowEquivariant` | 830-832 | §Stage-2 SUFFICIENT CONDITION 2 (the FORCE route): the narrowing is a structural function of `(adj, χ)` and so transports. The discards are genuinely DIFFERENT and the aggregate CHANGES — consistently — yielding a different but equally valid canonical form. No global lex-min, no knowledge of the answer. Checkable: never break ties by vertex index. | Definition |
+| `Descend.narrowTransport_of_narrowEquivariant` | 834-840 | §Stage-2 The FORCE route into the contract: equivariant narrowing ⟹ `NarrowTransport`. This is what lets the rigid solver enter Lean at all. | — |
+| `Descend.covering_deferAll` | 842-844 | §Stage-2 The baseline resolver never narrows, so it is trivially covering. | — |
+| `Descend.branches_transport_perm` | 713-728 | §Stage-2 The branch list transports UP TO PERMUTATION (it is built in index order) — which is exactly why `aggregate_perm` is needed. | — |
+| `Descend.narrowEquivariant_deferAll` | 846-848 | §Stage-2 The baseline resolver is also trivially equivariant — `deferAll` takes BOTH contract routes. | — |
+| `Descend.narrowTransport_deferAll` | 850-852 | §Stage-2 The exhaustive-branching object satisfies the resolver contract outright, carrying no resolver obligation at all. | — |
+| `Descend.descend_transport` | 856-877 | §Stage-2 ①b/①c: the descent is ISO-INVARIANT. The branch case is EXACTLY the resolver contract — note it needs no refiner hypothesis, so `NarrowTransport` is the whole per-node obligation. | — |
+| `Descend.isoInvariantOpt_canonForm?` | 879-889 | §Stage-2 `IsoInvariantOpt` for the top-level object — ①b and ①c then follow for free via Stage 0a. | — |
+| `Descend.isCanonicalFormOpt_canonForm?` | 891-897 | §Stage-2 ★ THE STAGE-2 CAPSTONE: the descent IS a canonical form (sound ∧ iso-invariant), hence a complete isomorphism invariant with an iso-invariant flag. ①a/①b/①c all discharged for the real object, modulo exactly two carried hypotheses. | — |
+| `Descend.canonForm?_complete` | 899-905 | §Stage-2 The `Publication.canon_complete` (①b) obligation, for the real object. | — |
+| `Descend.canonForm?_flag_iso_invariant` | 907-912 | §Stage-2 The `Publication.flag_iso_invariant` (①c) obligation, for the real object. | — |
+| `Descend.canonForm?_eq_deferAll_of_covering` | 918-942 | §Stage-2 ★★ WHY COVERING WAS TOO STRONG: a COVERING resolver is VALUE-INVISIBLE — it computes exactly the same answer as the exhaustive `deferAll`, changing the cost but never the answer. So demanding covering of every resolver pins the object to the exhaustive branch-min (= the retired `canonMin` anchor), and a FORCE resolver could satisfy it only by already computing that min — i.e. only by KNOWING THE ANSWER. This is the theorem that retired the one-contract design. | — |
+| `Descend.narrow_aut_invariant` | 944-958 | §Stage-2 An EQUIVARIANT narrowing is invariant under every colouring-preserving automorphism (`α·adj = adj`, `α·χ = χ` turn equivariance into `narrow = α · narrow`). | — |
+| `Descend.narrow_eq_branches_of_orbit` | 960-983 | §Stage-2 ★★ THE NON-COLLAPSE THEOREM: an equivariant narrowing CANNOT FIRE on a cell that is a single orbit — a nonempty invariant subset of one orbit is the whole orbit. So FORCE provably cannot fire on a symmetric cell and CONSUME fires exactly there: the two contract routes have COMPLEMENTARY, NON-OVERLAPPING firing domains, and the design does not collapse into GI ∈ P. Graphs where neither fires are the residue. | — |
+| `Descend.ncol` | 993-994 | §Stage-2 The number of colour classes — the descent's progress measure (discrete ⟺ `ncol = n`). | Definition |
+| `Descend.ncol_le` | 996-998 | §Stage-2 There are at most `n` colour classes. | — |
+| `Descend.discrete_of_ncol_eq` | 1000-1004 | §Stage-2 `n` colour classes ⟹ the colouring is discrete (pigeonhole) — the base case of totality. | — |
+| `Descend.ncol_lt_indivOne` | 1006-1033 | §Stage-2 Individualizing a branch vertex STRICTLY increases the colour count: it splits a non-singleton cell (the old colour survives on the partner; the new odd colour is fresh by parity). The descent therefore makes progress at every level. | — |
+| `Descend.RefineSplits` | 1035-1039 | §Stage-2 The refiner genuinely REFINES — it never merges two colour classes. This is what rules out the degenerate constant refiner (which is `RefineEquivariant` by `rfl` and would flag on every graph), so it is the hypothesis that earns NON-VACUITY. | Definition |
+| `Descend.ncol_le_refine` | 1041-1065 | §Stage-2 A genuinely-refining round never loses colour classes. | — |
+| `Descend.NarrowProper` | 1067-1071 | §Stage-2 The resolver's narrowing stays inside the branch list and never empties it. Both intended instances satisfy this (consume keeps an orbit representative; force keeps the determined branch). | Definition |
+| `Descend.narrowProper_deferAll` | 1073-1074 | §Stage-2 The baseline resolver is proper. | — |
+| `Descend.descend_ne_none` | 1076-1102 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
+| `Descend.canonForm?_ne_none` | 1104-1109 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
 ## ChainDescent/Refine.lean
 
 | Name | Line | Description | Notes |
@@ -2905,10 +2910,52 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Refine.C3` | 5-7 | Test fixture: the 3-cycle. | Definition |
-| `Refine.C4` | 9-11 | Test fixture: the 4-cycle. | Definition |
-| `Refine.C5` | 13-15 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
-| `Refine.C6` | 17-19 | Test fixture: the 6-cycle. | Definition |
-| `Refine.C7` | 22-24 | Test fixture: the 7-cycle. | Definition |
-| `Refine.form` | 32-47 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
-| `Refine.P5` | 48-49 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
+| `Refine.C3` | 6-8 | Test fixture: the 3-cycle. | Definition |
+| `Refine.C4` | 10-12 | Test fixture: the 4-cycle. | Definition |
+| `Refine.C5` | 14-16 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
+| `Refine.C6` | 18-20 | Test fixture: the 6-cycle. | Definition |
+| `Refine.C7` | 23-25 | Test fixture: the 7-cycle. | Definition |
+| `Refine.form` | 33-48 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
+| `Refine.P5` | 49-50 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
+| `Refine.rotP` | 64-67 | — | Definition |
+| `Refine.rotSupply` | 68-71 | — | Definition |
+| `Refine.formC` | 72-98 | — | Definition |
+## ChainDescent/Consume.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Consume.IsColAut` | 50-53 | §1 **The verification gate.** `α` is an automorphism of `adj` that also preserves the colouring `χ` — the only thing `consume` ever trusts. | Definition |
+| `Consume.decidableIsColAut` | 55-58 | §1 The gate is **decidable** (a finite edge-by-edge test), which is what makes an untrusted oracle supply safe to consume. | Instance |
+| `Consume.IsColAut.relabel` | 60-69 | §1 A verified automorphism fixes the graph: `relabelAdj α adj = adj`. Half of what turns `descend_transport` into a same-graph branch equality. | — |
+| `Consume.IsColAut.transport` | 71-76 | §1 A verified automorphism fixes the colouring: `transportColouring α χ = χ`. The other half. | — |
+| `Consume.IsColAut.one` | 78-80 | §1 The identity is colouring-preserving — the base of the orbit search. | — |
+| `Consume.IsColAut.comp` | 82-92 | §1 Colouring-preserving automorphisms are **closed under composition**, so a word in the verified generators is itself verified. This is what lets the orbit BFS accumulate a single witness. | — |
+| `Consume.Reach` | 99-101 | §2 **The covering witness.** Some verified colouring-preserving automorphism carries `b` to `m`. | Definition |
+| `Consume.Reach.rfl'` | 103-105 | §2 Every vertex is reachable from itself. | — |
+| `Consume.Reach.step` | 107-111 | §2 Reachability extends along a verified generator — the induction step of the orbit search's soundness. | — |
+| `Consume.Reach.colour` | 113-118 | §2 Reachable vertices share a colour, so an orbit never leaves the branch cell. This is why `consume`'s narrowing stays inside `branches`. | — |
+| `Consume.orbStep` | 122-124 | §3 One BFS round: close the current vertex set under the verified generators. | Definition |
+| `Consume.mem_orbStep_of_mem` | 126-130 | §3 The BFS step is extensive — it never loses a vertex it already had. | — |
+| `Consume.orbit` | 132-135 | §3 The orbit of `b` under the verified generators (`n` BFS rounds). A *short* search only keeps more branches, never fewer, so its depth carries no soundness obligation. | Definition |
+| `Consume.mem_iterate_self` | 137-143 | §3 `b` survives every BFS round. | — |
+| `Consume.mem_orbit_self` | 145-147 | §3 `b` is in its own orbit — so `rep b` has something to be the minimum of. | — |
+| `Consume.reach_of_mem_orbit` | 149-170 | §3 **Soundness of the orbit search.** Everything it finds is genuinely reachable by a verified automorphism — whatever the generator list was. | — |
+| `Consume.minList` | 174-177 | §4 Least element of `b :: l` (computable). | Definition |
+| `Consume.minList_mem` | 179-195 | §4 The minimum is the seed or a list member — so `rep b` always lies in `b`'s orbit. | — |
+| `Consume.rep` | 197-202 | §4 **The orbit representative of `b`.** The choice is deliberately *not* equivariant (orbit members are indistinguishable to refinement); only its *result* transports, which is exactly what the `Covering` route licenses. | Definition |
+| `Consume.rep_mem_orbit` | 204-209 | §4 The representative lies in the orbit it represents. | — |
+| `Consume.reach_rep` | 211-214 | §4 **The covering witness, packaged.** The representative is reachable from the branch it replaces. | — |
+| `Consume.Supply` | 218-220 | §5 **An oracle supply — UNTRUSTED.** Candidate permutations (`matchOracle` / the cascade oracle / the solver kernel), carrying *no* proof obligation. | `abbrev` |
+| `Consume.verified` | 222-224 | §5 The supply filtered through the decidable `IsColAut` check. Everything downstream uses only this. | Definition |
+| `Consume.isColAut_of_mem_verified` | 226-231 | §5 **Everything surviving the filter is a genuine colouring-preserving automorphism.** The single lemma that makes an untrusted supply harmless. | — |
+| `Consume.consume` | 233-237 | §5 **★ THE ORACLE RESOLVER.** Keeps one representative per orbit of the branch cell under the *verified* automorphisms, discarding the rest. | Definition |
+| `Consume.narrow_consume` | 239-240 | §5 The narrowing `consume` performs, unfolded. | `@[simp]` |
+| `Consume.exists_targetColour_of_mem` | 244-252 | §6 A nonempty branch list has a target colour, and its members carry it. | — |
+| `Consume.narrow_consume_subset` | 254-264 | §6 **The narrowing stays inside the branch cell** — orbits cannot leave it, since a verified automorphism preserves the colouring. | — |
+| `Consume.narrow_consume_ne_nil` | 266-275 | §6 The narrowing is never empty on a non-discrete node. | — |
+| `Consume.narrowProper_consume` | 277-280 | §6 `consume` is a **proper** narrowing (inside the cell, never empty) — the hypothesis totality (`canonForm?_ne_none`) needs. | — |
+| `Consume.branchVal_eq_of_isColAut` | 282-295 | §6 **★★ THE COVERING WITNESS.** A verified automorphism makes two branches *value-equal*: it is `descend_transport` at `σ = α`, where `relabelAdj α adj = adj` degenerates the transport equation into an equality between two branches of the *same* graph. This is where the fuel-graded `CoveringAt` earns its keep. | — |
+| `Consume.coveringAt_consume` | 297-327 | §6 **★★★ `consume` IS SOUND — for EVERY supply, however wrong.** The narrowed aggregate equals the full one, because each discarded branch is value-equal to the kept representative of its orbit. A broken oracle costs branches, never correctness. | — |
+| `Consume.narrowTransport_consume` | 329-332 | §6 `consume` satisfies the resolver contract (`NarrowTransport`), for every supply. | — |
+| `Consume.consume_canonizer` | 336-348 | §7 **★★★ THE ORACLE-DRIVEN CANONIZER.** `①a`/`①b`/`①c` hold and the descent never flags, **with no hypothesis on the oracle at all**. | — |
+| `Consume.consume_canonizer_fast` | 350-357 | §7 The same, on the runnable `encodeFreeFast` refiner. | — |

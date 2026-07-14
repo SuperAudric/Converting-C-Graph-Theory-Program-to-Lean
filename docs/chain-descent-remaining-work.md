@@ -45,15 +45,27 @@
 >      *Measurement traps:* a top-level `def` colouring **is** cached (so isolated tests hide the bug), and `lean`
 >      **discards all `#eval` output on timeout** (so a slow eval late in a file swallows the earlier ones) — bisect
 >      one `#eval` per file; bare-import baseline is ~75 s.
-> 3. **Resolver instances (Stage 3) — one per route.** **consume** = `matchOracle` on the **`Covering`** route (the
->    C#'s `CoveredByPathFixingAut` is exactly the witness); **force** = the rigid solver on the **`NarrowEquivariant`**
->    route (structural narrowing transports; *no* covering witness, *no* global lex-min, **no knowledge of the
->    answer**) — IR §11.12, Lean not started, C# `Option2Solver.cs` complete for handoff. **Neither can break ①** ⟹ a
->    *future* unhandled-residue solver plugs in with **no re-proof of ①**. ⚠ **But relocation is not elimination:** a
->    solver that extracts/solves too weakly is *sound* yet defers more ⟹ more branching ⟹ budget exhaustion ⟹ flag ⟹
->    the input lands in `UnhandledResidue`. **A solver that never fires is a canonizer that flags everything: correct,
->    and worthless.** So the rigid seal's **P1/P3 keep their full content — they move from ① to ②** (the firing rate),
->    which is exactly where the "poly-*or-flag*" headline lives.
+> 3. **Resolver instances (Stage 3) — one per route.**
+>    - **consume — ✅ DONE (2026-07-14, `ChainDescent/Consume.lean`, in `build.sh`, axiom-clean).** Keeps one
+>      representative per orbit of the branch cell; the **`Covering`** route. **★ THE ORACLE IS UNTRUSTED:** it is
+>      parameterized by an arbitrary **`Supply`** with **no proof obligation at all**, and the resolver filters it
+>      through a *decidable* `IsColAut` check. So **`coveringAt_consume` holds for EVERY supply**, and
+>      **`consume_canonizer`** gives ①a/①b/①c **plus totality** with *no hypothesis on the oracle*. A broken oracle
+>      costs branches, never correctness. **`CoveringAt` (the fuel-graded covering) is what made it provable** — the
+>      covering witness *is* `descend_transport` at an automorphism, so the hypothesis must be able to consume the
+>      induction hypothesis. Plus **`aggregate_congr_mem`** (the aggregate depends only on the *set* of branch
+>      results — consume genuinely *drops* branches). **Measured pruning** (`PerformanceTest.lean`, build-gating):
+>      `descentCost` C₅ 2016→804, C₆ 4123→1372, C₇ 7568→2160, with `#guard`s that the oracle form **equals the
+>      exhaustive form exactly**.
+>    - **force — NOT STARTED.** The rigid solver on the **`NarrowEquivariant`** route (structural narrowing
+>      transports; *no* covering witness, *no* global lex-min, **no knowledge of the answer**) — IR §11.12, C#
+>      `Option2Solver.cs` complete for handoff.
+>    - **Neither can break ①** ⟹ a *future* unhandled-residue solver plugs in with **no re-proof of ①**. ⚠ **But
+>      relocation is not elimination:** a solver that extracts/solves too weakly is *sound* yet defers more ⟹ more
+>      branching ⟹ budget exhaustion ⟹ flag ⟹ the input lands in `UnhandledResidue`. **A solver that never fires is a
+>      canonizer that flags everything: correct, and worthless.** So the rigid seal's **P1/P3 keep their full content —
+>      they move from ① to ②** (the firing rate), which is exactly where the "poly-*or-flag*" headline lives. The same
+>      now holds for the oracle: `matchOracle`'s **completeness** is a ②/firing obligation, and **nothing** on ①.
 > 4. **③** — `stalled ⟹ residueHiddenJohnson ∨ residueRigidObstruction` (D1 ∨ D2), plus non-vacuity.
 >
 > **⚠ THE TRAP, AND THE CORRECTION (2026-07-13).** The resolver contract is **`NarrowTransport`** — *the narrowed-branch

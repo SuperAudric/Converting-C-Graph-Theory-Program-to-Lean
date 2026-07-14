@@ -90,6 +90,8 @@ MODULES=(
   # Four family seals (affine-polar/alternating/half-spin/Suzuki) + the atom-free seam (L1 htransport discharged). All axiom-clean.
   ChainDescent.RouteCTransport      # ← Cascade (cross-graph WL-transport toolkit: SchemeRealizes + …_transport_iso tower + separatesAtBoundedBase_transport)
   ChainDescent.Refine       # ← Descend, RouteCTransport (THE REFINER INSTANCE: the encode-free structural round — ranks sigKey lists under lexLeList, never forms an Encodable.encode value; discharges RefineEquivariant + RefineSplits ⟹ the exhaustive canonizer is UNCONDITIONALLY a canonical form that answers; added 2026-07-13)
+  ChainDescent.Consume      # ← Descend, Refine (STAGE 3: the ORACLE resolver instance, the `Covering` route. Untrusted `Supply` + a DECIDABLE IsColAut check ⟹ `coveringAt_consume` holds for EVERY supply; keeps one orbit rep per branch cell. Capstone `consume_canonizer`: canonical form + never flags, with NO hypothesis on the oracle; added 2026-07-14)
+  ChainDescent.PerformanceTest # ← Refine, Consume (REGRESSION GATE, not a library: #guards iso-invariance, distinguishing power, that the descent answers, and that `consume` computes EXACTLY the exhaustive form while pruning it — a regression fails the build)
   # ── Nullstellensatz discharge — the quadric Nullstellensatz `NondegQuadricDeterminesForm` proved outright
   # (ported 2026-07-06 from the Scratch{Nullstellensatz,…Structural,…Count,…Hlink} files). A nondegenerate
   # quadric of even finrank ≥ 4 over an odd finite field is determined up to scalar by its isotropic cone.

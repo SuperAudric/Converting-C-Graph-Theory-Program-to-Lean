@@ -1,4 +1,5 @@
 import ChainDescent.Refine
+import ChainDescent.Consume
 namespace ChainDescent.Refine
 open ChainDescent.Descend
 
@@ -47,5 +48,53 @@ def form {n : Nat} (adj : AdjMatrix n) : Option (List Nat) :=
 -- constant would pass every test above. `P5` is the 5-path; `C5` the 5-cycle.
 def P5 : AdjMatrix 5 := ⟨fun i j => if i.val + 1 = j.val ∨ j.val + 1 = i.val then 1 else 0⟩
 #guard form C5 ≠ form P5
+
+/-! ## The ORACLE resolver (`Consume.consume`) — it prunes, and it stays right
+
+A real oracle supply: the **rotation** of a cycle (`rotP`). At the root the colouring is constant, so `rotP`
+verifies as a colouring-preserving automorphism and the whole cell is one orbit — the descent takes **one** branch
+instead of `n`. One level down, the individualized vertex breaks the rotation symmetry, `rotP` **fails
+verification**, and the resolver defers. That is the intended behaviour of the whole design, exercised.
+
+Measured (oracle vs exhaustive `descentCost`): `C₅ 2016 → 804`, `C₆ 4123 → 1372`, `C₇ 7568 → 2160`.
+
+Note what is *not* being assumed: the supply is untrusted. `Consume.consume_canonizer` holds for **every** supply,
+so these `#guard`s test the *firing*, not the soundness. -/
+
+/-- The cyclic rotation `i ↦ i + 1` of `Fin n`. -/
+def rotP (n : Nat) [NeZero n] : Equiv.Perm (Fin n) := Equiv.addRight (1 : Fin n)
+
+open ChainDescent.Consume in
+/-- The rotation supply — a genuine automorphism source for cycles, and junk for anything else. -/
+def rotSupply (n : Nat) [NeZero n] : Supply n := fun _ _ => [rotP n]
+
+open ChainDescent.Consume in
+/-- The canonical form computed with the **oracle** resolver. -/
+def formC {n : Nat} [NeZero n] (adj : AdjMatrix n) : Option (List Nat) :=
+  (canonForm? encodeFreeFast (consume (rotSupply n)) adj).map flatten
+
+-- **It still answers** (`Consume.consume_canonizer`, exercised).
+#guard (formC C5).isSome
+#guard (formC C7).isSome
+
+-- **★ THE COVERING PROPERTY, EXERCISED.** `consume` takes the `Covering` route, so it is *value-invisible*: it must
+-- compute **exactly** the exhaustive form, only cheaper. A resolver that pruned a branch it should not have would
+-- fail here.
+#guard formC C5 = form C5
+#guard formC C6 = form C6
+#guard formC C7 = form C7
+
+-- It still distinguishes, and is still iso-invariant.
+#guard formC C5 ≠ formC P5
+#guard formC C6 = formC (relabelAdj (Equiv.swap 2 5) C6)
+
+-- **It actually PRUNES.** The root fan-out collapses from `n` branches to one, so the oracle-driven descent is
+-- strictly cheaper than the exhaustive one. (Cost is the `②` projection of the same definition.)
+open ChainDescent.Consume in
+#eval (descentCost encodeFreeFast (consume (rotSupply 5)) C5, descentCost encodeFreeFast deferAll C5)
+open ChainDescent.Consume in
+#eval (descentCost encodeFreeFast (consume (rotSupply 6)) C6, descentCost encodeFreeFast deferAll C6)
+open ChainDescent.Consume in
+#eval (descentCost encodeFreeFast (consume (rotSupply 7)) C7, descentCost encodeFreeFast deferAll C7)
 
 end ChainDescent.Refine
