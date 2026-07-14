@@ -197,6 +197,58 @@ theorem guarded_force_canonizer {key : Key n} (hk : KeyEquivariant key) :
         (narrowEquivariant_guard (Force.narrowEquivariant_forceBy hk))),
    fun _ _ hR => descentCost_guard_le_encodeFree hR⟩
 
+/-! ## 5b. The descent's one choice is iso-invariant
+
+`guarded_choice_transports`: if the guarded descent selects branch `v` at a node of `G`, it selects `σ v` at the
+corresponding node of `σ·G`. The path is a function of the isomorphism class.
+
+> **⛔ THIS IS *NOT* A NO-FUSION ARGUMENT. An earlier version of this file claimed it was; that was WRONG and is
+> retracted.**
+>
+> **Fusion is a dependency of EXPOSURE, not a meta-product over orderings.** A decision's *type* — symmetry or real
+> decision — may only become **visible** once other decisions are resolved.
+> * **A ring.** Vertex-transitive, so every *initial* decision is a symmetry; yet most of its decisions are **rigid**
+>   — they simply are not exposed until `{root, direction}` have been consumed, after which 1-WL discretizes and
+>   handles them. (For a polar-affine graph the same story holds but is far harder to exhibit.)
+> * **Chang-A — the converse.** 360 symmetries that are visible immediately, plus 24 that become certifiable **only
+>   after some rigid decisions are made**.
+>
+> Nothing about iso-invariance of the chosen branch speaks to this. Fusion is not about *re-ordering a fixed set of
+> decisions*; it is about decisions whose *kind* is not yet determinable.
+
+**⚠ AND FUSION HAS A LIVE BITE ON THIS OBJECT — the target-cell selector.**
+
+`descend` targets the **least non-singleton colour** (`branches` / `targetColour`) — a *fixed* structural rule that
+is **blind to whether the resolvers can act on that cell**. The guard then flags if *that* cell is unresolvable.
+But a node may carry several non-singleton cells, and the exposure dependency is exactly the situation where
+
+* cell `A` (least colour) is resolvable by **neither** route, while
+* cell `B` is resolvable — and individualizing in `B`, then refining, **exposes** what `A` needed.
+
+The current object **flags at `A`**, on a graph an interleaved engine would canonize. That is a **spurious flag**:
+sound, polynomial, and needlessly weak. So the honest reading of `Stall.stalled` today is *"the least-colour cell
+stalled"*, **not** *"the node stalled"*, and `Residue.Handled` is correspondingly *stronger* than it should be.
+
+**The fix** (not built): make the target-cell selection **resolver-aware** — pick the least-colour cell that is
+*resolvable*, and flag only at a **true mutual stall** (no cell is resolvable). That is a `descend` signature change:
+`branches` must become a **selector parameter** `sel : AdjMatrix n → Colouring n → List (Fin n)` carrying an
+equivariance obligation (so `①c` survives) and a properness obligation (non-empty ⟺ non-discrete, and inside one
+cell). `branches` is then the default instance and everything here is the special case of the blind selector. -/
+
+/-- **The guarded descent's one choice is iso-invariant.** If it selects branch `v` at a node of `G`, it selects
+`σ v` at the corresponding node of `σ·G`.
+
+⚠ **This is not a no-fusion theorem** (see the retraction above) — it is exactly what it says: the chosen branch
+transports. It is used for `①c` and for reading the descent as a canonical single path. -/
+theorem guarded_choice_transports {R : Resolver n} (hne : NarrowEquivariant R)
+    (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) {v : Fin n}
+    (h : narrow (guard R) adj χ = [v]) :
+    narrow (guard R) (relabelAdj σ adj) (transportColouring σ χ) = [σ v] := by
+  have hp : (narrow (guard R) (relabelAdj σ adj) (transportColouring σ χ)).Perm
+      ((narrow (guard R) adj χ).map σ) := narrowEquivariant_guard hne σ adj χ
+  rw [h] at hp
+  simpa using hp.eq_singleton
+
 /-! ## 6. What the flag MEANS — the `③` hook
 
 The guarded descent flags at a node iff the resolvers left ≥ 2 branches there. For the **mixed** resolver

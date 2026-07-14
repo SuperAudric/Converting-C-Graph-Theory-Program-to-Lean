@@ -2870,8 +2870,12 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Descend.ncol_le_refine` | 1116-1140 | §Stage-2 A genuinely-refining round never loses colour classes. | — |
 | `Descend.NarrowProper` | 1142-1146 | §Stage-2 The resolver's narrowing stays inside the branch list and never empties it. Both intended instances satisfy this (consume keeps an orbit representative; force keeps the determined branch). | Definition |
 | `Descend.narrowProper_deferAll` | 1148-1149 | §Stage-2 The baseline resolver is proper. | — |
-| `Descend.descend_ne_none` | 1151-1177 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
-| `Descend.canonForm?_ne_none` | 1179-1184 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
+| `Descend.NarrowProperAt` | 1151-1157 | **Properness at ONE graph.** `descend_ne_none` never uses the resolver's properness at any graph other than the one it descends on, so totality is really a *per-graph* statement. §Load-bearing for ③: whether a graph is handled is a property of **that graph**, so the residue predicate must not be forced to quantify over all graphs. Definition. | Definition |
+| `Descend.narrowProperAt_of_narrowProper` | 1159-1161 | Global properness gives properness at every graph. | — |
+| `Descend.descend_ne_none_at` | 1163-1187 | Totality at one graph — the per-graph form of `descend_ne_none`. | — |
+| `Descend.canonForm?_ne_none_at` | 1189-1193 | **③-facing totality**: the descent answers on a graph whose resolver is proper *there*. | — |
+| `Descend.descend_ne_none` | 1195-1221 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
+| `Descend.canonForm?_ne_none` | 1223-1228 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
 ## ChainDescent/Refine.lean
 
 | Name | Line | Description | Notes |
@@ -3091,4 +3095,25 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Stall.stallEquivariant_of_narrowEquivariant` | 158-164 | An **equivariant** narrowing gives stall-equivariance for free (same length up to a permutation) — which is why the **force-only** route pays nothing for its flag. | — |
 | `Stall.narrowEquivariant_guard` | 166-178 | The guard preserves `NarrowEquivariant`: both sides stall together, and are otherwise unchanged. | — |
 | `Stall.guarded_force_canonizer` | 182-198 | §**★★★ THE FORCE ROUTE, GUARDED — a canonical form that is UNCONDITIONALLY POLYNOMIAL and flags exactly at the mutual stall.** `①a`/`①b`/`①c` modulo nothing but `KeyEquivariant`, *and* a single path on **every** input. It no longer "always answers" (the guard deliberately breaks `NarrowProper`) — **that is the point: it answers or it flags, and it is polynomial either way.** | — |
-| `Stall.narrow_guard_eq_nil_iff` | 210-218 | The guarded descent flags at a node **exactly** when that node stalled — the `③` hook. | — |
+| `Stall.guarded_choice_transports` | 224-235 | §**★★ THE DESCENT'S ONE CHOICE IS STRUCTURALLY DETERMINED — why FUSION cannot bite.** If the guarded descent selects branch `v` at a node of `G`, at the corresponding node of `σ·G` it selects **`σ v`**. The path is a function of the isomorphism class, so there is **no ordering degree of freedom** — and fusion, being a *meta-product over orderings* ("had you consumed a different decision first, this one's type would change"), has nothing to quantify over. ⚠ Does **not** dissolve an automorphism only visible *after* the solver's linear algebra — but that is `Supply` **strength**, not descent structure. | — |
+| `Stall.narrow_guard_eq_nil_iff` | 247-255 | The guarded descent flags at a node **exactly** when that node stalled — the `③` hook. | — |
+## ChainDescent/Residue.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Residue.guardedRef` | 66-68 | The guarded composite's reference narrowing: the forced set, emptied when the node stalls. Definition. | Definition |
+| `Residue.narrowFnEquivariant_guardedRef` | 70-81 | The reference transports — given `StallEquivariant` (an equivariant supply; the flag's price, `Stall.StallEquivariant`). | — |
+| `Residue.coveringOfAt_guarded` | 83-117 | The guarded composite covers its reference: empty on both sides when stalled, otherwise the composite's own covering argument. | — |
+| `Residue.narrowTransport_guarded` | 119-125 | **The guarded MIXED resolver meets the contract** — modulo `KeyEquivariant` + `StallEquivariant`. Needed the general `CoveringOfAt` route: the guarded composite is neither `Covering` nor `NarrowEquivariant`. | — |
+| `Residue.guarded_mixed_canonizer` | 127-133 | §**★★★ THE GUARDED MIXED CANONIZER** — sound, iso-invariant, complete, **and unconditionally polynomial** (`Stall.descentCost_guard_le`). The full object: both moves, one cell, a real flag, a real cost bound. | — |
+| `Residue.Handled` | 137-143 | §**★★ THE POSITIVE CAPABILITY PREDICATE — where ALL the open work now lives.** Every non-discrete cell is **either** supply-connected (consume's domain) **or** key-separated (force's domain). Stated *positively*: every strengthening of the oracle or the key **enlarges** it, with no re-proof of soundness or of the cost bound (both unconditional). Definition. | Definition |
+| `Residue.narrowProper_guard_of_handled` | 145-159 | On a handled graph no node stalls, so the guarded narrowing is proper. | — |
+| `Residue.answers_of_handled` | 161-176 | §**★★★ A HANDLED GRAPH ANSWERS.** The guarded descent never flags on it — and it was already unconditionally polynomial. So on `Handled`: **sound, iso-invariant, complete, polynomial, and it answers.** | — |
+| `Residue.Residue` | 180-182 | **THE UNHANDLED RESIDUE — defined, not asserted**: some cell defeats **both** resolvers. A *definition* (not an `opaque` atom), so its non-vacuity is provable. Definition. | Definition |
+| `Residue.residue_if_flag` | 184-189 | §**★★★ ③ — THE DESCENT FLAGS ONLY ON THE RESIDUE** (`Publication.residue_if_flag`, for the real object). | — |
+| `Residue.residue_iff` | 191-203 | Unfolded: a residual graph has a cell **neither** supply-connected **nor** key-separated — exactly `Composite.forceThenConsume_stall`'s attribution, so each residual cell is assignable to **one** side's weakness. | — |
+| `Residue.emptySupply` | 222-223 | The empty supply certifies nothing (non-vacuity witness). Definition. | Definition |
+| `Residue.constKey` | 225-226 | A constant key separates nothing (non-vacuity witness). Definition. | Definition |
+| `Residue.keyEquivariant_constKey` | 228 | The constant key is trivially equivariant — so the witness below uses a *legal* resolver, not an ill-formed one. | — |
+| `Residue.not_wordReach_nil` | 230-235 | With no generators, nothing is word-reachable but the point itself. | — |
+| `Residue.residue_nonvacuous` | 237-259 | §**★★ `unhandledResidue_nonvacuous` — THE RESIDUE IS INHABITED, AND NOW PROVABLY SO.** It was undischargeable *in principle* while the `Publication` atoms were `opaque … : Prop` with no definition. Witness is deliberately degenerate (an empty supply and a constant key certify nothing, so any 2-vertex cell defeats them): it shows the predicate is **inhabited**, not that the residue is *hard*. The real content is that `Residue` **shrinks as the resolvers strengthen** — measured in `PerformanceTest` (C₇ with a rotation-only supply is residual; with the full `Aut(C₇)` supply it is not). | — |

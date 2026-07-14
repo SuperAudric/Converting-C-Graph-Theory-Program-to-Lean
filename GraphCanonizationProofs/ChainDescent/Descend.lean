@@ -1148,6 +1148,50 @@ def NarrowProper (R : Resolver n) : Prop :=
 theorem narrowProper_deferAll : NarrowProper (n := n) deferAll :=
   ⟨fun _ χ h => by simpa using branches_ne_nil h, fun _ _ _ h => by simpa using h⟩
 
+/-- **Properness at ONE graph.** `descend_ne_none` never uses the resolver's properness at any graph other than the
+one it is descending on, so the totality theorem is really a *per-graph* statement. That matters for `③`: whether a
+graph is handled is a property of **that graph**, so a residue predicate must not be forced to quantify over all
+graphs (`Residue.lean`). -/
+def NarrowProperAt (R : Resolver n) (adj : AdjMatrix n) : Prop :=
+  (∀ χ : Colouring n, ¬ Discrete χ → narrow R adj χ ≠ []) ∧
+  (∀ (χ : Colouring n) (v : Fin n), v ∈ narrow R adj χ → v ∈ branches χ)
+
+theorem narrowProperAt_of_narrowProper {R : Resolver n} (hp : NarrowProper R) (adj : AdjMatrix n) :
+    NarrowProperAt R adj :=
+  ⟨fun χ h => hp.1 adj χ h, fun χ v h => hp.2 adj χ v h⟩
+
+theorem descend_ne_none_at {rf : Refiner n} {R : Resolver n} (hs : RefineSplits rf)
+    {adj : AdjMatrix n} (hp : NarrowProperAt R adj) :
+    ∀ (fuel : Nat) (χ : Colouring n), n ≤ ncol χ + fuel → (descend rf R adj fuel χ).1 ≠ none := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro χ hb
+      have hd : Discrete χ := discrete_of_ncol_eq (le_antisymm (ncol_le χ) (by omega))
+      rw [descend_val_leaf rf R adj hd 0]
+      exact fun hc => by simp at hc
+  | succ fuel ih =>
+      intro χ hb
+      by_cases hd : Discrete χ
+      · rw [descend_val_leaf rf R adj hd (fuel + 1)]
+        exact fun hc => by simp at hc
+      · rw [descend_val_succ rf R adj hd fuel]
+        refine aggregate_ne_none ?_ ?_
+        · exact fun hc => (hp.1 χ hd) (List.map_eq_nil_iff.mp hc)
+        · intro x hx
+          obtain ⟨v, hv, rfl⟩ := List.mem_map.mp hx
+          refine ih (refineV rf adj (indivOne χ v)) ?_
+          have h1 : ncol χ < ncol (indivOne χ v) := ncol_lt_indivOne (hp.2 χ v hv)
+          have h2 : ncol (indivOne χ v) ≤ ncol (refineV rf adj (indivOne χ v)) :=
+            ncol_le_refine hs adj (indivOne χ v)
+          omega
+
+/-- **`③`-facing totality: the descent answers on a graph whose resolver is proper THERE.** -/
+theorem canonForm?_ne_none_at {rf : Refiner n} {R : Resolver n} (hs : RefineSplits rf)
+    {adj : AdjMatrix n} (hp : NarrowProperAt R adj) : canonForm? rf R adj ≠ none :=
+  descend_ne_none_at hs hp n _
+    (by have := Nat.zero_le (ncol (refineV rf adj (fun _ => 0))); omega)
+
 /-- **★ TOTALITY — the descent always reaches a leaf.** With a genuinely-refining refiner and a proper resolver,
 `fuel` suffices whenever `n ≤ ncol χ + fuel`. -/
 theorem descend_ne_none {rf : Refiner n} {R : Resolver n} (hs : RefineSplits rf)
