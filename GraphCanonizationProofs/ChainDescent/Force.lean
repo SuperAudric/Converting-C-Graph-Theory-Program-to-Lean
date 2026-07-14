@@ -53,13 +53,22 @@ Individualize `v`, refine, and rank `v` by **the leaf that step reaches** (falli
 when it does not discretize). It is *not* the rigid solver — it is a real instance proving the combinator works,
 and the *shape* the solver's key will have: a structural invariant, ranked.
 
-**Measured, and both halves matter:**
+**Measured, and all three halves matter:**
 
 * On a **rigid** 3-regular graph (`F12`, one 1-WL cell of size 12) it collapses the root fan-out **12 → 1** and the
-  descent becomes a single path: `descentCost` **22477 → 5186**.
-* On the **symmetric** `C₇` it **cannot fire at all** — every cell is an orbit — so it only pays for the key:
-  `descentCost` **7568 → 10312**. That is not a defect; it is `forceBy_no_narrowing_on_orbit` *observed*, and it is
-  why `consume` exists.
+  descent becomes a single path. It **fires** — `forceBy_singleton_of_separating`, observed.
+* On the **symmetric** `C₇` it **cannot fire at all** — every cell is an orbit — so it only pays for the key. That
+  is not a defect; it is `forceBy_no_narrowing_on_orbit` *observed*, and it is why `consume` exists.
+* ⚠ **But under HONEST cost accounting it does not PAY.** `descentCost` on `F12`: exhaustive **22477**, forced
+  **26066** — a *net loss*. The key runs a full warm refinement per branch, so the root alone costs
+  `12 · (n³ + n²) = 22464`, which already exceeds the entire exhaustive descent. **Firing is not the same as
+  paying**, and until `Key` carried a cost the cost model could not see the difference (a flat `n³` charge per node
+  reported a fictitious 22477 → 5186).
+
+  The waste is *structural, not incidental*: the refinement `lookaheadKey` computes for branch `v` is **exactly**
+  the refinement the child node recomputes from scratch when the descent takes `v`. A resolver that handed its
+  look-ahead forward — instead of discarding it — would pay for it once. That is a `descend`-signature question and
+  belongs to `②`; it is recorded here because the honest cost model is what exposed it.
 
 **The histogram alone is NOT enough** (a false start worth recording): on a rigid cubic graph, individualizing
 *any* vertex discretizes, so every vertex's cell-size histogram is all-ones and the key separates **nothing**
@@ -184,42 +193,66 @@ theorem kmin?_congr_mem {l l' : List (List Nat)} (h : ∀ x, x ∈ l ↔ x ∈ l
 
 /-! ## 2. The `Key` contract and the `forceBy` combinator -/
 
-/-- A **structural vertex key** — any invariant the forcing rule ranks branches by. (`List Nat` so it can be
-compared with the already-proved total order `lexLeList`.) -/
-abbrev Key (n : Nat) := AdjMatrix n → Colouring n → Fin n → List Nat
+/-- A **structural vertex key** — any invariant the forcing rule ranks branches by, **with its own cost**.
 
-/-- **★ THE ONLY ① OBLIGATION OF A FORCE RESOLVER.** The key is a pure function of the *structure*: it commutes
-with relabelling, i.e. it never breaks ties by vertex index. -/
+⚠ **The `CostM` is load-bearing, not bookkeeping.** With a cost-free key the contract admits an *exponential*
+resolver that no theorem objects to: take `key adj χ v := flatten (canonForm? … (indivOne χ v))` — the whole
+subtree's canonical form. That is `KeyEquivariant` (it is built from equivariant pieces), it fires maximally, and
+`force_canonizer` certifies it a canonizer — while doing exhaustive work at every node. "The resolver fires" is
+only a meaningful claim against a key that is *charged for what it computes*, so a `Key` carries its cost and
+`forceBy` bills every evaluation (`forceBy_cost`). (`List Nat` so keys compare under the proved total order
+`lexLeList`.) -/
+abbrev Key (n : Nat) := AdjMatrix n → Colouring n → Fin n → CostM (List Nat)
+
+/-- The key's **value** projection — what the ranking actually compares. -/
+def keyV (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : List Nat :=
+  (key adj χ v).1
+
+/-- The key's **cost** projection — what `forceBy` is billed for each evaluation. -/
+def keyCost (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : Nat :=
+  (key adj χ v).2
+
+/-- **★ THE ONLY ① OBLIGATION OF A FORCE RESOLVER.** The key's *value* is a pure function of the *structure*: it
+commutes with relabelling, i.e. it never breaks ties by vertex index. (The key's **cost** carries no ① obligation
+— an expensive key is sound, just slow. Its cost is a ② obligation, which is the point of charging it.) -/
 def KeyEquivariant (key : Key n) : Prop :=
   ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n),
-    key (relabelAdj σ adj) (transportColouring σ χ) (σ v) = key adj χ v
+    keyV key (relabelAdj σ adj) (transportColouring σ χ) (σ v) = keyV key adj χ v
 
 /-- Keep exactly the branches attaining the least key. (Factored out so the `match` can be discharged by the two
 rewrite lemmas below rather than reduced in every proof.) -/
 def keepMin (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) (B : List (Fin n)) : List (Fin n) :=
-  match kmin? (B.map (key adj χ)) with
+  match kmin? (B.map (keyV key adj χ)) with
   | none => B
-  | some m => B.filter (fun v => decide (key adj χ v = m))
+  | some m => B.filter (fun v => decide (keyV key adj χ v = m))
 
 /-- No branches (a discrete node): nothing to narrow. -/
 theorem keepMin_none {key : Key n} {adj : AdjMatrix n} {χ : Colouring n} {B : List (Fin n)}
-    (h : kmin? (B.map (key adj χ)) = none) : keepMin key adj χ B = B := by
+    (h : kmin? (B.map (keyV key adj χ)) = none) : keepMin key adj χ B = B := by
   unfold keepMin; rw [h]
 
 /-- The narrowing is the fibre of the least key. -/
 theorem keepMin_some {key : Key n} {adj : AdjMatrix n} {χ : Colouring n} {B : List (Fin n)}
-    {m : List Nat} (h : kmin? (B.map (key adj χ)) = some m) :
-    keepMin key adj χ B = B.filter (fun v => decide (key adj χ v = m)) := by
+    {m : List Nat} (h : kmin? (B.map (keyV key adj χ)) = some m) :
+    keepMin key adj χ B = B.filter (fun v => decide (keyV key adj χ v = m)) := by
   unfold keepMin; rw [h]
 
 /-- **★ THE FORCE RESOLVER.** Keep exactly the branches of least key; discard the rest. The discards are genuinely
 *different* subproblems — the aggregate **changes** — but it changes *consistently* on `G` and `σ·G`, which is all
-iso-invariance ever needed. **No global lex-min, no knowledge of the answer.** -/
+iso-invariance ever needed. **No global lex-min, no knowledge of the answer.**
+
+The cost is the **sum of the key's own costs over the branches it evaluates**, plus `n²` for the scan — so a key
+that does exhaustive work is billed for exhaustive work, and `②` is a statement about what the resolver actually
+does. -/
 def forceBy (key : Key n) : Resolver n := fun adj χ B =>
-  (some (keepMin key adj χ B), n * n * n)
+  (some (keepMin key adj χ B), (B.map (keyCost key adj χ)).sum + n * n)
 
 theorem narrow_forceBy (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) :
     narrow (forceBy key) adj χ = keepMin key adj χ (branches χ) := rfl
+
+/-- **The resolver is billed for every key evaluation it makes.** -/
+theorem forceBy_cost (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) (B : List (Fin n)) :
+    (forceBy key adj χ B).2 = (B.map (keyCost key adj χ)).sum + n * n := rfl
 
 /-! ## 3. Soundness — `NarrowEquivariant`, from `KeyEquivariant` alone -/
 
@@ -242,21 +275,21 @@ theorem narrowEquivariant_forceBy {key : Key n} (hk : KeyEquivariant key) :
   have hbr : (branches (transportColouring σ χ)).Perm ((branches χ).map σ) :=
     branches_transport_perm σ χ
   have hkeys : ∀ v : Fin n,
-      key (relabelAdj σ adj) (transportColouring σ χ) (σ v) = key adj χ v := hk σ adj χ
+      keyV key (relabelAdj σ adj) (transportColouring σ χ) (σ v) = keyV key adj χ v := hk σ adj χ
   -- Step 1: the minimum key is the SAME natural-number list on both sides.
   have hmap : ((branches (transportColouring σ χ)).map
-        (key (relabelAdj σ adj) (transportColouring σ χ))).Perm
-      ((branches χ).map (key adj χ)) := by
+        (keyV key (relabelAdj σ adj) (transportColouring σ χ))).Perm
+      ((branches χ).map (keyV key adj χ)) := by
     refine (hbr.map _).trans ?_
     rw [List.map_map]
     exact List.Perm.of_eq (List.map_congr_left (fun v _ => hkeys v))
   have hmin : kmin? ((branches (transportColouring σ χ)).map
-        (key (relabelAdj σ adj) (transportColouring σ χ)))
-      = kmin? ((branches χ).map (key adj χ)) :=
+        (keyV key (relabelAdj σ adj) (transportColouring σ χ)))
+      = kmin? ((branches χ).map (keyV key adj χ)) :=
     kmin?_congr_mem (fun x => hmap.mem_iff)
   rw [narrow_forceBy, narrow_forceBy]
   -- Step 2: split on whether the cell is empty (discrete) or not.
-  cases hk0 : kmin? ((branches χ).map (key adj χ)) with
+  cases hk0 : kmin? ((branches χ).map (keyV key adj χ)) with
   | none =>
       rw [keepMin_none (hmin.trans hk0), keepMin_none hk0]
       exact hbr
@@ -270,6 +303,38 @@ theorem narrowEquivariant_forceBy {key : Key n} (hk : KeyEquivariant key) :
       intro v _
       simp only [hkeys v]
 
+/-- **The forced set is exactly the argmin of the key over the cell.** Everything about force's *firing* is read
+off this one characterization. -/
+theorem mem_keepMin_iff {key : Key n} {adj : AdjMatrix n} {χ : Colouring n} {B : List (Fin n)}
+    (v : Fin n) :
+    v ∈ keepMin key adj χ B
+      ↔ v ∈ B ∧ ∀ w ∈ B, lexLeList (keyV key adj χ v) (keyV key adj χ w) = true := by
+  cases hk : kmin? (B.map (keyV key adj χ)) with
+  | none =>
+      have hnil : B = [] := by
+        have h0 := (kmin?_eq_none_iff _).mp hk
+        simpa using h0
+      subst hnil
+      rw [keepMin_none hk]
+      simp
+  | some m =>
+      rw [keepMin_some hk]
+      have hle : ∀ x ∈ B.map (keyV key adj χ), lexLeList m x = true := kmin?_le _ m hk
+      constructor
+      · intro hv
+        obtain ⟨hvB, hvm⟩ := List.mem_filter.mp hv
+        have hvm' : keyV key adj χ v = m := by simpa using hvm
+        refine ⟨hvB, fun w hw => ?_⟩
+        rw [hvm']
+        exact hle _ (List.mem_map.mpr ⟨w, hw, rfl⟩)
+      · rintro ⟨hvB, hmin⟩
+        -- `v`'s key is ≤ every key, and `m` is ≤ every key and is attained ⟹ they are equal.
+        obtain ⟨w₀, hw₀, hw₀m⟩ := List.mem_map.mp (kmin?_mem _ hk)
+        have h1 : lexLeList (keyV key adj χ v) m = true := by rw [← hw₀m]; exact hmin w₀ hw₀
+        have h2 : lexLeList m (keyV key adj χ v) = true :=
+          hle _ (List.mem_map.mpr ⟨v, hvB, rfl⟩)
+        exact List.mem_filter.mpr ⟨hvB, by simp [lexLeList_antisymm _ _ h1 h2]⟩
+
 /-! ## 4. Properness (totality) -/
 
 /-- The forced narrowing stays inside the branch cell and never empties it. -/
@@ -278,24 +343,116 @@ theorem narrowProper_forceBy (key : Key n) : NarrowProper (forceBy key) := by
   · intro adj χ hd
     have hbne : branches χ ≠ [] := branches_ne_nil hd
     rw [narrow_forceBy]
-    cases hk : kmin? ((branches χ).map (key adj χ)) with
+    cases hk : kmin? ((branches χ).map (keyV key adj χ)) with
     | none => rw [keepMin_none hk]; exact hbne
     | some m =>
         rw [keepMin_some hk]
         -- the minimum is attained, so the filter keeps at least that branch
         obtain ⟨v, hv, hvm⟩ := List.mem_map.mp (kmin?_mem _ hk)
         intro hnil
-        have hmem : v ∈ (branches χ).filter (fun v => decide (key adj χ v = m)) :=
+        have hmem : v ∈ (branches χ).filter (fun v => decide (keyV key adj χ v = m)) :=
           List.mem_filter.mpr ⟨hv, by simp [hvm]⟩
         rw [hnil] at hmem
         exact absurd hmem (List.not_mem_nil)
   · intro adj χ v hv
     rw [narrow_forceBy] at hv
-    cases hk : kmin? ((branches χ).map (key adj χ)) with
+    cases hk : kmin? ((branches χ).map (keyV key adj χ)) with
     | none => rw [keepMin_none hk] at hv; exact hv
     | some m =>
         rw [keepMin_some hk] at hv
         exact (List.mem_filter.mp hv).1
+
+/-! ## 4b. ★ FIRING — what force actually narrows, and its floor and ceiling
+
+`narrowProper` says the narrowing is nonempty and inside the cell. **A resolver that returns the whole cell
+satisfies that** — so on its own it certifies nothing: sound, and silently useless. These are the theorems that
+pin force's firing *exactly*.
+
+**Ceiling** (`keyV_aut_invariant`): an equivariant key is **constant on colouring-preserving automorphism
+orbits**, so the forced set is a **union of orbits** — force can never split one, and never narrows below orbit
+granularity. That is `forceBy_no_narrowing_on_orbit` in sharper form, and it is what lets `consume` finish the job
+(the composite, `Composite.lean`).
+
+**Floor** (`forceBy_singleton_of_separating`): if the key **separates** the cell, the forced set is a
+**singleton** — force removes *all* branching. This is the precise obligation the rigid solver's key inherits, and
+it is what P1/P3 (§11.12) are really about. -/
+
+/-- **★ THE CEILING — an equivariant key is CONSTANT ON ORBITS.** If `α` is a colouring-preserving automorphism of
+`(adj, χ)`, it cannot change any vertex's key. So the key is blind to *exactly* the distinctions consume handles,
+and force's narrowing can never cut inside an orbit. -/
+theorem keyV_aut_invariant {key : Key n} (hk : KeyEquivariant key) {adj : AdjMatrix n}
+    {χ : Colouring n} {α : Equiv.Perm (Fin n)} (hadj : relabelAdj α adj = adj)
+    (hχ : transportColouring α χ = χ) (v : Fin n) :
+    keyV key adj χ (α v) = keyV key adj χ v := by
+  have h := hk α adj χ v
+  rwa [hadj, hχ] at h
+
+/-- **The forced set is a union of orbits** — a corollary of the ceiling, and the lemma the composite needs: an
+orbit representative of a kept branch is itself kept, so consuming *inside* the forced set never escapes it. -/
+theorem mem_keepMin_of_aut {key : Key n} (hk : KeyEquivariant key) {adj : AdjMatrix n}
+    {χ : Colouring n} {α : Equiv.Perm (Fin n)} (hadj : relabelAdj α adj = adj)
+    (hχ : transportColouring α χ = χ) {v : Fin n}
+    (hv : v ∈ keepMin key adj χ (branches χ)) (hαv : α v ∈ branches χ) :
+    α v ∈ keepMin key adj χ (branches χ) := by
+  obtain ⟨_, hmin⟩ := mem_keepMin_iff (key := key) (adj := adj) (χ := χ) (B := branches χ) v |>.mp hv
+  refine mem_keepMin_iff _ |>.mpr ⟨hαv, fun w hw => ?_⟩
+  rw [keyV_aut_invariant hk hadj hχ v]
+  exact hmin w hw
+
+/-- **★★ THE FLOOR — a SEPARATING key removes ALL branching.** If the key distinguishes the cell's vertices
+pairwise, `forceBy` narrows the cell to a **single** branch: the descent takes one path, not `|cell|`.
+
+This is the theorem that makes the force route *useful* rather than merely sound, and it states exactly what the
+rigid solver's key must deliver on the rigid residue. Note the hypothesis is *injectivity on the cell*, i.e. the
+key sees every distinction the graph makes there — the same content as §11.12's P1/P3, now on the ②/firing side of
+the ledger where it belongs. -/
+theorem forceBy_singleton_of_separating {key : Key n} {adj : AdjMatrix n} {χ : Colouring n}
+    (hd : ¬ Discrete χ)
+    (hsep : ∀ u ∈ branches χ, ∀ w ∈ branches χ, keyV key adj χ u = keyV key adj χ w → u = w) :
+    (narrow (forceBy key) adj χ).length = 1 := by
+  rw [narrow_forceBy]
+  set L := keepMin key adj χ (branches χ) with hL
+  -- nonempty (properness) …
+  have hne : L ≠ [] := by
+    have := (narrowProper_forceBy key).1 adj χ hd
+    rwa [narrow_forceBy] at this
+  obtain ⟨v, hv⟩ := List.exists_mem_of_ne_nil _ hne
+  -- … and any two members attain the same (minimal) key, hence are equal.
+  have huniq : ∀ w ∈ L, w = v := by
+    intro w hw
+    obtain ⟨hwB, hwmin⟩ := (mem_keepMin_iff w).mp hw
+    obtain ⟨hvB, hvmin⟩ := (mem_keepMin_iff v).mp hv
+    exact hsep w hwB v hvB
+      (lexLeList_antisymm _ _ (hwmin v hvB) (hvmin w hwB))
+  -- nodup + a unique member ⟹ length 1
+  have hnodup : L.Nodup := by
+    rw [hL]
+    cases hk : kmin? ((branches χ).map (keyV key adj χ)) with
+    | none => rw [keepMin_none hk]; exact branches_nodup χ
+    | some m => rw [keepMin_some hk]; exact (branches_nodup χ).filter _
+  have hfin : L.toFinset = {v} :=
+    Finset.eq_singleton_iff_unique_mem.mpr
+      ⟨List.mem_toFinset.mpr hv, fun w hw => huniq w (List.mem_toFinset.mp hw)⟩
+  have := List.toFinset_card_of_nodup hnodup
+  rw [hfin] at this
+  simpa using this.symm
+
+/-- **Force FIRES exactly when the key is non-constant on the cell** — it discards a branch iff two branches get
+different keys. (The contrapositive is the ceiling: on an orbit cell the key is constant, so nothing is
+discarded.) -/
+theorem forceBy_discards_of_key_ne {key : Key n} {adj : AdjMatrix n} {χ : Colouring n}
+    {u w : Fin n} (hu : u ∈ branches χ) (hw : w ∈ branches χ)
+    (hne : keyV key adj χ u ≠ keyV key adj χ w) :
+    ∃ z ∈ branches χ, z ∉ narrow (forceBy key) adj χ := by
+  rw [narrow_forceBy]
+  -- whichever of `u`, `w` has the strictly larger key cannot be in the argmin set
+  rcases lexLeList_total (keyV key adj χ u) (keyV key adj χ w) with h | h
+  · refine ⟨w, hw, fun hc => ?_⟩
+    obtain ⟨_, hmin⟩ := (mem_keepMin_iff w).mp hc
+    exact hne (lexLeList_antisymm _ _ h (hmin u hu))
+  · refine ⟨u, hu, fun hc => ?_⟩
+    obtain ⟨_, hmin⟩ := (mem_keepMin_iff u).mp hc
+    exact hne (lexLeList_antisymm _ _ (hmin w hw) h)
 
 /-! ## 5. ★ THE CAPSTONE -/
 
@@ -374,11 +531,27 @@ graph, individualizing *any* vertex discretizes, so every vertex's histogram is 
 nothing (measured — it narrowed 12 branches to 12 on `F12`). The leaf matrix separates them.
 
 Both branches are equivariant, and *discreteness itself* transports (`discrete_transport`), so the `if` is taken
-on the same side for `v` and `σ v`. -/
+on the same side for `v` and `σ v`.
+
+**Its cost is charged honestly**: one warm refinement (`warmRefineCost n = n³`) plus `n²` to read off the ranking
+invariant. `forceBy` bills this once per branch, so a node's force cost is `Θ(|cell| · n³)` — polynomial, and
+*visibly* so. (Compare the exhaustive key warned about at `Key`: it would be billed its exhaustive cost, and `②`
+would reject it. That is the whole reason `Key` carries a cost.) -/
 def lookaheadKey : Key n := fun adj χ v =>
   let ψ : Colouring n := (lookData adj χ v).col
-  if Discrete ψ then 1 :: flatten (leafMatrix adj ψ)
-  else 0 :: (List.finRange n).map (fun c => (cellOf ψ c.val).card)
+  ((if Discrete ψ then 1 :: flatten (leafMatrix adj ψ)
+    else 0 :: (List.finRange n).map (fun c => (cellOf ψ c.val).card)),
+   CostModel.WarmRefine.warmRefineCost n + n * n)
+
+@[simp] theorem keyV_lookaheadKey (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    keyV (lookaheadKey (n := n)) adj χ v =
+      (let ψ : Colouring n := (lookData adj χ v).col
+       if Discrete ψ then 1 :: flatten (leafMatrix adj ψ)
+       else 0 :: (List.finRange n).map (fun c => (cellOf ψ c.val).card)) := rfl
+
+/-- The look-ahead key costs one refinement per branch — **polynomial, and charged**. -/
+theorem keyCost_lookaheadKey (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    keyCost (lookaheadKey (n := n)) adj χ v = CostModel.WarmRefine.warmRefineCost n + n * n := rfl
 
 /-- The look-ahead colouring transports. -/
 theorem lookData_col_transport (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)

@@ -19,6 +19,66 @@
 
 ## STATUS (read first)
 
+> **▶▶▶ STAGE 3c — THE MIXED RESOLVER EXISTS (2026-07-14, `ChainDescent/Composite.lean`, in `build.sh`, axiom-clean,
+> no `sorry`, full build green 283s). THIS TRACK'S NAMESAKE OBJECT WAS MISSING UNTIL NOW.**
+>
+> `descend` takes **ONE** resolver. `Consume.lean` and `Force.lean` each build one, and each is a canonizer alone —
+> but the engine the project models is **interleaved** (§1.5, IR §11.11): almost every real residue is *mixed* and
+> needs **both** moves at the **same** cell. With only the two separate instances, **the mixed object did not
+> exist** and "Stage 3 complete" was true of each instance and false of the composition.
+>
+> **★ IT NEEDED A THIRD CONTRACT ROUTE — the two were not composable.** `forceThenConsume` is **neither**
+> `Covering` (force changes the aggregate — that is the point of forcing) **nor** `NarrowEquivariant` (consume's
+> choice of orbit representative is deliberately *non*-equivariant). It satisfied neither sufficient condition.
+> The fix (`Descend.lean` §9): both routes are the **same** condition against different *reference lists*, so
+> generalize the reference to an arbitrary **equivariant intermediate `N`** — **`CoveringOfAt rf R N` +
+> `NarrowFnEquivariant N` ⟹ `NarrowTransport`** (`narrowTransport_of_coveringOfAt`). Then `Covering` is `N =
+> branches`, `NarrowEquivariant` is `N = narrow R`, and the **composite is `N = the forced set`**. One contract,
+> three instances.
+>
+> **★ THE LEMMA IT LIVES ON: the forced set is a UNION OF ORBITS** (`Force.mem_keepMin_of_aut`). `KeyEquivariant`
+> instantiated at a colouring-preserving automorphism gives **`keyV_aut_invariant`: an equivariant key is constant
+> on orbits**. So the argmin set never cuts an orbit in half, and an orbit representative of a kept branch is
+> itself kept — consume, run *inside* the forced set, cannot escape it. **The order is therefore forced FOR THE
+> PROOF**: force-then-consume composes cleanly; consume-first is value-equivalent but leaves a *non*-equivariant
+> intermediate and has no such covering argument. (The old note that the schedule "is an efficiency concern, never
+> a correctness one" is right about the **answer** and wrong about the **proof**.)
+>
+> **▶▶ ★★★ THE FIRING/COMPLETENESS GAP IS CLOSED — this was the real hole.** Before this pass, **no theorem in
+> `Consume.lean` or `Force.lean` said either resolver EVER NARROWS.** `NarrowProper` (nonempty ∧ ⊆ cell) is
+> satisfied by **a resolver that returns the whole cell** — so *silent uselessness was consistent with the entire
+> proof stack*, and the 12→1 / 7→7 numbers were `#guard`s on two concrete graphs, not theorems. Now proved:
+> - **`Consume.consume_singleton_of_cellIsOrbit`** — cell is one orbit of the verified generators ⟹ narrowing is a
+>   **singleton**. Engine: **`Consume.orbit_closed`** — the orbit BFS *converges* (`n` rounds suffice: every
+>   non-closed round adds ≥1 vertex and there are only `n`), hence `orbit` is a genuine orbit, hence
+>   **`rep_eq_of_orbit_eq`: `rep` is constant on it**. Without convergence the BFS is only a depth-`n`
+>   approximation and consume could keep every branch.
+> - **`Force.forceBy_singleton_of_separating`** — the key separates the cell ⟹ narrowing is a **singleton**. Plus
+>   **`mem_keepMin_iff`** (the forced set *is* the argmin) and **`forceBy_discards_of_key_ne`** (fires ⟺ the key is
+>   non-constant on the cell). This is §11.12's **P1/P3, stated exactly**, on the ②-side.
+> - **`Composite.forceThenConsume_singleton_of_{cellIsOrbit,separating}`** — **the composite removes ALL branching
+>   on BOTH domains.** And **`forceThenConsume_stall`** names the residue: a cell it cannot collapse is one where
+>   the supply does not connect it **and** the key does not separate it. *That is the mutual-stall flag, in Lean.*
+> - `PerformanceTest.lean` now gates *firing*, not just correctness: composite narrows the root to **1** on `C₇`
+>   (symmetric — force provably cannot fire, so that `1` is **consume**) *and* on `F12` (rigid — consume cannot
+>   fire, so that `1` is **the key**). A resolver that regressed to deferring everything now **fails the build**.
+>
+> **▶ ★★ COSTS ARE NOW HONEST — AND THE FORCE HEADLINE DID NOT SURVIVE IT.** `Key` and `Supply` were **cost-free**,
+> which made `②` unfalsifiable in two ways: (a) `forceBy` charged a flat `n³` **for an arbitrary key**, so the
+> contract admitted an **exponential** resolver that no theorem objects to (take `key := flatten (canonForm? … v)`
+> — the subtree's own canonical form: equivariant, maximally firing, exhaustive); (b) `Supply` was a pure function,
+> so the **oracle's own work — T-C, *the* open problem — was billed at ZERO.** Both are now `CostM`-valued
+> (`Force.forceBy_cost`, `Consume.consume_cost`); every ① proof survived untouched (they all go through the *value*
+> projection).
+>
+> **The immediate casualty: `descentCost` on `F12` is 22477 (exhaustive) → 26066 (forced) — force with
+> `lookaheadKey` is a NET LOSS.** The old "22477 → 5186" was an artifact of the flat-`n³` charge. The root's 12 key
+> evaluations alone cost `12·(n³+n²) = 22464`, more than the whole exhaustive descent. **Firing ≠ paying.** The
+> waste is *structural*: the refinement `lookaheadKey` computes for branch `v` is **exactly** the one the child node
+> recomputes from scratch. A resolver that handed its look-ahead forward would pay once — a `descend`-signature
+> question, and now the first concrete item of **②**. (The composite still pays where consume drives it: `C₇`
+> 7568 → **5898**.)
+
 > **▶ STAGE 0 STARTED — the correctness framework is LANDED (2026-07-11, `ChainDescent/CanonicalForm.lean`, in
 > `build.sh`, axiom-clean `[propext, Classical.choice, Quot.sound]`).** The spec is deliberately **not** "= the
 > global lex-min" (deferral gives a *different* iso-invariant canonical form; user correction 2026-07-11). Built:

@@ -199,6 +199,27 @@ resolver contract) before touching it.
 >   (C₅/C₆/C₇ cost 2016/4123/7568 → 804/1372/2160). **Graphs where neither fires are the residue** — the architecture
 >   is no longer only proved, it is observed.
 
+> **★★★ THE MIXED RESOLVER + THE FIRING PROOFS + HONEST COSTS (2026-07-14, `ChainDescent/Composite.lean`,
+> axiom-clean, in `build.sh`).** Three corrections to the picture above:
+> - **The mixed object was MISSING.** `descend` takes **one** resolver, so the two separate instances could not
+>   model the **interleaved** engine. **`Composite.forceThenConsume`** (force, then consume, at one cell) now does.
+>   It is **neither** `Covering` nor `NarrowEquivariant`, so it needed a **third, unifying contract route** —
+>   `CoveringOfAt` + `NarrowFnEquivariant` (cover an arbitrary **equivariant intermediate**); the two old routes are
+>   its `N = branches` and `N = narrow R` special cases. Sound because **the forced set is a union of orbits** (an
+>   equivariant key is constant on orbits), so consume cannot escape it.
+> - **★ THE RESOLVERS WERE NEVER PROVED TO FIRE.** `NarrowProper` is satisfied by a resolver that returns the whole
+>   cell — *silent uselessness was consistent with the entire proof stack.* Now proved: **consume collapses a
+>   symmetric cell to ONE branch** (`consume_singleton_of_cellIsOrbit`; engine = **`orbit_closed`**, the orbit BFS
+>   converges) and **a separating key collapses a rigid cell to ONE branch** (`forceBy_singleton_of_separating` —
+>   §11.12's P1/P3, stated exactly). ⟹ **the composite removes all branching on BOTH domains**, and
+>   **`forceThenConsume_stall`** names the residue: neither the supply connects the cell nor the key separates it.
+>   **That is the mutual-stall flag, in Lean.**
+> - **★ COSTS ARE NOW HONEST — and the force headline did not survive.** `Key`/`Supply` were cost-free, so `②` was
+>   unfalsifiable (a flat `n³` charge for an *arbitrary* key admits an **exponential** resolver; the oracle's own
+>   work — **T-C** — was billed **zero**). Both are `CostM` now. **`descentCost` on `F12`: 22477 exhaustive → 26066
+>   forced — a NET LOSS.** The old "→ 5186" was the flat-charge artifact. **Firing ≠ paying**, and the waste is
+>   structural: the key's look-ahead refinement is *exactly* the one the child recomputes.
+
 **The live Lean frontier** (authoritative "what's left" = [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)):
 **① IS DONE.** What remains is **② and ③**:
 1. **② — the cost + the flag (THE gap).** Re-base the node bound onto the *branching* object: the old `n⁴`
@@ -460,8 +481,9 @@ direction-invariance and spine invariants that everything imports.
 | `ChainDescent/Descend.lean` | **THE OBJECT** — `descend`, the computable resolver-parameterized **branching** descent in `CostM`. Capstone `isCanonicalFormOpt_canonForm?` ⟹ **①a/①b/①c**. Also the **resolver contract** (`NarrowTransport`, `Covering`/`CoveringAt`, `NarrowEquivariant`), the covering refutation (`canonForm?_eq_deferAll_of_covering`), the non-collapse theorem (`narrow_eq_branches_of_orbit`), and totality (`canonForm?_ne_none`) |
 | `ChainDescent/Refine.lean` | the **encode-free refiner** (`encodeFree`/`encodeFreeFast`) — discharges both refiner obligations ⟹ `exhaustive_canonizer` (unconditional canonical form **that answers**) |
 | `ChainDescent/Consume.lean` | the **ORACLE resolver** (`Covering` route). Untrusted `Supply` + a decidable `IsColAut` check ⟹ `consume_canonizer` for **every** supply |
-| `ChainDescent/Force.lean` | the **RIGID/FORCE resolver route** (`NarrowEquivariant`), as the combinator `forceBy key`. Sole ① obligation: **`KeyEquivariant`**. Concrete firing key `lookaheadKey` |
-| `ChainDescent/PerformanceTest.lean` | the **regression gate** — `#guard`s correctness *and* both resolvers' firing; a regression fails the build |
+| `ChainDescent/Force.lean` | the **RIGID/FORCE resolver route** (`NarrowEquivariant`), as the combinator `forceBy key`. Sole ① obligation: **`KeyEquivariant`**. Concrete firing key `lookaheadKey`. **Firing:** `forceBy_singleton_of_separating` (a separating key ⟹ ONE branch) + the ceiling `keyV_aut_invariant` (an equivariant key is constant on orbits) |
+| `ChainDescent/Composite.lean` | **THE MIXED RESOLVER** — `forceThenConsume`, both moves at one cell (the interleaved engine, instantiated). Needed the **third contract route** (`CoveringOfAt`). Capstone `composite_canonizer`; **fires on BOTH domains**; `forceThenConsume_stall` **names the residue** |
+| `ChainDescent/PerformanceTest.lean` | the **regression gate** — `#guard`s correctness *and* that each resolver **actually fires on its own domain** (a resolver that regressed to deferring everything fails the build) |
 
 **Supporting / historical:**
 

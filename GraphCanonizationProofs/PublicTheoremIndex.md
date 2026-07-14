@@ -2785,86 +2785,92 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Descend.mem_branches_iff` | 170-174 | §Stage-0b Membership in the branch list is exactly "carries the target colour". | — |
 | `Descend.branches_ne_nil` | 176-197 | §Stage-0b A non-discrete colouring always has a branchable cell — so the descent can always take a step. Feeds the totality theorem. | — |
 | `Descend.exists_partner_of_mem_branches` | 199-217 | §Stage-0b Every branch vertex sits in a NON-singleton cell (it has a same-coloured partner) — the engine of `ncol_lt_indivOne`, hence of totality. | — |
-| `Descend.Refiner` | 226-227 | §Stage-1 A refinement round with its cost (`CostM`), carried as a PARAMETER so the `Encodable.encode` staller is not baked into the object. | `abbrev` |
-| `Descend.Resolver` | 229-230 | §Stage-1 A branch-narrowing resolver with its cost: narrow the branch list, or defer. Takes the `AdjMatrix` (both instances need the graph). Consume and force are two instances, one per contract route. | `abbrev` |
-| `Descend.refineV` | 232-233 | §Stage-1 The refiner's `value` projection (the `cost` half is what `②` will read). | Definition |
-| `Descend.narrow` | 235-238 | §Stage-1 The NARROWED branch list — the resolver's value, defaulting to the full branch list on defer. The whole resolver contract is stated about this one object. | Definition |
-| `Descend.deferAll` | 240-242 | §Stage-1 The baseline resolver: never narrows. `descend deferAll` is the honest exhaustive-branching object. | Definition |
-| `Descend.narrow_deferAll` | 244-245 | §Stage-1 The baseline resolver narrows to the full branch list (i.e. not at all). | `@[simp]` |
-| `Descend.allPairs` | 249-251 | §Stage-2 All index pairs in row-major order; the basis for `flatten` (and hence for `flatten_injective`). | Definition |
-| `Descend.mem_allPairs` | 253-255 | §Stage-2 Every index pair occurs in `allPairs`. | — |
-| `Descend.flatten` | 257-259 | §Stage-2 Row-major flattening of a labelled matrix, defined over `allPairs` so that injectivity is immediate. | Definition |
-| `Descend.flatten_injective` | 261-263 | §Stage-2 A matrix is determined by its row-major entries. This is what makes `lexLe` a genuine total order, hence the aggregate a well-defined minimum. | — |
-| `Descend.lexLeList` | 265-269 | §Stage-2 Computable lexicographic ≤ on `Nat` lists. | Definition |
-| `Descend.lexLe` | 271-272 | §Stage-2 Computable row-major lexicographic ≤ on labelled matrices. | Definition |
-| `Descend.lexMin?` | 274-280 | §Stage-2 The lex-least matrix of a list (`none` on the empty list). | Definition |
-| `Descend.aggregate` | 282-284 | §Stage-0b Combine branch results: flag if any branch flagged, else take the lex-least leaf. Deterministic — which is all iso-invariance needs (the spec never asks WHICH leaf). | Definition |
-| `Descend.descend` | 298-311 | §Stage-0b THE OBJECT: the computable, resolver-parameterized branching descent, in the cost monad. Correctness (①) is theorems about its `value`, cost (②) about its `cost`, and the executable IS this definition. Fuel is PER-LAYER, never threaded, so each resolver's poly-or-flag behaviour is local. | Definition |
-| `Descend.canonForm?` | 313-315 | §Stage-0b The top-level canonizer object — the `value` projection of `descend`. This is what `SoundOpt`/`IsoInvariantOpt` are proved of and what `Publication.canonForm?` becomes. | Definition |
-| `Descend.descentCost` | 317-320 | §Stage-0b The descent's cost — the `cost` projection of the SAME definition (no separate cost object, no bridge). | Definition |
-| `Descend.descend_val_leaf` | 324-327 | §Stage-2 The descent emits the leaf matrix at any fuel once the colouring is discrete (discreteness is tested BEFORE fuel). | — |
-| `Descend.descend_val_zero` | 329-331 | §Stage-2 Out of fuel on a non-discrete colouring, the descent flags. (A placeholder for the real mutual-stall flag — `canonForm?_ne_none` proves it never actually fires.) | — |
-| `Descend.descend_val_succ` | 333-339 | §Stage-2 The descent's `value` at a branching node: the aggregate over the NARROWED branches. Isolates the value projection once, so every later proof is about `narrow` and nothing else. | — |
-| `Descend.lexMin?_mem` | 346-362 | §Stage-2 The lex-min of a list is a member of it. | — |
-| `Descend.aggregate_mem` | 364-372 | §Stage-2 The aggregate returns one of its inputs — the key to soundness of the branch case. | — |
-| `Descend.lexLeList_refl` | 405-409 | §Stage-2 Reflexivity of list-lex ≤. | — |
-| `Descend.lexLeList_total` | 411-423 | §Stage-2 Totality of list-lex ≤. | — |
-| `Descend.lexLeList_trans` | 425-450 | §Stage-2 Transitivity of list-lex ≤. | — |
-| `Descend.lexLeList_antisymm` | 452-465 | §Stage-2 Antisymmetry of list-lex ≤. | — |
-| `Descend.lexLe_refl` | 467 | §Stage-2 Reflexivity of matrix-lex ≤. | — |
-| `Descend.lexLe_total` | 468 | §Stage-2 Totality of matrix-lex ≤. | — |
-| `Descend.lexLe_trans` | 469-470 | §Stage-2 Transitivity of matrix-lex ≤. | — |
-| `Descend.lexLe_antisymm` | 471-472 | §Stage-2 Antisymmetry of matrix-lex ≤ (via `flatten_injective`). Makes `lexLe` a total order, hence the aggregate a genuine minimum. | — |
-| `Descend.lexMin?_eq_none_iff` | 474-484 | §Stage-2 `lexMin?` flags exactly on the empty list. | — |
-| `Descend.lexMin?_le` | 486-518 | §Stage-2 `lexMin?` really is the minimum: it is ≤ every member. | — |
-| `Descend.lexMin?_perm` | 520-538 | §Stage-2 `lexMin?` is permutation-invariant — it depends only on the multiset of candidates. | — |
-| `Descend.aggregate_perm` | 540-553 | §Stage-2 THE AGGREGATE IS PERMUTATION-INVARIANT. Discharges the obligation created by the index-ordered branch `List`: the labelling-dependent branch order provably never leaks into the output. | — |
-| `Descend.descend_sound` | 374-392 | §Stage-2 ①a for the descent: whenever it answers, the answer is a relabelling. Holds for ANY refinement and ANY resolver — narrowing only removes branches, so a mis-narrowing resolver costs a branch, never correctness. | — |
-| `Descend.soundOpt_canonForm?` | 394-398 | §Stage-2 `SoundOpt` for the top-level object — the `Publication.canon_sound` (①a) obligation, DISCHARGED. | — |
-| `Descend.lexMin?_congr_mem` | 555-580 | §7 `lexMin?` depends only on the *set* of candidates (a minimum under a total order does). Strictly stronger than `lexMin?_perm` — multiplicities may differ. | — |
-| `Descend.aggregate_congr_mem` | 582-602 | §7 **★ The aggregate depends only on the SET of branch results.** What the **consume** resolver needs: it *drops* branches, so the branch multiset genuinely shrinks — but the value set does not, and that is all the aggregate sees. | — |
-| `Descend.aggregate_ne_none` | 604-621 | §Stage-2 The aggregate answers whenever the branch list is nonempty and no branch flagged — the step lemma of the totality theorem. | — |
-| `Descend.transportColouring` | 629-631 | §Stage-2 Transport a colouring along a relabelling: χ on G becomes χ∘σ⁻¹ on `relabelAdj σ G`. | Definition |
-| `Descend.discrete_transport` | 633-641 | §Stage-2 Discreteness transports along a relabelling. | — |
-| `Descend.vertexRank_transport` | 643-647 | §Stage-2 The rank of σv under the transported colouring is the rank of v under the original — the reason the σ cancels in the leaf. | — |
-| `Descend.indivOne_transport` | 649-658 | §Stage-2 Individualization commutes with transport. This is where the INDEX-FREE choice pays: an index-dependent individualization would fail this outright. | — |
-| `Descend.cellOf_card_transport` | 660-672 | §Stage-2 Cell sizes are preserved under transport. | — |
-| `Descend.image_transport` | 674-682 | §Stage-2 The set of colour values is preserved under transport. | — |
-| `Descend.targetColour_transport` | 684-691 | §Stage-2 The target colour is the same natural number on both sides — so the branch set transports. | — |
-| `Descend.leafMatrix_transport` | 693-711 | §Stage-2 THE HEART OF ①b: the emitted leaf matrices are LITERALLY EQUAL under relabelling. The σ cancels because the output is indexed by colour-RANKS, not by vertices. | — |
-| `Descend.RefineEquivariant` | 737-740 | §Stage-2 Carried hypothesis on the refinement PARAMETER: the refinement round commutes with relabelling. (The encode-free round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not baked in.) | Definition |
-| `Descend.TransportAt` | 742-746 | §Stage-2 The descent's iso-invariance AT A GIVEN FUEL — the graded induction statement, which the resolver contract is allowed to consume as its induction hypothesis. | Definition |
-| `Descend.NarrowTransport` | 748-765 | §Stage-2 ★ THE RESOLVER CONTRACT: the narrowed-branch aggregate TRANSPORTS under relabelling. Strictly weaker than covering — it does NOT ask narrowing to preserve the aggregate, only to produce the same one on `G` and `σ·G`, which is what lets FORCE change the canonical form instead of having to know the answer. FUEL-GRADED (the IH is threaded in), which is what makes the CONSUME instance provable without circularity. | Definition |
-| `Descend.branchVal_transport` | 767-776 | §Stage-2 The per-branch values agree under transport (`indivOne` equivariance + the refiner's equivariance + the IH). Shared by both contract routes. | — |
-| `Descend.Covering` | 783-788 | §Stage-2 SUFFICIENT CONDITION 1 (the CONSUME route): narrowing does not change the aggregate, because every discarded branch is already reachable through a kept one (a verified path-fixing automorphism). Redundancy, not victory. The choice of representative is genuinely NON-equivariant — which is exactly what covering licenses. ⚠ It is NOT the general contract: see `canonForm?_eq_deferAll_of_covering`. | Definition |
-| `Descend.CoveringAt` | 790-806 | §9 **★ The fuel-graded covering — the form a real resolver instance satisfies.** `Covering` with the induction hypothesis `TransportAt rf R fuel` threaded in. `consume` needs this: its covering witness *is* `descend_transport` at an automorphism, one fuel level down. | Definition |
-| `Descend.coveringAt_of_covering` | 808-809 | §9 Unconditional covering implies the graded form. | — |
-| `Descend.narrowTransport_of_coveringAt` | 811-818 | §9 **Sufficient condition 1 (graded).** Fuel-graded covering ⟹ the resolver contract. The entry point for `consume`. | — |
-| `Descend.narrowTransport_of_covering` | 820-822 | §Stage-2 The CONSUME route into the contract: covering ⟹ `NarrowTransport`. | — |
-| `Descend.NarrowEquivariant` | 830-832 | §Stage-2 SUFFICIENT CONDITION 2 (the FORCE route): the narrowing is a structural function of `(adj, χ)` and so transports. The discards are genuinely DIFFERENT and the aggregate CHANGES — consistently — yielding a different but equally valid canonical form. No global lex-min, no knowledge of the answer. Checkable: never break ties by vertex index. | Definition |
-| `Descend.narrowTransport_of_narrowEquivariant` | 834-840 | §Stage-2 The FORCE route into the contract: equivariant narrowing ⟹ `NarrowTransport`. This is what lets the rigid solver enter Lean at all. | — |
-| `Descend.covering_deferAll` | 842-844 | §Stage-2 The baseline resolver never narrows, so it is trivially covering. | — |
-| `Descend.branches_transport_perm` | 713-728 | §Stage-2 The branch list transports UP TO PERMUTATION (it is built in index order) — which is exactly why `aggregate_perm` is needed. | — |
-| `Descend.narrowEquivariant_deferAll` | 846-848 | §Stage-2 The baseline resolver is also trivially equivariant — `deferAll` takes BOTH contract routes. | — |
-| `Descend.narrowTransport_deferAll` | 850-852 | §Stage-2 The exhaustive-branching object satisfies the resolver contract outright, carrying no resolver obligation at all. | — |
-| `Descend.descend_transport` | 856-877 | §Stage-2 ①b/①c: the descent is ISO-INVARIANT. The branch case is EXACTLY the resolver contract — note it needs no refiner hypothesis, so `NarrowTransport` is the whole per-node obligation. | — |
-| `Descend.isoInvariantOpt_canonForm?` | 879-889 | §Stage-2 `IsoInvariantOpt` for the top-level object — ①b and ①c then follow for free via Stage 0a. | — |
-| `Descend.isCanonicalFormOpt_canonForm?` | 891-897 | §Stage-2 ★ THE STAGE-2 CAPSTONE: the descent IS a canonical form (sound ∧ iso-invariant), hence a complete isomorphism invariant with an iso-invariant flag. ①a/①b/①c all discharged for the real object, modulo exactly two carried hypotheses. | — |
-| `Descend.canonForm?_complete` | 899-905 | §Stage-2 The `Publication.canon_complete` (①b) obligation, for the real object. | — |
-| `Descend.canonForm?_flag_iso_invariant` | 907-912 | §Stage-2 The `Publication.flag_iso_invariant` (①c) obligation, for the real object. | — |
-| `Descend.canonForm?_eq_deferAll_of_covering` | 918-942 | §Stage-2 ★★ WHY COVERING WAS TOO STRONG: a COVERING resolver is VALUE-INVISIBLE — it computes exactly the same answer as the exhaustive `deferAll`, changing the cost but never the answer. So demanding covering of every resolver pins the object to the exhaustive branch-min (= the retired `canonMin` anchor), and a FORCE resolver could satisfy it only by already computing that min — i.e. only by KNOWING THE ANSWER. This is the theorem that retired the one-contract design. | — |
-| `Descend.narrow_aut_invariant` | 944-958 | §Stage-2 An EQUIVARIANT narrowing is invariant under every colouring-preserving automorphism (`α·adj = adj`, `α·χ = χ` turn equivariance into `narrow = α · narrow`). | — |
-| `Descend.narrow_eq_branches_of_orbit` | 960-983 | §Stage-2 ★★ THE NON-COLLAPSE THEOREM: an equivariant narrowing CANNOT FIRE on a cell that is a single orbit — a nonempty invariant subset of one orbit is the whole orbit. So FORCE provably cannot fire on a symmetric cell and CONSUME fires exactly there: the two contract routes have COMPLEMENTARY, NON-OVERLAPPING firing domains, and the design does not collapse into GI ∈ P. Graphs where neither fires are the residue. | — |
-| `Descend.ncol` | 993-994 | §Stage-2 The number of colour classes — the descent's progress measure (discrete ⟺ `ncol = n`). | Definition |
-| `Descend.ncol_le` | 996-998 | §Stage-2 There are at most `n` colour classes. | — |
-| `Descend.discrete_of_ncol_eq` | 1000-1004 | §Stage-2 `n` colour classes ⟹ the colouring is discrete (pigeonhole) — the base case of totality. | — |
-| `Descend.ncol_lt_indivOne` | 1006-1033 | §Stage-2 Individualizing a branch vertex STRICTLY increases the colour count: it splits a non-singleton cell (the old colour survives on the partner; the new odd colour is fresh by parity). The descent therefore makes progress at every level. | — |
-| `Descend.RefineSplits` | 1035-1039 | §Stage-2 The refiner genuinely REFINES — it never merges two colour classes. This is what rules out the degenerate constant refiner (which is `RefineEquivariant` by `rfl` and would flag on every graph), so it is the hypothesis that earns NON-VACUITY. | Definition |
-| `Descend.ncol_le_refine` | 1041-1065 | §Stage-2 A genuinely-refining round never loses colour classes. | — |
-| `Descend.NarrowProper` | 1067-1071 | §Stage-2 The resolver's narrowing stays inside the branch list and never empties it. Both intended instances satisfy this (consume keeps an orbit representative; force keeps the determined branch). | Definition |
-| `Descend.narrowProper_deferAll` | 1073-1074 | §Stage-2 The baseline resolver is proper. | — |
-| `Descend.descend_ne_none` | 1076-1102 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
-| `Descend.canonForm?_ne_none` | 1104-1109 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
+| `Descend.branches_nodup` | 219-225 | The branch list has no duplicates (a filter of `finRange`). §Turns "the narrowing has a unique member" into "has **length 1**" — i.e. it is what lets a resolver's *firing* be stated quantitatively at all. | — |
+| `Descend.Refiner` | 234-235 | §Stage-1 A refinement round with its cost (`CostM`), carried as a PARAMETER so the `Encodable.encode` staller is not baked into the object. | `abbrev` |
+| `Descend.Resolver` | 237-238 | §Stage-1 A branch-narrowing resolver with its cost: narrow the branch list, or defer. Takes the `AdjMatrix` (both instances need the graph). Consume and force are two instances, one per contract route. | `abbrev` |
+| `Descend.refineV` | 240-241 | §Stage-1 The refiner's `value` projection (the `cost` half is what `②` will read). | Definition |
+| `Descend.narrow` | 243-246 | §Stage-1 The NARROWED branch list — the resolver's value, defaulting to the full branch list on defer. The whole resolver contract is stated about this one object. | Definition |
+| `Descend.deferAll` | 248-250 | §Stage-1 The baseline resolver: never narrows. `descend deferAll` is the honest exhaustive-branching object. | Definition |
+| `Descend.narrow_deferAll` | 252-253 | §Stage-1 The baseline resolver narrows to the full branch list (i.e. not at all). | `@[simp]` |
+| `Descend.allPairs` | 257-259 | §Stage-2 All index pairs in row-major order; the basis for `flatten` (and hence for `flatten_injective`). | Definition |
+| `Descend.mem_allPairs` | 261-263 | §Stage-2 Every index pair occurs in `allPairs`. | — |
+| `Descend.flatten` | 265-267 | §Stage-2 Row-major flattening of a labelled matrix, defined over `allPairs` so that injectivity is immediate. | Definition |
+| `Descend.flatten_injective` | 269-271 | §Stage-2 A matrix is determined by its row-major entries. This is what makes `lexLe` a genuine total order, hence the aggregate a well-defined minimum. | — |
+| `Descend.lexLeList` | 273-277 | §Stage-2 Computable lexicographic ≤ on `Nat` lists. | Definition |
+| `Descend.lexLe` | 279-280 | §Stage-2 Computable row-major lexicographic ≤ on labelled matrices. | Definition |
+| `Descend.lexMin?` | 282-288 | §Stage-2 The lex-least matrix of a list (`none` on the empty list). | Definition |
+| `Descend.aggregate` | 290-292 | §Stage-0b Combine branch results: flag if any branch flagged, else take the lex-least leaf. Deterministic — which is all iso-invariance needs (the spec never asks WHICH leaf). | Definition |
+| `Descend.descend` | 306-319 | §Stage-0b THE OBJECT: the computable, resolver-parameterized branching descent, in the cost monad. Correctness (①) is theorems about its `value`, cost (②) about its `cost`, and the executable IS this definition. Fuel is PER-LAYER, never threaded, so each resolver's poly-or-flag behaviour is local. | Definition |
+| `Descend.canonForm?` | 321-323 | §Stage-0b The top-level canonizer object — the `value` projection of `descend`. This is what `SoundOpt`/`IsoInvariantOpt` are proved of and what `Publication.canonForm?` becomes. | Definition |
+| `Descend.descentCost` | 325-328 | §Stage-0b The descent's cost — the `cost` projection of the SAME definition (no separate cost object, no bridge). | Definition |
+| `Descend.descend_val_leaf` | 332-335 | §Stage-2 The descent emits the leaf matrix at any fuel once the colouring is discrete (discreteness is tested BEFORE fuel). | — |
+| `Descend.descend_val_zero` | 337-339 | §Stage-2 Out of fuel on a non-discrete colouring, the descent flags. (A placeholder for the real mutual-stall flag — `canonForm?_ne_none` proves it never actually fires.) | — |
+| `Descend.descend_val_succ` | 341-347 | §Stage-2 The descent's `value` at a branching node: the aggregate over the NARROWED branches. Isolates the value projection once, so every later proof is about `narrow` and nothing else. | — |
+| `Descend.lexMin?_mem` | 354-370 | §Stage-2 The lex-min of a list is a member of it. | — |
+| `Descend.aggregate_mem` | 372-380 | §Stage-2 The aggregate returns one of its inputs — the key to soundness of the branch case. | — |
+| `Descend.lexLeList_refl` | 413-417 | §Stage-2 Reflexivity of list-lex ≤. | — |
+| `Descend.lexLeList_total` | 419-431 | §Stage-2 Totality of list-lex ≤. | — |
+| `Descend.lexLeList_trans` | 433-458 | §Stage-2 Transitivity of list-lex ≤. | — |
+| `Descend.lexLeList_antisymm` | 460-473 | §Stage-2 Antisymmetry of list-lex ≤. | — |
+| `Descend.lexLe_refl` | 475 | §Stage-2 Reflexivity of matrix-lex ≤. | — |
+| `Descend.lexLe_total` | 476 | §Stage-2 Totality of matrix-lex ≤. | — |
+| `Descend.lexLe_trans` | 477-478 | §Stage-2 Transitivity of matrix-lex ≤. | — |
+| `Descend.lexLe_antisymm` | 479-480 | §Stage-2 Antisymmetry of matrix-lex ≤ (via `flatten_injective`). Makes `lexLe` a total order, hence the aggregate a genuine minimum. | — |
+| `Descend.lexMin?_eq_none_iff` | 482-492 | §Stage-2 `lexMin?` flags exactly on the empty list. | — |
+| `Descend.lexMin?_le` | 494-526 | §Stage-2 `lexMin?` really is the minimum: it is ≤ every member. | — |
+| `Descend.lexMin?_perm` | 528-546 | §Stage-2 `lexMin?` is permutation-invariant — it depends only on the multiset of candidates. | — |
+| `Descend.aggregate_perm` | 548-561 | §Stage-2 THE AGGREGATE IS PERMUTATION-INVARIANT. Discharges the obligation created by the index-ordered branch `List`: the labelling-dependent branch order provably never leaks into the output. | — |
+| `Descend.descend_sound` | 382-400 | §Stage-2 ①a for the descent: whenever it answers, the answer is a relabelling. Holds for ANY refinement and ANY resolver — narrowing only removes branches, so a mis-narrowing resolver costs a branch, never correctness. | — |
+| `Descend.soundOpt_canonForm?` | 402-406 | §Stage-2 `SoundOpt` for the top-level object — the `Publication.canon_sound` (①a) obligation, DISCHARGED. | — |
+| `Descend.lexMin?_congr_mem` | 563-588 | §7 `lexMin?` depends only on the *set* of candidates (a minimum under a total order does). Strictly stronger than `lexMin?_perm` — multiplicities may differ. | — |
+| `Descend.aggregate_congr_mem` | 590-610 | §7 **★ The aggregate depends only on the SET of branch results.** What the **consume** resolver needs: it *drops* branches, so the branch multiset genuinely shrinks — but the value set does not, and that is all the aggregate sees. | — |
+| `Descend.aggregate_ne_none` | 612-629 | §Stage-2 The aggregate answers whenever the branch list is nonempty and no branch flagged — the step lemma of the totality theorem. | — |
+| `Descend.transportColouring` | 637-639 | §Stage-2 Transport a colouring along a relabelling: χ on G becomes χ∘σ⁻¹ on `relabelAdj σ G`. | Definition |
+| `Descend.discrete_transport` | 641-649 | §Stage-2 Discreteness transports along a relabelling. | — |
+| `Descend.vertexRank_transport` | 651-655 | §Stage-2 The rank of σv under the transported colouring is the rank of v under the original — the reason the σ cancels in the leaf. | — |
+| `Descend.indivOne_transport` | 657-666 | §Stage-2 Individualization commutes with transport. This is where the INDEX-FREE choice pays: an index-dependent individualization would fail this outright. | — |
+| `Descend.cellOf_card_transport` | 668-680 | §Stage-2 Cell sizes are preserved under transport. | — |
+| `Descend.image_transport` | 682-690 | §Stage-2 The set of colour values is preserved under transport. | — |
+| `Descend.targetColour_transport` | 692-699 | §Stage-2 The target colour is the same natural number on both sides — so the branch set transports. | — |
+| `Descend.leafMatrix_transport` | 701-719 | §Stage-2 THE HEART OF ①b: the emitted leaf matrices are LITERALLY EQUAL under relabelling. The σ cancels because the output is indexed by colour-RANKS, not by vertices. | — |
+| `Descend.RefineEquivariant` | 745-748 | §Stage-2 Carried hypothesis on the refinement PARAMETER: the refinement round commutes with relabelling. (The encode-free round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not baked in.) | Definition |
+| `Descend.TransportAt` | 750-754 | §Stage-2 The descent's iso-invariance AT A GIVEN FUEL — the graded induction statement, which the resolver contract is allowed to consume as its induction hypothesis. | Definition |
+| `Descend.NarrowTransport` | 756-773 | §Stage-2 ★ THE RESOLVER CONTRACT: the narrowed-branch aggregate TRANSPORTS under relabelling. Strictly weaker than covering — it does NOT ask narrowing to preserve the aggregate, only to produce the same one on `G` and `σ·G`, which is what lets FORCE change the canonical form instead of having to know the answer. FUEL-GRADED (the IH is threaded in), which is what makes the CONSUME instance provable without circularity. | Definition |
+| `Descend.branchVal_transport` | 775-784 | §Stage-2 The per-branch values agree under transport (`indivOne` equivariance + the refiner's equivariance + the IH). Shared by both contract routes. | — |
+| `Descend.Covering` | 791-796 | §Stage-2 SUFFICIENT CONDITION 1 (the CONSUME route): narrowing does not change the aggregate, because every discarded branch is already reachable through a kept one (a verified path-fixing automorphism). Redundancy, not victory. The choice of representative is genuinely NON-equivariant — which is exactly what covering licenses. ⚠ It is NOT the general contract: see `canonForm?_eq_deferAll_of_covering`. | Definition |
+| `Descend.CoveringAt` | 798-814 | §9 **★ The fuel-graded covering — the form a real resolver instance satisfies.** `Covering` with the induction hypothesis `TransportAt rf R fuel` threaded in. `consume` needs this: its covering witness *is* `descend_transport` at an automorphism, one fuel level down. | Definition |
+| `Descend.coveringAt_of_covering` | 816-817 | §9 Unconditional covering implies the graded form. | — |
+| `Descend.narrowTransport_of_coveringAt` | 819-826 | §9 **Sufficient condition 1 (graded).** Fuel-graded covering ⟹ the resolver contract. The entry point for `consume`. | — |
+| `Descend.narrowTransport_of_covering` | 828-830 | §Stage-2 The CONSUME route into the contract: covering ⟹ `NarrowTransport`. | — |
+| `Descend.NarrowEquivariant` | 838-840 | §Stage-2 SUFFICIENT CONDITION 2 (the FORCE route): the narrowing is a structural function of `(adj, χ)` and so transports. The discards are genuinely DIFFERENT and the aggregate CHANGES — consistently — yielding a different but equally valid canonical form. No global lex-min, no knowledge of the answer. Checkable: never break ties by vertex index. | Definition |
+| `Descend.narrowTransport_of_narrowEquivariant` | 842-848 | §Stage-2 The FORCE route into the contract: equivariant narrowing ⟹ `NarrowTransport`. This is what lets the rigid solver enter Lean at all. | — |
+| `Descend.covering_deferAll` | 850-852 | §Stage-2 The baseline resolver never narrows, so it is trivially covering. | — |
+| `Descend.branches_transport_perm` | 721-736 | §Stage-2 The branch list transports UP TO PERMUTATION (it is built in index order) — which is exactly why `aggregate_perm` is needed. | — |
+| `Descend.narrowEquivariant_deferAll` | 854-856 | §Stage-2 The baseline resolver is also trivially equivariant — `deferAll` takes BOTH contract routes. | — |
+| `Descend.narrowTransport_deferAll` | 858-860 | §Stage-2 The exhaustive-branching object satisfies the resolver contract outright, carrying no resolver obligation at all. | — |
+| `Descend.NarrowFn` | 883-884 | An **intermediate narrowing**: the reference list a resolver's aggregate is compared against. Definition. | `abbrev` |
+| `Descend.NarrowFnEquivariant` | 886-889 | The intermediate narrowing transports under relabelling (`NarrowEquivariant`, for a bare function). Definition. | Definition |
+| `Descend.CoveringOfAt` | 891-899 | **`R` covers the intermediate `N`** — fuel-graded, so a composite's consume half can still use the induction hypothesis. Definition. | Definition |
+| `Descend.narrowTransport_of_coveringOfAt` | 901-911 | §**THE GENERAL RESOLVER CONTRACT — the third and unifying route.** Covering an *equivariant intermediate* `N` implies `NarrowTransport`. `Covering` is the case `N = branches`; `NarrowEquivariant` is `N = narrow R`; the **mixed** resolver is `N = the forced set`. This is what admits `Composite.forceThenConsume` — neither earlier route does, so the interleaved engine was previously not instantiable. | — |
+| `Descend.narrowFnEquivariant_branches` | 913-915 | `branches` is an equivariant intermediate — exhibiting `Covering` as the special case of the general route. | — |
+| `Descend.descend_transport` | 919-940 | §Stage-2 ①b/①c: the descent is ISO-INVARIANT. The branch case is EXACTLY the resolver contract — note it needs no refiner hypothesis, so `NarrowTransport` is the whole per-node obligation. | — |
+| `Descend.isoInvariantOpt_canonForm?` | 942-952 | §Stage-2 `IsoInvariantOpt` for the top-level object — ①b and ①c then follow for free via Stage 0a. | — |
+| `Descend.isCanonicalFormOpt_canonForm?` | 954-960 | §Stage-2 ★ THE STAGE-2 CAPSTONE: the descent IS a canonical form (sound ∧ iso-invariant), hence a complete isomorphism invariant with an iso-invariant flag. ①a/①b/①c all discharged for the real object, modulo exactly two carried hypotheses. | — |
+| `Descend.canonForm?_complete` | 962-968 | §Stage-2 The `Publication.canon_complete` (①b) obligation, for the real object. | — |
+| `Descend.canonForm?_flag_iso_invariant` | 970-975 | §Stage-2 The `Publication.flag_iso_invariant` (①c) obligation, for the real object. | — |
+| `Descend.canonForm?_eq_deferAll_of_covering` | 981-1005 | §Stage-2 ★★ WHY COVERING WAS TOO STRONG: a COVERING resolver is VALUE-INVISIBLE — it computes exactly the same answer as the exhaustive `deferAll`, changing the cost but never the answer. So demanding covering of every resolver pins the object to the exhaustive branch-min (= the retired `canonMin` anchor), and a FORCE resolver could satisfy it only by already computing that min — i.e. only by KNOWING THE ANSWER. This is the theorem that retired the one-contract design. | — |
+| `Descend.narrow_aut_invariant` | 1007-1021 | §Stage-2 An EQUIVARIANT narrowing is invariant under every colouring-preserving automorphism (`α·adj = adj`, `α·χ = χ` turn equivariance into `narrow = α · narrow`). | — |
+| `Descend.narrow_eq_branches_of_orbit` | 1023-1046 | §Stage-2 ★★ THE NON-COLLAPSE THEOREM: an equivariant narrowing CANNOT FIRE on a cell that is a single orbit — a nonempty invariant subset of one orbit is the whole orbit. So FORCE provably cannot fire on a symmetric cell and CONSUME fires exactly there: the two contract routes have COMPLEMENTARY, NON-OVERLAPPING firing domains, and the design does not collapse into GI ∈ P. Graphs where neither fires are the residue. | — |
+| `Descend.ncol` | 1056-1057 | §Stage-2 The number of colour classes — the descent's progress measure (discrete ⟺ `ncol = n`). | Definition |
+| `Descend.ncol_le` | 1059-1061 | §Stage-2 There are at most `n` colour classes. | — |
+| `Descend.discrete_of_ncol_eq` | 1063-1067 | §Stage-2 `n` colour classes ⟹ the colouring is discrete (pigeonhole) — the base case of totality. | — |
+| `Descend.ncol_lt_indivOne` | 1069-1096 | §Stage-2 Individualizing a branch vertex STRICTLY increases the colour count: it splits a non-singleton cell (the old colour survives on the partner; the new odd colour is fresh by parity). The descent therefore makes progress at every level. | — |
+| `Descend.RefineSplits` | 1098-1102 | §Stage-2 The refiner genuinely REFINES — it never merges two colour classes. This is what rules out the degenerate constant refiner (which is `RefineEquivariant` by `rfl` and would flag on every graph), so it is the hypothesis that earns NON-VACUITY. | Definition |
+| `Descend.ncol_le_refine` | 1104-1128 | §Stage-2 A genuinely-refining round never loses colour classes. | — |
+| `Descend.NarrowProper` | 1130-1134 | §Stage-2 The resolver's narrowing stays inside the branch list and never empties it. Both intended instances satisfy this (consume keeps an orbit representative; force keeps the determined branch). | Definition |
+| `Descend.narrowProper_deferAll` | 1136-1137 | §Stage-2 The baseline resolver is proper. | — |
+| `Descend.descend_ne_none` | 1139-1165 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
+| `Descend.canonForm?_ne_none` | 1167-1172 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
 ## ChainDescent/Refine.lean
 
 | Name | Line | Description | Notes |
@@ -2910,18 +2916,19 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Refine.C3` | 7-9 | Test fixture: the 3-cycle. | Definition |
-| `Refine.C4` | 11-13 | Test fixture: the 4-cycle. | Definition |
-| `Refine.C5` | 15-17 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
-| `Refine.C6` | 19-21 | Test fixture: the 6-cycle. | Definition |
-| `Refine.C7` | 24-26 | Test fixture: the 7-cycle. | Definition |
-| `Refine.form` | 34-49 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
-| `Refine.P5` | 50-51 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
-| `Refine.rotP` | 65-68 | The cyclic rotation `i ↦ i + 1` of `Fin n` — a genuine automorphism source for cycles. | Definition |
-| `Refine.rotSupply` | 69-72 | The rotation oracle **supply** for `Consume.consume`. Untrusted, like every supply: it verifies at the root and is *rejected* one level down, where individualization breaks the rotation symmetry. | Definition |
-| `Refine.formC` | 73-99 | The canonical form computed with the **oracle** (`consume`) resolver, as a comparable value. | Definition |
-| `Refine.F12` | 112-118 | A 3-regular graph on 12 vertices whose 1-WL leaves a **single cell of size 12** and whose cells are **not orbits** — the rigid case, where `force` fires (root fan-out 12 → 1). | Definition |
-| `Refine.formF` | 119-148 | The canonical form computed with the **force** (`forceBy lookaheadKey`) resolver, as a comparable value. | Definition |
+| `Refine.C3` | 8-10 | Test fixture: the 3-cycle. | Definition |
+| `Refine.C4` | 12-14 | Test fixture: the 4-cycle. | Definition |
+| `Refine.C5` | 16-18 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
+| `Refine.C6` | 20-22 | Test fixture: the 6-cycle. | Definition |
+| `Refine.C7` | 25-27 | Test fixture: the 7-cycle. | Definition |
+| `Refine.form` | 35-50 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
+| `Refine.P5` | 51-52 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
+| `Refine.rotP` | 66-69 | The cyclic rotation `i ↦ i + 1` of `Fin n` — a genuine automorphism source for cycles. | Definition |
+| `Refine.rotSupply` | 70-74 | The rotation oracle **supply** for `Consume.consume`. Untrusted, like every supply: it verifies at the root and is *rejected* one level down, where individualization breaks the rotation symmetry. | Definition |
+| `Refine.formC` | 75-101 | The canonical form computed with the **oracle** (`consume`) resolver, as a comparable value. | Definition |
+| `Refine.F12` | 118-124 | A 3-regular graph on 12 vertices whose 1-WL leaves a **single cell of size 12** and whose cells are **not orbits** — the rigid case, where `force` fires (root fan-out 12 → 1). | Definition |
+| `Refine.formF` | 125-154 | The canonical form computed with the **force** (`forceBy lookaheadKey`) resolver, as a comparable value. | Definition |
+| `Refine.formM` | 176-217 | The canonical form under the **mixed** resolver, as a comparable value (regression-gate helper). | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -2947,45 +2954,94 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Consume.rep` | 197-202 | §4 **The orbit representative of `b`.** The choice is deliberately *not* equivariant (orbit members are indistinguishable to refinement); only its *result* transports, which is exactly what the `Covering` route licenses. | Definition |
 | `Consume.rep_mem_orbit` | 204-209 | §4 The representative lies in the orbit it represents. | — |
 | `Consume.reach_rep` | 211-214 | §4 **The covering witness, packaged.** The representative is reachable from the branch it replaces. | — |
-| `Consume.Supply` | 218-220 | §5 **An oracle supply — UNTRUSTED.** Candidate permutations (`matchOracle` / the cascade oracle / the solver kernel), carrying *no* proof obligation. | `abbrev` |
-| `Consume.verified` | 222-224 | §5 The supply filtered through the decidable `IsColAut` check. Everything downstream uses only this. | Definition |
-| `Consume.isColAut_of_mem_verified` | 226-231 | §5 **Everything surviving the filter is a genuine colouring-preserving automorphism.** The single lemma that makes an untrusted supply harmless. | — |
-| `Consume.consume` | 233-237 | §5 **★ THE ORACLE RESOLVER.** Keeps one representative per orbit of the branch cell under the *verified* automorphisms, discarding the rest. | Definition |
-| `Consume.narrow_consume` | 239-240 | §5 The narrowing `consume` performs, unfolded. | `@[simp]` |
-| `Consume.exists_targetColour_of_mem` | 244-252 | §6 A nonempty branch list has a target colour, and its members carry it. | — |
-| `Consume.narrow_consume_subset` | 254-264 | §6 **The narrowing stays inside the branch cell** — orbits cannot leave it, since a verified automorphism preserves the colouring. | — |
-| `Consume.narrow_consume_ne_nil` | 266-275 | §6 The narrowing is never empty on a non-discrete node. | — |
-| `Consume.narrowProper_consume` | 277-280 | §6 `consume` is a **proper** narrowing (inside the cell, never empty) — the hypothesis totality (`canonForm?_ne_none`) needs. | — |
-| `Consume.branchVal_eq_of_isColAut` | 282-295 | §6 **★★ THE COVERING WITNESS.** A verified automorphism makes two branches *value-equal*: it is `descend_transport` at `σ = α`, where `relabelAdj α adj = adj` degenerates the transport equation into an equality between two branches of the *same* graph. This is where the fuel-graded `CoveringAt` earns its keep. | — |
-| `Consume.coveringAt_consume` | 297-327 | §6 **★★★ `consume` IS SOUND — for EVERY supply, however wrong.** The narrowed aggregate equals the full one, because each discarded branch is value-equal to the kept representative of its orbit. A broken oracle costs branches, never correctness. | — |
-| `Consume.narrowTransport_consume` | 329-332 | §6 `consume` satisfies the resolver contract (`NarrowTransport`), for every supply. | — |
-| `Consume.consume_canonizer` | 336-348 | §7 **★★★ THE ORACLE-DRIVEN CANONIZER.** `①a`/`①b`/`①c` hold and the descent never flags, **with no hypothesis on the oracle at all**. | — |
-| `Consume.consume_canonizer_fast` | 350-357 | §7 The same, on the runnable `encodeFreeFast` refiner. | — |
+| `Consume.Supply` | 218-225 | §5 **An oracle supply — UNTRUSTED.** Candidate permutations (`matchOracle` / the cascade oracle / the solver kernel), carrying *no* proof obligation. | `abbrev` |
+| `Consume.gens` | 227-229 | The supply's **value** projection (the candidate generators). Definition. | Definition |
+| `Consume.supplyCost` | 231-232 | The supply's **cost** projection — the oracle's own work, now billed to the descent. Definition. | Definition |
+| `Consume.verified` | 234-236 | §5 The supply filtered through the decidable `IsColAut` check. Everything downstream uses only this. | Definition |
+| `Consume.isColAut_of_mem_verified` | 238-243 | §5 **Everything surviving the filter is a genuine colouring-preserving automorphism.** The single lemma that makes an untrusted supply harmless. | — |
+| `Consume.consume` | 245-254 | §5 **★ THE ORACLE RESOLVER.** Keeps one representative per orbit of the branch cell under the *verified* automorphisms, discarding the rest. | Definition |
+| `Consume.narrow_consume` | 256-257 | §5 The narrowing `consume` performs, unfolded. | `@[simp]` |
+| `Consume.consume_cost` | 259-263 | §**The oracle's own work is charged.** Supply cost + one edge-by-edge verification per candidate + one orbit BFS per branch. Previously `Supply` was cost-free, so the T-C "work per node" question — *the* open oracle problem — was invisible to `②`. | — |
+| `Consume.exists_targetColour_of_mem` | 267-275 | §6 A nonempty branch list has a target colour, and its members carry it. | — |
+| `Consume.narrow_consume_subset` | 277-287 | §6 **The narrowing stays inside the branch cell** — orbits cannot leave it, since a verified automorphism preserves the colouring. | — |
+| `Consume.narrow_consume_ne_nil` | 289-298 | §6 The narrowing is never empty on a non-discrete node. | — |
+| `Consume.narrowProper_consume` | 300-303 | §6 `consume` is a **proper** narrowing (inside the cell, never empty) — the hypothesis totality (`canonForm?_ne_none`) needs. | — |
+| `Consume.branchVal_eq_of_isColAut` | 305-318 | §6 **★★ THE COVERING WITNESS.** A verified automorphism makes two branches *value-equal*: it is `descend_transport` at `σ = α`, where `relabelAdj α adj = adj` degenerates the transport equation into an equality between two branches of the *same* graph. This is where the fuel-graded `CoveringAt` earns its keep. | — |
+| `Consume.coveringAt_consume` | 320-350 | §6 **★★★ `consume` IS SOUND — for EVERY supply, however wrong.** The narrowed aggregate equals the full one, because each discarded branch is value-equal to the kept representative of its orbit. A broken oracle costs branches, never correctness. | — |
+| `Consume.narrowTransport_consume` | 352-355 | §6 `consume` satisfies the resolver contract (`NarrowTransport`), for every supply. | — |
+| `Consume.consume_canonizer` | 359-371 | §7 **★★★ THE ORACLE-DRIVEN CANONIZER.** `①a`/`①b`/`①c` hold and the descent never flags, **with no hypothesis on the oracle at all**. | — |
+| `Consume.consume_canonizer_fast` | 373-380 | §7 The same, on the runnable `encodeFreeFast` refiner. | — |
+| `Consume.Closed` | 394-396 | A vertex set is closed under the generators — the orbit BFS's fixpoint condition. Definition. | Definition |
+| `Consume.mem_orbStep_iff` | 398-410 | Membership in one BFS round: already present, or one generator step away. | — |
+| `Consume.mem_orbStep_of_closed` | 412-416 | A closed set is a **fixpoint** of the BFS step. | — |
+| `Consume.mem_iterate_of_closed` | 418-429 | Once closed, always closed: iterating the BFS from a closed set changes nothing. | — |
+| `Consume.iterate_subset_succ` | 431-437 | The BFS is monotone — a round never loses a vertex. | — |
+| `Consume.card_lt_of_not_closed` | 439-450 | **Every non-closed BFS round strictly grows the reached set** — the monovariant behind convergence. | — |
+| `Consume.orbit_closed` | 452-484 | §**THE ORBIT BFS CONVERGES — `n` rounds suffice.** If round `n` were not closed, all `n+1` rounds would have strictly grown the set, forcing `> n` distinct vertices into `Fin n`. Without this the BFS is only a depth-`n` approximation, `rep` need not be constant on an orbit, and **consume could silently keep every branch** — the whole firing story rests on this. | — |
+| `Consume.WordReach` | 488-493 | `m` is reachable from `b` by a **word in the supply's generators** (stronger than `Reach`, which asks only that *some* automorphism does it). Definition. | Inductive |
+| `Consume.mem_orbit_of_wordReach` | 495-501 | The orbit list contains everything a word reaches — what convergence buys: the BFS *is* the whole orbit, not an approximation of it. | — |
+| `Consume.minList_le_seed` | 505-513 | The running minimum never exceeds its seed. | — |
+| `Consume.minList_le` | 515-525 | The running minimum is `≤` every list element. | — |
+| `Consume.rep_eq_of_orbit_eq` | 527-537 | §**`rep` IS CONSTANT ON AN ORBIT.** Two vertices reaching the same set get the same representative, so consume maps them to **one** branch rather than two. This is exactly what `NarrowProper` could never give. | — |
+| `Consume.CellIsOrbit` | 541-547 | **The oracle's FIRING obligation, stated.** The branch cell is a single orbit of the supply's *verified* generators. A `②` obligation, never a `①` one — but not optional: without it consume defers and the descent branches. Definition. | Definition |
+| `Consume.orbit_subset_branches` | 549-555 | An orbit never leaves the branch cell (a verified automorphism preserves the colouring). | — |
+| `Consume.rep_const_of_cellIsOrbit` | 557-573 | On a cell that is one orbit, every branch has the same representative. | — |
+| `Consume.dedup_map_length_one` | 575-595 | The dedup of a constant map over a nonempty list is a singleton — the shape both firing theorems land in. | — |
+| `Consume.consume_singleton_of_cellIsOrbit` | 597-602 | §**CONSUME FIRES — a symmetric cell costs ONE branch, not `|cell|`.** If the cell is a single orbit of the verified generators, the narrowing is a **singleton**: the fan-out is gone. The completeness counterpart to `consume_canonizer` (which is sound for *every* supply, including a useless one). | — |
 ## ChainDescent/Force.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Force.kmin?` | 81-87 | §1 The lex-least key of a list (`none` on empty), under the proved total order `lexLeList`. | Definition |
-| `Force.kmin?_eq_none_iff` | 89-100 | §1 `kmin?` flags exactly on the empty list. | — |
-| `Force.kmin?_mem` | 102-118 | §1 The minimum is one of the candidates — so the forced narrowing is never empty. | — |
-| `Force.kmin?_le` | 120-157 | §1 The minimum really is `≤` every candidate. | — |
-| `Force.kmin?_congr_mem` | 159-183 | §1 **`kmin?` depends only on the SET of candidates.** What lets the narrowing survive the fact that the branch list is built in *index* order. | — |
-| `Force.Key` | 187-189 | §2 A **structural vertex key** — the invariant a forcing rule ranks branches by. (`List Nat`, so it is compared with the already-proved total order `lexLeList`.) | `abbrev` |
-| `Force.KeyEquivariant` | 191-195 | §2 **★ THE ONLY ① OBLIGATION OF A FORCE RESOLVER.** The key commutes with relabelling — i.e. it never breaks ties by vertex index. Everything else about the rigid solver (P1/P3) is a ②/firing matter. | Definition |
-| `Force.keepMin` | 197-202 | §2 Keep exactly the branches attaining the least key. | Definition |
-| `Force.keepMin_none` | 204-207 | §2 No branches (a discrete node): nothing to narrow. | — |
-| `Force.keepMin_some` | 209-213 | §2 The narrowing is the fibre of the least key. | — |
-| `Force.forceBy` | 215-219 | §2 **★ THE FORCE RESOLVER.** Keep the branches of least key. The discards are genuinely *different* subproblems — the aggregate **changes** — but consistently on `G` and `σ·G`, which is all iso-invariance needs. **No global lex-min, no knowledge of the answer.** | Definition |
-| `Force.narrow_forceBy` | 221-222 | §2 The narrowing `forceBy` performs, unfolded. | — |
-| `Force.filter_map_comm` | 226-234 | §3 Mapping then filtering is filtering-by-the-composite then mapping. | — |
-| `Force.narrowEquivariant_forceBy` | 236-271 | §3 **★★ THE FORCE ROUTE, DISCHARGED.** An equivariant key gives an equivariant narrowing, hence the whole resolver contract. This is the *entire* ① content of the rigid solver. | — |
-| `Force.narrowProper_forceBy` | 275-298 | §4 The forced narrowing stays inside the branch cell and never empties it — the hypothesis totality needs. | — |
-| `Force.force_canonizer` | 302-317 | §5 **★★★ THE FORCE-DRIVEN CANONIZER.** ①a/①b/①c and totality, modulo nothing but `KeyEquivariant key`. Note it computes a *different but equally valid* canonical form, not the exhaustive branch-min — which is precisely what frees the rigid solver from having to know the answer. | — |
-| `Force.force_canonizer_fast` | 319-326 | §5 The same, on the runnable `encodeFreeFast` refiner. | — |
-| `Force.forceBy_no_narrowing_on_orbit` | 328-339 | §5 **★★ NO GI ∈ P COLLAPSE.** `forceBy` cannot fire on a cell that is a single orbit: forcing is available only where the cell is genuinely *not* an orbit — exactly where **consume** cannot fire. Complementary, non-overlapping firing domains. | — |
-| `Force.lookData` | 351-358 | §6 The refinement reached by individualizing `v`, as **materialised data**. ⚠ Returns `ColData`, not `Colouring` — a `Colouring`-valued definition is eta-expanded to full arity and re-runs the refinement on *every* colour lookup (`Refine.lean` §4). | Definition |
-| `Force.lookData_col` | 360-364 | §6 The look-ahead colouring equals `warmRefineR`, so reification does not affect any proof. | — |
-| `Force.lookaheadKey` | 366-381 | §6 **A concrete key that provably FIRES.** Individualize `v`, refine, and rank `v` by the *leaf it reaches* (falling back to a cell-size histogram when it does not discretize). Measured: root fan-out 12→1 on a rigid cubic graph; provably no narrowing at all on a vertex-transitive one. The cell-size histogram **alone** separates nothing on a rigid graph — the leaf matrix is what does. | Definition |
-| `Force.lookData_col_transport` | 383-389 | §6 The look-ahead colouring transports. | — |
-| `Force.keyEquivariant_lookahead` | 391-409 | §6 **The look-ahead key is equivariant** — refinement, individualization and discreteness all transport, and both ranking invariants transport (`leafMatrix_transport` is *literal equality*; `cellOf_card_transport`). | — |
-| `Force.lookahead_canonizer` | 411-418 | §6 **★ THE LOOK-AHEAD CANONIZER** — a fully concrete, hypothesis-free force-driven canonizer: sound, iso-invariant, complete, and it always answers. | — |
+| `Force.kmin?` | 90-96 | §1 The lex-least key of a list (`none` on empty), under the proved total order `lexLeList`. | Definition |
+| `Force.kmin?_eq_none_iff` | 98-109 | §1 `kmin?` flags exactly on the empty list. | — |
+| `Force.kmin?_mem` | 111-127 | §1 The minimum is one of the candidates — so the forced narrowing is never empty. | — |
+| `Force.kmin?_le` | 129-166 | §1 The minimum really is `≤` every candidate. | — |
+| `Force.kmin?_congr_mem` | 168-192 | §1 **`kmin?` depends only on the SET of candidates.** What lets the narrowing survive the fact that the branch list is built in *index* order. | — |
+| `Force.Key` | 196-205 | §2 A **structural vertex key** — the invariant a forcing rule ranks branches by. (`List Nat`, so it is compared with the already-proved total order `lexLeList`.) | `abbrev` |
+| `Force.keyV` | 207-209 | The key's **value** projection — what the ranking compares. Definition. | Definition |
+| `Force.keyCost` | 211-213 | The key's **cost** projection — what `forceBy` is billed per evaluation. Definition. | Definition |
+| `Force.KeyEquivariant` | 215-220 | §2 **★ THE ONLY ① OBLIGATION OF A FORCE RESOLVER.** The key commutes with relabelling — i.e. it never breaks ties by vertex index. Everything else about the rigid solver (P1/P3) is a ②/firing matter. | Definition |
+| `Force.keepMin` | 222-227 | §2 Keep exactly the branches attaining the least key. | Definition |
+| `Force.keepMin_none` | 229-232 | §2 No branches (a discrete node): nothing to narrow. | — |
+| `Force.keepMin_some` | 234-238 | §2 The narrowing is the fibre of the least key. | — |
+| `Force.forceBy` | 240-248 | §2 **★ THE FORCE RESOLVER.** Keep the branches of least key. The discards are genuinely *different* subproblems — the aggregate **changes** — but consistently on `G` and `σ·G`, which is all iso-invariance needs. **No global lex-min, no knowledge of the answer.** | Definition |
+| `Force.narrow_forceBy` | 250-251 | §2 The narrowing `forceBy` performs, unfolded. | — |
+| `Force.forceBy_cost` | 253-255 | §**The resolver is billed for every key evaluation.** Load-bearing: with a cost-free `Key`, the contract admits an **exponential** resolver no theorem objects to (take the key to be the subtree's own canonical form — equivariant, maximally firing, exhaustive). "It fires" only means something against a key charged for what it computes. | — |
+| `Force.filter_map_comm` | 259-267 | §3 Mapping then filtering is filtering-by-the-composite then mapping. | — |
+| `Force.narrowEquivariant_forceBy` | 269-304 | §3 **★★ THE FORCE ROUTE, DISCHARGED.** An equivariant key gives an equivariant narrowing, hence the whole resolver contract. This is the *entire* ① content of the rigid solver. | — |
+| `Force.mem_keepMin_iff` | 306-336 | **The forced set is exactly the argmin of the key over the cell.** Every statement about force's firing is read off this one characterization. | — |
+| `Force.narrowProper_forceBy` | 340-363 | §4 The forced narrowing stays inside the branch cell and never empties it — the hypothesis totality needs. | — |
+| `Force.keyV_aut_invariant` | 380-388 | §**THE CEILING — an equivariant key is CONSTANT ON ORBITS.** A colouring-preserving automorphism cannot change a vertex's key, so force is blind to *precisely* the distinctions consume handles and can never cut inside an orbit. | — |
+| `Force.mem_keepMin_of_aut` | 390-400 | **The forced set is a union of orbits** — an orbit representative of a kept branch is itself kept. The lemma that makes the mixed resolver sound: consuming *inside* the forced set never escapes it. | — |
+| `Force.forceBy_singleton_of_separating` | 402-438 | §**THE FLOOR — a SEPARATING key removes ALL branching.** If the key distinguishes the cell's vertices pairwise, `forceBy` narrows it to a **single** branch. This is what makes the force route *useful* rather than merely sound, and it is exactly what the rigid solver's key must deliver — §11.12's P1/P3, on the `②`/firing side of the ledger. | — |
+| `Force.forceBy_discards_of_key_ne` | 440-455 | Force discards a branch iff two branches get different keys — firing is *equivalent* to the key being non-constant on the cell. | — |
+| `Force.force_canonizer` | 459-474 | §5 **★★★ THE FORCE-DRIVEN CANONIZER.** ①a/①b/①c and totality, modulo nothing but `KeyEquivariant key`. Note it computes a *different but equally valid* canonical form, not the exhaustive branch-min — which is precisely what frees the rigid solver from having to know the answer. | — |
+| `Force.force_canonizer_fast` | 476-483 | §5 The same, on the runnable `encodeFreeFast` refiner. | — |
+| `Force.forceBy_no_narrowing_on_orbit` | 485-496 | §5 **★★ NO GI ∈ P COLLAPSE.** `forceBy` cannot fire on a cell that is a single orbit: forcing is available only where the cell is genuinely *not* an orbit — exactly where **consume** cannot fire. Complementary, non-overlapping firing domains. | — |
+| `Force.lookData` | 508-515 | §6 The refinement reached by individualizing `v`, as **materialised data**. ⚠ Returns `ColData`, not `Colouring` — a `Colouring`-valued definition is eta-expanded to full arity and re-runs the refinement on *every* colour lookup (`Refine.lean` §4). | Definition |
+| `Force.lookData_col` | 517-521 | §6 The look-ahead colouring equals `warmRefineR`, so reification does not affect any proof. | — |
+| `Force.lookaheadKey` | 523-544 | §6 **A concrete key that provably FIRES.** Individualize `v`, refine, and rank `v` by the *leaf it reaches* (falling back to a cell-size histogram when it does not discretize). Measured: root fan-out 12→1 on a rigid cubic graph; provably no narrowing at all on a vertex-transitive one. The cell-size histogram **alone** separates nothing on a rigid graph — the leaf matrix is what does. | Definition |
+| `Force.keyV_lookaheadKey` | 546-550 | The look-ahead key's value: rank by the leaf reached if individualization discretizes, else by the cell-size histogram. | `@[simp]` |
+| `Force.keyCost_lookaheadKey` | 552-554 | The look-ahead key costs one warm refinement per branch — polynomial, and **charged**. ⚠ Charged honestly it does not *pay*: on `F12` the root's keys alone cost `12·(n³+n²) = 22464`, exceeding the whole exhaustive descent (22477). It fires; it loses. The refinement it computes is the one the child then recomputes. | — |
+| `Force.lookData_col_transport` | 556-562 | §6 The look-ahead colouring transports. | — |
+| `Force.keyEquivariant_lookahead` | 564-582 | §6 **The look-ahead key is equivariant** — refinement, individualization and discreteness all transport, and both ranking invariants transport (`leafMatrix_transport` is *literal equality*; `cellOf_card_transport`). | — |
+| `Force.lookahead_canonizer` | 584-591 | §6 **★ THE LOOK-AHEAD CANONIZER** — a fully concrete, hypothesis-free force-driven canonizer: sound, iso-invariant, complete, and it always answers. | — |
+## ChainDescent/Composite.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Composite.forcedSet` | 75-76 | The forced set as a `NarrowFn` — the equivariant intermediate the mixed resolver covers. Definition. | Definition |
+| `Composite.forceThenConsume` | 78-88 | §**THE MIXED RESOLVER — both moves at one cell.** Force first (narrow equivariantly to the least-key branches), then consume (one orbit representative among those). `descend` takes ONE resolver, so the interleaved engine (IR §11.11) — which needs *both* moves at the *same* cell, as almost every real residue does — was not instantiable from the two separate instances. Costs are summed, not hidden. Definition. | Definition |
+| `Composite.narrow_forceThenConsume` | 90-92 | The composite's narrowing, unfolded: orbit representatives of the least-key branches. | — |
+| `Composite.forcedSet_subset` | 94-97 | The forced set sits inside the branch cell. | — |
+| `Composite.forcedSet_ne_nil` | 99-103 | The forced set is nonempty on a non-discrete node. | — |
+| `Composite.rep_mem_forcedSet` | 112-122 | §**An orbit representative never escapes the forced set.** `KeyEquivariant` makes the key constant on orbits, so the argmin set is a union of whole orbits. Without this, consume could pick a representative force had discarded and the covering argument would collapse — this is the lemma the composite lives or dies on. | — |
+| `Composite.narrowFnEquivariant_forcedSet` | 126-129 | The forced set is an equivariant intermediate (it *is* `narrow (forceBy key)`). | — |
+| `Composite.coveringOfAt_forceThenConsume` | 131-165 | **The composite covers the forced set.** Consume's discards *within* it are value-equal to the kept representative (`descend_transport` at an automorphism), and that representative is still in the forced set. | — |
+| `Composite.narrowTransport_forceThenConsume` | 167-172 | §**THE MIXED RESOLVER MEETS THE CONTRACT** — via the general `CoveringOfAt` route. It is **neither** `Covering` (force changes the aggregate) **nor** `NarrowEquivariant` (consume's representative choice is deliberately non-equivariant), which is why the generalized third route had to exist. | — |
+| `Composite.narrowProper_forceThenConsume` | 174-190 | The composite is a proper narrowing (nonempty, inside the cell) — the totality hypothesis. | — |
+| `Composite.composite_canonizer` | 194-207 | §**THE MIXED CANONIZER** — `①a`/`①b`/`①c` plus totality for the interleaved object, modulo **nothing but `KeyEquivariant`**, and *nothing at all* on the oracle supply (which stays untrusted). | — |
+| `Composite.composite_canonizer_fast` | 209-216 | The runnable mixed canonizer (`encodeFreeFast` refiner — value-equal, so it inherits everything). | — |
+| `Composite.forceThenConsume_singleton_of_cellIsOrbit` | 223-232 | §**FIRING, THE SYMMETRIC CASE.** If the cell is one orbit of the verified generators, the composite narrows it to **one** branch. Force provably *cannot* fire here, so this is consume's domain — and consume closes it completely. | — |
+| `Composite.forceThenConsume_singleton_of_separating` | 234-254 | §**FIRING, THE RIGID CASE.** If the key separates the cell, the composite narrows it to **one** branch. Consume cannot fire here, so this is force's domain — and the key closes it completely. This is the precise firing obligation the rigid solver inherits: *separate the cell*. | — |
+| `Composite.forceThenConsume_stall` | 256-276 | §**THE RESIDUE, NAMED.** A cell the composite cannot collapse is one where the supply does not connect it **and** the key does not separate it — neither move applies. That is the mutual stall (`②`'s real flag), and those graphs are exactly `UnhandledResidue`. | — |

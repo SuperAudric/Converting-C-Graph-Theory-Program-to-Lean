@@ -1,6 +1,7 @@
 import ChainDescent.Refine
 import ChainDescent.Consume
 import ChainDescent.Force
+import ChainDescent.Composite
 namespace ChainDescent.Refine
 open ChainDescent.Descend
 
@@ -66,8 +67,9 @@ so these `#guard`s test the *firing*, not the soundness. -/
 def rotP (n : Nat) [NeZero n] : Equiv.Perm (Fin n) := Equiv.addRight (1 : Fin n)
 
 open ChainDescent.Consume in
-/-- The rotation supply — a genuine automorphism source for cycles, and junk for anything else. -/
-def rotSupply (n : Nat) [NeZero n] : Supply n := fun _ _ => [rotP n]
+/-- The rotation supply — a genuine automorphism source for cycles, and junk for anything else. It is charged for
+its own work (`Supply` is `CostM`-valued: an oracle is untrusted, but not free). -/
+def rotSupply (n : Nat) [NeZero n] : Supply n := fun _ _ => ([rotP n], n)
 
 open ChainDescent.Consume in
 /-- The canonical form computed with the **oracle** resolver. -/
@@ -105,8 +107,12 @@ Force fires where consume cannot, and vice versa: **complementary firing domains
 vertices** and whose cells are **not** orbits — the rigid case. `C₇` is vertex-transitive, so every cell *is* an
 orbit and force provably cannot narrow at all.
 
-Measured: on `F12` force collapses the root fan-out **12 → 1** (`descentCost` 22477 → 5186); on `C₇` it cannot fire
-and merely pays for its key (7568 → 10312). Both are the theory, observed. -/
+Measured: on `F12` force collapses the root fan-out **12 → 1**; on `C₇` it cannot fire at all (7 → 7).
+
+⚠ **It fires, but with `lookaheadKey` it does not PAY** (`descentCost`, honest accounting): `F12` 22477 → **26066**,
+`C₇` 7568 → **16192** — both a net loss. The key runs a full warm refinement *per branch*, and that refinement is
+exactly the one the child node then recomputes. See `Force.lookaheadKey`'s note; this is a `②` problem, not a `①`
+one, and it only became visible once `Key` carried its cost. -/
 
 open ChainDescent.Force in
 /-- A 3-regular graph on 12 vertices: 1-WL leaves one cell of size 12, and the cells are not orbits. -/
@@ -146,5 +152,68 @@ open ChainDescent.Force in
 #eval (descentCost encodeFreeFast (forceBy lookaheadKey) F12, descentCost encodeFreeFast deferAll F12)
 open ChainDescent.Force in
 #eval (descentCost encodeFreeFast (forceBy lookaheadKey) C7, descentCost encodeFreeFast deferAll C7)
+
+/-! ## ★★ THE MIXED RESOLVER (`Composite.forceThenConsume`) — BOTH moves, and the ANTI-USELESSNESS gate
+
+The guards above test that each resolver *is right*. **These test that each resolver is not silently useless** —
+the failure mode `NarrowProper` cannot see, because a resolver that returns the whole cell (never narrowing
+anything, deferring every decision) satisfies soundness, totality and properness, and would pass every `#guard`
+written before this section.
+
+The composite must narrow the root cell to **exactly one branch on BOTH domains**:
+
+* `C₇` — vertex-transitive: the cell is one orbit, force **provably cannot fire**
+  (`Force.forceBy_no_narrowing_on_orbit`), so **consume** must finish it
+  (`Composite.forceThenConsume_singleton_of_cellIsOrbit`);
+* `F12` — rigid: no two branches are automorphic, so **consume cannot fire** and the **key** must separate the cell
+  (`Composite.forceThenConsume_singleton_of_separating`).
+
+A regression in *either* resolver's firing — a key that stops separating, an orbit search that stops converging —
+turns one of these from `1` into the full fan-out and **fails the build**. That is the property the proof stack
+could not previously state, and the reason these guards exist. -/
+
+open ChainDescent.Composite in
+/-- The canonical form computed with the **mixed** resolver: force, then consume. -/
+def formM {n : Nat} [NeZero n] (adj : AdjMatrix n) : Option (List Nat) :=
+  (canonForm? encodeFreeFast
+    (forceThenConsume ChainDescent.Force.lookaheadKey (rotSupply n)) adj).map flatten
+
+-- **It answers** (`Composite.composite_canonizer`, exercised).
+#guard (formM C7).isSome
+#guard (formM F12).isSome
+
+-- **Iso-invariance (①a/①b/①c)** — the composite is a canonical form, modulo only `KeyEquivariant`.
+#guard formM C7 = formM (relabelAdj (Equiv.swap 1 4) C7)
+#guard formM F12 = formM (relabelAdj (Equiv.swap 0 7) F12)
+#guard formM C6 = formM (relabelAdj (Equiv.swap 2 5) C6)
+
+-- Still distinguishes.
+#guard formM C5 ≠ formM P5
+
+-- **★★★ THE FIRING GATE — one branch on BOTH domains.**
+-- `C₇` (symmetric): force cannot fire, so this `1` is CONSUME doing its job.
+open ChainDescent.Composite in
+#guard (narrow (forceThenConsume ChainDescent.Force.lookaheadKey (rotSupply 7)) C7
+          (refineV encodeFreeFast C7 (fun _ => 0))).length = 1
+-- `F12` (rigid): consume cannot fire, so this `1` is the KEY doing its job.
+open ChainDescent.Composite in
+#guard (narrow (forceThenConsume ChainDescent.Force.lookaheadKey (rotSupply 12)) F12
+          (refineV encodeFreeFast F12 (fun _ => 0))).length = 1
+
+-- For contrast, each resolver ALONE fails on the other's domain — the complementary firing domains, as data.
+-- (force on C₇: 7, i.e. no narrowing at all; consume on F12: 12, likewise.)
+open ChainDescent.Force in
+#guard (narrow (forceBy lookaheadKey) C7 (refineV encodeFreeFast C7 (fun _ => 0))).length = 7
+open ChainDescent.Consume in
+#guard (narrow (consume (rotSupply 12)) F12 (refineV encodeFreeFast F12 (fun _ => 0))).length = 12
+
+open ChainDescent.Composite in
+#eval (descentCost encodeFreeFast
+        (forceThenConsume ChainDescent.Force.lookaheadKey (rotSupply 7)) C7,
+       descentCost encodeFreeFast deferAll C7)
+open ChainDescent.Composite in
+#eval (descentCost encodeFreeFast
+        (forceThenConsume ChainDescent.Force.lookaheadKey (rotSupply 12)) F12,
+       descentCost encodeFreeFast deferAll F12)
 
 end ChainDescent.Refine

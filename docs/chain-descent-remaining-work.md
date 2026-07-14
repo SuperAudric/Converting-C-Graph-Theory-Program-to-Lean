@@ -1,6 +1,39 @@
 # Remaining work — the living tracker (modulo set · citation replacement · IR solver)
 
-> ## ★★★ WHAT'S LEFT, AS OF 2026-07-13 (read this first; everything below is older context)
+> ## ★★★ UPDATE 2026-07-14 — THE MIXED RESOLVER + THE FIRING PROOFS + HONEST COSTS
+>
+> Three things landed that change the "what's left" below. All in `build.sh`, axiom-clean, no `sorry`, full build
+> green (283s).
+>
+> 1. **`ChainDescent/Composite.lean` — THE MIXED RESOLVER (`forceThenConsume`).** `descend` takes **one** resolver,
+>    so the two separate instances could not model the **interleaved** engine (IR §11.11) that almost every real
+>    residue needs. The composite is **neither** `Covering` **nor** `NarrowEquivariant`, so it needed a **third,
+>    unifying contract route**: `CoveringOfAt rf R N` + `NarrowFnEquivariant N` ⟹ `NarrowTransport`
+>    (`Descend.narrowTransport_of_coveringOfAt`) — covering an arbitrary **equivariant intermediate**. `Covering` is
+>    `N = branches`, `NarrowEquivariant` is `N = narrow R`, the composite is `N = the forced set`. Sound because
+>    **`Force.mem_keepMin_of_aut`: the forced set is a union of orbits** (an equivariant key is constant on orbits),
+>    so consume cannot escape it. **Order is forced for the proof:** force-then-consume.
+>
+> 2. **★★★ THE FIRING GAP IS CLOSED — this was a real hole.** No theorem in `Consume.lean`/`Force.lean` said either
+>    resolver **ever narrows**. `NarrowProper` is satisfied by a resolver that returns the whole cell ⟹ **silent
+>    uselessness was consistent with the entire proof stack** ("a resolver that defers every decision is correct and
+>    worthless"). Now proved: **`Consume.consume_singleton_of_cellIsOrbit`** (symmetric cell ⟹ **one** branch; engine
+>    = **`orbit_closed`**, the BFS *converges* in `n` rounds, hence `rep` is constant on an orbit) and
+>    **`Force.forceBy_singleton_of_separating`** (a separating key ⟹ **one** branch; = §11.12's P1/P3 stated exactly).
+>    ⟹ **`Composite.forceThenConsume_singleton_of_{cellIsOrbit,separating}`: the composite removes ALL branching on
+>    BOTH domains**, and **`forceThenConsume_stall`** names the residue (neither the supply connects the cell nor the
+>    key separates it) — **that is the mutual-stall flag, in Lean.** `PerformanceTest.lean` now gates *firing*.
+>
+> 3. **★★ COSTS ARE HONEST — and it cost the force headline.** `Key` and `Supply` were cost-free ⟹ `②` was
+>    unfalsifiable: `forceBy` billed a flat `n³` **for an arbitrary key** (so the contract admitted an *exponential*
+>    resolver — `key := flatten (canonForm? … v)` is equivariant, maximally firing, and exhaustive), and the
+>    **oracle's own work (T-C!) was billed ZERO**. Both are now `CostM`-valued. **Casualty: `descentCost` on `F12` is
+>    22477 exhaustive → 26066 forced — force with `lookaheadKey` is a NET LOSS.** The old "→ 5186" was the
+>    flat-charge artifact. **Firing ≠ paying.** Root cause is *structural*: the key's look-ahead refinement is
+>    **exactly** the one the child node recomputes. ⟹ **First concrete item of ②: let the resolver hand its
+>    look-ahead forward** (a `descend`-signature change).
+>
+> ## ★★★ WHAT'S LEFT, AS OF 2026-07-13 (older; read with the 2026-07-14 update above)
 >
 > **The correctness trio ①a/①b/①c is DISCHARGED for the real object.** `ChainDescent/Descend.lean` (in `build.sh`,
 > axiom-clean, no `sorry`, full build green) defines **the object** — `descend`: a **computable**,

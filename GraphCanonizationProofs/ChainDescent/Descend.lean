@@ -216,6 +216,14 @@ theorem exists_partner_of_mem_branches {χ : Colouring n} {v : Fin n} (hv : v �
       · exact ⟨b, by rw [← hav]; exact fun hc' => hab hc'.symm, by rw [hχb, hχv]⟩
       · exact ⟨a, hav, by rw [hχa, hχv]⟩
 
+/-- The branch list has **no duplicates** (it is a filter of `finRange`). Needed to turn "the narrowing has a
+unique member" into "the narrowing has length 1" — i.e. to state a resolver's *firing* quantitatively. -/
+theorem branches_nodup (χ : Colouring n) : (branches χ).Nodup := by
+  unfold branches
+  cases targetColour χ with
+  | none => exact List.nodup_nil
+  | some c => exact (List.nodup_finRange n).filter _
+
 /-! ## 4. The `Refiner` and the `Resolver`
 
 Both are written in `CostM`, so the descent's `cost` projection can charge the refinement round and the
@@ -850,6 +858,61 @@ theorem narrowEquivariant_deferAll : NarrowEquivariant (n := n) deferAll := by
 theorem narrowTransport_deferAll {rf : Refiner n} (hre : RefineEquivariant rf) :
     NarrowTransport (n := n) rf deferAll :=
   narrowTransport_of_covering hre (covering_deferAll rf)
+
+/-! ### Sufficient condition 3 — **`CoveringOfAt`** (the HYBRID route: force **then** consume)
+
+The two routes above are not composable as stated, and the engine (IR §11.11) is **interleaved** — almost every
+real residue needs *both* moves at the *same* cell (consume the symmetry that is there, force the rest). A
+composite resolver is neither `Covering` (force changes the aggregate) nor `NarrowEquivariant` (consume's choice
+of orbit representative is not equivariant), so it satisfies **neither** sufficient condition, and the mixed
+object — the one this whole track is named for — could not be built.
+
+The fix is to see that both routes are the **same** condition against different *reference lists*. Covering says
+"the narrowed aggregate equals the aggregate over `branches`"; equivariance says "the narrowed aggregate equals
+the aggregate over `narrow` itself, which transports". Generalize the reference to an arbitrary **equivariant
+intermediate narrowing `N`**:
+
+> **`R` covers an equivariant `N`** — the aggregate over `narrow R` equals the aggregate over `N`, and `N`
+> transports.
+
+`Covering` is the case `N = branches`; `NarrowEquivariant` is the case `N = narrow R`. And the composite is the
+case `N = the FORCED set`: force narrows equivariantly to `N`, then consume covers `N` (its discards are
+redundant *within* `N`, because the force key is constant on automorphism orbits, so the forced set is a **union
+of orbits** and an orbit representative never escapes it). One contract, three instances. -/
+
+/-- An **intermediate narrowing** — the reference list a resolver's aggregate is compared against. -/
+abbrev NarrowFn (n : Nat) := AdjMatrix n → Colouring n → List (Fin n)
+
+/-- The intermediate narrowing transports (same shape as `NarrowEquivariant`, for a bare function). -/
+def NarrowFnEquivariant (N : NarrowFn n) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n),
+    (N (relabelAdj σ adj) (transportColouring σ χ)).Perm ((N adj χ).map σ)
+
+/-- **`R`'s narrowing covers `N`** — fuel-graded, exactly as `CoveringAt` is (the consume half of a composite
+still needs the induction hypothesis to know its discards are value-equal). -/
+def CoveringOfAt (rf : Refiner n) (R : Resolver n) (N : NarrowFn n) : Prop :=
+  ∀ (fuel : Nat), TransportAt rf R fuel →
+    ∀ (adj : AdjMatrix n) (χ : Colouring n),
+      aggregate ((narrow R adj χ).map
+          (fun v => (descend rf R adj fuel (refineV rf adj (indivOne χ v))).1))
+        = aggregate ((N adj χ).map
+          (fun v => (descend rf R adj fuel (refineV rf adj (indivOne χ v))).1))
+
+/-- **★★ THE GENERAL RESOLVER CONTRACT — covering an equivariant intermediate.** Sandwich: the narrowed aggregate
+equals `N`'s on each side, and `N`'s transports. Subsumes both earlier routes and admits the composite. -/
+theorem narrowTransport_of_coveringOfAt {rf : Refiner n} {R : Resolver n} {N : NarrowFn n}
+    (hre : RefineEquivariant rf) (hNe : NarrowFnEquivariant N) (hcov : CoveringOfAt rf R N) :
+    NarrowTransport rf R := by
+  intro fuel ih adj σ χ _
+  rw [hcov fuel ih (relabelAdj σ adj) (transportColouring σ χ), hcov fuel ih adj χ]
+  refine aggregate_perm (((hNe σ adj χ).map _).trans ?_)
+  rw [List.map_map]
+  exact List.Perm.of_eq
+    (List.map_congr_left (fun v _ => branchVal_transport hre ih adj σ χ v))
+
+/-- `Covering` is the hybrid route at `N = branches`. -/
+theorem narrowFnEquivariant_branches : NarrowFnEquivariant (n := n) (fun _ χ => branches χ) :=
+  fun σ _ χ => branches_transport_perm σ χ
 
 /-! ## 10. `IsoInvariantOpt descend` (the capstone) -/
 
