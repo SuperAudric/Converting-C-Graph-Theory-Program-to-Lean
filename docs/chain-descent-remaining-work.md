@@ -6,17 +6,29 @@
 > is **resolver strength**, plus one object-level defect (the target-cell selector is blind to resolvability).
 > Everything below is retained as the blow-by-blow record of how it got there.
 >
-> **The four open items, in priority order** (handoff §6):
-> 1. **Resolver-aware cell selector** — `descend` needs a `sel` parameter. *Design approved, not built.* Fixes
+> **✅ LANDED SINCE (2026-07-14): `P0`/`P1`/`P2`/`P3a`/`P3b`** — `SealBridge.lean` (the seal corpus now reaches the
+> supply), `SupplyTransport.lean` (the flag's iso-invariance discharged ⟹ the **first concrete mixed canonizer**),
+> `DeepMatchSupply.lean` (the bounded-depth oracle — `C₄`/`C₇` now answer), `OrbitPrune.lean` (the `SameOrbits`
+> reduction + the pruning license). **Handoff §6.0 / §6.2 / §6.2b are authoritative; the list below is superseded.**
+>
+> **The open items, in priority order** (handoff §6):
+> 1. **`P3c` — the ORBIT-PRUNED FIXPOINT.** `deepMatchSupply d` fires but does not *pay* (`n^{O(d)}`; 125× net loss
+>    on `C₇`). Build `prunedSupply d` and prove the **single** theorem `SameOrbits (prunedSupply d)
+>    (deepMatchSupply d)` — `OrbitPrune.lean` already makes this **pure combinatorics, with zero `①` exposure**.
+> 2. **Resolver-aware cell selector** — `descend` needs a `sel` parameter. *Design approved, not built.* Fixes
 >    fusion's live bite; `Stall.stalled` currently means "the **least-colour** cell stalled", not "the node stalled".
-> 2. **The MULTI-STEP / cross-branch supply** (the real T-C) — `matchSupply` is one-step and **flags on a 7-cycle**.
->    The residue is currently **inflated by this gap, not by anything hard**.
+>    ⚠ Interacts with (1): it must **probe the supply per cell** ⟹ product-not-sum risk. Do them together.
 > 3. **The rigid key** — nothing exists beyond `lookaheadKey`; §11.12's P1–P4 not started.
 > 4. **The `Publication` opaque-swap** — now **unblocked** (`Residue.Residue` is a *definition*, so
 >    `unhandledResidue_nonvacuous` is provable; it was undischargeable *in principle* before).
 >
 > Also open: **the duplicate-refine loss** (force *fires* but does not *pay*) — the same `descend` signature change
-> item 1 needs. Do them together.
+> item 2 needs. Do them together.
+>
+> **⛔⛔ SETTLED, DO NOT RE-PROPOSE: no STABILIZER CHAIN supply.** It must pick a **vertex inside a cell**, and cell
+> members are exactly what 1-WL cannot distinguish ⟹ no iso-invariant function picks one ⟹ **`①b` AND `①c` fail**
+> (both route through `StallEquivariant`). ⚠ **Distinguish**: choosing a **cell** *is* canonical (`targetColour`
+> transports), so item 2's selector is valid — it is the *within-cell vertex* pick that is illegal.
 
 > ## ▶▶▶ ★★★ ② IS DONE — THE DESCENT IS **UNCONDITIONALLY POLYNOMIAL** (`ChainDescent/Stall.lean`, 2026-07-14)
 >

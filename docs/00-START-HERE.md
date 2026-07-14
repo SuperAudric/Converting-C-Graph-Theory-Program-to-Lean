@@ -111,10 +111,27 @@ close it — is set out in
 > canonizer (`Descend.descend`) is sound, iso-invariant, complete, and — once **stall-guarded** (`Stall.guard`) —
 > **unconditionally polynomial**, flagging exactly where neither resolver can act. The residue (`Residue.Residue`) is
 > **defined** as the complement of a positive capability predicate, so it is not an asserted atom and it **shrinks**
-> whenever a resolver gets stronger, with no re-proof. **What is missing is resolver STRENGTH:** the built oracle
-> (`MatchSupply.matchSupply`) is a *one-step* colour match that **flags on a 7-cycle**, and the built rigid key is a
-> look-ahead heuristic. Plus one known object-level defect: the **target-cell selector is blind to resolvability**
-> (fusion's live bite — handoff §6.1).
+> whenever a resolver gets stronger, with no re-proof.
+>
+> **There is now a CONCRETE canonizer with no carried hypotheses** — `SupplyTransport.matchSupply_guarded_canonizer`
+> (encode-free refiner + `lookaheadKey` + the colour-match oracle) — and the seal corpus (`theorem_1_HOR_*`, the four
+> sealed form families, Spielman) **reaches it as imports** via `SealBridge.horb_of_cellsAreOrbits`.
+>
+> **What is missing is resolver STRENGTH, and it is now a COST problem more than a reach problem.**
+> `DeepMatchSupply.deepMatchSupply d` (enumerate every length-`≤ d` individualization sequence) **fires** where the
+> one-step oracle cannot — `C₄` flags at `d = 0` and **answers at `d = 1`** — but its cost is `n^{O(d)}`: *exactly*
+> the seal's ladder and no better (`C₇` answers at `d=1` for **949 819** vs **7 568** exhaustive — a 125× **net
+> loss**). **Firing is not paying.** The next build (`P3c`, handoff §6.2b) is the **orbit-pruned fixpoint** that turns
+> that `n^d` into a **sum**; `OrbitPrune.lean` has already reduced it to pure combinatorics with **zero `①`
+> exposure**. The rigid key is still just a look-ahead heuristic, and one object-level defect remains: the
+> **target-cell selector is blind to resolvability** (fusion's live bite — handoff §6.1).
+>
+> **⛔⛔ SETTLED — do not re-propose a STABILIZER-CHAIN supply.** It must pick a **vertex inside a cell**, and cell
+> members are *precisely* what 1-WL cannot distinguish ⟹ no iso-invariant function picks one ⟹ **`①b` AND `①c` fail**
+> (both route through `Stall.StallEquivariant`), not merely the flag. ⚠ **Distinguish:** choosing a **cell** *is*
+> canonical (`targetColour` transports), so the resolver-aware *selector* of §6.1 is valid — it is the *within-cell
+> vertex* pick that is illegal. (Likewise **do not port `matchOracleSet`/`matchOracleSeq`**: the project's own
+> `lockstep_disc_imp_stab_trivial` refutes them.)
 >
 > **⛔ Two claims made and RETRACTED this session — do not re-derive them** (handoff §5):
 > 1. *"A perfect key cannot exist"* — **circular** (it presupposes GI ∉ P). Correct: **a perfect key *is* GI ∈ P** —
@@ -319,6 +336,18 @@ discretizing oracle was *proven unable* to harvest a multi-step moved orbit
 (`lockstep_disc_imp_stab_trivial`). So multi-step hidden symmetry (CFI gauge
 twists, `tw ≥ 2`) **must** be harvested **cross-branch** — which is why Part A (a
 group object to fold automorphisms into) exists.
+
+> **⚠ SHARPENED 2026-07-14 (`DeepMatchSupply.lean`) — read the theorem's hypotheses.**
+> `lockstep_disc_imp_stab_trivial` refutes an oracle whose deepening is an
+> **equivariant CHOICE FUNCTION** (`LockstepExpandSeq`). It does **not** refute an
+> **exhaustive enumeration**, which makes no choice at all and is therefore
+> equivariant for free — the search space of `deepMatchSupply d` is characterised
+> purely by **length**, so `σ` maps it onto itself. That oracle *does* harvest the
+> multi-step orbit within-cell (measured: `C₄` answers at `d = 1`), at cost
+> `n^{O(d)}`. So the theorem's real content is a bound on **choice-based** deepening
+> — and it is exactly why a **stabilizer-chain** supply is impossible (its
+> within-cell vertex pick is not canonical). "Must be cross-branch" is too strong;
+> "must not be a canonical within-cell pick" is the correct reading.
 
 **The mechanism (cross-branch harvest).** `coversOrbits_of_realizers` reproduces
 *any* residual group — abelian or non-abelian — from the refinement-computable

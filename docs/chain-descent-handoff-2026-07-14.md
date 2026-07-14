@@ -42,6 +42,7 @@ whole frontier.
 | `ChainDescent/SealBridge.lean` | **P0 — THE VOCABULARY BRIDGE** (2026-07-14, second pass). `horb_of_cellsAreOrbits`: the seal's `CellsAreOrbits` **is** the supply's firing hypothesis. See §6.0. |
 | `ChainDescent/SupplyTransport.lean` | **P1 — THE FLAG'S ISO-INVARIANCE** (2026-07-14, second pass). `stallEquivariant_forceThenConsume`, and **`matchSupply_guarded_canonizer` — the first CONCRETE mixed canonizer, no carried hypotheses.** See §6.0. |
 | `ChainDescent/DeepMatchSupply.lean` | **P2 — THE BOUNDED-DEPTH ORACLE** (2026-07-14). `deepMatchSupply d`: enumerate every length-`≤ d` individualization sequence, colour-match all pairs. Equivariant **because it makes no choice**. `C₄`/`C₇` now answer. Cost `n^{O(d)}`. See §6.2. |
+| `ChainDescent/OrbitPrune.lean` | **P3 FOUNDATION** (2026-07-14). §1–3 **the reduction** — `SameOrbits S₁ S₂` ⟹ the two guarded canonizers are the *same function* ⟹ `①` transfers with **no equivariance obligation on the second supply**. §4 **the pruning license** (`deepCandidate_left_mul` / `_right_mul`). See §6.2b. |
 | `ChainDescent/Regression.lean` | the **build-gating** regression suite (~12 s). |
 | `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (~4 min). |
 
@@ -215,7 +216,12 @@ know" is an **efficiency** problem, not a correctness one. Concretely: replace `
 ⚠ This touches the contract definitions (`Covering`, `CoveringAt`, `CoveringOfAt`, `NarrowTransport` all mention
 `branches`). It is the one remaining change to the **core object**.
 
-### 6.2 ★ Consume is far weaker than the cascade oracle — **one step is not enough**
+### 6.2 ★ The oracle's REACH is fixed (`P2`); what is left is its **COST** (`P3c`)
+
+> **▶ Status 2026-07-14, third pass.** The *reach* problem below is **SOLVED** by
+> `DeepMatchSupply.deepMatchSupply d` — `C₄` flags at `d = 0` and **answers at `d = 1`**. What replaced it is a
+> **cost** problem: `n^{O(d)}`, a 125× net loss on `C₇`. **The live item is `P3c` (§6.2b), not this section.**
+> Everything from here to §6.2b is the *derivation* — read it for the dead routes, which are load-bearing.
 `MatchSupply.matchSupply` is `matchOracle`'s **construct-and-check** colour match rebuilt over `(adj, χ)`. It is
 honest and proved:
 - **`matchCandidate_eq_of_isColAut`** — the construction does not merely *find* an automorphism, it **reconstructs
@@ -224,13 +230,15 @@ honest and proved:
   oracle's `hdisc`-only firing, **no `CellsAreOrbits`, no localisation**);
 - it is **structural**, so it also **repairs `①c`** (`StallEquivariant`).
 
-> **⚠⚠ MEASURED: it FLAGS ON A 7-CYCLE.** `Discretizing` — the cascade oracle's `hdisc` — is **far stronger than it
-> sounds: it EXCLUDES CYCLES.** Individualizing one vertex of `C₇` and refining leaves `{0},{1,6},{2,5},{3,4}` —
-> **not discrete** — so the oracle constructs nothing, consume cannot fire, force cannot fire (orbit cell), and the
-> descent stalls. `F12` *does* discretize in one step and answers. Both facts are `#guard`ed.
+> **⚠⚠ MEASURED: it FLAGS ON A 7-CYCLE.** *(⚠ This box UNDERSTATES the limit — see the SHARPER box immediately
+> below, which supersedes its diagnosis. Retained because the measurement is real and `#guard`ed.)* `Discretizing` —
+> the cascade oracle's `hdisc` — is **far stronger than it sounds: it EXCLUDES CYCLES.** Individualizing one vertex
+> of `C₇` and refining leaves `{0},{1,6},{2,5},{3,4}` — **not discrete** — so the oracle constructs nothing, consume
+> cannot fire, force cannot fire (orbit cell), and the descent stalls. `F12` *does* discretize in one step and
+> answers. Both facts are `#guard`ed.
 
-**⟹ The residue is currently inflated by this gap, not by anything hard.** `Residue.Handled` is far smaller than the
-architecture intends, and a *cycle* is enough to expose it.
+**⟹ The residue was inflated by this gap, not by anything hard.** `Residue.Handled` was far smaller than the
+architecture intends, and a *cycle* was enough to expose it. (**Fixed by `P2`.**)
 
 > **⚠⚠ SHARPER, AND IT CHANGES THE FIX (2026-07-14, second pass).** "It flags on a 7-cycle" *understates* the
 > limit. If `α` is a colouring-preserving automorphism **fixing** a branch vertex `v`, it preserves `indivOne χ v`,
@@ -346,25 +354,25 @@ localisation it degrades gracefully back to the full enumeration. Note `CellIsOr
 **This is the real prize, and it reuses every P2 brick** (`deepCol`, `deepCandidate`, the reconstruction theorem,
 the equivariance machinery). Its poly bound will be *conditional on localisation* — which is fine: `②` stays
 unconditional because `supplyCost` is whatever the supply reports.
-- ⚠ **STATELESS, from `P1`.** `GensEquivariant` (which `①c` now provably needs) forbids an accumulating,
-  history-dependent generator store. The supply must be a **pure function of `(adj, χ)`**.
-- Cost is a **SUM**: `n` levels × `|cell|` reps × `n³` refinement — no product. `supplyCost` bills it into
-  `descentCost`, so any product-not-sum blow-up would **show up in the measured cost** rather than hiding.
-- Termination: the same `ncol`-increases monovariant `descend_ne_none` already uses; fuel `= n`.
-- **A free algebraic fact worth exploiting** (leaf-compare variant): `leafMatrix adj χ i j = adj.adj (rankInv χ i)
-  (rankInv χ j)`, so if two **discrete** colourings have **equal leaf matrices** then `rankSwap` between them is an
-  automorphism **unconditionally**. Soundness of a leaf-comparing supply is therefore free, and its discreteness
-  comes from *reaching a leaf*, not from a one-shot refinement — so `lockstep_disc_imp_stab_trivial` does not bite.
-  The crux that could still kill it is whether the constructed permutation preserves `χ` and maps `v ↦ w`; that is
-  a **cheap falsifier** (a self-contained lemma) and should be probed before building on it.
-- **The cross-branch harvest can no longer live in the descent**: the guarded descent is a **single path** with no
-  siblings. It must be internalized in the `Supply`. **⟹ the `Supply` IS the cascade+harvest engine, and its
-  polynomial cost IS T-C.**
-- ★ **`P0` means the seal's half is an IMPORT, not a re-proof.** The supply needs *localisation*
-  (`CellsAreOrbits`) and *depth*; `SealBridge.horb_of_cellsAreOrbits` hands the first straight through from
+**Standing notes for whoever builds `P3c`:**
+- ⚠ **A `GensEquivariant` supply must be STATELESS** (a pure function of `(adj, χ)`) — an accumulating store breaks
+  `①c`. **But the pruned supply does NOT use `GensEquivariant` at all** (it cannot; see the ⚠ box above): it runs on
+  `OrbitPrune.SameOrbits` instead. It is still a pure function of `(adj, χ)` — the "state" is an internal fixpoint,
+  not history carried across nodes.
+- **The harvest must live INSIDE the `Supply`.** The guarded descent is a **single path** with no siblings, so there
+  is no cross-branch structure left in the descent to hang it on. **⟹ the `Supply` IS the cascade+harvest engine,
+  and its polynomial cost IS T-C.**
+- **Termination of the fixpoint:** monovariant = the number of `⟨G⟩`-orbits on the `(branch, sequence)` table, which
+  strictly decreases each non-stable round ⟹ `|table|` rounds suffice. Same shape as `Consume.orbit_closed`.
+- **`supplyCost` bills the harvest into `descentCost`**, so any product-not-sum blow-up **shows up in the measured
+  cost** rather than hiding. Measure it (`PerformanceTest.lean`) — do not assume it.
+- ★ **`P0` means the seal's half is an IMPORT, not a re-proof.** The supply needs *localisation* (`CellsAreOrbits`)
+  and *depth* (`SeparatesAt`); `SealBridge.horb_of_cellsAreOrbits` hands the first straight through from
   `theorem_1_HOR_*` / the sealed families / Spielman. Only the **harvest** is new work.
-- **Reassurance on product-not-sum:** the descent can no longer branch at all and `supplyCost` is charged into
-  `descentCost`, so any product-not-sum blow-up in the harvest **shows up directly in the measured cost**.
+- **An unused free fact, recorded in case it is wanted:** `leafMatrix adj χ i j = adj.adj (rankInv χ i) (rankInv χ j)`,
+  so two **discrete** colourings with **equal leaf matrices** have a `rankSwap` between them that is an automorphism
+  **unconditionally**. (A leaf-comparing supply would get soundness free; the open crux is whether the constructed
+  permutation preserves `χ` and maps `v ↦ w`. Not needed for `P3c` — verification already makes soundness free.)
 - ⚠ The seal "consumes all visible symmetry except Cameron / node-4" is itself **modulo {G3 citation + `hImprim`}** —
   keep that in the statement.
 
@@ -413,13 +421,21 @@ provable (`Residue.residue_nonvacuous`). The atoms must be *defined* (as the com
    1-WL cell that is **not an orbit** — and **1-WL is a single cell on every regular graph** — so *any* regular
    **non-vertex-transitive** graph works. `Regression.G8` (cubic, 8 vertices) is ~8× cheaper than the Frucht graph.
    (F12 was originally chosen as the smallest *asymmetric* regular graph; **asymmetry was never needed**.)
+7. **⚠ A CHOICE IS THE THING THAT BREAKS `①`, not statefulness.** Three separate designs died on it (the stabilizer
+   chain, `matchOracleSeq`, the C# `ReplayDeepening`), each because it picked a **vertex inside a cell** — and cell
+   members are exactly what 1-WL cannot distinguish. Before proposing any supply, ask: *does it choose?* If yes,
+   either it is illegal, or it must run on `OrbitPrune.SameOrbits` (the choice is invisible to the **generated
+   group**). **Choosing a CELL is fine** (`targetColour` transports); choosing a **vertex within** one is not.
+8. **A conditional theorem whose hypothesis nothing satisfies is the recurring failure mode.** `hflag`,
+   `SchemeReproduced`, `∃ gens, closure = group`, and **`StallEquivariant` until `P1`** were all uninstantiated.
+   Every new obligation needs a *discharged instance* in the same pass, and a `#guard`ed non-vacuity witness.
 
 ---
 
 ## 8. Build / conventions
 
 ```
-bash scripts/build.sh                      # serial full build, ~110 s, MUST be green
+bash scripts/build.sh                      # serial full build, ~120 s, MUST be green
 lake build ChainDescent.PerformanceTest    # the heavy measurements, OFF the build path (~4 min)
 python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers --descriptions d.json
 ```
