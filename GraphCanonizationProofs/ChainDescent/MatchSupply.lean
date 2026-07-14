@@ -81,13 +81,20 @@ theorem lookData_col (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
     (lookData adj χ v).col = Refine.warmRefineR adj (indivOne χ v) :=
   Refine.warmRefineVec_col_eq adj (indivOne χ v)
 
-/-- **The construct-and-check candidate.** Individualize `v` and `w`, refine both; if both discretize, hand back the
-colour-match permutation. It is a *candidate only* — `Consume.verified` re-checks it edge-by-edge, so nothing here
-needs to be trusted. -/
-def matchFrom (dv dw : Refine.ColData n) : Option (Equiv.Perm (Fin n)) :=
-  if hv : Discrete dv.col then
-    if hw : Discrete dw.col then some (rankSwap dv.col dw.col hv hw) else none
+/-- **The construct-and-check candidate, at the level of COLOURINGS.** If both refinements discretize, hand back
+the colour-match permutation. It is a *candidate only* — `Consume.verified` re-checks it edge-by-edge, so nothing
+here needs to be trusted.
+
+⚠ Phrased on `Colouring`, not `ColData`, **on purpose**: the transport lemmas (§5) relate the *colourings* of two
+`ColData` values that are not themselves equal, and a `ColData`-level `dite` cannot be rewritten under. -/
+def matchCol (ψv ψw : Colouring n) : Option (Equiv.Perm (Fin n)) :=
+  if hv : Discrete ψv then
+    if hw : Discrete ψw then some (rankSwap ψv ψw hv hw) else none
   else none
+
+/-- The same, reading the materialised `ColData` (the form `matchSupply` pairs over). -/
+def matchFrom (dv dw : Refine.ColData n) : Option (Equiv.Perm (Fin n)) :=
+  matchCol dv.col dw.col
 
 def matchCandidate (adj : AdjMatrix n) (χ : Colouring n) (v w : Fin n) :
     Option (Equiv.Perm (Fin n)) :=
@@ -128,7 +135,7 @@ theorem matchCandidate_eq_of_isColAut {adj : AdjMatrix n} {χ : Colouring n}
     rw [rankInv_spec _ hdw]
     rw [hψ]
     exact (vertexRank_transport α ((lookData adj χ v).col) u).symm
-  unfold matchCandidate matchFrom
+  unfold matchCandidate matchFrom matchCol
   rw [dif_pos hdisc, dif_pos hdw]
   congr 1
   exact Equiv.ext (fun u => by rw [rankSwap_apply]; exact hrank u)
@@ -195,6 +202,96 @@ theorem cellIsOrbit_matchSupply {adj : AdjMatrix n} {χ : Colouring n}
     mem_verified_matchSupply hα hu (by rw [hαu]; exact hw) (hd u hu)
   have := (WordReach.refl (G := verified (matchSupply (n := n)) adj χ) u).step hmem
   rwa [hαu] at this
+
+/-! ## 5. ★★ TRANSPORT — the supply is a STRUCTURAL function, hence EQUIVARIANT
+
+This is what `SupplyTransport.GensEquivariant` asks for, and it is the reason `matchSupply` — unlike a supply that
+hands back a *fixed* generator list — can carry the **flag**. Soundness needs nothing from the supply
+(`consume_canonizer` holds for every supply, because a covering resolver is *value*-invisible); the **flag** does,
+because `Stall.stalled` reads the narrowing's *length*, which depends on how many orbits the supply actually
+proves. See `SupplyTransport.lean` for the full argument and for the `#guard`ed counterexample that shows the
+obligation is not free.
+
+Everything below is bookkeeping around one fact: **the colour-match permutation conjugates.** `rankSwap` is built
+from ranks, ranks transport (`vertexRank_transport`), so `rankSwap (σ·ψv) (σ·ψw) = σ · rankSwap ψv ψw · σ⁻¹`. -/
+
+/-- `rankInv` transports: the vertex of rank `i` under `σ·ψ` is the `σ`-image of the vertex of rank `i` under
+`ψ`. -/
+theorem rankInv_transport (σ : Equiv.Perm (Fin n)) {ψ : Colouring n} (hd : Discrete ψ) (i : Fin n) :
+    rankInv (transportColouring σ ψ) i = σ (rankInv ψ i) := by
+  have hd' : Discrete (transportColouring σ ψ) := (discrete_transport σ ψ).mpr hd
+  have hinj : Function.Injective (Colouring.vertexRank (transportColouring σ ψ)) := fun a b hab =>
+    (Colouring.rankPerm _ hd').injective hab
+  refine hinj ?_
+  rw [rankInv_spec _ hd', vertexRank_transport σ ψ (rankInv ψ i), rankInv_spec ψ hd]
+
+/-- **★ THE COLOUR-MATCH PERMUTATION CONJUGATES.** -/
+theorem rankSwap_conj (σ : Equiv.Perm (Fin n)) {ψv ψw : Colouring n}
+    (hv : Discrete ψv) (hw : Discrete ψw)
+    (hv' : Discrete (transportColouring σ ψv)) (hw' : Discrete (transportColouring σ ψw)) :
+    rankSwap (transportColouring σ ψv) (transportColouring σ ψw) hv' hw'
+      = σ * rankSwap ψv ψw hv hw * σ⁻¹ := by
+  refine Equiv.ext (fun u => ?_)
+  have hrank : Colouring.vertexRank (transportColouring σ ψv) u
+      = Colouring.vertexRank ψv (σ.symm u) := by
+    have h := vertexRank_transport σ ψv (σ.symm u)
+    rwa [Equiv.apply_symm_apply] at h
+  show rankInv (transportColouring σ ψw) (Colouring.vertexRank (transportColouring σ ψv) u)
+      = σ (rankSwap ψv ψw hv hw (σ.symm u))
+  rw [hrank, rankInv_transport σ hw]
+  rfl
+
+/-- The candidate constructor transports (up to conjugation), **including its failure mode**: it declines to
+construct on `σ·G` exactly where it declines on `G`. -/
+theorem matchCol_transport (σ : Equiv.Perm (Fin n)) (ψv ψw : Colouring n) :
+    matchCol (transportColouring σ ψv) (transportColouring σ ψw)
+      = (matchCol ψv ψw).map (fun t => σ * t * σ⁻¹) := by
+  unfold matchCol
+  by_cases hv : Discrete ψv
+  · have hv' : Discrete (transportColouring σ ψv) := (discrete_transport σ ψv).mpr hv
+    by_cases hw : Discrete ψw
+    · have hw' : Discrete (transportColouring σ ψw) := (discrete_transport σ ψw).mpr hw
+      rw [dif_pos hv', dif_pos hw', dif_pos hv, dif_pos hw]
+      simp [rankSwap_conj σ hv hw hv' hw']
+    · have hw' : ¬ Discrete (transportColouring σ ψw) := fun hc =>
+        hw ((discrete_transport σ ψw).mp hc)
+      rw [dif_pos hv', dif_neg hw', dif_pos hv, dif_neg hw]
+      rfl
+  · have hv' : ¬ Discrete (transportColouring σ ψv) := fun hc =>
+      hv ((discrete_transport σ ψv).mp hc)
+    rw [dif_neg hv', dif_neg hv]
+    rfl
+
+/-- The look-ahead refinement transports (refiner equivariance + `indivOne_transport`). -/
+theorem lookData_col_transport (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (v : Fin n) :
+    (lookData (relabelAdj σ adj) (transportColouring σ χ) (σ v)).col
+      = transportColouring σ ((lookData adj χ v).col) := by
+  rw [lookData_col, lookData_col, indivOne_transport σ χ v]
+  simpa [Refine.refineV_encodeFree] using Refine.refineEquivariant_encodeFree σ adj (indivOne χ v)
+
+/-- **★ THE CANDIDATE CONJUGATES.** -/
+theorem matchCandidate_conj (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (v w : Fin n) :
+    matchCandidate (relabelAdj σ adj) (transportColouring σ χ) (σ v) (σ w)
+      = (matchCandidate adj χ v w).map (fun t => σ * t * σ⁻¹) := by
+  unfold matchCandidate matchFrom
+  rw [lookData_col_transport, lookData_col_transport, matchCol_transport]
+
+/-- **Membership in the supply, characterised.** The generators are exactly the candidates the construction built
+on some ordered pair of branch vertices. -/
+theorem mem_gens_matchSupply_iff {adj : AdjMatrix n} {χ : Colouring n} {g : Equiv.Perm (Fin n)} :
+    g ∈ gens (matchSupply (n := n)) adj χ ↔
+      ∃ v ∈ branches χ, ∃ w ∈ branches χ, matchCandidate adj χ v w = some g := by
+  constructor
+  · intro hg
+    obtain ⟨p, hp, hq⟩ := List.mem_flatMap.mp hg
+    obtain ⟨v, hv, rfl⟩ := List.mem_map.mp hp
+    obtain ⟨q, hq2, hmf⟩ := List.mem_filterMap.mp hq
+    obtain ⟨w, hw, rfl⟩ := List.mem_map.mp hq2
+    exact ⟨v, hv, w, hw, hmf⟩
+  · rintro ⟨v, hv, w, hw, h⟩
+    exact mem_gens_matchSupply hv hw h
 
 end Consume
 end ChainDescent

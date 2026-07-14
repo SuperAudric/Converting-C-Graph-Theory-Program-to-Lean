@@ -11,13 +11,23 @@
 >   **`CellsAreOrbits`-free**, i.e. `matchOracle_fires_of_insertDiscrete`'s honest strength).
 > - Being **structural**, it also repairs **`①c`** (`Stall.StallEquivariant`).
 >
-> **⚠⚠ MEASURED: it FLAGS ON A 7-CYCLE.** `Discretizing` is **far stronger than it sounds — it EXCLUDES CYCLES**:
-> individualizing one vertex of `C₇` leaves `{0},{1,6},{2,5},{3,4}`, not discrete ⟹ the oracle constructs nothing.
-> **This is exactly why §C.6/§C.8's MULTI-STEP forms (`matchOracleSet`/`matchOracleSeq`) exist**, and exactly what
-> **`lockstep_disc_imp_stab_trivial`** already proves: a one-step discretizing colour match **cannot** harvest a
-> multi-step moved orbit ⟹ **cross-branch harvest**. ⟹ **the residue is currently inflated by this gap, not by
-> anything hard.** Next build = the multi-step supply (the real T-C).
-> **Authoritative:** [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md) §6.2.
+> **⚠⚠ MEASURED: it FLAGS ON A 7-CYCLE — and the real limit is WIDER than "excludes cycles".** If a
+> colouring-preserving automorphism **fixes** a branch vertex `v`, it preserves `indivOne χ v` and hence (refiner
+> equivariance) its refinement; a **discrete** colouring preserved by it forces it to be the identity. So
+> **`Discretizing` ⟹ TRIVIAL POINT STABILIZERS**, and `cellIsOrbit_matchSupply` fires **only on a REGULAR action**.
+> `C₇` fails not because it is a cycle but because `Aut(C₇) = D₇` has a reflection fixing each vertex. ⟹ **the
+> residue is inflated by every graph with a non-trivial point stabilizer — most of them — and by this gap, not by
+> anything hard.**
+>
+> **⛔ DO NOT PORT §C.6/§C.8's `matchOracleSet` / `matchOracleSeq` INTO THE SUPPLY — THEY ARE PROVED DEAD.**
+> `lockstep_disc_imp_stab_trivial` (§C.8, axiom-clean) says `LockstepExpandSeq ∧ hdiscSeq ⟹ stab_{Aut_D}(v) = 1`:
+> an **equivariant (canonical-choice) multi-step deepening's** completeness hypotheses hold jointly **only** where
+> one rep already kills the residual — the regime `matchSupply` already covers. §C.8's preamble adds that the *set*
+> variant merely relocates the obstruction. An earlier draft of this box cited that theorem as motivation and then
+> pointed at the machinery it refutes. **The fix is a STABILIZER-CHAIN supply** (`Aut(adj, refine(indivOne χ v))`
+> *is* `stab(v)`; recurse, harvest it, use it to canonicalize the colour-match), which is what
+> `SchemeRecoveredByDepth`'s two-phase `bs₁ ++ bs₂` already encodes.
+> **Authoritative:** [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md) §6.0 + §6.2.
 
 The **a-priori cascade oracle** is the genuine version of the
 component that resolves **true-symmetry cells**: given a target cell,

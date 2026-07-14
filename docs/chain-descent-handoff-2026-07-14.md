@@ -39,6 +39,8 @@ whole frontier.
 | `ChainDescent/Cost.lean` | **②** — `descentCost_le_of_resolved`, `poly_of_cells_resolved`. |
 | `ChainDescent/Stall.lean` | **the mutual-stall flag** (`guard`) ⟹ **unconditionally polynomial** (`descentCost_guard_le`). |
 | `ChainDescent/Residue.lean` | **③** — `Handled` (positive), `Residue := ¬Handled`, `residue_if_flag`, `residue_nonvacuous`. |
+| `ChainDescent/SealBridge.lean` | **P0 — THE VOCABULARY BRIDGE** (2026-07-14, second pass). `horb_of_cellsAreOrbits`: the seal's `CellsAreOrbits` **is** the supply's firing hypothesis. See §6.0. |
+| `ChainDescent/SupplyTransport.lean` | **P1 — THE FLAG'S ISO-INVARIANCE** (2026-07-14, second pass). `stallEquivariant_forceThenConsume`, and **`matchSupply_guarded_canonizer` — the first CONCRETE mixed canonizer, no carried hypotheses.** See §6.0. |
 | `ChainDescent/Regression.lean` | the **build-gating** regression suite (~12 s). |
 | `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (~4 min). |
 
@@ -155,6 +157,38 @@ iso-invariant**) but it is **not a no-fusion theorem**.
 
 ## 6. WHAT IS LEFT — in priority order
 
+### 6.0 ✅ DONE (2026-07-14, second pass) — `P0` + `P1`. **Read this before touching §6.2.**
+
+**`P1` — `ChainDescent/SupplyTransport.lean`. The flag's iso-invariance is DISCHARGED, and there is now a
+CONCRETE canonizer.** `Stall.StallEquivariant` was carried by all three `Residue` capstones and **instantiated by
+nothing** — so `guarded_mixed_canonizer` had no instance at all, while `Regression.lean` §6 `#guard`s a genuine
+counterexample. Closed by:
+- **`GensEquivariant S`** — *the supply hands back the `σ`-conjugates on the relabelled graph*. **Free for a
+  structural supply; IMPOSSIBLE for an accumulating one.** ⟹ **the Lean supply must be STATELESS.** (The C#
+  harness's global, order-dependent `Automorphisms` group is safe there only because its harvest is a pure
+  *covering* move and its flag is a **budget**; `Stall.guard`'s flag reads the narrowing's *length*, so the C#
+  design **does not transfer**. This is a hard design constraint on the §6.2 supply.)
+- **`Consume.rep_eq_iff_wordReach`** — `rep` merges **exactly** the orbit (the `→` half was missing). Hence the
+  narrowing's **length counts ORBITS**, so it transports even though the least-index `rep` deliberately does not.
+- Discharged for `matchSupply` (`gensEquivariant_matchSupply`, via `matchCandidate_conj`) ⟹
+  **`matchSupply_guarded_canonizer`: encode-free refiner + `lookaheadKey` + `matchSupply`, ①a/①b/①c and
+  unconditional polynomiality, NO carried hypotheses.** Everything still open is a *firing* question.
+
+**`P0` — `ChainDescent/SealBridge.lean`. The seal corpus can now reach the supply.** The seal speaks
+`warmRefine adj P (individualizedColouring n T)` / `CellsAreOrbits` / `ResidualAut`; the canonizer speaks
+`Consume.IsColAut adj χ` / `branches χ`. They could not talk, so **every** seal result was unusable and any
+consume-strength theorem would have had to be re-proved in parallel. Three gaps closed:
+1. the two **refiners** agree as partitions (`warmRefineR_samePartition`);
+2. the two **individualizations** agree (batch `individualizedColouring` vs interleaved index-free `indivOne`);
+3. **★ CONFLUENCE** (`warmRefine_indivOne_confluent`) — *refining before individualizing does not change the
+   stable partition*, because `warmRefine` is the **coarsest stable refinement**. The only non-bookkeeping step.
+
+⟹ **`horb_of_cellsAreOrbits`**: `CellsAreOrbits` at the committed set **is** the `horb` hypothesis
+`cellIsOrbit_matchSupply` already takes. `theorem_1_HOR_cfi_oddDeg`, `theorem_2_HOR_*`, the four sealed form
+families, `reachesRigidOrCameron_*`, Spielman's `SeparatesAtBoundedBase` are now **reusable as-is** — the seal
+results are *imports*, not re-proofs. **This is the answer to "reusable, else re-provable as parallel theorems":
+reusable.**
+
 ### 6.1 ⚠ The target-cell selector is BLIND to resolvability (fusion's live bite) — **design approved, not built**
 `descend` targets the **least non-singleton colour** (`branches`/`targetColour`) — a fixed rule that **does not ask
 whether the resolvers can act on that cell**. The guard then flags if *that* cell is unresolvable. But a node can
@@ -197,15 +231,55 @@ honest and proved:
 **⟹ The residue is currently inflated by this gap, not by anything hard.** `Residue.Handled` is far smaller than the
 architecture intends, and a *cycle* is enough to expose it.
 
-**THE FIX — the MULTI-STEP / cross-branch supply (the real T-C).** This is exactly why the cascade oracle has
-`matchOracleSet`/`matchOracleSeq` (§C.6/§C.8) and exactly what **`lockstep_disc_imp_stab_trivial`** already proves: a
-one-step discretizing colour match **provably cannot** harvest a multi-step moved orbit ⟹ **cross-branch harvest**.
-- The natural form here: **the supply runs the descent on each branch to a leaf and compares leaf matrices** (equal
-  leaves ⟹ the `rankSwap` perm is a candidate ⟹ verify). Legal — a `Supply` is an arbitrary algorithm at `(adj, χ)`,
-  **charged in `supplyCost`**. Needs a **termination/fuel** story for the recursion.
+> **⚠⚠ SHARPER, AND IT CHANGES THE FIX (2026-07-14, second pass).** "It flags on a 7-cycle" *understates* the
+> limit. If `α` is a colouring-preserving automorphism **fixing** a branch vertex `v`, it preserves `indivOne χ v`,
+> hence (refiner equivariance) preserves its refinement; a **discrete** colouring preserved by `α` forces `α = 1`.
+> So **`Discretizing` ⟹ every branch vertex has a TRIVIAL POINT STABILIZER**, and with `CellIsOrbit`
+> (transitivity) `cellIsOrbit_matchSupply` fires **only on a REGULAR action**. `C₇` fails not because it is a
+> cycle but because `Aut(C₇) = D₇` has a reflection fixing each vertex. ⟹ **the residue is inflated by every graph
+> with a non-trivial point stabilizer — i.e. most of them.** (Direct corollary of
+> `aut_trivial_of_discrete_warmRefine`; worth landing as a theorem to state the boundary precisely.)
+>
+> **And that says what the supply must DO: recover `stab(v)`.** The generators consume is missing live *inside the
+> point stabilizer*, which comparing branch `v` to branch `w` can never produce. Hence "cross-branch".
+
+**⛔ THE FIX IS *NOT* TO PORT `matchOracleSet` / `matchOracleSeq` (§C.6/§C.8) — THE PROJECT HAS PROVED THEM DEAD.**
+`CascadeOracle.lockstep_disc_imp_stab_trivial` (axiom-clean, in the build) says: `LockstepExpandSeq ∧ hdiscSeq ⟹
+stab_{Aut_D}(v) = 1`. I.e. **an equivariant (canonical-choice) multi-step deepening's two completeness hypotheses
+are jointly satisfiable ONLY where one rep already kills the residual** — exactly the regime `matchSupply` already
+covers. §C.8's own preamble adds that the *set* variant merely relocates the obstruction (`hdiscSet` false →
+`LockstepExpandSeq` false). An earlier draft of this section cited that theorem as *motivation* and then pointed at
+the very machinery it refutes; porting it buys **nothing provable**.
+
+**Nor does the C# port survive.** `ReplayDeepening` individualizes `members[0]` — the **lowest-index** vertex of
+the cell carrying the recorded id — which is *not* equivariant. It works empirically (K7 941 → 1) because an
+unverifiable candidate simply leaves the reps separate (sound over-split); it is a **heuristic with verification**,
+and it cannot support a completeness theorem of the `LockstepExpandSeq` shape.
+
+**THE FIX — the supply must be a STABILIZER CHAIN.** The same theorem tells you why the index-choice is harmless
+*once you know `stab(v)`*: two valid continuations differ by a stabilizer element, so the candidate is `α · s` —
+still an automorphism carrying `v ↦ w`. And `stab(v)` is available, because in the descent's own vocabulary
+**`Aut(adj, refineV (indivOne χ v))` IS `stab_{Aut(adj,χ)}(v)`**. So the supply recurses *down its own descent*,
+harvests the stabilizer at the deeper node (where the cell is smaller and the recursion bottoms out at
+discreteness), and uses it to canonicalize the colour-match at the current node. That is Schreier–Sims, and it is
+what `SchemeRecoveredByDepth`'s two-phase `bs₁ ++ bs₂` already encodes.
+- ⚠ **STATELESS, from `P1`.** `GensEquivariant` (which `①c` now provably needs) forbids an accumulating,
+  history-dependent generator store. The supply must be a **pure function of `(adj, χ)`**.
+- Cost is a **SUM**: `n` levels × `|cell|` reps × `n³` refinement — no product. `supplyCost` bills it into
+  `descentCost`, so any product-not-sum blow-up would **show up in the measured cost** rather than hiding.
+- Termination: the same `ncol`-increases monovariant `descend_ne_none` already uses; fuel `= n`.
+- **A free algebraic fact worth exploiting** (leaf-compare variant): `leafMatrix adj χ i j = adj.adj (rankInv χ i)
+  (rankInv χ j)`, so if two **discrete** colourings have **equal leaf matrices** then `rankSwap` between them is an
+  automorphism **unconditionally**. Soundness of a leaf-comparing supply is therefore free, and its discreteness
+  comes from *reaching a leaf*, not from a one-shot refinement — so `lockstep_disc_imp_stab_trivial` does not bite.
+  The crux that could still kill it is whether the constructed permutation preserves `χ` and maps `v ↦ w`; that is
+  a **cheap falsifier** (a self-contained lemma) and should be probed before building on it.
 - **The cross-branch harvest can no longer live in the descent**: the guarded descent is a **single path** with no
   siblings. It must be internalized in the `Supply`. **⟹ the `Supply` IS the cascade+harvest engine, and its
   polynomial cost IS T-C.**
+- ★ **`P0` means the seal's half is an IMPORT, not a re-proof.** The supply needs *localisation*
+  (`CellsAreOrbits`) and *depth*; `SealBridge.horb_of_cellsAreOrbits` hands the first straight through from
+  `theorem_1_HOR_*` / the sealed families / Spielman. Only the **harvest** is new work.
 - **Reassurance on product-not-sum:** the descent can no longer branch at all and `supplyCost` is charged into
   `descentCost`, so any product-not-sum blow-up in the harvest **shows up directly in the measured cost**.
 - ⚠ The seal "consumes all visible symmetry except Cameron / node-4" is itself **modulo {G3 citation + `hImprim`}** —

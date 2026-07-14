@@ -705,5 +705,91 @@ theorem consume_narrows_of_wordReach {S : Supply n} {adj : AdjMatrix n} {χ : Co
   rw [narrow_consume]
   exact dedup_map_length_lt (branches_nodup χ) hu hw huw (rep_eq_of_wordReach h)
 
+/-! ## 9. ★★ `rep` MERGES **EXACTLY** THE ORBIT — the converse of `rep_eq_of_wordReach`
+
+`rep_eq_of_wordReach` is one direction: connected ⟹ merged. The other direction — **merged ⟹ connected** — is
+what turns `rep` from "a sound merge" into "*the* orbit relation", and it is what the **flag** needs. The flag
+reads the narrowing's *length*, i.e. the number of distinct representatives; to know that this count is
+`σ`-invariant we must know it counts **orbits**, not an artefact of the least-index choice (which is emphatically
+*not* equivariant). So the iff below is the hinge of `SupplyTransport.lean` / `Stall.StallEquivariant`.
+
+The engine is that `orbit` is not a depth-`n` approximation but **exactly** the word-reachable set
+(`mem_orbit_iff_wordReach`, from convergence), so `WordReach` is a genuine equivalence relation on it. -/
+
+/-- Everything the orbit search reaches is reached by a **word** (the converse of `mem_orbit_of_wordReach`). -/
+theorem wordReach_of_mem_iterate {G : List (Equiv.Perm (Fin n))} {b : Fin n} :
+    ∀ (k : Nat) (m : Fin n), m ∈ (orbStep G)^[k] [b] → WordReach G b m := by
+  intro k
+  induction k with
+  | zero =>
+      intro m hm
+      simp only [Function.iterate_zero, id_eq, List.mem_singleton] at hm
+      rw [hm]
+      exact WordReach.refl b
+  | succ k ih =>
+      intro m hm
+      rw [Function.iterate_succ_apply'] at hm
+      rcases (mem_orbStep_iff G _ m).mp hm with h | ⟨g, hg, v, hv, hgv⟩
+      · exact ih m h
+      · exact hgv ▸ (ih v hv).step hg
+
+/-- **The orbit list IS the word-reachable set.** -/
+theorem mem_orbit_iff_wordReach {G : List (Equiv.Perm (Fin n))} {b m : Fin n} :
+    m ∈ orbit G b ↔ WordReach G b m :=
+  ⟨wordReach_of_mem_iterate n m, mem_orbit_of_wordReach⟩
+
+/-- Word-reachability is **transitive**. -/
+theorem WordReach.trans {G : List (Equiv.Perm (Fin n))} {u m w : Fin n}
+    (h₁ : WordReach G u m) (h₂ : WordReach G m w) : WordReach G u w := by
+  induction h₂ with
+  | refl => exact h₁
+  | step _ hg ih => exact ih.step hg
+
+/-- Word-reachability is **symmetric** (the orbit is inverse-closed, `closed_inv`). -/
+theorem WordReach.symm {G : List (Equiv.Perm (Fin n))} {u w : Fin n} (h : WordReach G u w) :
+    WordReach G w u :=
+  wordReach_of_mem_iterate n u (self_mem_orbit_of_wordReach h)
+
+/-- A branch reaches its own representative. -/
+theorem wordReach_rep (G : List (Equiv.Perm (Fin n))) (b : Fin n) : WordReach G b (rep G b) :=
+  wordReach_of_mem_iterate n _ (rep_mem_orbit G b)
+
+/-- **★★★ `rep` MERGES EXACTLY THE ORBIT.** Two branches share a representative **iff** the verified generators
+connect them. The `←` is `rep_eq_of_wordReach` (partial power ⟹ partial progress); the `→` is what says consume
+merges **nothing more** — the least-index choice adds no spurious identifications. Together: the length of the
+narrowing **counts orbits**, which is exactly what `Stall.StallEquivariant` needs and what a merely-sound `rep`
+could never give. -/
+theorem rep_eq_iff_wordReach {G : List (Equiv.Perm (Fin n))} {u w : Fin n} :
+    rep G u = rep G w ↔ WordReach G u w := by
+  refine ⟨fun h => ?_, rep_eq_of_wordReach⟩
+  have h1 : WordReach G u (rep G w) := by rw [← h]; exact wordReach_rep G u
+  exact h1.trans (wordReach_rep G w).symm
+
+/-! ## 10. Conjugation — `IsColAut` transports -/
+
+/-- **The verification check transports.** `α` is a colouring-preserving automorphism of `(adj, χ)` **iff** its
+`σ`-conjugate is one of `(σ·adj, σ·χ)`. This is the reason a *structural* supply can be equivariant at all: the
+thing it must hand back on the relabelled graph is the conjugate of what it hands back here. -/
+theorem isColAut_conj_iff (σ : Equiv.Perm (Fin n)) {adj : AdjMatrix n} {χ : Colouring n}
+    {α : Equiv.Perm (Fin n)} :
+    IsColAut (relabelAdj σ adj) (transportColouring σ χ) (σ * α * σ⁻¹) ↔ IsColAut adj χ α := by
+  have happ : ∀ u : Fin n, (σ * α * σ⁻¹) u = σ (α (σ.symm u)) := fun u => rfl
+  constructor
+  · rintro ⟨hadj, hχ⟩
+    refine ⟨fun i j => ?_, fun v => ?_⟩
+    · have h := hadj (σ i) (σ j)
+      simp only [happ, relabelAdj_adj, Equiv.symm_apply_apply] at h
+      exact h
+    · have h := hχ (σ v)
+      show χ (α v) = χ v
+      simp only [happ, transportColouring, Equiv.symm_apply_apply] at h
+      exact h
+  · rintro ⟨hadj, hχ⟩
+    refine ⟨fun i j => ?_, fun v => ?_⟩
+    · simp only [happ, relabelAdj_adj, Equiv.symm_apply_apply]
+      exact hadj (σ.symm i) (σ.symm j)
+    · simp only [happ, transportColouring, Equiv.symm_apply_apply]
+      exact hχ (σ.symm v)
+
 end Consume
 end ChainDescent

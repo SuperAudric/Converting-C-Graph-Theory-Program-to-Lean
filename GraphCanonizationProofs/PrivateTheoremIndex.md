@@ -346,3 +346,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `ConfinementCompleteness.min'_eq_of_eq` | 131-138 | — | — |
+## ChainDescent/SealBridge.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SealBridge.refineStep_mono'` | 86-90 | — | — |
