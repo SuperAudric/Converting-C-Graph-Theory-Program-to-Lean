@@ -91,12 +91,26 @@
 > is already a canonically-sorted `List Nat`, and `Descend.lexLeList` is already proved a **total order**, so the
 > round ranks the **keys themselves** and never forms a `Nat` encoding. Colours land in `0..n-1` by construction.
 >
-> **⚠ KNOWN EXECUTABLE LIMIT (proofs unaffected).** The refiner evaluates fine at every depth, but the **exhaustive**
-> descent completes only to `n = 4`. Cause: `Colouring n = Fin n → Nat`, so each level's colouring is a *closure*
-> over its parent's and Lean does not reliably share the materialised vector across levels (`@[noinline]` does not
-> suffice) ⟹ a depth-`d` lookup can re-run the refinement. Easy to miss — a top-level `def` colouring *is* cached, so
-> testing levels in isolation looks fine. **Fix = thread a `Vector Nat n` through `descend` instead of a
-> `Colouring n`** — a signature change to the object, to be decided deliberately.
+> **★ THE EXECUTABLE RUNS — and the sharing trap is ROOT-CAUSED AND FIXED (2026-07-13).** Exhaustive canonization of
+> `C₃…C₇` completes in **well under a second per graph** (`ChainDescent/PerformanceTest.lean`, now **in `build.sh` as a
+> regression gate**: it `#guard`s iso-invariance under relabelling *and* that non-isomorphic graphs get different
+> forms, so a regression **fails the build**). Before the fix, `C₃` alone took ~10 minutes and `C₅` never terminated.
+>
+> **The root cause (worth knowing — it will recur).** Lean's code generator **eta-expands every definition to the
+> arity of its TYPE**. `Colouring n` unfolds to `Fin n → Nat`, so *any* definition of type `… → Colouring n` is
+> compiled at full arity: `f adj χ v = <body> v`. Hence `f adj χ` is a **partial application** that stores its
+> arguments and **re-runs `<body>` on every colour lookup** — the materialised vector is never shared, and since each
+> descent level's colouring closes over its parent's, the cost *multiplies per level*. Measured (20 000 lookups,
+> `n = 5`): depth 1 ≈ 1 ms/lookup, depth 2 ≈ 4 ms, depth 3 → does not finish. **`@[noinline]` does not fix it** (it
+> blocks inlining, not eta-expansion), nor does eta-reducing the body, nor passing the vector as an argument.
+> **The cure: return a value whose type is NOT a function** — `warmRefineVec` returns a `ColData` *structure*, so it
+> is compiled at its true arity and forced **once**; `ColData.col` then closes over the already-forced vector and
+> lookups are genuine `O(1)` array reads. **No signature change to `descend` was needed after all.**
+>
+> **Two measurement traps that cost real time here:** (i) a **top-level `def` colouring IS cached**, so testing the
+> descent's levels in isolation looks fast and hides the bug completely — it only appears *inside* `descend`;
+> (ii) `lean` **discards all `#eval` output on timeout**, so one slow `#eval` late in a file silently swallows the
+> earlier results. Bisect with one `#eval` per file, and time the bare-import baseline.
 >
 > **▶ NEXT (in dependency order):** **(1) Stage 4 — ② cost + the real mutual-stall flag** (the old `n⁴` bound used
 > the single-path `nbud = n` and does **NOT** transfer); **(2) Stage 3 resolver instances** — consume (`matchOracle`,

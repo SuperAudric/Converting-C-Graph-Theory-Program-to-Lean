@@ -12,6 +12,33 @@
 
 ## STATUS (read first)
 
+> **▶▶▶ THE EXECUTABLE RUNS — DONE (2026-07-13, `ChainDescent/Refine.lean` + `ChainDescent/PerformanceTest.lean`, both
+> in `build.sh`).** Exhaustive canonization of `C₃…C₇` completes in **well under a second per graph**. The perf test is a
+> **regression gate**: it `#guard`s iso-invariance under relabelling *and* that non-isomorphic graphs get different forms,
+> so a regression **fails the build**. Two root causes had to be fixed, and *both* earlier diagnoses in this doc were
+> wrong — read these before touching the refiner:
+>
+> 1. **The `Encodable.encode` blow-up is a VALUE problem, and renumbering the output does NOT fix it.** Finding #2 below
+>    correctly says the bottleneck is the encoded *value*, but the prescribed cure (cost-model **D7 fork ii**: rank-renumber
+>    each round's output, `vertexRankNat ∘ refineStep`) is **insufficient** — measured, a **single** `refineStep` at `n = 3`
+>    already fails to `#eval`, i.e. the encode is infeasible after *one* round, before any cross-round compounding. The real
+>    round **drops `Encodable.encode` entirely**: `sigKey` is already a canonically-sorted `List Nat` and `Descend.lexLeList`
+>    is already a proved **total order**, so the round ranks the **keys themselves**; colours land in `0..n-1` by construction.
+> 2. **The Lean ETA-EXPANSION SHARING TRAP (new, and the one that actually caused the 10-minute runs).** Lean's code
+>    generator **eta-expands every definition to the arity of its TYPE**. `Colouring n` unfolds to `Fin n → Nat`, so *any*
+>    definition of type `… → Colouring n` is compiled at full arity — `f adj χ` is a **partial application** that **re-runs
+>    its body on every colour lookup**. Each descent level's colouring closes over its parent's, so the cost *multiplies per
+>    level* (measured, `n = 5`: depth 1 ≈ 1 ms/lookup, depth 2 ≈ 4 ms, depth 3 → never finishes). **`@[noinline]` does NOT
+>    fix it** (it blocks inlining, not eta-expansion), nor does eta-reducing the body, nor passing the vector as an argument.
+>    **Cure: return a value whose type is NOT a function** — `warmRefineVec : … → ColData n` (a *structure*) is compiled at
+>    its true arity and forced **once**; `ColData.col` then closes over the already-forced vector ⟹ `O(1)` lookups.
+>
+> **⚠ Two measurement traps that hid this for a long time:** (i) a **top-level `def` colouring IS cached**, so testing the
+> descent's levels in isolation looks fast and hides the bug entirely — it only appears *inside* `descend`; (ii) `lean`
+> **discards all `#eval` output on timeout**, so one slow `#eval` late in a file silently swallows the earlier results.
+> Bisect with **one `#eval` per file**, and remember the bare-import baseline is long (~75 s so a 90 s timeout is measuring
+> almost nothing, but this changes with environment freshness).
+>
 > **▶▶ ARCHITECTURE CHANGE (2026-07-13) — the executable is no longer a SEPARATE TRACK; it is a PROJECTION of the main
 > object. Read [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) §1 first.** The Lean
 > canonizer is now defined **once**, computably, in the cost monad — `descend : AdjMatrix n → CostM (Option Matrix)`,

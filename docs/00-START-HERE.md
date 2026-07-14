@@ -181,9 +181,12 @@ flag; (2) the **resolver instances** — consume (`matchOracle`, the **`Covering
 **`NarrowEquivariant`** route; IR §11.12, re-based); (3) **③** (`stalled ⟹ D1 ∨ D2`). Note (2) cannot break ① — but
 **relocation is not elimination**: a solver that never fires defers ⟹ branches ⟹ exhausts the budget ⟹ flags, so the rigid
 seal's **P1/P3 keep their full content, moved from ① to ②** (the firing rate) — which is exactly where the
-"polynomial-**or-flag**" headline lives. **Open executable item:** the exhaustive descent `#eval`s only to `n = 4` —
-`Colouring n = Fin n → Nat` means each level's colouring is a closure over its parent's and Lean does not reliably share
-the materialised vector; the fix is to thread a `Vector Nat n` through `descend` (a signature change, decide deliberately).
+"polynomial-**or-flag**" headline lives. **The executable RUNS** — exhaustive canonization of `C₃…C₇` in well under a
+second per graph, with `ChainDescent/PerformanceTest.lean` in `build.sh` as a **regression gate** (`#guard`s
+iso-invariance under relabelling *and* that non-isomorphic graphs get different forms). The earlier stall was a Lean
+**eta-expansion sharing trap** — any `… → Colouring n` definition is compiled at its type's full arity, so it re-runs its
+body on every colour lookup; the cure is to return a **non-function-typed** value (`ColData`), and **no `descend`
+signature change was needed**.
 
 **The one genuine wall.** `hSmallAutThin` — "small-Aut primitive residue ⟹ bounded WL-recovery" — is open at the
 *polynomial* threshold (there it *is* GI ∈ P) and is quarantined behind the mutual-stall flag: by design the canonizer is

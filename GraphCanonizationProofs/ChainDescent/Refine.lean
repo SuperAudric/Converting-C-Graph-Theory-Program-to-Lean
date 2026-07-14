@@ -33,27 +33,21 @@ the round can rank the **keys themselves** under that order and never form a `Na
 
 Two further notes, both load-bearing:
 
-* **Reification must be on the DATA, not inside a closure** — see `roundVec` / `warmRefineMat`. Materialising a
-  round as `let keys := …; fun v => …` does *not* memoise; the compiler floats the `let` into the lambda and the
-  work is redone on every lookup.
-* **No `@[implemented_by]`.** The fast version is tied to the slow one by a *proved equation* (`warmRefineMat_eq`),
-  never by an unchecked implementation swap (which can assert a false equation and make `#eval` lie — a firewall
-  risk).
+* **Sharing must be carried by a NON-function-typed value** — see the `ColData` block in §4. This is the single
+  subtlest thing in the file; read it before changing how the refiner hands out a colouring.
+* **No `@[implemented_by]`.** The fast version is tied to the slow one by a *proved equation*
+  (`warmRefineVec_col_eq`), never by an unchecked implementation swap (which can assert a false equation and make
+  `#eval` lie — a firewall risk).
 
 The `PMatrix` argument of `sigKey` is instantiated to the **constant** `constP`; the descent's refiner takes only
 `(adj, χ)`, and a constant `P` transports trivially (`hP` below is `rfl`).
 
-## ⚠ KNOWN EXECUTABLE LIMIT (proofs unaffected)
+## The executable
 
-The refiner itself evaluates fine at every depth. But the **exhaustive** descent (`deferAll`) currently completes
-only up to `n = 4`: `Colouring n = Fin n → Nat` means each descent level's colouring is a *closure* over its
-parent's, and Lean's compiler does not reliably share the materialised vector across levels (`@[noinline]` on
-`fromVec` / `warmRefineMat` does not suffice), so a depth-`d` colour lookup can re-run the refinement. It is easy
-to miss: a **top-level `def`** colouring *is* cached, so testing the levels in isolation looks fine.
-
-This is a *runtime-representation* issue, **not** a correctness one — every theorem in this file and in
-`Descend.lean` is unaffected. The clean fix is to thread a materialised `Vector Nat n` through `descend` instead of
-a `Colouring n` (a signature change to the object, to be decided deliberately).
+`descend` on `encodeFreeFast` runs. Exhaustive (`deferAll`) canonization of the cycles `C₃…C₇` completes in well
+under a second per graph (`ChainDescent/PerformanceTest.lean`); before the encode-free round and the `ColData`
+sharing fix, `C₃` alone took ~10 minutes and `C₅` did not terminate at all. The remaining growth is the *exhaustive
+resolver's* branching — exactly what the consume/force resolvers exist to prune — not the refinement.
 -/
 
 namespace ChainDescent
@@ -312,16 +306,25 @@ theorem refineSplits_encodeFree : RefineSplits (encodeFree (n := n)) := by
 
 /-! ## 4. The `#eval`-able version — reification (value-equal, NOT `@[implemented_by]`)
 
-`refineRound` recomputes every vertex's `keyOf` once per *comparison*, so a round costs `n²` signature builds and
-the `χ` it reads is the previous round's closure — nesting the rounds explodes exponentially. The fast version is
-tied to the slow one by a **proved equation** (`warmRefineMat_eq`), so all the theorems above transfer and `#eval`
-cannot lie.
+`refineRound` recomputes every vertex's `keyOf` once per *comparison*, so a round costs `n²` signature builds; the
+runnable version materialises each round to a `Vector` instead. It is tied to the reasoned-about one by a **proved
+equation** (`warmRefineVec_col_eq`), so all the theorems above transfer and `#eval` cannot lie.
 
-**⚠ The reification must be on the DATA, not inside a closure.** Writing a round as
-`let keys := Vector.ofFn …; fun v => ranked.get v` does *not* memoise: iterating it nests closures, each call
-rebuilds the vector, and the cost is exponential in the round count (measured — a warm round over such a
-"reified" round hangs at `n = 3`, while the unreified `refineRound` runs instantly). The cure is to iterate on a
-strict `Vector Nat n` and only expose a `Colouring` at the very end. -/
+**⚠⚠ THE SHARING TRAP — read this before touching `warmRefineVec` (measured, root-caused).** Lean's code
+generator **eta-expands every definition to the arity of its TYPE**. `Colouring n` unfolds to `Fin n → Nat`, so a
+definition of type `AdjMatrix n → Colouring n → Colouring n` is compiled at **arity 3**: `f adj χ v = <body> v`.
+Consequently `f adj χ` is a *partial application* that stores `adj` and `χ` and **re-runs `<body>` on every colour
+lookup** — the materialised vector is never shared. `@[noinline]` does **not** prevent this (it blocks inlining,
+not eta-expansion), and neither does eta-reducing the body or passing the vector as an argument.
+
+Measured cost of one colour lookup (20 000 lookups, `n = 5`): depth 1 ≈ 1 ms, depth 2 ≈ 4 ms, depth 3 → does not
+finish. Each descent level's colouring closes over its parent's, so the cost multiplies per level and the
+exhaustive descent hangs at `n = 5`.
+
+**The cure: return a value whose type is NOT a function.** `warmRefineVec` returns a `ColData` (a structure), so it
+is compiled at arity 2 and its body is forced **once**, to a real value. `ColData.col` then hands out a closure
+over that already-forced structure, so lookups are genuine `O(1)` array reads. This is why the refiner is built as
+`(warmRefineVec adj χ).col` and **not** as a `Colouring`-valued definition — do not "simplify" that away. -/
 
 /-- One encode-free round **on materialised data**. Every vertex's key is computed **once** (otherwise `sigKey`,
 and with it the whole signature multiset, is recomputed `n²` times per round). -/
@@ -341,21 +344,19 @@ theorem roundVec_ofFn (adj : AdjMatrix n) (χ : Colouring n) :
   have h := roundVec_get adj (Vector.ofFn χ) ⟨i, hi⟩
   simpa [Vector.get, Vector.getElem_ofFn] using h
 
-/-- View a materialised vector as a colouring. **`@[noinline]` is load-bearing** — see `warmRefineMat`. -/
-@[noinline] def fromVec (out : Vector Nat n) : Colouring n := fun v => out.get v
+/-- A **materialised** colouring. The point of the wrapper is that its type is **not a function type**, so a
+definition returning it is compiled at its true arity and its body is forced **once**, to a real value — see the
+sharing trap above. -/
+structure ColData (n : Nat) where
+  vec : Vector Nat n
 
-/-- **The runnable warm round** — `n` rounds, iterated on strict `Vector` data.
+/-- The warm round, **materialised**. Returns `ColData` (a *value*), not a `Colouring` (a *function*) — this is
+what makes the vector shared rather than recomputed per colour lookup. -/
+def warmRefineVec (adj : AdjMatrix n) (χ : Colouring n) : ColData n :=
+  ⟨(roundVec adj)^[n] (Vector.ofFn χ)⟩
 
-**⚠ The vector is passed as an ARGUMENT to `fromVec`, and that is the whole trick.** The descent threads
-colourings as *functions* (`Colouring n = Fin n → Nat`). A colouring built as `let out := <expensive>; fun v =>
-out.get v` does **not** memoise — the compiler floats the `let` into the lambda, so `<expensive>` re-runs on every
-lookup. Since each descent level's colouring closes over its parent's, that makes a depth-`d` colour lookup cost
-*exponential in `d`*, and the exhaustive descent hangs at `n = 5` (measured; it is easy to miss, because a
-top-level `def` colouring **is** cached, so testing the levels in isolation looks fine). Lean's compiled code is
-**call-by-value**, so making the vector a function *argument* forces it exactly once, when the colouring is
-constructed. Each level's colouring is then a genuine lookup table. -/
-@[noinline] def warmRefineMat (adj : AdjMatrix n) (χ : Colouring n) : Colouring n :=
-  fromVec ((roundVec adj)^[n] (Vector.ofFn χ))
+/-- Hand out a colouring backed by the already-forced vector. Lookups are `O(1)` array reads. -/
+def ColData.col (c : ColData n) : Colouring n := fun v => c.vec.get v
 
 theorem iterate_roundVec (adj : AdjMatrix n) :
     ∀ (k : Nat) (χ : Colouring n),
@@ -368,23 +369,27 @@ theorem iterate_roundVec (adj : AdjMatrix n) :
       rw [Function.iterate_succ_apply, Function.iterate_succ_apply, roundVec_ofFn adj χ]
       exact ih (refineRound adj χ)
 
-/-- **The runnable version computes exactly the reasoned-about one.** -/
-theorem warmRefineMat_eq (adj : AdjMatrix n) (χ : Colouring n) :
-    warmRefineMat adj χ = warmRefineR adj χ := by
+/-- **The runnable version computes exactly the reasoned-about one.** This proved equation is what replaces
+`@[implemented_by]`: every theorem about `warmRefineR` transfers, and `#eval` cannot lie. -/
+theorem warmRefineVec_col_eq (adj : AdjMatrix n) (χ : Colouring n) :
+    (warmRefineVec adj χ).col = warmRefineR adj χ := by
   funext v
   show ((roundVec adj)^[n] (Vector.ofFn χ)).get v = ((refineRound adj)^[n] χ) v
   rw [iterate_roundVec adj n χ]
   simp [Vector.get, Vector.getElem_ofFn]
 
 /-- **The runnable refiner** — value-equal to `encodeFree` (`encodeFreeFast_eq`), so it inherits *every* theorem
-above; only the evaluation strategy differs. This is the one to `#eval`. -/
+above; only the evaluation strategy differs. This is the one to `#eval`.
+
+**Do not refactor `(warmRefineVec adj χ).col` into a `Colouring`-valued definition** — that reintroduces the
+eta-expansion sharing trap documented above and makes every colour lookup re-run the refinement. -/
 def encodeFreeFast : Refiner n :=
-  fun adj χ => (warmRefineMat adj χ, CostModel.WarmRefine.warmRefineCost n)
+  fun adj χ => ((warmRefineVec adj χ).col, CostModel.WarmRefine.warmRefineCost n)
 
 theorem encodeFreeFast_eq : encodeFreeFast (n := n) = encodeFree (n := n) := by
   funext adj χ
-  show (warmRefineMat adj χ, _) = (warmRefineR adj χ, _)
-  rw [warmRefineMat_eq]
+  show ((warmRefineVec adj χ).col, _) = (warmRefineR adj χ, _)
+  rw [warmRefineVec_col_eq]
 
 theorem refineEquivariant_encodeFreeFast : RefineEquivariant (encodeFreeFast (n := n)) := by
   rw [encodeFreeFast_eq]; exact refineEquivariant_encodeFree

@@ -32,12 +32,19 @@
 >      already a canonically-sorted `List Nat` and `Descend.lexLeList` is already a proved **total order**, so the
 >      round ranks the **keys themselves**; colours land in `0..n-1` by construction. No `@[implemented_by]` — the
 >      fast version is tied to the slow one by a *proved equation* (`warmRefineMat_eq`).
->    - **⚠ KNOWN EXECUTABLE LIMIT (proofs unaffected).** The exhaustive descent `#eval`s only to `n = 4`:
->      `Colouring n = Fin n → Nat`, so each level's colouring is a *closure* over its parent's and Lean does not
->      reliably share the materialised vector across levels (`@[noinline]` does not suffice) ⟹ a depth-`d` lookup can
->      re-run the refinement. (Easy to miss: a top-level `def` colouring **is** cached, so testing levels in isolation
->      looks fine.) **Fix = thread a `Vector Nat n` through `descend` instead of a `Colouring n`** — a signature
->      change to the object, to be decided deliberately.
+>    - **★ THE EXECUTABLE RUNS — sharing trap ROOT-CAUSED AND FIXED (2026-07-13).** Exhaustive canonization of
+>      `C₃…C₇` completes in **well under a second per graph**; `ChainDescent/PerformanceTest.lean` is **in `build.sh`
+>      as a regression gate** (it `#guard`s iso-invariance under relabelling *and* that non-isomorphic graphs get
+>      different forms ⟹ a regression **fails the build**). Before the fix `C₃` took ~10 min and `C₅` never finished.
+>      **Root cause:** Lean **eta-expands every definition to the arity of its TYPE**, and `Colouring n` unfolds to
+>      `Fin n → Nat` — so any `… → Colouring n` definition is compiled at full arity and `f adj χ` is a *partial
+>      application* that **re-runs its body on every colour lookup**; each descent level closes over its parent's, so
+>      the cost multiplies per level. `@[noinline]` does **not** fix it (blocks inlining, not eta-expansion).
+>      **Cure: return a NON-function-typed value** — `warmRefineVec : … → ColData n` (a structure) is forced once, and
+>      `ColData.col` closes over it ⟹ `O(1)` lookups. **No `descend` signature change was needed after all.**
+>      *Measurement traps:* a top-level `def` colouring **is** cached (so isolated tests hide the bug), and `lean`
+>      **discards all `#eval` output on timeout** (so a slow eval late in a file swallows the earlier ones) — bisect
+>      one `#eval` per file; bare-import baseline is ~75 s.
 > 3. **Resolver instances (Stage 3) — one per route.** **consume** = `matchOracle` on the **`Covering`** route (the
 >    C#'s `CoveredByPathFixingAut` is exactly the witness); **force** = the rigid solver on the **`NarrowEquivariant`**
 >    route (structural narrowing transports; *no* covering witness, *no* global lex-min, **no knowledge of the
