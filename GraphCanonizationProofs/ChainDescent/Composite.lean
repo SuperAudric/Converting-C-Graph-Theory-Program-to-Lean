@@ -255,20 +255,32 @@ theorem forceThenConsume_singleton_of_separating {key : Key n} {S : Supply n} {a
 
 /-! ### ★★★ PARTIAL POWER ⟹ PARTIAL PROGRESS (the anti-perfectionism theorem)
 
-The two singleton theorems above are the **perfect endpoints**, and on their own they are a trap: read as the
-whole story they say *"only a perfect oracle or a perfect key counts"*, which is both false and the opposite of the
-project's own "over-splitting is safe" rule. Worse, a *perfect* key cannot exist: a key separating exactly the
-non-automorphic pairs would collapse every cell to one branch — that **is** GI ∈ P. So the architecture can never
-be justified by perfect components, and any account that needs them is wrong.
+The two singleton theorems above are the **perfect endpoints**, and on their own they are a trap: read as the whole
+story they say *"only a perfect oracle or a perfect key counts"*, which is the opposite of the project's own
+"over-splitting is safe" rule — and they say **nothing at all** about the realistic middle (a cell splitting into
+three orbits, a key sorting it into three classes).
 
 `forceThenConsume_narrows_of_partial` is the honest statement. **Any** capability from **either** side — the supply
 proving a *single* automorphism between two branches, or the key separating a *single* pair — **strictly** reduces
-the fan-out. No threshold, no cliff, no perfection: a resolver is rewarded for exactly what it can prove and
-penalized for nothing it cannot. The singleton theorems are then just the case where the reward is total.
+the fan-out. No threshold, no cliff, no perfection required: a resolver is rewarded for exactly what it can prove
+and penalized for nothing it cannot. The singleton theorems are then just the case where the reward is total.
 
-That is what makes the `②` ledger additive rather than all-or-nothing: a rigid solver that handles *part* of its
-residue, or an oracle that finds *some* of Aut, contributes *proportionally*. The residue is what is left after
-every partial contribution — not what is left if some component fails to be perfect. -/
+**★ What the force/consume split really buys: ATTRIBUTION.** At a branch cell the dichotomy is exhaustive — a
+choice between two vertices either leaves the reachable output matrices unchanged (a **symmetry**, consume's to
+take) or it changes them (a **real decision**, force's to take). So **every surviving branch pair is assignable to
+exactly one resolver's weakness**: either the supply failed to connect an automorphic pair, or the key failed to
+separate a non-automorphic one. `forceThenConsume_stall` is that attribution, and it makes residual weakness
+*localizable* — and, with the graded theorems above, *quantifiable* (how many pairs each side left on the table).
+That is a measuring instrument for improving the resolvers, and it is the practical payoff of the tautology.
+
+⚠ **It is NOT an impossibility argument, and must not be read as one.** A key that separated exactly the
+non-automorphic pairs would collapse every cell to one branch — i.e. **a perfect key is *equivalent to* GI ∈ P**.
+That makes it the route's **target**, not a barrier: this project's premise is that polynomial is not a wall (see
+`00-START-HERE` §1, "isolate, don't close"). Nothing here licenses assuming such a key is unreachable — and no
+theorem in this file does.
+
+Either way, the `②` ledger is **additive**: a rigid solver that handles *part* of its residue, or an oracle that
+finds *some* of `Aut`, contributes *proportionally*. The residue is what is left after every partial contribution. -/
 
 /-- **★★★ THE ANTI-PERFECTIONISM THEOREM — partial power gives partial progress.**
 

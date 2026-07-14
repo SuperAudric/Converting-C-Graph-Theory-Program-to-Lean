@@ -30,11 +30,21 @@
 > perfect key counts"*, which inverts the project's own **"over-splitting is safe"** rule: the design had swung from
 > *"a non-consuming resolver is fully valid"* all the way to *"only a perfect solver is valid"*.
 >
-> **★ AND A PERFECT KEY CANNOT EXIST.** The force/consume split *is* a tautology at the level of *existence* (a
-> decision either changes the output-matrix space or it does not). But a key separating exactly the non-automorphic
-> pairs would collapse **every** cell to one branch — that **is GI ∈ P**. **So the architecture can never be
-> justified by perfect components**, and any account that requires them is wrong on its face. What the residue
-> measures is precisely what a *poly-time* key/oracle can **see**, never what exists.
+> **★ WHAT THE TAUTOLOGY ACTUALLY BUYS: ATTRIBUTION (not an impossibility argument).** The force/consume split is
+> exhaustive: at a branch cell, a choice between two vertices either leaves the reachable output matrices unchanged
+> (a **symmetry** — consume's to take) or it changes them (a **real decision** — force's to take). So **every
+> surviving branch pair is assignable to exactly one resolver's weakness**: the supply failed to connect an
+> automorphic pair, or the key failed to separate a non-automorphic one. `Composite.forceThenConsume_stall` *is*
+> that attribution ⟹ residual weakness is **localizable**, and with the graded theorems below **quantifiable**
+> (how many pairs each side left on the table). **That is a measuring instrument for refining the resolvers** — the
+> real payoff.
+>
+> **⛔ AN EARLIER DRAFT OF THIS BLOCK ARGUED "A PERFECT KEY CANNOT EXIST" — THAT WAS WRONG AND IS RETRACTED.** It ran:
+> *a key separating exactly the non-automorphic pairs would collapse every cell to one branch, i.e. GI ∈ P, so it
+> cannot exist.* That **presupposes GI ∉ P** — the very thing this project does not assume and is in pursuit of
+> refuting. The correct statement is an **equivalence**: **a perfect key *is* GI ∈ P**, which makes it the route's
+> **TARGET**, not a barrier. This is the standing steer *"Polynomial is NOT a wall — it's the route's target"*, and
+> the earlier draft violated it. **Do not re-import an infeasibility assumption anywhere in this track.**
 >
 > **The fix — three theorems, all unconditional on the supply/key:**
 > - **`Consume.rep_eq_of_wordReach`** — consume merges **exactly** the branches its generators connect, with **no

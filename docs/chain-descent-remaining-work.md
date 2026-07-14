@@ -1,5 +1,38 @@
 # Remaining work — the living tracker (modulo set · citation replacement · IR solver)
 
+> ## ▶▶▶ ② HAS STARTED — `ChainDescent/Cost.lean` (2026-07-14, in `build.sh`, axiom-clean, full build green)
+>
+> **The first real ② theorem is landed, and the graded-firing reframe is what made it available.**
+>
+> The banked `n⁴` (`CanonForm.descentCost_le`) is against the **single-path** `spineCappedCanonizer` and does **not**
+> transfer: a branching object with fan-out `k` at every level has `kⁿ` nodes and *no* polynomial bound. So the
+> branching descent's cost is governed by **exactly one quantity — the fan-out the resolvers leave behind**. That is
+> why ② had to wait for the firing theorems, and it is where they cash out:
+>
+> - **`Cost.ResolvedAll`** — every non-discrete node is narrowed to **≤ 1** branch.
+> - **`Cost.descentCost_le_of_resolved`** — then the descent is a **single path** of depth ≤ `n` and
+>   `descentCost ≤ c₁ + (n+1)·(1 + c₁ + c₂)`, i.e. **polynomial** whenever the per-node refiner/resolver costs are.
+>   (`Cost.refiner_cost` discharges `c₁ = n³` outright.)
+> - **★★★ `Cost.poly_of_cells_resolved`** — *a graph every one of whose cells is **either** supply-connected **or**
+>   key-separated is canonized in **polynomial time***. With `Composite.composite_canonizer` (sound, iso-invariant,
+>   complete, always answers) this is **poly-time canonization on the resolved set**, with **no** hypothesis on the
+>   oracle's correctness and **none** on the key beyond `KeyEquivariant`.
+>
+> The content is **not** in the bound (a single path is obviously cheap) — it is in **what discharges `ResolvedAll`**,
+> which is exactly the two firing theorems. The residue is its complement, and `Composite.forceThenConsume_stall`
+> **attributes** each residual cell to one side's weakness (the supply failed to connect an automorphic pair, or the
+> key failed to separate a non-automorphic one).
+>
+> **⚠ `ResolvedAll` is a SUFFICIENT condition — a lower bound on the handled set, NOT a wall.** Bounded,
+> **non-stacking** fan-out is also polynomial and is *not yet captured*. Capturing it (the verify-consume
+> monovariant) is the next ② increment, not a barrier.
+>
+> **Still open in ②:** (a) bounded-fan-out (non-stacking) cost, widening the bound beyond single-path; (b) the real
+> **mutual-stall flag** in `descend` (the `fuel`-exhaustion `none` is still a placeholder — `canonForm?_ne_none`
+> proves it never fires; `forceThenConsume_stall` already supplies its **local, structural** statement, which is what
+> ①c requires); (c) the duplicate-refine loss (the key's look-ahead refinement is *exactly* the one the child
+> recomputes — a `descend`-signature change).
+
 > ## ★★★ UPDATE 2026-07-14 — THE MIXED RESOLVER + THE FIRING PROOFS + HONEST COSTS
 >
 > Three things landed that change the "what's left" below. All in `build.sh`, axiom-clean, no `sorry`, full build
