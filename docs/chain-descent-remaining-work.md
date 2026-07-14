@@ -57,9 +57,18 @@
 >      results — consume genuinely *drops* branches). **Measured pruning** (`PerformanceTest.lean`, build-gating):
 >      `descentCost` C₅ 2016→804, C₆ 4123→1372, C₇ 7568→2160, with `#guard`s that the oracle form **equals the
 >      exhaustive form exactly**.
->    - **force — NOT STARTED.** The rigid solver on the **`NarrowEquivariant`** route (structural narrowing
->      transports; *no* covering witness, *no* global lex-min, **no knowledge of the answer**) — IR §11.12, C#
->      `Option2Solver.cs` complete for handoff.
+>    - **force — ✅ DONE (2026-07-14, `ChainDescent/Force.lean`, in `build.sh`, axiom-clean).** Built as a
+>      **combinator**: **`forceBy key`** keeps the branches of least key. **★ The entire ① obligation is
+>      `KeyEquivariant`** (the key commutes with relabelling ⟹ never tie-breaks by vertex index);
+>      **`force_canonizer`** then gives ①a/①b/①c + totality unconditionally. **The rigid solver drops in as a
+>      stronger `key` and owes nothing else** — the concrete cash-out of the §11.12 re-basing. **P1/P3 are NOT ①
+>      obligations** (a weak key narrows less, which is sound) but they keep their full content as **②/firing**
+>      obligations — *how much the key sees*. Concrete instance `lookaheadKey` (individualize → refine → rank by the
+>      **leaf reached**): on rigid `F12` root fan-out **12 → 1**, `descentCost` **22477 → 5186**; on
+>      vertex-transitive `C₇` it **provably cannot fire** (narrows 7 → 7) — `forceBy_no_narrowing_on_orbit`
+>      **observed**, and exactly why `consume` exists. ⚠ *False start:* the cell-size **histogram** separates nothing
+>      on a rigid graph (individualizing any vertex discretizes ⟹ all-ones); the **leaf matrix** is what separates,
+>      usable because `leafMatrix_transport` gives *literal* equality.
 >    - **Neither can break ①** ⟹ a *future* unhandled-residue solver plugs in with **no re-proof of ①**. ⚠ **But
 >      relocation is not elimination:** a solver that extracts/solves too weakly is *sound* yet defers more ⟹ more
 >      branching ⟹ budget exhaustion ⟹ flag ⟹ the input lands in `UnhandledResidue`. **A solver that never fires is a

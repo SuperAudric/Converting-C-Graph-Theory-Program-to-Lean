@@ -141,9 +141,37 @@
 > colouring ⟹ rotation verifies ⟹ one orbit ⟹ one branch instead of `n`) and correctly **defers** one level down,
 > where individualization breaks the symmetry and the rotation fails verification.
 >
-> **▶ NEXT (in dependency order):** **(1) Stage 4 — ② cost + the real mutual-stall flag** (the old `n⁴` bound used
-> the single-path `nbud = n` and does **NOT** transfer); **(2) the FORCE resolver** — the rigid solver on the
-> **`NarrowEquivariant`** route (IR §11.12, re-based); **(3) ③**.
+> **▶▶▶ STAGE 3 IS COMPLETE — THE FORCE RESOLVER IS LANDED (2026-07-14, `ChainDescent/Force.lean`, in `build.sh`,
+> axiom-clean, no `sorry`, full build green).** Built as a **combinator, not a hard-wired solver**:
+> **`forceBy key`** keeps the branches of **least key**, where a `Key` is any vertex invariant.
+>
+> **★ THE ENTIRE ① OBLIGATION OF A FORCE RESOLVER IS `KeyEquivariant`** — *the key commutes with relabelling*, i.e.
+> it never breaks ties by vertex index (the same discipline that makes `indivOne` index-free). Given that,
+> **`narrowEquivariant_forceBy`** discharges the resolver contract and **`force_canonizer`** gives ①a/①b/①c **plus
+> totality**, unconditionally. **The rigid solver (Algorithm R) drops in here as a stronger `key` and owes nothing
+> else.** This is the concrete cash-out of the §11.12 re-basing: **P1/P3 are not ① obligations** — a weak key
+> narrows less, which is *sound*. ⚠ **But relocation is not elimination:** narrowing less ⟹ more branching ⟹ budget
+> exhaustion ⟹ flag. **A key that never separates is a canonizer that flags everything.** P1/P3 keep their full
+> content as **②/firing** obligations — they are exactly *how much the key sees*.
+>
+> **★★ THE COMPLEMENTARY-FIRING-DOMAIN THEOREM, NOW OBSERVED.** `forceBy_no_narrowing_on_orbit` (a specialization of
+> `narrow_eq_branches_of_orbit`): force **cannot fire on a cell that is an orbit**. Measured with the concrete
+> `lookaheadKey` (individualize → refine → rank by the *leaf reached*):
+> - **rigid** 3-regular `F12` (1-WL leaves one cell of all 12; cells are **not** orbits): root fan-out **12 → 1**,
+>   `descentCost` **22477 → 5186**.
+> - **vertex-transitive** `C₇` (every cell **is** an orbit): narrows **7 → 7**, i.e. *cannot fire at all*, and merely
+>   pays for its key (`descentCost` 7568 → 10312). **That is not a defect — it is the theorem, observed**, and it is
+>   exactly why `consume` exists. The two routes cover disjoint ground; graphs where **neither** fires are the residue.
+>
+> **⚠ A false start worth not repeating:** ranking by the **cell-size histogram** after individualization separates
+> **nothing** on a rigid graph (individualizing *any* vertex discretizes ⟹ every histogram is all-ones; measured: it
+> narrowed 12 → 12). The **leaf matrix** is what separates them — usable precisely because `leafMatrix_transport`
+> proves the emitted matrix is *literally equal* under relabelling. (Also: `lookData` must return `ColData`, not
+> `Colouring` — the eta-expansion sharing trap again, and it cost ~10⁴×.)
+>
+> **▶ NEXT:** **② — the cost + the real mutual-stall flag** (the old `n⁴` bound used the single-path `nbud = n` and
+> does **NOT** transfer; `descend`'s fuel-exhaustion `none` is still a **placeholder**), then **③**. Both resolver
+> instances now exist to cost against.
 
 **The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
 from source (2026-07-10):

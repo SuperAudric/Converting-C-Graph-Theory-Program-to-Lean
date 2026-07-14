@@ -1,5 +1,6 @@
 import ChainDescent.Refine
 import ChainDescent.Consume
+import ChainDescent.Force
 namespace ChainDescent.Refine
 open ChainDescent.Descend
 
@@ -96,5 +97,54 @@ open ChainDescent.Consume in
 #eval (descentCost encodeFreeFast (consume (rotSupply 6)) C6, descentCost encodeFreeFast deferAll C6)
 open ChainDescent.Consume in
 #eval (descentCost encodeFreeFast (consume (rotSupply 7)) C7, descentCost encodeFreeFast deferAll C7)
+
+/-! ## The FORCE resolver (`Force.forceBy lookaheadKey`) — the other route
+
+Force fires where consume cannot, and vice versa: **complementary firing domains**
+(`Force.forceBy_no_narrowing_on_orbit`). `F12` is a 3-regular graph whose 1-WL leaves a **single cell of all 12
+vertices** and whose cells are **not** orbits — the rigid case. `C₇` is vertex-transitive, so every cell *is* an
+orbit and force provably cannot narrow at all.
+
+Measured: on `F12` force collapses the root fan-out **12 → 1** (`descentCost` 22477 → 5186); on `C₇` it cannot fire
+and merely pays for its key (7568 → 10312). Both are the theory, observed. -/
+
+open ChainDescent.Force in
+/-- A 3-regular graph on 12 vertices: 1-WL leaves one cell of size 12, and the cells are not orbits. -/
+def F12 : AdjMatrix 12 := ⟨fun i j =>
+  let e : List (Nat × Nat) := [(0,1),(0,2),(0,11),(1,3),(1,6),(2,5),(2,10),(3,4),(3,6),(4,8),
+                               (4,11),(5,9),(5,10),(6,7),(7,8),(7,9),(8,9),(10,11)]
+  if e.contains (i.val, j.val) ∨ e.contains (j.val, i.val) then 1 else 0⟩
+
+open ChainDescent.Force in
+/-- The canonical form computed with the **force** resolver. -/
+def formF {n : Nat} (adj : AdjMatrix n) : Option (List Nat) :=
+  (canonForm? encodeFreeFast (forceBy lookaheadKey) adj).map flatten
+
+-- **It answers** (`Force.lookahead_canonizer`, exercised).
+#guard (formF F12).isSome
+#guard (formF C7).isSome
+
+-- **Iso-invariance (①b/①c)** — the whole point of `KeyEquivariant`.
+#guard formF F12 = formF (relabelAdj (Equiv.swap 0 7) F12)
+#guard formF F12 = formF (relabelAdj (Equiv.swap 3 11) F12)
+#guard formF C7 = formF (relabelAdj (Equiv.swap 1 4) C7)
+
+-- Still distinguishes.
+#guard formF C5 ≠ formF P5
+
+-- **★ IT FIRES ON THE RIGID CASE.** Root fan-out 12 → 1: force narrows a cell that is NOT an orbit.
+open ChainDescent.Force in
+#guard (narrow (forceBy lookaheadKey) F12 (refineV encodeFreeFast F12 (fun _ => 0))).length = 1
+#guard (branches (refineV encodeFreeFast F12 (fun _ => 0))).length = 12
+
+-- **★ IT CANNOT FIRE ON THE SYMMETRIC CASE** (`forceBy_no_narrowing_on_orbit`, observed): every cell of `C₇` is an
+-- orbit, so the forced narrowing is the whole cell.
+open ChainDescent.Force in
+#guard (narrow (forceBy lookaheadKey) C7 (refineV encodeFreeFast C7 (fun _ => 0))).length = 7
+
+open ChainDescent.Force in
+#eval (descentCost encodeFreeFast (forceBy lookaheadKey) F12, descentCost encodeFreeFast deferAll F12)
+open ChainDescent.Force in
+#eval (descentCost encodeFreeFast (forceBy lookaheadKey) C7, descentCost encodeFreeFast deferAll C7)
 
 end ChainDescent.Refine

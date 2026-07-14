@@ -2910,16 +2910,18 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Refine.C3` | 6-8 | Test fixture: the 3-cycle. | Definition |
-| `Refine.C4` | 10-12 | Test fixture: the 4-cycle. | Definition |
-| `Refine.C5` | 14-16 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
-| `Refine.C6` | 18-20 | Test fixture: the 6-cycle. | Definition |
-| `Refine.C7` | 23-25 | Test fixture: the 7-cycle. | Definition |
-| `Refine.form` | 33-48 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
-| `Refine.P5` | 49-50 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
-| `Refine.rotP` | 64-67 | — | Definition |
-| `Refine.rotSupply` | 68-71 | — | Definition |
-| `Refine.formC` | 72-98 | — | Definition |
+| `Refine.C3` | 7-9 | Test fixture: the 3-cycle. | Definition |
+| `Refine.C4` | 11-13 | Test fixture: the 4-cycle. | Definition |
+| `Refine.C5` | 15-17 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
+| `Refine.C6` | 19-21 | Test fixture: the 6-cycle. | Definition |
+| `Refine.C7` | 24-26 | Test fixture: the 7-cycle. | Definition |
+| `Refine.form` | 34-49 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
+| `Refine.P5` | 50-51 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
+| `Refine.rotP` | 65-68 | The cyclic rotation `i ↦ i + 1` of `Fin n` — a genuine automorphism source for cycles. | Definition |
+| `Refine.rotSupply` | 69-72 | The rotation oracle **supply** for `Consume.consume`. Untrusted, like every supply: it verifies at the root and is *rejected* one level down, where individualization breaks the rotation symmetry. | Definition |
+| `Refine.formC` | 73-99 | The canonical form computed with the **oracle** (`consume`) resolver, as a comparable value. | Definition |
+| `Refine.F12` | 112-118 | A 3-regular graph on 12 vertices whose 1-WL leaves a **single cell of size 12** and whose cells are **not orbits** — the rigid case, where `force` fires (root fan-out 12 → 1). | Definition |
+| `Refine.formF` | 119-148 | The canonical form computed with the **force** (`forceBy lookaheadKey`) resolver, as a comparable value. | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -2959,3 +2961,31 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Consume.narrowTransport_consume` | 329-332 | §6 `consume` satisfies the resolver contract (`NarrowTransport`), for every supply. | — |
 | `Consume.consume_canonizer` | 336-348 | §7 **★★★ THE ORACLE-DRIVEN CANONIZER.** `①a`/`①b`/`①c` hold and the descent never flags, **with no hypothesis on the oracle at all**. | — |
 | `Consume.consume_canonizer_fast` | 350-357 | §7 The same, on the runnable `encodeFreeFast` refiner. | — |
+## ChainDescent/Force.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Force.kmin?` | 81-87 | §1 The lex-least key of a list (`none` on empty), under the proved total order `lexLeList`. | Definition |
+| `Force.kmin?_eq_none_iff` | 89-100 | §1 `kmin?` flags exactly on the empty list. | — |
+| `Force.kmin?_mem` | 102-118 | §1 The minimum is one of the candidates — so the forced narrowing is never empty. | — |
+| `Force.kmin?_le` | 120-157 | §1 The minimum really is `≤` every candidate. | — |
+| `Force.kmin?_congr_mem` | 159-183 | §1 **`kmin?` depends only on the SET of candidates.** What lets the narrowing survive the fact that the branch list is built in *index* order. | — |
+| `Force.Key` | 187-189 | §2 A **structural vertex key** — the invariant a forcing rule ranks branches by. (`List Nat`, so it is compared with the already-proved total order `lexLeList`.) | `abbrev` |
+| `Force.KeyEquivariant` | 191-195 | §2 **★ THE ONLY ① OBLIGATION OF A FORCE RESOLVER.** The key commutes with relabelling — i.e. it never breaks ties by vertex index. Everything else about the rigid solver (P1/P3) is a ②/firing matter. | Definition |
+| `Force.keepMin` | 197-202 | §2 Keep exactly the branches attaining the least key. | Definition |
+| `Force.keepMin_none` | 204-207 | §2 No branches (a discrete node): nothing to narrow. | — |
+| `Force.keepMin_some` | 209-213 | §2 The narrowing is the fibre of the least key. | — |
+| `Force.forceBy` | 215-219 | §2 **★ THE FORCE RESOLVER.** Keep the branches of least key. The discards are genuinely *different* subproblems — the aggregate **changes** — but consistently on `G` and `σ·G`, which is all iso-invariance needs. **No global lex-min, no knowledge of the answer.** | Definition |
+| `Force.narrow_forceBy` | 221-222 | §2 The narrowing `forceBy` performs, unfolded. | — |
+| `Force.filter_map_comm` | 226-234 | §3 Mapping then filtering is filtering-by-the-composite then mapping. | — |
+| `Force.narrowEquivariant_forceBy` | 236-271 | §3 **★★ THE FORCE ROUTE, DISCHARGED.** An equivariant key gives an equivariant narrowing, hence the whole resolver contract. This is the *entire* ① content of the rigid solver. | — |
+| `Force.narrowProper_forceBy` | 275-298 | §4 The forced narrowing stays inside the branch cell and never empties it — the hypothesis totality needs. | — |
+| `Force.force_canonizer` | 302-317 | §5 **★★★ THE FORCE-DRIVEN CANONIZER.** ①a/①b/①c and totality, modulo nothing but `KeyEquivariant key`. Note it computes a *different but equally valid* canonical form, not the exhaustive branch-min — which is precisely what frees the rigid solver from having to know the answer. | — |
+| `Force.force_canonizer_fast` | 319-326 | §5 The same, on the runnable `encodeFreeFast` refiner. | — |
+| `Force.forceBy_no_narrowing_on_orbit` | 328-339 | §5 **★★ NO GI ∈ P COLLAPSE.** `forceBy` cannot fire on a cell that is a single orbit: forcing is available only where the cell is genuinely *not* an orbit — exactly where **consume** cannot fire. Complementary, non-overlapping firing domains. | — |
+| `Force.lookData` | 351-358 | §6 The refinement reached by individualizing `v`, as **materialised data**. ⚠ Returns `ColData`, not `Colouring` — a `Colouring`-valued definition is eta-expanded to full arity and re-runs the refinement on *every* colour lookup (`Refine.lean` §4). | Definition |
+| `Force.lookData_col` | 360-364 | §6 The look-ahead colouring equals `warmRefineR`, so reification does not affect any proof. | — |
+| `Force.lookaheadKey` | 366-381 | §6 **A concrete key that provably FIRES.** Individualize `v`, refine, and rank `v` by the *leaf it reaches* (falling back to a cell-size histogram when it does not discretize). Measured: root fan-out 12→1 on a rigid cubic graph; provably no narrowing at all on a vertex-transitive one. The cell-size histogram **alone** separates nothing on a rigid graph — the leaf matrix is what does. | Definition |
+| `Force.lookData_col_transport` | 383-389 | §6 The look-ahead colouring transports. | — |
+| `Force.keyEquivariant_lookahead` | 391-409 | §6 **The look-ahead key is equivariant** — refinement, individualization and discreteness all transport, and both ranking invariants transport (`leafMatrix_transport` is *literal equality*; `cellOf_card_transport`). | — |
+| `Force.lookahead_canonizer` | 411-418 | §6 **★ THE LOOK-AHEAD CANONIZER** — a fully concrete, hypothesis-free force-driven canonizer: sound, iso-invariant, complete, and it always answers. | — |
