@@ -2917,19 +2917,22 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Refine.C3` | 8-10 | Test fixture: the 3-cycle. | Definition |
-| `Refine.C4` | 12-14 | Test fixture: the 4-cycle. | Definition |
-| `Refine.C5` | 16-18 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
-| `Refine.C6` | 20-22 | Test fixture: the 6-cycle. | Definition |
-| `Refine.C7` | 25-27 | Test fixture: the 7-cycle. | Definition |
-| `Refine.form` | 35-50 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
-| `Refine.P5` | 51-52 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
-| `Refine.rotP` | 66-69 | The cyclic rotation `i ↦ i + 1` of `Fin n` — a genuine automorphism source for cycles. | Definition |
-| `Refine.rotSupply` | 70-74 | The rotation oracle **supply** for `Consume.consume`. Untrusted, like every supply: it verifies at the root and is *rejected* one level down, where individualization breaks the rotation symmetry. | Definition |
-| `Refine.formC` | 75-101 | The canonical form computed with the **oracle** (`consume`) resolver, as a comparable value. | Definition |
-| `Refine.F12` | 118-124 | A 3-regular graph on 12 vertices whose 1-WL leaves a **single cell of size 12** and whose cells are **not orbits** — the rigid case, where `force` fires (root fan-out 12 → 1). | Definition |
-| `Refine.formF` | 125-154 | The canonical form computed with the **force** (`forceBy lookaheadKey`) resolver, as a comparable value. | Definition |
-| `Refine.formM` | 176-217 | The canonical form under the **mixed** resolver, as a comparable value (regression-gate helper). | Definition |
+| `Refine.C3` | 9-11 | Test fixture: the 3-cycle. | Definition |
+| `Refine.C4` | 13-15 | Test fixture: the 4-cycle. | Definition |
+| `Refine.C5` | 17-19 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
+| `Refine.C6` | 21-23 | Test fixture: the 6-cycle. | Definition |
+| `Refine.C7` | 26-28 | Test fixture: the 7-cycle. | Definition |
+| `Refine.form` | 36-51 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
+| `Refine.P5` | 52-53 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
+| `Refine.rotP` | 67-70 | The cyclic rotation `i ↦ i + 1` of `Fin n` — a genuine automorphism source for cycles. | Definition |
+| `Refine.rotSupply` | 71-75 | The rotation oracle **supply** for `Consume.consume`. Untrusted, like every supply: it verifies at the root and is *rejected* one level down, where individualization breaks the rotation symmetry. | Definition |
+| `Refine.formC` | 76-102 | The canonical form computed with the **oracle** (`consume`) resolver, as a comparable value. | Definition |
+| `Refine.F12` | 119-125 | A 3-regular graph on 12 vertices whose 1-WL leaves a **single cell of size 12** and whose cells are **not orbits** — the rigid case, where `force` fires (root fan-out 12 → 1). | Definition |
+| `Refine.formF` | 126-155 | The canonical form computed with the **force** (`forceBy lookaheadKey`) resolver, as a comparable value. | Definition |
+| `Refine.formM` | 177-218 | The canonical form under the **mixed** resolver, as a comparable value (regression-gate helper). | Definition |
+| `Refine.dihSupply` | 228-232 | The **full** automorphism supply for a cycle (`Aut(Cₙ) = Dₙ = ⟨rotation, reflection⟩`) — regression-gate helper. The rotation-only supply is *incomplete*, and the guarded mixed descent correctly **flags** on it. | Definition |
+| `Refine.gForce` | 233-249 | Guarded **force** canonical form (no supply ⟹ equivariant narrowing ⟹ its flag is iso-invariant). Regression-gate helper. | Definition |
+| `Refine.gMix` | 250-258 | Guarded **mixed** canonical form with a supply that really generates `Aut(Cₙ)`. Regression-gate helper. | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3071,3 +3074,21 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Cost.resolvedAll_of_cellResolved` | 153-160 | Every resolved cell is narrowed to a single branch — the firing theorems, applied. | — |
 | `Cost.poly_of_cells_resolved` | 162-183 | §**THE ② PAYOFF — POLYNOMIAL ON THE RESOLVED SET.** *A graph every one of whose cells is **either** supply-connected **or** key-separated is canonized in time polynomial in `n`.* With `Composite.composite_canonizer` (sound, iso-invariant, complete, always answers) this is **poly-time canonization on the resolved set** — no hypothesis on the oracle's correctness, none on the key beyond `KeyEquivariant`. The residue is its complement, and `forceThenConsume_stall` *attributes* each residual cell to one side's weakness. ⚠ `ResolvedAll` is **sufficient**, a lower bound on the handled set — **not a wall**: bounded non-stacking fan-out is also polynomial and is not yet captured. | — |
 | `Cost.refiner_cost` | 185-189 | The refiner's per-node cost is exactly `n³` — one of the two summands discharged outright. | — |
+## ChainDescent/Stall.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Stall.aggregate_nil` | 69-71 | §**The object already HAS a flag channel.** The empty narrowing aggregates to `none`, and `none` propagates to the root — so a resolver can flag by returning `some []`, and the mutual-stall flag needs **no change to `descend`** and no re-proof of ①. | `@[simp]` |
+| `Stall.stalled` | 75-80 | **The node has stalled**: the resolvers left ≥ 2 branches, i.e. some branch pair was **neither** supply-connected **nor** key-separated (`Composite.forceThenConsume_stall`). A **local, structural predicate of the node** — never of the traversal, which is what `①c` requires. Definition. | Definition |
+| `Stall.guard` | 85-89 | §**THE STALL GUARD** — run the resolver; if it leaves ≥ 2 branches, **flag** instead of branching. Deferral is not a cheap mode of a healthy run, it **is** the failure: every node consumes or forces, and one that can do neither *is* the residue. So the descent is a single path or it stops — there is no exhaustive fallback to be polynomial *about*. Definition. | Definition |
+| `Stall.narrow_guard` | 91-96 | The guarded narrowing: empty when stalled, otherwise the underlying resolver's. | — |
+| `Stall.guard_cost` | 98-104 | The guard is free (it reads a length) — the guarded resolver costs what the underlying one costs. | — |
+| `Stall.narrow_guard_length_le_one` | 110-118 | The guarded narrowing never exceeds one branch — **by construction**. | — |
+| `Stall.resolvedAll_guard` | 120-123 | §**`Cost.ResolvedAll` HOLDS BY CONSTRUCTION.** It stops being a hypothesis about the graph and becomes a property of the object: the guard *makes* it true. | — |
+| `Stall.descentCost_guard_le` | 125-136 | §**★★★ THE GUARDED DESCENT IS UNCONDITIONALLY POLYNOMIAL.** No hypothesis on the graph, the oracle supply, or the key: the descent is a **single path** of depth ≤ n on every input, because a node the resolvers cannot resolve **flags** rather than branching. This is `poly` **and** `flag` — never `poly` **or** `exponential`. Supersedes the reading of `Cost.descentCost_le_of_resolved` as a conditional bound to be widened. | — |
+| `Stall.descentCost_guard_le_encodeFree` | 138-143 | The bound at the built refiner (`c₁ = n³`): polynomial as soon as the resolver is. | — |
+| `Stall.StallEquivariant` | 150-156 | **The stall predicate is iso-invariant.** ⚠ **The price of having a flag, and a genuinely new obligation.** `consume`'s supply is *untrusted* because a covering resolver is **value**-invisible — but a **flag is not value-invisible**: `stalled` reads the narrowing's *length*, which depends on how many orbits the supply actually proves. A supply good on `G` and junk on `σ·G` makes `G` answer and `σ·G` flag ⟹ **`①c` false**. Soundness still needs nothing from the supply; the flag needs it **equivariant**. (Counterexample witnessed in `PerformanceTest`.) Definition. | Definition |
+| `Stall.stallEquivariant_of_narrowEquivariant` | 158-164 | An **equivariant** narrowing gives stall-equivariance for free (same length up to a permutation) — which is why the **force-only** route pays nothing for its flag. | — |
+| `Stall.narrowEquivariant_guard` | 166-178 | The guard preserves `NarrowEquivariant`: both sides stall together, and are otherwise unchanged. | — |
+| `Stall.guarded_force_canonizer` | 182-198 | §**★★★ THE FORCE ROUTE, GUARDED — a canonical form that is UNCONDITIONALLY POLYNOMIAL and flags exactly at the mutual stall.** `①a`/`①b`/`①c` modulo nothing but `KeyEquivariant`, *and* a single path on **every** input. It no longer "always answers" (the guard deliberately breaks `NarrowProper`) — **that is the point: it answers or it flags, and it is polynomial either way.** | — |
+| `Stall.narrow_guard_eq_nil_iff` | 210-218 | The guarded descent flags at a node **exactly** when that node stalled — the `③` hook. | — |

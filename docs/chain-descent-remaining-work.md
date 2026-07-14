@@ -1,6 +1,55 @@
 # Remaining work — the living tracker (modulo set · citation replacement · IR solver)
 
-> ## ▶▶▶ ② HAS STARTED — `ChainDescent/Cost.lean` (2026-07-14, in `build.sh`, axiom-clean, full build green)
+> ## ▶▶▶ ★★★ ② IS DONE — THE DESCENT IS **UNCONDITIONALLY POLYNOMIAL** (`ChainDescent/Stall.lean`, 2026-07-14)
+>
+> **The correction that closed it (user, 2026-07-14).** The `Cost.lean` bound below reads as *conditional* — poly
+> **given** `ResolvedAll` — and suggests the next job is to *widen* it to graphs with bounded, non-stacking fan-out,
+> i.e. to let the descent **defer** a decision, branch, and stay poly. **That is not the algorithm.**
+>
+> > **Deferral is not a cheap mode of a healthy run — it IS the failure mode.** Every node either **consumes** (the
+> > supply connects the cell ⟹ a symmetry ⟹ no branching) or **forces** (the key separates it ⟹ a real decision,
+> > taken structurally). A node that can do **neither** has reached the **mutual stall**, and *that node is the
+> > unhandled residue*. There is **no deferred-then-retried decision anywhere in the design**, hence **no exhaustive
+> > fallback to be polynomial *about***. A descent runs as a single path or it stops.
+>
+> So the flag is not a budget and the cost is not conditional. **`Stall.guard R`** flags at any node the resolvers
+> leave with ≥ 2 branches ⟹ **`Stall.resolvedAll_guard` holds BY CONSTRUCTION** ⟹ **`Stall.descentCost_guard_le`:
+> polynomial with NO hypothesis at all** — on the graph, the supply, or the key. **`poly` AND `flag`, never `poly`
+> OR `exponential`.** Capstone **`Stall.guarded_force_canonizer`**: ①a/①b/①c modulo only `KeyEquivariant`, *and* a
+> single path on every input.
+>
+> **★ No `descend` signature change was needed.** `aggregate [] = none`, so a resolver **already has a flag
+> channel**: returning the *empty* narrowing makes the node emit `none`, which propagates to the root. Nothing about
+> `descend`, the resolver contract, or ① changed.
+>
+> **⚠⚠ THE NEW OBLIGATION THE FLAG CREATES — the supply must be EQUIVARIANT (`Stall.StallEquivariant`).**
+> `consume`'s headline is that the supply is **untrusted** (`consume_canonizer` holds for *every* supply) — because
+> a covering resolver is **value**-invisible. **A flag is NOT value-invisible:** `stalled` reads the narrowing's
+> *length*, which depends on how many orbits the supply's generators actually **prove**. A supply good on `G` and
+> junk on `σ·G` makes `G` **answer** and `σ·G` **flag** ⟹ **①c is false.** *Soundness still needs nothing from the
+> supply; the FLAG needs it to be equivariant.* **Free for the force-only route** (its narrowing is equivariant by
+> construction). **Witnessed, not just predicted** — `PerformanceTest.lean` `#guard`s the counterexample
+> (`dihSupply` hands back a fixed generator list, `Aut(σ·C₇) = σ·D₇·σ⁻¹` ⟹ `C₇` answers, `σ·C₇` flags), which is the
+> **non-vacuity witness** proving `StallEquivariant` cannot be dropped.
+>
+> **★ Measured, and the attribution works.** Guarded **force**: answers on rigid `F12` (26066), **flags cheaply** on
+> vertex-transitive `C₇` (3137 — it cannot fire on an orbit cell, so it stops instead of branching). Guarded
+> **mixed** with the *rotation-only* supply **flags** on `C₇` — correctly: after individualizing `0`, the cell
+> `{1,6}` is an orbit under the **reflection**, which that supply does not contain. Give it the reflection
+> (`dihSupply` = full `Aut(Cₙ)`) and it **answers** (C₅/C₆/C₇ = 2063/3687/6093). **The flag was pure oracle
+> incompleteness, and it said so.**
+>
+> **⟹ THE REMAINING QUESTION IS ONE, NOT TWO.** Under the old framing ② asked *"which graphs are cheap?"* and ③
+> asked *"which graphs answer?"*. **Every graph is now cheap.** What is left is only **③**: characterize the graphs
+> that **stall** (`stalled ⟹ residueHiddenJohnson ∨ residueRigidObstruction`), plus the `Publication` opaque-swap.
+> Also still open (a *firing/efficiency* item, not a correctness one): the **duplicate-refine loss** — the key's
+> look-ahead refinement is exactly the one the child recomputes, which is why force currently fires but does not pay.
+
+> ## ▶▶ ② — the cost projection (`ChainDescent/Cost.lean`, 2026-07-14) — SUPERSEDED IN READING BY `Stall.lean` ABOVE
+>
+> ⚠ Read `Cost.descentCost_le_of_resolved`'s `ResolvedAll` **not** as a hypothesis to be widened (that would license
+> the deferred-then-retried decisions the design does not have) but as the property `Stall.guard` **establishes**.
+> `Cost.poly_of_cells_resolved` remains exactly right as the *unguarded* statement.
 >
 > **The first real ② theorem is landed, and the graded-firing reframe is what made it available.**
 >

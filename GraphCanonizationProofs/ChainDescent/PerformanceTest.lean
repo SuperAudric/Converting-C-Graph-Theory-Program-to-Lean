@@ -2,6 +2,7 @@ import ChainDescent.Refine
 import ChainDescent.Consume
 import ChainDescent.Force
 import ChainDescent.Composite
+import ChainDescent.Stall
 namespace ChainDescent.Refine
 open ChainDescent.Descend
 
@@ -215,5 +216,69 @@ open ChainDescent.Composite in
 #eval (descentCost encodeFreeFast
         (forceThenConsume ChainDescent.Force.lookaheadKey (rotSupply 12)) F12,
        descentCost encodeFreeFast deferAll F12)
+
+/-! ## ★★★ THE STALL GUARD — the descent is UNCONDITIONALLY polynomial, and flags at the residue
+
+`Stall.guard R` flags (returns the empty narrowing ⟹ `aggregate [] = none`) at any node the resolvers leave with
+≥ 2 branches. So the descent is a **single path on every input** (`Stall.resolvedAll_guard`, no hypothesis) and
+`Stall.descentCost_guard_le` is polynomial **unconditionally**. Deferral is not a cheap mode of a healthy run — it
+*is* the failure — so there is no exhaustive fallback to be polynomial *about*. -/
+
+open ChainDescent.Stall ChainDescent.Force ChainDescent.Composite in
+/-- The **full** automorphism supply for a cycle: `Aut(Cₙ) = Dₙ = ⟨rotation, reflection⟩`. -/
+def dihSupply (m : Nat) [NeZero m] : ChainDescent.Consume.Supply m :=
+  fun _ _ => ([Equiv.addRight (1 : Fin m), Equiv.neg (Fin m)], m)
+
+open ChainDescent.Stall ChainDescent.Force in
+/-- Guarded **force**: no supply, so its narrowing is equivariant by construction. -/
+def gForce {m : Nat} (a : AdjMatrix m) : Option (List Nat) :=
+  (canonForm? encodeFreeFast (guard (forceBy lookaheadKey)) a).map flatten
+
+-- **It ANSWERS on the rigid case** (the key separates every cell) …
+#guard (gForce F12).isSome
+-- … and **FLAGS on the symmetric case** — correctly: force provably cannot fire on an orbit cell, so `C₇` is
+-- exactly where the force-only route has nothing to say. It stops *cheaply* rather than branching.
+#guard ¬ (gForce C7).isSome
+
+-- **★ ①b/①c SURVIVE THE FLAG** (`Stall.guarded_force_canonizer`): the guarded force narrowing is equivariant, so
+-- both the answer and the flag are iso-invariant.
+#guard gForce F12 = gForce (relabelAdj (Equiv.swap 0 7) F12)
+#guard gForce F12 = gForce (relabelAdj (Equiv.swap 3 11) F12)
+#guard gForce C7 = gForce (relabelAdj (Equiv.swap 1 4) C7)
+
+open ChainDescent.Stall ChainDescent.Force ChainDescent.Composite in
+/-- Guarded **mixed**, with a supply that really does generate `Aut(Cₙ)`. -/
+def gMix {m : Nat} [NeZero m] (a : AdjMatrix m) : Option (List Nat) :=
+  (canonForm? encodeFreeFast (guard (forceThenConsume lookaheadKey (dihSupply m))) a).map flatten
+
+-- **★★ THE MIXED ROUTE ANSWERS WHERE FORCE ALONE FLAGS.** Consume closes the symmetric cells force cannot touch.
+#guard (gMix C5).isSome
+#guard (gMix C6).isSome
+#guard (gMix C7).isSome
+#guard gMix C5 ≠ gMix P5   -- still distinguishing
+
+/-! ### ⚠ THE FLAG'S PRICE, WITNESSED: a NON-EQUIVARIANT supply breaks `①c`
+
+`consume`'s headline is that the supply is **untrusted** — `consume_canonizer` holds for *every* supply, because a
+covering resolver is *value*-invisible. **A flag is not value-invisible.** `Stall.stalled` reads
+`(narrow R adj χ).length`, which for the mixed resolver depends on how many orbits the supply's generators actually
+*prove*. `rotSupply`/`dihSupply` hand back a **fixed** generator list, ignoring `adj` — but `Aut(σ·C₇) = σ·D₇·σ⁻¹`,
+so those same generators **fail to verify** on the relabelled graph. Hence `C₇` answers and `σ·C₇` stalls.
+
+The `#guard` below **asserts that failure**, on purpose: it is the **non-vacuity witness for
+`Stall.StallEquivariant`**, proving the hypothesis cannot be dropped. Soundness still needs *nothing* from the
+supply; the **flag** needs it to be equivariant. That is a genuinely new obligation, and this is its counterexample. -/
+
+open ChainDescent.Stall ChainDescent.Force ChainDescent.Composite in
+#guard (canonForm? encodeFreeFast (guard (forceThenConsume lookaheadKey (dihSupply 7))) C7).isSome
+     ≠ (canonForm? encodeFreeFast (guard (forceThenConsume lookaheadKey (dihSupply 7)))
+          (relabelAdj (Equiv.swap 1 4) C7)).isSome
+
+-- Cost: the guarded descent is a single path, so it is cheap on EVERY input — including the ones it flags.
+open ChainDescent.Stall ChainDescent.Force ChainDescent.Composite in
+#eval (descentCost encodeFreeFast (guard (forceBy lookaheadKey)) F12,      -- answers
+       descentCost encodeFreeFast (guard (forceBy lookaheadKey)) C7,       -- flags, and flags CHEAPLY
+       descentCost encodeFreeFast (guard (forceThenConsume lookaheadKey (dihSupply 7))) C7,
+       descentCost encodeFreeFast deferAll C7)                             -- exhaustive, for scale
 
 end ChainDescent.Refine
