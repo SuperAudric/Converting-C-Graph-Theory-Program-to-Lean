@@ -173,8 +173,13 @@
 > does **NOT** transfer; `descend`'s fuel-exhaustion `none` is still a **placeholder**), then **③**. Both resolver
 > instances now exist to cost against.
 
-**The Lean canonizer today is a SINGLE DETERMINISTIC PATH — it cannot represent a mixed residue.** Verified
-from source (2026-07-10):
+> **⊘ HISTORICAL (2026-07-10) — this is the state the track was created to FIX, and it has been fixed.** The Lean
+> canonizer is now `Descend.descend`: a **branching**, resolver-parameterized descent with **both** resolver instances
+> built (`Consume.lean`, `Force.lean`). Read the block below only as the motivation for the track. The `canonForm?`
+> criticised here is `Spine.canonForm?` (the old single-path object), **not** `Descend.canonForm?`.
+
+**The Lean canonizer in 2026-07-10 was a SINGLE DETERMINISTIC PATH — it could not represent a mixed residue.** Verified
+from source at the time:
 
 - `canonForm?` runs `spineCappedCanonizer`: `defaultSpineChain` individualizes `sel χ` via `IndivStep.default`
   and the descent step is only `k ↦ k+1` to a discrete leaf (`Spine.lean:439-446`, `CostModel.lean:477-479`,
@@ -465,18 +470,27 @@ narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov
   fold over alternation depth is subsumed by the induction. `coversOrbits_append` (`Cascade.lean:1122`) remains the
   harvest-side substrate for the consume instance's covering witness.)*
 
-**Stage 3 — the resolver INSTANCES (★, the two witnesses) — one per route (§1.3).**
-- **consume** — `matchOracle` / `CascadeOracleSpec` (`CascadeOracle.lean:148,1095`) narrows to one orbit rep;
-  takes the **`Covering`** route, witnessed by a verified path-fixing automorphism (the C#'s
-  `CoveredByPathFixingAut`); soundness of deferral by `real_stays_real` (`CascadeOracle.lean:74`). Substrate:
-  `Confinement.SelectedCellIsOrbit` (`Confinement.lean:41`), `coversOrbits_of_realizers`. **The fuel-graded
-  `NarrowTransport` is what makes this instance provable at all** — its covering witness is an automorphism `α`, so
-  its proof is `descend_transport` at `σ = α`, one fuel level down.
-- **force** — **Algorithm R** (the rigid solver); takes the **`NarrowEquivariant`** route: the narrowing is a
-  structural function of `(adj, χ)` (the linear/ring solve), so it transports — *no* covering witness, *no* global
-  lex-min, **no knowledge of the answer**. It yields a **different but equally valid** canonical form, which is
-  legitimate for exactly the reason deferral always was. This is the separate IR track (§11.12; Lean **not started**;
-  the C# `Option2Solver.cs` is **complete for handoff** and is its runtime reference).
+**Stage 3 — the resolver INSTANCES (★, the two witnesses) — one per route (§1.3). ✅ BOTH DONE (2026-07-14).**
+- **consume — ✅ `ChainDescent/Consume.lean`** (in `build.sh`, axiom-clean). Keeps one representative per orbit of the
+  branch cell; the **`Covering`** route. **★ The oracle is UNTRUSTED:** parameterized by an arbitrary `Supply` with
+  **no proof obligation at all**; the resolver filters it through the *decidable* `IsColAut` check ⟹
+  **`coveringAt_consume` holds for EVERY supply**, and `consume_canonizer` gives ①a/①b/①c + totality with **no
+  hypothesis on the oracle**. **The fuel-graded `CoveringAt` is what makes this instance provable at all** — its
+  covering witness is an automorphism `α`, so its proof *is* `descend_transport` at `σ = α`, one fuel level down.
+  Measured pruning (rotation supply on cycles): `descentCost` C₅ 2016→804, C₆ 4123→1372, C₇ 7568→2160, with `#guard`s
+  that the oracle form **equals the exhaustive form exactly** (covering ⟹ value-invisible).
+  *(Upgrade path: swap the demo supply for `matchOracle` / `CascadeOracleSpec` — `CascadeOracle.lean:148,1095`. That is
+  a pure **firing/②** improvement and needs **no re-proof of ①**, because the supply is untrusted.)*
+- **force — ✅ `ChainDescent/Force.lean`** (in `build.sh`, axiom-clean). The **`NarrowEquivariant`** route, built as a
+  **combinator**: `forceBy key` keeps the branches of **least key**. **★ Its entire ① obligation is `KeyEquivariant`**
+  (the key commutes with relabelling ⟹ never tie-breaks by vertex index) ⟹ **the rigid solver drops in as a stronger
+  `key` and owes nothing else.** *No* covering witness, *no* global lex-min, **no knowledge of the answer**; it yields
+  a **different but equally valid** canonical form. Concrete instance `lookaheadKey` (individualize → refine → rank by
+  the **leaf reached**): on rigid `F12` root fan-out **12 → 1** (`descentCost` 22477 → 5186); on vertex-transitive `C₇`
+  it **provably cannot fire** (7 → 7) — `forceBy_no_narrowing_on_orbit` **observed**.
+  ⚠ *False start worth not repeating:* the cell-size **histogram** after individualization separates **nothing** on a
+  rigid graph (individualizing *any* vertex discretizes ⟹ all-ones; it narrowed 12 → 12). The **leaf matrix** is what
+  separates — usable precisely because `leafMatrix_transport` gives *literal* equality.
 - ⚠ **The obligations do not vanish — they RELOCATE from ① to ②.** Under the resolver contract, a solver that
   extracts too little or solves too weakly is *sound* (it just defers more). But **relocation is not elimination**:
   deferring more ⟹ more branching ⟹ budget exhaustion ⟹ flag ⟹ the input lands in `UnhandledResidue`. **A solver
@@ -486,7 +500,10 @@ narrowing `B → B'`, plus `Prop` fields **equivariance** and **covering** (`cov
   a re-basing of §11.12, not a deletion of it.
 - Stages 0–2 proceed with the resolver **abstract**, so this does not gate them.
 
-**Stage 3 — plug in the rigid solver as the `phase2` witness (★ = the IR track, separate).** `phase2` must
+**⊘ SUPERSEDED (kept for the C# status only) — "Stage 3 = plug in the rigid solver as the `phase2` witness".** The
+`Phase2.Solver` framing is retired: the rigid solver now enters as a **`Force.Key`** (sole obligation
+`KeyEquivariant`), not as a `phase2` function, and Stage 3 is **done** (above). Read the block below **only** for the
+C#-side status. `phase2` must
 satisfy `Phase2.Sound`/`IsoInvariant` (`Phase2Handoff.lean:78,86`) — witnessed by **Algorithm R**
 (`chain-descent-ir-blindspot-solver.md` §11.12). This is a *dependency*, not part of this framework: the
 composition is stated against the `Phase2.Solver` **contract**, so Stages 0–2 proceed with `phase2` abstract
@@ -517,39 +534,44 @@ PICK-UP-HERE banner "OPEN / NEXT". So **Stage 3's C# dependency is satisfied**; 
 ## 4. Dependencies, sequencing, first step
 
 ```
-Stage 0a (Option-lift) ─→ Stage 0b (the object: computable CostM descend) ─┬─→ Stage 2 (Sound ∧ IsoInvariant) ─→ ①a/①b/①c
-                                                                            │      (THE hard theorem)
-                          Stage 1 (Resolver contract: narrowing + covering) ┘
-                                                                            └─→ Stage 4 (cost projection) ─→ ② / ③
+✅ Stage 0a (Option-lift) → ✅ 0b (the object) → ✅ Stage 1 (contract) → ✅ Stage 2 (Sound ∧ IsoInvariant) → ①a/①b/①c
+✅ Refine.lean   (the encode-free refiner)          ⟹ Refine.exhaustive_canonizer  (unconditional, and it ANSWERS)
+✅ Consume.lean  (oracle resolver, Covering route)  ⟹ Consume.consume_canonizer    (for EVERY oracle supply)
+✅ Force.lean    (rigid route, NarrowEquivariant)   ⟹ Force.force_canonizer        (modulo only KeyEquivariant)
+✅ PerformanceTest.lean — build-gating regression (correctness AND both resolvers' firing)
 
-Stage 3 instances (independent): consume (matchOracle + CoveredByPathFixingAut) · force (rigid seal P1–P4, IR §11.12)
+▶ Stage 4 (the `cost` projection of the SAME definition) ─→ ② / ③        ← THE ONLY THING LEFT
 ```
 
-- **✅ DONE:** Stage 0a (spec + `Option`-lift), Stage 0b (the object), Stage 1 (the **hardened**
-  `Refiner`/`Resolver`/`NarrowTransport` contract, §1.3), **Stage 2 (the whole of ①)**, plus **totality**
-  (`canonForm?_ne_none` ⟹ the capstone is non-vacuous) and the **non-collapse** theorem
-  (`narrow_eq_branches_of_orbit`). Critical path 0a → 0b → 2 is complete.
-- **▶ NEXT / critical path:** **instantiate `refine`** with the encode-free round (+ its `RefineEquivariant` **and**
-  `RefineSplits` — the latter is what discharges totality for the real refiner), then **Stage 4** (② cost + the real
-  mutual-stall flag). These two are what a fresh reader should pick up.
-- **Start-anytime, independent:** the rigid solver's **P1** (extraction soundness, standalone,
-  `chain-descent-ir-blindspot-solver.md` §11.12).
-- **Not gating anything:** Stage 3's instances — ① is proved against the resolver **contract**, so correctness waits on
-  neither the oracle's nor the rigid solver's Lean witness, and **a resolver can only ever shrink the flagged residue,
-  never break ①**. This is what makes a future unhandled-residue solver plug in with **no re-proof**.
-- **Locked (§1.4 item 3):** `refine` is a **parameter**, so the `Encodable.encode` staller is not baked in. Instantiate
-  it with the encode-free / renumbering round; that is the only choice whose later change would mean redefining the
-  object everything else is proved about.
-- **Stage 0a DONE (2026-07-11), NEXT STEP = Stage 0b.** 0a (the correctness framework: `IsCanonicalForm`,
-  `complete_of_isCanonicalForm`, `lexMin`/`isCanonicalForm_lexMin`) is landed in `ChainDescent/CanonicalForm.lean`
-  (namespace `ChainDescent.CanonSpec`), in `build.sh`, axiom-clean — it *simplifies* ①b/①c (see §5) and gives the
-  true spec surface for `Publication.canonForm?` (an `opaque` stub today). **0b** = build the branching
-  consume/branch descent so its reached-leaf matrix set instantiates the `cand G` of `isCanonicalForm_lexMin`,
-  then discharge its two hypotheses: (i) each reached leaf is a relabelling [easy, via `labelledAdj (rankPerm χ)`,
-  cf. `SpineChain.canonAdj`], and (ii) `cand (relabelAdj σ G) = cand G` [the X3-hard iso-invariance — holds
-  because a leaf's matrix is a function of the σ-invariant abstract refinement colouring, not the input labelling].
+**① IS DONE AND CARRIES NOTHING.** Every capstone above is axiom-clean, `sorry`-free, in `build.sh`, full build green.
 
-## 5. Strategic note — the min-over-leaves spec makes ①b/①c nearly free
+- **▶ NEXT / the whole critical path: Stage 4 — ② (cost) + the real mutual-stall flag, then ③.** Start at
+  [`chain-descent-cost-model.md`](./chain-descent-cost-model.md) STATUS (rewritten for exactly this) and
+  [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) TOP. The two jobs:
+  1. **Re-base the node bound onto the BRANCHING object.** The banked `n⁴` (`CanonForm.descentCost_le`) is against
+     `spineCappedCanonizer` — a **single path** (`nbud = n`, assume-VT, `leaves = 1`) — and does **NOT** transfer.
+     (`CostModel.lean` also notes that object **can never flag**, so ③ against it would be *vacuous*.)
+  2. **Replace the flag.** `descend`'s `fuel`-exhaustion `none` is a **PLACEHOLDER**; `canonForm?_ne_none` proves it
+     never actually fires, so fuel is a pure **depth** bound and `none` is free for its real **mutual-stall** meaning.
+  - No bridge lemma is needed: `descentCost` is the **`cost` projection of the same definition** ①a/①b/①c ride on, and
+    both `Refiner` and `Resolver` are `CostM`-valued, so refinement *and* resolver work are already charged.
+  - **Two constraints not to "optimize" away:** fuel is **per-layer, never threaded** (⟹ "resolver `R` is poly-or-flag"
+    is a **local** statement about `R`); and **the flag must be a local, structural predicate of the node, not of the
+    traversal** — if "flagged" depended on traversal order, **①c would be false**.
+- **Then:** the **Publication opaque-swap** (`canonForm? n G := Descend.canonForm? …`). ⚠ Note
+  `unhandledResidue_nonvacuous` is **unprovable in principle** while the three residue atoms stay `opaque … : Prop`
+  with no definition — they must be *defined* first.
+- **Firing upgrades (pure ②, no re-proof of ①):** swap `consume`'s demo supply for `matchOracle`; swap `force`'s
+  `lookaheadKey` for the rigid solver's solve-derived key. **Neither can break ①** — the supply is untrusted and the
+  key's only obligation is `KeyEquivariant`. But **relocation is not elimination**: a resolver that never fires makes
+  a canonizer that flags everything.
+
+## 5. ⊘ SUPERSEDED — Strategic note on the min-over-leaves (`canonMin`) spec
+
+> **⊘ RETIRED (2026-07-13). Do not act on this section.** `canonMin` (the min over ALL IR-tree leaves) is **not** the
+> spec — the descent **defines** the canonical form (§1.1). Worse, anchoring on it re-introduces the *which-branch-wins*
+> knowledge the rigid solver cannot have; that mistake later came back in disguise as the single `Covering` contract and
+> had to be refuted (`canonForm?_eq_deferAll_of_covering`, §1.3). Kept only as provenance for why the anchor was dropped.
 
 The single-path `canonForm?` put the iso-invariance difficulty in the wrong place: it is *false* as stated
 (the "X3" cut — `DirAssignment` never re-orders index-coloured committed vertices, so the lex-min cannot wash

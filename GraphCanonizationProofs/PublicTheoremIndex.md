@@ -2722,12 +2722,12 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 | `Showcase.payne_thas` | 164-172 | — | axiom |
 | `Showcase.witt_flag_transitivity` | 173 | — | axiom |
 | `Showcase.canon_sound` | 181-192 | — | — |
-| `Showcase.canon_complete` | 194-210 | — | — |
-| `Showcase.flag_iso_invariant` | 212-219 | — | — |
-| `Showcase.canon_poly_or_flag` | 221-237 | — | — |
-| `Showcase.residue_if_flag` | 239-248 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 250-256 | — | — |
-| `Showcase.canonizer` | 263-273 | — | — |
+| `Showcase.canon_complete` | 194-218 | — | — |
+| `Showcase.flag_iso_invariant` | 220-227 | — | — |
+| `Showcase.canon_poly_or_flag` | 229-245 | — | — |
+| `Showcase.residue_if_flag` | 247-256 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 258-264 | — | — |
+| `Showcase.canonizer` | 271-281 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).

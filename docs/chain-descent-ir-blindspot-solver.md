@@ -239,7 +239,20 @@
 > - **B1d (iii) solve-speed perf (DEFERRED by the user)** — a constant-factor speedup only (the algorithm is already poly);
 >   torsion-safe `Z/|A|` reduction or component-wise mod `p^k`. A `BigInteger→long` fast-track was tried and *slowed* it
 >   (doubled work) — parked.
-> - **Lean P1–P4** (the rigid-seal proofs) — not started; independent of the above.
+> - **Lean: the rigid solver's ① witness is DONE — and it is NOT "P1–P4" (2026-07-14).** The force route landed as
+>   `ChainDescent/Force.lean` (in `build.sh`, axiom-clean): **`forceBy key`** keeps the branches of least key, and its
+>   **entire ① obligation is `KeyEquivariant`** (the key commutes with relabelling ⟹ never tie-breaks by vertex index).
+>   `force_canonizer` then gives ①a/①b/①c + totality **unconditionally**. **So the rigid solver enters Lean as a
+>   solve-derived `Key`, and owes nothing but `KeyEquivariant`.**
+>   **P1/P3 are NOT ① obligations** — a weak key narrows less, which is *sound*. ⚠ **But relocation is not
+>   elimination:** narrowing less ⟹ more branching ⟹ budget exhaustion ⟹ flag ⟹ the input lands in
+>   `UnhandledResidue`. **A key that never separates is a canonizer that flags everything: correct, and worthless.**
+>   P1/P3 therefore keep their **full** content as **②/firing** obligations — they are exactly *how much the key sees*,
+>   which is where the "polynomial-**or-flag**" headline lives. **P2 leaves the soundness path entirely** (it survives
+>   as a completeness statement). Read §11.12's re-basing banner before starting.
+>   *Proof of concept, measured:* the placeholder key `Force.lookaheadKey` (individualize → refine → rank by the leaf
+>   reached) collapses the root fan-out **12 → 1** on a rigid 3-regular graph; on a vertex-transitive one it
+>   **provably cannot fire** (`forceBy_no_narrowing_on_orbit`). A stronger (solve-derived) key is exactly the upgrade.
 >
 > **Validation lives in:** the 5 ring probe files (`RingInferenceProbe`, `RingMultipedeProbe`, `RingWlExtractionProbe`,
 > `RingSolveProbe`, `RingSolveProbe` — the RM-1..6 chain, 30 tests, `dotnet test --filter "FullyQualifiedName~Ring"`)

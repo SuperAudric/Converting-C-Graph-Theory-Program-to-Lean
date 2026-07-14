@@ -140,8 +140,14 @@ the descent spine `spine_branch_independent`); the **cross-branch harvest** mach
 **quasipolynomial** (`…affinePolar`) with sub-exp floor `…viaSpielman` — a genuine result, **parked off the headline
 path**; the mixed-composition **Stage 0a** framework (`ChainDescent.CanonicalForm`); ①a `canon_sound` + the ② cost side
 (`descentCost_le`, `≤ n⁴`) against the shared capped object; the `Phase2.Solver`/`Sound`/`IsoInvariant` **contract**
-skeleton (`Phase2Handoff.lean`). The **C# rigid solver is complete for handoff** (`Option2Solver.cs`, recover→solve→emit→verify,
-ring-general; every B-step landed) — its Lean witness (P1–P4) is the remaining rigid work.
+skeleton (`Phase2Handoff.lean`). Plus the **whole mixed-composition stack**: `Descend` (the object) → `Refine` (the
+encode-free refiner) → `Consume` + `Force` (both resolver instances) → `PerformanceTest` (the regression gate). The **C#
+rigid solver is complete for handoff** (`Option2Solver.cs`, recover→solve→emit→verify, ring-general; every B-step landed).
+
+> **▶ The rigid solver's Lean witness is NOT "P1–P4" any more.** Under the resolver contract, the force route's **only**
+> ① obligation is **`KeyEquivariant`** (`Force.lean`): supply a solve-derived vertex key and prove it commutes with
+> relabelling. **P1/P3 keep their full content but move from ① to ②** (they determine *how much the key separates* =
+> the firing rate). See IR §11.12's re-basing banner before starting that build.
 
 **★★★ THE CORRECTNESS TRIO IS DISCHARGED (2026-07-13) — `ChainDescent/Descend.lean`.** The Lean canonizer is no longer a
 single deterministic path: `descend` is **the object** — a *computable*, resolver-parameterized **branching** descent in
@@ -174,19 +180,44 @@ resolver contract) before touching it.
 > compressed. `sigKey` is already a sorted `List Nat` and `lexLeList` is already a proved total order, so the round
 > ranks the **keys themselves**.
 
+> **★★★ BOTH RESOLVER INSTANCES ARE LANDED — STAGE 3 IS COMPLETE (2026-07-14, axiom-clean, in `build.sh`).**
+> - **consume** (`ChainDescent/Consume.lean`, the **`Covering`** route) — keeps one representative per orbit of the
+>   branch cell. **★ THE ORACLE IS UNTRUSTED:** parameterized by an arbitrary **`Supply`** with **no proof obligation
+>   at all**; the resolver filters it through a *decidable* `IsColAut` check. So **`consume_canonizer` holds for EVERY
+>   supply** — a broken oracle costs branches, never correctness. This puts `matchOracle`'s **completeness** entirely
+>   on the **②/firing** side and **nothing** on ①. Made provable by **`CoveringAt`** (the *fuel-graded* covering: the
+>   covering witness *is* `descend_transport` at an automorphism, so the hypothesis must be able to consume the
+>   induction hypothesis).
+> - **force** (`ChainDescent/Force.lean`, the **`NarrowEquivariant`** route) — a **combinator**, not a hard-wired
+>   solver: **`forceBy key`** keeps the branches of least key. **★ Its entire ① obligation is `KeyEquivariant`** (the
+>   key never breaks ties by vertex index) ⟹ **the rigid solver drops in as a stronger `key` and owes nothing else.**
+>   P1/P3 are **not** ① obligations — a weak key narrows less, which is *sound* — but **relocation is not
+>   elimination**: they keep their full content as **②/firing** obligations, i.e. *how much the key sees*.
+> - **★★ COMPLEMENTARY FIRING DOMAINS, NOW MEASURED** (`forceBy_no_narrowing_on_orbit`): on the **rigid** 3-regular
+>   `F12` force collapses the root fan-out **12 → 1** (`descentCost` 22477 → 5186); on the **vertex-transitive** `C₇`
+>   it **provably cannot fire at all** (7 → 7) and merely pays for its key. Conversely `consume` fires exactly there
+>   (C₅/C₆/C₇ cost 2016/4123/7568 → 804/1372/2160). **Graphs where neither fires are the residue** — the architecture
+>   is no longer only proved, it is observed.
+
 **The live Lean frontier** (authoritative "what's left" = [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)):
-(1) **② — the cost + the flag** (the main gap): re-base the node bound onto the *branching* object (the old `n⁴` used the
-single-path `nbud = n` and does **not** transfer) and replace `descend`'s fuel placeholder with the real **mutual-stall**
-flag; (2) the **resolver instances** — consume (`matchOracle`, the **`Covering`** route) and force (the rigid solver, the
-**`NarrowEquivariant`** route; IR §11.12, re-based); (3) **③** (`stalled ⟹ D1 ∨ D2`). Note (2) cannot break ① — but
-**relocation is not elimination**: a solver that never fires defers ⟹ branches ⟹ exhausts the budget ⟹ flags, so the rigid
-seal's **P1/P3 keep their full content, moved from ① to ②** (the firing rate) — which is exactly where the
-"polynomial-**or-flag**" headline lives. **The executable RUNS** — exhaustive canonization of `C₃…C₇` in well under a
-second per graph, with `ChainDescent/PerformanceTest.lean` in `build.sh` as a **regression gate** (`#guard`s
-iso-invariance under relabelling *and* that non-isomorphic graphs get different forms). The earlier stall was a Lean
-**eta-expansion sharing trap** — any `… → Colouring n` definition is compiled at its type's full arity, so it re-runs its
-body on every colour lookup; the cure is to return a **non-function-typed** value (`ColData`), and **no `descend`
-signature change was needed**.
+**① IS DONE.** What remains is **② and ③**:
+1. **② — the cost + the flag (THE gap).** Re-base the node bound onto the *branching* object: the old `n⁴`
+   (`CanonForm.descentCost_le`) used the single-path `nbud = n` (assume-VT, `leaves = 1`) and does **not** transfer.
+   Replace `descend`'s **fuel-exhaustion `none` — still a PLACEHOLDER** — with the real **mutual-stall** flag. Both
+   resolver instances now exist to cost against. **Fuel is per-layer, never threaded** (each resolver is poly-or-flag
+   *locally*; do not "optimize" this into a global budget).
+2. **③** — `stalled ⟹ residueHiddenJohnson ∨ residueRigidObstruction` (D1 ∨ D2), plus non-vacuity.
+3. **The Publication swap** — `Publication.canonForm?` is still an `opaque` stub; substitute the real object. ⚠ Note
+   `unhandledResidue_nonvacuous` is currently **unprovable in principle**: the three residue atoms are `opaque … :
+   Prop` with no definition, so they can be neither inhabited nor refuted until they are defined.
+
+**The executable RUNS** — exhaustive canonization of `C₃…C₇` in well under a second per graph, with
+`ChainDescent/PerformanceTest.lean` in `build.sh` as a **regression gate** (it `#guard`s iso-invariance,
+distinguishing power, and both resolvers' firing behaviour ⟹ a regression fails the build). **⚠ THE STANDING LEAN
+TRAP:** any definition of type `… → Colouring n` is compiled at its *type's* full arity, so it re-runs its body on
+**every colour lookup** (`Colouring n = Fin n → Nat`); each descent level closes over its parent's, so the cost
+multiplies per level. `@[noinline]` does **not** fix it. **Cure: return a non-function-typed value** (`ColData`).
+This bit twice (~10⁴× each). **Never define anything of type `… → Colouring n`.**
 
 **The one genuine wall.** `hSmallAutThin` — "small-Aut primitive residue ⟹ bounded WL-recovery" — is open at the
 *polynomial* threshold (there it *is* GI ∈ P) and is quarantined behind the mutual-stall flag: by design the canonizer is
@@ -331,10 +362,13 @@ Read in this sequence; each doc has a STATUS block (its current state) at the to
    fixpoint = two moves, one wall), the six `Publication.lean` obligations, and the sequencing (§5).
 3. [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) — the **authoritative living tracker** of
    what's left; read its TOP section.
-4. [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) — the **priority Lean track**: the
-   branching interleaved descent (Stage 0a landed; Stage 0b next) and the sound∧iso-invariant spec.
+4. [`chain-descent-mixed-composition.md`](./chain-descent-mixed-composition.md) — the **priority Lean track**: the object,
+   the **two-route resolver contract** (§1.3 — read before touching any resolver), and the stage-by-stage state.
+   **Stages 0–3 are DONE; ② and ③ are what is left.**
 5. [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §11 — the **rigid solver**: the
-   §11.11 interleaved engine, the §11.12 rigid-seal P1–P4 roadmap, §11.13 ring design, §11.14 no-Cameron lead.
+   §11.11 interleaved engine, the §11.12 rigid-seal roadmap (**read its RE-BASED banner first** — the Lean witness is
+   no longer "P1–P4"; the force route's only ① obligation is `Force.KeyEquivariant`, and P1/P3 moved to ②), §11.13 ring
+   design, §11.14 no-Cameron lead.
 6. [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) —
    the theorem index; densest file, the ground truth for *what is proved*. Read in
    full. **It is well over 1000 lines — too large for one `Read` call (and even
@@ -417,6 +451,19 @@ cases). C# already canonizes CFI(K₄–K₇).
 **Lean — the proofs** (`GraphCanonizationProofs/`). The active library is the
 **`ChainDescent/` module split**; the top-level `ChainDescent.lean` holds the
 direction-invariance and spine invariants that everything imports.
+
+**★ THE HEADLINE STACK (read these first — this is the canonizer):**
+
+| Module | Proves |
+|---|---|
+| `ChainDescent/CanonicalForm.lean` | the **spec**: `IsCanonicalFormOpt = SoundOpt ∧ IsoInvariantOpt`, and `complete_of_isCanonicalFormOpt` — **completeness and flag-invariance are FREE** |
+| `ChainDescent/Descend.lean` | **THE OBJECT** — `descend`, the computable resolver-parameterized **branching** descent in `CostM`. Capstone `isCanonicalFormOpt_canonForm?` ⟹ **①a/①b/①c**. Also the **resolver contract** (`NarrowTransport`, `Covering`/`CoveringAt`, `NarrowEquivariant`), the covering refutation (`canonForm?_eq_deferAll_of_covering`), the non-collapse theorem (`narrow_eq_branches_of_orbit`), and totality (`canonForm?_ne_none`) |
+| `ChainDescent/Refine.lean` | the **encode-free refiner** (`encodeFree`/`encodeFreeFast`) — discharges both refiner obligations ⟹ `exhaustive_canonizer` (unconditional canonical form **that answers**) |
+| `ChainDescent/Consume.lean` | the **ORACLE resolver** (`Covering` route). Untrusted `Supply` + a decidable `IsColAut` check ⟹ `consume_canonizer` for **every** supply |
+| `ChainDescent/Force.lean` | the **RIGID/FORCE resolver route** (`NarrowEquivariant`), as the combinator `forceBy key`. Sole ① obligation: **`KeyEquivariant`**. Concrete firing key `lookaheadKey` |
+| `ChainDescent/PerformanceTest.lean` | the **regression gate** — `#guard`s correctness *and* both resolvers' firing; a regression fails the build |
+
+**Supporting / historical:**
 
 | Module | Proves |
 |---|---|

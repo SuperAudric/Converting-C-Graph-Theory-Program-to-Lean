@@ -199,23 +199,31 @@ theorem canon_complete (n : ℕ) (G H : AdjMatrix n) (cG cH : Fin n → Fin n �
   -- ★ DISCHARGED (2026-07-13): `ChainDescent.Descend.canonForm?_complete` — EXACTLY this shape, for the real
   -- branching object. Completeness is FREE: `CanonSpec.complete_of_isCanonicalFormOpt` (Stage 0a) says
   -- sound ∧ iso-invariant ⟹ complete, and `Descend.isCanonicalFormOpt_canonForm?` supplies both.
-  -- MODULO exactly two carried hypotheses (the ONLY correctness debt left in ①):
-  --   · `Descend.RefineEquivariant refine` — the refinement round commutes with relabelling (the encode-free
-  --     round satisfies it; carried because `refine` is a parameter, so the Encodable.encode staller is not
-  --     baked in);
-  --   · `Descend.Covering refine R` — the RESOLVER CONTRACT: narrowing the branch set does not change the
-  --     aggregate, because every discarded branch's output is already reachable through a kept one. NB
-  --     resolver *equivariance* is deliberately NOT required (that is what lets `consume` pick an arbitrary
-  --     orbit representative). `covering_deferAll` is proved by `rfl`.
+  --
+  -- ★★ AND ITS TWO HYPOTHESES ARE NOW BOTH DISCHARGED (2026-07-14) — ① CARRIES NOTHING.
+  --   · the refiner: `Refine.refineEquivariant_encodeFree` (the encode-free structural round);
+  --   · the resolver contract `Descend.NarrowTransport`, via EITHER of its two routes —
+  --       `Consume.narrowTransport_consume` (the ORACLE, `Covering` route; holds for EVERY oracle supply,
+  --        because the resolver VERIFIES each candidate automorphism itself), or
+  --       `Force.narrowEquivariant_forceBy` (the RIGID/FORCE route; sole obligation `KeyEquivariant`).
+  -- Ready-made capstones: `Refine.exhaustive_canonizer`, `Consume.consume_canonizer`,
+  -- `Force.force_canonizer` / `Force.lookahead_canonizer` — each gives ①a/①b/①c AND totality (never flags),
+  -- with NO carried hypothesis at all.
+  --
+  -- ⛔ DO NOT restate the resolver contract as the single unconditional `Covering`: a covering resolver is
+  -- provably VALUE-INVISIBLE (`Descend.canonForm?_eq_deferAll_of_covering`), which pins the object to the
+  -- exhaustive branch-min (the retired `canonMin` anchor) and would force the rigid solver to KNOW THE ANSWER.
+  --
+  -- Remaining = the opaque swap (below), done once together with ②/③.
   sorry
 
 /-- **①c The flag is iso-invariant (UNCONDITIONAL).** Flagging is a property of the isomorphism class, not
 of the labelling — so "flagged" is a well-defined statement about a graph up to iso. -/
 theorem flag_iso_invariant (n : ℕ) (G H : AdjMatrix n) (h : Iso G H) :
     (canonForm? n G = none) ↔ (canonForm? n H = none) := by
-  -- ★ DISCHARGED (2026-07-13): `ChainDescent.Descend.canonForm?_flag_iso_invariant`, same two carried
-  -- hypotheses as ①b. Free, because `IsoInvariantOpt` is a single equation on `Option`s — "relabelling changes
-  -- nothing", the answer AND whether it flagged. There is no separate flag obligation.
+  -- ★ DISCHARGED (2026-07-13): `ChainDescent.Descend.canonForm?_flag_iso_invariant`; its hypotheses are now
+  -- BOTH discharged (see ①b above) — ① carries nothing. Free, because `IsoInvariantOpt` is a single equation on
+  -- `Option`s — "relabelling changes nothing", the answer AND whether it flagged. No separate flag obligation.
   sorry
 
 /-- **② Poly-or-flag (the budget guarantee — the ONLY cost claim).** The descent either runs within the

@@ -63,24 +63,35 @@ The single durable statement, superseding the earlier sequential/RRU/confinement
   obligation. These transfer to the interleaved object; the concrete `n⁴`/quasipoly *degree* must be re-established
   against it (the `nbud = n` single-path justification does not carry — see cost-model STATUS).
 
-**★★★ THE CORRECTNESS TRIO IS DISCHARGED (2026-07-13).** `ChainDescent/Descend.lean` (in `build.sh`, axiom-clean, no
-`sorry`) defines **the object** — `descend`, a *computable*, resolver-parameterized **branching** descent written in
-`CostM` — and proves **`isCanonicalFormOpt_canonForm?`**: it is **sound ∧ iso-invariant**, hence (Stage 0a) a complete
-isomorphism invariant with an iso-invariant flag. So **①a, ①b, ①c all hold for the real object**, modulo exactly **two
-carried hypotheses**: `RefineEquivariant` (the refinement parameter) and `Covering` (the resolver contract — *branch
-covering*; resolver **equivariance is NOT needed**). The **executable and the cost are `value`/`cost` projections of that
-same definition** — there is no second object and no bridge.
+**★★★ ① IS DONE — THE WHOLE CORRECTNESS SIDE IS DISCHARGED AND HYPOTHESIS-FREE (2026-07-14).** The stack, all in
+`build.sh`, all axiom-clean, no `sorry`:
 
-**The live Lean frontier (what a fresh reader should pick up):**
-1. **② / the cost + flag (Stage 4)** — the main remaining gap. Re-base the node bound onto the branching object (the
-   old `n⁴` used `nbud = n` = the single-path assume-VT justification and does **not** transfer); replace `descend`'s
-   `fuel`-exhaustion placeholder with the real **mutual-stall** flag. Fuel is **per-layer, never threaded**, so each
-   resolver is poly-or-flag *locally*.
-2. **Instantiate `refine`** with the encode-free/renumbering round and prove its `RefineEquivariant` (a bounded build;
-   it also makes the executable fast — the `Encodable.encode` staller is *not* baked in, by design).
-3. **The resolver instances (Stage 3)** — consume (`matchOracle` + a `CoveredByPathFixingAut` covering witness) and
-   force (**the rigid seal P1–P4**, IR §11.12). Neither can break ①; they only shrink the flagged residue.
-4. **③** — `stalled ⟹ D1 ∨ D2`.
+| module | what it gives |
+|---|---|
+| `ChainDescent/Descend.lean` | **THE OBJECT.** `descend` — a *computable*, resolver-parameterized **branching** descent in `CostM`. **`isCanonicalFormOpt_canonForm?`**: sound ∧ iso-invariant ⟹ (Stage 0a) a complete isomorphism invariant with an iso-invariant flag ⟹ **①a/①b/①c**. Executable and cost are the `value`/`cost` **projections of that same definition** — no second object, no bridge. |
+| `ChainDescent/Refine.lean` | The **encode-free** refiner. Discharges *both* refiner obligations ⟹ `exhaustive_canonizer`: the exhaustive descent is **unconditionally** a canonical form **that answers**. |
+| `ChainDescent/Consume.lean` | The **oracle** resolver (`Covering` route). The oracle is **untrusted** — the resolver *verifies* — so `consume_canonizer` holds for **every** supply. |
+| `ChainDescent/Force.lean` | The **rigid/force** resolver route (`NarrowEquivariant`), as a **combinator** `forceBy key`. Its **entire ① obligation is `KeyEquivariant`**. |
+| `ChainDescent/PerformanceTest.lean` | The **regression gate** — a correctness or firing regression *fails the build*. |
+
+**The resolver contract is `NarrowTransport`** (*the narrowed-branch aggregate transports under σ*), fed by **two**
+routes with **complementary firing domains**: **`Covering`** (consume — non-equivariant choice, redundant discards;
+must be **fuel-graded**, `CoveringAt`) and **`NarrowEquivariant`** (force — structural choice, genuinely-different
+discards, a *different but equally valid* canonical form). ⛔ **Do not re-unify them under `Covering`** — a covering
+resolver is provably **value-invisible** (`canonForm?_eq_deferAll_of_covering`), which silently re-imports the retired
+`canonMin` anchor and would force the rigid solver to *know the answer*. `narrow_eq_branches_of_orbit` proves force
+cannot fire on an orbit cell and consume fires exactly there — **graphs where neither fires are the residue**, and that
+is why the design does not collapse into GI ∈ P.
+
+**The live Lean frontier (what a fresh reader should pick up) — ② and ③ only:**
+1. **② / the cost + flag — THE remaining gap.** Re-base the node bound onto the branching object (the old `n⁴` used
+   `nbud = n` = the single-path assume-VT justification and does **not** transfer); replace `descend`'s
+   **`fuel`-exhaustion `none`, which is still a PLACEHOLDER**, with the real **mutual-stall** flag. Fuel is
+   **per-layer, never threaded**, so each resolver is poly-or-flag *locally*. Both resolver instances now exist to
+   cost against.
+2. **③** — `stalled ⟹ D1 ∨ D2`, plus non-vacuity.
+3. **The Publication swap** — `canonForm?` is still `opaque`. ⚠ `unhandledResidue_nonvacuous` is **unprovable in
+   principle** while the three residue atoms remain `opaque … : Prop` with no definition.
 
 **No longer a separate track:** the *runnable* Lean canonizer — the executable **is** `descend`
 ([`chain-descent-executable-track.md`](./chain-descent-executable-track.md)); it `#eval`s today.

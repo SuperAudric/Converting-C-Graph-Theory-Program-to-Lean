@@ -17,6 +17,34 @@
 
 ## STATUS (read first)
 
+> # ★★★ THIS DOC IS THE NEXT TASK (2026-07-14). ① IS DONE; **② IS THE FRONTIER.**
+>
+> **Everything ② needs to be stated against now exists**, all in `build.sh`, all axiom-clean:
+> `ChainDescent/Descend.lean` (**the object** — `descend`, in `CostM`; `descentCost` is the **`cost` projection of the
+> same definition** ①a/①b/①c ride on, so ② needs **no bridge lemma**), `Refine.lean` (the encode-free refiner —
+> **charges its own cost**), `Consume.lean` + `Force.lean` (**both** resolver instances — they charge their own cost
+> too, since `Refiner` and `Resolver` are both `CostM`-valued).
+>
+> **The two concrete jobs:**
+> 1. **Re-base the node bound onto the BRANCHING object.** The banked `n⁴` (`CanonForm.descentCost_le`) is against
+>    `spineCappedCanonizer` — a **single path**, justified by `nbud = n` (assume-VT, `leaves = 1`). **It does NOT
+>    transfer.** (Also note `CostModel.lean`'s own comment: `spineCappedCanonizer` *can never flag*, so ③ against it
+>    would be **vacuous**.) The poly guarantee is the **verify-consume monovariant** + the fusion-severity look-ahead.
+> 2. **Replace the FLAG.** `descend`'s `fuel`-exhaustion `none` is a **PLACEHOLDER** — and `Descend.canonForm?_ne_none`
+>    proves it **never actually fires** for a genuine refiner, so fuel is a pure *depth* bound and `none` is free to
+>    acquire its real **mutual-stall** meaning.
+>
+> **Two constraints that must not be "optimized" away:**
+> - **Fuel is PER-LAYER, never threaded.** Every branch at a level gets the same fuel; accumulated cost is never fed
+>   back. This is what makes "resolver `R` is poly-or-flag" a **local** statement about `R`. A global budget would
+>   couple the resolvers' flag behaviour and destroy that locality.
+> - **The flag must be a LOCAL, STRUCTURAL predicate of the node — not of the traversal.** `aggregate` is
+>   permutation-invariant and the branch list is built in *index* order; if "flagged" depended on traversal order
+>   (e.g. which branch exhausted a shared budget first), **①c would be false**. Keep it a function of `(adj, χ)`.
+>
+> *(The D7 fork below is RESOLVED — see its banner. Its diagnosis was also wrong; the encode had to be dropped
+> entirely, not compressed.)*
+
 > **▶ CURRENT MODEL (2026-07-12) — the cost account is on the INTERLEAVED fixpoint; the threshold-gated assume-VT flag is
 > retired.** The big build-log below predates the model change and is retained as history; this banner is the current
 > state. Live Lean source is [`ChainDescent/CostModel.lean`](../GraphCanonizationProofs/ChainDescent/CostModel.lean)
