@@ -290,6 +290,47 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
   unconditional and the `n^d` sits honestly inside `c₂`); a **quality** problem.
 
 ### 6.2b ▶ P3 — the ORBIT-PRUNED FIXPOINT: how the `n^d` becomes a SUM
+
+> **✅ P3a + P3b LANDED — `ChainDescent/OrbitPrune.lean` (2026-07-14). The foundation is built; only the fixpoint
+> (P3c) remains, and it now carries ZERO `①` exposure.**
+>
+> **⚠ THE PLAN BELOW HAD A HOLE, AND THE FIX CHANGES THE SHAPE OF P3c.** A pruned enumeration keeps **one sequence
+> per orbit** — i.e. it **picks a representative** — so its generator *list* is **not** pointwise `σ`-conjugate to
+> the unpruned one (`σ` sends the chosen rep to a *different* rep of the conjugate orbit).
+> **`SupplyTransport.GensEquivariant` is therefore UNAVAILABLE to any pruned supply**, and re-deriving `①c` from
+> scratch for a fixpoint construction would be brutal. Do not attempt it.
+>
+> **The escape — `OrbitPrune.lean` §1, THE REDUCTION.** Everything downstream of the supply — `narrow`, `descend`,
+> `canonForm?`, `Stall.stalled`, `Consume.CellIsOrbit`, `Residue.Handled` — reads the supply through **exactly one
+> channel**: `Consume.rep (verified S adj χ)`, and `rep` is the least element of an **orbit**
+> (`mem_orbit_iff_wordReach`). Hence
+>
+> > **`SameOrbits S₁ S₂` ⟹ the two guarded canonizers are the SAME FUNCTION** (`canonForm?_eq_of_sameOrbits`)
+> > ⟹ **`①a`/`①b`/`①c` transfer wholesale** (`guarded_mixed_canonizer_of_sameOrbits`), and so do
+> > `StallEquivariant`, `CellIsOrbit`, `Cost.CellResolved` and `Residue.Handled` — **the residue is unchanged.**
+>
+> **⟹ a pruned supply's ONLY obligation is the group-theoretic one: it proves the same orbits.** No equivariance
+> proof, no `①` re-derivation. (And this reduction is reusable by **any** future supply optimization, not just this
+> one.)
+>
+> **P3b — the license itself** (`OrbitPrune.lean` §4, and the identity below made precise, both directions):
+> - **`deepCandidate v sv (g w) (g·sw) = g · deepCandidate v sv w sw`** (`deepCandidate_left_mul`)
+> - **`deepCandidate (g v) (g·sv) w sw = (deepCandidate v sv w sw) · g⁻¹`** (`deepCandidate_right_mul`)
+>
+> for any `g` the supply has already **verified**. So a pruned-away candidate is `g · c` with **both** factors in
+> the generated group ⟹ the group is unchanged. **Both sides of the enumeration may be pruned** (the `v`-side too —
+> that is what makes it a sum and not merely a `|cell|`-fold saving). And `CellIsOrbit` is stated via **`WordReach`**
+> — *a word in the generators* — so the pruned-away element survives as a **product**.
+>
+> **▶ WHAT IS LEFT (P3c), and it is now pure combinatorics:** build `prunedSupply d` as an orbit-pruned **fixpoint**
+> (prune the `(branch, sequence)` table by the orbits of the group found so far; harvest; repeat until stable —
+> monovariant = the number of orbits on the table, which strictly decreases, so `|table|` rounds suffice, exactly the
+> shape of `Consume.orbit_closed`'s convergence proof), then prove the single theorem
+> **`SameOrbits (prunedSupply d) (deepMatchSupply d)`**. Everything else is already done.
+
+---
+
+**(Original P3 sketch, retained — the mechanism is unchanged, only the correctness route above is new.)**
 Nauty's orbit pruning **is** canonical *at the group level*, and that is the escape. The key identity:
 
 > **`rankSwap ψᵥ (g · ψ_w) = g · rankSwap ψᵥ ψ_w`** — changing a deepening choice *within an orbit of the group

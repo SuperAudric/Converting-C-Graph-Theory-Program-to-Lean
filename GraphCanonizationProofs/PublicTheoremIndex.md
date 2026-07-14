@@ -3237,3 +3237,28 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `DeepMatch.separatesAt_zero_iff` | 328-342 | **`matchSupply` is the `d = 0` case**: `SeparatesAt … 0` *is* `Consume.Discretizing`. So the bounded-depth oracle is a strict generalization, not a replacement. | — |
 | `DeepMatch.cellIsOrbit_deepMatchSupply` | 344-367 | **★★★ THE ORACLE FIRES.** Given the **depth** witness (`SeparatesAt`) and **localisation** (`horb`, which `SealBridge.horb_of_cellsAreOrbits` imports straight from the seal's `CellsAreOrbits`), `deepMatchSupply d` certifies the branch cell as an orbit and `consume` collapses it. The proof is the design in one line: `α·s` has the same length as `s`, so the pair that reconstructs `α` **is enumerated**. | — |
 | `DeepMatch.deepMatchSupply_guarded_canonizer` | 371-381 | **★★★ THE BOUNDED-DEPTH MIXED CANONIZER** — sound, complete, iso-invariant (answer **and** flag) and unconditionally polynomial in the descent, for **every** `d`, with **no carried hypothesis**. `d` buys *firing*, never correctness. | — |
+## ChainDescent/OrbitPrune.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `OrbitPrune.minList_congr` | 61-70 | The minimum of a seeded list depends only on which elements the list *contains*. | — |
+| `OrbitPrune.rep_congr` | 72-78 | **★ P3/1 — `rep` IS A FUNCTION OF THE ORBIT RELATION.** Two generator lists that word-reach the same pairs give the *same* representative, even though `rep` is a least-index pick and neither list determines the other. | — |
+| `OrbitPrune.SameOrbits` | 82-85 | **Two supplies prove the SAME ORBITS** — the only thing about a supply the object can see. | Definition |
+| `OrbitPrune.SameOrbits.symm` | 87-88 | `SameOrbits` is symmetric. | — |
+| `OrbitPrune.narrow_forceThenConsume_congr` | 90-96 | The mixed resolver's narrowing is unchanged across `SameOrbits`. | — |
+| `OrbitPrune.narrow_guard_congr` | 98-109 | The **guard** reads only the narrowing, so it is unchanged too. | — |
+| `OrbitPrune.descend_val_congr` | 111-128 | **Resolvers with the same narrowing compute the same VALUE** — the *cost* may differ, which is exactly the point of pruning. | — |
+| `OrbitPrune.canonForm?_congr` | 130-133 | …and hence the same canonical form. | — |
+| `OrbitPrune.canonForm?_eq_of_sameOrbits` | 137-143 | **★★ The guarded mixed canonizers of two `SameOrbits` supplies are the SAME FUNCTION.** | — |
+| `OrbitPrune.guarded_mixed_canonizer_of_sameOrbits` | 145-154 | **★★★ P3 — `①` TRANSFERS ACROSS `SameOrbits`, FOR FREE.** A supply that proves the same orbits as an already-certified one inherits `①a`/`①b`/`①c` with **no equivariance obligation of its own**. This is the license every pruned/optimized supply runs on: it may make any internal choice it likes (a pruned enumeration *must* pick a representative sequence, so `GensEquivariant` is unavailable to it), provided the **group it generates** is unchanged. Reusable by any future supply optimization. | — |
+| `OrbitPrune.stallEquivariant_congr` | 156-162 | The **flag**'s iso-invariance transfers (it is read off the same narrowing). | — |
+| `OrbitPrune.cellIsOrbit_congr` | 164-167 | **Firing** transfers across `SameOrbits`. | — |
+| `OrbitPrune.cellResolved_congr` | 169-173 | `②`'s per-cell resolution predicate transfers. | — |
+| `OrbitPrune.handled_congr` | 175-177 | `③`'s `Handled` transfers — **the residue is unchanged** by pruning. | — |
+| `OrbitPrune.rankSwap_left_mul` | 181-189 | **★ P3/2 — the `w`-side identity.** Replacing the `w`-side colouring by its `g`-transport **left-multiplies** the colour-match by `g`: `rankSwap ψᵥ (g·ψ_w) = g · rankSwap ψᵥ ψ_w`. | — |
+| `OrbitPrune.rankSwap_right_mul` | 191-203 | **★ P3/2 — the `v`-side identity.** Replacing the `v`-side colouring by its `g`-transport **right-multiplies** by `g⁻¹`, so both sides of the enumeration may be pruned. | — |
+| `OrbitPrune.matchCol_left_mul` | 205-215 | The `w`-side identity, lifted to the candidate constructor (failure mode included). | — |
+| `OrbitPrune.matchCol_right_mul` | 217-227 | The `v`-side identity, lifted to the candidate constructor. | — |
+| `OrbitPrune.deepCol_aut` | 229-235 | Deepening along the `g`-image of a sequence gives the `g`-transported colouring, for `g` an automorphism the supply has already **verified**. | — |
+| `OrbitPrune.deepCandidate_left_mul` | 237-248 | **★★★ THE `w`-SIDE PRUNING LICENSE.** `deepCandidate v sv (g w) (g·sw) = g · deepCandidate v sv w sw`. A pruned-away candidate is `g · c` with **both** factors already in the generated group ⟹ the **group is unchanged**, and since `Consume.CellIsOrbit` is stated via `WordReach` (a *word* in the generators), the pruned-away element survives as a **product**. | — |
+| `OrbitPrune.deepCandidate_right_mul` | 250-258 | **★★★ THE `v`-SIDE PRUNING LICENSE** (right-multiplication by `g⁻¹`). | — |
