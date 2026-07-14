@@ -224,6 +224,18 @@ theorem branches_nodup (χ : Colouring n) : (branches χ).Nodup := by
   | none => exact List.nodup_nil
   | some c => exact (List.nodup_finRange n).filter _
 
+/-- A nodup list strictly inside another (some member of the bigger one is missing) is **strictly shorter**. The
+currency of *partial* firing: "the resolver discarded at least one branch" ⟹ "the fan-out actually went down". -/
+theorem length_lt_of_missing {L M : List (Fin n)} (hL : L.Nodup) (hM : M.Nodup)
+    (hsub : ∀ x ∈ L, x ∈ M) {z : Fin n} (hz : z ∈ M) (hnz : z ∉ L) : L.length < M.length := by
+  have hss : L.toFinset ⊂ M.toFinset := by
+    refine ⟨fun x hx => List.mem_toFinset.mpr (hsub x (List.mem_toFinset.mp hx)), fun hc => ?_⟩
+    exact hnz (List.mem_toFinset.mp (hc (List.mem_toFinset.mpr hz)))
+  have h1 := List.toFinset_card_of_nodup hL
+  have h2 := List.toFinset_card_of_nodup hM
+  have := Finset.card_lt_card hss
+  omega
+
 /-! ## 4. The `Refiner` and the `Resolver`
 
 Both are written in `CostM`, so the descent's `cost` projection can charge the refinement round and the

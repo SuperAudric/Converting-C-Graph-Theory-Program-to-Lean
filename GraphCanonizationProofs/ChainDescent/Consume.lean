@@ -554,23 +554,86 @@ theorem orbit_subset_branches {S : Supply n} {adj : AdjMatrix n} {χ : Colouring
     reach_of_mem_orbit (fun _ hg => isColAut_of_mem_verified hg) u n x hx
   exact (mem_branches_iff hc x).mpr (by rw [hreach.colour, huc])
 
-/-- **★★★ CONSUME FIRES — a symmetric cell costs ONE branch, not `|cell|`.**
+/-! ### ★★ THE GRADED FIRING LEMMA — consume merges *exactly* what its generators connect
 
-If the branch cell is a single orbit of the verified generators, `consume` narrows it to a **singleton**: the
-descent takes one path through that cell and the fan-out is *gone*. Together with `Force.forceBy_singleton_of_
-separating` (the rigid case) this is the completeness half of the architecture — each route provably removes all
-branching on its own domain, and neither has to be trusted to do it (both are sound regardless).
+The singleton theorem below is the **perfect endpoint** (the whole cell is one orbit). It is not the useful case: a
+real cell splits into *several* orbits, and consume should collapse `|cell|` branches to *the number of orbits*.
+`rep_eq_of_wordReach` is the statement that actually delivers that, with **no hypothesis on the supply at all** —
+whatever the supply proves, consume merges; whatever it does not, consume keeps. **Partial power, partial progress.**
 
-Note what is *not* assumed: nothing about the supply. If it supplies enough, this fires; if not, `consume` defers.
-Soundness never depended on it either way. -/
+Getting it requires the orbit to be **inverse-closed**, not merely forward-closed: `rep u = rep w` needs the two
+orbits to be the *same set*, and forward-closure alone only gives one inclusion. A generator permutes a finite
+forward-closed set, so it maps it *onto* itself — that is where the inverses come from. -/
+
+/-- A finite forward-closed set is **inverse-closed**: `g` maps it injectively into itself, hence onto itself. -/
+theorem closed_inv {G : List (Equiv.Perm (Fin n))} {S : List (Fin n)} (hcl : Closed G S) :
+    ∀ g ∈ G, ∀ v ∈ S, g.symm v ∈ S := by
+  intro g hg v hv
+  have himg : S.toFinset.image g ⊆ S.toFinset := by
+    intro x hx
+    obtain ⟨y, hy, hyx⟩ := Finset.mem_image.mp hx
+    exact List.mem_toFinset.mpr (hyx ▸ hcl g hg y (List.mem_toFinset.mp hy))
+  have hcard : S.toFinset.card ≤ (S.toFinset.image g).card :=
+    le_of_eq (Finset.card_image_of_injective _ g.injective).symm
+  have heq : S.toFinset.image g = S.toFinset := Finset.eq_of_subset_of_card_le himg hcard
+  have hv' : v ∈ S.toFinset.image g := by rw [heq]; exact List.mem_toFinset.mpr hv
+  obtain ⟨y, hy, hyv⟩ := Finset.mem_image.mp hv'
+  have : g.symm v = y := by rw [← hyv]; simp
+  exact this ▸ List.mem_toFinset.mp hy
+
+/-- **Minimality** — the orbit is contained in *every* closed set containing its seed. -/
+theorem mem_of_mem_orbit_of_closed {G : List (Equiv.Perm (Fin n))} {T : List (Fin n)}
+    (hcl : Closed G T) {b : Fin n} (hb : b ∈ T) :
+    ∀ (k : Nat) (x : Fin n), x ∈ (orbStep G)^[k] [b] → x ∈ T := by
+  intro k
+  induction k with
+  | zero => intro x hx; simpa using (by simpa using hx : x = b) ▸ hb
+  | succ k ih =>
+      intro x hx
+      rw [Function.iterate_succ_apply'] at hx
+      rcases (mem_orbStep_iff G _ x).mp hx with h | ⟨g, hg, v, hv, hgv⟩
+      · exact ih x h
+      · exact hgv ▸ hcl g hg v (ih v hv)
+
+/-- The orbit is inverse-closed (convergence + `closed_inv`). -/
+theorem orbit_closed_inv (G : List (Equiv.Perm (Fin n))) (b : Fin n) :
+    ∀ g ∈ G, ∀ v ∈ orbit G b, g.symm v ∈ orbit G b :=
+  closed_inv (orbit_closed G b)
+
+/-- **The reachability relation is symmetric on orbits**: if a word takes `u` to `w`, then `u` lies in `w`'s orbit.
+(The inverse word does it — available because the orbit is inverse-closed.) -/
+theorem self_mem_orbit_of_wordReach {G : List (Equiv.Perm (Fin n))} {u w : Fin n}
+    (h : WordReach G u w) : u ∈ orbit G w := by
+  induction h with
+  | refl => exact mem_orbit_self G u
+  | @step m _ g hg ih =>
+      -- `m = g⁻¹ (g m)` lies in `(g m)`'s orbit, so `m`'s whole orbit does — and `u` is in `m`'s orbit.
+      have hm : m ∈ orbit G (g m) := by
+        have := orbit_closed_inv G (g m) g hg (g m) (mem_orbit_self G (g m))
+        simpa using this
+      exact mem_of_mem_orbit_of_closed (orbit_closed G (g m)) hm n u ih
+
+/-- Connected vertices have the **same orbit set**. -/
+theorem orbit_eq_of_wordReach {G : List (Equiv.Perm (Fin n))} {u w : Fin n} (h : WordReach G u w) :
+    ∀ x, x ∈ orbit G u ↔ x ∈ orbit G w := by
+  have hw : w ∈ orbit G u := mem_orbit_of_wordReach h
+  have hu : u ∈ orbit G w := self_mem_orbit_of_wordReach h
+  exact fun x =>
+    ⟨fun hx => mem_of_mem_orbit_of_closed (orbit_closed G w) hu n x hx,
+     fun hx => mem_of_mem_orbit_of_closed (orbit_closed G u) hw n x hx⟩
+
+/-- **★★★ THE GRADED FIRING LEMMA. Consume merges exactly the branches its generators connect** — with **no
+hypothesis on the supply**. A supply that proves one automorphism merges one pair; a supply that proves the whole
+cell's symmetry collapses the cell. **Partial power gives partial progress**, which is what the perfect-endpoint
+theorems below cannot say. -/
+theorem rep_eq_of_wordReach {G : List (Equiv.Perm (Fin n))} {u w : Fin n} (h : WordReach G u w) :
+    rep G u = rep G w :=
+  rep_eq_of_orbit_eq (orbit_eq_of_wordReach h)
+
 theorem rep_const_of_cellIsOrbit {S : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
     (horb : CellIsOrbit S adj χ) {u w : Fin n} (hu : u ∈ branches χ) (hw : w ∈ branches χ) :
-    rep (verified S adj χ) u = rep (verified S adj χ) w := by
-  set G := verified S adj χ with hG
-  -- Every branch vertex reaches exactly the cell, so all their orbits coincide.
-  have horbit_eq : ∀ z ∈ branches χ, ∀ x, x ∈ orbit G z ↔ x ∈ branches χ := fun z hz x =>
-    ⟨fun hx => orbit_subset_branches hz hx, fun hx => mem_orbit_of_wordReach (horb z hz x hx)⟩
-  exact rep_eq_of_orbit_eq (fun x => (horbit_eq u hu x).trans (horbit_eq w hw x).symm)
+    rep (verified S adj χ) u = rep (verified S adj χ) w :=
+  rep_eq_of_wordReach (horb u hu w hw)
 
 /-- **The dedup of a constant map over a nonempty list is a singleton** — the shape both firing theorems land in
 (here, and for the composite in `Composite.lean`). -/
@@ -594,12 +657,53 @@ theorem dedup_map_length_one {L : List (Fin n)} (hne : L ≠ []) {f : Fin n → 
   rw [hfin] at hcard
   simpa using hcard.symm
 
+/-- **A merge is a strict shortening.** If two *distinct* branches get the same representative, the deduplicated
+narrowing is strictly shorter than the list it came from — one merged pair is one branch saved. -/
+theorem dedup_map_length_lt {L : List (Fin n)} (hL : L.Nodup) {f : Fin n → Fin n} {a b : Fin n}
+    (ha : a ∈ L) (hb : b ∈ L) (hab : a ≠ b) (hfab : f a = f b) :
+    ((L.map f).dedup).length < L.length := by
+  -- the image of `L` is the image of `L` with `a` removed (b covers a's value), so it is strictly smaller
+  have himg : L.toFinset.image f = (L.toFinset.erase a).image f := by
+    refine Finset.Subset.antisymm (fun x hx => ?_)
+      (Finset.image_subset_image (Finset.erase_subset _ _))
+    obtain ⟨y, hy, hyx⟩ := Finset.mem_image.mp hx
+    by_cases hya : y = a
+    · exact Finset.mem_image.mpr
+        ⟨b, Finset.mem_erase.mpr ⟨fun hc => hab hc.symm, List.mem_toFinset.mpr hb⟩,
+         by rw [← hfab, ← hya]; exact hyx⟩
+    · exact Finset.mem_image.mpr ⟨y, Finset.mem_erase.mpr ⟨hya, hy⟩, hyx⟩
+  have hcardL : L.toFinset.card = L.length := List.toFinset_card_of_nodup hL
+  have hpos : 0 < L.toFinset.card := by
+    rw [hcardL]; exact List.length_pos_of_mem ha
+  have hdedup : ((L.map f).dedup).length = (L.toFinset.image f).card := by
+    rw [← List.toFinset_card_of_nodup (List.nodup_dedup (L.map f))]
+    congr 1
+    ext x
+    simp [List.mem_toFinset, List.mem_dedup]
+  have hlt : (L.toFinset.image f).card < L.toFinset.card := by
+    rw [himg]
+    refine lt_of_le_of_lt (Finset.card_image_le) ?_
+    rw [Finset.card_erase_of_mem (List.mem_toFinset.mpr ha)]
+    omega
+  omega
+
 theorem consume_singleton_of_cellIsOrbit {S : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
     (hd : ¬ Discrete χ) (horb : CellIsOrbit S adj χ) :
     (narrow (consume S) adj χ).length = 1 := by
   rw [narrow_consume]
   exact dedup_map_length_one (branches_ne_nil hd)
     (fun a ha b hb => rep_const_of_cellIsOrbit horb ha hb)
+
+/-- **★★ CONSUME FIRES ON PARTIAL POWER.** A *single* verified automorphism connecting two distinct branches
+already shortens the narrowing — no need for the cell to be one orbit. This is the theorem that says the oracle
+does **not** have to be perfect to be useful: it is rewarded for exactly as much symmetry as it can prove, and
+penalized for nothing. -/
+theorem consume_narrows_of_wordReach {S : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    {u w : Fin n} (hu : u ∈ branches χ) (hw : w ∈ branches χ) (huw : u ≠ w)
+    (h : WordReach (verified S adj χ) u w) :
+    (narrow (consume S) adj χ).length < (branches χ).length := by
+  rw [narrow_consume]
+  exact dedup_map_length_lt (branches_nodup χ) hu hw huw (rep_eq_of_wordReach h)
 
 end Consume
 end ChainDescent

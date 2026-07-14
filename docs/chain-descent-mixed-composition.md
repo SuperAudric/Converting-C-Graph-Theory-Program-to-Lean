@@ -19,6 +19,42 @@
 
 ## STATUS (read first)
 
+> **▶▶▶ ★★★ THE FIRING LEDGER IS GRADED, NOT ALL-OR-NOTHING (2026-07-14, second pass — read this before reading the
+> singleton theorems).**
+>
+> **The trap, and it was live.** The first firing pass proved only the two **perfect endpoints** —
+> `Consume.consume_singleton_of_cellIsOrbit` (the cell is *one* orbit) and
+> `Force.forceBy_singleton_of_separating` (the key is *injective* on the cell). A cell that splits into three
+> orbits, or a key that sorts it into three classes — **the realistic middle** — was covered by **neither**, even
+> though consume should narrow 12→3 and force 12→4. Read alone, those two theorems say *"only a perfect oracle or a
+> perfect key counts"*, which inverts the project's own **"over-splitting is safe"** rule: the design had swung from
+> *"a non-consuming resolver is fully valid"* all the way to *"only a perfect solver is valid"*.
+>
+> **★ AND A PERFECT KEY CANNOT EXIST.** The force/consume split *is* a tautology at the level of *existence* (a
+> decision either changes the output-matrix space or it does not). But a key separating exactly the non-automorphic
+> pairs would collapse **every** cell to one branch — that **is GI ∈ P**. **So the architecture can never be
+> justified by perfect components**, and any account that requires them is wrong on its face. What the residue
+> measures is precisely what a *poly-time* key/oracle can **see**, never what exists.
+>
+> **The fix — three theorems, all unconditional on the supply/key:**
+> - **`Consume.rep_eq_of_wordReach`** — consume merges **exactly** the branches its generators connect, with **no
+>   hypothesis on the supply**. (Needed the orbit to be **inverse**-closed, not just forward-closed:
+>   `Consume.closed_inv` — a generator permutes a finite forward-closed set, hence maps it *onto* itself.)
+>   ⟹ **`consume_narrows_of_wordReach`**: *one* proved automorphism between two branches already **strictly**
+>   shortens the narrowing.
+> - **`Force.forceBy_narrows_of_key_ne`** — a key separating *any two* branches already **strictly** shortens it.
+>   It need not separate the whole cell.
+> - **`Composite.forceThenConsume_narrows_of_partial`** ★★★ — **THE ANTI-PERFECTIONISM THEOREM.** *Any* capability
+>   from *either* side strictly reduces the fan-out. **No threshold, no cliff.** Each resolver is rewarded for
+>   exactly the distinctions it can prove and penalized for nothing it cannot; the singleton theorems are just the
+>   case where the reward is total.
+>
+> **Why this matters for ②:** it makes the cost ledger **additive**. A rigid solver that handles *part* of its
+> residue, or an oracle that finds *some* of `Aut`, contributes *proportionally*. The residue is what survives every
+> **partial** contribution — **not** what survives a component failing to be perfect. (Which is also why the rigid
+> track having no recorded "what it can solve" proofs, and consume not being proved to handle Cameron/node-4, are
+> *firing-rate* gaps that shrink the handled set — **not** soundness gaps and not cliffs.)
+
 > **▶▶▶ STAGE 3c — THE MIXED RESOLVER EXISTS (2026-07-14, `ChainDescent/Composite.lean`, in `build.sh`, axiom-clean,
 > no `sorry`, full build green 283s). THIS TRACK'S NAMESAKE OBJECT WAS MISSING UNTIL NOW.**
 >

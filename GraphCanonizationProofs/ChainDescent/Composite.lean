@@ -253,6 +253,78 @@ theorem forceThenConsume_singleton_of_separating {key : Key n} {S : Supply n} {a
   rw [hv] at ha hb
   rw [List.mem_singleton.mp ha, List.mem_singleton.mp hb]
 
+/-! ### ★★★ PARTIAL POWER ⟹ PARTIAL PROGRESS (the anti-perfectionism theorem)
+
+The two singleton theorems above are the **perfect endpoints**, and on their own they are a trap: read as the
+whole story they say *"only a perfect oracle or a perfect key counts"*, which is both false and the opposite of the
+project's own "over-splitting is safe" rule. Worse, a *perfect* key cannot exist: a key separating exactly the
+non-automorphic pairs would collapse every cell to one branch — that **is** GI ∈ P. So the architecture can never
+be justified by perfect components, and any account that needs them is wrong.
+
+`forceThenConsume_narrows_of_partial` is the honest statement. **Any** capability from **either** side — the supply
+proving a *single* automorphism between two branches, or the key separating a *single* pair — **strictly** reduces
+the fan-out. No threshold, no cliff, no perfection: a resolver is rewarded for exactly what it can prove and
+penalized for nothing it cannot. The singleton theorems are then just the case where the reward is total.
+
+That is what makes the `②` ledger additive rather than all-or-nothing: a rigid solver that handles *part* of its
+residue, or an oracle that finds *some* of Aut, contributes *proportionally*. The residue is what is left after
+every partial contribution — not what is left if some component fails to be perfect. -/
+
+/-- **★★★ THE ANTI-PERFECTIONISM THEOREM — partial power gives partial progress.**
+
+If *either* the key separates two branches, *or* the supply's verified generators connect two distinct branches,
+the composite's narrowing is **strictly shorter** than the full branch list. Neither resolver has to be complete,
+or even good; each is rewarded for precisely the distinctions it can prove. -/
+theorem forceThenConsume_narrows_of_partial {key : Key n} (hk : KeyEquivariant key) {S : Supply n}
+    {adj : AdjMatrix n} {χ : Colouring n}
+    (hpart :
+      (∃ u ∈ branches χ, ∃ w ∈ branches χ, keyV key adj χ u ≠ keyV key adj χ w)
+      ∨ (∃ u ∈ branches χ, ∃ w ∈ branches χ, u ≠ w
+            ∧ Consume.WordReach (verified S adj χ) u w)) :
+    (narrow (forceThenConsume key S) adj χ).length < (branches χ).length := by
+  -- The narrowing is `dedup (map rep (forcedSet))`, so it is never longer than the forced set.
+  have hle : (narrow (forceThenConsume key S) adj χ).length ≤ (forcedSet key adj χ).length := by
+    rw [narrow_forceThenConsume]
+    have h1 := (List.dedup_sublist ((forcedSet key adj χ).map (rep (verified S adj χ)))).length_le
+    rw [List.length_map] at h1
+    exact h1
+  have hsub : ∀ x ∈ forcedSet key adj χ, x ∈ branches χ := fun x hx =>
+    forcedSet_subset key adj χ hx
+  have hFnodup : (forcedSet key adj χ).Nodup := Force.keepMin_nodup key adj χ
+  have hFle : (forcedSet key adj χ).length ≤ (branches χ).length := by
+    have h1 := List.toFinset_card_of_nodup hFnodup
+    have h2 := List.toFinset_card_of_nodup (branches_nodup χ)
+    have hs : (forcedSet key adj χ).toFinset ⊆ (branches χ).toFinset := fun x hx =>
+      List.mem_toFinset.mpr (hsub x (List.mem_toFinset.mp hx))
+    have := Finset.card_le_card hs
+    omega
+  rcases hpart with ⟨u, hu, w, hw, hne⟩ | ⟨u, hu, w, hw, huw, hreach⟩
+  · -- FORCE fires: it discards a branch, and consume can only shorten further.
+    have h := Force.forceBy_narrows_of_key_ne (key := key) hu hw hne
+    rw [Force.narrow_forceBy] at h
+    have h' : (forcedSet key adj χ).length < (branches χ).length := h
+    omega
+  · -- CONSUME fires. The key is constant on orbits, so `u` and `w` survive force together or not at all.
+    have hkeyeq : keyV key adj χ u = keyV key adj χ w := by
+      obtain ⟨α, hα, hαu⟩ := Consume.reach_of_mem_orbit
+        (fun _ hg => Consume.isColAut_of_mem_verified hg) u n w
+        (Consume.mem_orbit_of_wordReach hreach)
+      rw [← hαu, Force.keyV_aut_invariant hk hα.relabel hα.transport u]
+    by_cases hboth : u ∈ forcedSet key adj χ
+    · -- both are in the forced set, and they get the same representative ⟹ a merge ⟹ strictly shorter
+      have hwF : w ∈ forcedSet key adj χ := by
+        obtain ⟨_, hmin⟩ := (Force.mem_keepMin_iff u).mp hboth
+        exact (Force.mem_keepMin_iff w).mpr ⟨hw, fun z hz => by rw [← hkeyeq]; exact hmin z hz⟩
+      have hlt : (narrow (forceThenConsume key S) adj χ).length < (forcedSet key adj χ).length := by
+        rw [narrow_forceThenConsume]
+        exact Consume.dedup_map_length_lt hFnodup hboth hwF huw
+          (Consume.rep_eq_of_wordReach hreach)
+      omega
+    · -- force already discarded `u` ⟹ the forced set is strictly smaller than the cell
+      have : (forcedSet key adj χ).length < (branches χ).length :=
+        Descend.length_lt_of_missing hFnodup (branches_nodup χ) hsub hu hboth
+      omega
+
 /-- **The residue, named.** A cell the composite cannot collapse is one where the supply does not connect it *and*
 the key does not separate it — neither move applies. That is the mutual stall (`②`'s real flag), and the graphs
 that exhibit it are exactly `UnhandledResidue`. -/

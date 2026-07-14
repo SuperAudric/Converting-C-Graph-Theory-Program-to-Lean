@@ -437,6 +437,13 @@ theorem forceBy_singleton_of_separating {key : Key n} {adj : AdjMatrix n} {χ : 
   rw [hfin] at this
   simpa using this.symm
 
+/-- The forced set is nodup (a filter of the nodup branch list). -/
+theorem keepMin_nodup (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) :
+    (keepMin key adj χ (branches χ)).Nodup := by
+  cases hk : kmin? ((branches χ).map (keyV key adj χ)) with
+  | none => rw [keepMin_none hk]; exact branches_nodup χ
+  | some m => rw [keepMin_some hk]; exact (branches_nodup χ).filter _
+
 /-- **Force FIRES exactly when the key is non-constant on the cell** — it discards a branch iff two branches get
 different keys. (The contrapositive is the ceiling: on an orbit cell the key is constant, so nothing is
 discarded.) -/
@@ -453,6 +460,23 @@ theorem forceBy_discards_of_key_ne {key : Key n} {adj : AdjMatrix n} {χ : Colou
   · refine ⟨u, hu, fun hc => ?_⟩
     obtain ⟨_, hmin⟩ := (mem_keepMin_iff u).mp hc
     exact hne (lexLeList_antisymm _ _ (hmin w hw) h)
+
+/-- **★★ FORCE FIRES ON PARTIAL POWER.** A key that separates *any two* branches already shortens the narrowing —
+it does **not** have to separate the whole cell.
+
+This is the theorem that keeps the ledger honest in the other direction. `forceBy_singleton_of_separating` is the
+**perfect endpoint** (an injective key ⟹ zero branching); on its own it would read as "only a perfect solver
+counts". Here a key that resolves *one* distinction is rewarded for *one* distinction: the fan-out strictly drops.
+A rigid solver that handles part of its residue therefore contributes part of the saving, with no cliff — which is
+what "over-splitting is safe" has always meant, now stated so that the *gain* is graded too, not just the loss. -/
+theorem forceBy_narrows_of_key_ne {key : Key n} {adj : AdjMatrix n} {χ : Colouring n}
+    {u w : Fin n} (hu : u ∈ branches χ) (hw : w ∈ branches χ)
+    (hne : keyV key adj χ u ≠ keyV key adj χ w) :
+    (narrow (forceBy key) adj χ).length < (branches χ).length := by
+  obtain ⟨z, hz, hznot⟩ := forceBy_discards_of_key_ne hu hw hne
+  rw [narrow_forceBy] at hznot ⊢
+  exact Descend.length_lt_of_missing (keepMin_nodup key adj χ) (branches_nodup χ)
+    (fun x hx => (mem_keepMin_iff x).mp hx |>.1) hz hznot
 
 /-! ## 5. ★ THE CAPSTONE -/
 
