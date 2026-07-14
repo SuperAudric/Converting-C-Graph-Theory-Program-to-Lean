@@ -3,6 +3,7 @@ import ChainDescent.Consume
 import ChainDescent.Force
 import ChainDescent.Composite
 import ChainDescent.Stall
+import ChainDescent.MatchSupply
 namespace ChainDescent.Refine
 open ChainDescent.Descend
 
@@ -280,5 +281,52 @@ open ChainDescent.Stall ChainDescent.Force ChainDescent.Composite in
        descentCost encodeFreeFast (guard (forceBy lookaheadKey)) C7,       -- flags, and flags CHEAPLY
        descentCost encodeFreeFast (guard (forceThenConsume lookaheadKey (dihSupply 7))) C7,
        descentCost encodeFreeFast deferAll C7)                             -- exhaustive, for scale
+
+/-! ## ★★★ `matchSupply` — the CASCADE ORACLE, structurally: it fixes `①c`, and it is NOT ENOUGH
+
+`Consume.matchSupply` is the cascade oracle's **construct-and-check** colour match (`matchOracle`, §C.4) rebuilt
+over `(adj, χ)`. Two results, and the second is the important one.
+
+**★ IT FIXES `①c`.** The demo supplies (`rotSupply`/`dihSupply`) hand back a *fixed* generator list, so they are
+**not equivariant** and provably break flag iso-invariance (the `#guard` above witnesses it). `matchSupply` is a
+**structural function of `(adj, χ)`**, and iso-invariance is restored — the answer *and* the flag now transport.
+
+**⚠ AND IT IS NOT ENOUGH — one-step colour matching FLAGS ON A 7-CYCLE.** `Consume.cellIsOrbit_matchSupply` fires
+only at a **`Discretizing`** node (the cascade oracle's `hdisc` depth witness). Individualizing one vertex of `C₇`
+and refining leaves `{0},{1,6},{2,5},{3,4}` — **not discrete** — so the oracle constructs *nothing*, `consume`
+cannot fire, force cannot fire on an orbit cell, and the descent stalls. `F12` *does* discretize in one step, and
+there it answers.
+
+So `Discretizing` is far stronger than it sounds: **it excludes cycles.** This is exactly why the cascade oracle has
+a *multi-step* form (`matchOracleSet`/`matchOracleSeq`, §C.6/§C.8) and exactly what `lockstep_disc_imp_stab_trivial`
+says — a one-step discretizing colour match **provably cannot** harvest a multi-step moved orbit, which is where the
+cross-branch harvest (and the Cameron / node-4 obstruction) lives. The residue is currently inflated by this gap,
+not by anything hard. -/
+
+open ChainDescent.Stall ChainDescent.Force ChainDescent.Composite ChainDescent.Consume in
+/-- Guarded mixed with the **structural** cascade-oracle supply — no hand-supplied generators. -/
+def gMatch {m : Nat} (a : AdjMatrix m) : Option (List Nat) :=
+  (canonForm? encodeFreeFast (guard (forceThenConsume lookaheadKey matchSupply)) a).map flatten
+
+-- **★ ①c RESTORED.** A structural supply makes answer *and* flag iso-invariant — the demo supplies did not.
+#guard gMatch C7 = gMatch (relabelAdj (Equiv.swap 1 4) C7)
+#guard gMatch C6 = gMatch (relabelAdj (Equiv.swap 2 5) C6)
+#guard gMatch C5 = gMatch (relabelAdj (Equiv.swap 0 2) C5)
+#guard gMatch F12 = gMatch (relabelAdj (Equiv.swap 0 7) F12)
+
+-- **It answers where the node DISCRETIZES in one step** …
+#guard (gMatch F12).isSome
+#guard (gMatch P5).isSome
+
+-- **… and FLAGS on cycles, because they do not.** This is the honest domain of the one-step colour match, and it
+-- is the gap the multi-step / cross-branch harvest must close.
+#guard ¬ (gMatch C5).isSome
+#guard ¬ (gMatch C7).isSome
+
+open ChainDescent.Consume in
+-- The diagnosis, pinned: `C₇` is not `Discretizing`; `F12` is.
+#guard ¬ Discrete ((lookData C7 (refineV encodeFreeFast C7 (fun _ => 0)) 0).col)
+open ChainDescent.Consume in
+#guard Discrete ((lookData F12 (refineV encodeFreeFast F12 (fun _ => 0)) 0).col)
 
 end ChainDescent.Refine

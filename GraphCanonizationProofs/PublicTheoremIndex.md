@@ -2921,22 +2921,23 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Refine.C3` | 9-11 | Test fixture: the 3-cycle. | Definition |
-| `Refine.C4` | 13-15 | Test fixture: the 4-cycle. | Definition |
-| `Refine.C5` | 17-19 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
-| `Refine.C6` | 21-23 | Test fixture: the 6-cycle. | Definition |
-| `Refine.C7` | 26-28 | Test fixture: the 7-cycle. | Definition |
-| `Refine.form` | 36-51 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
-| `Refine.P5` | 52-53 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
-| `Refine.rotP` | 67-70 | The cyclic rotation `i ↦ i + 1` of `Fin n` — a genuine automorphism source for cycles. | Definition |
-| `Refine.rotSupply` | 71-75 | The rotation oracle **supply** for `Consume.consume`. Untrusted, like every supply: it verifies at the root and is *rejected* one level down, where individualization breaks the rotation symmetry. | Definition |
-| `Refine.formC` | 76-102 | The canonical form computed with the **oracle** (`consume`) resolver, as a comparable value. | Definition |
-| `Refine.F12` | 119-125 | A 3-regular graph on 12 vertices whose 1-WL leaves a **single cell of size 12** and whose cells are **not orbits** — the rigid case, where `force` fires (root fan-out 12 → 1). | Definition |
-| `Refine.formF` | 126-155 | The canonical form computed with the **force** (`forceBy lookaheadKey`) resolver, as a comparable value. | Definition |
-| `Refine.formM` | 177-218 | The canonical form under the **mixed** resolver, as a comparable value (regression-gate helper). | Definition |
-| `Refine.dihSupply` | 228-232 | The **full** automorphism supply for a cycle (`Aut(Cₙ) = Dₙ = ⟨rotation, reflection⟩`) — regression-gate helper. The rotation-only supply is *incomplete*, and the guarded mixed descent correctly **flags** on it. | Definition |
-| `Refine.gForce` | 233-249 | Guarded **force** canonical form (no supply ⟹ equivariant narrowing ⟹ its flag is iso-invariant). Regression-gate helper. | Definition |
-| `Refine.gMix` | 250-258 | Guarded **mixed** canonical form with a supply that really generates `Aut(Cₙ)`. Regression-gate helper. | Definition |
+| `Refine.C3` | 10-12 | Test fixture: the 3-cycle. | Definition |
+| `Refine.C4` | 14-16 | Test fixture: the 4-cycle. | Definition |
+| `Refine.C5` | 18-20 | Test fixture: the 5-cycle (vertex-transitive — the worst case for the exhaustive resolver's branching). | Definition |
+| `Refine.C6` | 22-24 | Test fixture: the 6-cycle. | Definition |
+| `Refine.C7` | 27-29 | Test fixture: the 7-cycle. | Definition |
+| `Refine.form` | 37-52 | The canonical form as a comparable value (via row-major `flatten`, since `Labelled n` is a function and has no `DecidableEq`). Used by the `#guard` regression checks. | Definition |
+| `Refine.P5` | 53-54 | Test fixture: the 5-path — non-isomorphic to `C5`, used to check the canonizer actually distinguishes. | Definition |
+| `Refine.rotP` | 68-71 | The cyclic rotation `i ↦ i + 1` of `Fin n` — a genuine automorphism source for cycles. | Definition |
+| `Refine.rotSupply` | 72-76 | The rotation oracle **supply** for `Consume.consume`. Untrusted, like every supply: it verifies at the root and is *rejected* one level down, where individualization breaks the rotation symmetry. | Definition |
+| `Refine.formC` | 77-103 | The canonical form computed with the **oracle** (`consume`) resolver, as a comparable value. | Definition |
+| `Refine.F12` | 120-126 | A 3-regular graph on 12 vertices whose 1-WL leaves a **single cell of size 12** and whose cells are **not orbits** — the rigid case, where `force` fires (root fan-out 12 → 1). | Definition |
+| `Refine.formF` | 127-156 | The canonical form computed with the **force** (`forceBy lookaheadKey`) resolver, as a comparable value. | Definition |
+| `Refine.formM` | 178-219 | The canonical form under the **mixed** resolver, as a comparable value (regression-gate helper). | Definition |
+| `Refine.dihSupply` | 229-233 | The **full** automorphism supply for a cycle (`Aut(Cₙ) = Dₙ = ⟨rotation, reflection⟩`) — regression-gate helper. The rotation-only supply is *incomplete*, and the guarded mixed descent correctly **flags** on it. | Definition |
+| `Refine.gForce` | 234-250 | Guarded **force** canonical form (no supply ⟹ equivariant narrowing ⟹ its flag is iso-invariant). Regression-gate helper. | Definition |
+| `Refine.gMix` | 251-259 | Guarded **mixed** canonical form with a supply that really generates `Aut(Cₙ)`. Regression-gate helper. | Definition |
+| `Refine.gMatch` | 307-330 | Guarded mixed canonical form with the **structural** cascade-oracle supply (no hand-supplied generators). Regression-gate helper. | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3083,7 +3084,7 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `Stall.aggregate_nil` | 69-71 | §**The object already HAS a flag channel.** The empty narrowing aggregates to `none`, and `none` propagates to the root — so a resolver can flag by returning `some []`, and the mutual-stall flag needs **no change to `descend`** and no re-proof of ①. | `@[simp]` |
-| `Stall.stalled` | 75-80 | **The node has stalled**: the resolvers left ≥ 2 branches, i.e. some branch pair was **neither** supply-connected **nor** key-separated (`Composite.forceThenConsume_stall`). A **local, structural predicate of the node** — never of the traversal, which is what `①c` requires. Definition. | Definition |
+| `Stall.stalled` | 75-80 | **The node has stalled**: the resolvers left ≥ 2 branches in the **target cell**. A **local, structural predicate of the node** — never of the traversal, which is what `①c` requires. ⚠ **Reads as "the LEAST-COLOUR cell stalled", not "the node stalled"**: the target selector (`branches`/`targetColour`) is blind to resolvability, so this can fire on a cell that another cell's resolution would have exposed (**fusion's live bite** — see `Stall` §5b). Fixing it needs a resolver-aware **selector parameter** on `descend`. Definition. | Definition |
 | `Stall.guard` | 85-89 | §**THE STALL GUARD** — run the resolver; if it leaves ≥ 2 branches, **flag** instead of branching. Deferral is not a cheap mode of a healthy run, it **is** the failure: every node consumes or forces, and one that can do neither *is* the residue. So the descent is a single path or it stops — there is no exhaustive fallback to be polynomial *about*. Definition. | Definition |
 | `Stall.narrow_guard` | 91-96 | The guarded narrowing: empty when stalled, otherwise the underlying resolver's. | — |
 | `Stall.guard_cost` | 98-104 | The guard is free (it reads a length) — the guarded resolver costs what the underlying one costs. | — |
@@ -3095,8 +3096,8 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Stall.stallEquivariant_of_narrowEquivariant` | 158-164 | An **equivariant** narrowing gives stall-equivariance for free (same length up to a permutation) — which is why the **force-only** route pays nothing for its flag. | — |
 | `Stall.narrowEquivariant_guard` | 166-178 | The guard preserves `NarrowEquivariant`: both sides stall together, and are otherwise unchanged. | — |
 | `Stall.guarded_force_canonizer` | 182-198 | §**★★★ THE FORCE ROUTE, GUARDED — a canonical form that is UNCONDITIONALLY POLYNOMIAL and flags exactly at the mutual stall.** `①a`/`①b`/`①c` modulo nothing but `KeyEquivariant`, *and* a single path on **every** input. It no longer "always answers" (the guard deliberately breaks `NarrowProper`) — **that is the point: it answers or it flags, and it is polynomial either way.** | — |
-| `Stall.guarded_choice_transports` | 224-235 | §**★★ THE DESCENT'S ONE CHOICE IS STRUCTURALLY DETERMINED — why FUSION cannot bite.** If the guarded descent selects branch `v` at a node of `G`, at the corresponding node of `σ·G` it selects **`σ v`**. The path is a function of the isomorphism class, so there is **no ordering degree of freedom** — and fusion, being a *meta-product over orderings* ("had you consumed a different decision first, this one's type would change"), has nothing to quantify over. ⚠ Does **not** dissolve an automorphism only visible *after* the solver's linear algebra — but that is `Supply` **strength**, not descent structure. | — |
-| `Stall.narrow_guard_eq_nil_iff` | 247-255 | The guarded descent flags at a node **exactly** when that node stalled — the `③` hook. | — |
+| `Stall.guarded_choice_transports` | 238-250 | The guarded descent's one choice is **iso-invariant**: select `v` at a node of `G` ⟹ select `σ v` at the corresponding node of `σ·G`. ⛔ **NOT a no-fusion theorem** — an earlier description claimed it dissolved fusion; that was WRONG and is retracted. **Fusion is a dependency of EXPOSURE** (a decision's *type* is not visible until other decisions are resolved: a ring's rigid decisions surface only after `{root, direction}` are consumed; Chang-A has 24 automorphisms certifiable only *after* rigid decisions), not a meta-product over orderings. See `Stall` §5b for fusion's **live bite**: the target-cell selector is blind to resolvability, so the descent can flag on a cell another cell's resolution would have exposed. | — |
+| `Stall.narrow_guard_eq_nil_iff` | 262-270 | The guarded descent flags at a node **exactly** when that node stalled — the `③` hook. | — |
 ## ChainDescent/Residue.lean
 
 | Name | Line | Description | Notes |
@@ -3117,3 +3118,18 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Residue.keyEquivariant_constKey` | 228 | The constant key is trivially equivariant — so the witness below uses a *legal* resolver, not an ill-formed one. | — |
 | `Residue.not_wordReach_nil` | 230-235 | With no generators, nothing is word-reachable but the point itself. | — |
 | `Residue.residue_nonvacuous` | 237-259 | §**★★ `unhandledResidue_nonvacuous` — THE RESIDUE IS INHABITED, AND NOW PROVABLY SO.** It was undischargeable *in principle* while the `Publication` atoms were `opaque … : Prop` with no definition. Witness is deliberately degenerate (an empty supply and a constant key certify nothing, so any 2-vertex cell defeats them): it shows the predicate is **inhabited**, not that the residue is *hard*. The real content is that `Residue` **shrinks as the resolvers strengthen** — measured in `PerformanceTest` (C₇ with a rotation-only supply is residual; with the full `Aut(C₇)` supply it is not). | — |
+## ChainDescent/MatchSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Consume.rankSwap` | 55-68 | The **colour-match permutation**: send the vertex of rank `i` under `ψv` to the vertex of rank `i` under `ψw`. Computable (via `rankInv`), and a genuine `Equiv` because `vertexRank` is injective on a discrete colouring. Definition. | Definition |
+| `Consume.rankSwap_apply` | 70-71 | `rankSwap` unfolded. | `@[simp]` |
+| `Consume.lookData` | 75-78 | The refinement reached by individualizing `v`, **materialised** (⚠ never a `… → Colouring n` definition — the eta-expansion trap). Definition. | Definition |
+| `Consume.lookData_col` | 80-82 | The look-ahead colouring equals `warmRefineR` after individualization. | — |
+| `Consume.matchCandidate` | 84-93 | **The construct-and-check candidate** (`CascadeOracle.matchOracle` §C.4, rebuilt over `(adj, χ)`): individualize `v` and `w`, refine both; if both discretize, hand back the colour-match permutation. A *candidate only* — `Consume.verified` re-checks it edge-by-edge, so nothing here is trusted. Definition. | Definition |
+| `Consume.matchCandidate_eq_of_isColAut` | 95-134 | §**★★ THE ORACLE RECONSTRUCTS THE AUTOMORPHISM EXACTLY.** If some colouring-preserving automorphism `α` carries `v` to `w` and individualizing `v` **discretizes**, the construction fires and returns **`α` itself** — not merely *an* automorphism. Proof is the descent's own transport layer: `α·adj = adj`, `α·χ = χ` ⟹ the `w`-side refinement is the `v`-side one transported by `α` ⟹ ranks transport ⟹ the rank-matching permutation is forced to be `α`. | — |
+| `Consume.matchSupply` | 138-146 | §**★ THE COLOUR-MATCH SUPPLY** — the cascade oracle as a `Consume.Supply`. Queries `matchCandidate` on every ordered pair of branch vertices. Untrusted as always (`verified` filters it), so `consume_canonizer` holds for it with no obligation. ★ Being a **structural function of `(adj, χ)`** it also repairs **`①c`**: the demo supplies hand back a fixed generator list, are non-equivariant, and provably break flag iso-invariance. Definition. | Definition |
+| `Consume.mem_gens_matchSupply` | 148-152 | A constructed candidate is in the supply's output. | — |
+| `Consume.mem_verified_matchSupply` | 154-161 | A genuine automorphism between branch vertices survives verification — it was *reconstructed*, so it verifies. | — |
+| `Consume.Discretizing` | 165-169 | **The one-step depth witness** (the cascade oracle's `hdisc`): individualizing any branch vertex discretizes the refinement. ⚠ **Far stronger than it sounds — it EXCLUDES CYCLES** (individualizing one vertex of `C₇` leaves `{0},{1,6},{2,5},{3,4}`). Where the Cameron / node-4 obstruction lives is *not* in the construction but here. Definition. | Definition |
+| `Consume.cellIsOrbit_matchSupply` | 171-189 | §**★★★ `matchSupply` CERTIFIES EVERY ORBIT IT CAN SEE.** At a `Discretizing` node, every colouring-preserving automorphism between branch vertices is recovered, verified and available to `consume` ⟹ a branch cell that *is* an orbit is certified as one and collapses to a single branch. This is the cascade oracle's honest `hdisc`-only firing (`matchOracle_fires_of_insertDiscrete`) — **no `CellsAreOrbits`, no localisation** — in the resolver's vocabulary. ⚠ **Measured: one step is NOT ENOUGH** — `C₇` is not `Discretizing`, so this flags on cycles. The multi-step / cross-branch harvest (`lockstep_disc_imp_stab_trivial`) is the gap. | — |
