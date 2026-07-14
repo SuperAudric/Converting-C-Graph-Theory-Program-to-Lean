@@ -2938,10 +2938,11 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Refine.gForce` | 234-250 | Guarded **force** canonical form (no supply ⟹ equivariant narrowing ⟹ its flag is iso-invariant). Regression-gate helper. | Definition |
 | `Refine.gMix` | 251-259 | Guarded **mixed** canonical form with a supply that really generates `Aut(Cₙ)`. Regression-gate helper. | Definition |
 | `Refine.gMatch` | 307-330 | Guarded mixed canonical form with the **structural** cascade-oracle supply (no hand-supplied generators). Regression-gate helper. | Definition |
-| `Perf.F12` | 35-41 | The **Frucht graph** — smallest asymmetric cubic graph; 1-WL leaves one cell of 12. Kept **off the build path** (`Regression.G8` covers the same property 8× cheaper); it is the honest large-`n` cost sample. Definition. | Definition |
-| `Perf.C7` | 43 | The 7-cycle (large-`n` symmetric sample, off the build path). Definition. | Definition |
-| `Perf.gForce` | 70-80 | Guarded force form (perf file). Definition. | Definition |
-| `Perf.gMatch` | 84-96 | Guarded mixed form with the structural supply (perf file). Definition. | Definition |
+| `Perf.F12` | 36-42 | The **Frucht graph** — smallest asymmetric cubic graph; 1-WL leaves one cell of 12. Kept **off the build path** (`Regression.G8` covers the same property 8× cheaper); it is the honest large-`n` cost sample. Definition. | Definition |
+| `Perf.C7` | 44 | The 7-cycle (large-`n` symmetric sample, off the build path). Definition. | Definition |
+| `Perf.gForce` | 71-81 | Guarded force form (perf file). Definition. | Definition |
+| `Perf.gMatch` | 85-97 | Guarded mixed form with the structural supply (perf file). Definition. | Definition |
+| `Perf.gDeep` | 121-130 | — | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3156,15 +3157,17 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 36-37 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 39-41 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 43-50 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 52-55 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 59-60 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 69-70 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 93-94 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 103-104 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 132-135 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C5` | 37-38 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 40-42 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 44-51 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 53-56 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 60-61 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 70-71 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 94-95 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 104-105 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 133-136 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 151 | — | Definition |
+| `Regression.gDeep` | 153-155 | — | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3205,3 +3208,32 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `SupplyTransport.gensEquivariant_matchSupply` | 216-237 | **★★ `matchSupply` IS EQUIVARIANT** — the construction conjugates (`Consume.matchCandidate_conj`), *including its failure mode*: it declines on `σ·G` exactly where it declines on `G`. The non-vacuity witness for `GensEquivariant`. | — |
 | `SupplyTransport.supplyEquivariant_matchSupply` | 239-240 | `matchSupply` satisfies the verified-list form of the transport obligation. | — |
 | `SupplyTransport.matchSupply_guarded_canonizer` | 242-254 | **★★★ THE FIRST CONCRETE MIXED CANONIZER.** Every parameter is a named, built object — the encode-free refiner, the look-ahead key, the colour-match oracle — and **no hypothesis is carried**: ①a (sound), ①b (complete), ①c (iso-invariant answer *and* flag), plus unconditional polynomiality via `Stall.descentCost_guard_le`. Everything still open is a **firing** question, not a correctness one. | — |
+## ChainDescent/DeepMatchSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `DeepMatch.seqsLen` | 71-74 | All vertex sequences of length exactly `k` (the depth-`d` search space's rungs). | Definition |
+| `DeepMatch.mem_seqsLen` | 76-90 | Membership in `seqsLen n k` **is** having length `k` — nothing else. | — |
+| `DeepMatch.allSeqs` | 92-95 | **P2's search space: every sequence of length `≤ d`.** No representative is ever *chosen* — a choice would be non-canonical (cell members are exactly what 1-WL cannot distinguish), breaking `GensEquivariant` and hence `①b`/`①c`. | Definition |
+| `DeepMatch.mem_allSeqs` | 97-106 | Membership in `allSeqs n d` **is** having length `≤ d`. | — |
+| `DeepMatch.mem_allSeqs_map` | 108-112 | **★ THE SEARCH SPACE IS σ-INVARIANT, trivially** — membership depends only on the **length**. This one line is why the bounded-depth oracle escapes `lockstep_disc_imp_stab_trivial` (which refutes an equivariant *choice function*, not an exhaustive enumeration). | — |
+| `DeepMatch.exists_preimage_seq` | 114-116 | Every sequence in the search space is the `σ`-image of one in it. | — |
+| `DeepMatch.deepCol` | 120-129 | **The colouring reached by individualizing a sequence in order, refining after each** — literally `descend`'s own step, iterated. Index-free, so it transports (unlike the seal's index-coloured `indivWithSeq`), and position-distinct, so it discretizes (unlike the uniform-coloured `indivWithSet`). ⚠ Spec only — never evaluated (the executable path is `deepData`). | Definition |
+| `DeepMatch.deepData` | 131-134 | The **materialised** deep colouring (`ColData`-valued, so each level is forced once — the eta-expansion trap). | Definition |
+| `DeepMatch.deepData_col` | 136-146 | The runnable deep colouring computes exactly the reasoned-about one. | — |
+| `DeepMatch.deepCol_transport` | 148-166 | **★ THE DEEP COLOURING TRANSPORTS** (`indivOne` is index-free; the refiner is equivariant). | — |
+| `DeepMatch.deepCandidate` | 170-173 | Individualize `v` then `sv`, and `w` then `sw`; if both discretize, colour-match. A *candidate only* — `Consume.verified` re-checks it. | Definition |
+| `DeepMatch.matchCol_self_transport` | 175-188 | A discrete colouring and its `α`-transport colour-match to **exactly `α`**. | — |
+| `DeepMatch.deepCandidate_eq_of_isColAut` | 190-206 | **★★ THE ORACLE RECONSTRUCTS THE AUTOMORPHISM EXACTLY, AT DEPTH.** If individualizing `v` then `s` discretizes, the pair `(v,s)` against `(α v, α·s)` constructs **`α` itself** — and `α·s` has the *same length* as `s`, so it is **in the search space**. That is the whole design: we never guess `α`'s continuation, we enumerate all of them. | — |
+| `DeepMatch.deepCandidate_conj` | 208-220 | The candidate conjugates — the engine of `GensEquivariant`. | — |
+| `DeepMatch.deepTable` | 224-233 | The `(branch, sequence)` table, each deep colouring materialised **once** (the per-branch base refinement is bound *outside* the sequence loop — recomputing it would be the `O(n)`-in-the-algorithm bug `matchSupply` originally shipped). | Definition |
+| `DeepMatch.mem_deepTable_iff` | 235-246 | Membership in the table, characterised. | — |
+| `DeepMatch.deepTable_col` | 248-255 | Every table row's colouring **is** the deep colouring it is indexed by. | — |
+| `DeepMatch.deepMatchSupply` | 257-263 | **★ THE BOUNDED-DEPTH ORACLE.** Colour-match every `(branch, sequence ≤ d)` pair against every other. Untrusted (`consume_canonizer` holds for it with no obligation). ⚠ Cost is `n^{O(d)}`: **polynomial for bounded `d`, quasi-polynomial at `d = Θ(log n)`, sub-exponential at Spielman's `d = Õ(n^{1/3})` — exactly the seal's ladder.** Billed in `supplyCost`, so `②` sees it. | Definition |
+| `DeepMatch.mem_gens_deepMatchSupply_iff` | 265-284 | Membership in the supply, characterised: its generators are exactly the candidates built on some pair of `(branch, sequence ≤ d)`. | — |
+| `DeepMatch.gensEquivariant_deepMatchSupply` | 288-314 | **★★ THE BOUNDED-DEPTH ORACLE IS EQUIVARIANT** — because the search space is `σ`-invariant and the deep colouring transports. **No representative is ever chosen**, which is exactly what a stabilizer-chain supply cannot arrange (its within-cell pick is non-canonical, so its generators are not `σ`-conjugates and `①b`/`①c` — both routing through `StallEquivariant` — would fail). | — |
+| `DeepMatch.supplyEquivariant_deepMatchSupply` | 316-318 | The verified-list form of the transport obligation, for `deepMatchSupply d`. | — |
+| `DeepMatch.SeparatesAt` | 322-326 | **The depth witness.** Every branch vertex, plus **some** sequence of `≤ d` further individualizations, discretizes. This is the descent-side form of the seal's `SeparatesAtBoundedBase` / `CascadesAt` — the *same* hypothesis the cascade oracle carries (P0's confluence identifies batch and interleaved individualization). | Definition |
+| `DeepMatch.separatesAt_zero_iff` | 328-342 | **`matchSupply` is the `d = 0` case**: `SeparatesAt … 0` *is* `Consume.Discretizing`. So the bounded-depth oracle is a strict generalization, not a replacement. | — |
+| `DeepMatch.cellIsOrbit_deepMatchSupply` | 344-367 | **★★★ THE ORACLE FIRES.** Given the **depth** witness (`SeparatesAt`) and **localisation** (`horb`, which `SealBridge.horb_of_cellsAreOrbits` imports straight from the seal's `CellsAreOrbits`), `deepMatchSupply d` certifies the branch cell as an orbit and `consume` collapses it. The proof is the design in one line: `α·s` has the same length as `s`, so the pair that reconstructs `α` **is enumerated**. | — |
+| `DeepMatch.deepMatchSupply_guarded_canonizer` | 371-381 | **★★★ THE BOUNDED-DEPTH MIXED CANONIZER** — sound, complete, iso-invariant (answer **and** flag) and unconditionally polynomial in the descent, for **every** `d`, with **no carried hypothesis**. `d` buys *firing*, never correctness. | — |

@@ -1,4 +1,5 @@
 import ChainDescent.Regression
+import ChainDescent.DeepMatchSupply
 
 /-!
 # Performance measurements — **NOT on the build path**
@@ -94,5 +95,38 @@ def gMatch {m : Nat} (a : AdjMatrix m) : Option (List Nat) :=
 #guard gMatch F12 = gMatch (relabelAdj (Equiv.swap 0 7) F12)
 
 #eval descentCost encodeFreeFast (guard (forceThenConsume lookaheadKey matchSupply)) F12
+
+/-! ## 6. `deepMatchSupply` — the bounded-depth oracle FIRES on cycles, and **DOES NOT PAY**
+
+`C₇` is where the one-step oracle died: `Aut(C₇) = D₇` has a reflection fixing each vertex, so no single
+individualization discretizes (`Discretizing ⟹ trivial point stabilizers`). At `d = 1` the enumeration finds the
+pair that reconstructs the rotation and `C₇` **answers**.
+
+**But look at the price.** The search space is every sequence of length `≤ d`, so the supply costs `Θ(n^d)` per
+node — and the cost model, which now bills `supplyCost`, shows it plainly:
+
+| | `descentCost` on `C₇` |
+|---|---|
+| exhaustive (`deferAll`) | **7 568** — and it never flags |
+| `guard (forceThenConsume lookaheadKey matchSupply)` | flags (cheaply) |
+| `guard (forceThenConsume lookaheadKey (deepMatchSupply 1))` | **949 819** — answers, at **125×** the exhaustive cost |
+
+**Firing is not paying** — the same lesson `lookaheadKey` taught, now at `n^d` scale. This is *not* a soundness or
+a `②` problem: `Stall.descentCost_guard_le` is unconditional and the descent is still a single path; the `n^d` is
+honestly inside `c₂`. It is a **quality** problem, and it is exactly what the `P3` orbit-pruned fixpoint exists to
+remove — enumerate one sequence **per orbit of the group found so far** (legal, because
+`rankSwap ψᵥ (g · ψ_w) = g · rankSwap ψᵥ ψ_w`, so pruning modulo a known element leaves the *generated group*
+unchanged), which collapses to a **single path per branch** under localisation and turns `n^d` into a **sum**. -/
+
+def gDeep {m : Nat} (d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
+  (canonForm? encodeFreeFast
+    (guard (forceThenConsume lookaheadKey (DeepMatch.deepMatchSupply d))) a).map flatten
+
+#eval ((gMatch C7).isSome, (gDeep 1 C7).isSome)   -- (false, true): depth 1 closes the 7-cycle
+#guard gDeep 1 C7 = gDeep 1 (relabelAdj (Equiv.swap 0 3) C7)
+
+#eval (descentCost encodeFreeFast (guard (forceThenConsume lookaheadKey (DeepMatch.deepMatchSupply 1))) C7,
+       descentCost encodeFreeFast deferAll C7)
+-- 949819 vs 7568 — a NET LOSS of 125×. See the header.
 
 end ChainDescent.Perf

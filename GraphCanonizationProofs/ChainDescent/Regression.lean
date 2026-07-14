@@ -1,5 +1,6 @@
 import ChainDescent.Residue
 import ChainDescent.MatchSupply
+import ChainDescent.DeepMatchSupply
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -133,5 +134,33 @@ def gMix {m : Nat} [NeZero m] (a : AdjMatrix m) : Option (List Nat) :=
   (canonForm? encodeFreeFast (guard (forceThenConsume lookaheadKey (dihSupply m))) a).map flatten
 
 #guard (gMix C5).isSome ≠ (gMix (relabelAdj (Equiv.swap 0 2) C5)).isSome
+
+/-! ## 7. ★★★ `deepMatchSupply` — THE RESIDUE SHRINKS, WITH NO RE-PROOF
+
+`C₄` is the cheapest witness of the whole `P2` thesis. `Aut(C₄) = D₄` has a **reflection fixing vertex 0**, so
+individualizing one vertex cannot discretize (`Discretizing` is false) — and `Discretizing ⟹ trivial point
+stabilizers`, so the one-step oracle **provably cannot** fire. It flags.
+
+Individualizing **one more** vertex *does* discretize. `deepMatchSupply 1` enumerates every length-≤1 continuation,
+so it finds the pair that reconstructs the rotation, and the graph **answers**.
+
+**Nothing was re-proved to get this.** `①a`/`①b`/`①c` and the polynomial bound are quantified over an arbitrary
+`Supply`; raising `d` moved the boundary of `Residue.Handled` and nothing else. That is the architecture doing its
+job, and it is the point of defining the residue as the complement of a *positive* capability. -/
+
+def C4 : AdjMatrix 4 := ⟨fun i j => if (i.val + 1) % 4 = j.val ∨ (j.val + 1) % 4 = i.val then 1 else 0⟩
+
+def gDeep {m : Nat} (d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
+  (canonForm? encodeFreeFast
+    (guard (forceThenConsume lookaheadKey (DeepMatch.deepMatchSupply d))) a).map flatten
+
+/-! **`d = 0` FLAGS, `d = 1` ANSWERS.** The left component is `matchSupply`'s reach (`separatesAt_zero_iff`); the
+right is the bounded-depth oracle's. **Do not delete this guard** — it is the non-vacuity witness that `d` buys
+firing, and the only thing separating `deepMatchSupply` from a silently useless generalization. -/
+#guard ((gDeep 0 C4).isSome, (gDeep 1 C4).isSome) = (false, true)
+
+/-! `①c` at depth 1: `deepMatchSupply` is equivariant (`gensEquivariant_deepMatchSupply`), so the answer
+transports. Measured, not merely proved. -/
+#guard gDeep 1 C4 = gDeep 1 (relabelAdj (Equiv.swap 0 1) C4)
 
 end ChainDescent.Regression

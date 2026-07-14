@@ -41,6 +41,7 @@ whole frontier.
 | `ChainDescent/Residue.lean` | **③** — `Handled` (positive), `Residue := ¬Handled`, `residue_if_flag`, `residue_nonvacuous`. |
 | `ChainDescent/SealBridge.lean` | **P0 — THE VOCABULARY BRIDGE** (2026-07-14, second pass). `horb_of_cellsAreOrbits`: the seal's `CellsAreOrbits` **is** the supply's firing hypothesis. See §6.0. |
 | `ChainDescent/SupplyTransport.lean` | **P1 — THE FLAG'S ISO-INVARIANCE** (2026-07-14, second pass). `stallEquivariant_forceThenConsume`, and **`matchSupply_guarded_canonizer` — the first CONCRETE mixed canonizer, no carried hypotheses.** See §6.0. |
+| `ChainDescent/DeepMatchSupply.lean` | **P2 — THE BOUNDED-DEPTH ORACLE** (2026-07-14). `deepMatchSupply d`: enumerate every length-`≤ d` individualization sequence, colour-match all pairs. Equivariant **because it makes no choice**. `C₄`/`C₇` now answer. Cost `n^{O(d)}`. See §6.2. |
 | `ChainDescent/Regression.lean` | the **build-gating** regression suite (~12 s). |
 | `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (~4 min). |
 
@@ -256,13 +257,54 @@ the cell carrying the recorded id — which is *not* equivariant. It works empir
 unverifiable candidate simply leaves the reps separate (sound over-split); it is a **heuristic with verification**,
 and it cannot support a completeness theorem of the `LockstepExpandSeq` shape.
 
-**THE FIX — the supply must be a STABILIZER CHAIN.** The same theorem tells you why the index-choice is harmless
-*once you know `stab(v)`*: two valid continuations differ by a stabilizer element, so the candidate is `α · s` —
-still an automorphism carrying `v ↦ w`. And `stab(v)` is available, because in the descent's own vocabulary
-**`Aut(adj, refineV (indivOne χ v))` IS `stab_{Aut(adj,χ)}(v)`**. So the supply recurses *down its own descent*,
-harvests the stabilizer at the deeper node (where the cell is smaller and the recursion bottoms out at
-discreteness), and uses it to canonicalize the colour-match at the current node. That is Schreier–Sims, and it is
-what `SchemeRecoveredByDepth`'s two-phase `bs₁ ++ bs₂` already encodes.
+**⛔⛔ AND THE STABILIZER CHAIN CANNOT BE THE GUARDED OBJECT EITHER — the deciding constraint (2026-07-14, P2).**
+A stabilizer chain must **pick a vertex** inside a cell to recurse into. But a cell's members are *precisely* what
+1-WL cannot distinguish, so **no iso-invariant function picks one** (lowest-index is labelling-dependent: `min(σ·C)
+≠ σ(min C)` — this is the same error `indivOne`'s index-freeness exists to avoid). Hence the harvested generators
+are **not `σ`-conjugates**, `SupplyTransport.GensEquivariant` fails, and — because `Residue.narrowFnEquivariant_
+guardedRef` routes **`①b` AND `①c`**, not just the flag, through `Stall.StallEquivariant` — **the guarded object's
+CORRECTNESS breaks**, not merely its cost. It would hold only *conditionally on the supply's own completeness*
+(= localisation), which is circular for a `①` obligation. The C# escapes this only because its pruning is a pure
+**covering** move (value-invisible ⟹ history-dependence is harmless) and its flag is a **budget**, not a stall.
+
+> **⚠ DISTINGUISH: choosing a CELL is canonical; choosing a VERTEX inside one is not.** `targetColour` (least
+> non-singleton *colour*) transports — colours are 1-WL values, a function of the coloured graph — so the
+> **resolver-aware selector of §6.1 is perfectly valid**, and stacking "…that a resolver can act on" onto it keeps
+> it canonical. It is the *within-cell vertex* pick that is illegal. (`Consume.rep` is such a pick and is openly
+> non-equivariant — licensed **only** because covering makes it value-invisible.)
+
+**⟹ THE FIX, BUILT: `ChainDescent/DeepMatchSupply.lean` — make NO choice at all.** Enumerate **every**
+individualization sequence of length `≤ d` on both sides and colour-match all pairs. Equivariance is then *free*,
+because the search space is characterised **purely by length** (`mem_allSeqs_map`), so `σ` maps it onto itself.
+`lockstep_disc_imp_stab_trivial` does not apply: it refutes an equivariant *choice function*, and there is none.
+- **Firing = `SeparatesAt adj χ d`** — every branch vertex plus *some* `≤ d` more discretizes. By **P0's
+  confluence** this is the *same* condition as the cascade oracle's `CascadesAt` / the seal's
+  `SeparatesAtBoundedBase`, so the two oracles fire under identical hypotheses and `theorem_1_HOR_*` populates it.
+  `matchSupply` is the `d = 0` case (`separatesAt_zero_iff`) — a strict generalization.
+- **MEASURED: `C₄` flags at `d=0` and ANSWERS at `d=1`** (`Regression.lean` §7 — do not delete); `C₇` likewise.
+  **Nothing was re-proved**: `①`/`②` are quantified over an arbitrary `Supply`, so raising `d` moved only
+  `Residue.Handled`'s boundary. That is the architecture working.
+- **⚠ COST IS `n^{O(d)}`** — poly for bounded `d`, **quasipoly at `d = Θ(log n)`, sub-exp at Spielman's
+  `d = Õ(n^{1/3})`: exactly the seal's ladder, and no better.** Measured on `C₇`: answers at `d=1` for **949 819**
+  vs **7 568** exhaustive — a 125× **net loss**. *Firing is not paying*, again. Not a `②` problem (the bound is
+  unconditional and the `n^d` sits honestly inside `c₂`); a **quality** problem.
+
+### 6.2b ▶ P3 — the ORBIT-PRUNED FIXPOINT: how the `n^d` becomes a SUM
+Nauty's orbit pruning **is** canonical *at the group level*, and that is the escape. The key identity:
+
+> **`rankSwap ψᵥ (g · ψ_w) = g · rankSwap ψᵥ ψ_w`** — changing a deepening choice *within an orbit of the group
+> already found* changes the candidate only by **left-multiplication by a known element**, so the **generated
+> group is unchanged**.
+
+So one may enumerate **one sequence per orbit under the group found so far**, iterate to a fixpoint, and still get
+a canonically-determined *group* — enough for `StallEquivariant` (which reads only the orbit partition, via
+`Consume.rep_eq_iff_wordReach`), hence enough for the guard. Under **localisation** each level has one orbit, the
+enumeration collapses to a **single path per branch**, and the cost becomes the **sum** `|cell| · d · n³`; without
+localisation it degrades gracefully back to the full enumeration. Note `CellIsOrbit` is stated via **`WordReach`**
+(a *word* in the generators), which is exactly what lets a pruned-away `α` survive as a product.
+**This is the real prize, and it reuses every P2 brick** (`deepCol`, `deepCandidate`, the reconstruction theorem,
+the equivariance machinery). Its poly bound will be *conditional on localisation* — which is fine: `②` stays
+unconditional because `supplyCost` is whatever the supply reports.
 - ⚠ **STATELESS, from `P1`.** `GensEquivariant` (which `①c` now provably needs) forbids an accumulating,
   history-dependent generator store. The supply must be a **pure function of `(adj, χ)`**.
 - Cost is a **SUM**: `n` levels × `|cell|` reps × `n³` refinement — no product. `supplyCost` bills it into
