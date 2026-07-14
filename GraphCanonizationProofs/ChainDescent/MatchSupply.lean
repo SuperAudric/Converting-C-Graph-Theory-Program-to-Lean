@@ -84,13 +84,14 @@ theorem lookData_col (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
 /-- **The construct-and-check candidate.** Individualize `v` and `w`, refine both; if both discretize, hand back the
 colour-match permutation. It is a *candidate only* — `Consume.verified` re-checks it edge-by-edge, so nothing here
 needs to be trusted. -/
+def matchFrom (dv dw : Refine.ColData n) : Option (Equiv.Perm (Fin n)) :=
+  if hv : Discrete dv.col then
+    if hw : Discrete dw.col then some (rankSwap dv.col dw.col hv hw) else none
+  else none
+
 def matchCandidate (adj : AdjMatrix n) (χ : Colouring n) (v w : Fin n) :
     Option (Equiv.Perm (Fin n)) :=
-  let ψv : Colouring n := (lookData adj χ v).col
-  let ψw : Colouring n := (lookData adj χ w).col
-  if hv : Discrete ψv then
-    if hw : Discrete ψw then some (rankSwap ψv ψw hv hw) else none
-  else none
+  matchFrom (lookData adj χ v) (lookData adj χ w)
 
 /-- **★★ THE ORACLE RECONSTRUCTS THE AUTOMORPHISM EXACTLY.**
 
@@ -127,8 +128,7 @@ theorem matchCandidate_eq_of_isColAut {adj : AdjMatrix n} {χ : Colouring n}
     rw [rankInv_spec _ hdw]
     rw [hψ]
     exact (vertexRank_transport α ((lookData adj χ v).col) u).symm
-  unfold matchCandidate
-  simp only []
+  unfold matchCandidate matchFrom
   rw [dif_pos hdisc, dif_pos hdw]
   congr 1
   exact Equiv.ext (fun u => by rw [rankSwap_apply]; exact hrank u)
@@ -137,19 +137,27 @@ theorem matchCandidate_eq_of_isColAut {adj : AdjMatrix n} {χ : Colouring n}
 
 /-- **★ THE COLOUR-MATCH SUPPLY.** Query the construct-and-check candidate on every ordered pair of branch vertices
 and hand back everything it built. Untrusted, as always: `Consume.verified` filters it through the decidable
-`IsColAut` check, so `consume_canonizer` continues to hold for it with no obligation whatsoever. -/
+`IsColAut` check, so `consume_canonizer` continues to hold for it with no obligation whatsoever.
+
+⚠ **The refinements are materialised ONCE, before pairing.** The obvious phrasing — `flatMap` over `v`, `filterMap`
+over `w`, calling `matchCandidate adj χ v w` — recomputes `lookData adj χ v` for **every pair**, i.e. `|cell|²`
+refinements where `|cell|` suffice. That is an `O(n)` factor in the *algorithm*, not merely in a test: measured, it
+was the difference between a 3.5-minute and a ~20-second canonization of `F12`. Pairing over the *materialised*
+`ColData` list keeps it at one refinement per branch. -/
 def matchSupply : Supply n := fun adj χ =>
-  ((branches χ).flatMap (fun v =>
-      (branches χ).filterMap (fun w => matchCandidate adj χ v w)),
-   -- one refinement per query, `|cell|²` queries
-   (branches χ).length * (branches χ).length
-     * (2 * CostModel.WarmRefine.warmRefineCost n + n * n))
+  let data : List (Fin n × Refine.ColData n) :=
+    (branches χ).map (fun v => (v, lookData adj χ v))
+  (data.flatMap (fun p => data.filterMap (fun q => matchFrom p.2 q.2)),
+   -- ONE refinement per branch, then `|cell|²` cheap rank-matches
+   (branches χ).length * CostModel.WarmRefine.warmRefineCost n
+     + (branches χ).length * (branches χ).length * (n * n))
 
 theorem mem_gens_matchSupply {adj : AdjMatrix n} {χ : Colouring n} {v w : Fin n}
     (hv : v ∈ branches χ) (hw : w ∈ branches χ) {π : Equiv.Perm (Fin n)}
     (h : matchCandidate adj χ v w = some π) : π ∈ gens (matchSupply (n := n)) adj χ := by
-  refine List.mem_flatMap.mpr ⟨v, hv, ?_⟩
-  exact List.mem_filterMap.mpr ⟨w, hw, h⟩
+  refine List.mem_flatMap.mpr ⟨(v, lookData adj χ v), ?_, ?_⟩
+  · exact List.mem_map.mpr ⟨v, hv, rfl⟩
+  · exact List.mem_filterMap.mpr ⟨(w, lookData adj χ w), List.mem_map.mpr ⟨w, hw, rfl⟩, h⟩
 
 /-- Everything the supply produces and the resolver keeps is a genuine automorphism (this is just
 `isColAut_of_mem_verified`, recorded here for the firing argument). -/
