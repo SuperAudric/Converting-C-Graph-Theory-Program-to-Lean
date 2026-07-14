@@ -1,5 +1,22 @@
 # Cost model — the Lean runtime cost framework and the poly bound
 
+> # ▶▶ ⚠ STATUS 2026-07-14 — **② IS DONE, AND UNCONDITIONALLY.** This doc is now BACKGROUND.
+>
+> The cost bound is no longer conditional and no longer lives here. **`Stall.descentCost_guard_le`: the guarded
+> descent is polynomial with NO hypothesis** — not on the graph, the supply, or the key. The reason is a *model*
+> correction, not a proof trick:
+>
+> > **Deferral is not a cheap mode of a healthy run — it IS the failure mode.** Every node consumes or forces; a node
+> > that can do **neither** has reached the mutual stall and *is* the unhandled residue. There is **no
+> > deferred-then-retried decision in the design**, hence **no exhaustive fallback to be polynomial *about***. A
+> > descent runs as a single path or it stops. **`poly` AND `flag`, never `poly` OR `exponential`.**
+>
+> The banked `n⁴` (`CanonForm.descentCost_le`) is against the **single-path** `spineCappedCanonizer` (`nbud = n`,
+> assume-VT) and does **NOT** transfer to a branching object. `ChainDescent/Cost.lean` + `ChainDescent/Stall.lean`
+> replace it. ⚠ **New obligation the flag creates: `Stall.StallEquivariant`** — a flag is *not* value-invisible, so
+> the oracle supply must be **equivariant** or `①c` is false (counterexample `#guard`ed in `Regression.lean`).
+> **Authoritative:** [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md) §3.
+
 > **What this is.** The design + build doc for the project's **cost model**: the Lean objects that turn
 > "poly time" from a meta-claim into a proven bound, serving obligation ②/③ of
 > [`GraphCanonizationProofs/Publication.lean`](../GraphCanonizationProofs/Publication.lean). It records the

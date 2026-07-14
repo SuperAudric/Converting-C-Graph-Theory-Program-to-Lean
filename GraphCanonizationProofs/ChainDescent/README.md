@@ -1,5 +1,9 @@
 # Lean proving reference — chain-descent canonizer
 
+> **▶▶▶ START AT [`docs/chain-descent-handoff-2026-07-14.md`](../../docs/chain-descent-handoff-2026-07-14.md)** — the
+> authoritative state of the canonizer track (①/②/③ all have real theorems; the frontier is **resolver strength**),
+> the **two retracted claims** you must not re-derive, and the trap list. This README is the module map only.
+
 Orientation for the Lean side: the module layout, how the Lean model maps to the
 C# implementation, the central modelling decisions, and what the model does and
 does not capture. For **what is currently proved**, read
@@ -33,8 +37,17 @@ The active library is this `ChainDescent/` split plus the top-level
 | `CFI.lean` | CFI gadgets, gauge flips (`cfiFlipAut`), the `Z₂^β` cycle space, the CFI-cov coverage instance |
 | `Group.lean` | permutation-group scaffolding |
 | **`CanonicalForm.lean`** | **the correctness SPEC** (mixed-composition Stage 0a): `IsCanonicalFormOpt = SoundOpt ∧ IsoInvariantOpt` on the *flagging* type, and the payoff **`complete_of_isCanonicalFormOpt`** — sound ∧ iso-invariant ⟹ **complete, for free**. `flag_iso_invariant_of_isoInvariantOpt` gives ①c free too. (`lexMin` is a legacy *optional* combinator — the spec is NOT a global lex-min.) |
-| **`Descend.lean`** | **★ THE OBJECT** (Stage 0b) + **the correctness proof** (Stage 2). `descend` = a **computable**, resolver-parameterized **branching** descent in `CostM`; `canonForm?` / `descentCost` are its `value` / `cost` projections, and **the executable IS this definition**. Capstone **`isCanonicalFormOpt_canonForm?`** ⟹ **①a/①b/①c discharged**, modulo `RefineEquivariant` + `Covering`. Key internals: computable leaf emit (`rankInv`/`leafMatrix`, since `rankPerm` is noncomputable), **index-free `indivOne`** (the X3 cut), equivariant `targetColour`, and `aggregate_perm` (the branch list is index-ordered, so the aggregate must be a permutation-invariant minimum). |
-| `Phase2Handoff.lean` | the `Phase2.Solver` / `Sound` / `IsoInvariant` **contract seam** the rigid solver fills. ⚠ Its `RRU` namespace (reachability apparatus) is **RETIRED** — content-free; do not build on it. |
+| **`Descend.lean`** | **★ THE OBJECT** (Stage 0b) + **the correctness proof** (Stage 2). `descend` = a **computable**, resolver-parameterized **branching** descent in `CostM`; `canonForm?` / `descentCost` are its `value` / `cost` projections, and **the executable IS this definition**. Capstone **`isCanonicalFormOpt_canonForm?`** ⟹ **①a/①b/①c discharged**, modulo `RefineEquivariant` + **`NarrowTransport`** (the resolver contract — ⚠ **NOT** `Covering`, which is **retired**: `canonForm?_eq_deferAll_of_covering` proves a covering resolver is *value-invisible*). Key internals: computable leaf emit (`rankInv`/`leafMatrix`, since `rankPerm` is noncomputable), **index-free `indivOne`** (the X3 cut), equivariant `targetColour`, and `aggregate_perm`. |
+| **`Refine.lean`** | the **encode-free refiner** (`encodeFree`/`encodeFreeFast`). Discharges *both* refiner obligations ⟹ **`exhaustive_canonizer`** (unconditional canonical form that answers). ⚠ Holds the **`ColData`** cure for the eta-expansion trap. |
+| **`Consume.lean`** | the **ORACLE resolver** (the `Covering` route). Untrusted `Supply` + a **decidable** `IsColAut` check ⟹ `consume_canonizer` for **every** supply. Firing: `consume_singleton_of_cellIsOrbit` (engine: `orbit_closed` — the orbit BFS *converges*), graded form `rep_eq_of_wordReach`. |
+| **`MatchSupply.lean`** | the **cascade oracle as a `Supply`** — `matchOracle`'s construct-and-check colour match, rebuilt over `(adj, χ)`. **`matchCandidate_eq_of_isColAut`**: it *reconstructs the automorphism exactly*. ⚠ **One step is not enough — it flags on a 7-cycle** (`Discretizing` excludes cycles). |
+| **`Force.lean`** | the **RIGID/FORCE resolver route** (`NarrowEquivariant`), as the combinator **`forceBy key`**. Sole ① obligation: **`KeyEquivariant`**. Firing: `forceBy_singleton_of_separating`; ceiling: `keyV_aut_invariant` (an equivariant key is **constant on orbits**). |
+| **`Composite.lean`** | **THE MIXED RESOLVER** `forceThenConsume` — both moves at one cell. Needed the **third** contract route (`CoveringOfAt` + `NarrowFnEquivariant`), since it is neither `Covering` nor `NarrowEquivariant`. |
+| **`Cost.lean`** | **②** — `descentCost_le_of_resolved`, `poly_of_cells_resolved`. |
+| **`Stall.lean`** | the **mutual-stall flag** (`guard`) ⟹ **`descentCost_guard_le`: UNCONDITIONALLY polynomial**. ⚠ Introduces the new obligation **`StallEquivariant`** (a flag is *not* value-invisible ⟹ the supply must be equivariant, or ①c is false). |
+| **`Residue.lean`** | **③** — `Handled` (**positive** capability), `Residue := ¬Handled` (a *definition*, not an `opaque` atom), `residue_if_flag`, `residue_nonvacuous`. |
+| `Regression.lean` / `PerformanceTest.lean` | the **build-gating** regression suite (~12 s, in `build.sh`) and the **off-path** measurements (run on demand). |
+| `Phase2Handoff.lean` | the `Phase2.Solver` / `Sound` / `IsoInvariant` **contract seam**. ⚠ **Superseded**: the rigid solver now enters as a **`Force.Key`**, not a `phase2` function. Its `RRU` namespace is **RETIRED** — content-free; do not build on it. |
 
 > This table is the **core** substrate only. The forms-graph node-4 work is further modules in `build.sh` (not listed
 > here): `CascadeAffine` + the ~14 pair-route modules (`…AffinePolarSeal`, the quasipoly `VO^ε` seal) and the **Route C**

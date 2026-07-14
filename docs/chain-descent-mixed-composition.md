@@ -1,5 +1,17 @@
 # Mixed rigid + symmetric handling — the Lean composition track
 
+> # ▶▶▶ SUPERSEDED BY [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md)
+>
+> **The track is complete**: Stages 0–4 are done, plus `③`. Read the handoff for the authoritative state and for the
+> **two retracted claims** ("a perfect key cannot exist"; "fusion is dissolved") — both are wrong and both appear in
+> earlier prose below. Everything here is retained as the design record.
+>
+> Landed since this doc's STATUS blocks were written: **`Composite.lean`** (the mixed resolver + the **third**
+> contract route `CoveringOfAt`), **`Cost.lean`** (②), **`Stall.lean`** (the mutual-stall flag ⟹ **unconditionally
+> polynomial**; new obligation **`StallEquivariant`**), **`Residue.lean`** (③ — `Handled` positive, `Residue` a
+> *definition*), **`MatchSupply.lean`** (the cascade oracle — which **flags on a 7-cycle**), and the
+> `Regression`/`PerformanceTest` split.
+
 > **What this is.** The scoping plan for pointing the **Lean** canonizer at the case that actually
 > dominates: a residue with **both** symmetric decisions (consumed by Phase 1) **and** rigid decisions
 > (solved by Phase 2) — i.e. `canonForm? = phase2 ∘ phase1`, proven correct on **mixed** inputs. It is the

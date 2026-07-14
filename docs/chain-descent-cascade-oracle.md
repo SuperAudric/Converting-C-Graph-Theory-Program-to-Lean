@@ -1,5 +1,24 @@
 # Chain descent — the a-priori cascade oracle (spec + design)
 
+> # ▶▶ ⚠ STATUS 2026-07-14 — the oracle is WIRED IN, and **ONE STEP IS NOT ENOUGH**
+>
+> `matchOracle`'s **construct-and-check** colour match has been rebuilt over the descent's own `(adj, χ)` vocabulary
+> as **`ChainDescent/MatchSupply.lean`** (`matchSupply : Consume.Supply`). It is *not* a port — `Spine.IsAut` is
+> literally `Consume.IsColAut`'s first conjunct, and the `(P, D)` chain bookkeeping is replaced by the colouring `χ`.
+> - **`matchCandidate_eq_of_isColAut`** — the construction **reconstructs the automorphism EXACTLY**, not merely
+>   *an* automorphism.
+> - **`cellIsOrbit_matchSupply`** — at a **`Discretizing`** node it certifies an orbit cell (this doc's `hdisc`;
+>   **`CellsAreOrbits`-free**, i.e. `matchOracle_fires_of_insertDiscrete`'s honest strength).
+> - Being **structural**, it also repairs **`①c`** (`Stall.StallEquivariant`).
+>
+> **⚠⚠ MEASURED: it FLAGS ON A 7-CYCLE.** `Discretizing` is **far stronger than it sounds — it EXCLUDES CYCLES**:
+> individualizing one vertex of `C₇` leaves `{0},{1,6},{2,5},{3,4}`, not discrete ⟹ the oracle constructs nothing.
+> **This is exactly why §C.6/§C.8's MULTI-STEP forms (`matchOracleSet`/`matchOracleSeq`) exist**, and exactly what
+> **`lockstep_disc_imp_stab_trivial`** already proves: a one-step discretizing colour match **cannot** harvest a
+> multi-step moved orbit ⟹ **cross-branch harvest**. ⟹ **the residue is currently inflated by this gap, not by
+> anything hard.** Next build = the multi-step supply (the real T-C).
+> **Authoritative:** [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md) §6.2.
+
 The **a-priori cascade oracle** is the genuine version of the
 component that resolves **true-symmetry cells**: given a target cell,
 certify which representatives are in the same automorphism orbit and

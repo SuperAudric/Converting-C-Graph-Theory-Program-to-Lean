@@ -1,5 +1,23 @@
 # Remaining work — the living tracker (modulo set · citation replacement · IR solver)
 
+> # ▶▶▶ SUPERSEDED BY [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md)
+>
+> That doc is the authoritative "what's left". **①/②/③ all have real theorems about the real object**; the frontier
+> is **resolver strength**, plus one object-level defect (the target-cell selector is blind to resolvability).
+> Everything below is retained as the blow-by-blow record of how it got there.
+>
+> **The four open items, in priority order** (handoff §6):
+> 1. **Resolver-aware cell selector** — `descend` needs a `sel` parameter. *Design approved, not built.* Fixes
+>    fusion's live bite; `Stall.stalled` currently means "the **least-colour** cell stalled", not "the node stalled".
+> 2. **The MULTI-STEP / cross-branch supply** (the real T-C) — `matchSupply` is one-step and **flags on a 7-cycle**.
+>    The residue is currently **inflated by this gap, not by anything hard**.
+> 3. **The rigid key** — nothing exists beyond `lookaheadKey`; §11.12's P1–P4 not started.
+> 4. **The `Publication` opaque-swap** — now **unblocked** (`Residue.Residue` is a *definition*, so
+>    `unhandledResidue_nonvacuous` is provable; it was undischargeable *in principle* before).
+>
+> Also open: **the duplicate-refine loss** (force *fires* but does not *pay*) — the same `descend` signature change
+> item 1 needs. Do them together.
+
 > ## ▶▶▶ ★★★ ② IS DONE — THE DESCENT IS **UNCONDITIONALLY POLYNOMIAL** (`ChainDescent/Stall.lean`, 2026-07-14)
 >
 > **The correction that closed it (user, 2026-07-14).** The `Cost.lean` bound below reads as *conditional* — poly

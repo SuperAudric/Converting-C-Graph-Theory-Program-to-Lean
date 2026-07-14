@@ -1,5 +1,23 @@
 # The IR-blind-spot solver — canonizing the rigid residue in polynomial time
 
+> # ▶▶ ⚠ STATUS 2026-07-14 — §11.12's Lean witness is a **`Force.Key`**, and NOTHING is built yet
+>
+> The rigid solver no longer enters as a `phase2` function. It enters as a **`Force.Key`** — a vertex invariant the
+> forcing rule ranks branches by — and its **only** `①` obligation is **`KeyEquivariant`** (the key never breaks ties
+> by vertex index). `Force.force_canonizer` then gives ①a/①b/①c + totality unconditionally.
+> - **P1/P3 are NOT `①` obligations** (a weak key narrows less, which is *sound*) — but **relocation is not
+>   elimination**: they keep their full content as **`②`/firing** obligations, now stated exactly as
+>   **`Force.forceBy_singleton_of_separating`** (*a key that separates the cell removes ALL branching*), with the
+>   graded form `forceBy_narrows_of_key_ne` (*any* separated pair strictly shrinks the fan-out).
+> - **Ceiling** (`Force.keyV_aut_invariant`): an equivariant key is **constant on automorphism orbits** ⟹ force
+>   **provably cannot fire on a symmetric cell**. That is consume's domain — complementary, non-overlapping.
+> - **⚠ NOTHING IS BUILT beyond the demo `lookaheadKey`.** P1–P4 are not started in Lean. **Build the ORACLE side
+>   first** — force is its mirror, so a design error there surfaces by comparison (that is how the one-step oracle's
+>   7-cycle failure was found).
+> - ⚠ `lookaheadKey` **fires but does not pay** (`F12`: 22477 exhaustive → 26066 forced) — it recomputes exactly the
+>   refinement the child then redoes. **Authoritative:**
+>   [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md) §6.3–§6.4.
+
 > **What this is.** The plan for the **rigid-residue solver** that consumes the output of the deferral
 > architecture's Phase 2 (`chain-descent-deferred-decisions.md` §7, the "rigid-residue hand-off" slot —
 > *named but never built*). Goal: canonize a **rigid** (trivial-`Aut`) residue — including the

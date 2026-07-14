@@ -100,7 +100,30 @@ close it — is set out in
 
 ---
 
-## 2. Where the project is now (2026-07-12)
+## 2. Where the project is now
+
+> # ▶▶▶ READ [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md) FIRST
+>
+> It is the **authoritative** state of the canonizer track and supersedes this section wherever they disagree.
+> The one-paragraph version:
+>
+> **①, ② and ③ all have real theorems about the real object, and every remaining gap is a *firing* gap.** The
+> canonizer (`Descend.descend`) is sound, iso-invariant, complete, and — once **stall-guarded** (`Stall.guard`) —
+> **unconditionally polynomial**, flagging exactly where neither resolver can act. The residue (`Residue.Residue`) is
+> **defined** as the complement of a positive capability predicate, so it is not an asserted atom and it **shrinks**
+> whenever a resolver gets stronger, with no re-proof. **What is missing is resolver STRENGTH:** the built oracle
+> (`MatchSupply.matchSupply`) is a *one-step* colour match that **flags on a 7-cycle**, and the built rigid key is a
+> look-ahead heuristic. Plus one known object-level defect: the **target-cell selector is blind to resolvability**
+> (fusion's live bite — handoff §6.1).
+>
+> **⛔ Two claims made and RETRACTED this session — do not re-derive them** (handoff §5):
+> 1. *"A perfect key cannot exist"* — **circular** (it presupposes GI ∉ P). Correct: **a perfect key *is* GI ∈ P** —
+>    the route's **target**, not a barrier. **Any "X ⟹ GI ∈ P, therefore X is impossible" argument is BANNED.**
+> 2. *"Fusion is dissolved"* — **wrong**. Fusion is a dependency of **exposure** (a ring's rigid decisions surface
+>    only after `{root, direction}` are consumed; Chang-A has 24 automorphisms certifiable only *after* rigid
+>    decisions), **not** a meta-product over orderings — and it has a live bite (§6.1 above).
+
+### 2b. The older map (2026-07-12) — kept for context
 
 > **This section is a map. The authoritative current state is the STATUS block at the top of each linked
 > `chain-descent-*.md`, plus [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) for
@@ -378,6 +401,9 @@ handoff sharpens** ([`chain-descent-seal-handoff.md`](./chain-descent-seal-hando
 Read in this sequence; each doc has a STATUS block (its current state) at the top.
 
 **Core (read in full, in order) — the CURRENT frame:**
+0. **★ [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md) — READ FIRST.** The
+   authoritative state of the canonizer: ①/②/③ all proved about the real object; the frontier is **resolver
+   strength**; the four open items; the **two retracted claims**; and the trap list. Everything below is context.
 1. **This doc** — the idea + current state.
 2. [`chain-descent-endgame-spec.md`](./chain-descent-endgame-spec.md) — the endgame frame (§1a: the interleaved
    fixpoint = two moves, one wall), the six `Publication.lean` obligations, and the sequencing (§5).
