@@ -321,6 +321,16 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
     node. **⟹ `theorem_1_HOR_*` / the four form families / `viaSpielman` now literally import.** (`Refine.constP n` *is*
     `fun _ _ => POE.unknown`, the seal's own PMatrix — no translation needed.) The remaining gap to `Residue.Handled`
     is now only that the seal hypotheses hold **at every reachable node** (a whole-descent statement), not vocabulary.
+  - **▶ TODO — `viaSpielman` POC import (small; mostly proof-of-concept).** `Cascade.SeparatesAtBoundedBase S bound`
+    is **definitionally** `CascadesAt (schemeAdj S) (Refine.constP n) bound` (same `∃ S₀ ≤ bound, Discrete(warmRefine ∘
+    individualizedColouring)`; `constP n = fun _ _ => POE.unknown`). So `cascadesFrom_pathCol_of_cascadesAt` /
+    `cellIsOrbit_pathCol_of_seal` apply **directly** at `adj := schemeAdj S`: a one-lemma bridge
+    `SeparatesAtBoundedBase S bound → CascadesAt (schemeAdj S) (constP n) bound` (unfold) then the P2c capstone ⟹
+    `deepMatchSupply bound` fires on the scheme's own adjacency at a localising node. This demonstrates the **full
+    ladder including the sub-exp top** (Spielman's `bound = Õ(n^{1/3})`); it is NOT the poly workhorse — the **poly**
+    pieces (`theorem_1_HOR_cfi_oddDeg` at bounded tw, `theorem_2_HOR_*` for the metric/DRG family) are what the real
+    construction is built from. ⚠ This fires on `schemeAdj S`, not yet on an arbitrary graph *realizing* S — that last
+    hop is the `RouteCTransport.separatesAtBoundedBase_transport` layer, out of scope for the POC.
   `matchSupply` is the `d = 0` case (`separatesAt_zero_iff`) — a strict generalization.
 - **MEASURED: `C₄` flags at `d=0` and ANSWERS at `d=1`** (`Regression.lean` §7 — do not delete); `C₇` likewise.
   **Nothing was re-proved**: `①`/`②` are quantified over an arbitrary `Supply`, so raising `d` moved only
@@ -363,21 +373,34 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
 > that is what makes it a sum and not merely a `|cell|`-fold saving). And `CellIsOrbit` is stated via **`WordReach`**
 > — *a word in the generators* — so the pruned-away element survives as a **product**.
 >
-> **▶ WHAT IS LEFT (P3c):** build `prunedSupply d` as an orbit-pruned **fixpoint**, then prove the single theorem
-> **`SameOrbits (prunedSupply d) (deepMatchSupply d)`** — `①`/`②`/`③` then transfer for free.
+> **▶ WHAT IS LEFT (P3c):** build `prunedSupply d` (online orbit-pruned harvest — see the design below), then prove the
+> single theorem **`SameOrbits (prunedSupply d) (deepMatchSupply d)`** — `①`/`②`/`③` then transfer for free.
 >
-> **⚠⚠ COST TRAP — the §6.2b sketch below ("prune the table by the orbits") CANNOT deliver the win, and a proof of
-> it would land axiom-clean while being measurably no cheaper (2026-07-15 audit).** `deepMatchSupply`'s cost is
-> `|table|·(d+1)·warmRefineCost + |table|²·n²` with `|table| = |cell|·|allSeqs n d| ≈ |cell|·n^d`. **The `n^d` is in
-> `|table|` itself — you pay it to *build* the table, before any pruning runs.** Pruning a materialized table only
-> attacks the `|table|²` term. **The fix is structural: never materialize.** Grow level by level and prune as you
-> grow — `kept₀ = branches χ`, `keptₖ₊₁` = one rep per ⟨G⟩-orbit of `keptₖ × Fin n`, harvest from the discrete
-> entries each level — so `|keptₖ₊₁| ≤ |keptₖ|·n` and under localisation `|keptₖ| = O(#orbits)` ⟹ the promised **sum**.
-> Second-order: with `G = ∅` at level 0 **no pruning is possible until the first discrete entry appears** (`matchCol`
-> needs both sides `Discrete`), i.e. depth `d` under `SeparatesAt d` — so a *single* level-by-level pass still pays
-> `n^d`. **The fixpoint (re-seed with the harvested group, re-run) is what recovers localisation.** That is a
-> *different object* from "prune the table." **⟹ MEASURE FIRST:** `#eval prunedSupply`'s cost on `C₇` and beat
-> 949 819 *before* investing in `SameOrbits`; if it doesn't beat it, the object is wrong and the proof is wasted.
+> **✅ MEASURED — the headroom is REAL (2026-07-15 derisking, root colouring of `Cₙ`, `d=1`):**
+>
+> | graph | `T`=table | `#orbits(G)` | `vPruned` (v=rep) | `\|allSeqs\|` | `seqReps` (seqs up to `G`) | raw `\|G\|` | `\|G.dedup\|` |
+> |---|---|---|---|---|---|---|---|
+> | `C₅` | 30 | **1** | 6 | 6 | **2** | 400 | 10 (=`\|D₅\|`) |
+> | `C₇` | 56 | **1** | 8 | 8 | **2** | — | 14 (=`\|D₇\|`) |
+>
+> Three findings, all load-bearing: **(a)** `#orbits(G) = 1` — full localisation confirmed (the whole cell is one
+> orbit). **(b)** the **sequence enumeration collapses**: `seqReps = 2` while `|allSeqs 7 1| = 8` — the depth-`d`
+> sequences are only a **handful of `G`-orbits**, not `n^d`. This is the `n^d → sum` collapse, *measured*, and it
+> grows with `d`. **(c)** representative work `≈ vPruned · seqReps ≈ 8·2 = 16` entries vs `T = 56`, so the match term
+> is `≈ reps² ≈ 256` vs `T² = 3136` — **~12× at `d=1`, widening with `d`.** ⟹ **P3c is viable; build it.**
+>
+> **⚠ THE §6.2b BATCH-FIXPOINT SKETCH IS SUPERSEDED — do ONLINE pruning instead (2026-07-15).** The earlier worry
+> ("with `G=∅` no pruning until depth `d`, so a single pass pays `n^d`; only the *fixpoint* recovers it") is resolved
+> by **online** pruning: maintain the growing verified group `G` *during* one pass and skip an entry the moment it is
+> a `G`-orbit-mate of one already processed. `G` **saturates early** (after `≈ reps²` matches reveal `Dₙ`), and every
+> later entry is skipped — so the discovery cost is `O(reps²)`, not `O(T²)`, in a **single pass, no batch re-run.**
+> This wins even at `d=1` (which the batch-fixpoint could not). The `SameOrbits` proof still rides the **P3b license**:
+> a skipped entry's candidate is `g·c` with `g` a verified word ⟹ the generated group is unchanged.
+>
+> **▶ ORTHOGONAL FREE WIN spotted while measuring:** `deepMatchSupply`'s raw candidate list is **massively
+> duplicated** — `|G| = 400` where `|G.dedup| = 10` on `C₅`. A `List.dedup` on the candidate list (or emitting only
+> distinct `matchCol` results) is a ~40× constant-factor cut on the harvest, independent of pruning, and needs **no**
+> `SameOrbits` (same *set* of generators ⟹ same orbits trivially). Low-hanging; do it first.
 >
 > **Brick P3c needs regardless:** the pruning license hypothesis is `IsColAut adj χ g` for `g` a **word** in the
 > verified generators, but `Consume` only has `isColAut_of_mem_verified` (a *single* generator). "`IsColAut` is a
