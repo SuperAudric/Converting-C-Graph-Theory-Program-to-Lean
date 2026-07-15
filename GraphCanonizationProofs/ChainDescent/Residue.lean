@@ -32,16 +32,19 @@ can be neither inhabited nor refuted).
 
 `Handled` is where **all** the open work now lives, and it is exactly the two halves:
 
-* **consume's half** — instantiate `Supply` from `matchOracle` / the cascade harvest, and prove its firing
-  (`CellIsOrbit`) on everything except the Cameron / node-4 obstruction. *Nothing is wired in today*: the only
-  supplies that exist are demo constants, so `Handled` currently holds only where the demo supply happens to
-  generate `Aut`.
+* **consume's half** — a `Supply` and its firing (`CellIsOrbit`) on everything except the Cameron / node-4
+  obstruction. Two structural supplies now exist — `MatchSupply.matchSupply` (fires at a `Discretizing` node,
+  i.e. regular-action only) and `DeepMatchSupply.deepMatchSupply d` (fires under `SeparatesAt d` — the seal's
+  bounded-depth ladder). **What is still missing is the discharge of `Handled` from a *structural* hypothesis:**
+  no theorem yet takes the seal's `CascadesAt` / `SeparatesAtBoundedBase` to `DeepMatch.SeparatesAt`, so the
+  sealed families (`theorem_1_HOR_*`, `viaSpielman`) do not yet populate `Handled` (that bridge is `P2b`;
+  handoff §6.2).
 * **force's half** — a solve-derived `Key` and its separation theorem (`KeySeparates`), i.e. §11.12's P1/P3.
   *Nothing is wired in today* beyond `lookaheadKey`.
 
 Both are **firing** obligations. Neither can break `①` (soundness is proved for *every* supply and *every*
-equivariant key), and neither can break the polynomial bound (which is unconditional). They only move the boundary
-of `Handled`.
+equivariant key), and neither can break the single-path node bound (unconditional; the wall-clock cost is
+polynomial iff the supply's per-call cost is). They only move the boundary of `Handled`.
 -/
 
 namespace ChainDescent

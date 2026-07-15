@@ -109,7 +109,9 @@ close it — is set out in
 >
 > **①, ② and ③ all have real theorems about the real object, and every remaining gap is a *firing* gap.** The
 > canonizer (`Descend.descend`) is sound, iso-invariant, complete, and — once **stall-guarded** (`Stall.guard`) —
-> **unconditionally polynomial**, flagging exactly where neither resolver can act. The residue (`Residue.Residue`) is
+> a **single path of ≤ `n+1` nodes on every input** (so no exponential blow-up; the *node count* is unconditional,
+> the wall-clock is polynomial iff the supply's per-call cost is — see handoff §3), flagging exactly where neither
+> resolver can act. The residue (`Residue.Residue`) is
 > **defined** as the complement of a positive capability predicate, so it is not an asserted atom and it **shrinks**
 > whenever a resolver gets stronger, with no re-proof.
 >

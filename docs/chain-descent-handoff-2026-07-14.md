@@ -88,8 +88,15 @@ domains; graphs where **neither** fires are the residue.
 > polynomial *about***. A descent runs as a **single path** or it **stops**.
 
 `Stall.guard R` flags at any node the resolvers leave with ≥ 2 branches ⟹ **`resolvedAll_guard` holds BY
-CONSTRUCTION** ⟹ **`Stall.descentCost_guard_le` is polynomial with NO hypothesis** (not on the graph, the supply, or
-the key). **`poly` AND `flag`, never `poly` OR `exponential`.**
+CONSTRUCTION** ⟹ the descent is a **single path of ≤ `n+1` nodes on every input** — no exponential blow-up is
+possible. **`poly` AND `flag`, never `poly` OR `exponential`.**
+
+> **⚠ READ THE THEOREM EXACTLY.** `Stall.descentCost_guard_le` concludes `descentCost ≤ c₁ + (n+1)·(1+c₁+c₂)` *from*
+> `hrf : (rf adj χ).2 ≤ c₁` and **`hR : ∀ χ B, (R adj χ B).2 ≤ c₂`**. What is unconditional is the **node count**
+> (single path ⟹ ≤ `n+1` nodes, no dependence on the graph/supply/key). The **total** cost is polynomial **iff the
+> per-node supply cost `c₂` is** — a hypothesis, not a conclusion. This matters: with `deepMatchSupply d` the supply's
+> own per-call cost is `n^{O(d)}` (§6.2), so "unconditionally polynomial" is true of the *number of nodes* and false
+> of the *wall-clock* until the supply is cheap. The whole frontier (§6.2b, `P3c`) is making `c₂` small.
 
 **★ No `descend` signature change was needed.** `aggregate [] = none`, so a resolver **already has a flag channel**:
 return the *empty* narrowing and the node emits `none`, which propagates to the root.
@@ -191,7 +198,13 @@ families, `reachesRigidOrCameron_*`, Spielman's `SeparatesAtBoundedBase` are now
 results are *imports*, not re-proofs. **This is the answer to "reusable, else re-provable as parallel theorems":
 reusable.**
 
-### 6.1 ⚠ The target-cell selector is BLIND to resolvability (fusion's live bite) — **design approved, not built**
+### 6.1 ⚠ The target-cell selector is BLIND to resolvability (fusion's live bite) — **design approved, not built; do AFTER `P3c`**
+> **⚠ ORDERING (2026-07-15 audit): this comes AFTER `P3c`, not "together" as an earlier note said.** A
+> resolver-aware selector must probe the supply **per cell**. With the unpruned `deepMatchSupply d` that probe is
+> `n^{O(d)}` *per cell*, so the selector multiplies the supply cost by the cell count — the "product-not-sum risk"
+> below, made concrete. With a **pruned** supply the probe reuses the already-harvested group, so the risk largely
+> evaporates. Build the cheap supply first.
+
 `descend` targets the **least non-singleton colour** (`branches`/`targetColour`) — a fixed rule that **does not ask
 whether the resolvers can act on that cell**. The guard then flags if *that* cell is unresolvable. But a node can
 carry several non-singleton cells, and exposure-dependency is exactly:
@@ -286,8 +299,28 @@ individualization sequence of length `≤ d` on both sides and colour-match all 
 because the search space is characterised **purely by length** (`mem_allSeqs_map`), so `σ` maps it onto itself.
 `lockstep_disc_imp_stab_trivial` does not apply: it refutes an equivariant *choice function*, and there is none.
 - **Firing = `SeparatesAt adj χ d`** — every branch vertex plus *some* `≤ d` more discretizes. By **P0's
-  confluence** this is the *same* condition as the cascade oracle's `CascadesAt` / the seal's
-  `SeparatesAtBoundedBase`, so the two oracles fire under identical hypotheses and `theorem_1_HOR_*` populates it.
+  confluence** this is the same condition as the cascade oracle's `CascadesAt` / the seal's `SeparatesAtBoundedBase`.
+  **✅ P2b (step 1) LANDED — `ChainDescent/SealDepthBridge.lean` (2026-07-15, axiom-clean, in `build.sh`).** Until it,
+  **no theorem produced `SeparatesAt`** (it was only `#guard`ed on cycles), so `SealBridge` bridged only
+  **localisation** (`CellsAreOrbits → horb`) and the sealed families could not populate `Residue.Handled`. The bridge
+  is one monotonicity fact — *individualizing more only refines, and refining a discrete colouring keeps it discrete*
+  (`deepCol_cons_refines`, via `warmRefineR_mono` transferred through `SealBridge.warmRefineR_samePartition`):
+  - **`separatesAt_of_cascadesFrom`** — `CascadesFrom adj χ k ⟹ SeparatesAt adj χ k`, **same bound `k`** (the witness
+    sequence for *every* branch vertex is the one set `S₀.toList` — prepending the branch vertex only refines).
+  - **`cellIsOrbit_of_cascadesFrom_of_horb`** — depth (`CascadesFrom`) + localisation (`horb`, imported by
+    `SealBridge.horb_of_cellsAreOrbits`) ⟹ `deepMatchSupply k` **fires** at that node. The depth analogue of P0's
+    `cellIsOrbit_of_cellsAreOrbits`.
+  - **✅ P2c LANDED — same file, §4 (2026-07-15, axiom-clean).** The connection is a single **exact equality**, not a
+    partition argument: **`deepCol adj (pathCol adj p) s = pathCol adj (s.reverse ++ p)`** (`deepCol_pathCol`) —
+    deepening the descent's node colouring is *literally* the colouring at the longer committed path, because
+    `pathCol adj (v :: p)` is definitionally `warmRefineR adj (indivOne (pathCol adj p) v)` = `deepCol`'s step. Then
+    `SealBridge.pathCol_samePartition` reads the partition as `warmRefine ∘ individualizedColouring`, and a superset
+    individualization stays discrete ⟹ **`cascadesFrom_pathCol_of_cascadesAt`**: the seal's `CascadesAt adj (constP n)
+    k` gives `CascadesFrom` at **every** descent node from one global `S₀`. Packaged: **`cellIsOrbit_pathCol_of_seal`**
+    — depth (`CascadesAt`) **and** localisation (`CellsAreOrbits`), both seal imports, fire `deepMatchSupply k` at the
+    node. **⟹ `theorem_1_HOR_*` / the four form families / `viaSpielman` now literally import.** (`Refine.constP n` *is*
+    `fun _ _ => POE.unknown`, the seal's own PMatrix — no translation needed.) The remaining gap to `Residue.Handled`
+    is now only that the seal hypotheses hold **at every reachable node** (a whole-descent statement), not vocabulary.
   `matchSupply` is the `d = 0` case (`separatesAt_zero_iff`) — a strict generalization.
 - **MEASURED: `C₄` flags at `d=0` and ANSWERS at `d=1`** (`Regression.lean` §7 — do not delete); `C₇` likewise.
   **Nothing was re-proved**: `①`/`②` are quantified over an arbitrary `Supply`, so raising `d` moved only
@@ -330,11 +363,30 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
 > that is what makes it a sum and not merely a `|cell|`-fold saving). And `CellIsOrbit` is stated via **`WordReach`**
 > — *a word in the generators* — so the pruned-away element survives as a **product**.
 >
-> **▶ WHAT IS LEFT (P3c), and it is now pure combinatorics:** build `prunedSupply d` as an orbit-pruned **fixpoint**
-> (prune the `(branch, sequence)` table by the orbits of the group found so far; harvest; repeat until stable —
-> monovariant = the number of orbits on the table, which strictly decreases, so `|table|` rounds suffice, exactly the
-> shape of `Consume.orbit_closed`'s convergence proof), then prove the single theorem
-> **`SameOrbits (prunedSupply d) (deepMatchSupply d)`**. Everything else is already done.
+> **▶ WHAT IS LEFT (P3c):** build `prunedSupply d` as an orbit-pruned **fixpoint**, then prove the single theorem
+> **`SameOrbits (prunedSupply d) (deepMatchSupply d)`** — `①`/`②`/`③` then transfer for free.
+>
+> **⚠⚠ COST TRAP — the §6.2b sketch below ("prune the table by the orbits") CANNOT deliver the win, and a proof of
+> it would land axiom-clean while being measurably no cheaper (2026-07-15 audit).** `deepMatchSupply`'s cost is
+> `|table|·(d+1)·warmRefineCost + |table|²·n²` with `|table| = |cell|·|allSeqs n d| ≈ |cell|·n^d`. **The `n^d` is in
+> `|table|` itself — you pay it to *build* the table, before any pruning runs.** Pruning a materialized table only
+> attacks the `|table|²` term. **The fix is structural: never materialize.** Grow level by level and prune as you
+> grow — `kept₀ = branches χ`, `keptₖ₊₁` = one rep per ⟨G⟩-orbit of `keptₖ × Fin n`, harvest from the discrete
+> entries each level — so `|keptₖ₊₁| ≤ |keptₖ|·n` and under localisation `|keptₖ| = O(#orbits)` ⟹ the promised **sum**.
+> Second-order: with `G = ∅` at level 0 **no pruning is possible until the first discrete entry appears** (`matchCol`
+> needs both sides `Discrete`), i.e. depth `d` under `SeparatesAt d` — so a *single* level-by-level pass still pays
+> `n^d`. **The fixpoint (re-seed with the harvested group, re-run) is what recovers localisation.** That is a
+> *different object* from "prune the table." **⟹ MEASURE FIRST:** `#eval prunedSupply`'s cost on `C₇` and beat
+> 949 819 *before* investing in `SameOrbits`; if it doesn't beat it, the object is wrong and the proof is wasted.
+>
+> **Brick P3c needs regardless:** the pruning license hypothesis is `IsColAut adj χ g` for `g` a **word** in the
+> verified generators, but `Consume` only has `isColAut_of_mem_verified` (a *single* generator). "`IsColAut` is a
+> subgroup" (mul/inv/one closure) is three short missing lemmas.
+>
+> **(Original sketch, retained for the mechanism — but see the trap above for why "prune the table" is the wrong
+> object):** prune the `(branch, sequence)` table by the orbits of the group found so far; harvest; repeat until
+> stable — monovariant = the number of orbits on the table, which strictly decreases, so `|table|` rounds suffice,
+> exactly the shape of `Consume.orbit_closed`'s convergence proof.
 
 ---
 
