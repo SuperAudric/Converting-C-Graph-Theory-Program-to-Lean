@@ -19,6 +19,20 @@
 **Policy (user).** Eventually *all* citations except possibly **G3** (Babai / CFSG) are to be fully built in Lean;
 G3 may stay cited (it is CFSG-based). Everything else is a discharge target — some already have routes.
 
+**⚠ CORRECTION PASS (2026-07-16) — two citation predicates were FALSE AS FORMALIZED; both fixed in place.**
+An audit (M1 applied retroactively) found: (1) **`ConePreservingCollineationIsSemiSimilitude`** asserted the
+semi-similitude conclusion for an arbitrary *pointwise* cone-preserving bijection — refuted by a transposition of
+two anisotropic vectors; corrected to the **difference-cone** antecedent (what a graph iso supplies) with a
+semi-affine conclusion (§3.3). (2) **`JointVarietyDeterminesFamily`** quantified over ALL jointly-nondegenerate
+families with no span hypothesis — refuted by any anisotropic family (cone `{0}` ⟹ hypothesis vacuous); corrected
+by stating the projective-normality span + independence antecedents, after which it is **proved outright**
+(`jointVarietyDeterminesFamily_holds`) and the carried content moves to the per-family span facts. In both cases
+the *consumers* never needed the false strength — the graph-iso instantiations supply the corrected antecedents.
+Until the fix the carriers were vacuously true and wiring the `Publication.lean` axioms to either predicate would
+have made the axiom system **inconsistent**. Related scope corrections: the `hSpielman` gloss (claw-bounded SRGs
+only — exceptional Steiner/Latin-square families are `Θ(√n)`-base and exit via Cameron) and the G3 threshold note
+(quasi-poly instantiation = Babai's open conjecture, not a citation); see those rows.
+
 **Headline (2026-07-04 … 2026-07-06).** Two citations are **fully discharged** (`SuzukiFormsDetermine` + now
 **`NondegQuadricDeterminesForm`**, both Route C). `JointVarietyDeterminesFamily` is **discharged from the F4
 iso-invariance object** — the vanishing-space transport of §3.2 is **BANKED** (axiom-clean, in `build.sh`; 5 lemmas in
@@ -89,14 +103,14 @@ truth for what is still carried (a discharged citation is *removed*, not merely 
 |---|---|---|---|---|
 | **`Suzuki.SuzukiFormsDetermine`** | *(removed)* `RouteCFormAdapters` §Suzuki | σ-twisted ovoid determiner; was Suzuki 1962 / `Sz(q)` 2-trans | was Route-C Suzuki `separates` | **✅ DISCHARGED 2026-07-04** — proved outright (§3.1). Deleted. |
 | **`NondegQuadricDeterminesForm`** | *(hcite removed)* — `RouteC.nondegQuadricDeterminesForm_of_even` proves it; `recoveredForm_colouring_equivariant` carries only `Even d` | quadric Nullstellensatz: nondeg quadric cone ⟹ form unique up to scalar (`p≠2,d≥4`); Hirschfeld | was `|Aut|`-naming only | **✅ DISCHARGED 2026-07-06** (axiom-clean, in `build.sh`). Ported → `ChainDescent.Nullstellensatz{,Structural,Count,Hlink}`. **Structural route** (not the `hconn` reroute — its `k=4` walk fails `q=3`): crux `section_iso_count` (exact isotropic-`u` section, gap `(q−2)q²>0`) → `cone_punctured_span` (hspan) + `aniso_polar_diameter_two` (hlink) → `nullstellensatz_of_structural` → `nondegQuadric_zmod_of_even` for **even `d`** (every `VO^ε_{2m}`; odd `d` open+unused). `#print axioms` = `[propext, Classical.choice, Quot.sound]`. `hconn` spare kept. |
-| **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` — **now only** the `|Aut|`-naming `recoveredFamily_colouring_equivariant` (injective-`Φ`); **no longer** the F4-multi partition object | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) | **`|Aut|`-naming only** (F4-multi iso-invariance discharged) | **◑ F4 DISCHARGED — BANKED (§3.2, 2026-07-05)** — same vanishing-space route (`recoveredFamily_partition_isoInvariant_vanishing`, generic core `recoveredForm_partition_isoInvariant_gen`). Injective-`Φ` still carried only for `Aut`-naming. |
-| **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | fundamental theorem of projective geometry (collineations are semilinear) + quadric uniqueness; Artin, *Geometric Algebra* | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3)** — FTPG genuinely deep; not elementarily dischargeable. Vacuous at `q=p` (`σ=id`). Keep cited for now. |
-| **`AffineSchemeTwoClosed`** | `RouteCSeam.lean` (`schemeAutGroup_affineScheme_eq_affineG` / `routeC_polySupport`) | rank-3 affine 2-closure: `SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (no unexpected automorphisms); Skresanov arXiv:2007.14696 / 2202.03746. Converse `≥` is **proved** (`affineG_le_schemeAutGroup`). | Route-C coarse-Aut pinning (the `\|Aut\|` side / meta poly) — **one named premise, all four families** via `G₀ := similitudeGroup Q` / `jointConeStab Qs` / Suzuki cone-stab | **○ CITED** — Skresanov rank-3 2-closure; formalizable, off the near-term path. Same instance as the Skresanov row below, now a concrete named Lean `Prop`. |
+| **`JointVarietyDeterminesFamily`** | `RouteCFormAdapters` — the predicate is now **PROVED** (`jointVarietyDeterminesFamily_holds`); `recoveredFamily_colouring_equivariant` carries the **per-family span/independence facts** instead | projective normality of Grassmann/spinor variety (span{Q_k} = deg-2 vanishing ideal) — now carried as the *per-family* `hspan`/`hspan'`/`hindep` premises, the faithful citation shape | **`|Aut|`-naming only** (F4-multi iso-invariance discharged) | **✅ PREDICATE CORRECTED + PROVED (2026-07-16).** The old blanket form (∀ jointly-nondeg families, no span hypothesis) was **FALSE as formalized** (anisotropic family ⟹ cone-hypothesis vacuous ⟹ no injective `Φ`; counterexample in the docstring) — carriers were vacuous and axiomatizing it would have been inconsistent. Corrected by stating the span/independence antecedents; the implication is then pure linear algebra, proved outright. Remaining carried content = the span facts at the concrete Plücker/spinor instantiation (never yet instantiated in Lean). |
+| **`ConePreservingCollineationIsSemiSimilitude`** | `RouteCFormAdapters` §F2 (`…_semilinear`) | isomorphisms of affine polar graphs are semi-affine semi-similitudes (Brouwer–Van Maldeghem SRG book, affine polar graphs; FTPG + quadric uniqueness once the graph recovers `AG(d,q)`) | **F2 only** (`q=pᵉ, e>1`) | **✗ HARD (§3.3) — ANTECEDENT CORRECTED 2026-07-16.** The old antecedent (pointwise cone-preservation on an arbitrary bijection) was **FALSE as formalized** (a transposition of two anisotropic vectors satisfies it; carriers were vacuous, axiom-wiring would have been inconsistent). Corrected to **difference-cone** preservation (what a graph iso supplies) with a semi-**affine** conclusion. Still genuinely deep; keep cited. |
+| **`AffineSchemeTwoClosed`** | `RouteCSeam.lean` (`schemeAutGroup_affineScheme_eq_affineG` / `routeC_polySupport`) | rank-3 affine 2-closure: `SchemeAutGroup(affineScheme G₀) ≤ affineG G₀` (no unexpected automorphisms); Skresanov arXiv:2007.14696 / 2202.03746. Converse `≥` is **proved** (`affineG_le_schemeAutGroup`). ⚠ **Scope note (2026-07-16 audit):** the source is for **rank-3** groups of **sufficiently large degree**; the Lean `Prop` carries neither guard, so it is citation-covered **only at the four intended rank-3 instances** (and small parameters need per-family checking) — do not instantiate at other `G₀`. | Route-C coarse-Aut pinning (the `\|Aut\|` side / meta poly) — **one named premise, all four families** via `G₀ := similitudeGroup Q` / `jointConeStab Qs` / Suzuki cone-stab | **○ CITED** — Skresanov rank-3 2-closure; formalizable, off the near-term path. Same instance as the Skresanov row below, now a concrete named Lean `Prop`. |
 | **`Theorem41Statement`** | `CoherentConfig.lean` (affine-slice / seam capstones) | Ponomarenko arXiv:2006.13592 §4 (pointed separability) | seal (affine slice) | **○ PLANNED** — the separability substrate is the intended proof (Stage 3); see `chain-descent-general-cc-separability.md`. |
-| **`hSpielman` (`SeparatesAtBoundedBase`)** | `Cascade.lean` (`…viaSpielman`) | Spielman STOC 1996 primitive-SRG discretization (sub-exp floor `exp(Õ(n^{1/5}))`, BCSTW FOCS'13) | the citable sub-exp floor | **○ OPTIONAL** — a genuine large WL/SRG result; off the critical path (δ′/rainbow routes bypass per-family). |
+| **`hSpielman` (`SeparatesAtBoundedBase`)** | `Cascade.lean` (`…viaSpielman`) | Spielman STOC 1996 **claw-bounded** primitive-SRG discretization (sub-exp floor; exponent `n^{1/5}` in BCSTW FOCS'13). ⚠ **Scope corrected 2026-07-16:** NOT "every primitive SRG" — the Neumaier-exceptional families (Steiner incl. `T(m)`, Latin-square incl. `L₂(m)`) have base `Θ(√n)`, so `SeparatesAtBoundedBase` at `Õ(n^{1/3})` is **false** there; they are Cameron-type and must exit via the Cameron branch. Dischargeable only on the claw-bounded residue. | the citable sub-exp floor (claw-bounded residue) | **○ OPTIONAL** — a genuine large WL/SRG result; off the critical path (δ′/rainbow routes bypass per-family). |
 | **`hcatch`** (CFI-1992 dimWL) | seal capstones | Cai–Fürer–Immerman 1992 Thm 5.2 | collapses to the `s(C)` core | **≈ MOOT** — not a real external citation; = the project's own open core in disguise (remaining-work §1). Free where 1-WL discretizes. |
-| **`PrimitiveCCClassification` (G3)** | all seal capstones (`hClassify`) | Babai ITCS'14 / J.Alg'15 / Kivva JCTB'24 / Sun–Wilmes — the Cameron classification (CFSG) | the "or Cameron" escape | **KEEP CITED** (policy) — CFSG-based; the one citation allowed to stay. |
-| Skresanov / Liebeck / Ponomarenko-cyclotomic-2-sep | affine-slice / seam (remaining-work §3a) | rank-3 2-closure / primitive-group / cyclotomic 2-sep | seal (schurian affine residue) | **○ CITED** — real classical results; formalizable, off the near-term path. |
+| **`PrimitiveCCClassification` (G3)** | all seal capstones (`hClassify`) | Babai ITCS'14 / J.Alg'15 / Kivva JCTB'24 / Sun–Wilmes — the Cameron classification | the "or Cameron" escape | **KEEP CITED** (policy). ⚠ **Threshold scope (2026-07-16):** citable only when `IsLargeScheme` is at least the Sun–Wilmes `exp(Õ(n^{1/3}))` (all ranks; Sun–Wilmes is CFSG-free) or rank ≤ 4 (Babai/Kivva, quasi-poly). The `Confinement.confinementLargeScheme` instantiation (quasi-poly threshold, all ranks) is **Babai's open conjecture, NOT a citation** — see the corrected docstring at `Confinement.lean` `confinementLargeScheme`; do not axiomatize `hClassify` at that instance. |
+| Skresanov / Liebeck / Ponomarenko-cyclotomic-2-sep | affine-slice / seam (remaining-work §3a) | rank-3 2-closure / primitive-group / cyclotomic 2-sep | seal (schurian affine residue) | **○ CITED** — real classical results; formalizable, off the near-term path. ⚠ **Bridge note (2026-07-16 audit):** the cyclotomic carrier `TwinsAreSemilinear` (`CascadeAffine.lean`) is the *operational* form — getting from the paper's 2-separability (Thm 1.1) to "depth-2 count twins at an arbitrary individualized base are realized by `T`-fixing automorphisms" is a pointed/base-transport step the paper does not state; name that bridge as an obligation before treating the row as a literal citation. Also: the F₁₆/F₂₅ non-exception claims rest on the paper's computed Table 1, not its theorems. |
 
 *(`hSmallAutThin` and `hImprim` are **not** citations — the first is the open research core, the second is deferred
 Lean infra (block tower). See remaining-work §1. `SparseSeparable`/`Separable`/`DepthOneSeparable` are project
@@ -183,16 +197,29 @@ inverse (folded into the payoff proof); prove the **partition-invariance iff** `
 count); specialize to `recoveredForm_partition_isoInvariant` (single) and `recoveredFamily_partition_isoInvariant_vanishing`
 (multi); prove separation-preservation via `Q ∈ W` (`vanishingColour_refines_form`). All five axiom-clean, in `build.sh`.
 The old `recovered{Form,Family}_colouring_equivariant` are **kept** (not rewired) — they are the strictly-stronger
-`|Aut|`-naming statements and legitimately still carry the two citations, needed only on the C# `|Aut|` side.
+`|Aut|`-naming statements, needed only on the C# `|Aut|` side. *(Update 2026-07-16: `recoveredFamily_colouring_
+equivariant` no longer carries `JointVarietyDeterminesFamily` as a blanket premise — the predicate was corrected and
+**proved** (`jointVarietyDeterminesFamily_holds`), and the theorem now carries the per-family span/independence
+facts instead; see the register row.)*
 
-### 3.3 `ConePreservingCollineationIsSemiSimilitude` — HARD (keep cited for now)
+### 3.3 `ConePreservingCollineationIsSemiSimilitude` — HARD (keep cited for now; antecedent CORRECTED 2026-07-16)
 
-This is the **fundamental theorem of projective geometry** (a cone-preserving collineation of `PG(d,q)`, `d≥2`, is
-semilinear `g = M∘σ̂`) composed with the quadric uniqueness of §3.2. The FTPG is genuinely deep and **not**
-elementarily dischargeable — and it is *essential* for `q=pᵉ, e>1`, because for a field-twisted `g`, `F'∘g` is not even
-a `K`-form without the semilinear decomposition (so the §3.2 `W`-transport needs `g` linear, which fails at `e>1`). At
-`q=p` it is the `σ=id` specialization and collapses to §3.2. **Verdict:** keep cited for now; it is the one hard residue of the
-Route-C citation set, and only for the field-extension case (the prime-field residue does not need it).
+> **⚠ 2026-07-16 CORRECTION (audit finding — the M1 step this citation never got).** As previously formalized the
+> predicate was **FALSE**: its antecedent was *pointwise* cone-preservation on an arbitrary bijection, and a
+> transposition of two anisotropic vectors is bijective and pointwise cone-preserving but not semilinear. So the
+> carrier `recoveredForm_colouring_equivariant_semilinear` was **vacuous**, and wiring `Publication.lean`'s `ftpg`
+> axiom to it would have made the axiom system inconsistent. **Fixed in place:** the antecedent is now
+> **difference-cone preservation** `∀ u t, Q(u−t)=0 ↔ Q'(g u − g t)=0` — exactly what a graph isomorphism of affine
+> polar graphs supplies — and the conclusion is semi-**affine** (`g v = M(σ̂ v) + b`; the translation `b` cancels in
+> the consumer's difference identity). The faithful source is the determination of isomorphisms between affine polar
+> graphs (Brouwer–Van Maldeghem, *SRG* book), i.e. FTPG applied *after* the graph structure recovers `AG(d,q)` —
+> "collineation" is derived mid-proof, never a legitimate antecedent on a bare bijection.
+
+The corrected fact is still genuinely deep and **not** elementarily dischargeable — and it is *essential* for
+`q=pᵉ, e>1`, because for a field-twisted `g`, `F'∘g` is not even a `K`-form without the semilinear decomposition (so
+the §3.2 `W`-transport needs `g` linear, which fails at `e>1`). At `q=p` it is the `σ=id` specialization and collapses
+to §3.2. **Verdict:** keep cited (in the corrected form); it is the one hard residue of the Route-C citation set, and
+only for the field-extension case (the prime-field residue does not need it).
 
 ### 3.5 `NondegQuadricDeterminesForm` — the full quadric Nullstellensatz — ✅ DISCHARGED (2026-07-06)
 

@@ -4762,16 +4762,24 @@ hypothesis `hSpielman : SeparatesAtBoundedBase S bound` — the residue individu
 reaches rigid), so the entire "or Cameron" / largeness machinery is *unneeded* at this threshold — this is the
 precise sense in which the floor is Cameron-free.
 
-**The citation (`hSpielman`'s faithful source) and the threshold.** Spielman (STOC 1996): **every primitive
-strongly regular graph individualizes-and-refines to discrete at a base of size `Õ(n^{1/3})`** — so for the
-primitive residue `hSpielman` holds with `bound = Õ(n^{1/3})` *unconditionally* (no smallness/largeness guard,
-the cover branch of the multiplicity route is vacuous because everything shatters). The imprimitive case is the
-block tower (`hImprim` infra) and the conference case is leg B; folded into the single `SeparatesAtBoundedBase`
-deliverable, this gives an **honestly sub-exponential** "reaches rigid or Cameron". The sub-exp-vs-polynomial
-distinction lives entirely in how `bound` scales with `n`: `bound = Õ(n^{1/3})` is the proven Spielman floor
-(here); a *polynomial* `bound = O(log n)` is the open rank-3 base case = node 4 (`hSmallAutThin`), which **no
-citation reaches**. So this capstone is the sharpest *fully-citable* (Cameron-free, G3-free) end-state, subsumed
-by Spielman; it does not close the polynomial seal, which remains node 4. Axiom-clean. -/
+**The citation (`hSpielman`'s source) and its honest scope — CORRECTED 2026-07-16.** *(An earlier version of this
+paragraph claimed the base bound for **every** primitive SRG, "unconditionally". That is false, and the floor is
+Cameron-free only off the exceptional list.)* Spielman (STOC 1996; exponent improved to `n^{1/5}` by
+Babai–Chen–Sun–Teng–Wilmes, FOCS 2013) works through **Neumaier's claw bound**: a primitive strongly regular graph
+either is claw-bounded — and then individualizes-and-refines to discrete at a base of size `Õ(n^{1/3})` — **or**
+it is a **Steiner graph (incl. the triangular `T(m)`) or Latin-square graph (incl. `L₂(m)`)**, which the paper
+routes to separate algorithms. For those exceptional families `SeparatesAtBoundedBase S (Õ(n^{1/3}))` is provably
+**FALSE**: `T(m)` has `Aut = S_m`, `|Aut| = m!` with `n = m(m−1)/2`, so ANY base has size
+`≥ log|Aut| / log n = Θ(√n) ≫ Õ(n^{1/3})`. Being Cameron/Johnson-type, they exit via the **Cameron branch**, not
+via this capstone — so `hSpielman` is dischargeable exactly on the claw-bounded residue, and instantiating it on
+an exceptional family would be citing a false statement. The imprimitive case is the block tower (`hImprim`
+infra) and the conference case is leg B; folded into the single `SeparatesAtBoundedBase` deliverable this still
+gives an honestly sub-exponential "reaches rigid or Cameron", with the exceptional families carried by the
+classification leg rather than by depth. The sub-exp-vs-polynomial distinction lives entirely in how `bound`
+scales with `n`: `bound = Õ(n^{1/3})` is the Spielman floor (here); a *polynomial* `bound = O(log n)` is the open
+rank-3 base case = node 4 (`hSmallAutThin`), which **no citation reaches**. So this capstone is the sharpest
+citable end-state on the claw-bounded residue; it does not close the polynomial seal, which remains node 4.
+Axiom-clean. -/
 theorem reachesRigidOrCameron_viaSpielman {n : Nat}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (S : SchurianScheme n)

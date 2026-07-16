@@ -969,8 +969,18 @@ largeness bridge is not merely *assumable* but **provable** (from `M.hcard`). Wi
 makes the P3 input satisfiable. -/
 
 /-- **The confinement's largeness predicate at the delivered threshold** — `|Aut| > 2^(baseMax n) = n^{log₂ n}`, a
-super-polynomial threshold. A genuine Cameron classification (G3) holds at any super-poly threshold, so `hClassify`
-at this predicate is the real citation. -/
+super-polynomial threshold.
+
+⚠ **Citation-scope warning — CORRECTED 2026-07-16.** *(This docstring previously claimed "a genuine Cameron
+classification (G3) holds at any super-poly threshold, so `hClassify` at this predicate is the real citation."
+That is false.)* The cited classifications hold at `|Aut| > exp(Õ(n^{1/3}))` (Sun–Wilmes, all ranks; Babai 1981
+at `exp(Õ(n^{1/2}))`). At a merely **quasi-polynomial** threshold like this one, "non-Cameron primitive CC ⟹
+quasi-poly `|Aut|`" is **Babai's open conjecture** (proved only for rank 3 — Babai — and rank 4 — Kivva). So
+`hClassify : PrimitiveCCClassification (confinementLargeScheme n) _` is NOT covered by any citation: it is
+conjecture-shaped and must not be axiomatized (the Publication firewall). A citation-faithful discharge requires
+raising the threshold to the Sun–Wilmes bound (and re-checking the flag delivers it) or restricting the rank.
+(The confinement/assume-VT track is superseded architecture — see `Publication.lean` §"provenance" — so this is a
+recorded caveat on retained substrate, not a live obligation.) -/
 def confinementLargeScheme (n : Nat) : ∀ (m : Nat), SchurianScheme m → Prop :=
   IsLargeSchemeViaAut (fun c => 2 ^ baseMax n < c)
 

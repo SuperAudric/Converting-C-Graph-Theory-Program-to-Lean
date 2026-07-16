@@ -327,7 +327,10 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
     `cellIsOrbit_pathCol_of_seal` apply **directly** at `adj := schemeAdj S`: a one-lemma bridge
     `SeparatesAtBoundedBase S bound → CascadesAt (schemeAdj S) (constP n) bound` (unfold) then the P2c capstone ⟹
     `deepMatchSupply bound` fires on the scheme's own adjacency at a localising node. This demonstrates the **full
-    ladder including the sub-exp top** (Spielman's `bound = Õ(n^{1/3})`); it is NOT the poly workhorse — the **poly**
+    ladder including the sub-exp top** (Spielman's `bound = Õ(n^{1/3})` — ⚠ scope corrected 2026-07-16: that bound
+    is citable for **claw-bounded** primitive SRGs only; the Neumaier-exceptional Steiner/Latin-square families have
+    base `Θ(√n)` and exit via Cameron — see the corrected `viaSpielman` docstring / citation register); it is NOT the
+    poly workhorse — the **poly**
     pieces (`theorem_1_HOR_cfi_oddDeg` at bounded tw, `theorem_2_HOR_*` for the metric/DRG family) are what the real
     construction is built from. ⚠ This fires on `schemeAdj S`, not yet on an arbitrary graph *realizing* S — that last
     hop is the `RouteCTransport.separatesAtBoundedBase_transport` layer, out of scope for the POC.

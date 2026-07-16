@@ -1125,14 +1125,14 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `persistentTwinYieldsBlock_iff_yieldsLarge_of_primitive` | 4688-4712 | On a primitive scheme the block disjunct of `PersistentTwinYieldsBlock` is vacuous (no nontrivial proper `ClosedSubset`), so the open crux collapses to the largeness-only form `¬SeparatesAtBoundedBase → IsLarge` — the fusion/closed-subset (`schemeEquiv_trans`) discharge cannot close the primitive floor (only the imprimitive case, already `hImprim`); the primitive crux is irreducibly the 2-closure/`s(X)` wall. | — |
 | `reachesRigidOrCameron_viaPersistentTwinBlock` | 4714-4741 | **(Phase-2 headline — CONDITIONAL.)** The fused seal with self-detection discharged via the general P3-converse crux `hCrux`. Carries `hClassify` (G3), `hImprim`, and the **open** `hCrux` (G2-B). Routes the primitive floor through the *general*, mechanism-agnostic crux, replacing the retracted Frobenius-specific `PowAffineSeparates` path. Axiom-clean. | — |
 | `schemeRecoveredByDepth_of_separatesAtBoundedBase` | 4743-4754 | **Separation at a bounded base ⟹ depth-graded recovery (the positive bridge).** A bounded base whose warm refinement is `Discrete` recovers the scheme at that depth: `stablyRecoverable_of_discrete` (discrete ⟹ every cell a singleton ⟹ trivially an orbit at every `T ⊇ S₀`) then `schemeRecoveredByDepth_of_stablyRecoverable`. The *positive* form of the recovery content — where `PersistentTwinYieldsBlock` derives separation by refuting a persistent twin (the open crux), this consumes separation supplied **outright** (a discretization citation, e.g. Spielman, or the δ′ engine). Axiom-clean. | — |
-| `reachesRigidOrCameron_viaSpielman` | 4756-4781 | **THE SEAL VIA SPIELMAN — the fully-citable, Cameron-free sub-exponential floor.** Carries the single hypothesis `hSpielman : SeparatesAtBoundedBase S bound` (the residue individualizes a `≤bound` base to `Discrete`); the seal holds via the rigid branch outright (`Or.inl (Or.inr …)` of `schemeRecoveredByDepth_of_separatesAtBoundedBase`). **Carries ONLY `hSpielman` — no G3 (`hClassify`), no `hImprim`, no largeness/Cameron routing** (the Cameron disjunct is never taken; the residue discretizes ⟹ reaches rigid). Faithful citation: Spielman STOC 1996 (every primitive SRG individualizes to discrete at `Õ(n^{1/3})`) ⟹ `hSpielman` at `bound = Õ(n^{1/3})` unconditionally; imprimitive = block tower, conference = leg B. The sub-exp-vs-poly distinction is the scaling of `bound`: `Õ(n^{1/3})` is the proven floor (here), `O(log n)` is the open rank-3 base case (node 4, no citation). The sharpest *fully-citable* end-state; does **not** close the polynomial seal. Axiom-clean. | — |
-| `intraCellRelations` | 4795-4804 | The scheme relations `R_k` entirely inside the `warmRefine (schemeAdj S)`-from-`S₀` cells (every `R_k`-pair shares a cell colour). Discrete base ⟹ `{R₀}`; one-cell base ⟹ everything; in between = the block candidate for the P3 converse. | Definition, `noncomputable` |
-| `mem_intraCellRelations` | 4806-4815 | Membership unfolding for `intraCellRelations`: `k ∈ … ↔ ∀ x y, rel k x y → warmRefine x = warmRefine y`. | — |
-| `intraCellRelations_isClosed` | 4817-4839 | **(THE CONVERSE'S PROVABLE CORE — the fusion closure.)** `intraCellRelations S S₀` is a `ClosedSubset`: `R₀` intra-cell (diagonal reflexive); composites stay intra-cell via `intersectionNumber_well_defined` (extract the intermediate `y`) + transitivity of cell-equality. Generalizes `schemeEquiv_trans` to the whole intra-cell set = the WL-stable-congruence ⟹ closed-subset fact. Any `AssociationScheme` (no schurity/Frobenius). Axiom-clean. | — |
-| `intraCellRelations_ne_univ_of_sep` | 4841-4855 | **(Properness, free.)** A base containing `t` with any `w ≠ t` makes `intraCellRelations ≠ univ`: `relOfPair t w` crosses cells since `t` keeps a unique individualized colour (`individualizedColouring_mem_sep`) that `warmRefine` only refines (`warmRefine_refines`). So the `≠ univ` half is automatic; the open residue is nontriviality alone. Axiom-clean. | — |
-| `intraCellRelations_eq_singleton_zero_of_primitive` | 4857-4873 | **(The intra-cell route's boundary.)** For a *primitive* scheme and any base individualizing a point (`t ∈ S₀`, `w ≠ t`), `intraCellRelations S S₀ = {0}` identically: it's a `ClosedSubset` (`intraCellRelations_isClosed`) so primitivity forces `{0}`/`univ`, and `≠ univ` is free (`intraCellRelations_ne_univ_of_sep`). So the intra-cell block can never witness the nontriviality kernel on the primitive floor — it discharges only the imprimitive case; the open G2-B floor needs a non-congruence object (the amorphic WL-fusion), not a block. Axiom-clean. | — |
-| `PersistentTwinGivesIntraCellBlock` | 4875-4889 | **(The sharpened open kernel — G2-B isolated to nontriviality.)** Persistence (`¬ SeparatesAtBoundedBase`) ⟹ large, or a bounded base whose `intraCellRelations` is `≠ {0}` and `≠ univ`. `PersistentTwinYieldsBlock` with the `ClosedSubset` construction (and `≠ univ`) discharged, so the *only* open content is nontriviality `≠ {0}` (a persistent twin gives a **whole** intra-cell non-diagonal relation, not one pair). Carried visibly. | Definition |
-| `persistentTwinYieldsBlock_of_intraCellBlock` | 4891-4902 | **(The reduction — provable.)** `PersistentTwinGivesIntraCellBlock ⟹ PersistentTwinYieldsBlock`; the block *is* `intraCellRelations S S₀` (closed by `intraCellRelations_isClosed`, nontrivial+proper by the kernel). Banks the fusion-closure core of the P3 converse. Axiom-clean. | — |
+| `reachesRigidOrCameron_viaSpielman` | 4756-4789 | **THE SEAL VIA SPIELMAN — the citable sub-exponential floor (scope CORRECTED 2026-07-16).** Carries the single hypothesis `hSpielman : SeparatesAtBoundedBase S bound` (the residue individualizes a `≤bound` base to `Discrete`); the seal holds via the rigid branch outright (`Or.inl (Or.inr …)` of `schemeRecoveredByDepth_of_separatesAtBoundedBase`). **Carries ONLY `hSpielman` — no G3 (`hClassify`), no `hImprim`, no largeness/Cameron routing.** Citation scope: Spielman STOC 1996 / BCSTW FOCS'13 give the `Õ(n^{1/3})` (resp. `n^{1/5}`) base for **claw-bounded** primitive SRGs only — the Neumaier-exceptional Steiner/Latin-square families (`T(m)`, `L₂(m)`) have base `Θ(√n)`, so `hSpielman` is FALSE there and those exit via the Cameron branch (see the corrected docstring). Imprimitive = block tower, conference = leg B. `Õ(n^{1/3})` is the floor (claw-bounded); `O(log n)` is the open rank-3 base case (node 4, no citation). Does **not** close the polynomial seal. Axiom-clean. | — |
+| `intraCellRelations` | 4803-4812 | The scheme relations `R_k` entirely inside the `warmRefine (schemeAdj S)`-from-`S₀` cells (every `R_k`-pair shares a cell colour). Discrete base ⟹ `{R₀}`; one-cell base ⟹ everything; in between = the block candidate for the P3 converse. | Definition, `noncomputable` |
+| `mem_intraCellRelations` | 4814-4823 | Membership unfolding for `intraCellRelations`: `k ∈ … ↔ ∀ x y, rel k x y → warmRefine x = warmRefine y`. | — |
+| `intraCellRelations_isClosed` | 4825-4847 | **(THE CONVERSE'S PROVABLE CORE — the fusion closure.)** `intraCellRelations S S₀` is a `ClosedSubset`: `R₀` intra-cell (diagonal reflexive); composites stay intra-cell via `intersectionNumber_well_defined` (extract the intermediate `y`) + transitivity of cell-equality. Generalizes `schemeEquiv_trans` to the whole intra-cell set = the WL-stable-congruence ⟹ closed-subset fact. Any `AssociationScheme` (no schurity/Frobenius). Axiom-clean. | — |
+| `intraCellRelations_ne_univ_of_sep` | 4849-4863 | **(Properness, free.)** A base containing `t` with any `w ≠ t` makes `intraCellRelations ≠ univ`: `relOfPair t w` crosses cells since `t` keeps a unique individualized colour (`individualizedColouring_mem_sep`) that `warmRefine` only refines (`warmRefine_refines`). So the `≠ univ` half is automatic; the open residue is nontriviality alone. Axiom-clean. | — |
+| `intraCellRelations_eq_singleton_zero_of_primitive` | 4865-4881 | **(The intra-cell route's boundary.)** For a *primitive* scheme and any base individualizing a point (`t ∈ S₀`, `w ≠ t`), `intraCellRelations S S₀ = {0}` identically: it's a `ClosedSubset` (`intraCellRelations_isClosed`) so primitivity forces `{0}`/`univ`, and `≠ univ` is free (`intraCellRelations_ne_univ_of_sep`). So the intra-cell block can never witness the nontriviality kernel on the primitive floor — it discharges only the imprimitive case; the open G2-B floor needs a non-congruence object (the amorphic WL-fusion), not a block. Axiom-clean. | — |
+| `PersistentTwinGivesIntraCellBlock` | 4883-4897 | **(The sharpened open kernel — G2-B isolated to nontriviality.)** Persistence (`¬ SeparatesAtBoundedBase`) ⟹ large, or a bounded base whose `intraCellRelations` is `≠ {0}` and `≠ univ`. `PersistentTwinYieldsBlock` with the `ClosedSubset` construction (and `≠ univ`) discharged, so the *only* open content is nontriviality `≠ {0}` (a persistent twin gives a **whole** intra-cell non-diagonal relation, not one pair). Carried visibly. | Definition |
+| `persistentTwinYieldsBlock_of_intraCellBlock` | 4899-4910 | **(The reduction — provable.)** `PersistentTwinGivesIntraCellBlock ⟹ PersistentTwinYieldsBlock`; the block *is* `intraCellRelations S S₀` (closed by `intraCellRelations_isClosed`, nontrivial+proper by the kernel). Banks the fusion-closure core of the P3 converse. Axiom-clean. | — |
 ## ChainDescent/Saturation.lean
 
 | Name | Line | Description | Notes |
@@ -1610,98 +1610,99 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `RouteC.frobVec` | 390-394 | The coordinate-wise action `x ↦ (σ(xᵢ))` of a field endomorphism `σ` on `V` — the semilinear part of a collineation of `AG(d,q)`. | Definition |
 | `RouteC.frobVec_sub` | 395-401 | `σ̂` is additive: `σ̂(u − t) = σ̂ u − σ̂ t`. What makes the semilinear equivariance identity go through. | — |
 | `RouteC.semisimilitude_colouring_equivariant` | 402-413 | **F2 brick 1.** A semi-similitude `g = M∘σ̂` transports the difference colouring by scalar `μ` and field automorphism `σ`: `Q'(M σ̂ u − M σ̂ t) = μ·σ(Q(u − t))`. The `q = pᵉ` analog of `similitude_colouring_equivariant`. | — |
-| `RouteC.ConePreservingCollineationIsSemiSimilitude` | 415-428 | **Scoped citation (F2).** A cone-preserving collineation is a semi-similitude (fundamental theorem of projective geometry) — the `q=pᵉ` semilinear seam. | Definition |
-| `RouteC.recoveredForm_colouring_equivariant_semilinear` | 430-447 | **F4 over `𝔽_q`.** The semilinear (`q=pᵉ`) form of F4 — the recovered form is iso-invariant including the Frobenius/ΓL part. | — |
-| `RouteC.FormAdapter` | 464-478 | **The generic Route-C engine interface.** A form family plugs in its linear group `G₀` (∋ −1), a bounded spanning base, and a `separates` certificate. | Structure |
-| `RouteC.FormAdapter.reachesRigidOrCameron` | 480-491 | **The shared engine theorem.** Any `FormAdapter` reaches the rigid-or-Cameron disjunction — one engine, N family instances. | — |
-| `RouteC.affinePolarAdapter` | 493-519 | **Instance 1** — affine-polar `VO^ε` as a `FormAdapter` (validates the interface). | Definition, `noncomputable` |
-| `RouteC.coords_determine_multi` | 535-555 | **Multi-form `coords_determine` (the alternating family's `separates` core).** A family of quadratic forms whose polar forms jointly separate (trivial common radical) determines the vertex from the joint value-profile at the standard frame. The `ι = Unit` case is `coords_determine`. | — |
-| `RouteC.coords_determine_multi_spanning` | 557-576 | **Multi-form `coords_determine` at a spanning base** — `coords_determine_multi` with the value-profile taken over any spanning set, combining the joint-radical and spanning arguments for Route C's iso-invariant base. | — |
-| `RouteC.multiFormAdapter` | 578-611 | **The multi-quadric engine.** A family of quadratic forms whose joint cone is the connection set plugs into one adapter — basis for the non-quadratic families. | Definition, `noncomputable` |
-| `RouteC.jointConeStab` | 634-654 | **The cone stabilizer — the graph-intrinsic linear group of a multi-quadric forms graph.** The setwise stabilizer of the joint isotropic cone (= the connection set): definable from the graph alone, so its affine scheme is the multi-form refinement target (analog of `similitudeGroup`). | Definition |
-| `RouteC.neg_mem_jointConeStab` | 656-663 | `−1 ∈ jointConeStab Qs` — the `hneg` input for the cone-stabilizer scheme (`Q_k(−v) = Q_k v` leaves the cone condition unchanged). | — |
-| `RouteC.iInf_isometryGroup_le_jointConeStab` | 665-676 | The joint isometry group is contained in the cone stabilizer (`⨅ₖ O(Q_k) ≤ jointConeStab Qs`) — what lets `affineScheme_refines_of_le` fire for the multi-form refinement brick. | — |
-| `RouteC.multiIsometryScheme_refines_coneScheme` | 678-693 | **brick-1-multi.** The recovered joint-isometry scheme `⨅ₖ O(Q_k)` refines the graph-intrinsic cone-stabilizer scheme. | — |
-| `RouteC.multiSimilitude_colouring_equivariant` | 695-707 | **F4-multi brick.** If a graph iso's linear part transports the value-tuple colouring by a global map `Φ`, it transports the difference colouring by the same `Φ`. Multi-form analog of `similitude_colouring_equivariant` (with `Φ` arbitrary). | — |
-| `RouteC.JointVarietyDeterminesFamily` | 709-725 | **Scoped citation (multi-form).** The joint variety determines its quadric family up to an invertible linear change — the F4-multi sibling of `NondegQuadricDeterminesForm`. | Definition |
-| `RouteC.recoveredFamily_colouring_equivariant` | 727-745 | **F4-multi.** Given a joint-cone-preserving graph iso, joint nondegeneracy, and the cited `JointVarietyDeterminesFamily`, the recovered value-tuple difference colouring transports by a single global injective `Φ` — the multi-quadric completion of F4. | — |
-| `RouteC.recoveredFamily_partition_isoInvariant` | 747-764 | **F4-multi payoff (`|Aut|`-naming).** The recovered value-tuple colour partition is iso-invariant (a graph iso transports it by a global injective Φ). Derived from the injective-`Φ` equivariance (carries `JointVarietyDeterminesFamily`). | — |
-| `RouteC.recoveredFamily_partition_isoInvariant_vanishing` | 766-783 | **F4-multi citation-free.** The recovered joint-`W` colour partition is iso-invariant with **no `JointVarietyDeterminesFamily`** — the `C:=∀k,Qₖ=0` specialization of `recoveredForm_partition_isoInvariant_gen` (vanishing-space transport, §3.2). Discharges F4-multi from projective normality at `q=p`. | — |
-| `RouteC.polar_linMulLin` | 794-799 | **Reusable primitive.** `polar (linMulLin f g) x y = f x·g y + f y·g x` — the building block for the polar of any Clifford-term-sum quadric (Plücker sub-Pfaffians, D₅ spinor quadrics). | — |
-| `RouteC.Plucker.pc` | 804-805 | The `i`-th Plücker coordinate projection on `𝔽_p^10`. | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf0` | 807-809 | Sub-Pfaffian deleting index 0 (`x₄x₉ − x₅x₈ + x₆x₇`); one of the 5 Plücker quadrics. | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf1` | 810-812 | Sub-Pfaffian deleting index 1 (`x₁x₉ − x₂x₈ + x₃x₇`). | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf2` | 813-815 | Sub-Pfaffian deleting index 2 (`x₀x₉ − x₂x₆ + x₃x₅`). | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf3` | 816-818 | Sub-Pfaffian deleting index 3 (`x₀x₈ − x₁x₆ + x₃x₄`). | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf4` | 819-821 | Sub-Pfaffian deleting index 4 (`x₀x₇ − x₁x₅ + x₂x₄`). | Definition, `noncomputable` |
-| `RouteC.Plucker.pluckerForms` | 823-825 | The family of 5 Plücker quadrics (`Fin 5`); the `Alt(5,q)` connection set is their joint cone. | Definition, `noncomputable` |
-| `RouteC.Plucker.Pf0_polar` | 827-830 | The polar form of `Pf0`, expanded in coordinates. | — |
-| `RouteC.Plucker.Pf1_polar` | 831-834 | The polar form of `Pf1`, expanded in coordinates. | — |
-| `RouteC.Plucker.Pf2_polar` | 835-838 | The polar form of `Pf2`, expanded in coordinates. | — |
-| `RouteC.Plucker.plucker_hjoint` | 840-879 | **The Plücker quadrics are jointly nondegenerate** (trivial common polar radical) — the sole geometric input the alternating adapter needs (`Pf₀` isolates coords 4..9, `Pf₁` isolates 1,2,3, `Pf₂` isolates 0). | — |
-| `RouteC.Plucker.alternatingAdapter` | 881-884 | **`Alt(5,q)` as a sealed `FormAdapter`** — the Plücker quadrics assembled via `multiFormAdapter`; `G₀ = ⨅ₖ O(Pf_k)`. The first concrete non-quadratic Route-C family. | Definition, `noncomputable` |
-| `RouteC.Plucker.reachesRigidOrCameron_alternating` | 886-899 | **Instance 2 sealed** — the alternating `Alt(5,q)` family via 5 Plücker quadrics; the first non-quadratic Route-C seal. | — |
-| `RouteC.Plucker.alternating_refines_coneScheme` | 901-913 | **`Alt(5,q)` brick-1 (concrete).** The recovered joint-isometry scheme refines the graph-intrinsic cone-stabilizer scheme of the Plücker family — the refinement leg for alternating. | — |
-| `RouteC.HalfSpin.halfSpin_reduction` | 935-952 | **Half-spin reduction (instance 3 target).** Committing the D₅ dimensions: any 10 quadratic forms on `𝔽_p^16` with joint nondegeneracy are sealed via `multiFormAdapter`, reducing all remaining half-spin work to constructing the spinor quadrics and their `hjoint`. | — |
-| `RouteC.HalfSpin.sc` | 969-970 | The `i`-th half-spin coordinate projection on `𝔽_p^16`. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S0` | 972-974 | D₅ spinor quadric — the quadruple form for `1234` (`x_∅x_{1234} = Pf`). | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S1` | 975-977 | D₅ spinor quadric — the quadruple form for `1235`. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S2` | 978-980 | D₅ spinor quadric — the quadruple form for `1245`. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S3` | 981-983 | D₅ spinor quadric — the quadruple form for `1345`. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S4` | 984-986 | D₅ spinor quadric — the quadruple form for `2345`. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S5` | 987-989 | D₅ spinor quadric — pair×quadruple form 5. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S6` | 990-992 | D₅ spinor quadric — pair×quadruple form 6. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S7` | 993-995 | D₅ spinor quadric — pair×quadruple form 7. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S8` | 996-998 | D₅ spinor quadric — pair×quadruple form 8. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S9` | 999-1001 | D₅ spinor quadric — pair×quadruple form 9. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.spinorForms` | 1003-1006 | The family of 10 D₅ spinor quadrics (`Fin 10`); their joint cone is the pure-spinor cone = the half-spin connection set. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.S0_polar` | 1008-1011 | The polar form of `S0`, expanded in coordinates. | — |
-| `RouteC.HalfSpin.S1_polar` | 1012-1015 | The polar form of `S1`, expanded in coordinates. | — |
-| `RouteC.HalfSpin.S2_polar` | 1016-1019 | The polar form of `S2`, expanded in coordinates. | — |
-| `RouteC.HalfSpin.S3_polar` | 1020-1023 | The polar form of `S3`, expanded in coordinates. | — |
-| `RouteC.HalfSpin.S4_polar` | 1024-1027 | The polar form of `S4`, expanded in coordinates. | — |
-| `RouteC.HalfSpin.spinor_hjoint` | 1029-1088 | **The 10 spinor quadrics are jointly nondegenerate** (trivial common polar radical) — the `hjoint` the half-spin adapter needs, provable from the 5 quadruple forms `S0..S4` alone. | — |
-| `RouteC.HalfSpin.spinAdapter` | 1090-1093 | **The D₅ half-spin family as a sealed `FormAdapter`** — the 10 spinor quadrics assembled via `multiFormAdapter`; `G₀ = ⨅ₖ O(S_k)`. | Definition, `noncomputable` |
-| `RouteC.HalfSpin.reachesRigidOrCameron_halfSpin` | 1095-1109 | **Instance 3 sealed** — the half-spin family via the 10 D₅ spinor quadrics. | — |
-| `RouteC.HalfSpin.halfSpin_refines_coneScheme` | 1111-1121 | **Half-spin brick-1 (concrete).** The recovered joint-isometry scheme refines the graph-intrinsic cone-stabilizer scheme of the D₅ spinor family — the refinement leg for half-spin. | — |
-| `RouteC.Suzuki.ovoidC` | 1148-1149 | The 4th Tits-ovoid coordinate `c = a·b + σa·a² + σb` (affine chart `x₀ = 1`). | Definition |
-| `RouteC.Suzuki.SF0` | 1151-1153 | Suzuki σ-twisted form 0 (the single derived form `x₃x₀^{σ+1}+x₁x₂x₀^σ+x₁^{σ+2}+x₂^σx₀²`). | Definition |
-| `RouteC.Suzuki.SF1` | 1154-1156 | Suzuki σ-twisted form 1. | Definition |
-| `RouteC.Suzuki.SF2` | 1157-1159 | Suzuki σ-twisted form 2. | Definition |
-| `RouteC.Suzuki.SF3` | 1160-1162 | Suzuki σ-twisted form 3. | Definition |
-| `RouteC.Suzuki.SF4` | 1163-1165 | Suzuki σ-twisted form 4. | Definition |
-| `RouteC.Suzuki.suzukiForms` | 1167-1170 | The 5 σ-twisted Suzuki forms packaged as a family over `Fin 5`, for the joint-value adapter. | Definition |
-| `RouteC.Suzuki.four_eq_zero` | 1172-1175 | `(4 : K) = 0` in char 2 — clears the `·4` coefficients `ring_nf` produces when four equal monomials collect. | — |
-| `RouteC.Suzuki.SF0_ovoid` | 1177-1181 | `SF0` vanishes on the affine ovoid `(1, a, b, ovoidC a b)`. | — |
-| `RouteC.Suzuki.SF1_ovoid` | 1183-1187 | `SF1` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
-| `RouteC.Suzuki.SF2_ovoid` | 1189-1193 | `SF2` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
-| `RouteC.Suzuki.SF3_ovoid` | 1195-1199 | `SF3` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
-| `RouteC.Suzuki.SF4_ovoid` | 1201-1205 | `SF4` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
-| `RouteC.Suzuki.suzukiForms_ovoid` | 1207-1217 | All 5 σ-twisted forms vanish on the affine ovoid (packaged over `Fin 5`). | — |
-| `RouteC.Suzuki.suzukiForms_infty` | 1218-1222 | All 5 forms vanish at the point at infinity `(0,0,0,1)`. | — |
-| `RouteC.Suzuki.suzukiForms_homog` | 1223-1229 | **σ-twisted homogeneity** — `SF_k(λ·x) = σλ·λ²·SF_k(x)`, so each `{SF_k = 0}` is a cone; with ovoid + infinity vanishing this gives vanishing on the whole connection set. | — |
-| `RouteC.Suzuki.SFv` | 1244-1245 | The Suzuki form family evaluated on a vector `v : Fin 4 → K`. | Definition |
-| `RouteC.Suzuki.PreservesForms` | 1247-1250 | A map preserves the σ-twisted Suzuki forms (`F_k(g w) = F_k(w)`) — the joint σ-form isometry condition whose orbit-of-difference relation is the Route-C isometry-scheme colouring. | Definition |
-| `RouteC.Suzuki.SF0_recover` | 1266-1272 | Recovery of `x₂` — the 2nd discrete derivative `D₀D₁ SF0` collapses to `x₂` (σ-terms cancel in char 2). | — |
-| `RouteC.Suzuki.SF1_recover_x3` | 1274-1280 | Recovery of `x₃` — `D₀D₁ SF1 = x₃`. | — |
-| `RouteC.Suzuki.SF1_recover_x0` | 1282-1288 | Recovery of `x₀` — `D₁D₃ SF1 = x₀`. | — |
-| `RouteC.Suzuki.SF4_recover_x1` | 1290-1298 | Recovery of `x₁` — `D₂D₃ SF4 = x₁`. | — |
-| `RouteC.Suzuki.preservesForms_eq` | 1299-1303 | A form-preserving map that carries `b` to `a` equalizes the form-values (`F_k a = F_k b`) — the σ-twisted "orbit ⟹ equal-values" half. | — |
-| `RouteC.Suzuki.recover_x2` | 1305-1310 | `SFv`-level recovery of `x₂` (`D₀D₁ SF0`), lifting `SF0_recover` through coordinate evaluation. | — |
-| `RouteC.Suzuki.recover_x3` | 1312-1317 | `SFv`-level recovery of `x₃` (`D₀D₁ SF1`). | — |
-| `RouteC.Suzuki.recover_x0` | 1319-1324 | `SFv`-level recovery of `x₀` (`D₁D₃ SF1`). | — |
-| `RouteC.Suzuki.recover_x1` | 1326-1331 | `SFv`-level recovery of `x₁` (`D₂D₃ SF4`). | — |
-| `RouteC.Suzuki.suzukiForms_determine` | 1333-1360 | **Suzuki citation discharge.** The 5 σ-twisted ovoid forms determine the coordinates on the enlarged base — makes `reachesRigidOrCameron_suzuki` citation-free. | — |
-| `RouteC.Suzuki.SFbar` | 1375-1376 | The Suzuki forms in `𝔽₂`-coordinates via the additive iso `Ψ` (`SFbar = SFv ∘ Ψ`). | Definition |
-| `RouteC.Suzuki.suzukiG₀` | 1378-1395 | **The transported Suzuki joint-isometry group** — the `𝔽₂`-linear autos of `Fin D → ZMod 2` preserving every `SFbar`, a clean subgroup feeding the char-2 engine. | Definition |
-| `RouteC.Suzuki.preservesForms_of_mem_G₀` | 1396-1403 | `g ∈ suzukiG₀` ⟹ its `Ψ`-conjugate preserves the `K`-side forms — the link from the standard-space isometry to the `K`-side determiner. | — |
-| `RouteC.Suzuki.neg_mem_suzukiG₀` | 1405-1411 | `−1 ∈ suzukiG₀` — free in char 2 (`Ψ(−w) = Ψw`, so `neg` preserves every `SFbar`). | — |
-| `RouteC.Suzuki.suzukiBaseVecs` | 1413-1417 | The 8 base vectors on the `K`-side (`{0, e₀, e₁, e₂, e₃, e₀+e₁, e₁+e₃, e₂+e₃}`) whose pairwise sums power the second-derivative recovery. | Definition |
-| `RouteC.Suzuki.suzukiBase` | 1419-1423 | The individualized base — `Ψ`-images of `suzukiBaseVecs` transported to `Fin (2^D)` (`≤ 8` points). | Definition, `noncomputable` |
-| `RouteC.Suzuki.suzukiBase_card_le` | 1424-1429 | The Suzuki base has `≤ 8` points. | — |
-| `RouteC.Suzuki.base_sfv_eq` | 1430-1439 | **Per-base-vector transport.** A `G₀`-orbit witness at the `Ψ`-image of `b` gives equality of the σ-form values of the two vertices' differences by `b`. | — |
-| `RouteC.Suzuki.suzukiAdapter` | 1441-1474 | **The Suzuki family as a `FormAdapter`** (instance 4). `G₀ = suzukiG₀`, base = enlarged frame images (`≤ 8`), `separates` = transport to the proved determiner `suzukiForms_determine` — no citation, no `hσ`, no field-size hypothesis. | Definition, `noncomputable` |
-| `RouteC.Suzuki.reachesRigidOrCameron_suzuki` | 1476-1490 | **Instance 4 sealed, citation-free** — Suzuki–Tits via 5 σ-twisted ovoid forms; `separates` proved by second-derivative recovery (no citation, no `hσ`). | — |
+| `RouteC.ConePreservingCollineationIsSemiSimilitude` | 415-438 | **Scoped citation (F2), CORRECTED 2026-07-16.** An iso of affine polar graphs (difference-cone-preserving bijection) is a semi-affine semi-similitude — the `q=pᵉ` semilinear seam. The old pointwise-cone antecedent was false as formalized (see docstring). | Definition |
+| `RouteC.recoveredForm_colouring_equivariant_semilinear` | 440-459 | **F4 over `𝔽_q`.** The semilinear (`q=pᵉ`) form of F4 — the recovered form is iso-invariant including the Frobenius/ΓL part (translation part cancels in differences). | — |
+| `RouteC.FormAdapter` | 476-490 | **The generic Route-C engine interface.** A form family plugs in its linear group `G₀` (∋ −1), a bounded spanning base, and a `separates` certificate. | Structure |
+| `RouteC.FormAdapter.reachesRigidOrCameron` | 492-503 | **The shared engine theorem.** Any `FormAdapter` reaches the rigid-or-Cameron disjunction — one engine, N family instances. | — |
+| `RouteC.affinePolarAdapter` | 505-531 | **Instance 1** — affine-polar `VO^ε` as a `FormAdapter` (validates the interface). | Definition, `noncomputable` |
+| `RouteC.coords_determine_multi` | 547-567 | **Multi-form `coords_determine` (the alternating family's `separates` core).** A family of quadratic forms whose polar forms jointly separate (trivial common radical) determines the vertex from the joint value-profile at the standard frame. The `ι = Unit` case is `coords_determine`. | — |
+| `RouteC.coords_determine_multi_spanning` | 569-588 | **Multi-form `coords_determine` at a spanning base** — `coords_determine_multi` with the value-profile taken over any spanning set, combining the joint-radical and spanning arguments for Route C's iso-invariant base. | — |
+| `RouteC.multiFormAdapter` | 590-623 | **The multi-quadric engine.** A family of quadratic forms whose joint cone is the connection set plugs into one adapter — basis for the non-quadratic families. | Definition, `noncomputable` |
+| `RouteC.jointConeStab` | 646-666 | **The cone stabilizer — the graph-intrinsic linear group of a multi-quadric forms graph.** The setwise stabilizer of the joint isotropic cone (= the connection set): definable from the graph alone, so its affine scheme is the multi-form refinement target (analog of `similitudeGroup`). | Definition |
+| `RouteC.neg_mem_jointConeStab` | 668-675 | `−1 ∈ jointConeStab Qs` — the `hneg` input for the cone-stabilizer scheme (`Q_k(−v) = Q_k v` leaves the cone condition unchanged). | — |
+| `RouteC.iInf_isometryGroup_le_jointConeStab` | 677-688 | The joint isometry group is contained in the cone stabilizer (`⨅ₖ O(Q_k) ≤ jointConeStab Qs`) — what lets `affineScheme_refines_of_le` fire for the multi-form refinement brick. | — |
+| `RouteC.multiIsometryScheme_refines_coneScheme` | 690-705 | **brick-1-multi.** The recovered joint-isometry scheme `⨅ₖ O(Q_k)` refines the graph-intrinsic cone-stabilizer scheme. | — |
+| `RouteC.multiSimilitude_colouring_equivariant` | 707-719 | **F4-multi brick.** If a graph iso's linear part transports the value-tuple colouring by a global map `Φ`, it transports the difference colouring by the same `Φ`. Multi-form analog of `similitude_colouring_equivariant` (with `Φ` arbitrary). | — |
+| `RouteC.JointVarietyDeterminesFamily` | 721-747 | **CORRECTED 2026-07-16 (was a false-as-formalized citation; now PROVED below).** The joint variety determines its quadric family up to an invertible recombination, GIVEN the span/independence antecedents (= the projective-normality content). The F4-multi sibling of `NondegQuadricDeterminesForm`. | Definition |
+| `RouteC.jointVarietyDeterminesFamily_holds` | 749-839 | **The corrected fact is a theorem — no citation at this layer.** Expand each pulled-back form over the other family (`hspan`/`hspan'`), compose the coefficient matrices, and linear independence forces `D·C = 1` ⟹ `Φ := C·` injective. Carried content moves to the per-family span facts at instantiation. | — |
+| `RouteC.recoveredFamily_colouring_equivariant` | 841-866 | **F4-multi (`|Aut|`-naming).** Given a joint-cone-preserving graph iso and the per-family span/independence facts (projective normality — the faithful citation shape, replacing the old blanket `hcite` 2026-07-16), the recovered value-tuple difference colouring transports by a single global injective `Φ` — the multi-quadric completion of F4. | — |
+| `RouteC.recoveredFamily_partition_isoInvariant` | 868-885 | **F4-multi payoff (`|Aut|`-naming).** The recovered value-tuple colour partition is iso-invariant (a graph iso transports it by a global injective Φ). Derived from the injective-`Φ` equivariance (span/independence facts upstream). | — |
+| `RouteC.recoveredFamily_partition_isoInvariant_vanishing` | 887-904 | **F4-multi citation-free.** The recovered joint-`W` colour partition is iso-invariant with **no `JointVarietyDeterminesFamily`** — the `C:=∀k,Qₖ=0` specialization of `recoveredForm_partition_isoInvariant_gen` (vanishing-space transport, §3.2). Discharges F4-multi from projective normality at `q=p`. | — |
+| `RouteC.polar_linMulLin` | 915-920 | **Reusable primitive.** `polar (linMulLin f g) x y = f x·g y + f y·g x` — the building block for the polar of any Clifford-term-sum quadric (Plücker sub-Pfaffians, D₅ spinor quadrics). | — |
+| `RouteC.Plucker.pc` | 925-926 | The `i`-th Plücker coordinate projection on `𝔽_p^10`. | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf0` | 928-930 | Sub-Pfaffian deleting index 0 (`x₄x₉ − x₅x₈ + x₆x₇`); one of the 5 Plücker quadrics. | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf1` | 931-933 | Sub-Pfaffian deleting index 1 (`x₁x₉ − x₂x₈ + x₃x₇`). | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf2` | 934-936 | Sub-Pfaffian deleting index 2 (`x₀x₉ − x₂x₆ + x₃x₅`). | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf3` | 937-939 | Sub-Pfaffian deleting index 3 (`x₀x₈ − x₁x₆ + x₃x₄`). | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf4` | 940-942 | Sub-Pfaffian deleting index 4 (`x₀x₇ − x₁x₅ + x₂x₄`). | Definition, `noncomputable` |
+| `RouteC.Plucker.pluckerForms` | 944-946 | The family of 5 Plücker quadrics (`Fin 5`); the `Alt(5,q)` connection set is their joint cone. | Definition, `noncomputable` |
+| `RouteC.Plucker.Pf0_polar` | 948-951 | The polar form of `Pf0`, expanded in coordinates. | — |
+| `RouteC.Plucker.Pf1_polar` | 952-955 | The polar form of `Pf1`, expanded in coordinates. | — |
+| `RouteC.Plucker.Pf2_polar` | 956-959 | The polar form of `Pf2`, expanded in coordinates. | — |
+| `RouteC.Plucker.plucker_hjoint` | 961-1000 | **The Plücker quadrics are jointly nondegenerate** (trivial common polar radical) — the sole geometric input the alternating adapter needs (`Pf₀` isolates coords 4..9, `Pf₁` isolates 1,2,3, `Pf₂` isolates 0). | — |
+| `RouteC.Plucker.alternatingAdapter` | 1002-1005 | **`Alt(5,q)` as a sealed `FormAdapter`** — the Plücker quadrics assembled via `multiFormAdapter`; `G₀ = ⨅ₖ O(Pf_k)`. The first concrete non-quadratic Route-C family. | Definition, `noncomputable` |
+| `RouteC.Plucker.reachesRigidOrCameron_alternating` | 1007-1020 | **Instance 2 sealed** — the alternating `Alt(5,q)` family via 5 Plücker quadrics; the first non-quadratic Route-C seal. | — |
+| `RouteC.Plucker.alternating_refines_coneScheme` | 1022-1034 | **`Alt(5,q)` brick-1 (concrete).** The recovered joint-isometry scheme refines the graph-intrinsic cone-stabilizer scheme of the Plücker family — the refinement leg for alternating. | — |
+| `RouteC.HalfSpin.halfSpin_reduction` | 1056-1073 | **Half-spin reduction (instance 3 target).** Committing the D₅ dimensions: any 10 quadratic forms on `𝔽_p^16` with joint nondegeneracy are sealed via `multiFormAdapter`, reducing all remaining half-spin work to constructing the spinor quadrics and their `hjoint`. | — |
+| `RouteC.HalfSpin.sc` | 1090-1091 | The `i`-th half-spin coordinate projection on `𝔽_p^16`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S0` | 1093-1095 | D₅ spinor quadric — the quadruple form for `1234` (`x_∅x_{1234} = Pf`). | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S1` | 1096-1098 | D₅ spinor quadric — the quadruple form for `1235`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S2` | 1099-1101 | D₅ spinor quadric — the quadruple form for `1245`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S3` | 1102-1104 | D₅ spinor quadric — the quadruple form for `1345`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S4` | 1105-1107 | D₅ spinor quadric — the quadruple form for `2345`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S5` | 1108-1110 | D₅ spinor quadric — pair×quadruple form 5. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S6` | 1111-1113 | D₅ spinor quadric — pair×quadruple form 6. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S7` | 1114-1116 | D₅ spinor quadric — pair×quadruple form 7. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S8` | 1117-1119 | D₅ spinor quadric — pair×quadruple form 8. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S9` | 1120-1122 | D₅ spinor quadric — pair×quadruple form 9. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.spinorForms` | 1124-1127 | The family of 10 D₅ spinor quadrics (`Fin 10`); their joint cone is the pure-spinor cone = the half-spin connection set. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.S0_polar` | 1129-1132 | The polar form of `S0`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.S1_polar` | 1133-1136 | The polar form of `S1`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.S2_polar` | 1137-1140 | The polar form of `S2`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.S3_polar` | 1141-1144 | The polar form of `S3`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.S4_polar` | 1145-1148 | The polar form of `S4`, expanded in coordinates. | — |
+| `RouteC.HalfSpin.spinor_hjoint` | 1150-1209 | **The 10 spinor quadrics are jointly nondegenerate** (trivial common polar radical) — the `hjoint` the half-spin adapter needs, provable from the 5 quadruple forms `S0..S4` alone. | — |
+| `RouteC.HalfSpin.spinAdapter` | 1211-1214 | **The D₅ half-spin family as a sealed `FormAdapter`** — the 10 spinor quadrics assembled via `multiFormAdapter`; `G₀ = ⨅ₖ O(S_k)`. | Definition, `noncomputable` |
+| `RouteC.HalfSpin.reachesRigidOrCameron_halfSpin` | 1216-1230 | **Instance 3 sealed** — the half-spin family via the 10 D₅ spinor quadrics. | — |
+| `RouteC.HalfSpin.halfSpin_refines_coneScheme` | 1232-1242 | **Half-spin brick-1 (concrete).** The recovered joint-isometry scheme refines the graph-intrinsic cone-stabilizer scheme of the D₅ spinor family — the refinement leg for half-spin. | — |
+| `RouteC.Suzuki.ovoidC` | 1269-1270 | The 4th Tits-ovoid coordinate `c = a·b + σa·a² + σb` (affine chart `x₀ = 1`). | Definition |
+| `RouteC.Suzuki.SF0` | 1272-1274 | Suzuki σ-twisted form 0 (the single derived form `x₃x₀^{σ+1}+x₁x₂x₀^σ+x₁^{σ+2}+x₂^σx₀²`). | Definition |
+| `RouteC.Suzuki.SF1` | 1275-1277 | Suzuki σ-twisted form 1. | Definition |
+| `RouteC.Suzuki.SF2` | 1278-1280 | Suzuki σ-twisted form 2. | Definition |
+| `RouteC.Suzuki.SF3` | 1281-1283 | Suzuki σ-twisted form 3. | Definition |
+| `RouteC.Suzuki.SF4` | 1284-1286 | Suzuki σ-twisted form 4. | Definition |
+| `RouteC.Suzuki.suzukiForms` | 1288-1291 | The 5 σ-twisted Suzuki forms packaged as a family over `Fin 5`, for the joint-value adapter. | Definition |
+| `RouteC.Suzuki.four_eq_zero` | 1293-1296 | `(4 : K) = 0` in char 2 — clears the `·4` coefficients `ring_nf` produces when four equal monomials collect. | — |
+| `RouteC.Suzuki.SF0_ovoid` | 1298-1302 | `SF0` vanishes on the affine ovoid `(1, a, b, ovoidC a b)`. | — |
+| `RouteC.Suzuki.SF1_ovoid` | 1304-1308 | `SF1` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
+| `RouteC.Suzuki.SF2_ovoid` | 1310-1314 | `SF2` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
+| `RouteC.Suzuki.SF3_ovoid` | 1316-1320 | `SF3` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
+| `RouteC.Suzuki.SF4_ovoid` | 1322-1326 | `SF4` vanishes on the affine ovoid (given `σ∘σ = (·)²`). | — |
+| `RouteC.Suzuki.suzukiForms_ovoid` | 1328-1338 | All 5 σ-twisted forms vanish on the affine ovoid (packaged over `Fin 5`). | — |
+| `RouteC.Suzuki.suzukiForms_infty` | 1339-1343 | All 5 forms vanish at the point at infinity `(0,0,0,1)`. | — |
+| `RouteC.Suzuki.suzukiForms_homog` | 1344-1350 | **σ-twisted homogeneity** — `SF_k(λ·x) = σλ·λ²·SF_k(x)`, so each `{SF_k = 0}` is a cone; with ovoid + infinity vanishing this gives vanishing on the whole connection set. | — |
+| `RouteC.Suzuki.SFv` | 1365-1366 | The Suzuki form family evaluated on a vector `v : Fin 4 → K`. | Definition |
+| `RouteC.Suzuki.PreservesForms` | 1368-1371 | A map preserves the σ-twisted Suzuki forms (`F_k(g w) = F_k(w)`) — the joint σ-form isometry condition whose orbit-of-difference relation is the Route-C isometry-scheme colouring. | Definition |
+| `RouteC.Suzuki.SF0_recover` | 1387-1393 | Recovery of `x₂` — the 2nd discrete derivative `D₀D₁ SF0` collapses to `x₂` (σ-terms cancel in char 2). | — |
+| `RouteC.Suzuki.SF1_recover_x3` | 1395-1401 | Recovery of `x₃` — `D₀D₁ SF1 = x₃`. | — |
+| `RouteC.Suzuki.SF1_recover_x0` | 1403-1409 | Recovery of `x₀` — `D₁D₃ SF1 = x₀`. | — |
+| `RouteC.Suzuki.SF4_recover_x1` | 1411-1419 | Recovery of `x₁` — `D₂D₃ SF4 = x₁`. | — |
+| `RouteC.Suzuki.preservesForms_eq` | 1420-1424 | A form-preserving map that carries `b` to `a` equalizes the form-values (`F_k a = F_k b`) — the σ-twisted "orbit ⟹ equal-values" half. | — |
+| `RouteC.Suzuki.recover_x2` | 1426-1431 | `SFv`-level recovery of `x₂` (`D₀D₁ SF0`), lifting `SF0_recover` through coordinate evaluation. | — |
+| `RouteC.Suzuki.recover_x3` | 1433-1438 | `SFv`-level recovery of `x₃` (`D₀D₁ SF1`). | — |
+| `RouteC.Suzuki.recover_x0` | 1440-1445 | `SFv`-level recovery of `x₀` (`D₁D₃ SF1`). | — |
+| `RouteC.Suzuki.recover_x1` | 1447-1452 | `SFv`-level recovery of `x₁` (`D₂D₃ SF4`). | — |
+| `RouteC.Suzuki.suzukiForms_determine` | 1454-1481 | **Suzuki citation discharge.** The 5 σ-twisted ovoid forms determine the coordinates on the enlarged base — makes `reachesRigidOrCameron_suzuki` citation-free. | — |
+| `RouteC.Suzuki.SFbar` | 1496-1497 | The Suzuki forms in `𝔽₂`-coordinates via the additive iso `Ψ` (`SFbar = SFv ∘ Ψ`). | Definition |
+| `RouteC.Suzuki.suzukiG₀` | 1499-1516 | **The transported Suzuki joint-isometry group** — the `𝔽₂`-linear autos of `Fin D → ZMod 2` preserving every `SFbar`, a clean subgroup feeding the char-2 engine. | Definition |
+| `RouteC.Suzuki.preservesForms_of_mem_G₀` | 1517-1524 | `g ∈ suzukiG₀` ⟹ its `Ψ`-conjugate preserves the `K`-side forms — the link from the standard-space isometry to the `K`-side determiner. | — |
+| `RouteC.Suzuki.neg_mem_suzukiG₀` | 1526-1532 | `−1 ∈ suzukiG₀` — free in char 2 (`Ψ(−w) = Ψw`, so `neg` preserves every `SFbar`). | — |
+| `RouteC.Suzuki.suzukiBaseVecs` | 1534-1538 | The 8 base vectors on the `K`-side (`{0, e₀, e₁, e₂, e₃, e₀+e₁, e₁+e₃, e₂+e₃}`) whose pairwise sums power the second-derivative recovery. | Definition |
+| `RouteC.Suzuki.suzukiBase` | 1540-1544 | The individualized base — `Ψ`-images of `suzukiBaseVecs` transported to `Fin (2^D)` (`≤ 8` points). | Definition, `noncomputable` |
+| `RouteC.Suzuki.suzukiBase_card_le` | 1545-1550 | The Suzuki base has `≤ 8` points. | — |
+| `RouteC.Suzuki.base_sfv_eq` | 1551-1560 | **Per-base-vector transport.** A `G₀`-orbit witness at the `Ψ`-image of `b` gives equality of the σ-form values of the two vertices' differences by `b`. | — |
+| `RouteC.Suzuki.suzukiAdapter` | 1562-1595 | **The Suzuki family as a `FormAdapter`** (instance 4). `G₀ = suzukiG₀`, base = enlarged frame images (`≤ 8`), `separates` = transport to the proved determiner `suzukiForms_determine` — no citation, no `hσ`, no field-size hypothesis. | Definition, `noncomputable` |
+| `RouteC.Suzuki.reachesRigidOrCameron_suzuki` | 1597-1611 | **Instance 4 sealed, citation-free** — Suzuki–Tits via 5 σ-twisted ovoid forms; `separates` proved by second-derivative recovery (no citation, no `hσ`). | — |
 
 ## ChainDescent/RouteCSeam.lean
 
@@ -2300,14 +2301,14 @@ See `docs/chain-descent-recovery-route.md` §6/§8.
 | `ConfinementP3.PrimRank3Classical` | 901-909 | — | Definition |
 | `ConfinementP3.residue_primRank3Classical` | 911-928 | — | — |
 | `ConfinementP3.confinement_selectedCellIsOrbit_spine_P3` | 938-960 | — | — |
-| `ConfinementP3.confinementLargeScheme` | 971-975 | — | Definition |
-| `ConfinementP3.largeBridge_confinementLargeScheme` | 977-986 | — | — |
-| `ConfinementP3.confinement_selectedCellIsOrbit_spine_P3_discharged` | 988-1006 | — | — |
-| `ConfinementWitt.WittCellTransitive` | 1027-1038 | — | Definition |
-| `ConfinementWitt.frameSelectorTransitive_of_wittCellTransitive` | 1040-1058 | — | — |
-| `ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt` | 1066-1088 | — | — |
-| `ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt_classical` | 1105-1126 | — | — |
-| `ConfinementSchurianModel.residueModel_of_orbitalGroup` | 1141-1162 | — | Definition, `noncomputable` |
+| `ConfinementP3.confinementLargeScheme` | 971-985 | — | Definition |
+| `ConfinementP3.largeBridge_confinementLargeScheme` | 987-996 | — | — |
+| `ConfinementP3.confinement_selectedCellIsOrbit_spine_P3_discharged` | 998-1016 | — | — |
+| `ConfinementWitt.WittCellTransitive` | 1037-1048 | — | Definition |
+| `ConfinementWitt.frameSelectorTransitive_of_wittCellTransitive` | 1050-1068 | — | — |
+| `ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt` | 1076-1098 | — | — |
+| `ConfinementWitt.confinement_selectedCellIsOrbit_spine_witt_classical` | 1115-1136 | — | — |
+| `ConfinementSchurianModel.residueModel_of_orbitalGroup` | 1151-1172 | — | Definition, `noncomputable` |
 
 ## ChainDescent/CostModel.lean
 

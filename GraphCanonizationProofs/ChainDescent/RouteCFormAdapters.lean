@@ -412,39 +412,51 @@ theorem semisimilitude_colouring_equivariant
   rw [← map_sub, ← frobVec_sub]
   exact hss (u - t)
 
-/-- **F2's cited classical fact — a cone-preserving collineation is a semi-similitude (scoped, carried).**
-For `p` odd (`(2:K) ≠ 0`) and `d ≥ 4`: a bijective, cone-preserving linear-part-of-a-collineation `g`
-between two affine-polar graphs (`Q` nondegenerate) decomposes as `g = M ∘ σ̂` (`M` `K`-linear, `σ` a
-field endomorphism) and is a **semi-similitude** `Q'(g v) = μ · σ(Q v)` (`μ ≠ 0`). This is the
-**fundamental theorem of projective geometry** (a collineation of `PG(d,q)`, `d ≥ 2`, is a semilinear
-map) composed with the semilinear form of the quadric-determines-form uniqueness (§ `NondegQuadric
-DeterminesForm`). Classical (Hirschfeld; Artin, *Geometric Algebra*); carried as a premise like
-`Theorem41Statement`. The `p ≠ 2`, `d ≥ 4` scope is exactly where it is TRUE (the linear `q = p` case is
-the `σ = id` specialization of this). -/
+/-- **F2's cited classical fact, CORRECTED SCOPE (2026-07-16) — an isomorphism of affine polar graphs is a
+semi-affine semi-similitude (carried).** For `p` odd (`(2:K) ≠ 0`) and `d ≥ 4`: a bijection `g` of `K^d`
+preserving the **difference cone** in both directions (`Q (u − t) = 0 ↔ Q' (g u − g t) = 0` — exactly what a
+graph isomorphism of affine polar graphs supplies: edges are `u ≠ t ∧ Q (u − t) = 0`, injectivity handles the
+diagonal), with `Q` nondegenerate, is **semi-affine** — `g v = M (σ̂ v) + b` (`M` `K`-linear, `σ` a field
+endomorphism, `b` a translation) — and its linear part is a **semi-similitude** `Q'(M (σ̂ v)) = μ · σ(Q v)`
+(`μ ≠ 0`). This is the classical determination of isomorphisms between affine polar graphs (Brouwer–Van
+Maldeghem, *Strongly Regular Graphs*, affine polar graphs; obtained from the **fundamental theorem of projective
+geometry** once the graph structure recovers `AG(d,q)`, composed with the semilinear quadric-uniqueness §
+`NondegQuadricDeterminesForm`). Carried as a premise like `Theorem41Statement`; instantiations must respect the
+source's parameter conditions. The `q = p` case is the `σ = id` specialization.
+
+⚠ **Correction note (2026-07-16).** The previous formulation's antecedent was only **pointwise**
+cone-preservation (`Q v = 0 ↔ Q' (g v) = 0`) on an arbitrary bijection — **false as stated**: a transposition of
+two anisotropic vectors is bijective and pointwise cone-preserving but not semilinear, so the predicate was
+unsatisfiable and its carriers vacuous. The difference-cone antecedent is what a graph isomorphism actually
+provides; it is translation-invariant, hence the semi-**affine** conclusion (the old form also silently forced
+`g 0 = 0`). Consumers lose nothing: the payoff identity is a difference identity, so `b` cancels. -/
 def ConePreservingCollineationIsSemiSimilitude (K : Type*) [Field K] [Fintype K] (d : ℕ) : Prop :=
   (2 : K) ≠ 0 → 4 ≤ d → ∀ (Q Q' : QuadraticForm K (Fin d → K)) (g : (Fin d → K) → (Fin d → K)),
-    (Q.polarBilin).Nondegenerate → Function.Bijective g → (∀ v, Q v = 0 ↔ Q' (g v) = 0) →
-      ∃ (M : (Fin d → K) ≃ₗ[K] (Fin d → K)) (σ : K →+* K) (μ : K),
-        μ ≠ 0 ∧ (∀ v, g v = M (frobVec σ v)) ∧ (∀ v, Q' (g v) = μ * σ (Q v))
+    (Q.polarBilin).Nondegenerate → Function.Bijective g →
+    (∀ u t, Q (u - t) = 0 ↔ Q' (g u - g t) = 0) →
+      ∃ (M : (Fin d → K) ≃ₗ[K] (Fin d → K)) (σ : K →+* K) (μ : K) (b : Fin d → K),
+        μ ≠ 0 ∧ (∀ v, g v = M (frobVec σ v) + b) ∧ (∀ v, Q' (M (frobVec σ v)) = μ * σ (Q v))
 
 /-- **F2 — the recovered form is iso-invariant over `𝔽_q` (equivariant under a graph iso, including the
-Frobenius twist).** Given the linear part `g` of a graph isomorphism between two `𝔽_q`-affine-polar
-graphs (bijective, cone-preserving), nondegenerate `Q`, and the cited fundamental-theorem fact `hcite`,
-the recovered difference colouring transports with a global scalar `μ` **and** a field automorphism `σ`:
-`Q'(g u − g t) = μ · σ(Q(u − t))`. This is F4 for `q = pᵉ`: canonicalizing via the recovered form is
-iso-invariant even in the presence of field twists (`AΓO` vs `AGO`). The `q = p` prime case
-(`recoveredForm_colouring_equivariant`) is the `σ = id` specialization. Axiom-clean; the only
-non-elementary input is `hcite`, threaded like `Theorem41Statement`. -/
+Frobenius twist).** Given a graph isomorphism's action `g` between two `𝔽_q`-affine-polar graphs (bijective,
+difference-cone-preserving), nondegenerate `Q`, and the cited fact `hcite`, the recovered difference colouring
+transports with a global scalar `μ` **and** a field automorphism `σ`: `Q'(g u − g t) = μ · σ(Q(u − t))` — the
+translation part of the semi-affine decomposition cancels in the differences. This is F4 for `q = pᵉ`:
+canonicalizing via the recovered form is iso-invariant even in the presence of field twists (`AΓO` vs `AGO`).
+The `q = p` prime case (`recoveredForm_colouring_equivariant`) is the `σ = id` specialization. Axiom-clean; the
+only non-elementary input is `hcite`, threaded like `Theorem41Statement`. -/
 theorem recoveredForm_colouring_equivariant_semilinear
     (hcite : ConePreservingCollineationIsSemiSimilitude K d) (h2 : (2 : K) ≠ 0) (hd : 4 ≤ d)
     (Q Q' : QuadraticForm K (Fin d → K)) (hQ : (Q.polarBilin).Nondegenerate)
     (g : (Fin d → K) → (Fin d → K)) (hg : Function.Bijective g)
-    (hcone : ∀ v, Q v = 0 ↔ Q' (g v) = 0) :
+    (hcone : ∀ u t, Q (u - t) = 0 ↔ Q' (g u - g t) = 0) :
     ∃ (σ : K →+* K) (μ : K), ∀ u t : Fin d → K, Q' (g u - g t) = μ * σ (Q (u - t)) := by
-  obtain ⟨M, σ, μ, _hμ, hgM, hss⟩ := hcite h2 hd Q Q' g hQ hg hcone
+  obtain ⟨M, σ, μ, b, _hμ, hgM, hss⟩ := hcite h2 hd Q Q' g hQ hg hcone
   refine ⟨σ, μ, fun u t => ?_⟩
-  rw [hgM u, hgM t]
-  exact semisimilitude_colouring_equivariant Q Q' M σ (fun v => by rw [← hgM v]; exact hss v) u t
+  have hdiff : g u - g t = M (frobVec σ u) - M (frobVec σ t) := by
+    rw [hgM u, hgM t, add_sub_add_right_eq_sub]
+  rw [hdiff]
+  exact semisimilitude_colouring_equivariant Q Q' M σ hss u t
 
 end F2
 
@@ -706,42 +718,151 @@ theorem multiSimilitude_colouring_equivariant {ι : Type*}
   simp only [map_sub] at h
   exact h
 
-/-- **F4-multi's cited classical fact — the joint variety determines its quadric family up to an invertible
-recombination (scoped, carried).** For a jointly-nondegenerate family `Qs` (trivial common polar radical) and a
-graph iso's linear part `g` preserving the joint cone (`(∀ k, Q_k v = 0) ↔ (∀ k, Q'_k (g v) = 0)`), the pulled-
-back family `{Q'_k ∘ g}` and `{Q_k}` span the same space of degree-2 forms (the degree-2 part of the vanishing
-ideal of the cone), so the value-tuple transports by a global **injective** linear map `Φ`. This is the
-multi-form analog of `NondegQuadricDeterminesForm`: there the vanishing space is `⟨Q⟩` (`Φ = ` scalar); here it
-is `span {Q_k}` (`Φ = ` the change-of-basis, injective because the family is independent — true for the Plücker
-quadrics of `Alt(5,q)` and the D₅ spinor quadrics). Classical projective algebraic geometry (the ideal of the
-Grassmann / spinor variety is generated by the Plücker / spinor quadrics — projective normality); carried as a
-premise like `Theorem41Statement`. NOT proved here. -/
-def JointVarietyDeterminesFamily (p d : ℕ) (ι : Type*) [Fact p.Prime] : Prop :=
+/-- **F4-multi's cited fact, CORRECTED AND SCOPED (2026-07-16) — the joint variety determines its quadric family
+up to an invertible recombination, GIVEN the span facts.** For families `Qs`, `Qs'` and a joint-cone-preserving
+linear `g`: IF each family **spans the degree-2 part of its joint cone's vanishing ideal** (`hspan` / `hspan'` —
+this is the projective-normality content, true for the Plücker quadrics of the Grassmannian and the D₅ spinor
+quadrics, NOT for arbitrary families) and the source family is linearly independent, THEN the value-tuple
+transports by a global **injective** `Φ`. The multi-form analog of `NondegQuadricDeterminesForm`: there the
+vanishing space is `⟨Q⟩` (`Φ =` scalar); here it is `span {Q_k}` (`Φ =` the change-of-basis).
+
+⚠ **Correction note (2026-07-16).** The previous formulation quantified over ALL jointly-nondegenerate families
+with NO span hypothesis — **false as stated**: for an anisotropic family the joint cone is `{0}`, so
+cone-preservation is vacuous for every `g ∈ GL` while the conclusion is a strong constraint (e.g. `p = 5`,
+`d = 2`, `Q = x² − 2y²`, `g = diag(1,2)` forces `Φ 1 = Φ 2 = 1`, not injective). The span hypothesis is exactly
+what the classical citation provides and what the old docstring already appealed to; with it *stated*, the
+implication is pure linear algebra and is **PROVED** below (`jointVarietyDeterminesFamily_holds`). The carried
+citation moves to the per-family span/independence facts, supplied at instantiation — the exact analog of the
+discharged `NondegQuadricDeterminesForm`. (The unused trivial-common-polar-radical antecedent was dropped.) -/
+def JointVarietyDeterminesFamily (p d : ℕ) (ι : Type*) [Fintype ι] [Fact p.Prime] : Prop :=
   ∀ (Qs Qs' : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
     (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)),
-    (∀ w : Fin d → ZMod p, (∀ k, (Qs k).polarBilin w = 0) → w = 0) →
     (∀ v, (∀ k, Qs k v = 0) ↔ (∀ k, Qs' k (g v) = 0)) →
+    (∀ F : QuadraticForm (ZMod p) (Fin d → ZMod p),
+      (∀ v, (∀ k, Qs k v = 0) → F v = 0) → ∃ c : ι → ZMod p, F = ∑ k, c k • Qs k) →
+    (∀ F : QuadraticForm (ZMod p) (Fin d → ZMod p),
+      (∀ v, (∀ k, Qs' k v = 0) → F v = 0) → ∃ c : ι → ZMod p, F = ∑ k, c k • Qs' k) →
+    (∀ c : ι → ZMod p, (∑ k, c k • Qs k) = 0 → c = 0) →
       ∃ Φ : (ι → ZMod p) → (ι → ZMod p),
         Function.Injective Φ ∧ ∀ v, (fun k => Qs' k (g v)) = Φ (fun k => Qs k v)
 
+/-- **The corrected fact is a THEOREM — no citation left at this layer.** Each pulled-back target form
+`Qs' j ∘ g` vanishes on the source cone, so `hspan` expands it over `Qs` with coefficient matrix `C`; symmetrically
+`Qs j ∘ g⁻¹` expands over `Qs'` with matrix `D`. Composing, `Qs j = ∑ m (D·C)ⱼₘ • Qs m`, so linear independence
+forces `D·C = 1` and `Φ := C·` is injective. What remains carried is per-family and faithful: the span facts
+(projective normality of the concrete Grassmann/spinor variety) and independence, supplied when instantiating at
+the Plücker / spinor quadrics. -/
+theorem jointVarietyDeterminesFamily_holds (p d : ℕ) (ι : Type*) [Fintype ι] [DecidableEq ι]
+    [Fact p.Prime] : JointVarietyDeterminesFamily p d ι := by
+  intro Qs Qs' g hcone hspan hspan' hindep
+  -- `C`: each pulled-back target form, expanded over the source family
+  have hCex : ∀ j, ∃ c : ι → ZMod p,
+      (Qs' j).comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p)) = ∑ k, c k • Qs k := by
+    intro j
+    refine hspan _ fun v hv => ?_
+    rw [QuadraticMap.comp_apply]
+    exact (hcone v).mp hv j
+  choose C hC using hCex
+  -- `D`: each source form pulled back through `g.symm`, expanded over the target family
+  have hDex : ∀ j, ∃ c : ι → ZMod p,
+      (Qs j).comp (g.symm : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p)) = ∑ k, c k • Qs' k := by
+    intro j
+    refine hspan' _ fun v hv => ?_
+    rw [QuadraticMap.comp_apply]
+    refine (hcone (g.symm v)).mpr (fun k => ?_) j
+    rw [LinearEquiv.apply_symm_apply]
+    exact hv k
+  choose D hD using hDex
+  -- pointwise forms of the two expansions
+  have hCval : ∀ j v, Qs' j (g v) = ∑ k, C j k * Qs k v := by
+    intro j v
+    have h : ((Qs' j).comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) v
+        = (∑ k, C j k • Qs k) v := by rw [hC j]
+    simpa [QuadraticMap.comp_apply, QuadraticMap.sum_apply, QuadraticMap.smul_apply,
+      smul_eq_mul] using h
+  have hDval : ∀ j v, Qs j (g.symm v) = ∑ k, D j k * Qs' k v := by
+    intro j v
+    have h : ((Qs j).comp (g.symm : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) v
+        = (∑ k, D j k • Qs' k) v := by rw [hD j]
+    simpa [QuadraticMap.comp_apply, QuadraticMap.sum_apply, QuadraticMap.smul_apply,
+      smul_eq_mul] using h
+  -- the composite expansion `Qs j = ∑ m (D·C)ⱼₘ • Qs m`, pointwise
+  have hexp : ∀ j v, Qs j v = ∑ m, (∑ k, D j k * C k m) * Qs m v := by
+    intro j v
+    have h0 : Qs j v = Qs j (g.symm (g v)) := by rw [LinearEquiv.symm_apply_apply]
+    rw [h0, hDval j (g v)]
+    calc ∑ k, D j k * Qs' k (g v)
+        = ∑ k, ∑ m, D j k * (C k m * Qs m v) := by
+          refine Finset.sum_congr rfl fun k _ => ?_
+          rw [hCval k v, Finset.mul_sum]
+      _ = ∑ m, ∑ k, D j k * (C k m * Qs m v) := Finset.sum_comm
+      _ = ∑ m, (∑ k, D j k * C k m) * Qs m v := by
+          refine Finset.sum_congr rfl fun m _ => ?_
+          rw [Finset.sum_mul]
+          exact Finset.sum_congr rfl fun k _ => by ring
+  -- linear independence forces `D·C = 1`
+  have hDC : ∀ j m, (∑ k, D j k * C k m) = if j = m then 1 else 0 := by
+    intro j m
+    have hz : (∑ l, ((∑ k, D j k * C k l) - if j = l then 1 else 0) • Qs l) = 0 := by
+      ext v
+      simp only [QuadraticMap.sum_apply, QuadraticMap.smul_apply, smul_eq_mul,
+        QuadraticMap.zero_apply, sub_mul, ite_mul, one_mul, zero_mul]
+      rw [Finset.sum_sub_distrib]
+      have h2 : (∑ l, if j = l then Qs l v else 0) = Qs j v := by simp
+      rw [h2, ← hexp j v, sub_self]
+    have h3 := congrFun (hindep _ hz) m
+    simp only [Pi.zero_apply] at h3
+    exact sub_eq_zero.mp h3
+  -- assemble `Φ := C·`, injective via the left inverse `D·`
+  refine ⟨fun y j => ∑ k, C j k * y k, ?_, ?_⟩
+  · have hli : Function.LeftInverse (fun z j => ∑ k, D j k * z k)
+        (fun y j => ∑ k, C j k * y k) := by
+      intro y
+      funext j
+      show (∑ k, D j k * ∑ l, C k l * y l) = y j
+      calc ∑ k, D j k * ∑ l, C k l * y l
+          = ∑ k, ∑ l, D j k * (C k l * y l) := by
+            refine Finset.sum_congr rfl fun k _ => ?_
+            rw [Finset.mul_sum]
+        _ = ∑ l, ∑ k, D j k * (C k l * y l) := Finset.sum_comm
+        _ = ∑ l, (∑ k, D j k * C k l) * y l := by
+            refine Finset.sum_congr rfl fun l _ => ?_
+            rw [Finset.sum_mul]
+            exact Finset.sum_congr rfl fun k _ => by ring
+        _ = ∑ l, (if j = l then 1 else 0) * y l := by
+            refine Finset.sum_congr rfl fun l _ => ?_
+            rw [hDC j l]
+        _ = y j := by simp
+    exact hli.injective
+  · intro v
+    funext j
+    exact hCval j v
+
 /-- **F4-multi — the recovered family colouring is iso-invariant (equivariant under a graph iso's linear
-part).** Given the linear part `g` of a graph iso between two multi-quadric forms graphs (joint-cone-preserving),
-joint nondegeneracy, and the cited `JointVarietyDeterminesFamily` (`hcite`), the recovered value-tuple
-**difference** colouring transports by a single global injective `Φ`:
+part), with NO blanket citation.** Given the linear part `g` of a graph iso between two multi-quadric forms
+graphs (joint-cone-preserving), the **span facts** (`hspan`/`hspan'` — projective normality of the concrete
+variety, the faithful per-family citation) and linear independence of the source family, the recovered
+value-tuple **difference** colouring transports by a single global injective `Φ`:
 `(Q'_k (g u − g t))_k = Φ ((Q_k (u − t))_k)`. So canonicalizing via the recovered family produces a canonical
 (iso-invariant) colouring — the multi-form completion of F4, previously present only for the single-quadratic
 affine-polar instance. Composes with `multiIsometryScheme_refines_coneScheme` and `FormAdapter.reachesRigidOrCameron`
 to give: iso-invariant discrete colouring at a bounded base ⟹ (meta) poly canonical labelling, for every
-multi-quadric family. Axiom-clean; the only non-elementary input is `hcite`. -/
-theorem recoveredFamily_colouring_equivariant {ι : Type*}
-    (hcite : JointVarietyDeterminesFamily p d ι)
+multi-quadric family. Axiom-clean. (2026-07-16: the blanket `hcite : JointVarietyDeterminesFamily` premise was
+replaced — the old predicate was false as formalized, see its docstring; this theorem now consumes the **proved**
+`jointVarietyDeterminesFamily_holds`, so the only carried content is the per-family span/independence facts.) -/
+theorem recoveredFamily_colouring_equivariant {ι : Type*} [Fintype ι] [DecidableEq ι]
     (Qs Qs' : ι → QuadraticForm (ZMod p) (Fin d → ZMod p))
     (g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
-    (hjoint : ∀ w : Fin d → ZMod p, (∀ k, (Qs k).polarBilin w = 0) → w = 0)
-    (hcone : ∀ v, (∀ k, Qs k v = 0) ↔ (∀ k, Qs' k (g v) = 0)) :
+    (hcone : ∀ v, (∀ k, Qs k v = 0) ↔ (∀ k, Qs' k (g v) = 0))
+    (hspan : ∀ F : QuadraticForm (ZMod p) (Fin d → ZMod p),
+      (∀ v, (∀ k, Qs k v = 0) → F v = 0) → ∃ c : ι → ZMod p, F = ∑ k, c k • Qs k)
+    (hspan' : ∀ F : QuadraticForm (ZMod p) (Fin d → ZMod p),
+      (∀ v, (∀ k, Qs' k v = 0) → F v = 0) → ∃ c : ι → ZMod p, F = ∑ k, c k • Qs' k)
+    (hindep : ∀ c : ι → ZMod p, (∑ k, c k • Qs k) = 0 → c = 0) :
     ∃ Φ : (ι → ZMod p) → (ι → ZMod p), Function.Injective Φ ∧
       ∀ u t : Fin d → ZMod p, (fun k => Qs' k (g u - g t)) = Φ (fun k => Qs k (u - t)) := by
-  obtain ⟨Φ, hΦinj, hΦ⟩ := hcite Qs Qs' g hjoint hcone
+  obtain ⟨Φ, hΦinj, hΦ⟩ :=
+    jointVarietyDeterminesFamily_holds p d ι Qs Qs' g hcone hspan hspan' hindep
   exact ⟨Φ, hΦinj, fun u t => multiSimilitude_colouring_equivariant Qs Qs' g Φ hΦ u t⟩
 
 /-- **F4-multi payoff — the recovered colour partition is iso-invariant.** From the equivariance
