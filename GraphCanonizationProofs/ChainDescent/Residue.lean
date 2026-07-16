@@ -7,7 +7,8 @@ import ChainDescent.Stall
 
 The residue is **not asserted**. It is *defined* as the complement of a **positive capability predicate**:
 
-> **`Handled key S adj`** — at every non-discrete colouring, the branch cell is **either** connected by the
+> **`Handled key S adj`** — at every **reachable** non-discrete colouring (`Descend.Reaches` — the descent's own
+> node colourings, over-approximated resolver-independently), the branch cell is **either** connected by the
 > supply's verified generators (**consume**'s domain) **or** separated by the key (**force**'s domain).
 
 Everything is then proved *forwards* from `Handled`: the guarded descent **answers** (`answers_of_handled`) and is
@@ -35,10 +36,11 @@ can be neither inhabited nor refuted).
 * **consume's half** — a `Supply` and its firing (`CellIsOrbit`) on everything except the Cameron / node-4
   obstruction. Two structural supplies now exist — `MatchSupply.matchSupply` (fires at a `Discretizing` node,
   i.e. regular-action only) and `DeepMatchSupply.deepMatchSupply d` (fires under `SeparatesAt d` — the seal's
-  bounded-depth ladder). **What is still missing is the discharge of `Handled` from a *structural* hypothesis:**
-  no theorem yet takes the seal's `CascadesAt` / `SeparatesAtBoundedBase` to `DeepMatch.SeparatesAt`, so the
-  sealed families (`theorem_1_HOR_*`, `viaSpielman`) do not yet populate `Handled` (that bridge is `P2b`;
-  handoff §6.2).
+  bounded-depth ladder). The seal's depth vocabulary reaches `SeparatesAt` via `SealDepthBridge` (P2b/P2c), and
+  **`HandledBridge.handled_of_seal` now discharges `Handled` itself** from the two structural seal hypotheses:
+  depth (`CascadesAt`, which `theorem_1_HOR_*` / `viaSpielman` produce at bounded `k`) and localisation at every
+  committed set (`∀ T, CellsAreOrbits` — the seal's own open per-family obligation, stated honestly as the
+  hypothesis).
 * **force's half** — a solve-derived `Key` and its separation theorem (`KeySeparates`), i.e. §11.12's P1/P3.
   *Nothing is wired in today* beyond `lookaheadKey`.
 
@@ -135,23 +137,61 @@ theorem guarded_mixed_canonizer {key : Key n} (hk : KeyEquivariant key) {S : Sup
   Descend.isCanonicalFormOpt_canonForm? Refine.refineEquivariant_encodeFreeFast
     (narrowTransport_guarded Refine.refineEquivariant_encodeFreeFast hk hse)
 
-/-! ## 2. ★ `Handled` — the POSITIVE capability predicate -/
+/-! ## 2. ★ `Handled` — the POSITIVE capability predicate, on the REACHED nodes
 
-/-- **★★ WHAT THE RESOLVERS HANDLE.** Every non-discrete colouring's branch cell is **either** connected by the
-supply's verified generators (consume's domain) **or** separated by the key (force's domain).
+**Why `Handled` quantifies over `Descend.Reaches`, not over all colourings (2026-07-16 correction).** The
+original definition demanded `CellResolved` at **every** non-discrete colouring — including colourings the
+descent never visits. That was undischargeable **in principle** for the intended import route: the seal corpus
+produces its firing hypotheses (`CellsAreOrbits`, `CascadesAt`) only at *committed individualization paths*
+(`SealBridge.pathCol`), and `CellsAreOrbits` genuinely **fails** at generic non-refinement-closed colourings —
+so no sealed family could ever have populated the old predicate, and zero theorem instances of it existed. The
+descent only visits `Reaches`-reachable colourings (an over-approximation closed under "individualize a branch
+vertex, refine"), so that is the honest domain of the capability claim: `answers_of_handled` goes through
+unchanged, and the seal imports can now discharge it (`HandledBridge.lean`). -/
+
+/-- **★★ WHAT THE RESOLVERS HANDLE.** At every **reachable** non-discrete colouring, the branch cell is
+**either** connected by the supply's verified generators (consume's domain) **or** separated by the key
+(force's domain).
 
 This is the *whole* remaining content of the project, and it is stated **positively**: every strengthening of the
-oracle or the key enlarges it, with no re-proof of soundness or of the cost bound (both are unconditional). -/
+oracle or the key enlarges it, with no re-proof of soundness or of the cost bound (both are unconditional). It is
+the mixed-canonizer analogue of the seal's `reachesRigidOrCameron` boundary: an improvable proof target, extended
+family-by-family (`HandledBridge.handled_of_seal`) or resolver-by-resolver (`OrbitPrune.handled_congr`), with the
+residue always its exact complement. The reachability set is **resolver-independent** (any branch vertex), so a
+`Handled` instance survives every future resolver strengthening. -/
 def Handled (key : Key n) (S : Supply n) (adj : AdjMatrix n) : Prop :=
-  ∀ χ : Colouring n, ¬ Discrete χ → Cost.CellResolved key S adj χ
+  ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ → ¬ Discrete χ →
+    Cost.CellResolved key S adj χ
 
-/-- On a handled graph no node ever stalls, so the guarded narrowing is proper. -/
+/-- The old universally-quantified capability still lands (it is strictly stronger) — kept so a discharge that
+happens to hold at every colouring plugs in unchanged. -/
+theorem handled_of_forall {key : Key n} {S : Supply n} {adj : AdjMatrix n}
+    (h : ∀ χ : Colouring n, ¬ Discrete χ → Cost.CellResolved key S adj χ) :
+    Handled key S adj :=
+  fun χ _ hd => h χ hd
+
+/-- **A 1-WL-rigid graph is handled by ANY resolvers.** If the refined root is already discrete, the root is the
+only reachable node (the branch step needs a non-discrete parent), so the capability demand is vacuous. This is
+the innermost ring of the boundary: plain refinement finishes, and neither resolver is ever consulted. -/
+theorem handled_of_root_discrete (key : Key n) (S : Supply n) {adj : AdjMatrix n}
+    (h : Discrete (Descend.refineV (Refine.encodeFreeFast (n := n)) adj (fun _ => 0))) :
+    Handled key S adj := by
+  have hall : ∀ χ : Colouring n,
+      Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ → Discrete χ := by
+    intro χ hr
+    induction hr with
+    | root => exact h
+    | step _ hd _ ih => exact absurd ih hd
+  exact fun χ hr hd => absurd (hall χ hr) hd
+
+/-- On a handled graph no reachable node ever stalls, so the guarded narrowing is proper there. -/
 theorem narrowProper_guard_of_handled {key : Key n} {S : Supply n} {adj : AdjMatrix n}
     (h : Handled key S adj) :
-    ∀ χ : Colouring n, ¬ Discrete χ → narrow (guard (forceThenConsume key S)) adj χ ≠ [] := by
-  intro χ hd
+    ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ → ¬ Discrete χ →
+      narrow (guard (forceThenConsume key S)) adj χ ≠ [] := by
+  intro χ hr hd
   have hone : (narrow (forceThenConsume key S) adj χ).length = 1 := by
-    rcases h χ hd with horb | hsep
+    rcases h χ hr hd with horb | hsep
     · exact Composite.forceThenConsume_singleton_of_cellIsOrbit hd horb
     · exact Composite.forceThenConsume_singleton_of_separating hd hsep
   have hns : ¬ stalled (forceThenConsume key S) adj χ := by
@@ -168,15 +208,15 @@ theorem answers_of_handled {key : Key n} {S : Supply n} {adj : AdjMatrix n}
     (h : Handled key S adj) :
     Descend.canonForm? (Refine.encodeFreeFast (n := n)) (guard (forceThenConsume key S)) adj
       ≠ none := by
-  -- properness is needed only **at `adj`** — which is exactly what `Handled adj` gives.
-  refine Descend.canonForm?_ne_none_at Refine.refineSplits_encodeFreeFast ⟨?_, ?_⟩
-  · exact fun χ hd => narrowProper_guard_of_handled h χ hd
-  · intro χ v hv
-    rw [Stall.narrow_guard] at hv
-    by_cases hst : stalled (forceThenConsume key S) adj χ
-    · rw [if_pos hst] at hv; exact absurd hv (List.not_mem_nil)
-    · rw [if_neg hst] at hv
-      exact (Composite.narrowProper_forceThenConsume S).2 adj χ v hv
+  -- properness is needed only at `adj`, and only at the REACHED nodes — exactly what `Handled` gives.
+  refine Descend.canonForm?_ne_none_reaches Refine.refineSplits_encodeFreeFast
+    (fun χ hr hd => narrowProper_guard_of_handled h χ hr hd) ?_
+  intro χ v hv
+  rw [Stall.narrow_guard] at hv
+  by_cases hst : stalled (forceThenConsume key S) adj χ
+  · rw [if_pos hst] at hv; exact absurd hv (List.not_mem_nil)
+  · rw [if_neg hst] at hv
+    exact (Composite.narrowProper_forceThenConsume S).2 adj χ v hv
 
 /-! ## 3. ★ The residue — the complement, and nothing more -/
 
@@ -191,19 +231,21 @@ theorem residue_if_flag {key : Key n} {S : Supply n} {adj : AdjMatrix n}
     Residue key S adj :=
   fun h => answers_of_handled h hflag
 
-/-- Unfolded: a residual graph has a cell that is **neither** supply-connected **nor** key-separated — which is
-exactly `Composite.forceThenConsume_stall`'s *attribution*. Each residual cell is assignable to **one** side's
-weakness. -/
+/-- Unfolded: a residual graph has a **reachable** cell that is **neither** supply-connected **nor**
+key-separated — which is exactly `Composite.forceThenConsume_stall`'s *attribution*. Each residual cell is
+assignable to **one** side's weakness, and it is a cell the descent can actually be confronted with. -/
 theorem residue_iff {key : Key n} {S : Supply n} {adj : AdjMatrix n} :
-    Residue key S adj ↔ ∃ χ : Colouring n, ¬ Discrete χ ∧ ¬ Cost.CellResolved key S adj χ := by
+    Residue key S adj ↔ ∃ χ : Colouring n,
+      Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ ∧ ¬ Discrete χ ∧
+        ¬ Cost.CellResolved key S adj χ := by
   unfold Residue Handled
   constructor
   · intro h
     by_contra hc
     push_neg at hc
-    exact h (fun χ hd => hc χ hd)
-  · rintro ⟨χ, hd, hnr⟩ h
-    exact hnr (h χ hd)
+    exact h (fun χ hr hd => hc χ hr hd)
+  · rintro ⟨χ, hr, hd, hnr⟩ h
+    exact hnr (h χ hr hd)
 
 /-! ## 4. Non-vacuity — the residue is INHABITED, and it SHRINKS
 
@@ -237,29 +279,47 @@ theorem not_wordReach_nil {u w : Fin n} (h : u ≠ w) :
   | refl => exact h rfl
   | step _ hg => exact absurd hg (List.not_mem_nil)
 
-/-- **★★ `unhandledResidue_nonvacuous` — the residue is INHABITED.** With resolvers that certify nothing, any graph
-on ≥ 2 vertices is residual: the constant colouring's cell has two vertices, the empty supply cannot connect them
-and the constant key cannot separate them. -/
-theorem residue_nonvacuous (adj : AdjMatrix 2) :
-    Residue (constKey (n := 2)) (emptySupply (n := 2)) adj := by
+/-- The empty graph on two vertices — the smallest graph whose swap symmetry survives refinement, so its root
+node is genuinely non-discrete and *reached*. (An arbitrary `AdjMatrix 2` would not do: a graph whose root
+refines to discrete is handled by ANY resolvers — `handled_of_root_discrete` — hence not residual.) -/
+def adjE2 : AdjMatrix 2 := ⟨fun _ _ => 0⟩
+
+/-- **★★ `unhandledResidue_nonvacuous` — the residue is INHABITED.** With resolvers that certify nothing, the
+empty two-vertex graph is residual: its refined **root** — a genuinely reached node — still has both vertices in
+one cell (the swap is a symmetry of the graph and the refiner is equivariant, so no round can split them), the
+empty supply cannot connect them and the constant key cannot separate them. -/
+theorem residue_nonvacuous :
+    Residue (constKey (n := 2)) (emptySupply (n := 2)) adjE2 := by
   rw [residue_iff]
-  refine ⟨fun _ => 0, ?_, ?_⟩
-  · -- the constant colouring is not discrete
-    intro hdisc
-    exact absurd (hdisc 0 1 rfl) (by decide)
-  · -- and its cell defeats both resolvers
-    have hbr : branches (n := 2) (fun _ => 0) = [0, 1] := by decide
-    rintro (horb | hsep)
-    · -- consume: the empty supply gives no words
-      have h01 : (0 : Fin 2) ≠ 1 := by decide
-      have := horb 0 (by rw [hbr]; simp) 1 (by rw [hbr]; simp)
-      -- `verified emptySupply = []`
-      have hv : Consume.verified (emptySupply (n := 2)) adj (fun _ => 0) = [] := rfl
-      rw [hv] at this
-      exact not_wordReach_nil h01 this
-    · -- force: the constant key cannot tell `0` from `1`
-      have h01 : (0 : Fin 2) ≠ 1 := by decide
-      exact h01 (hsep 0 (by rw [hbr]; simp) 1 (by rw [hbr]; simp) rfl)
+  set χ₀ : Colouring 2 := Descend.refineV (Refine.encodeFreeFast (n := 2)) adjE2 (fun _ => 0)
+    with hχ₀
+  -- the swap is a symmetry of the empty graph and the refiner is equivariant ⟹ the root keeps `0 ∼ 1`
+  have hswap : Descend.transportColouring (Equiv.swap 0 1) χ₀ = χ₀ :=
+    (Refine.refineEquivariant_encodeFreeFast (n := 2) (Equiv.swap 0 1) adjE2 (fun _ => 0)).symm
+  have h01 : χ₀ 0 = χ₀ 1 := by
+    have h := congrFun hswap 1
+    simpa [Descend.transportColouring, Equiv.symm_swap, Equiv.swap_apply_right] using h
+  have hnd : ¬ Discrete χ₀ := fun hdisc => absurd (hdisc 0 1 h01) (by decide)
+  refine ⟨χ₀, Descend.Reaches.root, hnd, ?_⟩
+  -- the (reached) root cell defeats both resolvers
+  obtain ⟨v, hv⟩ := List.exists_mem_of_ne_nil _ (branches_ne_nil hnd)
+  obtain ⟨c, hc, hvc⟩ := Consume.exists_targetColour_of_mem hv
+  have hvall : χ₀ 0 = χ₀ v ∧ χ₀ 1 = χ₀ v := by
+    fin_cases v
+    · exact ⟨rfl, h01.symm⟩
+    · exact ⟨h01, rfl⟩
+  have h0 : (0 : Fin 2) ∈ branches χ₀ := (mem_branches_iff hc 0).mpr (hvall.1.trans hvc)
+  have h1 : (1 : Fin 2) ∈ branches χ₀ := (mem_branches_iff hc 1).mpr (hvall.2.trans hvc)
+  rintro (horb | hsep)
+  · -- consume: the empty supply gives no words
+    have hne : (0 : Fin 2) ≠ 1 := by decide
+    have := horb 0 h0 1 h1
+    have hverif : Consume.verified (emptySupply (n := 2)) adjE2 χ₀ = [] := rfl
+    rw [hverif] at this
+    exact not_wordReach_nil hne this
+  · -- force: the constant key cannot tell `0` from `1`
+    have hne : (0 : Fin 2) ≠ 1 := by decide
+    exact hne (hsep 0 h0 1 h1 rfl)
 
 end Residue
 end ChainDescent

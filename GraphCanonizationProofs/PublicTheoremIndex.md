@@ -2875,8 +2875,11 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Descend.narrowProperAt_of_narrowProper` | 1159-1161 | Global properness gives properness at every graph. | — |
 | `Descend.descend_ne_none_at` | 1163-1187 | Totality at one graph — the per-graph form of `descend_ne_none`. | — |
 | `Descend.canonForm?_ne_none_at` | 1189-1193 | **③-facing totality**: the descent answers on a graph whose resolver is proper *there*. | — |
-| `Descend.descend_ne_none` | 1195-1221 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
-| `Descend.canonForm?_ne_none` | 1223-1228 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
+| `Descend.Reaches` | 1205-1213 | **The descent's reachable node colourings**, over-approximated resolver-independently: the refined root, closed under "individualize a branch vertex of a non-discrete node, then refine". The honest domain of any per-node capability claim (`Residue.Handled`) — strengthening a resolver only shrinks the true visit set, so `∀ χ, Reaches …` statements survive every resolver upgrade. | Inductive |
+| `Descend.descend_ne_none_reaches` | 1215-1245 | **Totality from properness on the REACHED set only** — the `∀ χ` of `descend_ne_none_at` was never needed; the induction re-establishes reachability for each child via the subset half. | — |
+| `Descend.canonForm?_ne_none_reaches` | 1247-1256 | **③-facing totality, reached-set form:** the descent answers on a graph whose resolver is proper at every *reached* node. Strictly more applicable than `canonForm?_ne_none_at`; what `Residue.answers_of_handled` rides on. | — |
+| `Descend.descend_ne_none` | 1258-1284 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
+| `Descend.canonForm?_ne_none` | 1286-1291 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
 ## ChainDescent/Refine.lean
 
 | Name | Line | Description | Notes |
@@ -2916,8 +2919,9 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Refine.encodeFreeFast_eq` | 389-392 | §4 The runnable refiner equals the reasoned-about one. | — |
 | `Refine.refineEquivariant_encodeFreeFast` | 394-395 | §4 The runnable refiner is equivariant (transferred from `encodeFree`). | — |
 | `Refine.refineSplits_encodeFreeFast` | 397-398 | §4 The runnable refiner genuinely refines (transferred from `encodeFree`). | — |
-| `Refine.isCanonicalFormOpt_encodeFree` | 406-410 | §5 The canonizer on the encode-free refiner, modulo ONLY the resolver contract (`NarrowTransport`) — the refiner side of `①` is fully discharged. | — |
-| `Refine.exhaustive_canonizer` | 412-422 | **★★ THE EXHAUSTIVE CANONIZER IS UNCONDITIONALLY A CANONICAL FORM THAT ANSWERS.** No carried hypotheses whatsoever: `①a`/`①b`/`①c` hold AND the descent never flags. The non-vacuity anchor for the whole track — every resolver added from here only narrows, so it shrinks the flagged residue and can never break this. | — |
+| `Refine.refineV_encodeFreeFast` | 400-404 | The runnable refiner's value projection is the reasoned-about round (`warmRefineR`) — the `refineV` face of `encodeFreeFast_eq`; lets a descent node colouring be read as `SealBridge.pathCol` verbatim. | — |
+| `Refine.isCanonicalFormOpt_encodeFree` | 412-416 | §5 The canonizer on the encode-free refiner, modulo ONLY the resolver contract (`NarrowTransport`) — the refiner side of `①` is fully discharged. | — |
+| `Refine.exhaustive_canonizer` | 418-428 | **★★ THE EXHAUSTIVE CANONIZER IS UNCONDITIONALLY A CANONICAL FORM THAT ANSWERS.** No carried hypotheses whatsoever: `①a`/`①b`/`①c` hold AND the descent never flags. The non-vacuity anchor for the whole track — every resolver added from here only narrows, so it shrinks the flagged residue and can never break this. | — |
 ## ChainDescent/PerformanceTest.lean
 
 | Name | Line | Description | Notes |
@@ -3116,22 +3120,25 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Residue.guardedRef` | 69-71 | The guarded composite's reference narrowing: the forced set, emptied when the node stalls. Definition. | Definition |
-| `Residue.narrowFnEquivariant_guardedRef` | 73-84 | The reference transports — given `StallEquivariant` (an equivariant supply; the flag's price, `Stall.StallEquivariant`). | — |
-| `Residue.coveringOfAt_guarded` | 86-120 | The guarded composite covers its reference: empty on both sides when stalled, otherwise the composite's own covering argument. | — |
-| `Residue.narrowTransport_guarded` | 122-128 | **The guarded MIXED resolver meets the contract** — modulo `KeyEquivariant` + `StallEquivariant`. Needed the general `CoveringOfAt` route: the guarded composite is neither `Covering` nor `NarrowEquivariant`. | — |
-| `Residue.guarded_mixed_canonizer` | 130-136 | §**★★★ THE GUARDED MIXED CANONIZER** — sound, iso-invariant, complete, **and unconditionally polynomial** (`Stall.descentCost_guard_le`). The full object: both moves, one cell, a real flag, a real cost bound. | — |
-| `Residue.Handled` | 140-146 | §**★★ THE POSITIVE CAPABILITY PREDICATE — where ALL the open work now lives.** Every non-discrete cell is **either** supply-connected (consume's domain) **or** key-separated (force's domain). Stated *positively*: every strengthening of the oracle or the key **enlarges** it, with no re-proof of soundness or of the cost bound (both unconditional). Definition. | Definition |
-| `Residue.narrowProper_guard_of_handled` | 148-162 | On a handled graph no node stalls, so the guarded narrowing is proper. | — |
-| `Residue.answers_of_handled` | 164-179 | §**★★★ A HANDLED GRAPH ANSWERS.** The guarded descent never flags on it — and it was already unconditionally polynomial. So on `Handled`: **sound, iso-invariant, complete, polynomial, and it answers.** | — |
-| `Residue.Residue` | 183-185 | **THE UNHANDLED RESIDUE — defined, not asserted**: some cell defeats **both** resolvers. A *definition* (not an `opaque` atom), so its non-vacuity is provable. Definition. | Definition |
-| `Residue.residue_if_flag` | 187-192 | §**★★★ ③ — THE DESCENT FLAGS ONLY ON THE RESIDUE** (`Publication.residue_if_flag`, for the real object). | — |
-| `Residue.residue_iff` | 194-206 | Unfolded: a residual graph has a cell **neither** supply-connected **nor** key-separated — exactly `Composite.forceThenConsume_stall`'s attribution, so each residual cell is assignable to **one** side's weakness. | — |
-| `Residue.emptySupply` | 225-226 | The empty supply certifies nothing (non-vacuity witness). Definition. | Definition |
-| `Residue.constKey` | 228-229 | A constant key separates nothing (non-vacuity witness). Definition. | Definition |
-| `Residue.keyEquivariant_constKey` | 231 | The constant key is trivially equivariant — so the witness below uses a *legal* resolver, not an ill-formed one. | — |
-| `Residue.not_wordReach_nil` | 233-238 | With no generators, nothing is word-reachable but the point itself. | — |
-| `Residue.residue_nonvacuous` | 240-262 | §**★★ `unhandledResidue_nonvacuous` — THE RESIDUE IS INHABITED, AND NOW PROVABLY SO.** It was undischargeable *in principle* while the `Publication` atoms were `opaque … : Prop` with no definition. Witness is deliberately degenerate (an empty supply and a constant key certify nothing, so any 2-vertex cell defeats them): it shows the predicate is **inhabited**, not that the residue is *hard*. The real content is that `Residue` **shrinks as the resolvers strengthen** — measured in `PerformanceTest` (C₇ with a rotation-only supply is residual; with the full `Aut(C₇)` supply it is not). | — |
+| `Residue.guardedRef` | 71-73 | The guarded composite's reference narrowing: the forced set, emptied when the node stalls. Definition. | Definition |
+| `Residue.narrowFnEquivariant_guardedRef` | 75-86 | The reference transports — given `StallEquivariant` (an equivariant supply; the flag's price, `Stall.StallEquivariant`). | — |
+| `Residue.coveringOfAt_guarded` | 88-122 | The guarded composite covers its reference: empty on both sides when stalled, otherwise the composite's own covering argument. | — |
+| `Residue.narrowTransport_guarded` | 124-130 | **The guarded MIXED resolver meets the contract** — modulo `KeyEquivariant` + `StallEquivariant`. Needed the general `CoveringOfAt` route: the guarded composite is neither `Covering` nor `NarrowEquivariant`. | — |
+| `Residue.guarded_mixed_canonizer` | 132-138 | §**★★★ THE GUARDED MIXED CANONIZER** — sound, iso-invariant, complete, **and unconditionally polynomial** (`Stall.descentCost_guard_le`). The full object: both moves, one cell, a real flag, a real cost bound. | — |
+| `Residue.Handled` | 152-164 | **★★ THE BOUNDARY PREDICATE (re-based 2026-07-16 onto `Descend.Reaches`):** at every REACHABLE non-discrete colouring the branch cell is supply-connected (consume) or key-separated (force). Positive, iteratively improvable (family-by-family via `HandledBridge.handled_of_seal`, supply-by-supply via `OrbitPrune.handled_congr`); the residue is its exact complement. The old ∀-all-colourings form was undischargeable in principle (the seal speaks only at committed paths). | Definition |
+| `Residue.handled_of_forall` | 166-171 | Compatibility: the old universally-quantified capability (all colourings) still lands — it is strictly stronger than `Handled`. | — |
+| `Residue.handled_of_root_discrete` | 173-185 | **The innermost ring of the boundary:** a 1-WL-rigid graph (refined root already discrete) is handled by ANY resolvers — the root is then the only reachable node, so the capability demand is vacuous. | — |
+| `Residue.narrowProper_guard_of_handled` | 187-202 | On a handled graph no node stalls, so the guarded narrowing is proper. | — |
+| `Residue.answers_of_handled` | 204-219 | §**★★★ A HANDLED GRAPH ANSWERS.** The guarded descent never flags on it — and it was already unconditionally polynomial. So on `Handled`: **sound, iso-invariant, complete, polynomial, and it answers.** | — |
+| `Residue.Residue` | 223-225 | **THE UNHANDLED RESIDUE — defined, not asserted**: some cell defeats **both** resolvers. A *definition* (not an `opaque` atom), so its non-vacuity is provable. Definition. | Definition |
+| `Residue.residue_if_flag` | 227-232 | §**★★★ ③ — THE DESCENT FLAGS ONLY ON THE RESIDUE** (`Publication.residue_if_flag`, for the real object). | — |
+| `Residue.residue_iff` | 234-248 | Unfolded: a residual graph has a **reachable** cell **neither** supply-connected **nor** key-separated — exactly `Composite.forceThenConsume_stall`'s attribution, so each residual cell is assignable to **one** side's weakness, and it is a cell the descent can actually be confronted with. | — |
+| `Residue.emptySupply` | 267-268 | The empty supply certifies nothing (non-vacuity witness). Definition. | Definition |
+| `Residue.constKey` | 270-271 | A constant key separates nothing (non-vacuity witness). Definition. | Definition |
+| `Residue.keyEquivariant_constKey` | 273 | The constant key is trivially equivariant — so the witness below uses a *legal* resolver, not an ill-formed one. | — |
+| `Residue.not_wordReach_nil` | 275-280 | With no generators, nothing is word-reachable but the point itself. | — |
+| `Residue.adjE2` | 282-285 | The empty graph on two vertices — the smallest graph whose swap symmetry survives refinement; the shared witness of both non-vacuity halves (`residue_nonvacuous` here, `HandledBridge.adjE2_handled` with the deep oracle). | Definition |
+| `Residue.residue_nonvacuous` | 287-322 | **★★ The residue is INHABITED, at a genuinely REACHED node:** the empty 2-graph's root — non-discrete by refiner equivariance under the swap — defeats the certify-nothing resolvers (`emptySupply`/`constKey`). Pairs with `HandledBridge.adjE2_handled`: same graph, handled once the supply is real. | — |
 ## ChainDescent/MatchSupply.lean
 
 | Name | Line | Description | Notes |
@@ -3301,3 +3308,17 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `PrunedSupply.sameOrbits_deepMatchSupply` | 197-201 | **★★★ `prunedSupply d` PROVES THE SAME ORBITS AS `deepMatchSupply d`** — the entire `①` obligation of the pruned supply, discharged, with no equivariance proof of its own. | — |
 | `PrunedSupply.prunedSupply_guarded_canonizer` | 203-211 | **★★★ THE PRUNED MIXED CANONIZER.** `①a`/`①b`/`①c` for the guarded composite over the cheaper reference-matching supply — inherited from `deepMatchSupply`'s equivariance through the `SameOrbits` reduction, no equivariance proof on `prunedSupply`. | — |
 | `PrunedSupply.prunedSupply_lookahead_canonizer` | 213-218 | The pruned mixed canonizer with the concrete `lookaheadKey`. | — |
+## ChainDescent/HandledBridge.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `HandledBridge.reaches_pathCol` | 65-76 | **★★ The reachable-node induction:** every reached node colouring of the concrete (encode-free) canonizer IS a committed path's colouring `SealBridge.pathCol adj p` — definitional via `refineV_encodeFreeFast`; the statement `SealBridge` previously asserted only in prose. | — |
+| `HandledBridge.handled_of_seal` | 80-92 | **★★★ THE FIRST STRUCTURAL DISCHARGE OF `Residue.Handled`:** seal depth (`CascadesAt` at bound `k` — what `theorem_1_HOR_*`/the sealed families produce) + localisation at every committed set (`∀ T, CellsAreOrbits`) ⟹ `Handled key (deepMatchSupply k)` for EVERY key. The mixed-canonizer analogue of `reachesRigidOrCameron`: the improvable boundary, extended per family with no re-proof. | — |
+| `HandledBridge.handled_of_seal_pruned` | 94-101 | The seal boundary transferred to the cheap reference-matching supply through `SameOrbits` — no new proof (P3a's reduction doing its job). | — |
+| `HandledBridge.seal_graph_answers` | 105-113 | **★★ Showcase:** a seal-covered graph is canonized by the guarded mixed canonizer — sound, iso-invariant, complete, single path of ≤ n+1 nodes, and it ANSWERS. | — |
+| `HandledBridge.seal_graph_answers_pruned` | 115-121 | The showcase corollary with the cheap pruned supply. | — |
+| `HandledBridge.emptyAdj` | 131-133 | The edgeless graph on `n` vertices — vertex-transitive, so 1-WL alone never finishes it (`n ≥ 2`); the concrete handled family's carrier. | Definition |
+| `HandledBridge.cellsAreOrbits_emptyAdj` | 135-156 | **Localisation at every committed set, discharged concretely:** on the edgeless graph every permutation is an automorphism, and a same-cell pair is never committed (`warmRefine_refines`), so a transposition fixing the committed set realizes the orbit. | — |
+| `HandledBridge.handled_emptyAdj` | 158-163 | **★★ THE FIRST INHABITED `Handled` INSTANCE — a family:** the edgeless graphs, every `n`, every key, via `handled_of_seal` at the trivial depth bound (`cascadesAt_univ`). Not vacuous: the supply genuinely fires at every reached node. | — |
+| `HandledBridge.adjE2_handled` | 165-170 | **★ THE RESIDUE SHRINKS, AT THEOREM LEVEL:** the very graph `residue_nonvacuous` shows residual for the certify-nothing resolvers is handled by the deep oracle — the non-vacuity pair is about ONE graph, differing only in resolver strength. | — |
+| `HandledBridge.adjE2_answers` | 172-178 | The shrink witness answers under the guarded mixed canonizer with the deep oracle. | — |

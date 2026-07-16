@@ -1192,6 +1192,69 @@ theorem canonForm?_ne_none_at {rf : Refiner n} {R : Resolver n} (hs : RefineSpli
   descend_ne_none_at hs hp n _
     (by have := Nat.zero_le (ncol (refineV rf adj (fun _ => 0))); omega)
 
+/-! ### Reachability — the node colourings the descent can actually visit
+
+`NarrowProperAt` still quantifies over **all** colourings, but the descent only ever sees colourings built by its
+own root/branch steps. `Reaches` names that set — as an **over-approximation** (any branch vertex, not just the
+resolver-kept ones), so it is *resolver-independent*: strengthening a resolver only shrinks the true visit set,
+and everything proved `∀ χ, Reaches rf adj χ → …` stays valid with no re-proof. This is what lets a capability
+predicate (`Residue.Handled`) be discharged from **structural** hypotheses (the seal speaks only about committed
+individualization paths, never about arbitrary colourings — `CellsAreOrbits` genuinely *fails* at colourings the
+descent never visits, so a `∀ χ` predicate was undischargeable in principle). -/
+
+/-- **The descent's reachable node colourings** (over-approximated): the refined root, closed under
+"individualize a branch vertex of a non-discrete node, then refine". Every colouring `descend rf R` actually
+visits satisfies this for *any* resolver whose narrowing stays inside `branches` (`NarrowProperAt`'s second
+half), because the branch step here allows **every** branch vertex. -/
+inductive Reaches (rf : Refiner n) (adj : AdjMatrix n) : Colouring n → Prop
+  | root : Reaches rf adj (refineV rf adj (fun _ => 0))
+  | step {χ : Colouring n} {v : Fin n} :
+      Reaches rf adj χ → ¬ Discrete χ → v ∈ branches χ →
+      Reaches rf adj (refineV rf adj (indivOne χ v))
+
+/-- **Totality from properness on the REACHED set only.** The `∀ χ` of `descend_ne_none_at` was never needed:
+the induction only ever applies the properness hypothesis at colourings the descent visits, all of which are
+`Reaches`-reachable (the subset half `hsub` is what re-establishes reachability for each child). -/
+theorem descend_ne_none_reaches {rf : Refiner n} {R : Resolver n} (hs : RefineSplits rf)
+    {adj : AdjMatrix n}
+    (hne : ∀ χ : Colouring n, Reaches rf adj χ → ¬ Discrete χ → narrow R adj χ ≠ [])
+    (hsub : ∀ (χ : Colouring n) (v : Fin n), v ∈ narrow R adj χ → v ∈ branches χ) :
+    ∀ (fuel : Nat) (χ : Colouring n), Reaches rf adj χ → n ≤ ncol χ + fuel →
+      (descend rf R adj fuel χ).1 ≠ none := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro χ _ hb
+      have hd : Discrete χ := discrete_of_ncol_eq (le_antisymm (ncol_le χ) (by omega))
+      rw [descend_val_leaf rf R adj hd 0]
+      exact fun hc => by simp at hc
+  | succ fuel ih =>
+      intro χ hr hb
+      by_cases hd : Discrete χ
+      · rw [descend_val_leaf rf R adj hd (fuel + 1)]
+        exact fun hc => by simp at hc
+      · rw [descend_val_succ rf R adj hd fuel]
+        refine aggregate_ne_none ?_ ?_
+        · exact fun hc => (hne χ hr hd) (List.map_eq_nil_iff.mp hc)
+        · intro x hx
+          obtain ⟨v, hv, rfl⟩ := List.mem_map.mp hx
+          refine ih (refineV rf adj (indivOne χ v)) (hr.step hd (hsub χ v hv)) ?_
+          have h1 : ncol χ < ncol (indivOne χ v) := ncol_lt_indivOne (hsub χ v hv)
+          have h2 : ncol (indivOne χ v) ≤ ncol (refineV rf adj (indivOne χ v)) :=
+            ncol_le_refine hs adj (indivOne χ v)
+          omega
+
+/-- **`③`-facing totality, reached-set form: the descent answers on a graph whose resolver is proper at every
+REACHED node.** Strictly more applicable than `canonForm?_ne_none_at` (whose `NarrowProperAt` quantifies over all
+colourings): the root is reachable by construction, so this needs properness only where the descent can go. -/
+theorem canonForm?_ne_none_reaches {rf : Refiner n} {R : Resolver n} (hs : RefineSplits rf)
+    {adj : AdjMatrix n}
+    (hne : ∀ χ : Colouring n, Reaches rf adj χ → ¬ Discrete χ → narrow R adj χ ≠ [])
+    (hsub : ∀ (χ : Colouring n) (v : Fin n), v ∈ narrow R adj χ → v ∈ branches χ) :
+    canonForm? rf R adj ≠ none :=
+  descend_ne_none_reaches hs hne hsub n _ Reaches.root
+    (by have := Nat.zero_le (ncol (refineV rf adj (fun _ => 0))); omega)
+
 /-- **★ TOTALITY — the descent always reaches a leaf.** With a genuinely-refining refiner and a proper resolver,
 `fuel` suffices whenever `n ≤ ncol χ + fuel`. -/
 theorem descend_ne_none {rf : Refiner n} {R : Resolver n} (hs : RefineSplits rf)

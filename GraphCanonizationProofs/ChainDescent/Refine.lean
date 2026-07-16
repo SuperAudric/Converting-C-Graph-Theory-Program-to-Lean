@@ -397,6 +397,12 @@ theorem refineEquivariant_encodeFreeFast : RefineEquivariant (encodeFreeFast (n 
 theorem refineSplits_encodeFreeFast : RefineSplits (encodeFreeFast (n := n)) := by
   rw [encodeFreeFast_eq]; exact refineSplits_encodeFree
 
+/-- The runnable refiner's **value** projection is the reasoned-about round — the `refineV` face of
+`encodeFreeFast_eq`. This is what lets a descent node colouring be read as `SealBridge.pathCol` verbatim. -/
+theorem refineV_encodeFreeFast (adj : AdjMatrix n) (χ : Colouring n) :
+    Descend.refineV (encodeFreeFast (n := n)) adj χ = warmRefineR adj χ :=
+  warmRefineVec_col_eq adj χ
+
 /-! ## 5. ★ THE PAYOFF — the descent, fully instantiated on its refiner
 
 With the encode-free round plugged in, the only hypothesis left on the whole canonizer is the **resolver**

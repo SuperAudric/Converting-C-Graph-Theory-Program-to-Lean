@@ -43,6 +43,8 @@ whole frontier.
 | `ChainDescent/SupplyTransport.lean` | **P1 — THE FLAG'S ISO-INVARIANCE** (2026-07-14, second pass). `stallEquivariant_forceThenConsume`, and **`matchSupply_guarded_canonizer` — the first CONCRETE mixed canonizer, no carried hypotheses.** See §6.0. |
 | `ChainDescent/DeepMatchSupply.lean` | **P2 — THE BOUNDED-DEPTH ORACLE** (2026-07-14). `deepMatchSupply d`: enumerate every length-`≤ d` individualization sequence, colour-match all pairs. Equivariant **because it makes no choice**. `C₄`/`C₇` now answer. Cost `n^{O(d)}`. See §6.2. |
 | `ChainDescent/OrbitPrune.lean` | **P3 FOUNDATION** (2026-07-14). §1–3 **the reduction** — `SameOrbits S₁ S₂` ⟹ the two guarded canonizers are the *same function* ⟹ `①` transfers with **no equivariance obligation on the second supply**. §4 **the pruning license** (`deepCandidate_left_mul` / `_right_mul`). See §6.2b. |
+| `ChainDescent/PrunedSupply.lean` | **P3c FIRST HALF** (2026-07-16). `prunedSupply d` — reference-matching, `\|table\|` not `\|table\|²`; `SameOrbits` ⟹ ①/②/③ transfer. See §6.2b. |
+| `ChainDescent/HandledBridge.lean` | **THE `Handled` POPULATION BRIDGE** (2026-07-16). `reaches_pathCol` (every reached node IS a `pathCol`) + **`handled_of_seal`** — the first theorem instances of `Residue.Handled`. See the §4 update box. |
 | `ChainDescent/Regression.lean` | the **build-gating** regression suite (~12 s). |
 | `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (~4 min). |
 
@@ -134,6 +136,40 @@ cell is **either** supply-connected (consume's domain) **or** key-separated (for
 **vacuous** predicates (`hflag`, `SchemeReproduced`, `∃ gens, closure = group` were all vacuous). A residue that is
 the complement of a positive, instantiated capability cannot be vacuous by accident — and it **shrinks** as the
 resolvers strengthen, with no re-proof.
+
+> **✅✅ UPDATE (2026-07-16) — `Handled` RE-BASED onto REACHABLE nodes, and POPULATED (`Residue.lean` +
+> `HandledBridge.lean`, axiom-clean, in `build.sh`).** The 2026-07-16 blocker audit found the original `Handled`
+> quantified over **all** colourings — **undischargeable in principle**: the seal corpus speaks only at committed
+> paths (`SealBridge.pathCol`), `CellsAreOrbits` genuinely *fails* at generic colourings (its own docstring), and
+> zero theorem instances existed. Fixed structurally, not by weakening the guarantees:
+> - **`Descend.Reaches rf adj χ`** — the descent's reachable node colourings, **over-approximated
+>   resolver-independently** (any branch vertex) so every instance survives future resolver strengthening;
+>   `descend_ne_none_reaches` / `canonForm?_ne_none_reaches` = totality from properness on the reached set only.
+> - **`Handled` now demands `CellResolved` only at reached nodes**; `answers_of_handled` / `residue_if_flag` /
+>   `handled_congr` unchanged in strength. `residue_nonvacuous` re-proved at a genuinely **reached** node (the
+>   empty 2-graph's root, non-discrete by refiner equivariance under the swap; ⚠ the old ∀-`adj` form is FALSE
+>   under the new definition for root-discrete graphs — that is the definition working, see
+>   `handled_of_root_discrete`).
+> - **`HandledBridge.reaches_pathCol`** — the reachable-node induction (every reached node colouring **is** a
+>   `pathCol`, definitionally via `Refine.refineV_encodeFreeFast`) — the statement `SealBridge` had only asserted
+>   in prose.
+> - **★★★ `HandledBridge.handled_of_seal` — the FIRST structural discharge:** depth (`CascadesAt adj (constP n) k`
+>   — what `theorem_1_HOR_*`/the sealed families produce) **+** localisation at every committed set
+>   (`∀ T, CellsAreOrbits adj (constP n) T`) ⟹ `Handled key (deepMatchSupply k)` for **every** key; transfers to
+>   `prunedSupply` via `SameOrbits` with no new proof (`handled_of_seal_pruned`); showcase `seal_graph_answers`.
+> - **First inhabited instances:** `handled_emptyAdj` (edgeless graphs, every `n`, every key — vertex-transitive,
+>   so the supply genuinely fires) ⟹ with `residue_nonvacuous` **both halves of the endgame non-vacuity obligation
+>   are theorems about ONE graph** (`adjE2`: residual with the certify-nothing resolvers, handled with the deep
+>   oracle — the residue-shrinks story at theorem level, `adjE2_handled`).
+> - **▶ The open item is now sharply named: PER-FAMILY LOCALISATION.** The HOR theorems deliver the **depth** half
+>   (`CascadesAt` at bounded `k`) and localisation only at the **discrete endpoint**; populating `Handled` for a
+>   sealed family = proving `∀ T, CellsAreOrbits` for it (or a reachable-`T`-restricted refinement of
+>   `handled_of_seal`, which the `Reaches` machinery now supports). That is the honest next increment, replacing
+>   the old vague "seal hypotheses at every reachable node".
+> - ⚠ A concrete 1-WL-rigid witness for `handled_of_root_discrete` via kernel `decide` is **blocked**:
+>   `Multiset.sort` (inside `sigKey`) is well-founded recursion, which the kernel cannot reduce. Runtime evidence
+>   stays in `Regression.lean` `#guard`s (which evaluate via the compiler, not the kernel — that is why they can
+>   see `warmRefine` values and theorems cannot, without manual proofs).
 
 ---
 
@@ -319,8 +355,12 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
     k` gives `CascadesFrom` at **every** descent node from one global `S₀`. Packaged: **`cellIsOrbit_pathCol_of_seal`**
     — depth (`CascadesAt`) **and** localisation (`CellsAreOrbits`), both seal imports, fire `deepMatchSupply k` at the
     node. **⟹ `theorem_1_HOR_*` / the four form families / `viaSpielman` now literally import.** (`Refine.constP n` *is*
-    `fun _ _ => POE.unknown`, the seal's own PMatrix — no translation needed.) The remaining gap to `Residue.Handled`
-    is now only that the seal hypotheses hold **at every reachable node** (a whole-descent statement), not vocabulary.
+    `fun _ _ => POE.unknown`, the seal's own PMatrix — no translation needed.) ~~The remaining gap to `Residue.Handled`
+    is now only that the seal hypotheses hold **at every reachable node** (a whole-descent statement), not vocabulary.~~
+    **✅ CLOSED as a statement (2026-07-16, `HandledBridge.handled_of_seal` — see the §4 update box):** the
+    whole-descent statement is now the theorem `CascadesAt + (∀ T, CellsAreOrbits) ⟹ Handled`, with the reachable-node
+    induction (`reaches_pathCol`) discharged. What remains is **per-family localisation** — `∀ T, CellsAreOrbits` for
+    each sealed family (the HOR theorems give depth + endpoint localisation only).
   - **▶ TODO — `viaSpielman` POC import (small; mostly proof-of-concept).** `Cascade.SeparatesAtBoundedBase S bound`
     is **definitionally** `CascadesAt (schemeAdj S) (Refine.constP n) bound` (same `∃ S₀ ≤ bound, Discrete(warmRefine ∘
     individualizedColouring)`; `constP n = fun _ _ => POE.unknown`). So `cascadesFrom_pathCol_of_cascadesAt` /

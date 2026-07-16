@@ -174,7 +174,7 @@ theorem cellResolved_congr {key : Key n} {S₁ S₂ : Supply n} (h : SameOrbits 
 
 theorem handled_congr {key : Key n} {S₁ S₂ : Supply n} (h : SameOrbits S₁ S₂)
     {adj : AdjMatrix n} (h1 : Residue.Handled key S₁ adj) : Residue.Handled key S₂ adj :=
-  fun χ hd => cellResolved_congr h (h1 χ hd)
+  fun χ hr hd => cellResolved_congr h (h1 χ hr hd)
 
 /-! ## 4. ★★ THE PRUNING LICENSE — the candidate changes by a KNOWN group element -/
 
