@@ -2953,70 +2953,71 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Consume.IsColAut.transport` | 71-76 | §1 A verified automorphism fixes the colouring: `transportColouring α χ = χ`. The other half. | — |
 | `Consume.IsColAut.one` | 78-80 | §1 The identity is colouring-preserving — the base of the orbit search. | — |
 | `Consume.IsColAut.comp` | 82-92 | §1 Colouring-preserving automorphisms are **closed under composition**, so a word in the verified generators is itself verified. This is what lets the orbit BFS accumulate a single witness. | — |
-| `Consume.Reach` | 99-101 | §2 **The covering witness.** Some verified colouring-preserving automorphism carries `b` to `m`. | Definition |
-| `Consume.Reach.rfl'` | 103-105 | §2 Every vertex is reachable from itself. | — |
-| `Consume.Reach.step` | 107-111 | §2 Reachability extends along a verified generator — the induction step of the orbit search's soundness. | — |
-| `Consume.Reach.colour` | 113-118 | §2 Reachable vertices share a colour, so an orbit never leaves the branch cell. This is why `consume`'s narrowing stays inside `branches`. | — |
-| `Consume.orbStep` | 122-124 | §3 One BFS round: close the current vertex set under the verified generators. | Definition |
-| `Consume.mem_orbStep_of_mem` | 126-130 | §3 The BFS step is extensive — it never loses a vertex it already had. | — |
-| `Consume.orbit` | 132-135 | §3 The orbit of `b` under the verified generators (`n` BFS rounds). A *short* search only keeps more branches, never fewer, so its depth carries no soundness obligation. | Definition |
-| `Consume.mem_iterate_self` | 137-143 | §3 `b` survives every BFS round. | — |
-| `Consume.mem_orbit_self` | 145-147 | §3 `b` is in its own orbit — so `rep b` has something to be the minimum of. | — |
-| `Consume.reach_of_mem_orbit` | 149-170 | §3 **Soundness of the orbit search.** Everything it finds is genuinely reachable by a verified automorphism — whatever the generator list was. | — |
-| `Consume.minList` | 174-177 | §4 Least element of `b :: l` (computable). | Definition |
-| `Consume.minList_mem` | 179-195 | §4 The minimum is the seed or a list member — so `rep b` always lies in `b`'s orbit. | — |
-| `Consume.rep` | 197-202 | §4 **The orbit representative of `b`.** The choice is deliberately *not* equivariant (orbit members are indistinguishable to refinement); only its *result* transports, which is exactly what the `Covering` route licenses. | Definition |
-| `Consume.rep_mem_orbit` | 204-209 | §4 The representative lies in the orbit it represents. | — |
-| `Consume.reach_rep` | 211-214 | §4 **The covering witness, packaged.** The representative is reachable from the branch it replaces. | — |
-| `Consume.Supply` | 218-225 | §5 **An oracle supply — UNTRUSTED.** Candidate permutations (`matchOracle` / the cascade oracle / the solver kernel), carrying *no* proof obligation. | `abbrev` |
-| `Consume.gens` | 227-229 | The supply's **value** projection (the candidate generators). Definition. | Definition |
-| `Consume.supplyCost` | 231-232 | The supply's **cost** projection — the oracle's own work, now billed to the descent. Definition. | Definition |
-| `Consume.verified` | 234-236 | §5 The supply filtered through the decidable `IsColAut` check. Everything downstream uses only this. | Definition |
-| `Consume.isColAut_of_mem_verified` | 238-243 | §5 **Everything surviving the filter is a genuine colouring-preserving automorphism.** The single lemma that makes an untrusted supply harmless. | — |
-| `Consume.consume` | 245-254 | §5 **★ THE ORACLE RESOLVER.** Keeps one representative per orbit of the branch cell under the *verified* automorphisms, discarding the rest. | Definition |
-| `Consume.narrow_consume` | 256-257 | §5 The narrowing `consume` performs, unfolded. | `@[simp]` |
-| `Consume.consume_cost` | 259-263 | §**The oracle's own work is charged.** Supply cost + one edge-by-edge verification per candidate + one orbit BFS per branch. Previously `Supply` was cost-free, so the T-C "work per node" question — *the* open oracle problem — was invisible to `②`. | — |
-| `Consume.exists_targetColour_of_mem` | 267-275 | §6 A nonempty branch list has a target colour, and its members carry it. | — |
-| `Consume.narrow_consume_subset` | 277-287 | §6 **The narrowing stays inside the branch cell** — orbits cannot leave it, since a verified automorphism preserves the colouring. | — |
-| `Consume.narrow_consume_ne_nil` | 289-298 | §6 The narrowing is never empty on a non-discrete node. | — |
-| `Consume.narrowProper_consume` | 300-303 | §6 `consume` is a **proper** narrowing (inside the cell, never empty) — the hypothesis totality (`canonForm?_ne_none`) needs. | — |
-| `Consume.branchVal_eq_of_isColAut` | 305-318 | §6 **★★ THE COVERING WITNESS.** A verified automorphism makes two branches *value-equal*: it is `descend_transport` at `σ = α`, where `relabelAdj α adj = adj` degenerates the transport equation into an equality between two branches of the *same* graph. This is where the fuel-graded `CoveringAt` earns its keep. | — |
-| `Consume.coveringAt_consume` | 320-350 | §6 **★★★ `consume` IS SOUND — for EVERY supply, however wrong.** The narrowed aggregate equals the full one, because each discarded branch is value-equal to the kept representative of its orbit. A broken oracle costs branches, never correctness. | — |
-| `Consume.narrowTransport_consume` | 352-355 | §6 `consume` satisfies the resolver contract (`NarrowTransport`), for every supply. | — |
-| `Consume.consume_canonizer` | 359-371 | §7 **★★★ THE ORACLE-DRIVEN CANONIZER.** `①a`/`①b`/`①c` hold and the descent never flags, **with no hypothesis on the oracle at all**. | — |
-| `Consume.consume_canonizer_fast` | 373-380 | §7 The same, on the runnable `encodeFreeFast` refiner. | — |
-| `Consume.Closed` | 394-396 | A vertex set is closed under the generators — the orbit BFS's fixpoint condition. Definition. | Definition |
-| `Consume.mem_orbStep_iff` | 398-410 | Membership in one BFS round: already present, or one generator step away. | — |
-| `Consume.mem_orbStep_of_closed` | 412-416 | A closed set is a **fixpoint** of the BFS step. | — |
-| `Consume.mem_iterate_of_closed` | 418-429 | Once closed, always closed: iterating the BFS from a closed set changes nothing. | — |
-| `Consume.iterate_subset_succ` | 431-437 | The BFS is monotone — a round never loses a vertex. | — |
-| `Consume.card_lt_of_not_closed` | 439-450 | **Every non-closed BFS round strictly grows the reached set** — the monovariant behind convergence. | — |
-| `Consume.orbit_closed` | 452-484 | §**THE ORBIT BFS CONVERGES — `n` rounds suffice.** If round `n` were not closed, all `n+1` rounds would have strictly grown the set, forcing `> n` distinct vertices into `Fin n`. Without this the BFS is only a depth-`n` approximation, `rep` need not be constant on an orbit, and **consume could silently keep every branch** — the whole firing story rests on this. | — |
-| `Consume.WordReach` | 488-493 | `m` is reachable from `b` by a **word in the supply's generators** (stronger than `Reach`, which asks only that *some* automorphism does it). Definition. | Inductive |
-| `Consume.mem_orbit_of_wordReach` | 495-501 | The orbit list contains everything a word reaches — what convergence buys: the BFS *is* the whole orbit, not an approximation of it. | — |
-| `Consume.minList_le_seed` | 505-513 | The running minimum never exceeds its seed. | — |
-| `Consume.minList_le` | 515-525 | The running minimum is `≤` every list element. | — |
-| `Consume.rep_eq_of_orbit_eq` | 527-537 | §**`rep` IS CONSTANT ON AN ORBIT.** Two vertices reaching the same set get the same representative, so consume maps them to **one** branch rather than two. This is exactly what `NarrowProper` could never give. | — |
-| `Consume.CellIsOrbit` | 541-547 | **The oracle's FIRING obligation, stated.** The branch cell is a single orbit of the supply's *verified* generators. A `②` obligation, never a `①` one — but not optional: without it consume defers and the descent branches. Definition. | Definition |
-| `Consume.orbit_subset_branches` | 549-555 | An orbit never leaves the branch cell (a verified automorphism preserves the colouring). | — |
-| `Consume.closed_inv` | 568-582 | A finite forward-closed set is **inverse-closed** (a generator permutes it, so it maps it *onto* itself). What supplies the inverse words the orbit symmetry needs. | — |
-| `Consume.mem_of_mem_orbit_of_closed` | 584-596 | **Minimality** — the orbit is contained in every closed set containing its seed. | — |
-| `Consume.orbit_closed_inv` | 598-601 | The orbit is inverse-closed (convergence + `closed_inv`). | — |
-| `Consume.self_mem_orbit_of_wordReach` | 603-614 | Reachability is **symmetric** on orbits: if a word takes `u` to `w`, then `u` lies in `w`'s orbit. | — |
-| `Consume.orbit_eq_of_wordReach` | 616-623 | Connected vertices have the **same orbit set** — both inclusions, so `rep` can be compared. | — |
-| `Consume.rep_eq_of_wordReach` | 625-631 | §**THE GRADED FIRING LEMMA — consume merges exactly what its generators connect**, with **no hypothesis on the supply**. One proved automorphism merges one pair; the whole cell's symmetry collapses the cell. **Partial power, partial progress** — the statement the perfect-endpoint singleton theorem cannot make. | — |
-| `Consume.rep_const_of_cellIsOrbit` | 633-636 | On a cell that is one orbit, every branch has the same representative. | — |
-| `Consume.dedup_map_length_one` | 638-658 | The dedup of a constant map over a nonempty list is a singleton — the shape both firing theorems land in. | — |
-| `Consume.dedup_map_length_lt` | 660-688 | **A merge is a strict shortening** — two distinct branches with the same representative ⟹ the deduplicated narrowing is strictly shorter. One merged pair is one branch saved. | — |
-| `Consume.consume_singleton_of_cellIsOrbit` | 690-695 | §**CONSUME FIRES — a symmetric cell costs ONE branch, not `|cell|`.** If the cell is a single orbit of the verified generators, the narrowing is a **singleton**: the fan-out is gone. The completeness counterpart to `consume_canonizer` (which is sound for *every* supply, including a useless one). | — |
-| `Consume.consume_narrows_of_wordReach` | 697-706 | §**CONSUME FIRES ON PARTIAL POWER.** A *single* verified automorphism between two distinct branches already shortens the narrowing — the cell need **not** be one orbit. The oracle does not have to be perfect to be useful: it is rewarded for exactly the symmetry it can prove, and penalized for nothing. | — |
-| `Consume.wordReach_of_mem_iterate` | 719-734 | Everything the orbit BFS reaches is reached by a **word** in the generators (the converse of `mem_orbit_of_wordReach`). | — |
-| `Consume.mem_orbit_iff_wordReach` | 736-739 | The orbit list **is** the word-reachable set — not a depth-`n` approximation (convergence). | — |
-| `Consume.WordReach.trans` | 741-746 | Word-reachability is transitive. | — |
-| `Consume.WordReach.symm` | 748-751 | Word-reachability is symmetric (the orbit is inverse-closed, `closed_inv`). | — |
-| `Consume.wordReach_rep` | 753-755 | A branch reaches its own orbit representative. | — |
-| `Consume.rep_eq_iff_wordReach` | 757-766 | **★★★ `rep` MERGES EXACTLY THE ORBIT.** Two branches share a representative **iff** the verified generators connect them. The `←` is `rep_eq_of_wordReach`; the `→` says consume merges **nothing more** — the least-index choice adds no spurious identifications. Hence the narrowing's *length* **counts orbits**, which is exactly what `Stall.StallEquivariant` needs and a merely-sound `rep` could never give. | — |
-| `Consume.isColAut_conj_iff` | 770-792 | **The verification check transports.** `α` is a colouring-preserving automorphism of `(adj, χ)` iff its `σ`-conjugate is one of `(σ·adj, σ·χ)` — why a *structural* supply can be equivariant at all. | — |
+| `Consume.IsColAut.inv` | 94-103 | Colouring-preserving automorphisms are **closed under inverse** — completing `one`/`comp` into a subgroup. Needed by orbit-pruning, where a candidate reconstructed as a product/conjugate of verified generators (the P3b license) must itself certify as an automorphism. | — |
+| `Consume.Reach` | 110-112 | §2 **The covering witness.** Some verified colouring-preserving automorphism carries `b` to `m`. | Definition |
+| `Consume.Reach.rfl'` | 114-116 | §2 Every vertex is reachable from itself. | — |
+| `Consume.Reach.step` | 118-122 | §2 Reachability extends along a verified generator — the induction step of the orbit search's soundness. | — |
+| `Consume.Reach.colour` | 124-129 | §2 Reachable vertices share a colour, so an orbit never leaves the branch cell. This is why `consume`'s narrowing stays inside `branches`. | — |
+| `Consume.orbStep` | 133-135 | §3 One BFS round: close the current vertex set under the verified generators. | Definition |
+| `Consume.mem_orbStep_of_mem` | 137-141 | §3 The BFS step is extensive — it never loses a vertex it already had. | — |
+| `Consume.orbit` | 143-146 | §3 The orbit of `b` under the verified generators (`n` BFS rounds). A *short* search only keeps more branches, never fewer, so its depth carries no soundness obligation. | Definition |
+| `Consume.mem_iterate_self` | 148-154 | §3 `b` survives every BFS round. | — |
+| `Consume.mem_orbit_self` | 156-158 | §3 `b` is in its own orbit — so `rep b` has something to be the minimum of. | — |
+| `Consume.reach_of_mem_orbit` | 160-181 | §3 **Soundness of the orbit search.** Everything it finds is genuinely reachable by a verified automorphism — whatever the generator list was. | — |
+| `Consume.minList` | 185-188 | §4 Least element of `b :: l` (computable). | Definition |
+| `Consume.minList_mem` | 190-206 | §4 The minimum is the seed or a list member — so `rep b` always lies in `b`'s orbit. | — |
+| `Consume.rep` | 208-213 | §4 **The orbit representative of `b`.** The choice is deliberately *not* equivariant (orbit members are indistinguishable to refinement); only its *result* transports, which is exactly what the `Covering` route licenses. | Definition |
+| `Consume.rep_mem_orbit` | 215-220 | §4 The representative lies in the orbit it represents. | — |
+| `Consume.reach_rep` | 222-225 | §4 **The covering witness, packaged.** The representative is reachable from the branch it replaces. | — |
+| `Consume.Supply` | 229-236 | §5 **An oracle supply — UNTRUSTED.** Candidate permutations (`matchOracle` / the cascade oracle / the solver kernel), carrying *no* proof obligation. | `abbrev` |
+| `Consume.gens` | 238-240 | The supply's **value** projection (the candidate generators). Definition. | Definition |
+| `Consume.supplyCost` | 242-243 | The supply's **cost** projection — the oracle's own work, now billed to the descent. Definition. | Definition |
+| `Consume.verified` | 245-247 | §5 The supply filtered through the decidable `IsColAut` check. Everything downstream uses only this. | Definition |
+| `Consume.isColAut_of_mem_verified` | 249-254 | §5 **Everything surviving the filter is a genuine colouring-preserving automorphism.** The single lemma that makes an untrusted supply harmless. | — |
+| `Consume.consume` | 256-265 | §5 **★ THE ORACLE RESOLVER.** Keeps one representative per orbit of the branch cell under the *verified* automorphisms, discarding the rest. | Definition |
+| `Consume.narrow_consume` | 267-268 | §5 The narrowing `consume` performs, unfolded. | `@[simp]` |
+| `Consume.consume_cost` | 270-274 | §**The oracle's own work is charged.** Supply cost + one edge-by-edge verification per candidate + one orbit BFS per branch. Previously `Supply` was cost-free, so the T-C "work per node" question — *the* open oracle problem — was invisible to `②`. | — |
+| `Consume.exists_targetColour_of_mem` | 278-286 | §6 A nonempty branch list has a target colour, and its members carry it. | — |
+| `Consume.narrow_consume_subset` | 288-298 | §6 **The narrowing stays inside the branch cell** — orbits cannot leave it, since a verified automorphism preserves the colouring. | — |
+| `Consume.narrow_consume_ne_nil` | 300-309 | §6 The narrowing is never empty on a non-discrete node. | — |
+| `Consume.narrowProper_consume` | 311-314 | §6 `consume` is a **proper** narrowing (inside the cell, never empty) — the hypothesis totality (`canonForm?_ne_none`) needs. | — |
+| `Consume.branchVal_eq_of_isColAut` | 316-329 | §6 **★★ THE COVERING WITNESS.** A verified automorphism makes two branches *value-equal*: it is `descend_transport` at `σ = α`, where `relabelAdj α adj = adj` degenerates the transport equation into an equality between two branches of the *same* graph. This is where the fuel-graded `CoveringAt` earns its keep. | — |
+| `Consume.coveringAt_consume` | 331-361 | §6 **★★★ `consume` IS SOUND — for EVERY supply, however wrong.** The narrowed aggregate equals the full one, because each discarded branch is value-equal to the kept representative of its orbit. A broken oracle costs branches, never correctness. | — |
+| `Consume.narrowTransport_consume` | 363-366 | §6 `consume` satisfies the resolver contract (`NarrowTransport`), for every supply. | — |
+| `Consume.consume_canonizer` | 370-382 | §7 **★★★ THE ORACLE-DRIVEN CANONIZER.** `①a`/`①b`/`①c` hold and the descent never flags, **with no hypothesis on the oracle at all**. | — |
+| `Consume.consume_canonizer_fast` | 384-391 | §7 The same, on the runnable `encodeFreeFast` refiner. | — |
+| `Consume.Closed` | 405-407 | A vertex set is closed under the generators — the orbit BFS's fixpoint condition. Definition. | Definition |
+| `Consume.mem_orbStep_iff` | 409-421 | Membership in one BFS round: already present, or one generator step away. | — |
+| `Consume.mem_orbStep_of_closed` | 423-427 | A closed set is a **fixpoint** of the BFS step. | — |
+| `Consume.mem_iterate_of_closed` | 429-440 | Once closed, always closed: iterating the BFS from a closed set changes nothing. | — |
+| `Consume.iterate_subset_succ` | 442-448 | The BFS is monotone — a round never loses a vertex. | — |
+| `Consume.card_lt_of_not_closed` | 450-461 | **Every non-closed BFS round strictly grows the reached set** — the monovariant behind convergence. | — |
+| `Consume.orbit_closed` | 463-495 | §**THE ORBIT BFS CONVERGES — `n` rounds suffice.** If round `n` were not closed, all `n+1` rounds would have strictly grown the set, forcing `> n` distinct vertices into `Fin n`. Without this the BFS is only a depth-`n` approximation, `rep` need not be constant on an orbit, and **consume could silently keep every branch** — the whole firing story rests on this. | — |
+| `Consume.WordReach` | 499-504 | `m` is reachable from `b` by a **word in the supply's generators** (stronger than `Reach`, which asks only that *some* automorphism does it). Definition. | Inductive |
+| `Consume.mem_orbit_of_wordReach` | 506-512 | The orbit list contains everything a word reaches — what convergence buys: the BFS *is* the whole orbit, not an approximation of it. | — |
+| `Consume.minList_le_seed` | 516-524 | The running minimum never exceeds its seed. | — |
+| `Consume.minList_le` | 526-536 | The running minimum is `≤` every list element. | — |
+| `Consume.rep_eq_of_orbit_eq` | 538-548 | §**`rep` IS CONSTANT ON AN ORBIT.** Two vertices reaching the same set get the same representative, so consume maps them to **one** branch rather than two. This is exactly what `NarrowProper` could never give. | — |
+| `Consume.CellIsOrbit` | 552-558 | **The oracle's FIRING obligation, stated.** The branch cell is a single orbit of the supply's *verified* generators. A `②` obligation, never a `①` one — but not optional: without it consume defers and the descent branches. Definition. | Definition |
+| `Consume.orbit_subset_branches` | 560-566 | An orbit never leaves the branch cell (a verified automorphism preserves the colouring). | — |
+| `Consume.closed_inv` | 579-593 | A finite forward-closed set is **inverse-closed** (a generator permutes it, so it maps it *onto* itself). What supplies the inverse words the orbit symmetry needs. | — |
+| `Consume.mem_of_mem_orbit_of_closed` | 595-607 | **Minimality** — the orbit is contained in every closed set containing its seed. | — |
+| `Consume.orbit_closed_inv` | 609-612 | The orbit is inverse-closed (convergence + `closed_inv`). | — |
+| `Consume.self_mem_orbit_of_wordReach` | 614-625 | Reachability is **symmetric** on orbits: if a word takes `u` to `w`, then `u` lies in `w`'s orbit. | — |
+| `Consume.orbit_eq_of_wordReach` | 627-634 | Connected vertices have the **same orbit set** — both inclusions, so `rep` can be compared. | — |
+| `Consume.rep_eq_of_wordReach` | 636-642 | §**THE GRADED FIRING LEMMA — consume merges exactly what its generators connect**, with **no hypothesis on the supply**. One proved automorphism merges one pair; the whole cell's symmetry collapses the cell. **Partial power, partial progress** — the statement the perfect-endpoint singleton theorem cannot make. | — |
+| `Consume.rep_const_of_cellIsOrbit` | 644-647 | On a cell that is one orbit, every branch has the same representative. | — |
+| `Consume.dedup_map_length_one` | 649-669 | The dedup of a constant map over a nonempty list is a singleton — the shape both firing theorems land in. | — |
+| `Consume.dedup_map_length_lt` | 671-699 | **A merge is a strict shortening** — two distinct branches with the same representative ⟹ the deduplicated narrowing is strictly shorter. One merged pair is one branch saved. | — |
+| `Consume.consume_singleton_of_cellIsOrbit` | 701-706 | §**CONSUME FIRES — a symmetric cell costs ONE branch, not `|cell|`.** If the cell is a single orbit of the verified generators, the narrowing is a **singleton**: the fan-out is gone. The completeness counterpart to `consume_canonizer` (which is sound for *every* supply, including a useless one). | — |
+| `Consume.consume_narrows_of_wordReach` | 708-717 | §**CONSUME FIRES ON PARTIAL POWER.** A *single* verified automorphism between two distinct branches already shortens the narrowing — the cell need **not** be one orbit. The oracle does not have to be perfect to be useful: it is rewarded for exactly the symmetry it can prove, and penalized for nothing. | — |
+| `Consume.wordReach_of_mem_iterate` | 730-745 | Everything the orbit BFS reaches is reached by a **word** in the generators (the converse of `mem_orbit_of_wordReach`). | — |
+| `Consume.mem_orbit_iff_wordReach` | 747-750 | The orbit list **is** the word-reachable set — not a depth-`n` approximation (convergence). | — |
+| `Consume.WordReach.trans` | 752-757 | Word-reachability is transitive. | — |
+| `Consume.WordReach.symm` | 759-762 | Word-reachability is symmetric (the orbit is inverse-closed, `closed_inv`). | — |
+| `Consume.wordReach_rep` | 764-766 | A branch reaches its own orbit representative. | — |
+| `Consume.rep_eq_iff_wordReach` | 768-777 | **★★★ `rep` MERGES EXACTLY THE ORBIT.** Two branches share a representative **iff** the verified generators connect them. The `←` is `rep_eq_of_wordReach`; the `→` says consume merges **nothing more** — the least-index choice adds no spurious identifications. Hence the narrowing's *length* **counts orbits**, which is exactly what `Stall.StallEquivariant` needs and a merely-sound `rep` could never give. | — |
+| `Consume.isColAut_conj_iff` | 781-803 | **The verification check transports.** `α` is a colouring-preserving automorphism of `(adj, χ)` iff its `σ`-conjugate is one of `(σ·adj, σ·χ)` — why a *structural* supply can be equivariant at all. | — |
 ## ChainDescent/Force.lean
 
 | Name | Line | Description | Notes |

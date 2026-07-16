@@ -91,6 +91,17 @@ theorem IsColAut.comp {adj : AdjMatrix n} {χ : Colouring n} {g α : Equiv.Perm 
     show χ (g (α v)) = χ v
     rw [hg.2 (α v), hα.2 v]
 
+/-- Colouring-preserving automorphisms are **closed under inverse** — completing `one`/`comp` into a subgroup.
+Needed by any orbit-pruning argument, where a candidate reconstructed as a product/conjugate of verified
+generators (the P3b license) must itself be certified an automorphism. -/
+theorem IsColAut.inv {adj : AdjMatrix n} {χ : Colouring n} {α : Equiv.Perm (Fin n)}
+    (hα : IsColAut adj χ α) : IsColAut adj χ α⁻¹ := by
+  refine ⟨fun i j => ?_, fun v => ?_⟩
+  · have := hα.1 (α⁻¹ i) (α⁻¹ j)
+    simpa using this.symm
+  · have := hα.2 (α⁻¹ v)
+    simpa using this.symm
+
 /-! ## 2. Reachability — the covering witness
 
 `Reach adj χ b m` says a *verified* automorphism carries `b` to `m`. It is exactly the certificate the covering

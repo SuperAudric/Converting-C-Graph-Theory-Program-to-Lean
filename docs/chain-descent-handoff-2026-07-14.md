@@ -416,9 +416,34 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
 > distinct `matchCol` results) is a ~40× constant-factor cut on the harvest, independent of pruning, and needs **no**
 > `SameOrbits` (same *set* of generators ⟹ same orbits trivially). Low-hanging; do it first.
 >
-> **Brick P3c needs regardless:** the pruning license hypothesis is `IsColAut adj χ g` for `g` a **word** in the
-> verified generators, but `Consume` only has `isColAut_of_mem_verified` (a *single* generator). "`IsColAut` is a
-> subgroup" (mul/inv/one closure) is three short missing lemmas.
+> **✅ Brick landed (2026-07-16): `IsColAut` is a subgroup** — `IsColAut.one`/`comp` existed; `IsColAut.inv` added
+> (`Consume.lean`). The pruning license needs this: a candidate reconstructed as a product/conjugate of verified
+> generators must itself certify as an automorphism.
+>
+> **⚠⚠ THE SECOND HALF IS A GROUP-CLOSURE PROOF, NOT SET-EQUALITY — measured and pinned down (2026-07-16).** The first
+> half worked because the verified sets were *equal* (`verified_mem_iff`). **Sequence pruning breaks that**, and the
+> measurement shows exactly how: keeping the group-canonical sequences on `C₇`/`d=1` retains **14 of 56** entries, and
+> matching *within* the kept set finds **10** automorphisms — **not all 14** (`|D₇|`). The missing 4 are **words** of
+> the 10. So the pruned generators are a **strict subset** of the auto group that must be shown to **generate the same
+> orbits** — a Schreier-Sims-grade closure, not the clean membership-equality of the first half. Concretely (the
+> cleanest provable route found): reference-match with a **`W`-side orbit prune** — candidates `{matchCol ref q}` for
+> `q` a rep of the found-group's orbit of `(branch, seq)` — and prove `⟨pruned⟩` reaches every `matchCol ref q` via
+> **`OrbitPrune.matchCol_left_mul`** (`matchCol ref (g·q) = g · matchCol ref q`) closed under a **BFS on the found
+> group** (the same convergence shape as `Consume.orbit_closed`). The circular "`g` is a verified word" is discharged
+> by the online invariant (an entry is skipped only once its reducing `g` is already generated). This is real,
+> de-risked work — but it is **~200+ lines of orbit-closure**, materially harder than everything in P3 so far.
+>
+> **⚠ NAIVE ORBIT-PRUNING OF ENTRIES IS WRONG — do not attempt it (2026-07-16).** "Keep one entry per `G`-orbit"
+> destroys auto discovery: the autos come from matching an entry against its `G`-**image** (same orbit), which that
+> pruning deletes, so matches between distinct orbit-reps yield only the identity. The correct object is **nauty-style
+> tree pruning** (keep the search tree, harvest autos from ref-vs-node matches, prune the *subtrees* of nodes proven
+> auto-equivalent to a kept node) — whose autos in a pruned subtree are **conjugates** of kept ones.
+>
+> **▶ SCOPE NOTE — the first half already closes the POLY regime.** At **bounded `d`** the reference-matching supply
+> is already polynomial (`|table| = |cell|·n^d`, poly for fixed `d`); the `|table|²→|table|` cut is a constant-factor
+> improvement there. The second half's payoff is the **quasipoly→poly** ladder-break at `d = Θ(log n)` (turning `n^d`
+> into a sum), **conditional on localisation at every level** — the seal's own open hypothesis. So it is the
+> high-value-but-conditional piece, not on the critical path for the poly-or-flag headline.
 >
 > **(Original sketch, retained for the mechanism — but see the trap above for why "prune the table" is the wrong
 > object):** prune the `(branch, sequence)` table by the orbits of the group found so far; harvest; repeat until
