@@ -373,8 +373,22 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
 > that is what makes it a sum and not merely a `|cell|`-fold saving). And `CellIsOrbit` is stated via **`WordReach`**
 > — *a word in the generators* — so the pruned-away element survives as a **product**.
 >
-> **▶ WHAT IS LEFT (P3c):** build `prunedSupply d` (online orbit-pruned harvest — see the design below), then prove the
-> single theorem **`SameOrbits (prunedSupply d) (deepMatchSupply d)`** — `①`/`②`/`③` then transfer for free.
+> **✅ P3c FIRST HALF LANDED — `ChainDescent/PrunedSupply.lean` (2026-07-16, axiom-clean, in `build.sh`).** The
+> reference-matching supply: match from **one** discrete reference entry, not all pairs — `|table|` matches, not
+> `|table|²`. The `SameOrbits` proof needed **no** online Schreier-Sims and **no** composition identity, because the
+> enumeration is **length-closed** (`α·(v,s)` is a table entry for any automorphism `α`, `mem_allSeqs_map`): the two
+> **verified sets are equal as membership sets** (`verified_mem_iff`) — pruned⊆deep (a reference match is an all-pairs
+> candidate), deep⊆pruned (a verified `g` = `matchCol r (g·r)` by `matchCol_self_transport`, and `g·r` is a table
+> entry). Equal verified sets ⟹ same `WordReach` (`wordReach_congr_mem`, membership-only) ⟹ `SameOrbits`
+> (`sameOrbits_deepMatchSupply`) ⟹ `①`/`②`/`③` transfer via `guarded_mixed_canonizer_of_sameOrbits`
+> (`prunedSupply_guarded_canonizer`, no equivariance proof on the pruned supply). **MEASURED (Cₙ root, d=1):**
+> supplyCost `C₇ 192080 → 41160` (4.7×), `|verified| 1764 → 42` (42× — **subsumes the dedup win**). `Regression` §7
+> `#guard`s `gPruned 1 C4 = gDeep 1 C4` (behavioural `SameOrbits`). **⚠ This kills the `|table|²` pairing but NOT the
+> `n^d` inside `|table|`** (the sequence enumeration / refinement term — now the dominant cost, unchanged).
+>
+> **▶ WHAT IS LEFT (P3c second half):** collapse the `n^d` sequence enumeration to the measured `seqReps` (the online
+> orbit-pruned sequence growth — the harder increment; see the design below). The reference-matching win and the
+> sequence-pruning win **compose** (one cuts `|table|²→|table|`, the other cuts `|table|` itself).
 >
 > **✅ MEASURED — the headroom is REAL (2026-07-15 derisking, root colouring of `Cₙ`, `d=1`):**
 >

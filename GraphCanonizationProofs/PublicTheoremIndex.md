@@ -3157,17 +3157,18 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 37-38 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 40-42 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 44-51 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 53-56 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 60-61 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 70-71 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 94-95 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 104-105 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 133-136 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 151 | — | Definition |
-| `Regression.gDeep` | 153-155 | — | Definition |
+| `Regression.C5` | 38-39 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 41-43 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 45-52 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 54-57 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 61-62 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 71-72 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 95-96 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 105-106 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 134-137 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 152 | — | Definition |
+| `Regression.gDeep` | 154-156 | — | Definition |
+| `Regression.gPruned` | 171-175 | — | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3278,3 +3279,23 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `SealDepthBridge.deepCol_pathCol` | 143-156 | **★ DEEPENING A DESCENT NODE = COMMITTING THE LONGER PATH.** `deepCol adj (SealBridge.pathCol adj p) s = SealBridge.pathCol adj (s.reverse ++ p)` — an **exact** equality, because `pathCol adj (v :: p)` is definitionally `warmRefineR adj (indivOne (pathCol adj p) v)` = exactly `deepCol`'s step. The whole `P2c` vocabulary bridge rests on this one line. | — |
 | `SealDepthBridge.cascadesFrom_pathCol_of_cascadesAt` | 158-175 | **★★★ THE SEAL'S DEPTH HYPOTHESIS, AT A DESCENT NODE.** `CascadesAt adj (constP n) k` (a **global** bounded-base discreteness witness, `= SeparatesAtBoundedBase`) ⟹ the descent-side `CascadesFrom adj (pathCol adj p) k` at **every** committed path `p`, from the *same* `S₀`: deepening reaches the longer path (`deepCol_pathCol`), whose partition is `warmRefine ∘ individualizedColouring` (`pathCol_samePartition`), and a superset individualization stays discrete. | — |
 | `SealDepthBridge.cellIsOrbit_pathCol_of_seal` | 177-190 | **★★★ THE FULL SEAL → DEEP FIRING BRIDGE.** Depth (`CascadesAt`) **and** localisation (`CellsAreOrbits`) — both discharged by the sealed families (`theorem_1_HOR_*`, the four form families, `viaSpielman`) — together fire `deepMatchSupply k` at the descent node `pathCol adj p`, so `consume` collapses the branch cell. Both halves are now imports; the depth+localisation completion of P0's `cellIsOrbit_of_cellsAreOrbits` (which had only localisation). | — |
+## ChainDescent/PrunedSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `PrunedSupply.wordReach_congr_mem` | 47-52 | `WordReach` reads only whether a generator is **in** the list — never its position or multiplicity. Induction on the reach derivation. | — |
+| `PrunedSupply.sameOrbits_of_verified_mem` | 54-59 | Two supplies whose **verified** lists have the same membership prove the same orbits (`OrbitPrune.SameOrbits`) — via `wordReach_congr_mem` both ways. | — |
+| `PrunedSupply.refCol?` | 63-66 | The colouring of the first **discrete** table entry, if any — the single reference `prunedSupply` matches everything against (`matchCol r _` is `none` unless `r` is discrete). | Definition |
+| `PrunedSupply.prunedSupply` | 68-76 | **★ THE REFERENCE-MATCHING ORACLE.** Match the one reference entry against every table entry — `|table|` colour matches instead of `|table|²`. Untrusted (`consume` re-verifies). | Definition |
+| `PrunedSupply.gens_prunedSupply` | 78-84 | The pruned candidate list unfolded: `(refCol?).elim [] (fun r => table.filterMap (matchCol r ·.col))`. | — |
+| `PrunedSupply.mem_gens_prunedSupply` | 86-99 | Membership in the pruned candidate list: `g` is a candidate iff `refCol? = some r` and some table entry `q` has `matchCol r q.col = some g`. | — |
+| `PrunedSupply.mem_gens_deepMatchSupply_raw` | 101-114 | Membership in the all-pairs (`deepMatchSupply`) candidate list: `g` is a candidate iff some ordered pair of table entries `matchCol`s to it. | — |
+| `PrunedSupply.discrete_refCol` | 118-124 | Whatever `refCol?` returns is **discrete** — it is the `find?` predicate. | — |
+| `PrunedSupply.refCol_eq_deepCol` | 126-131 | The reference is one of the table entries' colourings — so a reference match is an all-pairs candidate (the pruned ⊆ deep direction). | — |
+| `PrunedSupply.refCol_isSome_of_discrete` | 133-140 | A **discrete** table entry forces the reference to exist (`refCol? = some _`). | — |
+| `PrunedSupply.mem_branches_of_isColAut` | 142-146 | A verified automorphism **permutes the branch cell** — it preserves colours and `branches` is a colour class. | — |
+| `PrunedSupply.exists_image_entry` | 148-174 | **★ THE KEY CONSTRUCTION.** For a verified automorphism `g` and reference `r = (v₀, s₀)`, the `g`-image `(g v₀, s₀.map g)` is **also a table entry** (length-closed enumeration), with colouring `g`-transport of `r`, so `matchCol r (that) = some g` — every verified `g` is a reference match (the deep ⊆ pruned direction). | — |
+| `PrunedSupply.verified_mem_iff` | 178-195 | **★★★ THE VERIFIED SETS ARE EQUAL.** `g ∈ verified prunedSupply ↔ g ∈ verified deepMatchSupply` — pruned⊆deep (a ref match is an all-pairs candidate) and deep⊆pruned (`exists_image_entry`). | — |
+| `PrunedSupply.sameOrbits_deepMatchSupply` | 197-201 | **★★★ `prunedSupply d` PROVES THE SAME ORBITS AS `deepMatchSupply d`** — the entire `①` obligation of the pruned supply, discharged, with no equivariance proof of its own. | — |
+| `PrunedSupply.prunedSupply_guarded_canonizer` | 203-211 | **★★★ THE PRUNED MIXED CANONIZER.** `①a`/`①b`/`①c` for the guarded composite over the cheaper reference-matching supply — inherited from `deepMatchSupply`'s equivariance through the `SameOrbits` reduction, no equivariance proof on `prunedSupply`. | — |
+| `PrunedSupply.prunedSupply_lookahead_canonizer` | 213-218 | The pruned mixed canonizer with the concrete `lookaheadKey`. | — |

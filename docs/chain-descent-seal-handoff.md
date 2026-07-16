@@ -181,6 +181,26 @@ from the fully-visible block decomposition. The **sole irreducible carried input
 **G2-B**) + the cited classification (G3): the honest conditional seal `modulo {G3 + G2-B}`. The three-input table below
 is the *historical* `…_viaRecovery` decomposition; the live form has `hImprimitive` reduced to block recovery.
 
+**Update (2026-07-16) — the built resolver's effect on `hImprim`: CONSOLIDATION, not a new crack (durable note; to be
+re-examined at pickup).** The canonizer track's deep oracle (`DeepMatchSupply.deepMatchSupply d`) + the P2b/P2c depth
+bridge (`SealDepthBridge.lean`) change `hImprim`'s *shape* but not the wall:
+- **The carried interfaces are now the same object as the primitive floor.** `hImprim`'s residual content is
+  constituent recovery (`hqvis`/`hfvis` — the block/quotient action and the fiber/within-block action recover), which is
+  **not** citably bounded (imprimitive schurian schemes reach *unbounded* `s(C)`: circulants, WL-dim ≥ c√log n,
+  Wu–Ren–Ponomarenko 2025). Via P2b/P2c those recovery interfaces are **exactly `deepMatchSupply` firing (`SeparatesAt`
+  = `CascadesAt`) on the constituents.** So the imprimitive leg's leaves and the primitive floor's firing are one
+  oracle with one firing hypothesis — any strengthening of the oracle helps both legs simultaneously.
+- **The deep oracle can subsume the block tower.** Under `SeparatesAt d` the untrusted enumeration harvests the whole
+  recoverable group directly (verified automorphisms, no structural choice), computing **no** explicit block system —
+  the blocks fall out as orbits of the recovered point stabilizer where recovery works. So the block-decompose →
+  quotient → fiber → recurse apparatus is not *needed* by the canonizer; it is one way to organize the same recovery.
+- **⚠ The wall is UNTOUCHED.** `SeparatesAt` at *polynomial* depth = recovery at a *polynomial* base = precisely the
+  unbounded-`s(C)` statement refuted for circulants. The quasipoly-recoverable imprimitive cases (`s(C) = O(log n)`)
+  *are* now concretely handled by `deepMatchSupply` at the matching depth — a real, importable gain — but the
+  **polynomial** wall does not move. **At pickup, check for a genuinely new crack** (e.g. the *iterated* resolver
+  exposing structure across levels, or the **rigid solver** breaking an imprimitive block up algebraically rather than
+  recovering it by WL) — those are the live candidates, not the deep oracle, which shares the wall by construction.
+
 **Update (2026-06-08) — THE FUSED SEAL is the single headline.** `reachesRigidOrCameron_viaFusedSeal` (`Cascade.lean`,
 axiom-clean) fuses the two partial capstones into one statement:
 `((SchemeBlockRecovered ∨ AbelianConsumed) ∨ SchemeRecoveredByDepth bound) ∨ IsCameronScheme`. Each non-Cameron branch is

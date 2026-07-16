@@ -1,6 +1,7 @@
 import ChainDescent.Residue
 import ChainDescent.MatchSupply
 import ChainDescent.DeepMatchSupply
+import ChainDescent.PrunedSupply
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -162,5 +163,15 @@ firing, and the only thing separating `deepMatchSupply` from a silently useless 
 /-! `①c` at depth 1: `deepMatchSupply` is equivariant (`gensEquivariant_deepMatchSupply`), so the answer
 transports. Measured, not merely proved. -/
 #guard gDeep 1 C4 = gDeep 1 (relabelAdj (Equiv.swap 0 1) C4)
+
+/-! **`prunedSupply` gives the SAME answer as `deepMatchSupply`** — the behavioural witness of
+`PrunedSupply.sameOrbits_deepMatchSupply` (proved: same orbits ⟹ same guarded canonizer). Reference-matching is a
+pure cost win, and this guard proves a wiring bug in it (matching from the wrong reference, or dropping a generator)
+would change the answer and fail the build. -/
+def gPruned {m : Nat} (d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
+  (canonForm? encodeFreeFast
+    (guard (forceThenConsume lookaheadKey (PrunedSupply.prunedSupply d))) a).map flatten
+
+#guard gPruned 1 C4 = gDeep 1 C4
 
 end ChainDescent.Regression
