@@ -80,11 +80,18 @@ def ResolvedAll (R : Resolver n) (adj : AdjMatrix n) : Prop :=
   ∀ χ : Colouring n, ¬ Discrete χ → (narrow R adj χ).length ≤ 1
 
 /-- **★★ THE COST BOUND.** With bounded per-node refiner and resolver work (`c₁`, `c₂`) and no residual fan-out,
-the descent's cost is **linear in the fuel** — i.e. the descent is a single path of depth ≤ `n`. -/
+the descent's cost is **linear in the fuel** — i.e. the descent is a single path of depth ≤ `n`.
+
+⚠ **The resolver-cost hypothesis is stated at the descent's ONLY call site, `B = branches χ` (2026-07-17
+weakening).** The previous `∀ B` form was **unsatisfiable** for any resolver whose cost reads `B.length` — which
+is *both* built resolvers (`consume` bills per candidate-verification over `B`, `forceBy` bills one key evaluation
+per element of `B`), and `B : List (Fin n)` ranges over arbitrary (duplicating, unboundedly long) lists. So no
+concrete `c₂` existed and the bound could not be instantiated (standing trap #8: a hypothesis nothing satisfies).
+`descend` only ever calls `R adj χ (branches χ)` (`descend_cost_succ`), so this is the honest per-node cost. -/
 theorem descend_cost_le_of_resolved {rf : Refiner n} {R : Resolver n} {adj : AdjMatrix n}
     (hres : ResolvedAll R adj) {c₁ c₂ : Nat}
     (hrf : ∀ χ : Colouring n, (rf adj χ).2 ≤ c₁)
-    (hR : ∀ (χ : Colouring n) (B : List (Fin n)), (R adj χ B).2 ≤ c₂) :
+    (hR : ∀ χ : Colouring n, (R adj χ (branches χ)).2 ≤ c₂) :
     ∀ (fuel : Nat) (χ : Colouring n),
       (descend rf R adj fuel χ).2 ≤ (fuel + 1) * (1 + c₁ + c₂) := by
   intro fuel
@@ -107,7 +114,7 @@ theorem descend_cost_le_of_resolved {rf : Refiner n} {R : Resolver n} {adj : Adj
       by_cases hd : Discrete χ
       · rw [descend_cost_leaf rf R adj hd (fuel + 1)]; omega
       · rw [descend_cost_succ rf R adj hd fuel]
-        have hRc : (R adj χ (branches χ)).2 ≤ c₂ := hR χ (branches χ)
+        have hRc : (R adj χ (branches χ)).2 ≤ c₂ := hR χ
         -- the narrowed list has ≤ 1 element: no child, or exactly one
         have hcase : narrow R adj χ = [] ∨ ∃ v, narrow R adj χ = [v] := by
           have hlen := hres χ hd
@@ -131,7 +138,7 @@ per-node refiner and resolver costs are. -/
 theorem descentCost_le_of_resolved {rf : Refiner n} {R : Resolver n} {adj : AdjMatrix n}
     (hres : ResolvedAll R adj) {c₁ c₂ : Nat}
     (hrf : ∀ χ : Colouring n, (rf adj χ).2 ≤ c₁)
-    (hR : ∀ (χ : Colouring n) (B : List (Fin n)), (R adj χ B).2 ≤ c₂) :
+    (hR : ∀ χ : Colouring n, (R adj χ (branches χ)).2 ≤ c₂) :
     descentCost rf R adj ≤ c₁ + (n + 1) * (1 + c₁ + c₂) := by
   unfold descentCost
   have h1 : (rf adj (fun _ => 0)).2 ≤ c₁ := hrf _
@@ -176,8 +183,7 @@ theorem poly_of_cells_resolved {key : Key n} {S : Supply n} {adj : AdjMatrix n}
     (hcells : ∀ χ : Colouring n, ¬ Discrete χ → CellResolved key S adj χ)
     {c₁ c₂ : Nat}
     (hrf : ∀ χ : Colouring n, (Refine.encodeFreeFast (n := n) adj χ).2 ≤ c₁)
-    (hR : ∀ (χ : Colouring n) (B : List (Fin n)),
-      (Composite.forceThenConsume key S adj χ B).2 ≤ c₂) :
+    (hR : ∀ χ : Colouring n, (Composite.forceThenConsume key S adj χ (branches χ)).2 ≤ c₂) :
     descentCost (Refine.encodeFreeFast (n := n)) (Composite.forceThenConsume key S) adj
       ≤ c₁ + (n + 1) * (1 + c₁ + c₂) :=
   descentCost_le_of_resolved (resolvedAll_of_cellResolved hcells) hrf hR

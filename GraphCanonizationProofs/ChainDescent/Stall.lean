@@ -127,17 +127,23 @@ theorem resolvedAll_guard (R : Resolver n) (adj : AdjMatrix n) :
 No hypothesis on the graph, the oracle supply, or the key: whatever they do, the descent is a **single path** of
 depth ≤ `n`, because a node the resolvers cannot resolve **flags** rather than branching. This is what "the
 algorithm is polynomial, or it reports an unhandled residue" actually means — the polynomiality is *not*
-conditional on the residue being small; it is `poly` **and** `flag`, never `poly` **or** `exponential`. -/
+conditional on the residue being small; it is `poly` **and** `flag`, never `poly` **or** `exponential`.
+
+⚠ **What is unconditional is the NODE COUNT** (single path, ≤ `n + 1` nodes); the total is polynomial **iff the
+per-node supply/key cost `c₂` is** — a hypothesis, discharged for the concrete supplies in `SupplyCost.lean`.
+The hypothesis is stated at the descent's only call site `B = branches χ` (2026-07-17 weakening — the old `∀ B`
+form was unsatisfiable for both built resolvers, whose cost reads `B.length`; see
+`Cost.descend_cost_le_of_resolved`). -/
 theorem descentCost_guard_le {rf : Refiner n} {R : Resolver n} {adj : AdjMatrix n} {c₁ c₂ : Nat}
     (hrf : ∀ χ : Colouring n, (rf adj χ).2 ≤ c₁)
-    (hR : ∀ (χ : Colouring n) (B : List (Fin n)), (R adj χ B).2 ≤ c₂) :
+    (hR : ∀ χ : Colouring n, (R adj χ (branches χ)).2 ≤ c₂) :
     descentCost rf (guard R) adj ≤ c₁ + (n + 1) * (1 + c₁ + c₂) :=
   Cost.descentCost_le_of_resolved (resolvedAll_guard R adj) hrf
-    (fun χ B => by rw [guard_cost]; exact hR χ B)
+    (fun χ => by rw [guard_cost]; exact hR χ)
 
 /-- Instantiated at the built refiner: `c₁ = n³`, so the whole bound is polynomial as soon as the resolver is. -/
 theorem descentCost_guard_le_encodeFree {R : Resolver n} {adj : AdjMatrix n} {c₂ : Nat}
-    (hR : ∀ (χ : Colouring n) (B : List (Fin n)), (R adj χ B).2 ≤ c₂) :
+    (hR : ∀ χ : Colouring n, (R adj χ (branches χ)).2 ≤ c₂) :
     descentCost (Refine.encodeFreeFast (n := n)) (guard R) adj
       ≤ n * n * n + (n + 1) * (1 + n * n * n + c₂) :=
   descentCost_guard_le (fun χ => le_of_eq (Cost.refiner_cost adj χ)) hR
@@ -189,7 +195,7 @@ theorem guarded_force_canonizer {key : Key n} (hk : KeyEquivariant key) :
     CanonSpec.IsCanonicalFormOpt
         (Descend.canonForm? (Refine.encodeFreeFast (n := n)) (guard (Force.forceBy key)))
     ∧ ∀ (adj : AdjMatrix n) (c₂ : Nat),
-        (∀ (χ : Colouring n) (B : List (Fin n)), (Force.forceBy key adj χ B).2 ≤ c₂) →
+        (∀ χ : Colouring n, (Force.forceBy key adj χ (branches χ)).2 ≤ c₂) →
         descentCost (Refine.encodeFreeFast (n := n)) (guard (Force.forceBy key)) adj
           ≤ n * n * n + (n + 1) * (1 + n * n * n + c₂) :=
   ⟨Descend.isCanonicalFormOpt_canonForm? Refine.refineEquivariant_encodeFreeFast

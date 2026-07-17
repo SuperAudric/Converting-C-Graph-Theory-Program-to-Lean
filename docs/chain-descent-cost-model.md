@@ -16,6 +16,13 @@
 > replace it. ⚠ **New obligation the flag creates: `Stall.StallEquivariant`** — a flag is *not* value-invisible, so
 > the oracle supply must be **equivariant** or `①c` is false (counterexample `#guard`ed in `Regression.lean`).
 > **Authoritative:** [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md) §3.
+>
+> **✅ UPDATE 2026-07-17 — the `c₂` side is DISCHARGED for the consume oracle (`ChainDescent/SupplyCost.lean`).**
+> Explicit per-supply `supplyCost` bounds (match / deep / partial / pruned, closed-form, poly per fixed `d`), the
+> key-abstract mixed per-node bound, and the first end-to-end explicit-polynomial `descentCost` for the concrete
+> canonizer of record (`descentCost_pruned_lookahead_le`) + the ②+③ capstone `handled_answers_poly`. It also
+> **weakened `hR` in place**: the old `∀ χ B` form was *unsatisfiable* for both built resolvers (cost reads
+> `B.length`); the hypothesis now lives at the descent's only call site `B = branches χ`. Detail: handoff §3.
 
 > **What this is.** The design + build doc for the project's **cost model**: the Lean objects that turn
 > "poly time" from a meta-claim into a proven bound, serving obligation ②/③ of

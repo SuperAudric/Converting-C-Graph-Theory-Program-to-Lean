@@ -94,11 +94,32 @@ CONSTRUCTION** ⟹ the descent is a **single path of ≤ `n+1` nodes on every in
 possible. **`poly` AND `flag`, never `poly` OR `exponential`.**
 
 > **⚠ READ THE THEOREM EXACTLY.** `Stall.descentCost_guard_le` concludes `descentCost ≤ c₁ + (n+1)·(1+c₁+c₂)` *from*
-> `hrf : (rf adj χ).2 ≤ c₁` and **`hR : ∀ χ B, (R adj χ B).2 ≤ c₂`**. What is unconditional is the **node count**
-> (single path ⟹ ≤ `n+1` nodes, no dependence on the graph/supply/key). The **total** cost is polynomial **iff the
-> per-node supply cost `c₂` is** — a hypothesis, not a conclusion. This matters: with `deepMatchSupply d` the supply's
-> own per-call cost is `n^{O(d)}` (§6.2), so "unconditionally polynomial" is true of the *number of nodes* and false
-> of the *wall-clock* until the supply is cheap. The whole frontier (§6.2b, `P3c`) is making `c₂` small.
+> `hrf : (rf adj χ).2 ≤ c₁` and **`hR : ∀ χ, (R adj χ (branches χ)).2 ≤ c₂`**. What is unconditional is the **node
+> count** (single path ⟹ ≤ `n+1` nodes, no dependence on the graph/supply/key). The **total** cost is polynomial
+> **iff the per-node supply cost `c₂` is**. This matters: with `deepMatchSupply d` the supply's own per-call cost is
+> `n^{O(d)}` (§6.2), so "unconditionally polynomial" is true of the *number of nodes* — and of the wall-clock only
+> **per fixed `d`**. The `d = Θ(log n)` ladder-break (§6.2b, `P3c` second half) is what would make `c₂` small at
+> growing depth.
+>
+> **✅ `c₂` IS DISCHARGED FOR EVERY BUILT CONSUME SUPPLY (2026-07-17, `ChainDescent/SupplyCost.lean`, axiom-clean,
+> in `build.sh`).** Explicit closed-form bounds: `matchSupply ≤ matchSupplyBound n` (`O(n⁴)`);
+> `deepMatchSupply d`/`partialMatchSupply d ≤ pairSupplyBound n d`; `prunedSupply d ≤ refSupplyBound n d` with
+> candidate count `≤ tableBound n d = n·(n+1)^d` **not** `tableBound²` — the measured `|table|²→|table|` cut is now
+> a theorem. End-to-end: `descentCost_guard_consume_*_le` per supply, the key-abstract mixed bound
+> `descentCost_guard_mixed_le` (`kc` a parameter — F3's ring key drops in with one `keyCost` lemma), **★
+> `descentCost_pruned_lookahead_le`** — the first end-to-end explicit-polynomial `descentCost` for the concrete
+> canonizer of record (② companion of `prunedSupply_lookahead_canonizer`) — and the ②+③ capstone
+> `handled_answers_poly` (`Handled` ⟹ answers ∧ within `pathBound`). All poly **per fixed `d`**.
+>
+> **⚠ THE `hR` WEAKENING THIS REQUIRED (2026-07-17) — the old form was UNSATISFIABLE.** The previous hypothesis
+> `∀ χ B, (R adj χ B).2 ≤ c₂` quantified over **arbitrary** `B : List (Fin n)` (duplicating, unboundedly long),
+> while **both** built resolvers bill per element of `B` (`consume`: per-candidate verification over `B`; `forceBy`:
+> one key evaluation per element) — so **no finite `c₂` existed for any concrete resolver** and ②'s conditional form
+> could not be instantiated (standing trap #8, caught in the wild). `descend` only ever calls the resolver at
+> `B = branches χ` (`Cost.descend_cost_succ`), so the hypothesis now lives at that call site
+> (`Cost.descend_cost_le_of_resolved`, `Stall.descentCost_guard_le{,_encodeFree}`, `Stall.guarded_force_canonizer`,
+> `Cost.poly_of_cells_resolved` all weakened in place; no downstream breakage — nothing could have instantiated the
+> old form).
 
 **★ No `descend` signature change was needed.** `aggregate [] = none`, so a resolver **already has a flag channel**:
 return the *empty* narrowing and the node emits `none`, which propagates to the root.
