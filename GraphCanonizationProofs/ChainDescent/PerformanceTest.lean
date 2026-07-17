@@ -129,4 +129,40 @@ def gDeep {m : Nat} (d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
        descentCost encodeFreeFast deferAll C7)
 -- 949819 vs 7568 — a NET LOSS of 125×. See the header.
 
+/-! ## 7. `F1` — the fold family end-to-end (`docs/chain-descent-fold-tower-plan.md`)
+
+The Regression §8 guards witness the supply-level separation (`deepMatchSupply 0` dead, `partialMatchSupply 0`
+collapses the copies cell, 132× cheaper than `deepMatchSupply 1` which is *also* dead). Here the descent-level
+consequence: the guarded mixed descent on the 24-vertex 4-fold cover **answers** with the support-local supply
+and **flags** with the full-match one — same `d = 0`, same (trivial) key. `constKey` keeps the force side out of
+the measurement (`lookaheadKey` at `n = 24` costs ~8 s per node and is irrelevant to a consume-side demo).
+Measured 2026-07-17: the answering descent is ~3.5 min interpreted; the flagging one stalls at the root. -/
+
+def gPartialFold : Option (List Nat) :=
+  (canonForm? encodeFreeFast
+    (guard (forceThenConsume Residue.constKey (PartialMatch.partialMatchSupply 0)))
+    Regression.fold4).map flatten
+
+def gDeepFold : Option (List Nat) :=
+  (canonForm? encodeFreeFast
+    (guard (forceThenConsume Residue.constKey (DeepMatch.deepMatchSupply 0)))
+    Regression.fold4).map flatten
+
+#eval (gPartialFold.isSome, gDeepFold.isSome)   -- (true, false): support-local answers, full-match flags
+
+/-! `①c`, observed at `n = 24` at the supply level: the narrowing still collapses to ONE branch on a cross-copy
+relabelling (`gensEquivariant_partialMatchSupply` is the proved statement; a second full descent just to re-observe
+it would double this file's cost). -/
+def fold4Swapped : AdjMatrix 24 := relabelAdj (Equiv.swap 0 7) Regression.fold4
+def fold4SwappedRoot : Refine.ColData 24 := Refine.warmRefineVec fold4Swapped (fun _ => 0)
+
+#guard (narrow (consume (PartialMatch.partialMatchSupply 0)) fold4Swapped fold4SwappedRoot.col).length = 1
+
+/-! `deepMatchSupply` needs `d = k − 2 = 2` on a 4-fold cover; at `d = 1` it is still dead and already 132× the
+firing supply's cost. -/
+#eval ((narrow (consume (DeepMatch.deepMatchSupply 1)) Regression.fold4 Regression.fold4Root.col).length,
+       Consume.supplyCost (DeepMatch.deepMatchSupply 1) Regression.fold4 Regression.fold4Root.col,
+       Consume.supplyCost (PartialMatch.partialMatchSupply 0) Regression.fold4 Regression.fold4Root.col)
+-- (4, 8524800, 64512)
+
 end ChainDescent.Perf

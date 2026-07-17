@@ -351,3 +351,15 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `SealBridge.refineStep_mono'` | 86-90 | — | — |
+## ChainDescent/PartialMatch.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `PartialMatch.existsUnique_univ` | 90-93 | `∃!` over the type ⟹ `∃!` in `Finset.univ` (the `Finset.choose` plumbing). | — |
+| `PartialMatch.existsUnique_transport` | 109-119 | `∃!`-at-a-colour transfers across `transportColouring` via the `σ` bijection. | — |
+| `PartialMatch.invol_apply` | 166-169 | `α * α = 1` applied pointwise. | — |
+| `PartialMatch.fixed_inv_iff` | 171-173 | Fixed points of `α⁻¹` and `α` coincide. | — |
+| `PartialMatch.symm_eq_of_invol` | 175-177 | For an involution, `α.symm = α` pointwise. | — |
+| `PartialMatch.transport_transport` | 213-215 | `transportColouring` composes (definitionally). | — |
+| `PartialMatch.transport_inv_cancel` | 217-220 | `transport α⁻¹ ∘ transport α = id` — the mirror-side rewriting step. | — |
+| `PartialMatch.pm_check_conj` | 287-301 | The two-sided inverse check transfers across conjugation — the dite-condition bridge inside `partialMatch_conj`. | — |

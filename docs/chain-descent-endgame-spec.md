@@ -203,10 +203,13 @@ the shortest line. Concretely:
   exists*". If the wall ever falls, `⊥` drops in for free.
 
 **Transfer assessment (answers "does node-4/Cameron → known-solution transfer to the rigid side?").**
-- **Rigid node-4 (the F₂/ring-multipede): TRANSFERS / handled.** The F₂→ring (Smith-normal-form) solver canonizes
-  it — validated end-to-end (D-M0–M4) *and* for `Z₄` (IR §11.11). `Z_{2^k}` is **inside** the iterative engine,
-  not the floor. Lichter's FPC+rank lower bound does **not** bind it: Lichter is individualization-free; this
-  solver individualizes.
+- **Rigid node-4 (the F₂/ring-multipede): TRANSFERS / handled** ⚠ **for odd-part(fold) ≤ 5 (scoped 2026-07-17;
+  the 2026-07-16 audit found F_k fold covers with odd-part ≥ 7 are linear-over-a-ring yet unhandled BOTH sides —
+  inside this leg's stated boundary. Closure plan = [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md):
+  F1 `partialMatchSupply` landed in Lean; F3 CRT/Smith coset ordering is the odd-part fix).** The F₂→ring
+  (Smith-normal-form) solver canonizes it — validated end-to-end (D-M0–M4) *and* for `Z₄` (IR §11.11). `Z_{2^k}` is
+  **inside** the iterative engine, not the floor. Lichter's FPC+rank lower bound does **not** bind it: Lichter is
+  individualization-free; this solver individualizes.
 - **Rigid Cameron: likely ABSENT** (IR §11.14, conjecture-level). Hiding is abelian/linear (a CFI gauge is a
   module action); Johnson/Cameron is non-abelian; there is no non-abelian CFI. So the rigid seal's escape is
   plausibly **tighter than the symmetric one — no "or Cameron" leg at all**. Proving this tightens the headline

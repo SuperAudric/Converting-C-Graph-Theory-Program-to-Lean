@@ -2,6 +2,7 @@ import ChainDescent.Residue
 import ChainDescent.MatchSupply
 import ChainDescent.DeepMatchSupply
 import ChainDescent.PrunedSupply
+import ChainDescent.PartialMatch
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -173,5 +174,56 @@ def gPruned {m : Nat} (d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
     (guard (forceThenConsume lookaheadKey (PrunedSupply.prunedSupply d))) a).map flatten
 
 #guard gPruned 1 C4 = gDeep 1 C4
+
+/-! ## 8. `F1` — the fold family: support-local matching fires where full matching is DEAD
+
+The F_k fold-cover gap (2026-07-16 audit; `docs/chain-descent-fold-tower-plan.md`): on a `k`-fold cover the
+copies are 1-WL twins, so `matchCol` — which demands **globally discrete** colourings — needs `d ≥ k − 2`, and
+the whole family costs `n^{Ω(k)}`. `partialMatchSupply` matches the **support** instead: a copy transposition is
+caught at the depth that discretizes ONE copy, independent of `k`.
+
+Witness: **4 disjoint copies of a 6-vertex 1-WL-discrete (hence asymmetric) core** — the smallest fold on which
+`d = 0` separates the two supplies (`k = 3` would let `deepMatchSupply 1` in by elimination). Measured 2026-07-17:
+`deepMatchSupply` is dead at `d = 0` (0 verified, no narrowing) **and** `d = 1` (supplyCost 8 524 800, still no
+narrowing — PerformanceTest); `partialMatchSupply 0` verifies 16 generators and collapses the cell to ONE branch
+at supplyCost 64 512. **Do not delete these guards** — they are the non-vacuity witness that support-locality buys
+firing, and the only thing separating `partialMatch` from a silently useless generalization of `matchCol`. -/
+
+/-- Path `0-1-2-3-4-5` plus the chord `1-3` — 1-WL-discrete, so each copy of it is rigid and refinement-visible. -/
+def coreE (a b : Nat) : Bool :=
+  decide ((a, b) ∈ [(0,1),(1,2),(2,3),(3,4),(4,5),(1,3)]) ||
+  decide ((b, a) ∈ [(0,1),(1,2),(2,3),(3,4),(4,5),(1,3)])
+
+def core6 : AdjMatrix 6 := ⟨fun i j => if coreE i.val j.val then 1 else 0⟩
+
+/-- The 4-fold cover (disjoint form): copy = `i / 6`, core vertex = `i % 6`. -/
+def fold4 : AdjMatrix 24 :=
+  ⟨fun i j => if i.val / 6 = j.val / 6 && coreE (i.val % 6) (j.val % 6) then 1 else 0⟩
+
+/-- Materialized root colourings — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression
+re-runs the refinement on every colour lookup; at `n = 24` that turns these guards from ~2 s into minutes). -/
+def core6Root : Refine.ColData 6 := Refine.warmRefineVec core6 (fun _ => 0)
+def fold4Root : Refine.ColData 24 := Refine.warmRefineVec fold4 (fun _ => 0)
+
+/-! The demo is honest: the core really is 1-WL-discrete, and the fold's branch cell really is the 4 copies. -/
+#guard Discrete core6Root.col
+#guard (branches fold4Root.col).length = 4
+
+/-! **Full matching is DEAD at `d = 0`** — pinning one vertex leaves copies 2–4 as mutual twins, nothing is
+`Discrete`, `matchCol` constructs nothing: 0 verified generators, no narrowing. -/
+#guard (Consume.verified (DeepMatch.deepMatchSupply 0) fold4 fold4Root.col).length = 0
+#guard (narrow (consume (DeepMatch.deepMatchSupply 0)) fold4 fold4Root.col).length = 4
+
+/-! **Support-local matching FIRES at `d = 0`** — every copy transposition is identity off two copies, and
+pinning one vertex discretizes one of them: 16 verified generators, the cell collapses to ONE branch. -/
+#guard (Consume.verified (PartialMatch.partialMatchSupply 0) fold4 fold4Root.col).length = 16
+#guard (narrow (consume (PartialMatch.partialMatchSupply 0)) fold4 fold4Root.col).length = 1
+
+/-! The descent-level consequences need no guard here: narrowing to `≥ 2` branches ⟹ the guard flags is
+`Stall.resolvedAll_guard` (a theorem, by construction), so `narrow = 4` above already settles that the deep-match
+descent **flags** on the fold. The measured end-to-end pair — the same guarded descent with `partialMatchSupply 0`
+**answers** with a full canonical form (~3.5 min, `constKey`, n = 24) while `deepMatchSupply 0` flags, plus the
+relabelling invariance of the answer — lives in `PerformanceTest` §7 (off the build path; the descent at `n = 24`
+is ~80 s even to flag at the root, which would swamp this suite). -/
 
 end ChainDescent.Regression

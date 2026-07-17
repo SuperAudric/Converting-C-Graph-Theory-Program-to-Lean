@@ -2948,6 +2948,10 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Perf.gForce` | 71-81 | Guarded force form (perf file). Definition. | Definition |
 | `Perf.gMatch` | 85-97 | Guarded mixed form with the structural supply (perf file). Definition. | Definition |
 | `Perf.gDeep` | 121-130 | — | Definition |
+| `Perf.gPartialFold` | 141-144 | The fold end-to-end **ANSWER**: guarded mixed descent, `constKey` + `partialMatchSupply 0`, `n = 24` — a full canonical form in ~3.5 min interpreted. | Definition |
+| `Perf.gDeepFold` | 146-151 | The fold end-to-end **FLAG**: the same descent with `deepMatchSupply 0` stalls at the root copies cell. | Definition |
+| `Perf.fold4Swapped` | 156 | Cross-copy relabelling of the fold — the supply-level `①c` observation's graph. | Definition |
+| `Perf.fold4SwappedRoot` | 157-159 | Its materialized root (trap #1). | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3166,18 +3170,23 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 38-39 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 41-43 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 45-52 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 54-57 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 61-62 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 71-72 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 95-96 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 105-106 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 134-137 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 152 | — | Definition |
-| `Regression.gDeep` | 154-156 | — | Definition |
-| `Regression.gPruned` | 171-175 | — | Definition |
+| `Regression.C5` | 39-40 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 42-44 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 46-53 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 55-58 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 62-63 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 72-73 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 96-97 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 106-107 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 135-138 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 153 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 155-157 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 172-176 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 192-195 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 197 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 199-201 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 203-205 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 206 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3327,3 +3336,39 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `HandledBridge.handled_emptyAdj` | 226-231 | **★★ THE FIRST INHABITED `Handled` INSTANCE — a family:** the edgeless graphs, every `n`, every key, via `handled_of_seal` at the trivial depth bound (`cascadesAt_univ`). Not vacuous: the supply genuinely fires at every reached node. | — |
 | `HandledBridge.adjE2_handled` | 233-238 | **★ THE RESIDUE SHRINKS, AT THEOREM LEVEL:** the very graph `residue_nonvacuous` shows residual for the certify-nothing resolvers is handled by the deep oracle — the non-vacuity pair is about ONE graph, differing only in resolver strength. | — |
 | `HandledBridge.adjE2_answers` | 240-246 | The shrink witness answers under the guarded mixed canonizer with the deep oracle. | — |
+## ChainDescent/ClosureCalculus.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SingletonAt` | 79-81 | — | Definition |
+
+## ChainDescent/PartialMatch.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `PartialMatch.SingletonAt` | 62-65 | `u`'s colour class is a singleton — the pointwise form of `Discrete`, read support-locally. | Definition |
+| `PartialMatch.singletonAt_of_discrete` | 70-72 | A discrete colouring makes every vertex a singleton — the subsumption direction's engine. | — |
+| `PartialMatch.singletonAt_transport` | 74-83 | Singleton-ness transports: the transported class at `u` is a singleton iff the class at `σ⁻¹u` is. | — |
+| `PartialMatch.uniqueAt` | 95-100 | The unique vertex of colour `c`, if exactly one — the only lookup the constructor performs; canonical, no representative chosen. | Definition |
+| `PartialMatch.uniqueAt_self` | 102-107 | At a singleton vertex the lookup returns exactly that vertex. | — |
+| `PartialMatch.uniqueAt_transport` | 121-138 | The lookup transports: `uniqueAt` on the transported colouring is the `σ`-image of the lookup — engine of both the reconstruction and `GensEquivariant`. | — |
+| `PartialMatch.pmFun` | 142-147 | The raw support-local map: forward-match on `ψ₁`-singletons, backward-match on `ψ₂`-singletons, identity elsewhere. Total; the permutation check lives in `partialMatch`. | Definition |
+| `PartialMatch.partialMatch` | 149-155 | **The support-local candidate constructor:** assemble `pmFun` and its mirror into an `Equiv.Perm` iff they are two-sided inverses (decidable); else decline. Untrusted like `matchCol`, but never demands global discreteness. | Definition |
+| `PartialMatch.CatchesAt` | 159-164 | **The catch condition:** every moved vertex a `ψ`-singleton (any `α`), OR `α` an **involution** with every moved vertex singleton on ONE side — the fold case (one copy discretized). | Definition |
+| `PartialMatch.pmFun_transport_eq` | 179-211 | **★ The reconstruction, pointwise:** on a catchable pair the raw map is exactly `α` — forward reads `α` off singleton colours, backward reads `α⁻¹ = α` (involution), identity is `α` off the support. | — |
+| `PartialMatch.catchesAt_symm` | 222-247 | The catch condition holds symmetrically for `α⁻¹` against the transported colouring — what makes the two-sided inverse check pass. | — |
+| `PartialMatch.partialMatch_transport_of_catches` | 249-261 | **★★ THE RECONSTRUCTION:** on a catchable pair the constructor returns exactly `α` — `matchCol_self_transport` with global discreteness replaced by a (half-)discretized support. | — |
+| `PartialMatch.pmFun_conj` | 265-285 | The raw map conjugates under `σ` (via the `SingletonAt`/`uniqueAt` transport lemmas). | — |
+| `PartialMatch.partialMatch_conj` | 303-318 | The constructor transports up to conjugation, **including its failure mode** — the `matchCol_transport` analogue, so the supply's equivariance proof is `deepMatchSupply`'s verbatim. | — |
+| `PartialMatch.pCandidate` | 322-325 | The deep candidate, support-locally: individualize-and-refine along both sequences, then `partialMatch`. | Definition |
+| `PartialMatch.pCandidate_eq_of_isColAut` | 327-340 | **The oracle reconstructs a catchable automorphism exactly, at depth** — `α·s` has the same length as `s`, so the partner is enumerated; no guessing, no choice. | — |
+| `PartialMatch.pCandidate_conj` | 342-354 | The candidate conjugates — the engine of `GensEquivariant`. | — |
+| `PartialMatch.partialMatchSupply` | 356-363 | **★ THE SUPPORT-LOCAL BOUNDED-DEPTH ORACLE** — the `deepTable` enumeration verbatim with `matchCol` replaced by `partialMatch`; untrusted; cost formula identical to `deepMatchSupply d`. | Definition |
+| `PartialMatch.mem_gens_partialMatchSupply_iff` | 365-384 | Generator membership = some enumerated `(branch, seq≤d)` pair's candidate. | — |
+| `PartialMatch.gensEquivariant_partialMatchSupply` | 388-415 | **★★ The supply is equivariant** — length-characterized search space + conjugating constructor; no representative is ever chosen (standing trap #7). | — |
+| `PartialMatch.supplyEquivariant_partialMatchSupply` | 417-419 | Packaged for the guard. | — |
+| `PartialMatch.SupportSeparatesAt` | 423-429 | **The support-local depth witness:** every branch pair is connected by an automorphism whose support is (half-)discretized within some `≤ d` continuation — on a `k`-fold cover this holds at the `d` that discretizes ONE copy, where `SeparatesAt` needs `d ≥ k−2`. | Definition |
+| `PartialMatch.supportSeparatesAt_of_separatesAt` | 431-441 | **The strict-generalization half:** every `deepMatchSupply` firing configuration (`SeparatesAt` + localisation) is a `partialMatchSupply` one. | — |
+| `PartialMatch.wordReach_partialMatch_of_catches` | 443-458 | **Graded firing, per pair:** one catchable automorphism puts its pair into the verified `WordReach` — each verified copy transposition merges its two copies, whatever happens elsewhere in the cell. | — |
+| `PartialMatch.cellIsOrbit_partialMatchSupply` | 460-467 | **★★★ THE ORACLE FIRES:** under the support-local witness the branch cell is certified one orbit and consume collapses it to one branch — on a fold, at the depth that discretizes one copy, independent of `k`. | — |
+| `PartialMatch.partialMatchSupply_guarded_canonizer` | 471-480 | **★★★ THE SUPPORT-LOCAL MIXED CANONIZER** — ①a/①b/①c + single guarded path, every `d`, NO carried hypotheses. F1 of `docs/chain-descent-fold-tower-plan.md`; MEASURED: the 4-fold cover answers at `d = 0` where `deepMatchSupply` is dead at `d = 0` AND `d = 1` (132× the cost). | — |

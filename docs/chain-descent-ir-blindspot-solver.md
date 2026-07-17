@@ -224,9 +224,14 @@
 > (b) ℚ-independent row reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k).
 >
 > **OPEN / NEXT (all bounded, off the critical path — the rigid solver is otherwise complete):**
-> - **Fold covers of multiplicity `s > 6` — RESOLVED, poly, any `s` (2026-07-12).** (a) FULLY-SYMMETRIC: identity order via
->   the copy-swap automorphism check (validated `K_s` cover s=8,12). (b) DISTINGUISHABLE (a **Z₂ᵏ tower** — the only
->   distinguishable case, and vertex-transitive on copies, so refinement can't order them and the flat `s!` is exponential):
+> - **Fold covers of multiplicity `s > 6` — ⚠ RESOLVED ONLY FOR odd-part(s) ≤ 5 (headline corrected 2026-07-17; the
+>   original "poly, any s" OVERSTATED its own scope note below — the 2026-07-16 blocker audit flagged it, and odd-part ≥ 7
+>   is unhandled on BOTH the C# and Lean sides. Resolution plan for the full family, incl. the Lean supplies and the
+>   CRT/Smith replacement for the peel: [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md); its F1
+>   `partialMatchSupply` is landed in Lean 2026-07-17).** (a) FULLY-SYMMETRIC: identity order via
+>   the copy-swap automorphism check (validated `K_s` cover s=8,12). (b) DISTINGUISHABLE (a **Z₂ᵏ tower** — ⚠ NOT the only
+>   distinguishable case: nested odd covers (Z₃² etc., rook's-graph fibers) are constructible and fail below; corrected
+>   2026-07-17 — and vertex-transitive on copies, so refinement can't order them and the flat `s!` is exponential):
 >   **recursive s=2 doubling peel** (`TryDoublingPeel`) — a "direction" (parallel class of same-cell edges via induced
 >   4-cycles) halves the copies into two s=2 super-copies matched by a verified involution σ; recurse on one half, lift s=2
 >   (fully symmetric); lex-min over the ≤ log₂s directions ⟹ canonical + poly. **Recursion is MUTUAL** (the recursed half
@@ -248,7 +253,9 @@
 >   multipede core stays in the descent's blind spot) needs the fold/solver run on a **sub-residue AT A DESCENT NODE**,
 >   canonicalizing its core there and harvesting its `Aut` — the alternating-engine integration (§11.11). Sub-step 1 is the
 >   load-bearing seam that integration consumes.
-> - **Q1 CLOSED (2026-07-12) + dead-end recorded:** distinguishable `s>6` is closed by the **recursive doubling peel** above
+> - **Q1 ⚠ CLOSED ONLY FOR odd-part(s) ≤ 5 (corrected 2026-07-17 — "closed" overstated; the odd-part ≥ 7 residual is open
+>   both sides, target = the CRT/Smith coset ordering, fold-tower-plan §5) + dead-end recorded:** distinguishable `s>6`
+>   with odd part ≤ 5 is closed by the **recursive doubling peel** above
 >   (NOT by raising `MaxFoldMultiplicity` — **`cap→n` gives `n!`**, since the `s!` lex-min only guards the *bounded distinguishable*
 >   fallback and the poly-in-`s` paths are the fully-symmetric branch + the peel). Key finding: the copies are WL-invisible
 >   (same cell) so refinement can't order them, and the natural case (Z₂ᵏ tower) is vertex-transitive — hence the *peel*
