@@ -126,7 +126,10 @@ close it — is set out in
 > loss**). **Firing is not paying.** The next build (`P3c`, handoff §6.2b) is the **orbit-pruned fixpoint** that turns
 > that `n^d` into a **sum**; `OrbitPrune.lean` has already reduced it to pure combinatorics with **zero `①`
 > exposure**. The rigid key is still just a look-ahead heuristic, and one object-level defect remains: the
-> **target-cell selector is blind to resolvability** (fusion's live bite — handoff §6.1).
+> **target-cell selector is blind to resolvability** (fusion's live bite — handoff §6.1). **(2026-07-17: the sel
+> fix is UNDERWAY — design validated, ordering reversed (before F2/F3/P3c-2nd-half), `Select.lean` increments 1+2
+> landed: the node-resolver interface + exact blind equivalence + the ①-capstone for the generalized object.
+> Authoritative state + increment-3 spec = handoff §6.1's build-state block.)**
 >
 > **⛔⛔ SETTLED — do not re-propose a STABILIZER-CHAIN supply.** It must pick a **vertex inside a cell**, and cell
 > members are *precisely* what 1-WL cannot distinguish ⟹ no iso-invariant function picks one ⟹ **`①b` AND `①c` fail**
@@ -531,6 +534,11 @@ cases). C# already canonizes CFI(K₄–K₇).
 direction-invariance and spine invariants that everything imports.
 
 **★ THE HEADLINE STACK (read these first — this is the canonizer):**
+
+> **⚠ This table is a 2026-07-13/14 snapshot.** The CURRENT full stack table is **handoff §1** — the modules added
+> since (`Stall`, `Residue`, `SealBridge`, `SupplyTransport`, `DeepMatchSupply`, `OrbitPrune`, `PrunedSupply`,
+> `SealDepthBridge`, `PartialMatch`, `SupplyCost`, `HandledBridge`, `ImprimitiveDischarge`, `Select`) are listed
+> there with one-line summaries.
 
 | Module | Proves |
 |---|---|

@@ -45,6 +45,7 @@ whole frontier.
 | `ChainDescent/OrbitPrune.lean` | **P3 FOUNDATION** (2026-07-14). §1–3 **the reduction** — `SameOrbits S₁ S₂` ⟹ the two guarded canonizers are the *same function* ⟹ `①` transfers with **no equivariance obligation on the second supply**. §4 **the pruning license** (`deepCandidate_left_mul` / `_right_mul`). See §6.2b. |
 | `ChainDescent/PrunedSupply.lean` | **P3c FIRST HALF** (2026-07-16). `prunedSupply d` — reference-matching, `\|table\|` not `\|table\|²`; `SameOrbits` ⟹ ①/②/③ transfer. See §6.2b. |
 | `ChainDescent/HandledBridge.lean` | **THE `Handled` POPULATION BRIDGE** (2026-07-16). `reaches_pathCol` (every reached node IS a `pathCol`) + **`handled_of_seal`** — the first theorem instances of `Residue.Handled`. See the §4 update box. |
+| `ChainDescent/Select.lean` | **THE SEL REWRITE, increments 1+2** (2026-07-17). `NodeRes` (node resolver: children WITH their refined colourings, `[] = flag` = true mutual stall — §6.1 AND §6.4 in one interface), `descendS`, ★ `descendS_blind` (EXACT `CostM` equation vs `descend` — the safety net), `descendS_sound` (①a **unconditional**), `NodeTransport` + `descendS_transport` ⟹ capstone `isCanonicalFormOptS_canonFormS?`, and ★ `nodeTransport_blindNode` (**conservativity** — every proved `NarrowTransport` instance discharges the new contract at the blind instance). See §6.1's design-pass block. |
 | `ChainDescent/Regression.lean` | the **build-gating** regression suite (~12 s). |
 | `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (~4 min). |
 
@@ -264,7 +265,7 @@ families, `reachesRigidOrCameron_*`, Spielman's `SeparatesAtBoundedBase` are now
 results are *imports*, not re-proofs. **This is the answer to "reusable, else re-provable as parallel theorems":
 reusable.**
 
-### 6.1 ⚠ The target-cell selector is BLIND to resolvability (fusion's live bite) — **design VALIDATED 2026-07-17; ordering REVERSED (do BEFORE F2/F3 and P3c-2nd-half); build started (`Select.lean`)**
+### 6.1 ⚠ The target-cell selector is BLIND to resolvability (fusion's live bite) — **design VALIDATED 2026-07-17; ordering REVERSED (do BEFORE F2/F3 and P3c-2nd-half); increments 1+2 LANDED (`Select.lean`)**
 
 > **▶▶ 2026-07-17 DESIGN PASS (source-checked; supersedes the 2026-07-15 ordering box below — user approved the
 > reversal).** The naive fused selector — *least colour whose cell some resolver collapses to `≤ 1`* — **is valid**,
@@ -307,6 +308,38 @@ reusable.**
 >   `ValidPath`/`handled_of_seal_selected` follow sel — else `reaches_pathCol`/`handled_of_seal` silently miss the
 >   new object. The `∀ T CellsAreOrbits` hook absorbs the widening unchanged.
 > - `Handled`/`CellResolved` become sel-aware ⟹ the residue **deflates** (the point of the fix).
+>
+> **▶▶ BUILD STATE (2026-07-17) — increments 1+2 LANDED (`ChainDescent/Select.lean`, in `build.sh`, axiom-clean;
+> theorem index descriptions filled).** What exists, and exactly where a fresh reader continues:
+> - **Inc 1 (the interface + the safety net):** `NodeRes` (`adj → χ → CostM (List (Fin n × Colouring n))`,
+>   `[] = flag`), `descendS` + the four val/cost equations + `descendS_val_stall` (the flag channel, stated once),
+>   `blindNode` (today's per-node step, packaged), ★ **`descendS_blind`** — `descendS (blindNode rf R) = descend
+>   rf R` as an **exact `CostM` equation** (value AND cost), `canonFormS?_blind`/`descentCostS_blind` at top level,
+>   and `NodeProper` (partner exists + the hand-forward equation `vc.2 = refineV rf (indivOne χ vc.1)`) with its
+>   blind discharge.
+> - **Inc 2 (the transport pass):** `descendS_sound` ⟹ `soundOptS_canonFormS?` (**①a unconditional** — soundness
+>   never inspects the hand-forward), `NodeTransportAt`/`NodeTransport` (the fuel-graded node contract, exact
+>   mirror of `NarrowTransport`), `descendS_transport`, capstone **`isCanonicalFormOptS_canonFormS?`** (①a/①b/①c
+>   modulo `RefineEquivariant` + `NodeTransport`; `canonFormS?_complete` + `canonFormS?_flag_iso_invariant` free),
+>   and the two feeding routes: `nodeTransport_of_nodeEquivariant` (equivariant instances) and ★
+>   **`nodeTransport_blindNode`** (conservativity — every proved `NarrowTransport` instance, i.e. consume for every
+>   supply / force via `KeyEquivariant` / the guarded composite, discharges the new contract at the blind instance
+>   with no new proof).
+> - **Inc 3 (NEXT — the fused instance `selNode key S`):** probe cells in colour order; commit to the least colour
+>   whose cell the mixed resolver collapses to `≤ 1`; `[]` when none (= the true mutual stall). Needs (i) the
+>   **all-cells harvest** variants of the supplies (widen `lookTable`/`deepTable` seeds from `branches χ` to all
+>   non-singleton-cell vertices — same `tableBound n d`, `SupplyCost.lean` counting carries verbatim); (ii) its
+>   `NodeTransport` discharge via the **covering argument mirroring `Residue.coveringOfAt_guarded`** (the consume
+>   half's `rep` pick is not equivariant, so the equivariant route does NOT apply; the chosen-colour transport comes
+>   from the same per-cell facts `StallEquivariant` already provides). **Acceptance criteria (bind the build to
+>   these):** (a) *no strength increase* — the fused object answers wherever the guarded blind object answers
+>   (same key, same supply): "SOME cell narrows to ≤ 1" is strictly weaker per node than "the LEAST cell narrows to
+>   ≤ 1"; (b) an **exposure-dependency witness** in `Regression.lean` — a graph where the blind object flags and the
+>   fused object answers (cell `A` unresolvable until individualizing in cell `B` exposes it); (c) *no exponential* —
+>   fan-out `≤ 1` by construction, probe billed in `CostM`, measured in `PerformanceTest`.
+> - **Inc 4:** widen `Reaches.step`/`ValidPath` (see the pin above). **Inc 5:** sel-aware `Handled`/`CellResolved`
+>   (+ cost bounds via the `SupplyCost` counting). Contract-def migration (`Covering`/`CoveringAt`/`CoveringOfAt`
+>   restated against the node anchor) can proceed lazily — the conservativity bridge means nothing blocks on it.
 
 > **⊘ SUPERSEDED — ⚠ ORDERING (2026-07-15 audit): this comes AFTER `P3c`, not "together" as an earlier note said.** A
 > resolver-aware selector must probe the supply **per cell**. With the unpruned `deepMatchSupply d` that probe is

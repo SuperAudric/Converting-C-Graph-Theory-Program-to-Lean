@@ -55,6 +55,8 @@ definition (the ~10⁴× eta trap).
   `nodeTransport_blindNode` (the OLD contract `NarrowTransport` discharges the NEW one at the blind instance).
 - the fused instance `selNode key S` over `forceThenConsume` with the **all-cells harvest** supplies;
   `Stall.stalled` becomes the true mutual stall; `Handled`/`CellResolved` become sel-aware (residue deflates).
+  **Full increment-3 spec + the three ACCEPTANCE CRITERIA (no strength increase / exposure witness / no
+  exponential) = `docs/chain-descent-handoff-2026-07-14.md` §6.1, the build-state block.**
 - widen `Descend.Reaches.step` (any non-singleton-cell vertex) + `HandledBridge.ValidPath` to cover sel-descents.
 -/
 

@@ -15,9 +15,13 @@
 > 1. **`P3c` — the ORBIT-PRUNED FIXPOINT.** `deepMatchSupply d` fires but does not *pay* (`n^{O(d)}`; 125× net loss
 >    on `C₇`). Build `prunedSupply d` and prove the **single** theorem `SameOrbits (prunedSupply d)
 >    (deepMatchSupply d)` — `OrbitPrune.lean` already makes this **pure combinatorics, with zero `①` exposure**.
-> 2. **Resolver-aware cell selector** — *design VALIDATED + ordering REVERSED 2026-07-17 (user-approved); build
->    started (`Select.lean`).* Fixes fusion's live bite; `Stall.stalled` currently means "the **least-colour** cell
->    stalled", not "the node stalled". The naive fused selector ("least colour whose cell some resolver collapses
+> 2. **Resolver-aware cell selector** — *design VALIDATED + ordering REVERSED 2026-07-17 (user-approved);
+>    increments 1+2 LANDED (`Select.lean`, axiom-clean: `descendS` + EXACT-CostM blind equivalence `descendS_blind`
+>    + ①a unconditional + fuel-graded `NodeTransport` contract + capstone `isCanonicalFormOptS_canonFormS?` +
+>    conservativity `nodeTransport_blindNode`); NEXT = increment 3, the fused `selNode` instance (all-cells
+>    harvest + covering-argument contract discharge + the exposure-dependency regression witness) — full spec +
+>    acceptance criteria in handoff §6.1's build-state block.* Fixes fusion's live bite; `Stall.stalled` currently
+>    means "the **least-colour** cell stalled", not "the node stalled". The naive fused selector ("least colour whose cell some resolver collapses
 >    to ≤ 1", `[] = flag` = true mutual stall) is valid with NO new hypothesis class and NO `Supply` type change
 >    (all-cells harvest; same `tableBound`); the old "probe per cell ⟹ product-not-sum risk" premise dissolved ⟹
 >    **do BEFORE F2/F3 and P3c-2nd-half**, as ONE interface change also covering the duplicate-refine loss
