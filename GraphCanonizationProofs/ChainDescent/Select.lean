@@ -49,8 +49,10 @@ materialize its colourings through `Refine.ColData` before wrapping them, never 
 definition (the ~10⁴× eta trap).
 
 ## Roadmap (next increments)
-- transport pass: `NodeEquivariant` + `descendS_transport` (mirror `descend_transport`), then
-  `isCanonicalFormOpt` for `descendS` via the node-level contract (the `NarrowFn` shape `①c` already uses).
+- ✅ transport pass (increment 2, this file §4–§6): `descendS_sound` (unconditional), the node-level contract
+  `NodeTransport` + `descendS_transport`, the `①a`/`①b`/`①c` capstone `isCanonicalFormOptS_canonFormS?`, the
+  equivariant sufficient condition `nodeTransport_of_nodeEquivariant`, and the conservativity bridge
+  `nodeTransport_blindNode` (the OLD contract `NarrowTransport` discharges the NEW one at the blind instance).
 - the fused instance `selNode key S` over `forceThenConsume` with the **all-cells harvest** supplies;
   `Stall.stalled` becomes the true mutual stall; `Handled`/`CellResolved` become sel-aware (residue deflates).
 - widen `Descend.Reaches.step` (any non-singleton-cell vertex) + `HandledBridge.ValidPath` to cover sel-descents.
@@ -207,6 +209,156 @@ theorem nodeProper_blindNode {rf : Refiner n} {R : Resolver n}
   rw [blindNode_children] at hvc
   obtain ⟨v, hv, rfl⟩ := List.mem_map.mp hvc
   exact ⟨exists_partner_of_mem_branches (hsub adj χ v hv), rfl⟩
+
+/-! ## 4. `①a` — soundness, UNCONDITIONAL
+
+Holds for **any** node resolver, exactly as `descend_sound` holds for any resolver: a leaf is emitted only at a
+discrete colouring, and `leafMatrix_sound` makes it a relabelling regardless of how the node reached it. The
+hand-forward changes nothing here — soundness never inspects where a child colouring came from. -/
+
+theorem descendS_sound (N : NodeRes n) (adj : AdjMatrix n) :
+    ∀ (fuel : Nat) (χ : Colouring n) (c : Labelled n),
+      (descendS N adj fuel χ).1 = some c → ∃ π : Equiv.Perm (Fin n), c = labelledAdj π adj := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro χ c h
+      by_cases hd : Discrete χ
+      · rw [descendS_val_leaf N adj hd 0] at h
+        exact (Option.some.inj h) ▸ leafMatrix_sound adj χ hd
+      · rw [descendS_val_zero N adj hd] at h
+        exact absurd h (by simp)
+  | succ fuel ih =>
+      intro χ c h
+      by_cases hd : Discrete χ
+      · rw [descendS_val_leaf N adj hd (fuel + 1)] at h
+        exact (Option.some.inj h) ▸ leafMatrix_sound adj χ hd
+      · rw [descendS_val_succ N adj hd fuel] at h
+        obtain ⟨vc, _, hvc1⟩ := List.mem_map.mp (aggregate_mem h)
+        exact ih vc.2 c hvc1
+
+/-- **`SoundOpt` for the top-level object** — for ANY refiner and ANY node resolver. -/
+theorem soundOptS_canonFormS? (rf : Refiner n) (N : NodeRes n) :
+    CanonSpec.SoundOpt (canonFormS? (n := n) rf N) := by
+  intro adj c h
+  exact descendS_sound N adj n _ c h
+
+/-! ## 5. `①b`/`①c` — the node-level contract and the transport induction
+
+The contract is the exact mirror of `Descend.NarrowTransport`, stated on the node resolver's children: *the
+children's aggregate transports under σ*, fuel-graded (the induction hypothesis is threaded in explicitly, so an
+instance may use the descent's own iso-invariance one level down — which the fused consume half must, exactly as
+`CoveringAt` does today). -/
+
+/-- The generalized descent's iso-invariance **at a given fuel** (the graded induction statement; mirror of
+`TransportAt`). -/
+def NodeTransportAt (N : NodeRes n) (fuel : Nat) : Prop :=
+  ∀ (adj : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (χ : Colouring n),
+    (descendS N (relabelAdj σ adj) fuel (transportColouring σ χ)).1
+      = (descendS N adj fuel χ).1
+
+/-- **★ THE NODE-RESOLVER CONTRACT — the children's aggregate transports.** Precisely the branch case of
+`descendS_transport`, and nothing more (mirror of `NarrowTransport`). Note it constrains the CHOSEN cell and the
+kept children jointly — a fused selector satisfies it because "which cell is chosen" transports (colour values
+are canonical) and the kept children of that cell transport (the same per-cell facts the guarded flag already
+needs). -/
+def NodeTransport (N : NodeRes n) : Prop :=
+  ∀ (fuel : Nat), NodeTransportAt N fuel →
+    ∀ (adj : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (χ : Colouring n), ¬ Discrete χ →
+      aggregate (((N (relabelAdj σ adj) (transportColouring σ χ)).1).map
+          (fun vc => (descendS N (relabelAdj σ adj) fuel vc.2).1))
+        = aggregate (((N adj χ).1).map (fun vc => (descendS N adj fuel vc.2).1))
+
+/-- **The transport induction** (mirror of `descend_transport`): the contract is the whole per-node
+obligation. -/
+theorem descendS_transport {N : NodeRes n} (hnt : NodeTransport N) :
+    ∀ fuel, NodeTransportAt N fuel := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro adj σ χ
+      by_cases hd : Discrete χ
+      · rw [descendS_val_leaf N _ ((discrete_transport σ χ).mpr hd) 0,
+            descendS_val_leaf N adj hd 0, leafMatrix_transport σ adj χ hd]
+      · rw [descendS_val_zero N _ (fun hc => hd ((discrete_transport σ χ).mp hc)),
+            descendS_val_zero N adj hd]
+  | succ fuel ih =>
+      intro adj σ χ
+      by_cases hd : Discrete χ
+      · rw [descendS_val_leaf N _ ((discrete_transport σ χ).mpr hd) (fuel + 1),
+            descendS_val_leaf N adj hd (fuel + 1), leafMatrix_transport σ adj χ hd]
+      · rw [descendS_val_succ N _ (fun hc => hd ((discrete_transport σ χ).mp hc)) fuel,
+            descendS_val_succ N adj hd fuel]
+        exact hnt fuel ih adj σ χ hd
+
+theorem isoInvariantOptS_canonFormS? {rf : Refiner n} {N : NodeRes n}
+    (hre : RefineEquivariant rf) (hnt : NodeTransport N) :
+    CanonSpec.IsoInvariantOpt (canonFormS? (n := n) rf N) := by
+  intro σ adj
+  show (descendS N (relabelAdj σ adj) n (refineV rf (relabelAdj σ adj) (fun _ => 0))).1
+      = (descendS N adj n (refineV rf adj (fun _ => 0))).1
+  have h0 : refineV rf (relabelAdj σ adj) (fun _ => 0)
+      = transportColouring σ (refineV rf adj (fun _ => 0)) := by
+    simpa [transportColouring] using hre σ adj (fun _ => 0)
+  rw [h0]
+  exact descendS_transport hnt n adj σ (refineV rf adj (fun _ => 0))
+
+/-- **★ THE CAPSTONE — `descendS` IS A CANONICAL FORM** (`①a`/`①b`/`①c` for the generalized object), modulo
+exactly the refiner's equivariance (root colouring only) and the node-resolver contract. -/
+theorem isCanonicalFormOptS_canonFormS? {rf : Refiner n} {N : NodeRes n}
+    (hre : RefineEquivariant rf) (hnt : NodeTransport N) :
+    CanonSpec.IsCanonicalFormOpt (canonFormS? (n := n) rf N) :=
+  ⟨soundOptS_canonFormS? rf N, isoInvariantOptS_canonFormS? hre hnt⟩
+
+/-- Completeness, free (mirror of `canonForm?_complete`). -/
+theorem canonFormS?_complete {rf : Refiner n} {N : NodeRes n}
+    (hre : RefineEquivariant rf) (hnt : NodeTransport N)
+    (G H : AdjMatrix n) (cG cH : Labelled n)
+    (hG : canonFormS? rf N G = some cG) (hH : canonFormS? rf N H = some cH) :
+    CanonSpec.GraphIso G H ↔ cG = cH :=
+  CanonSpec.complete_of_isCanonicalFormOpt (isCanonicalFormOptS_canonFormS? hre hnt) G H cG cH hG hH
+
+/-- The flag is iso-invariant, free — and for a FUSED node resolver the flag IS the true mutual stall, so this
+is `①c` for the mutual-stall semantics the design intends. -/
+theorem canonFormS?_flag_iso_invariant {rf : Refiner n} {N : NodeRes n}
+    (hre : RefineEquivariant rf) (hnt : NodeTransport N)
+    {G H : AdjMatrix n} (h : CanonSpec.GraphIso G H) :
+    canonFormS? rf N G = none ↔ canonFormS? rf N H = none :=
+  CanonSpec.flag_iso_invariant_of_isoInvariantOpt (isoInvariantOptS_canonFormS? hre hnt) h
+
+/-! ## 6. The two feeding routes -/
+
+/-- **Sufficient condition 1 — the node resolver is EQUIVARIANT**: the transported node's children are (up to
+permutation) the σ-images of the originals, vertex AND handed colouring. The mirror of `NarrowEquivariant` at
+the node level. (The fused selector's consume half is NOT equivariant — its `rep` pick — so the fused instance
+will discharge `NodeTransport` directly by a covering argument, mirroring `Residue.coveringOfAt_guarded`; this
+route serves force-only / structural instances.) -/
+def NodeEquivariant (N : NodeRes n) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n),
+    ((N (relabelAdj σ adj) (transportColouring σ χ)).1).Perm
+      (((N adj χ).1).map (fun vc => (σ vc.1, transportColouring σ vc.2)))
+
+theorem nodeTransport_of_nodeEquivariant {N : NodeRes n} (hne : NodeEquivariant N) :
+    NodeTransport N := by
+  intro fuel ih adj σ χ _
+  refine aggregate_perm (((hne σ adj χ).map _).trans ?_)
+  rw [List.map_map]
+  exact List.Perm.of_eq (List.map_congr_left (fun vc _ => ih adj σ vc.2))
+
+/-- The graded IHs of the two objects coincide at the blind instance (via the safety-net equation). -/
+theorem nodeTransportAt_blind_iff {rf : Refiner n} {R : Resolver n} {fuel : Nat} :
+    NodeTransportAt (blindNode rf R) fuel ↔ TransportAt rf R fuel := by
+  unfold NodeTransportAt TransportAt
+  simp only [descendS_blind]
+
+/-- **Sufficient condition 2 — CONSERVATIVITY: the OLD contract discharges the NEW one at the blind instance.**
+Every `NarrowTransport` instance already proved (consume for every supply, force via `KeyEquivariant`, the
+guarded composite) hands the generalized object its contract with no new proof. -/
+theorem nodeTransport_blindNode {rf : Refiner n} {R : Resolver n}
+    (hnt : NarrowTransport rf R) : NodeTransport (blindNode rf R) := by
+  intro fuel ih adj σ χ hd
+  have h := hnt fuel (nodeTransportAt_blind_iff.mp ih) adj σ χ hd
+  simpa [blindNode_children, List.map_map, Function.comp_def, descendS_blind, refineV] using h
 
 end Select
 end ChainDescent
