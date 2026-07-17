@@ -2698,23 +2698,23 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Showcase.Iso` | 43-46 | — | Definition |
-| `Showcase.UnhandledResidue` | 107-114 | — | Definition |
-| `Showcase.cameron_classification` | 132-137 | — | axiom |
-| `Showcase.skresanov_two_closure` | 138-141 | — | axiom |
-| `Showcase.liebeck_rank3` | 142-145 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 146-150 | — | axiom |
-| `Showcase.ftpg` | 151-157 | — | axiom |
-| `Showcase.buekenhout_shult` | 158-163 | — | axiom |
-| `Showcase.payne_thas` | 164-172 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 173 | — | axiom |
-| `Showcase.canon_sound` | 181-192 | — | — |
-| `Showcase.canon_complete` | 194-218 | — | — |
-| `Showcase.flag_iso_invariant` | 220-227 | — | — |
-| `Showcase.canon_poly_or_flag` | 229-245 | — | — |
-| `Showcase.residue_if_flag` | 247-256 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 258-264 | — | — |
-| `Showcase.canonizer` | 271-281 | — | — |
+| `Showcase.Iso` | 70-73 | — | Definition |
+| `Showcase.UnhandledResidue` | 134-141 | — | Definition |
+| `Showcase.cameron_classification` | 162-167 | — | axiom |
+| `Showcase.skresanov_two_closure` | 168-171 | — | axiom |
+| `Showcase.liebeck_rank3` | 172-175 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 176-184 | — | axiom |
+| `Showcase.ftpg` | 185-191 | — | axiom |
+| `Showcase.buekenhout_shult` | 192-199 | — | axiom |
+| `Showcase.payne_thas` | 200-208 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 209 | — | axiom |
+| `Showcase.canon_sound` | 217-228 | — | — |
+| `Showcase.canon_complete` | 230-254 | — | — |
+| `Showcase.flag_iso_invariant` | 256-263 | — | — |
+| `Showcase.canon_poly_or_flag` | 265-287 | — | — |
+| `Showcase.residue_if_flag` | 289-298 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 300-306 | — | — |
+| `Showcase.canonizer` | 313-323 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -3431,3 +3431,24 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 | `abelianConsumed_translationScheme` | 534-540 | **§3 ★ The FIRST concrete `AbelianConsumed` instance** — leg B fires on the elementary-abelian translation scheme. Both `hImprim` target predicates were previously zero-instantiated (the recurring vacuity failure mode); this closes the leg-B half. | — |
 | `not_isPrimitive_translationScheme` | 542-627 | §3 **The translation scheme is IMPRIMITIVE for `d ≥ 2`** — the difference classes of the subspace `{0, e₀}` form a proper non-trivial closed subset (the constructive direction of the M1 block ⟺ subspace bridge, in char 2). | — |
 | `hImprim_nonvacuous_witness` | 629-638 | **§3 ★ `hImprim`'s conclusion, non-vacuously, on a genuinely IMPRIMITIVE scheme** — imprimitive ∧ (`SchemeBlockRecovered ∨ AbelianConsumed`) for the translation scheme, `d ≥ 2`: the first machine-checked witness that the seal's imprimitive branch can actually fire. | — |
+## ChainDescent/Select.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Select.NodeRes` | 70-74 | **The NODE RESOLVER interface (sel rewrite increment 1, handoff §6.1 design pass)** — at a non-discrete node, pick a cell, narrow it, and return the kept children `(v, χᵥ)` WITH their already-computed refined colourings (the §6.4 hand-forward); `[] = flag` = the true mutual stall. One interface covers resolver-aware selection AND the duplicate-refine fix. | `abbrev` |
+| `Select.descendS` | 76-88 | **The generalized descent** — `descend` with the per-node step delegated to a `NodeRes`: leaf on discrete, else aggregate over the resolver's children (which arrive with their colourings — no per-child refine in the recursion). Fuel per-layer, never threaded, as in `descend`. | Definition |
+| `Select.canonFormS?` | 90-93 | Top-level value projection of `descendS` (root colouring from the refiner — the root has no parent to hand it forward). | Definition |
+| `Select.descentCostS` | 95-97 | Top-level cost projection of the same definition (root refine billed + descent cost). | Definition |
+| `Select.descendS_val_leaf` | 101-104 | A discrete node emits its leaf matrix at any fuel (mirror of `descend_val_leaf`). | — |
+| `Select.descendS_val_zero` | 106-108 | Fuel exhaustion on a non-discrete node emits `none` (mirror of `descend_val_zero`). | — |
+| `Select.descendS_val_succ` | 110-115 | The successor value equation: the node's value is the aggregate over the node resolver's children values (mirror of `descend_val_succ`, with the children handed forward). | — |
+| `Select.descendS_cost_succ` | 117-122 | The successor cost equation: `1 +` the node resolver's cost (probe + children refinements) `+` the children's descent costs. | — |
+| `Select.descendS_val_stall` | 124-130 | **The `[] = flag` channel, stated once** — a node resolver returning no children flags the node, and the flag propagates to the root through `aggregate`. For a fused selector this IS the true mutual stall (no cell resolvable). | — |
+| `Select.blindNode` | 134-140 | **The blind instance = today's per-node step, packaged**: least non-singleton cell (`branches`), the resolver's narrowing, one refine per kept child. | Definition |
+| `Select.blindNode_children` | 142-145 | The blind instance's children are exactly `narrow R adj χ`, each paired with its refined colouring. | `@[simp]` |
+| `Select.sum_map_add` | 147-154 | Local helper: sums distribute over a pointwise-added map (the cost-rearrangement engine of `descendS_blind`). | — |
+| `Select.descendS_blind` | 156-176 | **★ THE SAFETY NET — the blind instance IS today's object, as an EXACT `CostM` equation (value AND cost)**: `descendS (blindNode rf R) = descend rf R`. Everything built so far is literally the new object's special case; the sel migration proceeds against this equation with nothing proved twice. | — |
+| `Select.canonFormS?_blind` | 178-182 | The top-level value equality: `canonFormS? rf (blindNode rf R) = canonForm? rf R`. | — |
+| `Select.descentCostS_blind` | 184-188 | The top-level cost equality: `descentCostS rf (blindNode rf R) = descentCost rf R`. | — |
+| `Select.NodeProper` | 192-198 | **Obligation 1 of the node-resolver contract** — every emitted child individualizes a vertex with a same-coloured partner (⟹ `ncol` strictly increases ⟹ the depth bound is honest) and hands forward EXACTLY its refined colouring (`vc.2 = refineV rf (indivOne χ vc.1)`) — the hand-forward is licensed by a proved equation, never trusted. (Obligation 2, `NodeEquivariant`, comes with the transport pass.) | Definition |
+| `Select.nodeProper_blindNode` | 200-209 | The blind instance is `NodeProper` whenever the resolver's narrowing stays inside the branch cell (the same `hsub` the totality theorems already carry). | — |

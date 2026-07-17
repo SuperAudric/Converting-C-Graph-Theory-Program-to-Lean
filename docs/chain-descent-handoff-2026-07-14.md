@@ -264,12 +264,56 @@ families, `reachesRigidOrCameron_*`, Spielman's `SeparatesAtBoundedBase` are now
 results are *imports*, not re-proofs. **This is the answer to "reusable, else re-provable as parallel theorems":
 reusable.**
 
-### 6.1 ⚠ The target-cell selector is BLIND to resolvability (fusion's live bite) — **design approved, not built; do AFTER `P3c`**
-> **⚠ ORDERING (2026-07-15 audit): this comes AFTER `P3c`, not "together" as an earlier note said.** A
+### 6.1 ⚠ The target-cell selector is BLIND to resolvability (fusion's live bite) — **design VALIDATED 2026-07-17; ordering REVERSED (do BEFORE F2/F3 and P3c-2nd-half); build started (`Select.lean`)**
+
+> **▶▶ 2026-07-17 DESIGN PASS (source-checked; supersedes the 2026-07-15 ordering box below — user approved the
+> reversal).** The naive fused selector — *least colour whose cell some resolver collapses to `≤ 1`* — **is valid**,
+> and two of the three feared complications dissolve on inspection:
+> 1. **No new equivariance architecture.** `①b`/`①c` for the guarded object ALREADY route through
+>    `Stall.StallEquivariant` (`Residue.narrowFnEquivariant_guardedRef` takes `hse`), so "per-cell resolvability
+>    transports" is the **same hypothesis class**, discharged by the **same P1 instances** — their proofs use only
+>    cell-transport facts that hold for *any* colour class, not just the least one. Colour values are canonical
+>    (`targetColour_transport` is a value equality), so "least resolvable colour" transports.
+> 2. **No `Supply` type change.** The resolver layer is already cell-generic (`Consume.consume` maps
+>    `rep (verified S adj χ)` over the **passed** `B`; `verified` is cell-independent; `Force.keepMin` generic).
+>    Only the supply *instances* harvest from `branches χ` internally — widen the harvest to **all non-singleton
+>    cells**: cells partition the vertex set, so the widened table is `≤ n·(n+1)^d = tableBound n d`, the bound
+>    `SupplyCost.lean` **already proves** (it only ever used `|branches| ≤ n`). The proved `②` bounds carry over
+>    verbatim; equivariance keeps the same choice-free shape (the enumeration is still structurally characterised).
+> 3. **⟹ the "probe per cell = product" risk does not materialize** (it assumed re-invoking the harvest per cell).
+>    ONE all-cells harvest per node; the probe filters one shared `verified` list; per-cell orbit-BFS/`keepMin`
+>    **sums over a partition of `V`** — the same form as today's consume term. **Hence the ordering argument
+>    reverses**: every `branches`-anchored statement F2/F3/P3c-2nd-half add is future rework, so the interface
+>    change comes FIRST (fold-tower plan already sequences F3 with it).
+>
+> **⚠ NO EXPONENTIAL IS REINTRODUCED — read the branching accounting exactly.** The widening enlarges the per-node
+> **candidate table** (poly-bounded, billed in `CostM`), never the descent's fan-out: sel commits to **one** cell,
+> and only one already narrowed to `≤ 1` branch — the guard's `resolvedAll_guard` is **absorbed into the selector**
+> (`[] = flag` when NO cell qualifies = the true mutual stall). Single path of `≤ n+1` nodes exactly as today
+> (each step still individualizes one vertex of a non-singleton cell ⟹ `ncol` strictly increases). The probe
+> examines `≤ n` cells per node but **descends into one** — probe work is additive per node; there is no tree.
+> Measured constants rise (the least cell is usually smaller than `n`); the proved asymptotics do not.
+>
+> **Design pins (binding for the build):**
+> - "Makes progress" = **narrows to `≤ 1`** — NOT "narrows strictly" (a cell cut 5→2 is still a stall; poly-AND-flag).
+> - **Anchor = the node-level narrowing** (`NarrowFn` — `①c` already works there via `guardedRef`): generalize
+>   `descend` to a node resolver `adj → χ → CostM (List (Fin n × Colouring n))` (`[] = flag`), each kept child
+>   **handed its already-computed refined colouring** — ONE interface change covers §6.1 **and** §6.4, and the
+>   probe's refinements ARE the children's (the probe pays for itself). Obligations: **properness** (children lie
+>   in one non-singleton cell; the handed colouring `= refineV rf (indivOne χ v)`, a proved per-instance equation)
+>   + conditional **`NarrowFnEquivariant`**. Old object = the blind instance `fun adj χ => narrow R adj χ` +
+>   per-child refine — an **exact `CostM` equation**, the migration safety net.
+> - **Widen `Descend.Reaches.step`** (`v ∈ branches χ` → `v` in ANY non-singleton cell) and let
+>   `ValidPath`/`handled_of_seal_selected` follow sel — else `reaches_pathCol`/`handled_of_seal` silently miss the
+>   new object. The `∀ T CellsAreOrbits` hook absorbs the widening unchanged.
+> - `Handled`/`CellResolved` become sel-aware ⟹ the residue **deflates** (the point of the fix).
+
+> **⊘ SUPERSEDED — ⚠ ORDERING (2026-07-15 audit): this comes AFTER `P3c`, not "together" as an earlier note said.** A
 > resolver-aware selector must probe the supply **per cell**. With the unpruned `deepMatchSupply d` that probe is
 > `n^{O(d)}` *per cell*, so the selector multiplies the supply cost by the cell count — the "product-not-sum risk"
 > below, made concrete. With a **pruned** supply the probe reuses the already-harvested group, so the risk largely
-> evaporates. Build the cheap supply first.
+> evaporates. Build the cheap supply first. *(The premise — per-cell harvest re-invocation — is what the 2026-07-17
+> pass dissolved.)*
 
 `descend` targets the **least non-singleton colour** (`branches`/`targetColour`) — a fixed rule that **does not ask
 whether the resolvers can act on that cell**. The guard then flags if *that* cell is unresolvable. But a node can
@@ -575,6 +619,10 @@ scratch — and `matchSupply` computes it a **third** time. Measured on `F12`: e
 a **net loss**. (The old "22477 → 5186" was an artifact of billing an arbitrary key a flat `n³`; `Key` now carries
 its cost, and `②` can see the difference.) **Fix:** let a resolver **hand its look-ahead forward** — a `descend`
 signature change, and **the same one §6.1 needs**. Do them together.
+> **▶ 2026-07-17: "together" is now ONE interface, not two coordinated changes** — the §6.1 node resolver returns
+> `List (Fin n × Colouring n)`, i.e. each kept child arrives WITH its refined colouring, so the hand-forward IS the
+> selector signature. The resolvability probe computes exactly these refinements, so the probe pays for itself and
+> the F12-style triple-computation collapses to one. See the §6.1 design-pass block.
 
 ### 6.5 The `Publication` opaque-swap — now unblocked
 Substitute the real `Descend.canonForm?` for the `opaque` stub. `unhandledResidue_nonvacuous` was **unprovable in

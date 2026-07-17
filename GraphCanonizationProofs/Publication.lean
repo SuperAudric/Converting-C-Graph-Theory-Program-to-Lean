@@ -31,6 +31,33 @@ Compile standalone (NOT via `lake build`; this file carries `axiom` and temporar
 Quality note: this is the ONLY file in the project permitted `axiom`. The library stays axiom-clean
 `[propext, Classical.choice, Quot.sound]`; the citations are carried there as *hypotheses*, and only HERE
 are they instantiated with `axiom` witnesses so `#print axioms` aggregates them into one legible list.
+
+## STATUS (2026-07-17) — the statements here are TARGETS, not finalized design (user steer; blocker-audit item 8).
+Finalization is deliberately deferred; read the obligations as the intended shape, not as what the library fills
+today. Per-obligation state:
+  · ① — swap-ready and mechanical, EXCEPT the import cone: this file imports only `ChainDescent.Spine`, which does
+    NOT reach `Descend`/`Stall`/`Residue`/`PrunedSupply`. Fix the import at swap time (one line; the swap has never
+    been compile-tested).
+  · ② — now fillable PER FIXED DEPTH `d`: pin the canonizer-of-record (encode-free refiner + `lookaheadKey` +
+    `prunedSupply d`) and `SupplyCost.descentCost_pruned_lookahead_le` supplies the explicit polynomial for
+    `costConst`/`costDeg`. The status comment inside `canon_poly_or_flag` below is SUPERSEDED (see its banner).
+  · ③ — TWO LAYERS, not a design conflict: the library's operational residue (`Residue.Residue := ¬Handled`, key/
+    supply-parameterized) is the intermediate; this file's structural atoms are the target; the missing object is
+    the ATTRIBUTION theorem `¬Handled(record) → D1 ∨ D2`. ⚠ The strong reading "flag ⟹ genuine obstruction" is NOT
+    reachable in full: the flag marks a CAPABILITY boundary, not hardness — the leftover can be a single unresolved
+    decision, and constructible flagged-but-not-believed-hard inputs exist (odd-part ≥ 7 fold towers, audit item 4).
+    Target the graded pair instead: (③a) flag ⟹ ¬Handled(record) + the stall attribution
+    (`Composite.forceThenConsume_stall`) — unconditional; (③b) per-family: flag ∧ ⟨family⟩ ⟹ structural atom —
+    where the citations live. The atoms stay `opaque` until the per-family carving matures; they must NEVER be
+    defined as "the algorithm flagged" (the firewall below stands).
+  · The §1 "mutual stall" prose is the TARGET flag semantics, pending the sel rewrite (handoff §6.1 design-pass
+    block): today's `Stall.stalled` reads "the LEAST-COLOUR cell stalled", not "the node stalled".
+  · Axiom WIRING IS DEFERRED for every entry in §2; per-entry cautions are noted inline (G3 threshold, FTPG's
+    corrected predicate, Payne–Thas narrowing).
+  · Non-vacuity: the handled half is now fillable in principle (`Residue.handled_emptyAdj` — a trivial witness);
+    the load-bearing witnesses (a CFI/forms graph handled AT THE RECORD RESOLVERS; a real unhandled instance at
+    the same resolvers) remain the target. The library's `residue_nonvacuous` witness uses `constKey`/`emptySupply`
+    and does NOT transfer to the record object.
 -/
 import ChainDescent.Spine
 
@@ -127,7 +154,10 @@ FIREWALL CHECK for this list: every entry is a theorem *proved outside the proje
 / classical-group development). Nothing here is a project conjecture. -/
 
 /-- G3 — the primitive-coherent-configuration / Cameron classification (CFSG-based). The one citation
-policy allows to stay cited permanently. Source: Babai ITCS'14 / J.Algebra'15; Kivva JCTB'24; Sun–Wilmes. -/
+policy allows to stay cited permanently. Source: Babai ITCS'14 / J.Algebra'15; Kivva JCTB'24; Sun–Wilmes.
+⚠ WIRING CAUTION (2026-07-16 audit): the citable threshold is Sun–Wilmes `exp(Õ(n^{1/3}))` (all ranks; rank 3/4
+at quasipoly via Babai/Kivva). NEVER instantiate `hClassify` at the `confinementLargeScheme` quasi-poly threshold
+`n^{log₂ n}` — at that threshold the statement is Babai's OPEN conjecture, not a citation. -/
 opaque PrimitiveCCClassification : Prop
 axiom cameron_classification : PrimitiveCCClassification
 
@@ -146,7 +176,11 @@ opaque PonomarenkoCyclotomic2Sep : Prop
 axiom ponomarenko_2sep : PonomarenkoCyclotomic2Sep
 
 /-- Fundamental theorem of projective geometry (cone-preserving collineations are semilinear); needed only
-for the `q = pᵉ`, `e > 1` field twist. Source: Artin, *Geometric Algebra*. -/
+for the `q = pᵉ`, `e > 1` field twist. Source: Artin, *Geometric Algebra*.
+⚠ WIRING TARGET = the CORRECTED difference-cone predicate (2026-07-16 fix): the original
+`ConePreservingCollineationIsSemiSimilitude` (bare cone-preserving bijection antecedent) was false-as-formalized;
+wire only the difference-cone form. (`JointVarietyDeterminesFamily` is PROVED outright — no axiom needed; it is
+deliberately absent from this list.) -/
 opaque FundamentalThmProjGeom : Prop
 axiom ftpg : FundamentalThmProjGeom
 
@@ -159,7 +193,9 @@ axiom buekenhout_shult : PolarSpaceRankGe3Classical
 
 /-- Payne–Thas: recognition/coordinatization of a CLASSICAL generalized quadrangle (the `d = 4`, rank-2 case,
 outside Buekenhout–Shult). **Correctness only.** The genuine soft spot (non-classical GQs exist), route-c-plan
-§7a (e). Source: Payne–Thas, *Finite Generalized Quadrangles*. -/
+§7a (e). Source: Payne–Thas, *Finite Generalized Quadrangles*.
+⚠ MUST BE NARROWED to a specific characterization theorem before wiring (2026-07-16 audit): there is no general
+"classical GQ recognition" theorem — as an unscoped axiom this would be citation-shaped open mathematics. -/
 opaque ClassicalGQRecognition : Prop
 axiom payne_thas : ClassicalGQRecognition
 
@@ -230,6 +266,12 @@ theorem flag_iso_invariant (n : ℕ) (G H : AdjMatrix n) (h : Iso G H) :
 explicit polynomial budget or it emits an honest flag. No residue predicate appears here. -/
 theorem canon_poly_or_flag (n : ℕ) (G : AdjMatrix n) :
     cost n G ≤ costConst * n ^ costDeg ∨ canonForm? n G = none := by
+  -- ⊘ THE STATUS BELOW IS SUPERSEDED (2026-07-17; retained for provenance). The guard design (`Stall.lean`)
+  -- replaced the verify-consume-monovariant / fuel-placeholder plan: deferral IS the failure mode, the guarded
+  -- descent is a SINGLE PATH of ≤ n+1 nodes or it flags (`Stall.resolvedAll_guard`, by construction), and the
+  -- explicit polynomial is `SupplyCost.descentCost_pruned_lookahead_le` (end-to-end, for the canonizer of
+  -- record, per fixed depth d). Filling this obligation = pinning the record object (fixes costConst/costDeg)
+  -- + the opaque swap. See the file STATUS block.
   -- OPEN — this is now the main remaining obligation of ①/②. STATUS (2026-07-13):
   --  · `cost` is the `cost` PROJECTION of the same definition ①a/①b ride on: `ChainDescent.Descend.descentCost`
   --    (`descend` is written in `CostM`, so cost is co-defined with the value — no separate object, no bridge).

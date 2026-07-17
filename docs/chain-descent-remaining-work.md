@@ -15,9 +15,13 @@
 > 1. **`P3c` — the ORBIT-PRUNED FIXPOINT.** `deepMatchSupply d` fires but does not *pay* (`n^{O(d)}`; 125× net loss
 >    on `C₇`). Build `prunedSupply d` and prove the **single** theorem `SameOrbits (prunedSupply d)
 >    (deepMatchSupply d)` — `OrbitPrune.lean` already makes this **pure combinatorics, with zero `①` exposure**.
-> 2. **Resolver-aware cell selector** — `descend` needs a `sel` parameter. *Design approved, not built.* Fixes
->    fusion's live bite; `Stall.stalled` currently means "the **least-colour** cell stalled", not "the node stalled".
->    ⚠ Interacts with (1): it must **probe the supply per cell** ⟹ product-not-sum risk. Do them together.
+> 2. **Resolver-aware cell selector** — *design VALIDATED + ordering REVERSED 2026-07-17 (user-approved); build
+>    started (`Select.lean`).* Fixes fusion's live bite; `Stall.stalled` currently means "the **least-colour** cell
+>    stalled", not "the node stalled". The naive fused selector ("least colour whose cell some resolver collapses
+>    to ≤ 1", `[] = flag` = true mutual stall) is valid with NO new hypothesis class and NO `Supply` type change
+>    (all-cells harvest; same `tableBound`); the old "probe per cell ⟹ product-not-sum risk" premise dissolved ⟹
+>    **do BEFORE F2/F3 and P3c-2nd-half**, as ONE interface change also covering the duplicate-refine loss
+>    (node resolver hands each child its refined colouring). Authoritative: handoff §6.1 design-pass block.
 > 3. **The rigid key** — nothing exists beyond `lookaheadKey`; §11.12's P1–P4 not started.
 > 4. **The `Publication` opaque-swap** — now **unblocked** (`Residue.Residue` is a *definition*, so
 >    `unhandledResidue_nonvacuous` is provable; it was undischargeable *in principle* before).
