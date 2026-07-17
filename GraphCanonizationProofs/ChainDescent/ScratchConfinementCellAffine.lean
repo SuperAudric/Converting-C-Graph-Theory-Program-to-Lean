@@ -26,7 +26,7 @@ against `hC ▸ M.S`; the transport of `hne`/`IsPrimitive` across `hC` is handle
 Axiom target `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.
 -/
 import ChainDescent.ScratchConfinementCellImprim
-import ChainDescent.ScratchSchemeRealizesPrimitive
+import ChainDescent.ImprimitiveDischarge
 
 namespace ChainDescent.ConfinementCellAffine
 

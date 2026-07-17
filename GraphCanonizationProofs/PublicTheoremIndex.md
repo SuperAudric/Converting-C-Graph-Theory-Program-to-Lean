@@ -2411,12 +2411,6 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 | `RRU.phase1Root_reachesRigid_of_recoverable` | 213-219 | **Payoff (root domain).** Under root recoverability, `phase1Root` always lands on a rigid (`IsBase`) residue. | — |
 | `RRU.phase1Root_isoInvariant_of_recoverable` | 221-227 | **Payoff (root domain).** Under root recoverability, `phase1Root`'s handoff transports under relabelling. | — |
 
-## ChainDescent/ScratchAffinePrimitive.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `irreducible_imp_isPrimitive_affineScheme` | 33-156 | — | — |
-
 ## ChainDescent/ScratchConfinementCellAffine.lean
 
 | Name | Line | Description | Notes |
@@ -2691,14 +2685,6 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 | `RenumberFast.canonOutputFast` | 59-62 | — | Definition |
 | `RenumberFast.canonOutputFast_sound` | 64-80 | — | — |
 | `RenumberFast.render3` | 82-88 | — | Definition |
-
-## ChainDescent/ScratchSchemeRealizesPrimitive.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `isPrimitive_of_schemeRealizes` | 28-97 | — | — |
-| `affineScheme_hne` | 105-109 | — | — |
-| `isPrimitive_of_realizes_affineScheme` | 111-123 | — | — |
 
 ## ChainDescent/Spine.lean
 
@@ -3409,3 +3395,39 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `SupplyCost.descentCost_guard_mixed_le` | 333-342 | §6 **The generic mixed ②** — key abstract via `kc`; F3's ring key drops in with one `keyCost` lemma. | — |
 | `SupplyCost.descentCost_pruned_lookahead_le` | 344-353 | §6 **★ ② for the concrete canonizer of record** (`lookaheadKey` + `prunedSupply d`; ① side = `prunedSupply_lookahead_canonizer`): an explicit polynomial `descentCost` on every input, for each fixed `d` — the project's first end-to-end cost theorem for a concrete canonizer. | — |
 | `SupplyCost.handled_answers_poly` | 357-371 | §7 **★ The ②+③ capstone.** On a `Handled` graph the guarded mixed canonizer ANSWERS and runs within the explicit `pathBound` budget — "which graphs are handled" is now the only question not riding on an undischarged `c₂`. | — |
+## ChainDescent/ImprimitiveDischarge.lean
+
+The `hImprim` discharge layer (2026-07-17): §1 forward-M1 (`G₀Irreducible ⟹ IsPrimitive`, the dual of M1.2),
+§2 the vacuous discharge of the seal's imprimitive branch on the irreducible-affine class, §2b primitivity
+transport along `SchemeRealizes` (realized residues covered), §3 the elementary-abelian translation scheme —
+the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-vacuity witness. Promoted from
+`ScratchAffinePrimitive.lean` + `ScratchSchemeRealizesPrimitive.lean` (both retired).
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `irreducible_imp_isPrimitive_affineScheme` | 58-181 | **§1 Forward M1 — irreducible `G₀` ⟹ `affineScheme G₀` primitive.** The dual of `isPrimitive_affineScheme_imp_irreducible`, completing the M1 ⟺: a closed subset's difference-vectors form a `G₀`-invariant subspace (`+`-closure = the intersection-number closure at the concrete triple; scaling = char-`p` iterated addition), which irreducibility collapses to `⊥`/`⊤` ⟹ `I = {0}`/`univ`. | — |
+| `affineScheme_rel_relDiff` | 183-203 | §1 Every relation of `affineScheme` is realized: `R_k` contains `(0, affineRelDiff k)` (Fact A exported — the orbital of the representative-pair difference is the relation itself). | — |
+| `hImprim_affine_of_irreducible` | 219-227 | **§2 The `hImprim` discharge, irreducible-affine class.** For irreducible `G₀` the seal's carried `hImprim : ¬IsPrimitive → SchemeBlockRecovered ∨ AbelianConsumed` is a theorem — the antecedent is refuted by forward M1. Exactly the hypothesis shape every seal capstone consumes. | — |
+| `hImprim_cyclicAffineScheme` | 229-235 | §2 `hImprim` discharged for `cyclicAffineScheme` (the full-generator rank-2 `K_{p^d}` case) via `G0cyc_irreducible`. | — |
+| `hImprim_G0pow_of_adjoin` | 237-248 | §2 `hImprim` discharged for the **genuine cyclotomic slice** — `G0pow β` with field-generating `β` (`Algebra.adjoin = ⊤`). The imprimitive cyclotomic members (`β` in a proper subfield) are exactly what stays uncovered. | — |
+| `reachesRigidOrCameron_viaAffineIrreducible_prim` | 250-271 | **§2 ★ The affine-irreducible seal with `hImprim` REMOVED** — the first seal capstone whose imprimitive branch is closed by a theorem: given irreducibility, the carried set shrinks from `{G3, hbound, hImprim}` to `{G3, hbound}` (and `hbound` loses its irreducibility antecedent). | — |
+| `isPrimitive_of_schemeRealizes` | 289-358 | **§2b Primitivity transports along a scheme realization.** Conjugation `π ↦ f π f⁻¹` is a bijection `S.SchemeAutGroup ≅ X.SchemeAutGroup` intertwined by `f`; preprimitivity transports along the equivariant bijection (`MulAction.isPreprimitive_congr`), bridged both ends by `isPreprimitive_iff_isPrimitive`. | — |
+| `affineScheme_hne` | 367-371 | §2b Every relation of `affineScheme` occurs — the orbital scheme's `hne` hypothesis, free via `orbMk_out`. | — |
+| `isPrimitive_of_realizes_affineScheme` | 373-383 | §2b ★ The seam's primitivity leg end-to-end: a residue realized as an irreducible-affine model (`SchemeRealizes f S (affineScheme G₀)`, carried like Route C's `hreal`) is primitive. | — |
+| `hImprim_of_realizes_affineScheme` | 385-396 | **§2b The `hImprim` discharge at an arbitrary REALIZED residue** — the route-2 endpoint: wherever the descent's recovered residue realizes an irreducible-affine scheme, the imprimitive branch is closed by a theorem. | — |
+| `neg_mem_bot_two` | 413-423 | §3 Over `ZMod 2` negation IS the identity (`−x = x`), so `affineScheme`'s `hneg` holds for the trivial group — the char-2 entry ticket for `G₀ = ⊥`. | — |
+| `translationScheme` | 425-429 | **§3 The elementary-abelian translation scheme** `affineScheme ⊥` over `F₂`: relations = difference vectors, `Aut` = the `2^d` translations. The CFI-gauge witness scheme. | Definition, `noncomputable` |
+| `translationScheme_relOfPair_eq_iff` | 431-443 | §3 With `G₀ = ⊥` the orbital is exactly the difference: two pairs share a relation iff their differences are equal. | — |
+| `diffClass` | 445-447 | §3 The relation class of a difference vector — the scheme's relations enumerated by `Z₂^d`. | Definition, `noncomputable` |
+| `diffClass_inj` | 449-451 | §3 Distinct differences get distinct relation classes. | — |
+| `diffClass_zero` | 453-454 | §3 The zero difference is the diagonal relation `R₀`. | — |
+| `rel_eq_diffClass` | 456-463 | §3 Any related pair's relation is the class of its difference (via translation-invariance of `relOfPair`). | — |
+| `transPerm` | 465-467 | §3 The translation permutation `x ↦ x + t` on `Fin (2^d)` through the coordinate equivalence (public replacement for the file-private `affinePermFin` at `g₀ = 1`). | Definition, `noncomputable` |
+| `transPerm_apply` | 469-471 | §3 `transPerm t x = affineE (affineE.symm x + t)`. | — |
+| `isAut_transPerm` | 473-482 | §3 Translations are automorphisms of the labelled scheme graph (differences are translation-invariant). | — |
+| `residualAut_translationScheme_eq` | 484-495 | §3 **Every residual automorphism IS a translation** — the colour-preserving automorphisms of the complete Cayley colour graph of an abelian group are exactly the translations. | — |
+| `residualAbelian_translationScheme` | 497-515 | §3 **The translation residual is ABELIAN** — the honest `ResidualAbelian` instance leg B was designed for (no reflection in characteristic 2; for odd order the reflection makes it dihedral and this FAILS — see the seal-handoff 2026-07-17 reflection finding). | — |
+| `not_isBase_translationScheme` | 517-532 | §3 The translation residual is non-trivial (`d ≠ 0`): a non-zero translation moves the origin. | — |
+| `abelianConsumed_translationScheme` | 534-540 | **§3 ★ The FIRST concrete `AbelianConsumed` instance** — leg B fires on the elementary-abelian translation scheme. Both `hImprim` target predicates were previously zero-instantiated (the recurring vacuity failure mode); this closes the leg-B half. | — |
+| `not_isPrimitive_translationScheme` | 542-627 | §3 **The translation scheme is IMPRIMITIVE for `d ≥ 2`** — the difference classes of the subspace `{0, e₀}` form a proper non-trivial closed subset (the constructive direction of the M1 block ⟺ subspace bridge, in char 2). | — |
+| `hImprim_nonvacuous_witness` | 629-638 | **§3 ★ `hImprim`'s conclusion, non-vacuously, on a genuinely IMPRIMITIVE scheme** — imprimitive ∧ (`SchemeBlockRecovered ∨ AbelianConsumed`) for the translation scheme, `d ≥ 2`: the first machine-checked witness that the seal's imprimitive branch can actually fire. | — |

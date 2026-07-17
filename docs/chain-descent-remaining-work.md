@@ -284,7 +284,7 @@ step's large-Aut classification machinery; the per-leg build-log is condensed he
 - **hImprim is wall-free — NOT the wall.** An imprimitive residue stays vertex-transitive (block-tower transitivity:
   `schemeBlocks_transitive` + `schemeBlock_fiber_transitive`, `Scheme.lean`), so each branch routes to
   `FrameSelectorTransitive`, never through `BlockRefinementVisible` (= the WL-dimension wall). Discharged vacuously for
-  the affine class (`irreducible_imp_isPrimitive_affineScheme`, `ScratchAffinePrimitive.lean`); generic backstop =
+  the affine class (`irreducible_imp_isPrimitive_affineScheme`, promoted to `ImprimitiveDischarge.lean` in build 2026-07-17); generic backstop =
   block-tower transitivity-preservation. File: `ScratchConfinementCellImprim.lean`.
 - **The SchurianScheme model `M` = the D0 MODELLING GAP** (endgame §4.1, `Publication.lean` D0), not an unhandled
   residue. Seam = 3 legs: primitivity (built, `isPrimitive_of_schemeRealizes`); the 2-closure count (the Skresanov

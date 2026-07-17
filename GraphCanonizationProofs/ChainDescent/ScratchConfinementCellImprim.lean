@@ -107,7 +107,7 @@ theorem confinement_selectedCellIsOrbit_spine_cell_total
 
 /-- **`hImprimTrans` from primitivity (the vacuous discharge).** When the residue cell scheme is *provably*
 primitive, the ¬IsPrimitive branch never fires, so `hImprimTrans` holds vacuously. For the affine/forms families
-primitivity is a theorem — `ScratchAffinePrimitive.irreducible_imp_isPrimitive_affineScheme` (forward-M1,
+primitivity is a theorem — `ImprimitiveDischarge.irreducible_imp_isPrimitive_affineScheme` (forward-M1, in build,
 `G₀Irreducible → IsPrimitive(affineScheme)`) supplies it — so feeding this into `confinement_selectedCellIsOrbit_spine_cell_total`
 discharges the imprimitive branch outright for that class (modulo the `M.S`↔`affineScheme` seam). -/
 theorem hImprimTrans_of_primitive

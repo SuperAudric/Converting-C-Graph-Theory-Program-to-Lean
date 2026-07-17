@@ -201,6 +201,41 @@ bridge (`SealDepthBridge.lean`) change `hImprim`'s *shape* but not the wall:
   exposing structure across levels, or the **rigid solver** breaking an imprimitive block up algebraically rather than
   recovering it by WL) — those are the live candidates, not the deep oracle, which shares the wall by construction.
 
+**Update (2026-07-17) — the `hImprim` DISCHARGE LAYER is landed (`ChainDescent/ImprimitiveDischarge.lean`, in
+`build.sh`, axiom-clean), and the generic form is now known to be REFUTATION-SHAPED. Four durable results:**
+1. **The irreducible-affine class is DISCHARGED (route: prevent the antecedent).** Forward-M1
+   `irreducible_imp_isPrimitive_affineScheme` (`G₀Irreducible ⟹ IsPrimitive`, the long-missing dual of M1.2,
+   promoted from scratch) ⟹ `hImprim_affine_of_irreducible`: the seal's carried
+   `hImprim : ¬IsPrimitive → SchemeBlockRecovered ∨ AbelianConsumed` is a **theorem** (false antecedent) wherever
+   `G₀` acts irreducibly. Instantiated at both in-build irreducibility witnesses (`hImprim_cyclicAffineScheme`,
+   `hImprim_G0pow_of_adjoin` — the genuine cyclotomic slice with field-generating `β`), transported to arbitrary
+   **realized** residues (`isPrimitive_of_schemeRealizes` / `hImprim_of_realizes_affineScheme`, promoted from
+   `ScratchSchemeRealizesPrimitive`), and cashed out as
+   **`reachesRigidOrCameron_viaAffineIrreducible_prim` — the first seal capstone whose imprimitive branch is closed
+   by a theorem: carried set `{G3, hbound}`, no `hImprim`.** The imprimitive *cyclotomic* members (`β` in a proper
+   subfield) are exactly what stays uncovered — the honest carried content.
+2. **Both `hImprim` target predicates are now INHABITED (the vacuity-mode risk is closed).**
+   `translationScheme d := affineScheme ⊥` over `F₂` (the elementary-abelian translation scheme — the CFI-gauge
+   witness): `abelianConsumed_translationScheme` is the **first concrete `AbelianConsumed` instance** (its residual
+   is exactly the `2^d` translations, `residualAut_translationScheme_eq`), `not_isPrimitive_translationScheme`
+   proves it imprimitive for `d ≥ 2` (subspace ⟹ closed subset, the constructive direction of the M1 block ⟺
+   subspace bridge), so **`hImprim_nonvacuous_witness` exhibits the imprimitive branch actually firing.**
+3. **⚠⚠ THE REFLECTION FINDING — "circulants exit via leg B" is FALSE in this framework; do not re-derive it.**
+   The `p = 2` choice in (2) is *forced*: `AssociationScheme` relations are symmetric, so for any odd-order
+   translation-type scheme the reflection `x ↦ −x` is a scheme automorphism; take `g = 1`, `h = the reflection` at
+   `a = b = 0` — both fix `0`, yet `g c = c ≠ −c = h c` — so **`AbelianConsumed`'s determinacy clause (and
+   `ResidualAbelian`) is FALSE for every symmetric circulant-type scheme with `n ≥ 3`** (the residual is dihedral,
+   not `Z_n`). Consequently the Wu–Ren–Ponomarenko circulant families (imprimitive, schurian, unbounded `s(C)`)
+   have **no leg-B escape**: at some `T` the realizer clauses `hqvis`/`hfvis` fail (cells ⊋ orbits), and
+   `AbelianConsumed` fails by the reflection ⟹ **the generic ∀-scheme `hImprim` is refutation-shaped, not merely
+   uncitable.** Leg B's honest domain is **characteristic 2 / elementary-abelian gauge** (where `−1 = 1`) — i.e.
+   exactly the CFI setting it was designed for.
+4. **Consequence for how to carry it:** treat `hImprim` **per-family** (affine-irreducible: discharged; char-2
+   abelian: leg B fires; else: carried honestly), and when the imprimitive branch is next touched, restate it
+   **depth-graded** (`SchemeBlockRecoveredAtDepth d`, matching the 2026-07-16 consolidation above: constituent
+   recovery *is* `deepMatchSupply` firing at depth `d`) so the WuRP refutation becomes "the depth grows", not "the
+   hypothesis is false" — the same graded-firing discipline as the rest of the project.
+
 **Update (2026-06-08) — THE FUSED SEAL is the single headline.** `reachesRigidOrCameron_viaFusedSeal` (`Cascade.lean`,
 axiom-clean) fuses the two partial capstones into one statement:
 `((SchemeBlockRecovered ∨ AbelianConsumed) ∨ SchemeRecoveredByDepth bound) ∨ IsCameronScheme`. Each non-Cameron branch is
