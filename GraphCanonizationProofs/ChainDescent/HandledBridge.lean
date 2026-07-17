@@ -24,9 +24,15 @@ connections and the first population theorems:
    **localisation at every committed set** (`∀ T, CellsAreOrbits adj (constP n) T`) together put the graph in
    `Residue.Handled key (deepMatchSupply k)` — for **every** key. Consume alone suffices; force can only enlarge
    the handled set further.
-3. **`handled_of_seal_pruned`** — the same boundary for the **cheap** supply, transferred through
-   `OrbitPrune.SameOrbits` with no new proof (`P3a` doing its job).
-4. **`seal_graph_answers`** — the showcase corollary: such a graph is canonized by the guarded mixed canonizer —
+3. **`handled_of_seal_selected`** — the **weakest hook**: localisation demanded only for the **target cell**
+   (the `SelectedCellIsOrbit` shape — `Consume.CellIsOrbit` reads nothing else) and only at **validly-reachable**
+   committed sets (`ValidPath` — each vertex drawn from the current target cell; carried by
+   `reaches_pathCol_valid`). The `∀ T` hook implies it (`selectedOrbits_of_cellsAreOrbits`), and `handled_of_seal`
+   is proved as its instance — use this one when a family's localisation is earned along the descent's own
+   choices and fails at unreachable sets or non-target cells.
+4. **`handled_of_seal_pruned`** / **`_selected_pruned`** — the same boundaries for the **cheap** supply,
+   transferred through `OrbitPrune.SameOrbits` with no new proof (`P3a` doing its job).
+5. **`seal_graph_answers`** — the showcase corollary: such a graph is canonized by the guarded mixed canonizer —
    sound, iso-invariant, complete (`SupplyTransport.deep`/`prunedSupply` capstones), **single-path** (`Stall`),
    and it **answers**.
 
@@ -62,34 +68,96 @@ variable {n : Nat}
 
 /-! ## 1. The reachable-node induction: every reached colouring is a committed path's colouring -/
 
-/-- **★★ EVERY REACHABLE NODE IS A `pathCol` NODE.** The concrete canonizer's reachable colourings are exactly
-the committed-path colourings the seal corpus speaks about: the root is `pathCol adj []` and the branch step is
-`pathCol`'s cons equation, both definitionally (`Refine.refineV_encodeFreeFast`). This is the induction
+/-- **A validly-reachable committed path** (head = most recent): each successive vertex is drawn from the
+**target cell** of the node it extends — exactly the paths the descent can commit. For a valid `p`, `p.toFinset`
+ranges over strictly fewer sets than all of `Finset (Fin n)` (on `C₆` after committing `{0}` the cells are
+`{0},{1,5},{2,4},{3}` and the target is `{1,5}`, so `{0,3}` is never committed) — which is why a per-family
+localisation obligation stated on valid paths is strictly lighter than a `∀ T` one. -/
+inductive ValidPath (adj : AdjMatrix n) : List (Fin n) → Prop
+  | nil : ValidPath adj []
+  | cons {p : List (Fin n)} {v : Fin n} :
+      ValidPath adj p → ¬ Discrete (SealBridge.pathCol adj p) →
+      v ∈ branches (SealBridge.pathCol adj p) →
+      ValidPath adj (v :: p)
+
+/-- **★★ EVERY REACHABLE NODE IS A `pathCol` NODE, at a VALID path.** The concrete canonizer's reachable
+colourings are exactly the committed-path colourings the seal corpus speaks about: the root is `pathCol adj []`
+and the branch step is `pathCol`'s cons equation, both definitionally (`Refine.refineV_encodeFreeFast`) — and the
+branch step's `v ∈ branches` side condition is retained, so the witnessing path is valid. This is the induction
 `SealBridge`'s prose ("`pathCol` is exactly the colouring `descend` carries") appealed to; now it is a theorem. -/
+theorem reaches_pathCol_valid {adj : AdjMatrix n} {χ : Colouring n}
+    (h : Reaches (Refine.encodeFreeFast (n := n)) adj χ) :
+    ∃ p : List (Fin n), ValidPath adj p ∧ χ = SealBridge.pathCol adj p := by
+  induction h with
+  | root => exact ⟨[], ValidPath.nil, by rw [Refine.refineV_encodeFreeFast]; rfl⟩
+  | @step χ' v _ hd hv ih =>
+      obtain ⟨p, hvp, rfl⟩ := ih
+      exact ⟨v :: p, hvp.cons hd hv, by rw [Refine.refineV_encodeFreeFast]; rfl⟩
+
+/-- Validity-forgetting corollary — enough for the `∀ T` hook (`handled_of_seal`). -/
 theorem reaches_pathCol {adj : AdjMatrix n} {χ : Colouring n}
     (h : Reaches (Refine.encodeFreeFast (n := n)) adj χ) :
-    ∃ p : List (Fin n), χ = SealBridge.pathCol adj p := by
-  induction h with
-  | root => exact ⟨[], by rw [Refine.refineV_encodeFreeFast]; rfl⟩
-  | @step χ' v _ _ _ ih =>
-      obtain ⟨p, rfl⟩ := ih
-      exact ⟨v :: p, by rw [Refine.refineV_encodeFreeFast]; rfl⟩
+    ∃ p : List (Fin n), χ = SealBridge.pathCol adj p :=
+  (reaches_pathCol_valid h).imp fun _ hp => hp.2
 
 /-! ## 2. ★★★ THE POPULATION CAPSTONE — the seal's two structural hypotheses discharge `Handled` -/
+
+/-- **★★ THE WEAKEST HOOK — target-cell-only localisation, at validly-reachable sets only.** The per-node demand
+is pared to exactly what the descent consumes: (i) only the **target cell** (`branches` — `Consume.CellIsOrbit`
+reads nothing else; this is the `Confinement.SelectedCellIsOrbit` shape, stated here without that import), and
+(ii) only at committed sets a **valid** descent path can produce. Implied by the `∀ T, CellsAreOrbits` hook
+(`selectedOrbits_of_cellsAreOrbits`), so use whichever a family affords: the stronger hook when localisation is
+uniform, this one when it is *earned along the descent's own choices* and fails — or is unprovable — at
+unreachable sets or non-target cells. -/
+theorem handled_of_seal_selected {adj : AdjMatrix n} {k : Nat} (key : Key n)
+    (hdepth : CascadesAt adj (Refine.constP n) k)
+    (hloc : ∀ p : List (Fin n), ValidPath adj p →
+      ∀ u ∈ branches (SealBridge.pathCol adj p), ∀ w ∈ branches (SealBridge.pathCol adj p),
+        OrbitPartition adj (Refine.constP n) p.toFinset u w) :
+    Residue.Handled key (deepMatchSupply (n := n) k) adj := by
+  intro χ hr _hd
+  obtain ⟨p, hvp, rfl⟩ := reaches_pathCol_valid hr
+  refine Or.inl (SealDepthBridge.cellIsOrbit_of_cascadesFrom_of_horb adj _ k
+    (SealDepthBridge.cascadesFrom_pathCol_of_cascadesAt p hdepth) ?_)
+  intro u hu w hw
+  obtain ⟨α, haut, _hP, hfix, hαu⟩ := hloc p hvp u hu w hw
+  exact ⟨α, SealBridge.isColAut_of_pathFixing haut
+    (fun v hv => hfix v (List.mem_toFinset.mpr hv)), hαu⟩
+
+/-- **The two hooks are a lattice, in code:** full localisation at every set restricts to the target cell at any
+path (two target-cell vertices share the node colour, and `pathCol`'s partition is `warmRefine`'s). -/
+theorem selectedOrbits_of_cellsAreOrbits {adj : AdjMatrix n}
+    (hloc : ∀ T : Finset (Fin n), CellsAreOrbits adj (Refine.constP n) T) (p : List (Fin n)) :
+    ∀ u ∈ branches (SealBridge.pathCol adj p), ∀ w ∈ branches (SealBridge.pathCol adj p),
+      OrbitPartition adj (Refine.constP n) p.toFinset u w := by
+  intro u hu w hw
+  obtain ⟨c, hc, huc⟩ := Consume.exists_targetColour_of_mem hu
+  have hwc : SealBridge.pathCol adj p w = c := (mem_branches_iff hc w).mp hw
+  exact hloc p.toFinset u w
+    ((SealBridge.pathCol_samePartition adj p u w).mp (by rw [huc, hwc]))
 
 /-- **★★★ `handled_of_seal` — THE FIRST STRUCTURAL DISCHARGE OF `Residue.Handled`.** A graph with the seal's
 **depth** content (`CascadesAt` at bound `k` — what `theorem_1_HOR_*` / the sealed families produce) and its
 **localisation** content at every committed set (`∀ T, CellsAreOrbits` — the seal's open per-family obligation,
 carried honestly) is handled by the bounded-depth oracle `deepMatchSupply k`, for **every** key: at each reachable
-node the branch cell is a certified orbit (`SealDepthBridge.cellIsOrbit_pathCol_of_seal`), so consume alone
-resolves it. A stronger key can only enlarge `Handled` further. -/
+node the branch cell is a certified orbit, so consume alone resolves it. A stronger key can only enlarge `Handled`
+further. Proved as the `∀ T` instance of the weakest hook (`handled_of_seal_selected`). -/
 theorem handled_of_seal {adj : AdjMatrix n} {k : Nat} (key : Key n)
     (hdepth : CascadesAt adj (Refine.constP n) k)
     (hloc : ∀ T : Finset (Fin n), CellsAreOrbits adj (Refine.constP n) T) :
-    Residue.Handled key (deepMatchSupply (n := n) k) adj := by
-  intro χ hr _hd
-  obtain ⟨p, rfl⟩ := reaches_pathCol hr
-  exact Or.inl (SealDepthBridge.cellIsOrbit_pathCol_of_seal p hdepth (hloc p.toFinset))
+    Residue.Handled key (deepMatchSupply (n := n) k) adj :=
+  handled_of_seal_selected key hdepth
+    (fun p _ => selectedOrbits_of_cellsAreOrbits hloc p)
+
+/-- The weakest hook, on the **cheap** supply — the same `SameOrbits` transfer. -/
+theorem handled_of_seal_selected_pruned {adj : AdjMatrix n} {k : Nat} (key : Key n)
+    (hdepth : CascadesAt adj (Refine.constP n) k)
+    (hloc : ∀ p : List (Fin n), ValidPath adj p →
+      ∀ u ∈ branches (SealBridge.pathCol adj p), ∀ w ∈ branches (SealBridge.pathCol adj p),
+        OrbitPartition adj (Refine.constP n) p.toFinset u w) :
+    Residue.Handled key (PrunedSupply.prunedSupply (n := n) k) adj :=
+  OrbitPrune.handled_congr (PrunedSupply.sameOrbits_deepMatchSupply k)
+    (handled_of_seal_selected key hdepth hloc)
 
 /-- The same boundary for the **cheap** reference-matching supply — transferred through `SameOrbits`, no new
 proof (`P3a`'s reduction doing its job: the pruned supply proves the same orbits, so it handles the same graphs). -/

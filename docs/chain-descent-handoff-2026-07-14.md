@@ -157,15 +157,24 @@ resolvers strengthen, with no re-proof.
 >   — what `theorem_1_HOR_*`/the sealed families produce) **+** localisation at every committed set
 >   (`∀ T, CellsAreOrbits adj (constP n) T`) ⟹ `Handled key (deepMatchSupply k)` for **every** key; transfers to
 >   `prunedSupply` via `SameOrbits` with no new proof (`handled_of_seal_pruned`); showcase `seal_graph_answers`.
+> - **★ THE WEAKEST HOOK (2026-07-17) — `handled_of_seal_selected` (+ `_pruned`).** Per-family localisation pared
+>   to exactly what the descent consumes: only the **target cell** (the `SelectedCellIsOrbit` shape —
+>   `Consume.CellIsOrbit` reads nothing else) and only at **validly-reachable** committed sets
+>   (`HandledBridge.ValidPath`: each vertex drawn from the current target cell; carried by
+>   `reaches_pathCol_valid`). The `∀ T` hook implies it (`selectedOrbits_of_cellsAreOrbits` — the lattice, in
+>   code; `handled_of_seal` is now proved as its instance). **Populate a family through whichever it affords**:
+>   `∀ T` when localisation is uniform; `_selected` when it is earned along the descent's own choices and fails
+>   at unreachable sets (e.g. `C₆` never commits `{0,3}`) or non-target cells.
 > - **First inhabited instances:** `handled_emptyAdj` (edgeless graphs, every `n`, every key — vertex-transitive,
 >   so the supply genuinely fires) ⟹ with `residue_nonvacuous` **both halves of the endgame non-vacuity obligation
 >   are theorems about ONE graph** (`adjE2`: residual with the certify-nothing resolvers, handled with the deep
 >   oracle — the residue-shrinks story at theorem level, `adjE2_handled`).
 > - **▶ The open item is now sharply named: PER-FAMILY LOCALISATION.** The HOR theorems deliver the **depth** half
 >   (`CascadesAt` at bounded `k`) and localisation only at the **discrete endpoint**; populating `Handled` for a
->   sealed family = proving `∀ T, CellsAreOrbits` for it (or a reachable-`T`-restricted refinement of
->   `handled_of_seal`, which the `Reaches` machinery now supports). That is the honest next increment, replacing
->   the old vague "seal hypotheses at every reachable node".
+>   sealed family = discharging localisation through **either hook**: `∀ T, CellsAreOrbits` (`handled_of_seal`) or
+>   the strictly lighter target-cell-at-valid-paths form (`handled_of_seal_selected`, landed 2026-07-17 — see the
+>   weakest-hook bullet below). That is the honest next increment, replacing the old vague "seal hypotheses at
+>   every reachable node".
 > - ⚠ A concrete 1-WL-rigid witness for `handled_of_root_discrete` via kernel `decide` is **blocked**:
 >   `Multiset.sort` (inside `sigKey`) is well-founded recursion, which the kernel cannot reduce. Runtime evidence
 >   stays in `Regression.lean` `#guard`s (which evaluate via the compiler, not the kernel — that is why they can
