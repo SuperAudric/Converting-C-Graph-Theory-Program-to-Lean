@@ -363,3 +363,10 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `PartialMatch.transport_transport` | 213-215 | `transportColouring` composes (definitionally). | — |
 | `PartialMatch.transport_inv_cancel` | 217-220 | `transport α⁻¹ ∘ transport α = id` — the mirror-side rewriting step. | — |
 | `PartialMatch.pm_check_conj` | 287-301 | The two-sided inverse check transfers across conjugation — the dite-condition bridge inside `partialMatch_conj`. | — |
+## ChainDescent/FoldSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Fold.existsUnique_univ` | 129-132 | `∃!` over the type ⟹ `∃!` in `Finset.univ` (the `Finset.choose` plumbing). | — |
+| `Fold.existsUnique_bool_transport` | 150-171 | `∃!`-of-a-Bool-predicate transfers across a conjugating `σ`. | — |
+| `Fold.swap_check_conj` | 336-351 | The involution check transfers across conjugation — the dite-condition bridge inside `swapCand_conj`. | — |

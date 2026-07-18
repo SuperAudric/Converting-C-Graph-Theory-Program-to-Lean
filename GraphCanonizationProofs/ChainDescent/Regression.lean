@@ -4,6 +4,7 @@ import ChainDescent.DeepMatchSupply
 import ChainDescent.PrunedSupply
 import ChainDescent.PartialMatch
 import ChainDescent.SelectNode
+import ChainDescent.FoldSupply
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -258,5 +259,46 @@ def gSelDeep {m : Nat} (d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
 /-! **`①c`, behavioural, for the fused object** (its theorem form is `Select.selNode_canonizer` /
 `selNode_match_canonizer`). -/
 #guard gSel P5 = gSel (relabelAdj (Equiv.swap 0 3) P5)
+
+/-! ## 10. `F2a` — the STRUCTURAL fold supply fires where refinement-based matching is DEAD
+
+The fold/tower plan's second move (`docs/chain-descent-fold-tower-plan.md` §4). §8's fold had a
+refinement-visible core, so F1's support-local matching sufficed. Here the core is `C₄` + a pendant: its mirror
+(1 ↔ 3) **survives every pin on the mirror axis**, so a copy is never discretized and `CatchesAt` fails at every
+depth — refinement-based candidate construction is structurally blind (the miniature of the WL-blind multipede
+copy). `Fold.foldSupply` reads the fold off the CELL structure instead (fibers = same-cell components, copies =
+cross-cell components, fiber-wise swap, involution gate) and does not care.
+
+Witness: 2 copies of the core, one vertical matching edge per fiber (`vfold2`, n = 10). Measured 2026-07-18:
+the branch cell is the two pendant copies; `deepMatchSupply 0` and `partialMatchSupply 0` leave it un-narrowed
+(the copy swap moves the mirror-tied vertices, singleton on NEITHER side); `foldSupply` verifies 4 generators
+and collapses it to ONE branch. **Do not delete these guards** — they are the non-vacuity witness that
+structural detection buys firing beyond every matching supply, and the only observation separating `foldSupply`
+from a silently useless port. -/
+
+/-- `C₄` (0-1-2-3-0) + pendant 4 on 0 — arithmetic edge predicate (cheap per interpreted lookup). -/
+def vcoreB (a b : Nat) : Bool :=
+  (a + 1 == b && b ≤ 3) || (b + 1 == a && a ≤ 3) ||
+  (a == 0 && b == 3) || (a == 3 && b == 0) ||
+  (a == 0 && b == 4) || (a == 4 && b == 0)
+
+/-- 2 copies, a vertical matching edge on every fiber: copy = `i / 5`, core vertex = `i % 5`. -/
+def vfold2 : AdjMatrix 10 :=
+  ⟨fun i j => if (i.val / 5 == j.val / 5 && vcoreB (i.val % 5) (j.val % 5)) ||
+      (i.val / 5 != j.val / 5 && i.val % 5 == j.val % 5) then 1 else 0⟩
+
+def vfold2Root : Refine.ColData 10 := Refine.warmRefineVec vfold2 (fun _ => 0)
+
+/-! The branch cell is the two pendant copies (`4` and `9` = copy-1's pendant), and the within-copy mirror
+class `{1,3}` really is merged (a 4-cell) — the blindness is present, not hypothetical. -/
+#guard branches vfold2Root.col = [4, 9]
+
+/-! **Refinement-based matching is DEAD** — both supplies leave the copy cell un-narrowed. -/
+#guard (narrow (consume (DeepMatch.deepMatchSupply 0)) vfold2 vfold2Root.col).length = 2
+#guard (narrow (consume (PartialMatch.partialMatchSupply 0)) vfold2 vfold2Root.col).length = 2
+
+/-! **Structural detection FIRES** — 4 verified candidates (the copy swap from each seed pair), ONE branch. -/
+#guard (Consume.verified (Fold.foldSupply) vfold2 vfold2Root.col).length = 4
+#guard (narrow (consume (Fold.foldSupply)) vfold2 vfold2Root.col).length = 1
 
 end ChainDescent.Regression

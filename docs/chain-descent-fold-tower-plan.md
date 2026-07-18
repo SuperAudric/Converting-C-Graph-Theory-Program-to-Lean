@@ -1,6 +1,25 @@
 # The fold/tower resolution — closing the F_k cover gap (native + tower, polynomial)
 
-> ## STATUS (2026-07-17, created)
+> ## STATUS (2026-07-18: F2a LANDED; created 2026-07-17)
+>
+> **✅ F2a — `foldSupply` (`ChainDescent/FoldSupply.lean`, axiom-clean, in `build.sh`; guards `Regression` §10,
+> measurements `PerformanceTest` §8).** The structural fold supply of §4, copy-swap half: fibers = same-cell-
+> adjacency components, copies = cross-cell components (`relComp`, a fixed-`n` closure needing **no convergence
+> proof** — every statement is relative to what it computes, with membership-level transport
+> `mem_relComp_transport`); candidates = the fiber-wise copy swap from every **branch-cell seed pair** (no
+> choice), unique-partner lookups + involution gate + `IsColAut` verification. Reconstruction
+> `swapCand_eq_of_foldSwap` (hypotheses = exactly the cover geometry); `gensEquivariant_foldSupply`; capstones
+> for **both** objects (`foldSupply_guarded_canonizer`, `foldSupply_selNode_canonizer` — the fused selector
+> probes every cell with it). ζ-equal rfl-twins (`swapFunFast`/`swapCandFast`) carry the runtime (~500×).
+> **MEASURED — the F1/F2 separation is real:** on 2-/3-fold vertical covers of `C₄`+pendant (n = 10/15) the
+> within-copy mirror survives every pin, so `deepMatchSupply 0` **and** `partialMatchSupply 0` leave the copy
+> cell un-narrowed — while `foldSupply` verifies 4/9 generators and collapses it to ONE branch. That is the
+> WL-blind mechanism in miniature: F1 needs the copy refinement-visible; F2a does not.
+> **Still open:** F2b (parallel-class involutions — the `Z₂ᵏ` tower gauge; spec in §4 step 3) and F3 (the ring
+> key; odd-part ≥ 7 + native arity + tower peel). A cell that is an orbit only under a non-copy-swap symmetry
+> (e.g. the global mirror) is correctly left to `matchSupply`/F1 at the node where it surfaces, or to F3.
+>
+> ## Original STATUS (2026-07-17, at creation)
 >
 > **What this is.** The resolution plan for the **F_k fold-cover gap** found by the 2026-07-16 blocker audit
 > (`memory: project_blocker_audit_2026-07-16` item 4), and the build record of its first Lean increment. The gap:

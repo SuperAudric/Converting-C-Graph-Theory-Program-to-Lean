@@ -2939,6 +2939,10 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Perf.gDeepFold` | 146-151 | The fold end-to-end **FLAG**: the same descent with `deepMatchSupply 0` stalls at the root copies cell. | Definition |
 | `Perf.fold4Swapped` | 156 | Cross-copy relabelling of the fold — the supply-level `①c` observation's graph. | Definition |
 | `Perf.fold4SwappedRoot` | 157-159 | Its materialized root (trap #1). | Definition |
+| `Perf.vfold3` | 174-176 | The `s = 3` mirror-tied vertical cover (n = 15) — the F2a measurement graph. | Definition |
+| `Perf.vfold3Root` | 178-188 | Materialized root (trap #1). | Definition |
+| `Perf.vfold3Swapped` | 192 | Cross-copy relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Perf.vfold3SwappedRoot` | 193-195 | Its materialized root (trap #1). | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3157,25 +3161,28 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 40-41 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 43-45 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 47-54 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 56-59 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 63-64 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 73-74 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 97-98 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 107-108 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 136-139 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 154 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 156-158 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 173-177 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 193-196 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 198 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 200-202 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 204-206 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 207 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
-| `Regression.gSel` | 242-243 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
-| `Regression.gSelDeep` | 245-246 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.C5` | 41-42 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 44-46 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 48-55 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 57-60 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 64-65 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 74-75 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 98-99 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 108-109 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 137-140 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 155 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 157-159 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 174-178 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 194-197 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 199 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 201-203 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 205-207 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 208 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 243-244 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 246-247 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.vcoreB` | 279-283 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
+| `Regression.vfold2` | 285-288 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
+| `Regression.vfold2Root` | 290 | Materialized root colouring (trap #1). | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3579,3 +3586,36 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 |------|------|-------------|-------|
 | `SelectWitness.Z4S` | 58-63 | The Z₄ chiral subdivided wheel (n = 14, `Aut = Z₄`): least cell = the apex 2-orbit whose pins keep `γ²` alive — the exposure-witness graph (blind + least-rooted harvest FLAGS; fused + all-cells harvest ANSWERS). | Definition |
 | `SelectWitness.rootZ` | 65 | The witness graph's materialised root colouring. | Definition |
+## ChainDescent/FoldSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Fold.sameCellRel` | 61-63 | Same-cell adjacency — the VERTICAL edges of a fold cover (copies of one core vertex are 1-WL twins). | Definition |
+| `Fold.crossCellRel` | 65-67 | Cross-cell adjacency — the horizontal (within-copy) edges; removing the vertical edges leaves the copies. | Definition |
+| `Fold.sameCellRel_transport` | 69-72 | The vertical relation transports under relabelling. | — |
+| `Fold.crossCellRel_transport` | 74-77 | The horizontal relation transports under relabelling. | — |
+| `Fold.relStep` | 81-83 | One closure round: everything reached plus every `rel`-successor. | Definition |
+| `Fold.relComp` | 85-88 | The `rel`-component of `b` as computed (`n` closure rounds) — **no convergence proof is ever needed**: every downstream statement is relative to what it computes. | Definition |
+| `Fold.mem_relStep_iff` | 90-92 | Membership through one closure round. | — |
+| `Fold.mem_relComp_transport` | 94-125 | **★ Components transport, membership-level** — the engine of everything equivariant in the file. | — |
+| `Fold.uniqueMem` | 137-141 | The unique vertex satisfying `P`, if exactly one — the fiber-partner lookup; canonical, no representative chosen. | Definition |
+| `Fold.uniqueMem_eq_some` | 143-148 | The lookup returns the unique witness. | — |
+| `Fold.uniqueMem_transport` | 173-185 | The lookup transports: `uniqueMem` of the conjugated predicate is the `σ`-image. | — |
+| `Fold.swapFun` | 189-198 | The fiber-wise copy swap (spec form): a copy-`u₁` vertex maps to its unique same-cell-component partner in copy `u₂`, mirrored; identity elsewhere. | Definition |
+| `Fold.swapCand` | 200-206 | **The structural candidate constructor** (spec form): keep the swap iff it is an involution (decidable); untrusted — `Consume.verified` re-checks `IsColAut`. | Definition |
+| `Fold.swapFunFast` | 215-224 | ζ-equal rfl-twin of `swapFun` — components bound once per call (~500× runtime, measured). | Definition |
+| `Fold.swapFunFast_eq` | 226 | The twin IS the spec (`rfl`, ζ-reduction) — every `swapFun` theorem applies unchanged. | — |
+| `Fold.swapCandFast` | 228-232 | ζ-equal rfl-twin of `swapCand` — the form `foldSupply` evaluates. | Definition |
+| `Fold.swapCandFast_eq` | 234 | The twin IS the spec (`rfl`). | — |
+| `Fold.swapFun_eq_of_foldSwap` | 238-272 | **★ The reconstruction, pointwise:** if `τ` maps each copy-`u₁` vertex to its UNIQUE fiber partner in copy `u₂` (mirrored) and is the identity off both copies, `swapFun` computes exactly `τ` — the hypotheses are the cover geometry. | — |
+| `Fold.swapCand_eq_of_foldSwap` | 274-290 | **★★ THE RECONSTRUCTION:** a clean fold pair's copy-swap automorphism is returned exactly. | — |
+| `Fold.swapFun_conj` | 294-334 | The raw swap conjugates under `σ` (via component and lookup transport). | — |
+| `Fold.swapCand_conj` | 353-368 | The constructor transports up to conjugation, **including its failure mode** — the `matchCol_transport` analogue. | — |
+| `Fold.foldSupply` | 372-378 | **★ THE STRUCTURAL FOLD SUPPLY** — every branch-cell pair seeds a copy-swap candidate; involution gate + verification filter the junk; **no refinement involved**, so a refinement-blind copy costs nothing. Billed flat `|cell|²·n⁵`. | Definition |
+| `Fold.mem_gens_foldSupply_iff` | 380-389 | Generator membership = some branch-cell seed pair's candidate. | — |
+| `Fold.gensEquivariant_foldSupply` | 393-415 | **★★ The supply is equivariant** — the pair enumeration is the branch cell (transports) and the candidate conjugates; membership-only reasoning, no representative chosen (trap #7). | — |
+| `Fold.supplyEquivariant_foldSupply` | 417-418 | Packaged for the guard and the fused selector. | — |
+| `Fold.wordReach_foldSupply` | 422-435 | **Graded firing, per pair:** a verified swap carrying `u₁` to `u₂` puts the pair into the verified `WordReach`; compositions (`τ₁₂·τ₁₃·τ₁₂`) come free as words. | — |
+| `Fold.cellIsOrbit_foldSupply` | 437-446 | **★★★ THE ORACLE FIRES:** every branch pair connected by a verified swap ⟹ the cell is one orbit, one branch — with no refinement involved. | — |
+| `Fold.foldSupply_guarded_canonizer` | 450-456 | **★★★ The guarded (blind) mixed canonizer over the structural fold supply** — no carried hypotheses. | — |
+| `Fold.foldSupply_selNode_canonizer` | 458-465 | **★★★ The FUSED (resolver-aware) canonizer over the structural fold supply** — the selector probes every cell with its verified list, so a fold cell resolves wherever it sits in the colour order. F2a capstone of `docs/chain-descent-fold-tower-plan.md`. | — |

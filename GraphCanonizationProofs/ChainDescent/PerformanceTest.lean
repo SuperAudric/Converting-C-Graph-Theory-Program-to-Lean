@@ -165,4 +165,33 @@ firing supply's cost. -/
        Consume.supplyCost (PartialMatch.partialMatchSupply 0) Regression.fold4 Regression.fold4Root.col)
 -- (4, 8524800, 64512)
 
+/-! ## 8. `F2a` — the structural fold supply at `s = 3` (`Regression` §10 is the `s = 2` gate)
+
+3 vertical copies of the mirror-tied core, n = 15: the merged `{1,3}` class shows up as a 6-cell, the pendant
+copy cell as a 3-cell; refinement-based matching is dead on it while `foldSupply` verifies 9 candidates
+(3² seed pairs, diagonal seeds contribute the identity) and collapses it to ONE branch. -/
+
+def vfold3 : AdjMatrix 15 :=
+  ⟨fun i j => if (i.val / 5 == j.val / 5 && Regression.vcoreB (i.val % 5) (j.val % 5)) ||
+      (i.val / 5 != j.val / 5 && i.val % 5 == j.val % 5) then 1 else 0⟩
+
+def vfold3Root : Refine.ColData 15 := Refine.warmRefineVec vfold3 (fun _ => 0)
+
+#eval ((Consume.verified (Fold.foldSupply) vfold3 vfold3Root.col).length,
+       (narrow (consume (Fold.foldSupply)) vfold3 vfold3Root.col).length,
+       (narrow (consume (PartialMatch.partialMatchSupply 0)) vfold3 vfold3Root.col).length,
+       (narrow (consume (DeepMatch.deepMatchSupply 0)) vfold3 vfold3Root.col).length)
+-- (9, 1, 3, 3): structural fires, both matching supplies dead
+
+#eval (Consume.supplyCost (Fold.foldSupply) vfold3 vfold3Root.col,
+       Consume.supplyCost (PartialMatch.partialMatchSupply 0) vfold3 vfold3Root.col)
+-- (6834375, 12150) — the flat |cell|²·n⁵ bill vs the (dead) matcher's table bill
+
+/-! `①c`, observed at the supply level on a cross-copy relabelling (the theorem form is
+`gensEquivariant_foldSupply`). -/
+def vfold3Swapped : AdjMatrix 15 := relabelAdj (Equiv.swap 0 5) vfold3
+def vfold3SwappedRoot : Refine.ColData 15 := Refine.warmRefineVec vfold3Swapped (fun _ => 0)
+
+#guard (narrow (consume (Fold.foldSupply)) vfold3Swapped vfold3SwappedRoot.col).length = 1
+
 end ChainDescent.Perf
