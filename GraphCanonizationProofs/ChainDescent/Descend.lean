@@ -1078,11 +1078,12 @@ theorem discrete_of_ncol_eq {χ : Colouring n} (h : ncol χ = n) : Discrete χ :
     rw [Finset.card_univ, Fintype.card_fin]; exact h
   exact Finset.injOn_of_card_image_eq hcard (Finset.mem_univ i) (Finset.mem_univ j) hij
 
-/-- **Individualizing a branch vertex strictly increases the colour count.** (It splits a non-singleton cell:
-the old colour survives on the partner, and the new odd colour is fresh by parity.) -/
-theorem ncol_lt_indivOne {χ : Colouring n} {v : Fin n} (hv : v ∈ branches χ) :
-    ncol χ < ncol (indivOne χ v) := by
-  obtain ⟨u, huv, hχu⟩ := exists_partner_of_mem_branches hv
+/-- **Individualizing a vertex with a same-coloured partner strictly increases the colour count.** (It splits a
+non-singleton cell: the old colour survives on the partner, and the new odd colour is fresh by parity.) The
+partner form is the exact hypothesis the widened `Reaches.step` and `Select.NodeProper` carry. -/
+theorem ncol_lt_indivOne_of_partner {χ : Colouring n} {v : Fin n}
+    (hp : ∃ u, u ≠ v ∧ χ u = χ v) : ncol χ < ncol (indivOne χ v) := by
+  obtain ⟨u, huv, hχu⟩ := hp
   -- The doubled old colours, plus the fresh odd colour, all occur in `indivOne χ v`.
   have hsub : insert (2 * χ v + 1) ((Finset.univ.image χ).image (fun c => 2 * c))
       ⊆ Finset.univ.image (indivOne χ v) := by
@@ -1106,6 +1107,11 @@ theorem ncol_lt_indivOne {χ : Colouring n} {v : Fin n} (hv : v ∈ branches χ)
     _ < (insert (2 * χ v + 1) ((Finset.univ.image χ).image (fun c => 2 * c))).card := by
         rw [Finset.card_insert_of_notMem hnotmem]; omega
     _ ≤ ncol (indivOne χ v) := Finset.card_le_card hsub
+
+/-- The branch-list form (the original statement, now a corollary of the partner form). -/
+theorem ncol_lt_indivOne {χ : Colouring n} {v : Fin n} (hv : v ∈ branches χ) :
+    ncol χ < ncol (indivOne χ v) :=
+  ncol_lt_indivOne_of_partner (exists_partner_of_mem_branches hv)
 
 /-- **The refiner genuinely refines**: it never merges two colour classes. (Colour refinement satisfies this by
 construction; the degenerate constant refiner does not — which is exactly what this rules out.) -/
@@ -1203,13 +1209,17 @@ individualization paths, never about arbitrary colourings — `CellsAreOrbits` g
 descent never visits, so a `∀ χ` predicate was undischargeable in principle). -/
 
 /-- **The descent's reachable node colourings** (over-approximated): the refined root, closed under
-"individualize a branch vertex of a non-discrete node, then refine". Every colouring `descend rf R` actually
-visits satisfies this for *any* resolver whose narrowing stays inside `branches` (`NarrowProperAt`'s second
-half), because the branch step here allows **every** branch vertex. -/
+"individualize a vertex of a NON-SINGLETON CELL of a non-discrete node, then refine". Every colouring
+`descend rf R` actually visits satisfies this for *any* resolver whose narrowing stays inside `branches`
+(`NarrowProperAt`'s second half — `exists_partner_of_mem_branches` supplies the partner), and every colouring the
+SEL descent (`Select.descendS` under a `NodeProper` node resolver) visits satisfies it too — `NodeProper`'s first
+component IS the partner condition. The step was widened from `v ∈ branches χ` (least cell only) on 2026-07-17
+for exactly that: a selector-chosen cell need not be the least one, and `Handled`/the seal bridges must cover
+sel-descents. The `∀ T CellsAreOrbits` seal hook absorbs the widening unchanged (`HandledBridge`). -/
 inductive Reaches (rf : Refiner n) (adj : AdjMatrix n) : Colouring n → Prop
   | root : Reaches rf adj (refineV rf adj (fun _ => 0))
   | step {χ : Colouring n} {v : Fin n} :
-      Reaches rf adj χ → ¬ Discrete χ → v ∈ branches χ →
+      Reaches rf adj χ → ¬ Discrete χ → (∃ u, u ≠ v ∧ χ u = χ v) →
       Reaches rf adj (refineV rf adj (indivOne χ v))
 
 /-- **Totality from properness on the REACHED set only.** The `∀ χ` of `descend_ne_none_at` was never needed:
@@ -1238,7 +1248,8 @@ theorem descend_ne_none_reaches {rf : Refiner n} {R : Resolver n} (hs : RefineSp
         · exact fun hc => (hne χ hr hd) (List.map_eq_nil_iff.mp hc)
         · intro x hx
           obtain ⟨v, hv, rfl⟩ := List.mem_map.mp hx
-          refine ih (refineV rf adj (indivOne χ v)) (hr.step hd (hsub χ v hv)) ?_
+          refine ih (refineV rf adj (indivOne χ v))
+            (hr.step hd (exists_partner_of_mem_branches (hsub χ v hv))) ?_
           have h1 : ncol χ < ncol (indivOne χ v) := ncol_lt_indivOne (hsub χ v hv)
           have h2 : ncol (indivOne χ v) ≤ ncol (refineV rf adj (indivOne χ v)) :=
             ncol_le_refine hs adj (indivOne χ v)

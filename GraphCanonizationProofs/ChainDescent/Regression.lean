@@ -3,6 +3,7 @@ import ChainDescent.MatchSupply
 import ChainDescent.DeepMatchSupply
 import ChainDescent.PrunedSupply
 import ChainDescent.PartialMatch
+import ChainDescent.SelectNode
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -225,5 +226,37 @@ descent **flags** on the fold. The measured end-to-end pair — the same guarded
 **answers** with a full canonical form (~3.5 min, `constKey`, n = 24) while `deepMatchSupply 0` flags, plus the
 relabelling invariance of the answer — lives in `PerformanceTest` §7 (off the build path; the descent at `n = 24`
 is ~80 s even to flag at the root, which would swamp this suite). -/
+
+/-! ## 9. The FUSED selector (`Select.selNode`) — dominance parity, measured
+
+The sel rewrite's behavioural gates. The DOMINANCE theorem (`Select.canonFormS?_selNode_dominates`) proves the
+fused object answers with the SAME value wherever the guarded blind object answers; these guards measure the
+instantiation through the runnable twin `Select.canonFormFastS?` (= `canonFormS?` at `encodeFreeFast`,
+definitionally — `canonFormFastS?_eq`). A wiring bug in `selColour`/`cellNarrow` would break value equality here
+and nowhere else.
+
+⚠ The EXPOSURE witness (blind-with-least-rooted-harvest FLAGS, fused-with-all-cells-harvest ANSWERS — the `Z4S`
+graph, n = 14) lives in `ChainDescent/SelectWitness.lean`, deliberately OFF the build path (minutes of eval,
+like `PerformanceTest`); run it on demand with `lake build ChainDescent.SelectWitness`. -/
+
+def gSel {m : Nat} (a : AdjMatrix m) : Option (List Nat) :=
+  (ChainDescent.Select.canonFormFastS? lookaheadKey matchSupply a).map flatten
+
+def gSelDeep {m : Nat} (d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
+  (ChainDescent.Select.canonFormFastS? lookaheadKey (DeepMatch.deepMatchSupply d) a).map flatten
+
+/-! **Value-exact dominance, measured**: where the blind object answers, the fused object answers identically. -/
+#guard (gSel P5).isSome
+#guard gSel P5 = gMatch P5
+#guard (gSelDeep 1 C4).isSome
+#guard gSelDeep 1 C4 = gDeep 1 C4
+
+/-! **Flag parity** where the blind object flags with the same supply (`C5`: one cell, nothing resolvable at
+`d = 0` — the fused selector changes which cells are PROBED, never what a probe can prove). -/
+#guard ¬ (gSel C5).isSome
+
+/-! **`①c`, behavioural, for the fused object** (its theorem form is `Select.selNode_canonizer` /
+`selNode_match_canonizer`). -/
+#guard gSel P5 = gSel (relabelAdj (Equiv.swap 0 3) P5)
 
 end ChainDescent.Regression

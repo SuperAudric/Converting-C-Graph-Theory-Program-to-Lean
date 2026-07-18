@@ -15,23 +15,30 @@
 > 1. **`P3c` — the ORBIT-PRUNED FIXPOINT.** `deepMatchSupply d` fires but does not *pay* (`n^{O(d)}`; 125× net loss
 >    on `C₇`). Build `prunedSupply d` and prove the **single** theorem `SameOrbits (prunedSupply d)
 >    (deepMatchSupply d)` — `OrbitPrune.lean` already makes this **pure combinatorics, with zero `①` exposure**.
-> 2. **Resolver-aware cell selector** — *design VALIDATED + ordering REVERSED 2026-07-17 (user-approved);
->    increments 1+2 LANDED (`Select.lean`, axiom-clean: `descendS` + EXACT-CostM blind equivalence `descendS_blind`
->    + ①a unconditional + fuel-graded `NodeTransport` contract + capstone `isCanonicalFormOptS_canonFormS?` +
->    conservativity `nodeTransport_blindNode`); NEXT = increment 3, the fused `selNode` instance (all-cells
->    harvest + covering-argument contract discharge + the exposure-dependency regression witness) — full spec +
->    acceptance criteria in handoff §6.1's build-state block.* Fixes fusion's live bite; `Stall.stalled` currently
->    means "the **least-colour** cell stalled", not "the node stalled". The naive fused selector ("least colour whose cell some resolver collapses
->    to ≤ 1", `[] = flag` = true mutual stall) is valid with NO new hypothesis class and NO `Supply` type change
->    (all-cells harvest; same `tableBound`); the old "probe per cell ⟹ product-not-sum risk" premise dissolved ⟹
->    **do BEFORE F2/F3 and P3c-2nd-half**, as ONE interface change also covering the duplicate-refine loss
->    (node resolver hands each child its refined colouring). Authoritative: handoff §6.1 design-pass block.
+> 2. **Resolver-aware cell selector** — **✅ ALL FIVE INCREMENTS LANDED (2026-07-17/18; `Select.lean` +
+>    `SelectNode.lean`, axiom-clean, build green 135 s).** The fused instance `selNode` (least RESOLVABLE colour,
+>    `[] = flag` = the TRUE mutual stall — `selNode_stall_iff` is the Publication §1 flag semantics); ①
+>    capstones from exactly `KeyEquivariant + SupplyEquivariant` incl. the pruned record supply
+>    (`selNode_pruned_canonizer` via the fused `SameOrbits` reduction); ★ DOMINANCE **as a theorem**
+>    (`canonFormS?_selNode_dominates`: same key+supply, fused answers with the SAME value wherever blind
+>    answers); fan-out ≤ 1 unconditionally; `Reaches`/`ValidPath` widened to the partner form; sel-aware residue
+>    `HandledS` (DEFLATES: `Handled ⟹ HandledS`) with answers/③a/seal-import theorems; explicit-poly ②
+>    (`selNode_pruned_record` = ①+②+③a in one place); the ALL-CELLS harvest `allCellsMatchSupply`
+>    (equivariant); runnable `rfl`-twins `selNodeFast`/`canonFormFastS?` (trap #1 measured: ≈30 ms/colour-lookup
+>    on generic `refineV` closures — the twins materialise via `ColData`); EXPOSURE WITNESS `Z4S` in
+>    `ChainDescent/SelectWitness.lean` (off-build: blind+`matchSupply` FLAGS, fused+all-cells ANSWERS; at `d = 0`
+>    the harvest carries it) + `Regression` §9 cheap gates. **Residuals** (handoff §6.1 build-state block):
+>    SELECTOR-strict witness (needs WL-weak-at-scale structure — open, not assumed); contract-def migration
+>    (lazy); the KEY-side duplicate-refine (key must RETURN its refinement — F2-adjacent); deep/pruned all-cells
+>    variants.
 > 3. **The rigid key** — nothing exists beyond `lookaheadKey`; §11.12's P1–P4 not started.
 > 4. **The `Publication` opaque-swap** — now **unblocked** (`Residue.Residue` is a *definition*, so
 >    `unhandledResidue_nonvacuous` is provable; it was undischargeable *in principle* before).
 >
-> Also open: **the duplicate-refine loss** (force *fires* but does not *pay*) — the same `descend` signature change
-> item 2 needs. Do them together.
+> Also open: **the duplicate-refine loss** (force *fires* but does not *pay*) — ½ RESOLVED by item 2's landing
+> (2026-07-18): the node-resolver interface hands each child its refined colouring, so the DESCENT no longer
+> recomputes it; the remaining half is KEY-side (`lookaheadKey` still computes its look-ahead internally and
+> discards it — deduping that needs the key to RETURN its refinement, an F2-adjacent interface change).
 >
 > **⛔⛔ SETTLED, DO NOT RE-PROPOSE: no STABILIZER CHAIN supply.** It must pick a **vertex inside a cell**, and cell
 > members are exactly what 1-WL cannot distinguish ⟹ no iso-invariant function picks one ⟹ **`①b` AND `①c` fail**

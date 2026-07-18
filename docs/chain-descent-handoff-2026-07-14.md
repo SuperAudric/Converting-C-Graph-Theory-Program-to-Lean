@@ -325,21 +325,64 @@ reusable.**
 >   **`nodeTransport_blindNode`** (conservativity — every proved `NarrowTransport` instance, i.e. consume for every
 >   supply / force via `KeyEquivariant` / the guarded composite, discharges the new contract at the blind instance
 >   with no new proof).
-> - **Inc 3 (NEXT — the fused instance `selNode key S`):** probe cells in colour order; commit to the least colour
->   whose cell the mixed resolver collapses to `≤ 1`; `[]` when none (= the true mutual stall). Needs (i) the
->   **all-cells harvest** variants of the supplies (widen `lookTable`/`deepTable` seeds from `branches χ` to all
->   non-singleton-cell vertices — same `tableBound n d`, `SupplyCost.lean` counting carries verbatim); (ii) its
->   `NodeTransport` discharge via the **covering argument mirroring `Residue.coveringOfAt_guarded`** (the consume
->   half's `rep` pick is not equivariant, so the equivariant route does NOT apply; the chosen-colour transport comes
->   from the same per-cell facts `StallEquivariant` already provides). **Acceptance criteria (bind the build to
->   these):** (a) *no strength increase* — the fused object answers wherever the guarded blind object answers
->   (same key, same supply): "SOME cell narrows to ≤ 1" is strictly weaker per node than "the LEAST cell narrows to
->   ≤ 1"; (b) an **exposure-dependency witness** in `Regression.lean` — a graph where the blind object flags and the
->   fused object answers (cell `A` unresolvable until individualizing in cell `B` exposes it); (c) *no exponential* —
->   fan-out `≤ 1` by construction, probe billed in `CostM`, measured in `PerformanceTest`.
-> - **Inc 4:** widen `Reaches.step`/`ValidPath` (see the pin above). **Inc 5:** sel-aware `Handled`/`CellResolved`
->   (+ cost bounds via the `SupplyCost` counting). Contract-def migration (`Covering`/`CoveringAt`/`CoveringOfAt`
->   restated against the node anchor) can proceed lazily — the conservativity bridge means nothing blocks on it.
+> - **Inc 3 LANDED (2026-07-17, `ChainDescent/SelectNode.lean`, in `build.sh`, axiom-clean) — the fused instance
+>   `selNode rf key S`:** per-cell mixed narrowing `cellNarrow` (per-cell `keepMin`, then orbit reps from the
+>   node's ONE shared `verified` list), selector `selColour` = least colour narrowing to `≤ 1`, `[] =` the TRUE
+>   mutual stall (`selNode_stall_iff` — the Publication §1 flag semantics, as a characterization). `NodeTransport`
+>   discharged by the covering mirror as planned (`selColour_transport` = `targetColour_transport` + the per-cell
+>   orbit-count argument `cellNarrow_length_transport` mirroring `stallEquivariant_forceThenConsume`;
+>   `aggregate_cellNarrow_eq` mirroring `coveringOfAt_guarded`) from EXACTLY `KeyEquivariant + SupplyEquivariant`
+>   ⟹ capstones `selNode_canonizer` / `selNode_match_canonizer` (concrete, no hypotheses) /
+>   `selNode_pruned_canonizer` (via the fused `SameOrbits` reduction `selNode_canonizer_of_sameOrbits` — the
+>   record supply stays open). **Acceptance criteria, settled:** (a) *no strength increase* — **upgraded to a
+>   THEOREM**: `canonFormS?_selNode_dominates` (same key, same supply: wherever the guarded blind object answers,
+>   the fused object answers with the SAME value; engine `selColour_of_target_resolvable`); (c) *no exponential* —
+>   `selNode_children_length_le_one`, fan-out `≤ 1` by construction, unconditionally. For (b) see the witness
+>   entry below.
+> - **Inc 4 LANDED:** `Reaches.step` and `ValidPath.cons` widened to the PARTNER form (`∃ u ≠ v, χ u = χ v` —
+>   exactly `NodeProper`'s first component). Only two proofs destruct `Reaches` (`reaches_pathCol_valid`,
+>   `handled_of_root_discrete`); both survived one-line; the `∀ T CellsAreOrbits` hook absorbed the widening
+>   unchanged, `ncol_lt_indivOne` generalized to `ncol_lt_indivOne_of_partner`.
+> - **Inc 5 LANDED:** sel-aware residue — `NodeResolved` (∃ resolvable cell) / `HandledS`; **the residue
+>   DEFLATES**: `handledS_of_handled` (`Handled ⟹ HandledS`, so `residue_of_not_handledS` places the sel residue
+>   INSIDE the blind residue); `answersS_of_handledS` (via the totality mirror `descendS_ne_none_reaches` — the
+>   widened `Reaches` is exactly what its induction needs) + `not_handledS_if_flagS` (③a for the fused object);
+>   seal import `handledS_of_seal`; `handledS_of_sameOrbits`. Cost: `descendS_cost_le_of_le_one` (single path,
+>   NO firing hypothesis) ⟹ `descentCostS_selNode_pruned_lookahead_le` / `_match_lookahead_le` / `_allCells_le`
+>   and the one-place capstone `selNode_pruned_record` (①+②+③a for the fused canonizer of record).
+> - **The ALL-CELLS harvest LANDED** (item (i), `allCellsMatchSupply`): harvest from every non-singleton cell
+>   (`nsList`), `GensEquivariant` by the same conjugation + `nsList_transport_perm`, priced at `matchSupplyBound`
+>   (`|nsList| ≤ n` replaces `|branches| ≤ n`), `branches_subset_nsList` (the harvest only widens) ⟹
+>   `selNode_allCellsMatch_canonizer`. Deep/pruned all-cells variants: not yet (same recipe; build when a witness
+>   or firing theorem needs them).
+> - **⚠ TRAP #1 MEASURED IN THE WILD (the runnable twins):** the generic `refineV rf …` children of
+>   `selNode`/`descendS` compile as partial applications whose body re-runs the refinement on EVERY colour lookup
+>   (measured ≈ 30 ms/lookup at n = 14; the fused probe does ~n² lookups per node ⟹ the descent HUNG > 9 min).
+>   Cure: `selNodeFast` / `canonFormFastS?` — `Refine.ColData`-materialised **`rfl`-twins** (definitionally the
+>   reasoned objects, `selNodeFast_eq`/`canonFormFastS?_eq`), descent → ~10 s. Also trap-#2 sharing: `selNode`
+>   evaluates the supply ONCE per node (`selNodeCore`/`cellNarrowV`/`selColourV`; `selNode_eq` is the
+>   reasoning-side unfolding).
+> - **(b) THE EXPOSURE WITNESS (2026-07-18; `ChainDescent/SelectWitness.lean`, OFF the build path like
+>   `PerformanceTest`):**
+>   `Z4S`, the Z₄ chiral subdivided wheel (n = 14; `Aut = Z₄ = ⟨γ⟩`; least cell = the apex 2-orbit whose pins
+>   keep `γ²` alive ⟹ never discretize; ring/subdivision pins kill `γ` ⟹ discretize). Four measured quadrants:
+>   blind+`matchSupply` FLAGS, fused+`matchSupply` FLAGS, blind+`allCellsMatchSupply` answers,
+>   **fused+`allCellsMatchSupply` ANSWERS** — the fused object of record answers where the prior record flags.
+>   **Attribution, honest:** at `d = 0` on this graph the HARVEST carries the separation (row 3). A
+>   SELECTOR-strict witness (same supply, blind flags, fused answers) was searched and does not exist at small n
+>   for structural reasons worth keeping: (i) `Aut = Z₂ᵏ` product symmetries ⟹ no single pin discretizes ⟹ both
+>   objects flag; (ii) pin-discretizing least cells self-resolve (aut pair ⟹ `matchCol` verifies; rigid pair ⟹
+>   leaf-branch keys differ ⟹ force fires); (iii) 1-WL is BLIND TO CHIRALITY (chord-level chirality breaks
+>   reflections as automorphisms but not as WL-symmetries — pinned refinements stall at mirror ties), so the
+>   mirror-tie must be broken WL-visibly (the subdivision trick). The separating candidate lives where 1-WL is
+>   weak at scale (SRG-land, n ≥ 25) — carried OPEN, not assumed. `Regression.lean` §9 carries the cheap gates
+>   (value-exact dominance parity, flag parity, behavioural ①c).
+> - **Still open (sel-track residuals):** contract-def migration (`Covering`/`CoveringAt`/`CoveringOfAt` restated
+>   against the node anchor) — lazy, conservativity bridge means nothing blocks on it; the §6.4 KEY-side
+>   duplicate-refine (the hand-forward interface is in place and the children's refinements are shared, but
+>   `lookaheadKey` still recomputes its look-ahead internally — deduping that needs the key to RETURN its
+>   refinement, an F2-adjacent interface change); the selector-strict witness (above); deep/pruned all-cells
+>   variants.
 
 > **⊘ SUPERSEDED — ⚠ ORDERING (2026-07-15 audit): this comes AFTER `P3c`, not "together" as an earlier note said.** A
 > resolver-aware selector must probe the supply **per cell**. With the unpruned `deepMatchSupply d` that probe is

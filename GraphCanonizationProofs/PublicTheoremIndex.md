@@ -2698,23 +2698,23 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Showcase.Iso` | 70-73 | — | Definition |
-| `Showcase.UnhandledResidue` | 134-141 | — | Definition |
-| `Showcase.cameron_classification` | 162-167 | — | axiom |
-| `Showcase.skresanov_two_closure` | 168-171 | — | axiom |
-| `Showcase.liebeck_rank3` | 172-175 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 176-184 | — | axiom |
-| `Showcase.ftpg` | 185-191 | — | axiom |
-| `Showcase.buekenhout_shult` | 192-199 | — | axiom |
-| `Showcase.payne_thas` | 200-208 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 209 | — | axiom |
-| `Showcase.canon_sound` | 217-228 | — | — |
-| `Showcase.canon_complete` | 230-254 | — | — |
-| `Showcase.flag_iso_invariant` | 256-263 | — | — |
-| `Showcase.canon_poly_or_flag` | 265-287 | — | — |
-| `Showcase.residue_if_flag` | 289-298 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 300-306 | — | — |
-| `Showcase.canonizer` | 313-323 | — | — |
+| `Showcase.Iso` | 74-77 | — | Definition |
+| `Showcase.UnhandledResidue` | 138-145 | — | Definition |
+| `Showcase.cameron_classification` | 166-171 | — | axiom |
+| `Showcase.skresanov_two_closure` | 172-175 | — | axiom |
+| `Showcase.liebeck_rank3` | 176-179 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 180-188 | — | axiom |
+| `Showcase.ftpg` | 189-195 | — | axiom |
+| `Showcase.buekenhout_shult` | 196-203 | — | axiom |
+| `Showcase.payne_thas` | 204-212 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 213 | — | axiom |
+| `Showcase.canon_sound` | 221-232 | — | — |
+| `Showcase.canon_complete` | 234-258 | — | — |
+| `Showcase.flag_iso_invariant` | 260-267 | — | — |
+| `Showcase.canon_poly_or_flag` | 269-291 | — | — |
+| `Showcase.residue_if_flag` | 293-302 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 304-310 | — | — |
+| `Showcase.canonizer` | 317-327 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -2852,20 +2852,21 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Descend.ncol` | 1068-1069 | §Stage-2 The number of colour classes — the descent's progress measure (discrete ⟺ `ncol = n`). | Definition |
 | `Descend.ncol_le` | 1071-1073 | §Stage-2 There are at most `n` colour classes. | — |
 | `Descend.discrete_of_ncol_eq` | 1075-1079 | §Stage-2 `n` colour classes ⟹ the colouring is discrete (pigeonhole) — the base case of totality. | — |
-| `Descend.ncol_lt_indivOne` | 1081-1108 | §Stage-2 Individualizing a branch vertex STRICTLY increases the colour count: it splits a non-singleton cell (the old colour survives on the partner; the new odd colour is fresh by parity). The descent therefore makes progress at every level. | — |
-| `Descend.RefineSplits` | 1110-1114 | §Stage-2 The refiner genuinely REFINES — it never merges two colour classes. This is what rules out the degenerate constant refiner (which is `RefineEquivariant` by `rfl` and would flag on every graph), so it is the hypothesis that earns NON-VACUITY. | Definition |
-| `Descend.ncol_le_refine` | 1116-1140 | §Stage-2 A genuinely-refining round never loses colour classes. | — |
-| `Descend.NarrowProper` | 1142-1146 | §Stage-2 The resolver's narrowing stays inside the branch list and never empties it. Both intended instances satisfy this (consume keeps an orbit representative; force keeps the determined branch). | Definition |
-| `Descend.narrowProper_deferAll` | 1148-1149 | §Stage-2 The baseline resolver is proper. | — |
-| `Descend.NarrowProperAt` | 1151-1157 | **Properness at ONE graph.** `descend_ne_none` never uses the resolver's properness at any graph other than the one it descends on, so totality is really a *per-graph* statement. §Load-bearing for ③: whether a graph is handled is a property of **that graph**, so the residue predicate must not be forced to quantify over all graphs. Definition. | Definition |
-| `Descend.narrowProperAt_of_narrowProper` | 1159-1161 | Global properness gives properness at every graph. | — |
-| `Descend.descend_ne_none_at` | 1163-1187 | Totality at one graph — the per-graph form of `descend_ne_none`. | — |
-| `Descend.canonForm?_ne_none_at` | 1189-1193 | **③-facing totality**: the descent answers on a graph whose resolver is proper *there*. | — |
-| `Descend.Reaches` | 1205-1213 | **The descent's reachable node colourings**, over-approximated resolver-independently: the refined root, closed under "individualize a branch vertex of a non-discrete node, then refine". The honest domain of any per-node capability claim (`Residue.Handled`) — strengthening a resolver only shrinks the true visit set, so `∀ χ, Reaches …` statements survive every resolver upgrade. | Inductive |
-| `Descend.descend_ne_none_reaches` | 1215-1245 | **Totality from properness on the REACHED set only** — the `∀ χ` of `descend_ne_none_at` was never needed; the induction re-establishes reachability for each child via the subset half. | — |
-| `Descend.canonForm?_ne_none_reaches` | 1247-1256 | **③-facing totality, reached-set form:** the descent answers on a graph whose resolver is proper at every *reached* node. Strictly more applicable than `canonForm?_ne_none_at`; what `Residue.answers_of_handled` rides on. | — |
-| `Descend.descend_ne_none` | 1258-1284 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
-| `Descend.canonForm?_ne_none` | 1286-1291 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
+| `Descend.ncol_lt_indivOne_of_partner` | 1081-1109 | §Stage-2 Individualizing a vertex with a same-coloured PARTNER strictly increases the colour count — the partner form is exactly the hypothesis the widened `Reaches.step` and `Select.NodeProper` carry, so the sel descent's totality rides on this generalization. | — |
+| `Descend.ncol_lt_indivOne` | 1111-1114 | §Stage-2 The branch-list form, now a corollary of the partner form: individualizing a branch vertex strictly increases the colour count, so the descent makes progress at every level. | — |
+| `Descend.RefineSplits` | 1116-1120 | §Stage-2 The refiner genuinely REFINES — it never merges two colour classes. This is what rules out the degenerate constant refiner (which is `RefineEquivariant` by `rfl` and would flag on every graph), so it is the hypothesis that earns NON-VACUITY. | Definition |
+| `Descend.ncol_le_refine` | 1122-1146 | §Stage-2 A genuinely-refining round never loses colour classes. | — |
+| `Descend.NarrowProper` | 1148-1152 | §Stage-2 The resolver's narrowing stays inside the branch list and never empties it. Both intended instances satisfy this (consume keeps an orbit representative; force keeps the determined branch). | Definition |
+| `Descend.narrowProper_deferAll` | 1154-1155 | §Stage-2 The baseline resolver is proper. | — |
+| `Descend.NarrowProperAt` | 1157-1163 | **Properness at ONE graph.** `descend_ne_none` never uses the resolver's properness at any graph other than the one it descends on, so totality is really a *per-graph* statement. §Load-bearing for ③: whether a graph is handled is a property of **that graph**, so the residue predicate must not be forced to quantify over all graphs. Definition. | Definition |
+| `Descend.narrowProperAt_of_narrowProper` | 1165-1167 | Global properness gives properness at every graph. | — |
+| `Descend.descend_ne_none_at` | 1169-1193 | Totality at one graph — the per-graph form of `descend_ne_none`. | — |
+| `Descend.canonForm?_ne_none_at` | 1195-1199 | **③-facing totality**: the descent answers on a graph whose resolver is proper *there*. | — |
+| `Descend.Reaches` | 1211-1223 | **The descent's reachable node colourings**, over-approximated resolver-independently: the refined root, closed under "individualize a NON-SINGLETON-CELL vertex (the partner form — widened 2026-07-17 from the least cell so SEL-descents are covered) of a non-discrete node, then refine". The honest domain of any per-node capability claim (`Residue.Handled`, `Select.HandledS`) — strengthening a resolver only shrinks the true visit set. | Inductive |
+| `Descend.descend_ne_none_reaches` | 1225-1256 | **Totality from properness on the REACHED set only** — the `∀ χ` of `descend_ne_none_at` was never needed; the induction re-establishes reachability for each child via the subset half. | — |
+| `Descend.canonForm?_ne_none_reaches` | 1258-1267 | **③-facing totality, reached-set form:** the descent answers on a graph whose resolver is proper at every *reached* node. Strictly more applicable than `canonForm?_ne_none_at`; what `Residue.answers_of_handled` rides on. | — |
+| `Descend.descend_ne_none` | 1269-1295 | §Stage-2 ★ TOTALITY: with a genuinely-refining refiner and a proper resolver the descent ALWAYS REACHES A LEAF (fuel suffices whenever `n ≤ ncol χ + fuel`). | — |
+| `Descend.canonForm?_ne_none` | 1297-1302 | §Stage-2 ★ THE CANONIZER ANSWERS — `canonForm?` never flags, so the Stage-2 capstone is about a canonizer that COMPUTES rather than one that flags on everything. Fuel exhaustion is thereby a pure DEPTH bound, leaving `none` free for its real (Stage 4) mutual-stall meaning. | — |
 ## ChainDescent/Refine.lean
 
 | Name | Line | Description | Notes |
@@ -3156,23 +3157,25 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 39-40 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 42-44 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 46-53 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 55-58 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 62-63 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 72-73 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 96-97 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 106-107 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 135-138 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 153 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 155-157 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 172-176 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 192-195 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 197 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 199-201 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 203-205 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 206 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.C5` | 40-41 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 43-45 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 47-54 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 56-59 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 63-64 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 73-74 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 97-98 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 107-108 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 136-139 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 154 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 156-158 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 173-177 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 193-196 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 198 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 200-202 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 204-206 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 207 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 242-243 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 245-246 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3307,21 +3310,21 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `HandledBridge.ValidPath` | 71-81 | **A validly-reachable committed path**: each successive vertex drawn from the target cell of the node it extends — exactly the paths the descent can commit. `p.toFinset` for valid `p` ranges over strictly fewer sets than `∀ T`, which is what makes the weakest hook lighter. | Inductive |
-| `HandledBridge.reaches_pathCol_valid` | 83-95 | **★★ The reachable-node induction, validity-carrying:** every reached node colouring IS `pathCol adj p` for a VALID `p` (the branch step's `v ∈ branches` side condition is retained). Feeds the weakest hook. | — |
-| `HandledBridge.reaches_pathCol` | 97-101 | Validity-forgetting corollary of `reaches_pathCol_valid` — enough for the `∀ T` hook. | — |
-| `HandledBridge.handled_of_seal_selected` | 105-125 | **★★ THE WEAKEST HOOK:** localisation demanded only for the TARGET cell (the `SelectedCellIsOrbit` shape — `Consume.CellIsOrbit` reads nothing else) and only at validly-reachable committed sets ⟹ `Handled key (deepMatchSupply k)`, every key. Use when a family's localisation is earned along the descent's own choices; the `∀ T` hook implies this one's hypothesis. | — |
-| `HandledBridge.selectedOrbits_of_cellsAreOrbits` | 127-137 | **The two hooks are a lattice, in code:** `∀ T, CellsAreOrbits` restricts to the target cell at any path — so `handled_of_seal` is the `∀ T` instance of `handled_of_seal_selected`. | — |
-| `HandledBridge.handled_of_seal` | 139-150 | **★★★ THE FIRST STRUCTURAL DISCHARGE OF `Residue.Handled`:** seal depth (`CascadesAt` at bound `k` — what `theorem_1_HOR_*`/the sealed families produce) + localisation at every committed set (`∀ T, CellsAreOrbits`) ⟹ `Handled key (deepMatchSupply k)` for EVERY key. The mixed-canonizer analogue of `reachesRigidOrCameron`: the improvable boundary, extended per family with no re-proof. | — |
-| `HandledBridge.handled_of_seal_selected_pruned` | 152-160 | The weakest hook on the cheap reference-matching supply — same `SameOrbits` transfer, no new proof. | — |
-| `HandledBridge.handled_of_seal_pruned` | 162-169 | The seal boundary transferred to the cheap reference-matching supply through `SameOrbits` — no new proof (P3a's reduction doing its job). | — |
-| `HandledBridge.seal_graph_answers` | 173-181 | **★★ Showcase:** a seal-covered graph is canonized by the guarded mixed canonizer — sound, iso-invariant, complete, single path of ≤ n+1 nodes, and it ANSWERS. | — |
-| `HandledBridge.seal_graph_answers_pruned` | 183-189 | The showcase corollary with the cheap pruned supply. | — |
-| `HandledBridge.emptyAdj` | 199-201 | The edgeless graph on `n` vertices — vertex-transitive, so 1-WL alone never finishes it (`n ≥ 2`); the concrete handled family's carrier. | Definition |
-| `HandledBridge.cellsAreOrbits_emptyAdj` | 203-224 | **Localisation at every committed set, discharged concretely:** on the edgeless graph every permutation is an automorphism, and a same-cell pair is never committed (`warmRefine_refines`), so a transposition fixing the committed set realizes the orbit. | — |
-| `HandledBridge.handled_emptyAdj` | 226-231 | **★★ THE FIRST INHABITED `Handled` INSTANCE — a family:** the edgeless graphs, every `n`, every key, via `handled_of_seal` at the trivial depth bound (`cascadesAt_univ`). Not vacuous: the supply genuinely fires at every reached node. | — |
-| `HandledBridge.adjE2_handled` | 233-238 | **★ THE RESIDUE SHRINKS, AT THEOREM LEVEL:** the very graph `residue_nonvacuous` shows residual for the certify-nothing resolvers is handled by the deep oracle — the non-vacuity pair is about ONE graph, differing only in resolver strength. | — |
-| `HandledBridge.adjE2_answers` | 240-246 | The shrink witness answers under the guarded mixed canonizer with the deep oracle. | — |
+| `HandledBridge.ValidPath` | 71-83 | **A validly-reachable committed path**: each successive vertex drawn from a NON-SINGLETON cell of the node it extends (partner form — widened 2026-07-17 in lockstep with `Reaches.step` so sel-descents are covered). Valid `p.toFinset` still ranges over strictly fewer sets than `∀ T`, which keeps the weakest hook lighter. | Inductive |
+| `HandledBridge.reaches_pathCol_valid` | 85-97 | **★★ The reachable-node induction, validity-carrying:** every reached node colouring IS `pathCol adj p` for a VALID `p` (the branch step's `v ∈ branches` side condition is retained). Feeds the weakest hook. | — |
+| `HandledBridge.reaches_pathCol` | 99-103 | Validity-forgetting corollary of `reaches_pathCol_valid` — enough for the `∀ T` hook. | — |
+| `HandledBridge.handled_of_seal_selected` | 107-127 | **★★ THE WEAKEST HOOK:** localisation demanded only for the TARGET cell (the `SelectedCellIsOrbit` shape — `Consume.CellIsOrbit` reads nothing else) and only at validly-reachable committed sets ⟹ `Handled key (deepMatchSupply k)`, every key. Use when a family's localisation is earned along the descent's own choices; the `∀ T` hook implies this one's hypothesis. | — |
+| `HandledBridge.selectedOrbits_of_cellsAreOrbits` | 129-139 | **The two hooks are a lattice, in code:** `∀ T, CellsAreOrbits` restricts to the target cell at any path — so `handled_of_seal` is the `∀ T` instance of `handled_of_seal_selected`. | — |
+| `HandledBridge.handled_of_seal` | 141-152 | **★★★ THE FIRST STRUCTURAL DISCHARGE OF `Residue.Handled`:** seal depth (`CascadesAt` at bound `k` — what `theorem_1_HOR_*`/the sealed families produce) + localisation at every committed set (`∀ T, CellsAreOrbits`) ⟹ `Handled key (deepMatchSupply k)` for EVERY key. The mixed-canonizer analogue of `reachesRigidOrCameron`: the improvable boundary, extended per family with no re-proof. | — |
+| `HandledBridge.handled_of_seal_selected_pruned` | 154-162 | The weakest hook on the cheap reference-matching supply — same `SameOrbits` transfer, no new proof. | — |
+| `HandledBridge.handled_of_seal_pruned` | 164-171 | The seal boundary transferred to the cheap reference-matching supply through `SameOrbits` — no new proof (P3a's reduction doing its job). | — |
+| `HandledBridge.seal_graph_answers` | 175-183 | **★★ Showcase:** a seal-covered graph is canonized by the guarded mixed canonizer — sound, iso-invariant, complete, single path of ≤ n+1 nodes, and it ANSWERS. | — |
+| `HandledBridge.seal_graph_answers_pruned` | 185-191 | The showcase corollary with the cheap pruned supply. | — |
+| `HandledBridge.emptyAdj` | 201-203 | The edgeless graph on `n` vertices — vertex-transitive, so 1-WL alone never finishes it (`n ≥ 2`); the concrete handled family's carrier. | Definition |
+| `HandledBridge.cellsAreOrbits_emptyAdj` | 205-226 | **Localisation at every committed set, discharged concretely:** on the edgeless graph every permutation is an automorphism, and a same-cell pair is never committed (`warmRefine_refines`), so a transposition fixing the committed set realizes the orbit. | — |
+| `HandledBridge.handled_emptyAdj` | 228-233 | **★★ THE FIRST INHABITED `Handled` INSTANCE — a family:** the edgeless graphs, every `n`, every key, via `handled_of_seal` at the trivial depth bound (`cascadesAt_univ`). Not vacuous: the supply genuinely fires at every reached node. | — |
+| `HandledBridge.adjE2_handled` | 235-240 | **★ THE RESIDUE SHRINKS, AT THEOREM LEVEL:** the very graph `residue_nonvacuous` shows residual for the certify-nothing resolvers is handled by the deep oracle — the non-vacuity pair is about ONE graph, differing only in resolver strength. | — |
+| `HandledBridge.adjE2_answers` | 242-248 | The shrink witness answers under the guarded mixed canonizer with the deep oracle. | — |
 ## ChainDescent/ClosureCalculus.lean
 
 | Name | Line | Description | Notes |
@@ -3465,3 +3468,114 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 | `Select.nodeTransport_of_nodeEquivariant` | 343-348 | An equivariant node resolver meets the contract (`aggregate_perm` + the graded IH pointwise). | — |
 | `Select.nodeTransportAt_blind_iff` | 350-354 | The two objects' graded IHs coincide at the blind instance (via the `descendS_blind` safety net). | — |
 | `Select.nodeTransport_blindNode` | 356-363 | **Sufficient condition 2 — CONSERVATIVITY: the OLD contract discharges the NEW one at the blind instance.** Every `NarrowTransport` instance already proved (consume for every supply, force via `KeyEquivariant`, the guarded composite) hands `descendS` its contract with no new proof. | — |
+## ChainDescent/SelectNode.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Select.cellList` | 65-68 | The cell of colour `c` as a list, in index order — `branches` generalized from the least cell to any cell (they coincide at `targetColour`). | Definition |
+| `Select.mem_cellList_iff` | 70-73 | Cell membership is colour equality: `v ∈ cellList χ c ↔ χ v = c`. | — |
+| `Select.branches_eq_cellList` | 75-80 | At the target colour the cell IS the branch list — the definitional bridge between the fused and blind objects. | — |
+| `Select.cellList_nodup` | 82-83 | Cell lists have no duplicates (filters of `finRange`). | — |
+| `Select.cellList_ne_nil` | 85-95 | A non-singleton colour's cell is nonempty. | — |
+| `Select.exists_partner_of_mem_cellList` | 97-109 | Every member of a non-singleton cell has a same-coloured partner — `exists_partner_of_mem_branches` at an arbitrary colour; feeds `NodeProper` and the widened `Reaches.step`. | — |
+| `Select.cellList_transport_perm` | 111-123 | The cell of a FIXED colour transports up to permutation (colour values are canonical, so no colour translation appears) — mirror of `branches_transport_perm`. | — |
+| `Select.nonSingletonColours_transport` | 125-133 | The non-singleton colour set is literally invariant under transport — the first half of `targetColour_transport`, exposed because the fused selector filters the SET, not only its min. | — |
+| `Select.keepMin_subset` | 137-139 | Generic-`B` form: the forced set sits inside its base list. | — |
+| `Select.keepMin_ne_nil` | 141-152 | Generic-`B` form: `keepMin` never empties a nonempty base list. | — |
+| `Select.keepMin_nodup_of_nodup` | 154-158 | Generic-`B` form: `keepMin` preserves nodup. | — |
+| `Select.mem_keepMin_of_aut'` | 160-169 | `Force.mem_keepMin_of_aut` at an arbitrary base list: a colour-automorphism image of a kept vertex is kept whenever it is in the base at all (an equivariant key is constant on orbits). | — |
+| `Select.keepMin_transport_perm` | 171-198 | `keepMin` transports over any permutation-related pair of base lists — the generic-`B` core of `Force.narrowEquivariant_forceBy` (which is this at `B = branches`). | — |
+| `Select.cellNarrowV` | 202-207 | The per-cell mixed narrowing against an ALREADY-COMPUTED verified list `V` — the shared-probe form (trap #2: phrasing on `S` re-evaluates the supply once per probed cell, measured ~10× per node). | Definition |
+| `Select.cellNarrow` | 209-215 | **The mixed narrowing of the cell of colour `c`**: per-cell `keepMin`, then one orbit representative per verified-automorphism orbit from the node's ONE shared verified list. | Definition |
+| `Select.cellNarrow_targetColour` | 217-223 | At the target colour the per-cell narrowing IS `narrow (forceThenConsume key S)` — the blind object's step, recovered exactly. | — |
+| `Select.rep_mem_cellList` | 225-231 | An orbit representative stays in its vertex's cell (verified automorphisms preserve colour). | — |
+| `Select.rep_mem_keepMin_cell` | 233-243 | **The per-cell forced set is a union of orbits** (mirror of `Composite.rep_mem_forcedSet`): a kept vertex's representative is itself kept — consume inside the cell never escapes the per-cell argmin. | — |
+| `Select.cellNarrow_subset` | 245-248 | The per-cell narrowing stays inside its cell. | — |
+| `Select.cellNarrow_ne_nil` | 250-260 | A non-singleton cell's narrowing is nonempty — so "narrowed to ≤ 1" means exactly one, and a committed cell always yields a child. | — |
+| `Select.selColourV` | 264-268 | The selector against an already-computed verified list (shared-probe form). | Definition |
+| `Select.selColour` | 270-274 | **The selected colour: least colour whose cell the mixed narrowing collapses to ≤ 1**; `none` = the TRUE MUTUAL STALL. Design pin: "makes progress" = narrows to ≤ 1, NOT strictly. | Definition |
+| `Select.selColour_def` | 276-280 | The reasoning-side unfolding of `selColour` (a filtered `Finset.min` — the `V`-sharing is runtime-only). | — |
+| `Select.selColour_spec` | 282-288 | A selected colour is a non-singleton colour whose cell narrowed to ≤ 1. | — |
+| `Select.selColour_none` | 290-302 | The flag fires only at a true mutual stall: NO non-singleton cell narrows to ≤ 1. | — |
+| `Select.selColour_of_target_resolvable` | 304-322 | **★ The dominance hook**: if the least cell resolves, it is the selected cell (min over a subset containing the superset's min) — what makes "no strength increase" a theorem. | — |
+| `Select.nsColours` | 324-327 | The non-singleton colours as a COMPUTABLE list (`Finset.toList` is noncomputable; the probe's bill must `#eval`). | Definition |
+| `Select.cellList_length_eq_card` | 329-336 | A cell's list length is its `Finset` card — the computable/`nonSingletonColours` bridge. | — |
+| `Select.mem_nsColours_iff` | 338-343 | `nsColours` has exactly the `nonSingletonColours` membership. | — |
+| `Select.selProbeCost` | 345-352 | The probe's bill: supply once per node, one verification per candidate, per cell one key evaluation per member plus scan plus orbit BFS — cells partition `V`, so the sums total one size-`n` cell's bill. | Definition |
+| `Select.selNodeCore` | 354-362 | The node step against an already-computed verified list and probe bill — the shared core all `selNode` forms route through. | Definition |
+| `Select.selNode` | 364-378 | **★ The fused node resolver**: probe all cells against the ONE per-node supply evaluation, commit to the least resolvable colour, hand each kept child its refined colouring (§6.4 hand-forward); `[] = flag` = the true mutual stall. | Definition |
+| `Select.selNode_eq` | 380-384 | The reasoning-side unfolding: `selNode = selNodeCore` at `verified S`/`selProbeCost` (definitional — the sharing is runtime-only). | — |
+| `Select.selNodeFast` | 386-409 | **The RUNNABLE fused resolver** (trap #1 measured live: generic `refineV rf …` children ≈ 30 ms/colour-lookup — partial applications re-run the refinement): children built through `Refine.ColData`, forced once. | Definition |
+| `Select.selNodeFast_eq` | 411-413 | The runnable resolver IS `selNode` at `encodeFreeFast` — definitionally (`rfl`), so every theorem transfers verbatim. | — |
+| `Select.canonFormFastS?` | 415-417 | The runnable top-level fused canonizer (root colouring materialised once too). | Definition |
+| `Select.canonFormFastS?_eq` | 419-424 | The runnable top-level object IS `canonFormS?` at `encodeFreeFast`/`selNode` — definitionally (`rfl`). | — |
+| `Select.selNode_children_none` | 426-431 | No selected colour ⟹ no children (the flag channel of the fused instance). | — |
+| `Select.selNode_children_some` | 433-441 | A selected colour's children are its narrowing, each with its refined colouring. | — |
+| `Select.selNode_children_length_le_one` | 445-454 | **★ No exponential, by construction** (acceptance criterion 3): the fused resolver emits at most ONE child, unconditionally — `Stall.guard`'s job absorbed into the instance. | — |
+| `Select.selNode_children_length_one` | 456-464 | A committed cell yields exactly one child (nonempty + ≤ 1). | — |
+| `Select.nodeProper_selNode` | 466-476 | `NodeProper` discharged for the fused instance: every child individualizes a partnered vertex and is handed exactly its refined colouring (definitionally). | — |
+| `Select.cellNarrow_length_transport` | 485-514 | Per-cell mirror of `stallEquivariant_forceThenConsume`: the narrowing's length COUNTS ORBITS meeting the per-cell forced set, and both the orbit partition and the forced set transport — `rep` itself never has to. | — |
+| `Select.selColour_transport` | 516-527 | **★ The chosen colour transports as a VALUE** (mirror of `targetColour_transport`, with the resolvability conjunct riding on the orbit count) — why choosing a CELL is canonical while a within-cell vertex pick is not. | — |
+| `Select.branchValS_transport` | 529-537 | Per-branch value transport for the generalized descent (mirror of `Descend.branchVal_transport`). | — |
+| `Select.branchValS_eq_of_isColAut` | 539-549 | The covering witness at the `descendS` level: a verified automorphism makes two branches value-equal (`branchValS_transport` at `σ = α`). | — |
+| `Select.aggregate_cellNarrow_eq` | 551-571 | The per-cell covering step (mirror of `coveringOfAt_guarded`'s un-stalled branch): the aggregate over kept representatives equals the aggregate over the per-cell forced set. | — |
+| `Select.nodeTransport_selNode` | 573-623 | **★★★ The fused instance meets the node contract** from exactly the guarded blind object's hypotheses (`KeyEquivariant` + `SupplyEquivariant` — NO new class): chosen colour transports; per-cell covering on each side; the forced set transports with value-equal entries. | — |
+| `Select.selNode_canonizer` | 627-636 | **★★★ The fused canonizer** — ①a/①b/①c for the resolver-aware selector; its flag is the TRUE mutual stall. | — |
+| `Select.selNode_match_canonizer` | 638-644 | The first CONCRETE fused canonizer (`encodeFreeFast` + `lookaheadKey` + `matchSupply`) — no hypothesis carried. | — |
+| `Select.cellNarrow_congr` | 648-654 | `SameOrbits` supplies give the same per-cell narrowing (`rep_congr` pointwise). | — |
+| `Select.selColour_congr` | 656-663 | `SameOrbits` supplies select the same colour. | — |
+| `Select.selNode_children_congr` | 665-675 | `SameOrbits` supplies emit the same children (values; costs may differ — the point). | — |
+| `Select.descendS_selNode_val_congr` | 677-695 | The fused descents over `SameOrbits` supplies compute the same VALUE at every fuel. | — |
+| `Select.canonFormS?_selNode_congr` | 697-700 | The fused canonizers over `SameOrbits` supplies are the same function (value side). | — |
+| `Select.selNode_canonizer_of_sameOrbits` | 702-713 | **★★ The reduction, fused** (mirror of `guarded_mixed_canonizer_of_sameOrbits`): a pruned supply inherits the fused capstone from any orbit-equal equivariant reference — NO equivariance proof of its own. | — |
+| `Select.selNode_pruned_canonizer` | 715-722 | The fused canonizer at the record supply (`prunedSupply d`), every depth — via the fused `SameOrbits` reduction. | — |
+| `Select.exists_targetColour_of_not_discrete` | 731-739 | A non-discrete colouring has a target colour. | — |
+| `Select.aggregate_singleton` | 741-744 | `aggregate [x] = x` — the single-child descent step reads off. | — |
+| `Select.descendS_selNode_val_of_guard` | 746-793 | The fuel-graded dominance induction: wherever the guarded blind descent answers, the fused descent answers with the SAME value (blind survives ⟹ least cell resolved ⟹ least resolvable = least ⟹ identical step). | — |
+| `Select.canonFormS?_selNode_dominates` | 795-803 | **★★ THE DOMINANCE THEOREM** (acceptance criterion 1): same refiner/key/supply — wherever the guarded blind object answers, the fused object answers with the SAME canonical form. The residue can only shrink; no resolver-strength increase anywhere. | — |
+| `Select.selNode_stall_iff` | 807-828 | **★ The flag semantics `Publication` §1 names, as a characterization**: the fused resolver emits no child iff NO non-singleton cell narrows to ≤ 1 (contrast `Stall.stalled`, which reads only the least cell). | — |
+| `Select.NodeResolved` | 837-839 | The fused resolver can act: SOME non-singleton cell narrows to ≤ 1 — strictly weaker per node than `Cost.CellResolved` at the same key/supply strength. | Definition |
+| `Select.HandledS` | 841-844 | The sel-aware capability predicate: every reached non-discrete node has some resolvable cell. | Definition |
+| `Select.nodeResolved_of_cellResolved` | 846-855 | The blind payload implies the fused one node-by-node: a resolved least cell IS a resolvable cell. | — |
+| `Select.handledS_of_handled` | 857-860 | **★ The residue DEFLATES**: `Handled ⟹ HandledS`, same key, same supply. | — |
+| `Select.residue_of_not_handledS` | 862-865 | Contrapositive: the sel-aware residue sits INSIDE the blind residue. | — |
+| `Select.handledS_of_sameOrbits` | 867-874 | `HandledS` transfers along `SameOrbits` (the fused object reads the supply only through its orbits). | — |
+| `Select.handledS_of_seal` | 876-883 | The seal populates the sel-aware predicate too: depth + `∀T` localisation ⟹ `HandledS` for the deep oracle (through the widened `handled_of_seal`). | — |
+| `Select.descendS_ne_none_reaches` | 887-919 | Totality for the generalized descent (mirror of `descend_ne_none_reaches`): a `NodeProper` resolver emitting a child at every reached non-discrete node reaches a leaf — the widened partner-form `Reaches` is exactly what the induction needs. | — |
+| `Select.selNode_ne_nil_of_nodeResolved` | 921-928 | A `NodeResolved` node is never a stall for the fused resolver. | — |
+| `Select.answersS_of_handledS` | 930-942 | **★★ The answers theorem**: the fused canonizer ANSWERS on every `HandledS` graph — with `handledS_of_handled` it recovers every blind answers-instance. | — |
+| `Select.not_handledS_if_flagS` | 944-950 | ③a for the fused object: the flag names the sel-aware residue — which sits inside the blind residue. | — |
+| `Select.descendS_cost_leaf` | 954-957 | The generalized descent's leaf cost is 1. | — |
+| `Select.descendS_cost_zero` | 959-961 | The generalized descent's fuel-0 non-leaf cost is 1. | — |
+| `Select.descendS_cost_le_of_le_one` | 963-1002 | The single-path cost bound for the generalized descent (mirror of `descend_cost_le_of_resolved`) — the fan-out hypothesis is ≤ 1, which `selNode` meets BY CONSTRUCTION with no firing hypothesis. | — |
+| `Select.descentCostS_le_of_le_one` | 1004-1013 | The top-level ② shape for the generalized object. | — |
+| `Select.selNode_cost_none` | 1015-1021 | The stall node bills exactly the probe. | — |
+| `Select.selNode_cost_some` | 1023-1032 | A committed node bills the probe plus its children's refinements. | — |
+| `Select.selNode_cost_le` | 1034-1052 | The fused resolver's per-node bill: the probe plus at most ONE child refinement. | — |
+| `Select.cellList_length_le` | 1054-1057 | Every cell has at most `n` members. | — |
+| `Select.nsColours_length_le` | 1059-1063 | At most `n` non-singleton colours. | — |
+| `Select.selProbeBound` | 1065-1068 | The probe's budget, coarsely: ≤ `n` cells × (`n` keys + scan + `n` orbit-BFS runs against ≤ `gB` generators). | Definition |
+| `Select.selProbeCost_le` | 1070-1103 | The probe is bounded by `selProbeBound` from supply-cost, candidate-count and per-vertex key-cost bounds — the fused analogue of `consume_cost_le`. | — |
+| `Select.descentCostS_selNode_pruned_lookahead_le` | 1105-1122 | **★★ ② end-to-end for the fused canonizer of record** (`lookaheadKey` + `prunedSupply d`): explicit polynomial on EVERY input, per fixed `d` — and unlike the guarded bound it carries no `ResolvedAll`. | — |
+| `Select.descentCostS_selNode_match_lookahead_le` | 1124-1138 | The same for the one-step oracle: explicit polynomial, no hypotheses. | — |
+| `Select.selNode_pruned_record` | 1140-1155 | **★★★ The fused capstone of record — ①+②+③a in one place**: sound/complete/flag-iso-invariant, explicit polynomial budget unconditionally, flag = the sel-aware residue (inside the blind residue). | — |
+| `Select.nsList` | 1171-1173 | The vertices of the non-singleton cells — the all-cells harvest roots, computably. | Definition |
+| `Select.nsList_length_le` | 1175-1178 | At most `n` harvest roots. | — |
+| `Select.allCellsMatchSupply` | 1180-1189 | **★ The all-cells colour-match supply** — `matchSupply` with the harvest widened from the least cell to every non-singleton cell (untrusted as always; the exposure witness's enabler). | Definition |
+| `Select.mem_gens_allCellsMatchSupply_iff` | 1191-1204 | Membership characterised: exactly the candidates built on ordered pairs of harvest roots. | — |
+| `Select.cellList_length_transport` | 1206-1209 | Per-colour cell size is transport-invariant (list form of `cellOf_card_transport`). | — |
+| `Select.nsList_transport_perm` | 1211-1230 | The harvest roots transport up to permutation (mirror of `branches_transport_perm`). | — |
+| `Select.gensEquivariant_allCellsMatchSupply` | 1232-1254 | **★★ The all-cells supply is equivariant** (mirror of `gensEquivariant_matchSupply`): candidates conjugate, roots transport — the fused capstone instantiates with no new hypothesis. | — |
+| `Select.supplyEquivariant_allCellsMatchSupply` | 1256-1258 | The verified list conjugates (via `supplyEquivariant_of_gensEquivariant`). | — |
+| `Select.selNode_allCellsMatch_canonizer` | 1260-1267 | The fused canonizer over the all-cells harvest — concrete, no hypotheses; the instance the exposure witness runs. | — |
+| `Select.supplyCost_allCellsMatchSupply_le` | 1269-1277 | The all-cells harvest prices exactly like `matchSupply` (`|nsList| ≤ n` replaces `|branches| ≤ n`). | — |
+| `Select.gens_allCellsMatchSupply_length_le` | 1279-1284 | At most `n²` candidates. | — |
+| `Select.descentCostS_selNode_allCells_le` | 1286-1300 | ② for the fused all-cells object: explicit polynomial on every input. | — |
+| `Select.branches_subset_nsList` | 1302-1318 | `nsList` extends `branches`: every branch vertex is a harvest root — the all-cells harvest only widens. | — |
+
+## ChainDescent/SelectWitness.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SelectWitness.Z4S` | 58-63 | The Z₄ chiral subdivided wheel (n = 14, `Aut = Z₄`): least cell = the apex 2-orbit whose pins keep `γ²` alive — the exposure-witness graph (blind + least-rooted harvest FLAGS; fused + all-cells harvest ANSWERS). | Definition |
+| `SelectWitness.rootZ` | 65 | The witness graph's materialised root colouring. | Definition |

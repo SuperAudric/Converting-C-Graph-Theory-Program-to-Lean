@@ -50,8 +50,12 @@ today. Per-obligation state:
     (`Composite.forceThenConsume_stall`) — unconditional; (③b) per-family: flag ∧ ⟨family⟩ ⟹ structural atom —
     where the citations live. The atoms stay `opaque` until the per-family carving matures; they must NEVER be
     defined as "the algorithm flagged" (the firewall below stands).
-  · The §1 "mutual stall" prose is the TARGET flag semantics, pending the sel rewrite (handoff §6.1 design-pass
-    block): today's `Stall.stalled` reads "the LEAST-COLOUR cell stalled", not "the node stalled".
+  · The §1 "mutual stall" prose IS now the flag semantics of a BUILT object (2026-07-18, sel rewrite landed):
+    `Select.selNode` flags exactly when NO non-singleton cell resolves (`Select.selNode_stall_iff`), with
+    ①+②+③a in one place at the record supply (`Select.selNode_pruned_record`) and the blind object DOMINATED
+    value-exactly (`canonFormS?_selNode_dominates`). The Publication swap to the fused object is still deferred
+    with the rest of the wiring; the old guarded-blind object (`Stall.stalled` = "the LEAST cell stalled")
+    remains available and is strictly weaker (`Residue.Handled ⟹ Select.HandledS`).
   · Axiom WIRING IS DEFERRED for every entry in §2; per-entry cautions are noted inline (G3 threshold, FTPG's
     corrected predicate, Payne–Thas narrowing).
   · Non-vacuity: the handled half is now fillable in principle (`Residue.handled_emptyAdj` — a trivial witness);

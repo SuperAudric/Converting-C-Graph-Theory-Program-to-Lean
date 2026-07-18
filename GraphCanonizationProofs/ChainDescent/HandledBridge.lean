@@ -68,16 +68,18 @@ variable {n : Nat}
 
 /-! ## 1. The reachable-node induction: every reached colouring is a committed path's colouring -/
 
-/-- **A validly-reachable committed path** (head = most recent): each successive vertex is drawn from the
-**target cell** of the node it extends — exactly the paths the descent can commit. For a valid `p`, `p.toFinset`
-ranges over strictly fewer sets than all of `Finset (Fin n)` (on `C₆` after committing `{0}` the cells are
-`{0},{1,5},{2,4},{3}` and the target is `{1,5}`, so `{0,3}` is never committed) — which is why a per-family
-localisation obligation stated on valid paths is strictly lighter than a `∀ T` one. -/
+/-- **A validly-reachable committed path** (head = most recent): each successive vertex is drawn from a
+**non-singleton cell** of the node it extends (it has a same-coloured partner) — exactly the paths a descent can
+commit. Widened 2026-07-17 from "the target cell" in lockstep with `Descend.Reaches.step`, so that SEL-descents
+(`Select.selNode`, which may branch on a non-least cell) are covered. Valid paths still range over strictly fewer
+sets than all of `Finset (Fin n)` (no vertex of a singleton cell is ever committed, and nothing extends a
+discrete node) — a per-family localisation obligation stated on valid paths remains lighter than a `∀ T` one,
+though less sharply than the old target-cell-only form. -/
 inductive ValidPath (adj : AdjMatrix n) : List (Fin n) → Prop
   | nil : ValidPath adj []
   | cons {p : List (Fin n)} {v : Fin n} :
       ValidPath adj p → ¬ Discrete (SealBridge.pathCol adj p) →
-      v ∈ branches (SealBridge.pathCol adj p) →
+      (∃ u, u ≠ v ∧ SealBridge.pathCol adj p u = SealBridge.pathCol adj p v) →
       ValidPath adj (v :: p)
 
 /-- **★★ EVERY REACHABLE NODE IS A `pathCol` NODE, at a VALID path.** The concrete canonizer's reachable
