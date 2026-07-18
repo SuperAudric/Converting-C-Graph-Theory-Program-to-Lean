@@ -31,7 +31,15 @@
 >    SELECTOR-strict witness (needs WL-weak-at-scale structure — open, not assumed); contract-def migration
 >    (lazy); the KEY-side duplicate-refine (key must RETURN its refinement — F2-adjacent); deep/pruned all-cells
 >    variants.
-> 3. **The rigid key** — nothing exists beyond `lookaheadKey`; §11.12's P1–P4 not started.
+> 3. **The rigid key** — **▶ RE-SCOPED + STARTED 2026-07-18** (= the fold-tower plan's F3;
+>    [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md) §5b is the authoritative scope,
+>    `ChainDescent/HolKey.lean`'s module-doc Build-state block the pickup): `lookaheadKey` already covers
+>    pin-discretizing distinguishable folds; the genuine residue is DISTINGUISHABLE-but-WL-MERGED (coset data ⟹
+>    the vehicle is the fold's HOLONOMY, not propagation signatures or rank). F3a tranches 1–2 LANDED
+>    (`KeySeparates` + firing theorem `keepMin_pairwise_aut_of_separates`, component-closure lemma set,
+>    symmetrized cell relations, indicator-form `holKey`; measured 3|3 split of the WL-merged twisted/untwisted
+>    union where `lookaheadKey` is dead). Staged: `KeyEquivariant holKey`, eval twins, guards; F3b Smith/CRT
+>    gated on a holonomy-failure witness. §11.12's P1–P4 re-based accordingly (P-content = firing/② side).
 > 4. **The `Publication` opaque-swap** — now **unblocked** (`Residue.Residue` is a *definition*, so
 >    `unhandledResidue_nonvacuous` is provable; it was undischargeable *in principle* before).
 >

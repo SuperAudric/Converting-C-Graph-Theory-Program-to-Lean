@@ -375,3 +375,11 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `Deck.deck_check_one` | 492-507 | One half of the two-sided-inverse condition transports under conjugation (the `swap_check_conj` shape, generalized over the four seed arguments). | — |
+## ChainDescent/HolKey.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Hol.nodup_iterate_relStep` | 157-162 | Every closure round is nodup (the `dedup` tail). | — |
+| `Hol.mem_iterate_relStep_mono` | 164-167 | Rounds are monotone on membership. | — |
+| `Hol.stab_succ` | 169-182 | A membership-stable round stays stable. | — |
+| `Hol.exists_stab` | 184-217 | Some round ≤ `n` is membership-stable (nodup + strict-growth pigeonhole on `toFinset` cards). | — |

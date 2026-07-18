@@ -3681,13 +3681,26 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Hol.KeySeparates` | 69-75 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
-| `Hol.keyV_eq_of_mem_keepMin` | 77-89 | Members of the narrowed set all attain the minimum key value. | — |
-| `Hol.keepMin_pairwise_aut_of_separates` | 91-113 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
-| `Hol.partnerTo` | 117-121 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
-| `Hol.walkOk` | 123-127 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
-| `Hol.holMoved` | 129-143 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
-| `Hol.holSig` | 145-150 | **The holonomy signature**: sorted, deduplicated moved-counts over ALL target pairs — representative-free (trap #7) and multiplicity-free. | Definition |
-| `Hol.holKey` | 152-156 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3|3 where `lookaheadKey` keeps 6. | Definition |
-| `Hol.keyV_holKey` | 158-159 | The key's value projection is `holSig`. | `@[simp]` |
-| `Hol.keyCost_holKey` | 161-162 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |
+| `Hol.KeySeparates` | 100-106 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
+| `Hol.keyV_eq_of_mem_keepMin` | 108-120 | Members of the narrowed set all attain the minimum key value. | — |
+| `Hol.keepMin_pairwise_aut_of_separates` | 122-144 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
+| `Hol.relComp_closed` | 219-235 | The closure really is closed: a `rel`-step out of `relComp` stays inside (monotone-rounds pigeonhole — the convergence content F2a never needed). | — |
+| `Hol.relComp_subset_of_closed` | 237-253 | Anything reachable from a member of a closed set is in it. | — |
+| `Hol.mem_relComp_self` | 255-260 | Component membership is reflexive. | — |
+| `Hol.mem_relComp_trans` | 262-265 | Component membership is transitive (via closedness). | — |
+| `Hol.mem_relComp_symm` | 267-284 | Component membership is symmetric — for a symmetric relation. | — |
+| `Hol.mem_relComp_congr` | 286-291 | **★ Copy-designator well-definedness**: any member of a component designates the same component. | — |
+| `Hol.symSame` | 300-302 | Symmetrized same-cell (vertical) adjacency — weak components; `AdjMatrix` guarantees no symmetry. | Definition |
+| `Hol.symCross` | 304-306 | Symmetrized cross-cell (horizontal) adjacency. | Definition |
+| `Hol.symSame_symm` | 308-309 | The symmetrized vertical relation is symmetric (by construction). | — |
+| `Hol.symCross_symm` | 311-312 | The symmetrized horizontal relation is symmetric (by construction). | — |
+| `Hol.symSame_transport` | 314-318 | The symmetrized vertical relation transports. | — |
+| `Hol.symCross_transport` | 320-324 | The symmetrized horizontal relation transports. | — |
+| `Hol.partnerTo` | 328-332 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
+| `Hol.walkOk` | 334-338 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
+| `Hol.holMoved` | 340-354 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
+| `Hol.holHas` | 356-359 | Is some valid walk's moved-count equal to `c`? — the signature's membership test. | Definition |
+| `Hol.holSig` | 361-366 | **The holonomy signature**: the indicator vector over `[0, n]` of attained moved-counts — representative-free (trap #7) and canonical BY CONSTRUCTION (no sort/dedup, so equivariance is existential reindexing). | Definition |
+| `Hol.holKey` | 368-372 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3-vs-3 where `lookaheadKey` keeps 6. | Definition |
+| `Hol.keyV_holKey` | 374-375 | The key's value projection is `holSig`. | `@[simp]` |
+| `Hol.keyCost_holKey` | 377-378 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |

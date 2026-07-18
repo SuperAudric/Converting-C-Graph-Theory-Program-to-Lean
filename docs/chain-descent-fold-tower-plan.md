@@ -26,9 +26,12 @@
 > stabilizers (per-copy twin gauges = wreath-type, NOT linear-over-a-ring) stall and correctly fall through.
 > ⚠ Trap #1 hit LIVE again: a function-typed forcing round compounds **exponentially** under iterate (2 rounds
 > ≈ 1 s, 9 rounds > 300 s at n = 9); cure = Vector-state rounds (`roundVecD`, data → data) + `uniqueFilter`,
-> bridge `propagateVec_eq`. **Still open: F3** (the ring key — the force half: ordering genuinely
-> distinguishable copies + native arity; on those, every deck seed propagation contradicts and emits nothing,
-> correctly).
+> bridge `propagateVec_eq`. **F3: SCOPED same day (§5b — read it before any F3 work; it re-scopes the ring
+> key) and STARTED — F3a tranches 1–2 landed** (`HolKey.lean`: `KeySeparates` + the force firing theorem,
+> the component-closure lemma set, symmetrized cell relations, the indicator-form holonomy key; measured 3|3
+> split of the WL-merged twisted/untwisted union where `lookaheadKey` is dead; the file's module-doc
+> Build-state block = the pickup, staged items with proof routes). F3b (Smith/CRT) gated on a measured
+> holonomy-failure witness.
 >
 > **✅ F2a — `foldSupply` (`ChainDescent/FoldSupply.lean`, axiom-clean, in `build.sh`; guards `Regression` §10,
 > measurements `PerformanceTest` §8).** The structural fold supply of §4, copy-swap half: fibers = same-cell-
@@ -362,23 +365,29 @@ theorem is owed for soundness.
    connected variant — path-joined at one pendant each — keeps the WL-merge and is the follow-on witness.)
 
 **The staging:**
-- **F3a — `KeySeparates` infrastructure + the holonomy key (`holKey`). ▶ FIRST TRANCHE LANDED 2026-07-18
-  (`ChainDescent/HolKey.lean`, compile-clean, axiom-clean, in `build.sh`):** `KeySeparates` (force's firing
-  dual of `CellIsOrbit`) + **the firing theorem `keepMin_pairwise_aut_of_separates`** (separates ⟹ the kept
-  branches are pairwise `Aut`-equivalent — inside ONE orbit, which consume then collapses; the graded mirror
-  of `cellIsOrbit_*`), and the spec-level key: `partnerTo` (the one-sided F2a partner lookup, target copy
-  designated by a VERTEX — no ids, no representatives), `walkOk`/`holMoved`/`holSig` (moved-count of the
-  composite `copy(v) → copy(t₁) → copy(t₂) → copy(v)`, sorted dedup over ALL target pairs; `L = 3` is the v1
-  grading — the witness's parity lives there; the ladder extends like every other oracle's `d`), `holKey` with
-  flat `n⁵` cost. **STAGED (the remaining tranche):** (i) the **component-closure lemma set** — `relComp` of a
-  symmetric relation is membership-equivalence (closedness after `n` monotone rounds; the convergence content
-  F2a deliberately never needed, F3a genuinely does: well-definedness of vertex copy-designators is what the
-  evaluation twin's per-copy dedup and several transport steps factor through); (ii) the **evaluation twins**
-  (materialised id-tables, the probe's shape — the spec forms recompute `relComp` per membership test, trap
-  #1's shape, do not `#eval` them at `n ≥ 15`); (iii) **`KeyEquivariant holKey`** via the F2a toolkit
-  (matchings conjugate by `uniqueMem_transport` + `mem_relComp_transport`; walk enumeration reindexes;
-  dedup+sort invariant); (iv) witness guards (`holKey` splits the 6-pendant cell 3|3 where `lookaheadKey`
-  keeps 6) + capstone `forceThenConsume holKey (appendSupply foldSupply deckSupply)` + fused mirror.
+- **F3a — `KeySeparates` infrastructure + the holonomy key (`holKey`). ▶ TRANCHES 1–2 LANDED 2026-07-18
+  (`ChainDescent/HolKey.lean`, compile-clean, axiom-clean, in `build.sh`; its module-doc "Build state" block
+  is the AUTHORITATIVE pickup — staged items listed there in order, WITH proof routes):**
+  **Landed:** (a) `KeySeparates` (force's firing dual of `CellIsOrbit`) + **the firing theorem
+  `keepMin_pairwise_aut_of_separates`** (separates ⟹ the kept branches are pairwise `Aut`-equivalent — ONE
+  orbit, which consume then collapses; the graded mirror of `cellIsOrbit_*`); (b) the **component-closure
+  lemma set** — `relComp_closed` (monotone-rounds pigeonhole), `mem_relComp_self/trans/symm`,
+  `mem_relComp_congr` (copy-designator well-definedness) — the convergence content F2a deliberately never
+  needed and F3a genuinely does; (c) the **symmetrized** cell relations `symSame`/`symCross`
+  (weakly-connected components — `AdjMatrix` guarantees no symmetry; symmetrizing makes (b) unconditional;
+  matches the C#) + `_symm`/`_transport`; (d) the spec key `partnerTo`/`walkOk`/`holMoved`/`holHas`/
+  `holSig`/`holKey` — `partnerTo` = the one-sided F2a partner lookup with the target copy designated by a
+  VERTEX (no ids, no representatives); `holSig` = the **indicator vector over the value range `[0, n]`**,
+  canonical BY CONSTRUCTION (no sort/dedup — chosen so equivariance is existential reindexing, not
+  sorted-permutation plumbing); `L = 3` is the v1 grading (the witness's parity lives there; the ladder
+  extends like every other oracle's `d`); flat `n⁵` cost.
+  **Staged (in the file's Build-state block, with routes):** (i) `KeyEquivariant holKey` (conj chain:
+  `partnerTo_conj` → `walkOk_conj` → `holMoved_conj` → `holHas_conj` → `holSig_conj`; the F2a transport
+  toolkit throughout); (ii) the evaluation twins (min-member id-tables `compTbl`, walks over the deduped id
+  set; bridges `compTbl_get_eq_iff` + walk-value-set equality via `mem_relComp_congr`; the spec forms are
+  trap-#1-shaped — no `#eval` at `n ≥ 15`); (iii) witness guards + capstones — ⚠ with the indicator
+  signature the T-side is lex-LEAST, so expect `keepMin = [19, 24, 29]` and note the composite lands at 2
+  on that side (`foldSupply` verifies only the (0,1)-swap there); measure first, then port numbers.
 - **F3b — the Smith/CRT coset canonicalization** (= §11.12 P3's real weight, §5 above): needed where holonomy
   *signatures* exist but must be ORDERED at the module level (large holonomy groups; native-arity gadget
   systems with no fold skeleton; canonical coset reps of `coker`). **Gated on a concrete witness where F3a
@@ -434,11 +443,12 @@ fold's own localisation) once F2/F3 land.
    **GENERALIZED** (§4b): the planned parallel-class port would have kept the exponent-2 ceiling; the
    propagation harvest subsumes it and closes arbitrary arity + height on the consume side. Includes
    `appendSupply` (supply concatenation + split equivariance + fold++deck capstone).
-4. **F3** `ringKey` — after (or with) the key-side duplicate-refine residual (handoff §6.1 landed the interface;
-   `lookaheadKey` still recomputes internally), since a solve-derived key is exactly the look-ahead worth handing
-   forward; Lean content = §11.12 P1 (extraction soundness) + P3 (solve iso-invariance) instantiated as
-   `KeyEquivariant` + `KeySeparates`. With F3, port a true **multipede fold** as the joint F2+F3 witness at
-   scale (the WL-blind separation the small witnesses cannot show — a pin discretizes them).
+4. ▶ **F3 — RE-SCOPED, see §5b (supersedes this item's `ringKey` framing); F3a tranches 1–2 landed 2026-07-18**
+   (`HolKey.lean`; its module-doc Build-state block = the pickup). The holonomy key sidesteps the §6.4
+   duplicate-refine coupling entirely (no refinement look-ahead); `lookaheadKey`'s hand-forward stays with the
+   §6.1 interface work. F3b (Smith/CRT coset — the §11.12 P3 weight) gated on a measured holonomy-failure
+   witness. With F3 landed, port a true **multipede fold** as the joint F2+F3 witness at scale (the WL-blind
+   separation the small witnesses cannot show — a pin discretizes them).
 5. C# parity, now TWO items: (a) the CRT peel replacing `TryDoublingPeel` (§5); (b) optionally the propagation
    harvest itself (`deckSupply` is straightforwardly portable and strictly more general than
    `BuildParallelMatching`). Then re-run the fold suite with a failing odd-part ≥ 7 case added FIRST as the red

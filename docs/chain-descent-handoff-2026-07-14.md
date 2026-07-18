@@ -712,10 +712,18 @@ Substitute the real `Descend.canonForm?` for the `opaque` stub. `unhandledResidu
 principle** while the three residue atoms were `opaque … : Prop`; with `Residue.Residue` a **definition** it is now
 provable (`Residue.residue_nonvacuous`). The atoms must be *defined* (as the complement of `Handled`), not asserted.
 
-### 6.6 ▶ The FOLD/TOWER track (2026-07-17/18) — F1 + F2a LANDED; F2b/F3 the open tail
+### 6.6 ▶ The FOLD/TOWER track — F1 + F2a + **F2b** LANDED; F3 SCOPED + F3a tranches 1–2 landed (2026-07-18 late)
 
 > **Authoritative home: [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md)** (STATUS block =
-> current state; its §9 is the pickup section). Origin: the 2026-07-16 audit's F_k tower gap — every supply needed
+> current state; consume-side pickup §9; **force-side/F3 pickup = §5b + `HolKey.lean`'s module-doc Build-state
+> block**). ⚠ The bullets below predate 2026-07-18-late and are provenance — headline updates: **F2b landed
+> GENERALIZED** as `DeckSupply.lean` (the propagation harvest — generators of ANY order; the parallel-class port
+> spec is ⊘ superseded, plan §4b; measured `Z₉` odd-part-9 narrow 9→1, no C# path); **F3 re-scoped** (plan §5b:
+> `lookaheadKey` already covers pin-discretizing distinguishable folds; the genuine residue is
+> distinguishable-but-WL-merged, its invariant is COSET data, and the structural vehicle is the fold's HOLONOMY —
+> not propagation signatures, not rank); **F3a tranches 1–2 landed** (`HolKey.lean`: `KeySeparates` + firing
+> theorem, component-closure lemma set, symmetrized cell relations, indicator-form `holKey`; staged remainder
+> with worked-out routes in the file). Origin: the 2026-07-16 audit's F_k tower gap — every supply needed
 > `SeparatesAt` depth `d ≥ k−2` on a `k`-fold cover (`n^{Ω(k)}`), and the C# handles only odd-part(k) ≤ 5.
 > - **✅ F1 `PartialMatch.lean`** — support-local matching (forward/backward on singletons, id elsewhere): any α
 >   with discretized support (subsumes `deepMatchSupply` firing) + any INVOLUTION with half-discretized support ⟹
