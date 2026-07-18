@@ -6,8 +6,9 @@
 > retracted claims** that a reader could otherwise re-derive and act on.
 >
 > **Quality bar (unchanged, non-negotiable):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`;
-> full build green (`bash scripts/build.sh`, **~110 s**); no `sorry`; no fresh `axiom` (cited results are theorem
-> hypotheses); **`native_decide` BANNED**; **`@[implemented_by]` AVOIDED** (it can assert a false equation).
+> full build green (`bash scripts/build.sh`, **~165 s** as of 2026-07-18); no `sorry`; no fresh `axiom` (cited
+> results are theorem hypotheses); **`native_decide` BANNED**; **`@[implemented_by]` AVOIDED** (it can assert a
+> false equation).
 
 ---
 
@@ -43,10 +44,16 @@ whole frontier.
 | `ChainDescent/SupplyTransport.lean` | **P1 — THE FLAG'S ISO-INVARIANCE** (2026-07-14, second pass). `stallEquivariant_forceThenConsume`, and **`matchSupply_guarded_canonizer` — the first CONCRETE mixed canonizer, no carried hypotheses.** See §6.0. |
 | `ChainDescent/DeepMatchSupply.lean` | **P2 — THE BOUNDED-DEPTH ORACLE** (2026-07-14). `deepMatchSupply d`: enumerate every length-`≤ d` individualization sequence, colour-match all pairs. Equivariant **because it makes no choice**. `C₄`/`C₇` now answer. Cost `n^{O(d)}`. See §6.2. |
 | `ChainDescent/OrbitPrune.lean` | **P3 FOUNDATION** (2026-07-14). §1–3 **the reduction** — `SameOrbits S₁ S₂` ⟹ the two guarded canonizers are the *same function* ⟹ `①` transfers with **no equivariance obligation on the second supply**. §4 **the pruning license** (`deepCandidate_left_mul` / `_right_mul`). See §6.2b. |
+| `ChainDescent/SealDepthBridge.lean` | **P2b/P2c — THE DEPTH BRIDGE** (2026-07-15). `separatesAt_of_cascadesFrom`, `deepCol_pathCol`, `cellIsOrbit_pathCol_of_seal` — the seal's depth content reaches `deepMatchSupply` at every descent node. |
+| `ChainDescent/SupplyCost.lean` | **the poly-`c₂` layer** (2026-07-16): `tableBound n d` and the satisfiable per-node supply-cost bounds (the old `∀ B` form was unsatisfiable). |
+| `ChainDescent/ImprimitiveDischarge.lean` | **the `hImprim` discharge layer** (2026-07-17): the irreducible-affine class — first capstone carrying NO `hImprim`. |
+| `ChainDescent/PartialMatch.lean` | **F1 — THE SUPPORT-LOCAL ORACLE** (2026-07-17, fold/tower plan). `partialMatch`: forward/backward singleton matching + identity, so an INVOLUTION with a **half-discretized support** (a copy transposition with ONE copy pinned) is caught at `d` independent of the fold multiplicity. Subsumes `deepMatchSupply` firing (`supportSeparatesAt_of_separatesAt`). See §6.6. |
+| `ChainDescent/FoldSupply.lean` | **F2a — THE STRUCTURAL FOLD SUPPLY** (2026-07-18, fold/tower plan). Fibers/copies read off the CELL structure (`relComp`); fiber-wise copy swaps from branch-cell seed pairs; fires where **refinement-based matching is provably dead** (mirror-tied covers). Capstones for the guarded AND fused objects. See §6.6. |
 | `ChainDescent/PrunedSupply.lean` | **P3c FIRST HALF** (2026-07-16). `prunedSupply d` — reference-matching, `\|table\|` not `\|table\|²`; `SameOrbits` ⟹ ①/②/③ transfer. See §6.2b. |
 | `ChainDescent/HandledBridge.lean` | **THE `Handled` POPULATION BRIDGE** (2026-07-16). `reaches_pathCol` (every reached node IS a `pathCol`) + **`handled_of_seal`** — the first theorem instances of `Residue.Handled`. See the §4 update box. |
 | `ChainDescent/Select.lean` | **THE SEL REWRITE, increments 1+2** (2026-07-17). `NodeRes` (node resolver: children WITH their refined colourings, `[] = flag` = true mutual stall — §6.1 AND §6.4 in one interface), `descendS`, ★ `descendS_blind` (EXACT `CostM` equation vs `descend` — the safety net), `descendS_sound` (①a **unconditional**), `NodeTransport` + `descendS_transport` ⟹ capstone `isCanonicalFormOptS_canonFormS?`, and ★ `nodeTransport_blindNode` (**conservativity** — every proved `NarrowTransport` instance discharges the new contract at the blind instance). See §6.1's design-pass block. |
-| `ChainDescent/Regression.lean` | the **build-gating** regression suite (~12 s). |
+| `ChainDescent/SelectNode.lean` | **THE SEL REWRITE, increments 3–5** (2026-07-17/18). The fused `selNode` (least RESOLVABLE colour; `[] = flag` = TRUE mutual stall, `selNode_stall_iff`), ★ dominance `canonFormS?_selNode_dominates`, `selNode_canonizer` (+ `_pruned_` via `SameOrbits`), `HandledS`/`handledS_of_seal`, one-place record `selNode_pruned_record`, rfl-twins `selNodeFast`/`canonFormFastS?`, `allCellsMatchSupply`. See §6.1's build-state block. |
+| `ChainDescent/Regression.lean` | the **build-gating** regression suite (~25 s: §8 F1 fold guards, §9 sel, §10 F2a mirror-tie guards added 2026-07-17/18). |
 | `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (~4 min). |
 
 ---
@@ -265,7 +272,7 @@ families, `reachesRigidOrCameron_*`, Spielman's `SeparatesAtBoundedBase` are now
 results are *imports*, not re-proofs. **This is the answer to "reusable, else re-provable as parallel theorems":
 reusable.**
 
-### 6.1 ⚠ The target-cell selector is BLIND to resolvability (fusion's live bite) — **design VALIDATED 2026-07-17; ordering REVERSED (do BEFORE F2/F3 and P3c-2nd-half); increments 1+2 LANDED (`Select.lean`)**
+### 6.1 ⚠ The target-cell selector WAS blind to resolvability (fusion's live bite) — **✅ ALL FIVE INCREMENTS LANDED 2026-07-17/18 (`Select.lean` + `SelectNode.lean`; witness `SelectWitness.lean` off-build); residuals in the build-state block below**
 
 > **▶▶ 2026-07-17 DESIGN PASS (source-checked; supersedes the 2026-07-15 ordering box below — user approved the
 > reversal).** The naive fused selector — *least colour whose cell some resolver collapses to `≤ 1`* — **is valid**,
@@ -704,6 +711,29 @@ signature change, and **the same one §6.1 needs**. Do them together.
 Substitute the real `Descend.canonForm?` for the `opaque` stub. `unhandledResidue_nonvacuous` was **unprovable in
 principle** while the three residue atoms were `opaque … : Prop`; with `Residue.Residue` a **definition** it is now
 provable (`Residue.residue_nonvacuous`). The atoms must be *defined* (as the complement of `Handled`), not asserted.
+
+### 6.6 ▶ The FOLD/TOWER track (2026-07-17/18) — F1 + F2a LANDED; F2b/F3 the open tail
+
+> **Authoritative home: [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md)** (STATUS block =
+> current state; its §9 is the pickup section). Origin: the 2026-07-16 audit's F_k tower gap — every supply needed
+> `SeparatesAt` depth `d ≥ k−2` on a `k`-fold cover (`n^{Ω(k)}`), and the C# handles only odd-part(k) ≤ 5.
+> - **✅ F1 `PartialMatch.lean`** — support-local matching (forward/backward on singletons, id elsewhere): any α
+>   with discretized support (subsumes `deepMatchSupply` firing) + any INVOLUTION with half-discretized support ⟹
+>   copy transpositions at the `d` that discretizes ONE copy, independent of `k`. Measured: fold4 (n = 24) answers
+>   at `d = 0` where deep is dead at `d = 0` AND `d = 1` (132× the cost).
+> - **✅ F2a `FoldSupply.lean`** — the STRUCTURAL fold supply (C# B4 port, copy-swap half): fibers/copies read off
+>   the CELL structure (`relComp` closure, membership-level transport, **no convergence proof needed**), fiber-wise
+>   swaps from branch-cell seed pairs, involution gate, ζ-equal rfl-twins. Capstones for BOTH objects, incl. the
+>   fused `foldSupply_selNode_canonizer`. Measured (mirror-tied covers, n = 10/15): the within-copy mirror survives
+>   every pin ⟹ deep AND partial matching provably dead, `foldSupply` narrows to 1 — the WL-blind mechanism in
+>   miniature. Guards `Regression` §8/§10; measurements `PerformanceTest` §7/§8.
+> - **Open: F2b** (parallel-class involutions = the `Z₂ᵏ` tower gauge — full port spec in the plan §9) and **F3**
+>   (the CRT/Smith ring key: odd-part ≥ 7 both sides + native arity + tower peel; = §6.3's rigid key, sequenced
+>   with the §6.1 interface change per its ordering note).
+> - **⚠ Selector interaction worth testing later: `foldSupply` is REFLECTION-BLIND** (it certifies only copy-swap
+>   symmetry), which makes a fold whose least cell is a merged mirror class a **candidate selector-strict witness**
+>   (blind flags, fused answers, SAME supply, n ≈ 10–15 — far below the SRG-land estimate in the §6.1 witness
+>   analysis). Details + test procedure: plan §10.
 
 ---
 

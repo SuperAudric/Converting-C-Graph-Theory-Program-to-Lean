@@ -249,11 +249,115 @@ fold's own localisation) once F2/F3 land.
 
 ## 8. Build order
 
-1. ✅ **F1** (`PartialMatch.lean` + Regression §8 guards) — this increment.
-2. **F2** `foldSupply` — pure supply build, no contract changes; its demo family = folds of a multipede core
-   (port `MultipedeGenerator`'s smallest instance to a Lean literal).
-3. **F3** `ringKey` — after (or with) the `sel`/duplicate-refine signature change (handoff §6.1/§6.4), since a
-   solve-derived key is exactly the look-ahead worth handing forward; Lean content = §11.12 P1 (extraction
-   soundness) + P3 (solve iso-invariance) instantiated as `KeyEquivariant` + `KeySeparates`.
-4. C# CRT peel (parity), then re-run the fold suite with a negative test for odd-part ≥ 7 **removed** (it should
+1. ✅ **F1** (`PartialMatch.lean` + Regression §8 guards) — landed 2026-07-17.
+2. ✅ **F2a** `foldSupply` (`FoldSupply.lean` + Regression §10 + PerformanceTest §8) — landed 2026-07-18. Pure
+   supply build, no contract changes, exactly as planned. ⚠ The demo family CHANGED from the plan: a multipede-core
+   port was unnecessary — a **mirror-tied core** (`C₄`+pendant, vertical cover) already exhibits the WL-blind
+   mechanism (the within-copy mirror survives every pin, so no matching supply ever sees a singleton) at n = 10,
+   which is what makes the guards build-gateable. A true multipede fold is still the right *eventual* witness for
+   the F2b+F3 composition; port it when F2b lands.
+3. **F2b** — the parallel-class involutions (spec: §9.2). Same file, same contract seams.
+4. **F3** `ringKey` — after (or with) the key-side duplicate-refine residual (handoff §6.1 landed the interface;
+   `lookaheadKey` still recomputes internally), since a solve-derived key is exactly the look-ahead worth handing
+   forward; Lean content = §11.12 P1 (extraction soundness) + P3 (solve iso-invariance) instantiated as
+   `KeyEquivariant` + `KeySeparates`.
+5. C# CRT peel (parity), then re-run the fold suite with a negative test for odd-part ≥ 7 **removed** (it should
    pass) — today that case has **no test at all**; add the failing case first as the red bar.
+
+---
+
+## 9. HANDOFF — build state + pickup (2026-07-18)
+
+**Read first:** the STATUS block above, then this section. Everything below is source-verified as of 2026-07-18;
+build green 164 s serial; all new theorems axiom-clean `[propext, Classical.choice, Quot.sound]`.
+
+### 9.1 What exists, where
+
+| piece | file | capstones | witness |
+|---|---|---|---|
+| F1 support-local matcher | `ChainDescent/PartialMatch.lean` | `partialMatchSupply_guarded_canonizer`, `cellIsOrbit_partialMatchSupply` (+ graded `wordReach_…`), `supportSeparatesAt_of_separatesAt` (subsumption) | `Regression` §8 (`fold4`, n = 24: deep dead d=0, partial fires d=0), `PerformanceTest` §7 (descent answers/flags `(true,false)`; deep d=1 dead at 132× cost) |
+| F2a structural fold supply | `ChainDescent/FoldSupply.lean` | `foldSupply_guarded_canonizer`, `foldSupply_selNode_canonizer` (fused), `cellIsOrbit_foldSupply`, reconstruction `swapCand_eq_of_foldSwap`, `gensEquivariant_foldSupply` | `Regression` §10 (`vfold2`, n = 10: deep AND partial dead, fold verifies 4, narrow 2→1), `PerformanceTest` §8 (n = 15: 9 verified, narrow 3→1; costs 6 834 375 vs 12 150) |
+
+Supplies plug into **both** objects unchanged: the guarded blind object via `SupplyTransport.guarded_mixed_canonizer`
+and the fused selector via `Select.selNode_canonizer` — each needs only `SupplyEquivariant` (from `GensEquivariant`).
+The `SameOrbits` route (`OrbitPrune`) remains available for any pruned variant.
+
+**Traps hit this build (beyond the standing §7 list of the handoff):**
+- Guard graphs must use **arithmetic** edge predicates and **`ColData`-materialised roots**; a List-membership
+  `decide` edge predicate made an n = 15 supply call cost minutes (the supply's closures call back into the
+  interpreted adjacency on every `rel` evaluation).
+- A full guarded **descent** at n = 24 costs ~80 s interpreted *even when it stalls at the root* — never put one in
+  `Regression`; supply-level `narrow`/`verified` guards carry the same content (narrowing ≥ 2 ⟹ flag is
+  `Stall.resolvedAll_guard`, a theorem).
+- `swapFun`'s spec form recomputes `relComp` inside the `uniqueMem` scan; the ζ-equal rfl-twins
+  (`swapFunFast`/`swapCandFast`, proved by literal `rfl`) are ~500×. Any F2b candidate constructor should be
+  written twin-first.
+
+### 9.2 F2b — the parallel-class involutions (full port spec; C# source of truth `Option2Solver.cs:303-426`)
+
+The `Z₂ᵏ` tower gauge: for a **distinguishable** cover the fiber-wise copy transposition is NOT an automorphism,
+but the *matching* involution σ (copy `c ↔ τ(c)` simultaneously in every fiber, for a perfect matching τ on
+copies) is. The C# builds τ per "direction" and uses it to peel; here it becomes more *consume generators* in
+`foldSupply` — no peel, no recursion, the descent's own levels do the peeling.
+
+C# mechanics to port (verified against source 2026-07-17):
+1. **The copy graph** `F[a,b]` ⟺ copies `a ≠ b` are same-cell-adjacent within a fiber (C# uses fiber 0 — a
+   choice; the Lean port must either take `F` from **every** fiber-seed or phrase it per-vertex through
+   `relComp`, keeping the enumeration choice-free).
+2. **Seed + propagation**: a parallel class is grown from a seed `F`-edge `(a₀, b₀)`: for a rung `x—y` (`y = τ x`)
+   and side-edge `x—c`, set `τ c :=` the **unique** `d` with `F c d ∧ F y d ∧ ¬ F x d` (the induced-4-cycle rule);
+   ambiguity, incompleteness, or inconsistency ⟹ reject the seed. Enumerate **all** seeds (C# dedups serialized
+   τ's, ≤ log₂ s survive) — all-seeds is what keeps it choice-free in Lean.
+3. **Two-colour check**: components of `F` minus τ-edges must be exactly 2, equal size, τ matching across.
+   (Optional in Lean — it guards the *peel*; as a mere generator emitter, the involution + `IsColAut` gates
+   already carry soundness, so the check is only a firing-quality filter.)
+4. **The whole-graph involution**: `σ v :=` the unique same-cell-component partner of `v` in copy `τ(copy v)` —
+   the same `uniqueMem`-shaped lookup `swapFun` already uses, so the reconstruction/equivariance proofs are the
+   `swapCand` ones with τ in place of the two-copy swap.
+
+Lean shape: extend `foldSupply`'s candidate list (or a `foldSupplyB`) with the τ-involutions; `GensEquivariant`
+via the same membership-transport toolkit (`mem_relComp_transport`, `uniqueMem_transport`); firing theorem =
+reconstruction under the matching geometry (mirror of `swapCand_eq_of_foldSwap` with a τ-indexed hypothesis).
+**Witness to port**: the smallest C# `DoubleAndMatch` instance (a genuine s = 4 `Z₂²` tower where no plain
+transposition verifies but the parallel-class σ does) — that is also the honest moment to port a multipede core.
+
+### 9.3 What a fresh reader should NOT redo
+
+- Do not re-derive the F1/F2 boundary: F1 provably needs a singleton on one side of every moved vertex
+  (`CatchesAt`); the mirror-tied covers refute anything stronger — it is **measured**, `Regression` §10.
+- Do not add a convergence/completeness proof for `relComp` — nothing needs it (all statements are relative to
+  the computed closure); adding one buys no theorem.
+- Do not try to make `foldSupply` catch the global mirror (reflection) — that is deliberate scope (§10); the
+  mirror is `matchSupply`/F1's or F3's, at the node where it surfaces.
+- The cost bills are **deliberately flat** (`|cell|²·n⁵`); tightening them is the same counting-lemma tranche as
+  audit item 5 (no poly-c₂ theorem anywhere yet), not a per-supply chore.
+
+---
+
+## 10. ⚠ `foldSupply` is REFLECTION-BLIND — selector interaction, and a candidate witness (test later)
+
+**The fact.** `foldSupply` certifies **copy-swap symmetry only**. An orbit that needs a non-copy-swap
+automorphism — the global mirror ρ of the `vfold` family (1↔3 in every copy simultaneously) — is invisible to it:
+the merged mirror class `{1,3} × copies` narrows only to the two `⟨copy-swaps⟩`-orbits (`{1_*}`, `{3_*}`), never
+to 1. Force cannot help there either: the class is ONE `Aut`-orbit, and an equivariant key is constant on
+`Aut`-orbits (`keyV_aut_invariant`). This is honest, documented behaviour — but it has a selector-level
+consequence worth testing:
+
+**The candidate selector-strict witness.** The sel-rewrite analysis (memory `project-sel-rewrite-2026-07-18`;
+handoff §6.1) left "blind flags / fused answers at the SAME supply" open, estimating it needs SRG-land (n ≥ 25),
+because with `matchSupply`-style supplies a pin-discretizing least cell self-resolves. `foldSupply` changes that
+calculus: take a fold whose **least-coloured cell is the merged mirror class** — then
+- **blind** (`Stall.guard`, targets least colour): `narrow` length 2 ⟹ **flags at the root**;
+- **fused** (`selNode`, least *resolvable* colour): a pure copy-cell narrows to 1 ⟹ **selects it and proceeds**.
+Same supply both sides, n ≈ 10–15. The sel analysis's defeater #2 (self-resolving pins) does not bite: the mirror
+cell's pins do NOT discretize (1-WL is chirality-blind — their finding #3) and force cannot fire (one orbit).
+
+**Test procedure (when picked up):** the colour order of `vfold2`/`vfold3` puts the pendant cell least (measured:
+`branches = [4, 9]`), so tune the core so the mirror class ranks least — e.g. drop the pendant's degree-1
+distinction or add decoration raising the other classes' colours — then compare
+`canonForm? … (guard (forceThenConsume constKey foldSupply))` (expect `none`) against
+`Select.canonFormS? … (selNode … constKey foldSupply)` (expect progress past the root; whether it *answers*
+end-to-end depends on the deep mirror-pair cells — combining `foldSupply ++ matchSupply` generators is the
+natural completion, and a supply-concatenation combinator is a trivial add). Caveat honestly: root-level
+separation is the designed part; the full-descent claim needs the trace. If it lands, it closes the §6.1 open
+witness at a quarter of the estimated size.
