@@ -65,7 +65,9 @@
 > **Arity and height in one mechanism:** a `Z_{p^k}` deck is ONE propagation constructing the order-`p^k`
 > generator — height enters only through `n`. **Honest firing scope:** graded + measured, never claimed —
 > trivial-stabilizer seeds complete (regular deck over rigid core = every tower gadget); nontrivial seed
-> stabilizers (per-copy twin gauges = wreath-type, NOT linear-over-a-ring) stall and correctly fall through.
+> stabilizers (per-copy twin gauges = wreath-type, NOT linear-over-a-ring) stall and correctly fall through
+> — ⚠ "fall through" = out of THIS leg, not out of the project: the wreath-gauge class is tracked for its
+> own mechanism as `remaining-work.md` §1C item C2 (2026-07-18 retarget — no family is permanently residual).
 > ⚠ Trap #1 hit LIVE again: a function-typed forcing round compounds **exponentially** under iterate (2 rounds
 > ≈ 1 s, 9 rounds > 300 s at n = 9); cure = Vector-state rounds (`roundVecD`, data → data) + `uniqueFilter`,
 > bridge `propagateVec_eq`. **F3: SCOPED same day (§5b — read it before any F3 work; it re-scopes the ring
@@ -122,7 +124,8 @@
 >
 > **Poly headline for both encodings** (§6): native = arity ≤ n (F3); tower = per-level consume of the
 > elementary-abelian gauge (F1/F2) + value peel across descent levels ≤ n (F3). No move claims the WL-blind
-> **non-linear** residue — that stays the named wall, unchanged.
+> **non-linear** residue — outside this plan's scope; ⚠ it is NOT a permanent wall: it is the W2 target of
+> [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) §1W (2026-07-18 retarget).
 >
 > **Doc corrections carried by this plan:** `chain-descent-ir-blindspot-solver.md` §STATUS "Fold covers s > 6 —
 > RESOLVED, poly, any s" / "Q1 CLOSED" are **overstated** (its own scope note eight lines later concedes odd-part
@@ -475,7 +478,8 @@ fold's own localisation) once F2/F3 land.
 
 ## 7. What this plan does NOT close (kept explicit, per the vacuity steer)
 
-- **The WL-blind non-linear residue** — unchanged, the named wall (`hSmallAutThin`). No move above claims it.
+- **The WL-blind non-linear residue** — the named wall (`hSmallAutThin`). No move above claims it — but it is
+  a TARGET, not a fixture: attack plan = `remaining-work.md` §1W (W2), per the 2026-07-18 completeness retarget.
 - **F2/F3 are designs**, not theorems: until they land, the *Lean* fold coverage is exactly F1's (refinement-
   visible folds), and the endgame-spec "rigid node-4 handled" leg remains scoped to what the C# validates
   (odd-part ≤ 5 towers + native rings, bounded rank) **plus nothing on the Lean side**.

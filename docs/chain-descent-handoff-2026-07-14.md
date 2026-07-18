@@ -24,6 +24,13 @@ gets stronger, with no re-proof of anything. What is missing is resolver **stren
 *one-step* colour match that flags on a 7-cycle, and the built rigid key is a look-ahead heuristic. That is the
 whole frontier.
 
+> **▶▶ 2026-07-18 — TARGET RESTATED + LIVE PLAN MOVED.** The target is a **complete** canonizer (the flag
+> provably never fires); a named residue is only the recorded-exhaustion fallback, never a design assumption.
+> The full gap enumeration (consume/force gaps, the recovery poly program, the wall's two faces, the theorem
+> ledger) and the ordered plan now live in
+> [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) §0–§2 — read it after this file.
+> This handoff remains the authoritative record of what is BUILT (§1–§7).
+
 ---
 
 ## 1. The stack (all in `scripts/build.sh`, all axiom-clean, no `sorry`)

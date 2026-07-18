@@ -34,7 +34,13 @@ are they instantiated with `axiom` witnesses so `#print axioms` aggregates them 
 
 ## STATUS (2026-07-17) — the statements here are TARGETS, not finalized design (user steer; blocker-audit item 8).
 Finalization is deliberately deferred; read the obligations as the intended shape, not as what the library fills
-today. Per-obligation state:
+today.
+  · ⚠ END-TARGET RESTATED (2026-07-18, user steer): the goal is a COMPLETE canonizer — `canonForm? ≠ none` on
+    every input (③ becomes vacuous, the residue atoms drop). The poly-or-flag + graded-③ shape below is the
+    honest INTERMEDIATE each stage publishes through, and the fallback only after recorded route-exhaustion
+    (plan: docs/chain-descent-remaining-work.md §0–§2). Nothing below changes until legs close; totality
+    tightens the file at the end, not before.
+Per-obligation state:
   · ① — swap-ready and mechanical, EXCEPT the import cone: this file imports only `ChainDescent.Spine`, which does
     NOT reach `Descend`/`Stall`/`Residue`/`PrunedSupply`. Fix the import at swap time (one line; the swap has never
     been compile-tested).

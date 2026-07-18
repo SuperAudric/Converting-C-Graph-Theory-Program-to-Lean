@@ -100,6 +100,16 @@ is why the design does not collapse into GI ∈ P.
 
 ## 1. The end state, and the definition of "done"
 
+> **⚠ RETARGET (2026-07-18, user steer — read before the bullets below).** The end state below (poly-or-flag +
+> a characterized residue) is the honest **intermediate scaffold and the fallback**, NOT the target. **The
+> target is a COMPLETE canonizer — every input handled, polynomially: the flag provably never fires**
+> (totality assembled per-leg + the G3 case-split). A named residue is acceptable in the final version **only
+> for a gap whose every identified route has been attempted and recorded dead** (steers-archive discipline).
+> The full gap enumeration and the plan to closure:
+> [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) §0–§2. The obligations below stay
+> exactly as stated — each intermediate stage publishes through them; "done" tightens from "③ characterized"
+> to "③ vacuous (no flag)".
+
 The finished project is the theorem `Showcase.canonizer` (and the trio + non-vacuity guard it composes):
 
 - **Correctness is unconditional** — for *every* graph, whenever the canonizer answers, its output is a
@@ -500,8 +510,10 @@ Seal substrate (warm_6_2, spine, Stage 0a complete_of_isCanonicalForm) ─→ co
   non-empty rigid residual is an expected outcome. Upside: proving no-rigid-Cameron collapses `UnhandledResidue`
   to one atom — pursue it as a headline-tightener, not just a hope.*
 - **`UnhandledResidue → ⊥` = closing the shared wall** (`hSmallAutThin` = rigid-GI ∈ P), the central open
-  problem — NOT a near-term deliverable. *Mitigation: the honest best headline is one named residue with no
-  witness (§1a); `⊥` drops in free if the wall falls. Do not gate "done" on emptying it.*
+  problem. ⚠ REFRAMED (2026-07-18, user steer): this IS the target, not a stretch goal — the wall is attacked
+  to route-exhaustion (remaining-work §1W), and the named-residue headline is the *fallback* carried with its
+  recorded route obituaries, never a design assumption. Near-term stages still publish through the
+  poly-or-flag shape while the wall stands.
 - **Cost-model granularity is an unmade decision** that everything in ② inherits. *Resolve at the pilot.*
 - **Paper theorem statement** should be pinned now (it is `canonizer`); it defines "clean enough" for
   Publication-Phase cleanup and prevents polishing what the paper will not use.
