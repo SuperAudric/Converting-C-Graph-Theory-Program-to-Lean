@@ -42,45 +42,36 @@ missing partner counts as moved — validity is part of the value, not a side co
   — which the consume side then collapses. Graded and measured, never claimed globally.
 - ② = the cost field, billed flat.
 
-## Build state (2026-07-18, handoff — the STAGED items are the pickup; the proof routes are worked out)
+## Build state (2026-07-18: F3a COMPLETE — all tranches landed, axiom-clean; guards `Regression` §12)
 
-**LANDED (this file, compile-clean, axiom-clean):** §1 `KeySeparates` + the firing theorem
-`keepMin_pairwise_aut_of_separates`; §2 the **component-closure lemma set** (`relComp_closed` via the
-monotone-rounds pigeonhole, `mem_relComp_self/trans/symm`, `mem_relComp_congr` = copy-designator
-well-definedness — for a SYMMETRIC relation, hence §3); §3 the **symmetrized** cell relations
-`symSame`/`symCross` (weakly-connected components: `AdjMatrix` guarantees no symmetry, and symmetrizing makes
-the closure lemmas unconditional; matches the C#) with `_symm`/`_transport` lemmas; §4 the spec key:
-`partnerTo`/`walkOk`/`holMoved`/`holHas`/`holSig`/`holKey`. `holSig` is the **indicator vector over `[0, n]`**
-— canonical BY CONSTRUCTION (no sort, no dedup), chosen so equivariance is pure existential reindexing
-rather than sorted-permutation plumbing.
+- §1 `KeySeparates` + the firing theorem `keepMin_pairwise_aut_of_separates`.
+- §2 the **component-closure lemma set**: `relComp_closed` (monotone-rounds pigeonhole),
+  `mem_relComp_self/trans/symm`, `mem_relComp_congr` = copy-designator well-definedness — the convergence
+  content F2a deliberately never needed, generic over any SYMMETRIC relation (hence §3).
+- §3 the **symmetrized** cell relations `symSame`/`symCross` (weakly-connected components: `AdjMatrix`
+  guarantees no symmetry, and symmetrizing makes the closure lemmas unconditional; matches the C#).
+- §4–5 the spec key: `partnerTo`/`walkOk`/`holMoved`/`holHas`/`holSig`/`holKey`. `holSig` is the **indicator
+  vector over `[0, n]`, presence-first** (`0` = attained, so the lex-least key prefers the straightest copy —
+  which is also the side a fully-symmetric consume supply can then collapse) — canonical BY CONSTRUCTION (no
+  sort, no dedup), so equivariance is pure existential reindexing rather than sorted-permutation plumbing.
+- §6 **`keyEquivariant_holKey`** — the whole ① obligation: `partnerTo_conj` (`uniqueMem_transport` +
+  `mem_relComp_transport`), `walkOk_conj`, `holMoved_conj` (`countP` fused over the filter, reindexed via
+  `(finRange n).map σ ~ finRange n`), `holHas_conj` (existential reindexing), `holSig_conj`.
+- §7 the **evaluation twins**: `compIdx`/`compTbl` (min-member id-tables, INTERNAL ids — `compIdx_eq_iff`
+  proves id-equality is exactly component membership), `pfT`/`walkOkT`/`holMovedT`, `holSigFast`/`holKeyFast`
+  with value-equality bridges (`holSigFast_eq`/`holKeyFast_eq`). Do NOT `#eval` the spec forms at `n ≥ 15`
+  (they recompute `relComp` per membership test — trap #1's shape); the twin does the full `n = 30` witness
+  `keepMin` in ~10 s interpreted.
+- §8 capstones: `holKey_canonizer` (pure force), `holKey_foldDeck_guarded_canonizer` and
+  `holKey_foldDeck_selNode_canonizer` (**the F3a canonizers of record for the fold family**: force = holonomy,
+  consume = `foldSupply ++ deckSupply`).
 
-**STAGED — the next tranche, in order, with routes:**
-1. **`KeyEquivariant holKey`.** Route: `partnerTo_conj` (= `uniqueMem_transport` +
-   `mem_relComp_transport` + `symSame_transport`/`symCross_transport` — the `swapFun_conj` pattern);
-   `walkOk_conj` (three `decide_eq_decide.mpr (mem_relComp_transport …)` rewrites); `holMoved_conj`
-   (`List.countP_filter` to fuse filter into countP, reindex over `finRange` via
-   `(finRange n).map σ ~ finRange n` + `List.Perm.countP_eq` + `List.countP_map`, then pointwise cases on
-   the `partnerTo_conj`-rewritten match chain, `σ.injective` for the final `decide`); `holHas_conj`
-   (`List.any_eq_true` both sides, reindex the two existentials by `σ`/`σ.symm` — no perm plumbing, which
-   is what the indicator form buys); `holSig_conj` = `map`-congruence pointwise; `keyEquivariant_holKey`
-   is then `holSig_conj` verbatim.
-2. **The evaluation twins.** The spec forms recompute `relComp` per membership test — trap #1's shape; do
-   NOT `#eval` them at `n ≥ 15` (the F3 probes measured the table form at ~0.5 s for six vertices,
-   `n = 30`). Twin design: per key call materialise min-member id-tables
-   `compTbl rel := Vector.ofFn (fun v => ((relComp rel v).map Fin.val).foldr min n)` for both relations;
-   partner/walk tests by `Nat` id-equality; enumerate walks over the DEDUPED id set (~s² instead of n²
-   pairs). Bridges: `compTbl_get_eq_iff : (compTbl rel).get v = (compTbl rel).get w ↔ w ∈ relComp rel v`
-   (fold-min of the member-val list is a member and a lower bound, then §2's membership-equivalence), and
-   id-pair-walk vs vertex-pair-walk value-set equality via `mem_relComp_congr` — exactly what §2 exists for.
-3. **Witness guards + capstones.** Witness = `U3 ⊔ T3` (recipe + measured numbers in plan §5b: U-side
-   attains moved-counts `{0, 5}`, T-side `{2, 5}`). ⚠ With the indicator signature the T-side is lex-LEAST
-   (indicator 0 at position 0), so expect `keepMin holKeyFast = [19, 24, 29]` (T-pendants) where
-   `lookaheadKey` keeps all 6 — and on the T-side `foldSupply` verifies only the (0,1)-swap, so
-   `forceThenConsume` lands at 2 there, not 1; the clean `= 1` composite needs the kept side fully
-   symmetric (flip the indicator polarity, or guard `≤ 2` honestly). MEASURE FIRST in scratch (standing
-   steer), then port the confirmed numbers. Capstones: `force_canonizer` / `guarded_mixed_canonizer` /
-   `Select.selNode_canonizer` instances over `holKey`, hypothesis = `keyEquivariant_holKey` only.
-4. **F3b (Smith/CRT coset)** stays gated on a measured holonomy-failure witness — plan §5b.
+**Measured (Regression §12, n = 30 `U3 ⊔ T3`):** branch cell = all 6 pendants (WL-merged), `lookaheadKey`
+keeps 6, `holKeyFast` keeps exactly the straight triple `[4, 9, 14]` — one genuine orbit, which `foldSupply`
+collapses (measured at n = 15, §10's family). The n = 30 composite `#eval` is omitted only because
+`foldSupply`'s twins recompute `relComp` per lookup at that size — porting §7's `compTbl` id-tables into F2a's
+twins is the noted follow-on. **F3b (Smith/CRT coset)** stays gated on a measured holonomy-failure witness —
+plan §5b.
 -/
 
 namespace ChainDescent
@@ -359,11 +350,12 @@ def holHas (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) (c : Nat) : Bool :
     walkOk adj χ v t₁ t₂ && decide (holMoved adj χ v t₁ t₂ = c)))
 
 /-- **The holonomy signature**: the indicator vector, over the value range `[0, n]` (a moved-count never
-exceeds the copy size), of which moved-counts are attained by some valid walk. Full enumeration makes it
-representative-free (trap #7); the indicator form makes it **canonical by construction** — no sorting, no
-dedup — so equivariance is pure existential reindexing. -/
+exceeds the copy size), of which moved-counts are attained by some valid walk — encoded presence-first
+(`0` = attained), so the lex-LEAST key prefers the branch whose holonomy is trivial-est (the straightest
+copy). Full enumeration makes it representative-free (trap #7); the indicator form makes it **canonical by
+construction** — no sorting, no dedup — so equivariance is pure existential reindexing. -/
 def holSig (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : List Nat :=
-  (List.range (n + 1)).map (fun c => if holHas adj χ v c then 1 else 0)
+  (List.range (n + 1)).map (fun c => if holHas adj χ v c then 0 else 1)
 
 /-- **★ THE HOLONOMY KEY.** Ranks a branch by its copy's holonomy signature — the coset/monodromy data the
 1-WL look-ahead cannot see. Cost billed flat at `n⁵` per evaluation (walk pairs × copy sweep × partner scans,
@@ -376,6 +368,338 @@ def holKey : Key n := fun adj χ v =>
 
 @[simp] theorem keyCost_holKey (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
     keyCost (holKey (n := n)) adj χ v = n * n * n * n * n := rfl
+
+/-! ## 6. `①` — the key is EQUIVARIANT (the whole soundness obligation of a force key) -/
+
+private theorem finRange_map_perm (σ : Equiv.Perm (Fin n)) :
+    ((List.finRange n).map σ).Perm (List.finRange n) := by
+  refine List.perm_of_nodup_nodup_toFinset_eq
+    ((List.nodup_finRange n).map σ.injective) (List.nodup_finRange n) ?_
+  ext u
+  simp only [List.mem_toFinset, List.mem_map, List.mem_finRange, iff_true]
+  exact ⟨σ.symm u, by simp⟩
+
+private theorem countP_reindex (σ : Equiv.Perm (Fin n)) (f : Fin n → Bool) :
+    (List.finRange n).countP (fun x => f (σ x)) = (List.finRange n).countP f := by
+  have h1 : ((List.finRange n).map σ).countP f = (List.finRange n).countP f :=
+    (finRange_map_perm σ).countP_eq f
+  rw [← h1, List.countP_map]
+  rfl
+
+theorem partnerTo_conj (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (x t : Fin n) :
+    partnerTo (relabelAdj σ adj) (transportColouring σ χ) (σ x) (σ t)
+      = (partnerTo adj χ x t).map σ := by
+  unfold partnerTo
+  refine Fold.uniqueMem_transport σ (fun w => ?_)
+  rw [decide_eq_decide.mpr (Fold.mem_relComp_transport σ (symSame_transport σ adj χ) x w),
+      decide_eq_decide.mpr (Fold.mem_relComp_transport σ (symCross_transport σ adj χ) t w)]
+
+theorem walkOk_conj (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (v t₁ t₂ : Fin n) :
+    walkOk (relabelAdj σ adj) (transportColouring σ χ) (σ v) (σ t₁) (σ t₂)
+      = walkOk adj χ v t₁ t₂ := by
+  unfold walkOk
+  rw [decide_eq_decide.mpr (Fold.mem_relComp_transport σ (symCross_transport σ adj χ) v t₁),
+      decide_eq_decide.mpr (Fold.mem_relComp_transport σ (symCross_transport σ adj χ) v t₂),
+      decide_eq_decide.mpr (Fold.mem_relComp_transport σ (symCross_transport σ adj χ) t₁ t₂)]
+
+theorem holMoved_conj (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (v t₁ t₂ : Fin n) :
+    holMoved (relabelAdj σ adj) (transportColouring σ χ) (σ v) (σ t₁) (σ t₂)
+      = holMoved adj χ v t₁ t₂ := by
+  unfold holMoved
+  rw [List.countP_filter, List.countP_filter, ← countP_reindex σ]
+  congr 1
+  funext x
+  congr 1
+  · -- the composed-partner chain transports pointwise (re-expose each hop after the previous one reduces)
+    simp only [partnerTo_conj]
+    cases hp₁ : partnerTo adj χ x t₁ with
+    | none => rfl
+    | some y₁ =>
+        simp only [Option.map_some, partnerTo_conj]
+        cases hp₂ : partnerTo adj χ y₁ t₂ with
+        | none => rfl
+        | some y₂ =>
+            simp only [Option.map_some, partnerTo_conj]
+            cases hp₃ : partnerTo adj χ y₂ v with
+            | none => rfl
+            | some y₃ =>
+                simp only [Option.map_some]
+                rw [decide_eq_decide.mpr
+                  ⟨fun h => σ.injective h, fun h => congrArg σ h⟩]
+  · -- the copy-membership filter transports pointwise
+    rw [decide_eq_decide.mpr (Fold.mem_relComp_transport σ (symCross_transport σ adj χ) v x)]
+
+theorem holHas_conj (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (v : Fin n) (c : Nat) :
+    holHas (relabelAdj σ adj) (transportColouring σ χ) (σ v) c = holHas adj χ v c := by
+  unfold holHas
+  rw [Bool.eq_iff_iff, List.any_eq_true, List.any_eq_true]
+  constructor
+  · rintro ⟨t₁, -, h₁⟩
+    obtain ⟨t₂, -, h₂⟩ := List.any_eq_true.mp h₁
+    refine ⟨σ.symm t₁, List.mem_finRange _, List.any_eq_true.mpr
+      ⟨σ.symm t₂, List.mem_finRange _, ?_⟩⟩
+    rw [show t₁ = σ (σ.symm t₁) from (σ.apply_symm_apply t₁).symm,
+        show t₂ = σ (σ.symm t₂) from (σ.apply_symm_apply t₂).symm,
+        walkOk_conj, holMoved_conj] at h₂
+    exact h₂
+  · rintro ⟨t₁, -, h₁⟩
+    obtain ⟨t₂, -, h₂⟩ := List.any_eq_true.mp h₁
+    refine ⟨σ t₁, List.mem_finRange _, List.any_eq_true.mpr
+      ⟨σ t₂, List.mem_finRange _, ?_⟩⟩
+    rw [walkOk_conj, holMoved_conj]
+    exact h₂
+
+theorem holSig_conj (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    holSig (relabelAdj σ adj) (transportColouring σ χ) (σ v) = holSig adj χ v := by
+  unfold holSig
+  exact List.map_congr_left (fun c _ => by rw [holHas_conj])
+
+/-- **★★ THE HOLONOMY KEY IS EQUIVARIANT** — the whole `①` obligation of a force key discharged: the partner
+lookups conjugate (`uniqueMem_transport` on the transported component memberships), the walk enumeration and
+the copy sweep reindex bijectively, and the indicator signature is canonical by construction. -/
+theorem keyEquivariant_holKey : KeyEquivariant (holKey (n := n)) := by
+  intro σ adj χ v
+  show holSig (relabelAdj σ adj) (transportColouring σ χ) (σ v) = holSig adj χ v
+  exact holSig_conj σ adj χ v
+
+/-! ## 7. The evaluation twin — materialised component-id tables
+
+The spec forms recompute `relComp` inside every membership test (trap #1's shape — do not `#eval` them at
+`n ≥ 15`). The twin materialises, per key call, two id-tables (`compTbl` — the least member index of each
+vertex's component, an INTERNAL id: outputs consult only id-equality, which `compIdx_eq_iff` proves is exactly
+component membership) and reads everything off the forced tables. Value-equal (`holSigFast_eq` /
+`holKeyFast_eq`), so every theorem transfers. -/
+
+private theorem foldr_min_le (L : List Nat) (x : Nat) (hx : x ∈ L) : L.foldr min n ≤ x := by
+  induction L with
+  | nil => cases hx
+  | cons a t ih =>
+      rcases List.mem_cons.mp hx with rfl | hx'
+      · exact min_le_left _ _
+      · exact le_trans (min_le_right _ _) (ih hx')
+
+private theorem foldr_min_mem (L : List Nat) (hne : L ≠ []) (hlt : ∀ x ∈ L, x < n) :
+    L.foldr min n ∈ L := by
+  induction L with
+  | nil => exact absurd rfl hne
+  | cons a t ih =>
+      cases t with
+      | nil =>
+          show min a ([].foldr min n) ∈ [a]
+          rw [List.foldr_nil, min_eq_left (le_of_lt (hlt a (List.mem_cons_self ..)))]
+          exact List.mem_cons_self ..
+      | cons b t' =>
+          have hmem := ih (by simp) (fun x hx => hlt x (List.mem_cons_of_mem a hx))
+          show min a ((b :: t').foldr min n) ∈ a :: b :: t'
+          rcases le_total a ((b :: t').foldr min n) with h | h
+          · rw [min_eq_left h]
+            exact List.mem_cons_self ..
+          · rw [min_eq_right h]
+            exact List.mem_cons_of_mem a hmem
+
+private theorem foldr_min_congr {L L' : List Nat} (hmem : ∀ x, x ∈ L ↔ x ∈ L')
+    (hne : L ≠ []) (hlt : ∀ x ∈ L, x < n) : L.foldr min n = L'.foldr min n := by
+  obtain ⟨a, ha⟩ := List.exists_mem_of_ne_nil L hne
+  have hne' : L' ≠ [] := List.ne_nil_of_mem ((hmem a).mp ha)
+  have hlt' : ∀ x ∈ L', x < n := fun x hx => hlt x ((hmem x).mpr hx)
+  exact Nat.le_antisymm
+    (foldr_min_le L _ ((hmem _).mpr (foldr_min_mem L' hne' hlt')))
+    (foldr_min_le L' _ ((hmem _).mp (foldr_min_mem L hne hlt)))
+
+/-- The component id: the least member index — INTERNAL (outputs consult only id-equality). -/
+def compIdx (rel : Fin n → Fin n → Bool) (u : Fin n) : Nat :=
+  ((relComp rel u).map Fin.val).foldr min n
+
+/-- **★ Ids test exactly component membership** (for a symmetric relation) — the well-definedness that lets
+the twin replace every `relComp` membership scan with an `O(1)` id comparison. -/
+theorem compIdx_eq_iff (rel : Fin n → Fin n → Bool) (hsym : ∀ a b, rel a b = rel b a)
+    (v w : Fin n) : compIdx rel v = compIdx rel w ↔ w ∈ relComp rel v := by
+  have hmemv : ∀ u : Fin n, compIdx rel u ∈ (relComp rel u).map Fin.val := fun u =>
+    foldr_min_mem _ (List.ne_nil_of_mem (List.mem_map_of_mem (mem_relComp_self rel u)))
+      (fun x hx => by
+        obtain ⟨m, -, rfl⟩ := List.mem_map.mp hx
+        exact m.isLt)
+  constructor
+  · intro hEq
+    obtain ⟨m, hm, hmv⟩ := List.mem_map.mp (hmemv v)
+    obtain ⟨m', hm', hmv'⟩ := List.mem_map.mp (hmemv w)
+    have hmm : m = m' := Fin.val_injective (by rw [hmv, hmv', hEq])
+    subst hmm
+    exact mem_relComp_trans rel hm (mem_relComp_symm rel hsym hm')
+  · intro hw
+    unfold compIdx
+    refine foldr_min_congr (fun x => ?_)
+      (List.ne_nil_of_mem (List.mem_map_of_mem (mem_relComp_self rel v)))
+      (fun x hx => by
+        obtain ⟨m, -, rfl⟩ := List.mem_map.mp hx
+        exact m.isLt)
+    rw [List.mem_map, List.mem_map]
+    constructor
+    · rintro ⟨m, hm, rfl⟩
+      exact ⟨m, (mem_relComp_congr rel hsym hw m).mpr hm, rfl⟩
+    · rintro ⟨m, hm, rfl⟩
+      exact ⟨m, (mem_relComp_congr rel hsym hw m).mp hm, rfl⟩
+
+/-- The forced id-table (data, not a function — trap #1). -/
+def compTbl (rel : Fin n → Fin n → Bool) : Vector Nat n :=
+  Vector.ofFn (compIdx rel)
+
+theorem compTbl_get (rel : Fin n → Fin n → Bool) (u : Fin n) :
+    (compTbl rel).get u = compIdx rel u := by
+  simp [compTbl, Vector.get]
+
+/-- Table-level partner lookup (`c` = the target copy's id). -/
+def pfT (sT cT : Vector Nat n) (x : Fin n) (c : Nat) : Option (Fin n) :=
+  Deck.uniqueFilter (fun w => decide (sT.get w = sT.get x) && decide (cT.get w = c))
+
+/-- Table-level walk validity. -/
+def walkOkT (cT : Vector Nat n) (cv : Nat) (t₁ t₂ : Fin n) : Bool :=
+  !decide (cT.get t₁ = cv) && !decide (cT.get t₂ = cv) && !decide (cT.get t₂ = cT.get t₁)
+
+/-- Table-level holonomy moved-count. -/
+def holMovedT (sT cT : Vector Nat n) (cv : Nat) (t₁ t₂ : Fin n) : Nat :=
+  ((List.finRange n).filter (fun x => decide (cT.get x = cv))).countP (fun x =>
+    match pfT sT cT x (cT.get t₁) with
+    | none => true
+    | some y₁ =>
+        match pfT sT cT y₁ (cT.get t₂) with
+        | none => true
+        | some y₂ =>
+            match pfT sT cT y₂ cv with
+            | none => true
+            | some y₃ => !decide (y₃ = x))
+
+private theorem pfT_eq (adj : AdjMatrix n) (χ : Colouring n) (x t : Fin n) :
+    pfT (compTbl (symSame adj χ)) (compTbl (symCross adj χ)) x
+        ((compTbl (symCross adj χ)).get t)
+      = partnerTo adj χ x t := by
+  unfold pfT partnerTo
+  rw [Deck.uniqueFilter_eq_uniqueMem]
+  congr 1
+  funext w
+  rw [compTbl_get, compTbl_get, compTbl_get, compTbl_get,
+      decide_eq_decide.mpr (eq_comm.trans (compIdx_eq_iff _ (symSame_symm adj χ) x w)),
+      decide_eq_decide.mpr (eq_comm.trans (compIdx_eq_iff _ (symCross_symm adj χ) t w))]
+
+private theorem walkOkT_eq (adj : AdjMatrix n) (χ : Colouring n) (v t₁ t₂ : Fin n) :
+    walkOkT (compTbl (symCross adj χ)) ((compTbl (symCross adj χ)).get v) t₁ t₂
+      = walkOk adj χ v t₁ t₂ := by
+  unfold walkOkT walkOk
+  rw [compTbl_get, compTbl_get, compTbl_get,
+      decide_eq_decide.mpr (eq_comm.trans (compIdx_eq_iff _ (symCross_symm adj χ) v t₁)),
+      decide_eq_decide.mpr (eq_comm.trans (compIdx_eq_iff _ (symCross_symm adj χ) v t₂)),
+      decide_eq_decide.mpr (eq_comm.trans (compIdx_eq_iff _ (symCross_symm adj χ) t₁ t₂))]
+
+private theorem tbl_filter_eq (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    (List.finRange n).filter
+        (fun x => decide ((compTbl (symCross adj χ)).get x = (compTbl (symCross adj χ)).get v))
+      = (List.finRange n).filter (fun x => decide (x ∈ relComp (symCross adj χ) v)) := by
+  refine List.filter_congr (fun x _ => ?_)
+  rw [compTbl_get, compTbl_get]
+  exact decide_eq_decide.mpr (eq_comm.trans (compIdx_eq_iff _ (symCross_symm adj χ) v x))
+
+private theorem holMovedT_eq (adj : AdjMatrix n) (χ : Colouring n) (v t₁ t₂ : Fin n) :
+    holMovedT (compTbl (symSame adj χ)) (compTbl (symCross adj χ))
+        ((compTbl (symCross adj χ)).get v) t₁ t₂
+      = holMoved adj χ v t₁ t₂ := by
+  unfold holMovedT holMoved
+  rw [tbl_filter_eq]
+  congr 1
+  funext x
+  simp only [pfT_eq]
+
+private theorem any_walkVals_eq_holHas (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n)
+    (c : Nat) :
+    (((List.finRange n).flatMap (fun t₁ => (List.finRange n).filterMap (fun t₂ =>
+        if walkOk adj χ v t₁ t₂ then some (holMoved adj χ v t₁ t₂) else none))).any
+      (fun m => decide (m = c))) = holHas adj χ v c := by
+  unfold holHas
+  rw [Bool.eq_iff_iff, List.any_eq_true, List.any_eq_true]
+  constructor
+  · rintro ⟨m, hm, hmc⟩
+    obtain ⟨t₁, ht₁, hm₁⟩ := List.mem_flatMap.mp hm
+    obtain ⟨t₂, ht₂, hm₂⟩ := List.mem_filterMap.mp hm₁
+    refine ⟨t₁, ht₁, List.any_eq_true.mpr ⟨t₂, ht₂, ?_⟩⟩
+    by_cases hok : walkOk adj χ v t₁ t₂
+    · rw [if_pos hok] at hm₂
+      rw [hok, Bool.true_and, Option.some.inj hm₂]
+      exact hmc
+    · rw [if_neg hok] at hm₂
+      cases hm₂
+  · rintro ⟨t₁, ht₁, h₁⟩
+    obtain ⟨t₂, ht₂, h₂⟩ := List.any_eq_true.mp h₁
+    rw [Bool.and_eq_true] at h₂
+    refine ⟨holMoved adj χ v t₁ t₂,
+      List.mem_flatMap.mpr ⟨t₁, ht₁, List.mem_filterMap.mpr ⟨t₂, ht₂, by rw [if_pos h₂.1]⟩⟩,
+      h₂.2⟩
+
+/-- **The runnable signature** — two forced id-tables per call, then `O(1)` reads everywhere. -/
+def holSigFast (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : List Nat :=
+  let sT := compTbl (symSame adj χ)
+  let cT := compTbl (symCross adj χ)
+  let cv := cT.get v
+  let vals := (List.finRange n).flatMap (fun t₁ => (List.finRange n).filterMap (fun t₂ =>
+    if walkOkT cT cv t₁ t₂ then some (holMovedT sT cT cv t₁ t₂) else none))
+  (List.range (n + 1)).map (fun c => if vals.any (fun m => decide (m = c)) then 0 else 1)
+
+/-- **The runnable signature computes exactly the reasoned-about one.** -/
+theorem holSigFast_eq (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    holSigFast adj χ v = holSig adj χ v := by
+  unfold holSigFast holSig
+  simp only [walkOkT_eq, holMovedT_eq]
+  exact List.map_congr_left (fun c _ => by rw [any_walkVals_eq_holHas])
+
+/-- The runnable key — value-equal to `holKey` (`holKeyFast_eq`), so every theorem transfers. -/
+def holKeyFast : Key n := fun adj χ v =>
+  (holSigFast adj χ v, n * n * n * n * n)
+
+theorem holKeyFast_eq : (holKeyFast : Key n) = holKey := by
+  funext adj χ v
+  show (holSigFast adj χ v, n * n * n * n * n) = (holSig adj χ v, n * n * n * n * n)
+  rw [holSigFast_eq]
+
+theorem keyEquivariant_holKeyFast : KeyEquivariant (holKeyFast (n := n)) := by
+  rw [holKeyFast_eq]
+  exact keyEquivariant_holKey
+
+/-! ## 8. ★★★ THE CAPSTONES — no carried hypotheses -/
+
+/-- **★★★ The pure-force canonizer over the holonomy key** — sound, iso-invariant, and it always answers. -/
+theorem holKey_canonizer :
+    CanonSpec.IsCanonicalFormOpt
+        (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+          (Force.forceBy (holKeyFast (n := n))))
+      ∧ ∀ adj : AdjMatrix n,
+        Descend.canonForm? (Refine.encodeFreeFast (n := n))
+          (Force.forceBy (holKeyFast (n := n))) adj ≠ none :=
+  Force.force_canonizer_fast keyEquivariant_holKeyFast
+
+/-- **★★★ THE F3a CANONIZER OF RECORD for the fold family (guarded blind object)**: force = the holonomy key
+(separates WL-merged distinguishable copies), consume = `foldSupply ++ deckSupply` (collapses the kept
+orbit). -/
+theorem holKey_foldDeck_guarded_canonizer :
+    CanonSpec.IsCanonicalFormOpt
+      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (holKeyFast (n := n))
+          (Deck.appendSupply (Fold.foldSupply (n := n)) (Deck.deckSupply (n := n)))))) :=
+  SupplyTransport.guarded_mixed_canonizer keyEquivariant_holKeyFast
+    (Deck.supplyEquivariant_appendSupply Fold.gensEquivariant_foldSupply
+      Deck.gensEquivariant_deckSupply)
+
+/-- **★★★ The FUSED (resolver-aware) mirror** — the selector probes every cell with the same force + supply
+pair. -/
+theorem holKey_foldDeck_selNode_canonizer :
+    CanonSpec.IsCanonicalFormOpt
+      (Select.canonFormS? (Refine.encodeFreeFast (n := n))
+        (Select.selNode (Refine.encodeFreeFast (n := n)) (holKeyFast (n := n))
+          (Deck.appendSupply (Fold.foldSupply (n := n)) (Deck.deckSupply (n := n))))) :=
+  Select.selNode_canonizer keyEquivariant_holKeyFast
+    (Deck.supplyEquivariant_appendSupply Fold.gensEquivariant_foldSupply
+      Deck.gensEquivariant_deckSupply)
 
 end Hol
 end ChainDescent

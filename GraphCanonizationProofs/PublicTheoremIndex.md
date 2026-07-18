@@ -3169,33 +3169,36 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 42-43 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 45-47 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 49-56 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 58-61 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 65-66 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 75-76 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 99-100 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 109-110 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 138-141 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 156 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 158-160 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 175-179 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 195-198 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 200 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 202-204 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 206-208 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 209 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
-| `Regression.gSel` | 244-245 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
-| `Regression.gSelDeep` | 247-248 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
-| `Regression.vcoreB` | 280-284 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
-| `Regression.vfold2` | 286-289 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
-| `Regression.vfold2Root` | 291 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wEdge` | 317-322 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
-| `Regression.wcyc9` | 324 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
-| `Regression.wcyc9Root` | 325-327 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wcyc9Swapped` | 338 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
-| `Regression.wcyc9SwappedRoot` | 339-340 | Its materialized root (trap #1). | Definition |
+| `Regression.C5` | 43-44 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 46-48 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 50-57 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 59-62 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 66-67 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 76-77 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 100-101 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 110-111 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 139-142 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 157 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 159-161 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 176-180 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 196-199 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 201 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 203-205 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 207-209 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 210 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 245-246 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 248-249 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.vcoreB` | 281-285 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
+| `Regression.vfold2` | 287-290 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
+| `Regression.vfold2Root` | 292 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wEdge` | 318-323 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
+| `Regression.wcyc9` | 325 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
+| `Regression.wcyc9Root` | 326-328 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wcyc9Swapped` | 339 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Regression.wcyc9SwappedRoot` | 340-341 | Its materialized root (trap #1). | Definition |
+| `Regression.vfoldT` | 366-373 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
+| `Regression.ut` | 375-379 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
+| `Regression.utRoot` | 381 | Materialized root colouring (trap #1). | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3681,26 +3684,47 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Hol.KeySeparates` | 100-106 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
-| `Hol.keyV_eq_of_mem_keepMin` | 108-120 | Members of the narrowed set all attain the minimum key value. | — |
-| `Hol.keepMin_pairwise_aut_of_separates` | 122-144 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
-| `Hol.relComp_closed` | 219-235 | The closure really is closed: a `rel`-step out of `relComp` stays inside (monotone-rounds pigeonhole — the convergence content F2a never needed). | — |
-| `Hol.relComp_subset_of_closed` | 237-253 | Anything reachable from a member of a closed set is in it. | — |
-| `Hol.mem_relComp_self` | 255-260 | Component membership is reflexive. | — |
-| `Hol.mem_relComp_trans` | 262-265 | Component membership is transitive (via closedness). | — |
-| `Hol.mem_relComp_symm` | 267-284 | Component membership is symmetric — for a symmetric relation. | — |
-| `Hol.mem_relComp_congr` | 286-291 | **★ Copy-designator well-definedness**: any member of a component designates the same component. | — |
-| `Hol.symSame` | 300-302 | Symmetrized same-cell (vertical) adjacency — weak components; `AdjMatrix` guarantees no symmetry. | Definition |
-| `Hol.symCross` | 304-306 | Symmetrized cross-cell (horizontal) adjacency. | Definition |
-| `Hol.symSame_symm` | 308-309 | The symmetrized vertical relation is symmetric (by construction). | — |
-| `Hol.symCross_symm` | 311-312 | The symmetrized horizontal relation is symmetric (by construction). | — |
-| `Hol.symSame_transport` | 314-318 | The symmetrized vertical relation transports. | — |
-| `Hol.symCross_transport` | 320-324 | The symmetrized horizontal relation transports. | — |
-| `Hol.partnerTo` | 328-332 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
-| `Hol.walkOk` | 334-338 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
-| `Hol.holMoved` | 340-354 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
-| `Hol.holHas` | 356-359 | Is some valid walk's moved-count equal to `c`? — the signature's membership test. | Definition |
-| `Hol.holSig` | 361-366 | **The holonomy signature**: the indicator vector over `[0, n]` of attained moved-counts — representative-free (trap #7) and canonical BY CONSTRUCTION (no sort/dedup, so equivariance is existential reindexing). | Definition |
-| `Hol.holKey` | 368-372 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3-vs-3 where `lookaheadKey` keeps 6. | Definition |
-| `Hol.keyV_holKey` | 374-375 | The key's value projection is `holSig`. | `@[simp]` |
-| `Hol.keyCost_holKey` | 377-378 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |
+| `Hol.KeySeparates` | 91-97 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
+| `Hol.keyV_eq_of_mem_keepMin` | 99-111 | Members of the narrowed set all attain the minimum key value. | — |
+| `Hol.keepMin_pairwise_aut_of_separates` | 113-135 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
+| `Hol.relComp_closed` | 210-226 | The closure really is closed: a `rel`-step out of `relComp` stays inside (monotone-rounds pigeonhole — the convergence content F2a never needed). | — |
+| `Hol.relComp_subset_of_closed` | 228-244 | Anything reachable from a member of a closed set is in it. | — |
+| `Hol.mem_relComp_self` | 246-251 | Component membership is reflexive. | — |
+| `Hol.mem_relComp_trans` | 253-256 | Component membership is transitive (via closedness). | — |
+| `Hol.mem_relComp_symm` | 258-275 | Component membership is symmetric — for a symmetric relation. | — |
+| `Hol.mem_relComp_congr` | 277-282 | **★ Copy-designator well-definedness**: any member of a component designates the same component. | — |
+| `Hol.symSame` | 291-293 | Symmetrized same-cell (vertical) adjacency — weak components; `AdjMatrix` guarantees no symmetry. | Definition |
+| `Hol.symCross` | 295-297 | Symmetrized cross-cell (horizontal) adjacency. | Definition |
+| `Hol.symSame_symm` | 299-300 | The symmetrized vertical relation is symmetric (by construction). | — |
+| `Hol.symCross_symm` | 302-303 | The symmetrized horizontal relation is symmetric (by construction). | — |
+| `Hol.symSame_transport` | 305-309 | The symmetrized vertical relation transports. | — |
+| `Hol.symCross_transport` | 311-315 | The symmetrized horizontal relation transports. | — |
+| `Hol.partnerTo` | 319-323 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
+| `Hol.walkOk` | 325-329 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
+| `Hol.holMoved` | 331-345 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
+| `Hol.holHas` | 347-350 | Is some valid walk's moved-count equal to `c`? — the signature's membership test. | Definition |
+| `Hol.holSig` | 352-358 | **The holonomy signature**: the indicator vector over `[0, n]` of attained moved-counts — representative-free (trap #7) and canonical BY CONSTRUCTION (no sort/dedup, so equivariance is existential reindexing). | Definition |
+| `Hol.holKey` | 360-364 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3-vs-3 where `lookaheadKey` keeps 6. | Definition |
+| `Hol.keyV_holKey` | 366-367 | The key's value projection is `holSig`. | `@[simp]` |
+| `Hol.keyCost_holKey` | 369-370 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |
+| `Hol.partnerTo_conj` | 389-396 | The partner lookup conjugates (`uniqueMem_transport` on the transported component memberships). | — |
+| `Hol.walkOk_conj` | 398-405 | Walk validity transports (three component-membership rewrites). | — |
+| `Hol.holMoved_conj` | 407-433 | The moved-count transports: `countP` fused over the filter, reindexed over `finRange` by σ, pointwise via the conjugated partner chain. | — |
+| `Hol.holHas_conj` | 435-454 | The membership test transports — pure existential reindexing (what the indicator form buys). | — |
+| `Hol.holSig_conj` | 456-459 | The signature is invariant under relabelling — map-congruence over `holHas_conj`. | — |
+| `Hol.keyEquivariant_holKey` | 461-467 | **★★ The holonomy key is equivariant** — the whole `①` obligation of a force key, discharged. | — |
+| `Hol.compIdx` | 513-515 | The component id: the least member index — INTERNAL (outputs consult only id-equality). | Definition |
+| `Hol.compIdx_eq_iff` | 517-545 | **★ Id-equality tests exactly component membership** (symmetric relation) — the well-definedness letting the twin replace membership scans with `O(1)` id comparisons. | — |
+| `Hol.compTbl` | 547-549 | The forced id-table (data, not a function — trap #1). | Definition |
+| `Hol.compTbl_get` | 551-553 | Table reads are `compIdx` values. | — |
+| `Hol.pfT` | 555-557 | Table-level partner lookup (`c` = the target copy's id). | Definition |
+| `Hol.walkOkT` | 559-561 | Table-level walk validity. | Definition |
+| `Hol.holMovedT` | 563-574 | Table-level holonomy moved-count. | Definition |
+| `Hol.holSigFast` | 640-647 | **The runnable signature** — two forced id-tables per call, then `O(1)` reads everywhere. | Definition |
+| `Hol.holSigFast_eq` | 649-654 | **The runnable signature computes exactly the reasoned-about one.** | — |
+| `Hol.holKeyFast` | 656-658 | The runnable key — value-equal to `holKey`, so every theorem transfers. | Definition |
+| `Hol.holKeyFast_eq` | 660-663 | The runnable key equals the spec key. | — |
+| `Hol.keyEquivariant_holKeyFast` | 665-667 | `①` for the runnable key, by transfer. | — |
+| `Hol.holKey_canonizer` | 671-679 | **★★★ The pure-force canonizer over the holonomy key** — sound, iso-invariant, always answers. | — |
+| `Hol.holKey_foldDeck_guarded_canonizer` | 681-691 | **★★★ The F3a canonizer of record for the fold family (guarded blind object)**: force = holonomy, consume = `foldSupply ++ deckSupply`. | — |
+| `Hol.holKey_foldDeck_selNode_canonizer` | 693-702 | **★★★ The fused (resolver-aware) mirror** — the selector probes every cell with the same force + supply pair. | — |

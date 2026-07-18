@@ -6,6 +6,7 @@ import ChainDescent.PartialMatch
 import ChainDescent.SelectNode
 import ChainDescent.FoldSupply
 import ChainDescent.DeckSupply
+import ChainDescent.HolKey
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -347,5 +348,47 @@ fires. And vice versa on the cycle. `Deck.appendSupply` covers both families wit
 #guard (narrow (consume (Deck.deckSupply)) vfold2 vfold2Root.col).length = 2
 #guard (narrow (consume (Deck.appendSupply Fold.foldSupply Deck.deckSupply)) vfold2 vfold2Root.col).length = 1
 #guard (narrow (consume (Deck.appendSupply Fold.foldSupply Deck.deckSupply)) wcyc9 wcyc9Root.col).length = 1
+
+/-! ## 12. `F3a` — the HOLONOMY key separates what 1-WL merges (the force-side gap)
+
+The genuine force residue of the fold family (plan §5b): DISTINGUISHABLE-but-WL-MERGED cells. Witness:
+`U3 ⊔ T3` — vfold3's core family (3 copies of the mirror-tied `C₄`+pendant, triangle of vertical matchings)
+unioned with its one-pair-twisted variant. Twist parity around the copy triangle makes `T3 ≇ U3`; 1-WL merges
+the components (the twist is invisible — the mirror class never splits), so the 6-pendant branch cell holds
+TWO orbits; consume cannot resolve it as a matter of principle (no automorphism between non-isomorphic
+components), and `lookaheadKey` is blind (pins leave the mirror tie; the histograms agree). `Hol.holKeyFast`
+reads the fold's HOLONOMY — composing the vertical matchings around the copy triangle: identity on the U side,
+the mirror on the T side — and keeps exactly the straight triple. **Do not delete** — the non-vacuity witness
+for the force firing theorem (`keepMin_pairwise_aut_of_separates`'s hypothesis is REAL here: the kept branches
+are one genuine orbit, which `foldSupply` collapses — measured at n = 15 in §10's family; the n = 30 composite
+eval is only an F2a evaluation-constant away, see plan §5b). -/
+
+/-- The twisted/untwisted vertical 3-fold: copy `c = i / 5`, core vertex `v = i % 5`; `twist01` crosses the
+`{1, 3}` fiber edges of the (0,1) copy-pair. -/
+def vfoldT (twist01 : Bool) (i j : Nat) : Bool :=
+  let ci := i / 5; let vi := i % 5; let cj := j / 5; let vj := j % 5
+  if ci == cj then vcoreB vi vj
+  else if twist01 && ((ci == 0 && cj == 1) || (ci == 1 && cj == 0)) then
+    (vi == 1 && vj == 3) || (vi == 3 && vj == 1) || (vi == vj && vi != 1 && vi != 3)
+  else vi == vj
+
+/-- `U3 ⊔ T3`, block-diagonal at 15 (n = 30). -/
+def ut : AdjMatrix 30 := ⟨fun i j =>
+  if i.val < 15 && j.val < 15 then (if vfoldT false i.val j.val then 1 else 0)
+  else if 15 ≤ i.val && 15 ≤ j.val then (if vfoldT true (i.val - 15) (j.val - 15) then 1 else 0)
+  else 0⟩
+
+def utRoot : Refine.ColData 30 := Refine.warmRefineVec ut (fun _ => 0)
+
+/-! 1-WL merges the two components' pendant cells — the branch cell spans both. -/
+#guard (branches utRoot.col).map Fin.val = [4, 9, 14, 19, 24, 29]
+
+/-! **The 1-WL look-ahead key is DEAD** — it keeps the whole 6-cell. -/
+#guard (Force.keepMin Force.lookaheadKey ut utRoot.col (branches utRoot.col)).length = 6
+
+/-! **The holonomy key FIRES**: the U-pendants' signature attains moved-count 0 (straight triangles compose to
+the identity), the T-pendants' does not (the twisted triangle moves the mirror pair) — presence-first
+encoding, so `keepMin` keeps exactly the straight triple, ONE genuine orbit. -/
+#guard (Force.keepMin Hol.holKeyFast ut utRoot.col (branches utRoot.col)).map Fin.val = [4, 9, 14]
 
 end ChainDescent.Regression
