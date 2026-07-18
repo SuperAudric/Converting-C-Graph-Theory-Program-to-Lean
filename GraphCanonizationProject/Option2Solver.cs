@@ -249,8 +249,16 @@ namespace Canonizer
             // for bounded s. For LARGE s (a Z₂ᵏ tower — the copies are vertex-transitive, so neither refinement
             // nor the flat s-quotient can order them in poly), recursively PEEL an s=2 matched-double factor
             // (each level is fully-symmetric ⟹ poly); only if no factor is found do we fall through (null, sound).
+            // The COORDINATE peel is tried first (fold-tower plan §5): cycle fibers cover ANY s including
+            // odd part ≥ 7 — the case the doubling peel provably cannot touch (`s % 2 ≠ 0 → null`); the
+            // hypercube-fiber Z₂ᵏ towers stay with the doubling peel. "Fibers are cycles" is an iso-invariant
+            // structural predicate, so the dispatch is canonical.
             if (s > MaxFoldMultiplicity)
+            {
+                var viaCycle = TryCycleCoordinatePeel(adj, n, vertexAt, nFibers, s, fiberRank, coreN);
+                if (viaCycle != null) return viaCycle;
                 return TryDoublingPeel(adj, n, cellOf, numCells, vertexAt, nFibers, s);
+            }
             int[]? best = null; string? bestForm = null;
             foreach (var rho in Permutations(s))
             {
@@ -361,6 +369,81 @@ namespace Canonizer
                     var form = EmitForm(n, adj, whole);
                     if (bestForm == null || string.CompareOrdinal(form, bestForm) < 0) { bestForm = form; best = whole; }
                 }
+            return best;
+        }
+
+        // ── The COORDINATE (CRT) peel — the odd-part ≥ 7 closer (fold-tower plan §5 / §8 item 5) ──────
+        // When a fiber's copy graph is a single CYCLE C_s (the Z_s voltage-tower shape: every copy has
+        // exactly two same-cell directions), the copy set carries a Z_s coordinate read off by walking the
+        // cycle — and NOTHING combinatorial needs peeling: the residual freedom is exactly the phase ×
+        // direction of the walk (the §5 unit-group scan, ≤ 2s ≤ 2n candidates), so enumerate ALL
+        // coordinatizations, emit the order (core-canonical fiber rank, coordinate) for each, and lex-min
+        // the serialized form. This replaces the s! cap with a ≤ 2n scan and has no parallel-class /
+        // matching-shape obstruction — which is why it closes the odd case the doubling peel provably
+        // cannot (`s % 2 != 0 → null`). CHOICE-FREE (the Lean port discipline): the walk candidates are
+        // taken from EVERY fiber's copy graph, not a reference fiber — the candidate set is a structural
+        // function of the cover, so lex-min over it is iso-invariant; soundness is automatic (every
+        // emitted order is a genuine relabelling through the (fiber, copy) bijection). Poly: ≤ 2n walks,
+        // O(n²) emit each. A mixed 2ᵃ·m tower whose peeled halves have cycle fibers composes through the
+        // mutual recursion (the doubling peel's halves re-enter TryCanonicalOrderWithFold, which routes a
+        // still-large odd residual here).
+        //
+        // SCOPE, honest: fibers that are neither hypercubes (doubling peel) nor cycles — e.g. the
+        // K_p□K_p rook grids of NESTED odd towers — still return null (sound fall-through). That residual
+        // is the module-level Smith/CRT coset ordering (the Lean F3b gate, built only on a measured
+        // witness), not a bigger walk enumeration.
+        private static int[]? TryCycleCoordinatePeel(
+            int[] adj, int n, int[] vertexAt, int nFibers, int s, int[] fiberRank, int coreN)
+        {
+            if (s < 5) return null;   // C₃ = K₃ is the fully-symmetric path; s ≤ 6 never dispatches here
+            int[]? best = null; string? bestForm = null;
+            var seenWalk = new HashSet<string>();
+            for (int f = 0; f < nFibers; f++)
+            {
+                // this fiber's copy graph: F[a,b] ⟺ copies a,b same-cell-adjacent within fiber f.
+                var F = new bool[s, s];
+                var deg = new int[s];
+                bool cyclic = true;
+                for (int a = 0; a < s && cyclic; a++)
+                {
+                    for (int b = 0; b < s; b++)
+                    {
+                        F[a, b] = a != b && adj[vertexAt[f * s + a] * n + vertexAt[f * s + b]] != 0;
+                        if (F[a, b]) deg[a]++;
+                    }
+                    if (deg[a] != 2) cyclic = false;   // a cycle: exactly two directions everywhere
+                }
+                if (!cyclic) continue;
+
+                for (int start = 0; start < s; start++)
+                    for (int first = 0; first < s; first++)
+                    {
+                        if (!F[start, first]) continue;
+                        // walk: rho[k] = the k-th copy in this coordinatization of THIS fiber's cycle.
+                        var rho = new int[s];
+                        var pos = new int[s]; Array.Fill(pos, -1);
+                        rho[0] = start; pos[start] = 0;
+                        rho[1] = first; pos[first] = 1;
+                        bool ok = true;
+                        for (int k = 2; k < s; k++)
+                        {
+                            int prev = rho[k - 2], cur = rho[k - 1], next = -1;
+                            for (int d = 0; d < s; d++)
+                                if (F[cur, d] && d != prev) next = d;
+                            if (next == -1 || pos[next] != -1) { ok = false; break; }   // not one s-cycle
+                            rho[k] = next; pos[next] = k;
+                        }
+                        if (!ok || !F[rho[s - 1], rho[0]]) continue;                    // must close at length s
+                        if (!seenWalk.Add(string.Join(",", rho))) continue;            // dedup across fibers
+
+                        var whole = new int[n];
+                        for (int r = 0; r < coreN; r++)
+                            for (int p = 0; p < s; p++)
+                                whole[r * s + p] = vertexAt[fiberRank[r] * s + rho[p]];
+                        var form = EmitForm(n, adj, whole);
+                        if (bestForm == null || string.CompareOrdinal(form, bestForm) < 0) { bestForm = form; best = whole; }
+                    }
+            }
             return best;
         }
 

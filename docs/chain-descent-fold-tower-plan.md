@@ -2,6 +2,48 @@
 
 > ## STATUS (2026-07-18 late: F2b LANDED — GENERALIZED; F2a landed same day; created 2026-07-17)
 >
+> **✅✅ THE §8 TAIL CLOSED (2026-07-18, latest pass — supersedes the per-item "open"/"follow-on" notes
+> below and in §5b/§8):**
+> - **F2a evaluation constant** (`ChainDescent/FoldFast.lean`, axiom-clean, in `build.sh`; smoke guard
+>   `Regression` §10): `foldSupplyFast`, the materialised-TABLE twin — component-membership ROWS forced once
+>   per supply call. ⚠ NOT the F3a `compIdx` id-tables: `compIdx_eq_iff` needs a SYMMETRIC relation and
+>   F2a's spec closures are DIRECTED (`relComp (sameCellRel …) b` from a base), so id-equality is not
+>   value-equal — membership rows are, by construction. `foldSupplyFast_eq` is a FUNCTION-level equality ⟹
+>   every `foldSupply` theorem transfers by rewriting; all-fast capstone
+>   `holKey_foldDeckFast_selNode_canonizer`. (F2b needed no port — `deckCandFast` has no `relComp` in its
+>   runtime path.)
+> - **The n = 30 F3a COMPOSITE, measured** (`PerformanceTest` §10): on `U3 ⊔ T3`, force (`holKeyFast`)
+>   keeps `[4, 9, 14]`, consume (`foldSupplyFast ++ deckSupply`) collapses to `[4]` — the 6-fan to ONE
+>   branch in one mixed step, ~40 s interpreted. ⚠ END-TO-END on the union FLAGS below the root (measured
+>   twice, incl. with `partialMatchSupply 0` appended): the T-side gauge — per-copy mirrors composed through
+>   the TWISTED matchings — is outside every built supply's reach (fold: merged twisted fibers ⟹ ambiguous
+>   partner; deck: a commuting copy swap ⟹ ≥ 2 extensions per mirror seed; matching: 1-WL chirality-blind).
+>   A CONSUME-side open item (a mirror-composite constructor), carried in `PerformanceTest` §10 — the root
+>   composite is the F3a claim and it fires.
+> - **The MULTIPEDE FOLD witness at scale** (`ChainDescent/MultipedeWitness.lean`, OFF-build like
+>   `PerformanceTest`; ~2.5 min): the C# `BuildNativeMultipede` ported (native-Z₂, 6-circulant `{0,1,3}`,
+>   n = 36). **Exhaustive pin-blindness `#guard`ed** — no segment pin cascades (2 singletons ever, 34/36
+>   vertices stay merged), which no `vfold`/`wcyc` witness could show. Matched double (n = 72):
+>   `deepMatchSupply 0` constructs NOTHING, `partialMatchSupply 0` verifies only diagonal identities,
+>   `foldSupplyFast` fires refinement-free (16/16 verified, 4-fan → 2). Any-`d` deadness is STRUCTURAL
+>   (σ moves every vertex; `d` pins make ≤ 2d + 2 singletons ⟹ `CatchesAt` unsatisfiable below d ≈ n/2).
+>   The surviving pair = the rigid GAUGE decision — the IR blind spot, attributed to force/the Smith solve
+>   (the F3b gate), not hidden. The JOINT F2+F3 measurement at multipede scale (twisted triple cover,
+>   n = 216) is gated on a COMPILED-evaluation tranche — the flat-`n⁵` `holKeyFast` is out of interpreted
+>   range there; the capstone theorems already cover the object.
+> - **✅ C# PARITY (§8 item 5a) — odd-part ≥ 7 CLOSED for cycle-fiber towers.** Red bar FIRST
+>   (`Option2SolverTests.B4_OddCycleCover_CoordinatePeel_ScrambleInvariant`, `CycleCover` builder: Z_s
+>   cycle covers of the multipede, s = 7/9 — measured RED, `null`, 2026-07-18: the case had no C# path AND
+>   no test). Then **`TryCycleCoordinatePeel`** (`Option2Solver.cs`): when a fiber's copy graph is a single
+>   CYCLE, the copy set carries a Z_s coordinate — enumerate ALL ≤ 2s coordinatizations (phase × direction
+>   = §5's unit-group scan; CHOICE-FREE: walks taken from EVERY fiber, the Lean trap-#7 discipline ported,
+>   dedup'd) and lex-min the emitted forms. Dispatched BEFORE the doubling peel ("fibers are cycles" is an
+>   iso-invariant predicate); hypercube fibers stay with the doubling peel; mixed `2ᵃ·m` towers compose
+>   through the mutual recursion. 53/53 solver + 80/80 descent tests green, scramble-invariant. ⚠ Honest
+>   residual: `K_p□K_p` rook-grid fibers (NESTED odd towers) still `null` — sound fall-through; that
+>   residual is the module-level Smith/CRT coset ordering, same weight and same gate as Lean F3b. Item 5b
+>   (the propagation-harvest port) stays optional/open.
+>
 > **✅ F2b — `deckSupply` (`ChainDescent/DeckSupply.lean`, axiom-clean, in `build.sh`; guards `Regression` §11,
 > measurements `PerformanceTest` §9), GENERALIZED beyond the planned parallel-class port.** Plan-correctness
 > finding first: **every consume constructor on BOTH sides emitted involutions only** (`matchCol` rank-swap, F1,
@@ -458,12 +500,18 @@ fold's own localisation) once F2/F3 land.
    (`HolKey.lean`; its module-doc Build-state block = the content map). The holonomy key sidesteps the §6.4
    duplicate-refine coupling entirely (no refinement look-ahead); `lookaheadKey`'s hand-forward stays with the
    §6.1 interface work. F3b (Smith/CRT coset — the §11.12 P3 weight) gated on a measured holonomy-failure
-   witness. With F3 landed, port a true **multipede fold** as the joint F2+F3 witness at scale (the WL-blind
-   separation the small witnesses cannot show — a pin discretizes them).
-5. C# parity, now TWO items: (a) the CRT peel replacing `TryDoublingPeel` (§5); (b) optionally the propagation
-   harvest itself (`deckSupply` is straightforwardly portable and strictly more general than
-   `BuildParallelMatching`). Then re-run the fold suite with a failing odd-part ≥ 7 case added FIRST as the red
-   bar — today that case has no C# test at all. The **Lean** side no longer has this gap (wcyc27 measured).
+   witness. ✅ **The multipede fold witness LANDED 2026-07-18** (`MultipedeWitness.lean`, off-build; STATUS
+   block for the measured content) — the F2 half at scale (exhaustive pin-blindness; matchers structurally
+   dead; `foldSupplyFast` fires refinement-free). The F3 half at multipede scale (twisted triple cover,
+   n = 216) is gated on a compiled-evaluation tranche; the residue left by the fold (the rigid gauge pair)
+   is exactly the F3b shape, and becomes its witness the day it is force-critical.
+5. ✅/▶ C# parity, TWO items: (a) ✅ **the coordinate peel LANDED 2026-07-18** (red bar first —
+   `B4_OddCycleCover_CoordinatePeel_ScrambleInvariant` measured `null` before the fix; then
+   `TryCycleCoordinatePeel`, choice-free every-fiber walk enumeration + lex-min, dispatched before the
+   doubling peel): odd-part ≥ 7 closed for cycle-fiber towers; `K_p□K_p` rook-grid fibers (nested odd
+   towers) remain `null` — sound, the Smith/CRT module-level residual, same gate as F3b. (b) optionally the
+   propagation harvest itself (`deckSupply` is straightforwardly portable and strictly more general than
+   `BuildParallelMatching`) — still open. The **Lean** side has neither gap (wcyc27 measured).
 
 ---
 
@@ -479,6 +527,8 @@ build green 164 s serial; all new theorems axiom-clean `[propext, Classical.choi
 | F1 support-local matcher | `ChainDescent/PartialMatch.lean` | `partialMatchSupply_guarded_canonizer`, `cellIsOrbit_partialMatchSupply` (+ graded `wordReach_…`), `supportSeparatesAt_of_separatesAt` (subsumption) | `Regression` §8 (`fold4`, n = 24: deep dead d=0, partial fires d=0), `PerformanceTest` §7 (descent answers/flags `(true,false)`; deep d=1 dead at 132× cost) |
 | F2a structural fold supply | `ChainDescent/FoldSupply.lean` | `foldSupply_guarded_canonizer`, `foldSupply_selNode_canonizer` (fused), `cellIsOrbit_foldSupply`, reconstruction `swapCand_eq_of_foldSwap`, `gensEquivariant_foldSupply` | `Regression` §10 (`vfold2`, n = 10: deep AND partial dead, fold verifies 4, narrow 2→1), `PerformanceTest` §8 (n = 15: 9 verified, narrow 3→1; costs 6 834 375 vs 12 150) |
 | F2b propagation supply (§4b) | `ChainDescent/DeckSupply.lean` | `deckSupply_guarded_canonizer`, `deckSupply_selNode_canonizer`, `foldDeckSupply_selNode_canonizer` (over `appendSupply`), `cellIsOrbit_deckSupply`, reconstruction `deckCand_eq_of_isColAut` (via invariant `propagate_sound`), `gensEquivariant_deckSupply`, `gensEquivariant_appendSupply` | `Regression` §11 (`wcyc9`: fold narrow 3 vs deck 1, 9 verified rotations; vfold2 complementarity: deck stalls, append narrows both), `PerformanceTest` §9 (`wcyc15`/`wcyc27` = `Z₅`/`Z₉` odd-part ≥ 7, order-9 generator from one propagation; `vring18` voltage ring; fused end-to-end answers) |
+| F2a eval constant (STATUS top block) | `ChainDescent/FoldFast.lean` | `foldSupplyFast_eq` (function-level ⟹ everything transfers), `gensEquivariant_foldSupplyFast`, `holKey_foldDeckFast_selNode_canonizer` (the all-fast F3a capstone) | `Regression` §10 smoke guard; `PerformanceTest` §10 (n = 30 composite: force `[4,9,14]`, consume `[4]`, ~40 s; end-to-end flag below root recorded honestly) |
+| Multipede fold witness (STATUS top block) | `ChainDescent/MultipedeWitness.lean` (OFF-build) | measurement file — no new theorems; leans on `foldSupplyFast_eq` + the F1/F2a firing corpus | its own `#guard`s (~2.5 min): exhaustive pin-blindness at n = 36; matchers dead / fold fires 4→2 at n = 72 |
 
 Supplies plug into **both** objects unchanged: the guarded blind object via `SupplyTransport.guarded_mixed_canonizer`
 and the fused selector via `Select.selNode_canonizer` — each needs only `SupplyEquivariant` (from `GensEquivariant`).

@@ -7,6 +7,7 @@ import ChainDescent.SelectNode
 import ChainDescent.FoldSupply
 import ChainDescent.DeckSupply
 import ChainDescent.HolKey
+import ChainDescent.FoldFast
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -302,6 +303,10 @@ class `{1,3}` really is merged (a 4-cell) — the blindness is present, not hypo
 /-! **Structural detection FIRES** — 4 verified candidates (the copy swap from each seed pair), ONE branch. -/
 #guard (Consume.verified (Fold.foldSupply) vfold2 vfold2Root.col).length = 4
 #guard (narrow (consume (Fold.foldSupply)) vfold2 vfold2Root.col).length = 1
+
+/-! The materialised-table twin (`FoldFast.foldSupplyFast`) — `foldSupplyFast_eq` is the parity THEOREM;
+this guard is the wiring smoke test (a broken table would fail here and nowhere else). -/
+#guard (narrow (consume (Fold.foldSupplyFast)) vfold2 vfold2Root.col).length = 1
 
 /-! ## 11. `F2b` — the propagation supply catches generators of ANY order (the odd-arity gap)
 

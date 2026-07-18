@@ -68,10 +68,13 @@ missing partner counts as moved — validity is part of the value, not a side co
 
 **Measured (Regression §12, n = 30 `U3 ⊔ T3`):** branch cell = all 6 pendants (WL-merged), `lookaheadKey`
 keeps 6, `holKeyFast` keeps exactly the straight triple `[4, 9, 14]` — one genuine orbit, which `foldSupply`
-collapses (measured at n = 15, §10's family). The n = 30 composite `#eval` is omitted only because
-`foldSupply`'s twins recompute `relComp` per lookup at that size — porting §7's `compTbl` id-tables into F2a's
-twins is the noted follow-on. **F3b (Smith/CRT coset)** stays gated on a measured holonomy-failure witness —
-plan §5b.
+collapses (measured at n = 15, §10's family). ✅ **The n = 30 composite is now MEASURED**
+(`PerformanceTest` §10, 2026-07-18): the F2a evaluation constant landed as `FoldFast.foldSupplyFast`
+(membership-ROW tables, not §7's id-tables — `compIdx_eq_iff` needs symmetry and F2a's closures are
+directed), and one `forceThenConsume holKeyFast (foldSupplyFast ++ deckSupply)` step narrows the 6-fan to
+`[4]` in ~40 s interpreted. **F3b (Smith/CRT coset)** stays gated on a measured holonomy-failure witness —
+plan §5b; the multipede double's rigid gauge pair (`MultipedeWitness.lean`) is that shape, gated until
+force-critical.
 -/
 
 namespace ChainDescent

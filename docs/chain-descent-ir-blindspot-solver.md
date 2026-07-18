@@ -224,6 +224,13 @@
 > (b) ℚ-independent row reduction of the solve is torsion-incorrect (use `Z/|A|`-independence or component-wise mod p^k).
 >
 > **OPEN / NEXT (all bounded, off the critical path — the rigid solver is otherwise complete):**
+> - **⟹ UPDATE 2026-07-18: odd-part ≥ 7 CLOSED for CYCLE-FIBER towers on the C# side too** —
+>   `TryCycleCoordinatePeel` (choice-free walk enumeration over every fiber's copy cycle + lex-min over the
+>   ≤ 2s coordinatizations, dispatched before the doubling peel; red-bar test
+>   `B4_OddCycleCover_CoordinatePeel_ScrambleInvariant` measured `null` first, s = 7/9 now green,
+>   scramble-invariant). The cap language below remains accurate ONLY for the residual: `K_p□K_p` rook-grid
+>   fibers (nested odd towers) still `null` — the module-level Smith/CRT coset ordering, same gate as the
+>   plan's F3b. Authoritative record: fold-tower-plan STATUS top block.
 > - **Fold covers of multiplicity `s > 6` — ⚠ RESOLVED ONLY FOR odd-part(s) ≤ 5 (headline corrected 2026-07-17; the
 >   original "poly, any s" OVERSTATED its own scope note below — the 2026-07-16 blocker audit flagged it, and odd-part ≥ 7
 >   is unhandled on BOTH the C# and Lean sides. Resolution plan for the full family, incl. the Lean supplies and the

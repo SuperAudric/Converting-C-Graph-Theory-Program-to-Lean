@@ -253,4 +253,29 @@ def gDeckCycle : Option (List Nat) :=
 #eval gDeckCycle.isSome
 -- true
 
+/-! ## 10. `F3a` — the n = 30 COMPOSITE fires (`Regression` §12 is the per-half gate; plan §5b)
+
+The two halves were measured separately (force: `holKeyFast` keeps the straight triple `[4, 9, 14]`,
+`Regression` §12; consume: `foldSupply` collapses a straight copy cell, §8 above and `Regression` §10);
+the composite eval was blocked on the F2a evaluation constant (`FoldFast.lean`, the per-supply-call
+membership tables). With it: ONE mixed-resolver step on `U3 ⊔ T3` — force keeps the WL-merged cell's
+straight triple (the T-pendants' holonomy signature differs), consume merges the kept triple into one
+orbit — narrowing the 6-fan to a SINGLE branch. ~40 s interpreted, dominated by `holKeyFast` (~10 s) and
+the n = 30 deck propagations. Soundness of exactly this object is `Fold.holKey_foldDeckFast_selNode_
+canonizer` / `Hol.holKey_foldDeck_guarded_canonizer`. -/
+
+#eval (narrow (forceThenConsume Hol.holKeyFast
+        (Deck.appendSupply Fold.foldSupplyFast Deck.deckSupply)) Regression.ut
+        Regression.utRoot.col).map Fin.val
+-- [4]: 6-fan → ONE branch (force 6→3, consume 3→1) — the F3a composite firing, measured
+
+/-! ⚠ **End-to-end on `ut` FLAGS below the root — measured, honest, carried open** (probed 2026-07-18,
+not repeated here: ~2 min each). Both `canonFormFastS? holKeyFast (foldFast ++ deck)` and the full stack
+with `partialMatchSupply 0` appended flag: the T-component's gauge — per-copy mirrors composed through
+the TWISTED matchings — is outside every built supply's reach (fold: the twisted `{1,3}` fibers merge, so
+the unique-partner lookup is ambiguous; deck: a commuting copy swap gives every mirror seed ≥ 2 extensions;
+matching: the mirror tie survives every pin — 1-WL chirality-blindness). The root composite above is the
+F3a claim and it fires; canonizing `T3`'s inside is a CONSUME-side open item (a mirror-composite
+constructor), not a force one. -/
+
 end ChainDescent.Perf

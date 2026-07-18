@@ -654,6 +654,68 @@ public sealed class Option2SolverTests
         _out.WriteLine($"{name,-4} symmetric cover n={N} (s={s} > cap): POLY fold canonicalizes, scramble-inv=True");
     }
 
+    // ── Q1 ODD PART ≥ 7 (fold-tower plan §5 / §8 item 5) — RED BAR 2026-07-18, then closed ─────
+    // A Z_s CYCLE cover: fiber graph F = C_s (same-cell edges (c,i)—(c+1 mod s, i) per core vertex).
+    // The deck is D_s — all fiber-cycles rotate/reflect TOGETHER — so single copy-0↔c transpositions
+    // are NOT automorphisms ⟹ not fully symmetric; with s ∈ {7, 9} > MaxFoldMultiplicity the s!-fallback
+    // is off and the doubling peel is `s % 2 ≠ 0 → null`. MEASURED RED (2026-07-18): before
+    // TryCycleCoordinatePeel, TryCanonicalOrderWithFold returned null on every case below — odd part ≥ 7
+    // had NO C# path and NO test at all. The coordinate peel (§5: read the Z_s coordinate off the cycle,
+    // enumerate ALL 2s coordinatizations = the phase × direction freedom, lex-min — an ≤ 2s scan
+    // replacing the s! cap) closes it for the cycle-fiber tower family; a successful scramble-invariant
+    // canonicalization proves the peel engaged (both other paths are provably off).
+    [Theory]
+    [InlineData("Z2", 9)]
+    [InlineData("Z3", 9)]
+    [InlineData("Z2", 7)]
+    public void B4_OddCycleCover_CoordinatePeel_ScrambleInvariant(string name, int s)
+    {
+        var A = name switch { "Z2" => new Ab(2), "Z3" => new Ab(3), _ => throw new ArgumentException(name) };
+        Assert.True(s > 6 && s % 2 != 0, "the point is an odd multiplicity beyond every pre-existing path");
+        int nW = 6;
+        var (core, ct) = BuildNativeMultipede(A, CirculantLines(nW, new[] { 0, 1, 3 }), nW);
+        var (cov, cvt) = CycleCover(core, ct, s);
+        int N = cov.VertexCount;
+        Assert.Equal(s * core.VertexCount, N);
+
+        var forms = new List<string?>();
+        for (int scr = -1; scr < 3; scr++)
+        {
+            AdjMatrix g; int[] t;
+            if (scr < 0) { g = cov; t = (int[])cvt.Clone(); }
+            else (g, t) = ScrambleWithTypes(cov, cvt, 26000 + scr);
+            var adj = Flat(g);
+            var part = new WarmPartition(N); part.Refine(adj, SeedFromTypes(N, t));
+
+            Assert.Null(Option2Solver.TryCanonicalOrder(adj, N, part.CellOf, part.NumCells));   // plain flags
+            var order = Option2Solver.TryCanonicalOrderWithFold(adj, N, part.CellOf, part.NumCells);
+            Assert.NotNull(order);                                          // RED before the peel; the peel's claim
+            Assert.Equal(Enumerable.Range(0, N), order!.OrderBy(x => x));   // genuine permutation
+            forms.Add(EmitFromOrder(adj, N, order));
+        }
+        Assert.True(forms.Distinct().Count() == 1);                          // scramble-invariant
+        _out.WriteLine($"{name,-4} odd cycle cover n={N} (s={s}, odd part ≥ 7): coordinate peel canonicalizes, scramble-inv=True");
+    }
+
+    // s isomorphic copies of `g` glued by CYCLE fibers (F = C_s): same-cell edges (c,i)—(c+1 mod s, i).
+    // Distinguishable in the fold's sense (no copy-swap transposition verifies) while the copies stay
+    // 1-WL twins (the rotation deck). The odd-part ≥ 7 witness shape.
+    private static (AdjMatrix, int[]) CycleCover(AdjMatrix g, int[] types, int s)
+    {
+        int n = g.VertexCount, N = s * n;
+        var adj = new int[N, N];
+        for (int c = 0; c < s; c++)
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (g[i, j] != 0) adj[c * n + i, c * n + j] = g[i, j];   // each copy = the core
+        for (int i = 0; i < n; i++)
+            for (int c = 0; c < s; c++)
+            { int d = (c + 1) % s; adj[c * n + i, d * n + i] = 1; adj[d * n + i, c * n + i] = 1; }
+        var t = new int[N];
+        for (int c = 0; c < s; c++) for (int i = 0; i < n; i++) t[c * n + i] = types[i];
+        return (new AdjMatrix(adj), t);
+    }
+
     // s isomorphic copies of `g`, glued fiber-wise: for each core-vertex i the s copies
     // {i, n+i, …, (s−1)n+i} share a colour AND form a clique K_s of same-cell edges (so every copy-swap
     // is an automorphism = S_s symmetry). COPIES = the s cores (G minus same-cell edges).

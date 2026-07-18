@@ -712,7 +712,7 @@ Substitute the real `Descend.canonForm?` for the `opaque` stub. `unhandledResidu
 principle** while the three residue atoms were `opaque … : Prop`; with `Residue.Residue` a **definition** it is now
 provable (`Residue.residue_nonvacuous`). The atoms must be *defined* (as the complement of `Handled`), not asserted.
 
-### 6.6 ▶ The FOLD/TOWER track — F1 + F2a + **F2b** LANDED; F3 SCOPED + F3a tranches 1–2 landed (2026-07-18 late)
+### 6.6 ▶ The FOLD/TOWER track — F1/F2a/F2b/F3a LANDED + the §8 tail CLOSED (2026-07-18 latest: `FoldFast` eval constant + n=30 composite measured + `MultipedeWitness` at scale + C# cycle-coordinate peel, odd-part ≥ 7 green); F3b gated
 
 > **Authoritative home: [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md)** (STATUS block =
 > current state; consume-side pickup §9; **force-side/F3 pickup = §5b + `HolKey.lean`'s module-doc Build-state
