@@ -370,3 +370,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `Fold.existsUnique_univ` | 129-132 | `∃!` over the type ⟹ `∃!` in `Finset.univ` (the `Finset.choose` plumbing). | — |
 | `Fold.existsUnique_bool_transport` | 150-171 | `∃!`-of-a-Bool-predicate transfers across a conjugating `σ`. | — |
 | `Fold.swap_check_conj` | 336-351 | The involution check transfers across conjugation — the dite-condition bridge inside `swapCand_conj`. | — |
+## ChainDescent/DeckSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deck.deck_check_one` | 492-507 | One half of the two-sided-inverse condition transports under conjugation (the `swap_check_conj` shape, generalized over the four seed arguments). | — |

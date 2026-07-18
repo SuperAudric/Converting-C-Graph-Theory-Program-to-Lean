@@ -2943,6 +2943,14 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Perf.vfold3Root` | 178-188 | Materialized root (trap #1). | Definition |
 | `Perf.vfold3Swapped` | 192 | Cross-copy relabelling — the supply-level `①c` observation's graph. | Definition |
 | `Perf.vfold3SwappedRoot` | 193-195 | Its materialized root (trap #1). | Definition |
+| `Perf.wcyc15` | 205 | Weighted `C₁₅` — `Aut = Z₅`: 25/25 seeds complete to order-5 rotations, narrow → 1. | Definition |
+| `Perf.wcyc15Root` | 206-211 | Materialized root (trap #1). | Definition |
+| `Perf.wcyc27` | 215 | Weighted `C₂₇` — `Aut = Z₉`: odd part 9 ≥ 7 (no C# path at any size) and height 2 (9 = 3²). | Definition |
+| `Perf.wcyc27Root` | 216-223 | Materialized root (trap #1). | Definition |
+| `Perf.vringB` | 229-237 | The voltage-ring edge predicate: rigid 6-vertex core, cross edge `(c,a)–(c+1,b)` = voltage 1; asymmetric pendant paths kill the WL reversal ghost and every reflection. | Definition |
+| `Perf.vring18` | 239 | `Z₃` voltage-ring cover (the true tower-gadget shape), deck `Z₃` exactly, `Aut` involution-free. | Definition |
+| `Perf.vring18Root` | 240-245 | Materialized root (trap #1). | Definition |
+| `Perf.gDeckCycle` | 249-254 | End-to-end fused descent over `foldSupply ++ deckSupply` on the involution-free cycle — answers. | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3161,28 +3169,33 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 41-42 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 44-46 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 48-55 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 57-60 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 64-65 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 74-75 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 98-99 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 108-109 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 137-140 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 155 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 157-159 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 174-178 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 194-197 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 199 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 201-203 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 205-207 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 208 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
-| `Regression.gSel` | 243-244 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
-| `Regression.gSelDeep` | 246-247 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
-| `Regression.vcoreB` | 279-283 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
-| `Regression.vfold2` | 285-288 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
-| `Regression.vfold2Root` | 290 | Materialized root colouring (trap #1). | Definition |
+| `Regression.C5` | 42-43 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 45-47 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 49-56 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 58-61 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 65-66 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 75-76 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 99-100 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 109-110 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 138-141 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 156 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 158-160 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 175-179 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 195-198 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 200 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 202-204 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 206-208 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 209 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 244-245 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 247-248 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.vcoreB` | 280-284 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
+| `Regression.vfold2` | 286-289 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
+| `Regression.vfold2Root` | 291 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wEdge` | 317-322 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
+| `Regression.wcyc9` | 324 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
+| `Regression.wcyc9Root` | 325-327 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wcyc9Swapped` | 338 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Regression.wcyc9SwappedRoot` | 339-340 | Its materialized root (trap #1). | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3619,3 +3632,48 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 | `Fold.cellIsOrbit_foldSupply` | 437-446 | **★★★ THE ORACLE FIRES:** every branch pair connected by a verified swap ⟹ the cell is one orbit, one branch — with no refinement involved. | — |
 | `Fold.foldSupply_guarded_canonizer` | 450-456 | **★★★ The guarded (blind) mixed canonizer over the structural fold supply** — no carried hypotheses. | — |
 | `Fold.foldSupply_selNode_canonizer` | 458-465 | **★★★ The FUSED (resolver-aware) canonizer over the structural fold supply** — the selector probes every cell with its verified list, so a fold cell resolves wherever it sits in the colour order. F2a capstone of `docs/chain-descent-fold-tower-plan.md`. | — |
+## ChainDescent/DeckSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deck.candPred` | 72-83 | Forcing predicate: `w` is a viable image for `v` under partial map `m` — colour agrees, and adjacency (both directions, full weight equality, non-edges included) plus injectivity agree with every assigned vertex. Generalizes the C# induced-4-cycle rule. | Definition |
+| `Deck.forceRound` | 85-92 | One forcing round (spec form): an unassigned vertex is assigned iff its candidate set is a `uniqueMem` singleton — no choice, ambiguity waits or stalls. | Definition |
+| `Deck.seedMap` | 94-96 | The one-point seed `u₁ ↦ u₂`. | Definition |
+| `Deck.propagate` | 98-102 | `n` forcing rounds from the seed (monotone; a no-assignment round is a fixpoint; no convergence proof needed — statements are relative to the computed value). | Definition |
+| `Deck.deckFun` | 104-106 | Candidate map: propagated image where assigned, identity elsewhere (junk is caught by the gates). | Definition |
+| `Deck.deckCand` | 108-115 | **The propagation candidate**: forward and reverse propagations gated as two-sided inverses; `Consume.verified` re-checks `IsColAut`. Stalls/contradictions fail the gate — sound by construction. | Definition |
+| `Deck.uniqueFilter` | 119-124 | List-based unique lookup — value-equal to `uniqueMem` without the `Finset.choose`/`∃!`-decide overhead at evaluation. | Definition |
+| `Deck.uniqueFilter_eq_uniqueMem` | 126-166 | The evaluation lookup computes exactly `uniqueMem` — every `uniqueMem` lemma transfers to the fast path. | — |
+| `Deck.candPredV` | 168-177 | Vector-state forcing predicate — all reads are `.get` on forced data (trap #1 discipline). | Definition |
+| `Deck.roundVecD` | 179-186 | One forcing round, **data → data** (the `Refine.roundVec` pattern). The function-typed round compounds exponentially under iterate — measured live this build. | Definition |
+| `Deck.propagateVec` | 188-191 | The runnable propagation (Vector-state rounds); `propagateVec_eq` transfers every spec theorem. | Definition |
+| `Deck.candPredV_ofFn` | 193-210 | Bridge: the Vector predicate over `Vector.ofFn m` equals the spec predicate over `m`. | — |
+| `Deck.roundVecD_ofFn` | 212-229 | Bridge, one round: `roundVecD` over `Vector.ofFn` equals `Vector.ofFn` of the spec round (the `roundVec_ofFn` shape). | — |
+| `Deck.iterate_roundVecD` | 231-240 | Bridge, iterated: `k` Vector rounds equal `Vector.ofFn` of `k` spec rounds (the `iterate_roundVec` shape). | — |
+| `Deck.propagateVec_eq` | 242-246 | **The runnable propagation computes exactly the reasoned-about one** — the `warmRefineVec_col_eq` shape. | — |
+| `Deck.deckCandFast` | 248-256 | The runnable candidate — value-equal to `deckCand`; the `let`s bind forced Vectors (data, not functions), one propagation per side per candidate. | Definition |
+| `Deck.deckCandFast_eq` | 258-265 | The runnable candidate equals the spec candidate — the supply evaluates what the theorems describe. | — |
+| `Deck.forceRound_sound` | 269-306 | One round preserves the invariant `m ⊆ ρ`: a forced value is the unique constraint-satisfier and `ρ`'s value satisfies, so they coincide. | — |
+| `Deck.propagate_sound` | 308-331 | **★ Soundness of the propagation**: everything assigned agrees with ANY colour-automorphism extending the seed. Corollary: ≤ 1 automorphism extends a completed seed. | — |
+| `Deck.propagate_seed` | 333-348 | The seed survives every round (rounds are monotone on assignments). | — |
+| `Deck.deckCand_eq_of_isColAut` | 350-384 | **★★ The reconstruction**: if a colour-automorphism `ρ` extends the seed and both propagations complete, the candidate IS `ρ`. Completion is decidable and measured, never assumed. | — |
+| `Deck.mconj` | 388-390 | Conjugated partial map — the transported assignment state for the equivariance proofs. | Definition |
+| `Deck.candPred_conj` | 392-428 | The forcing predicate transports: `candPred` on the relabelled graph at conjugated arguments equals `candPred` here. | — |
+| `Deck.forceRound_conj` | 430-450 | One forcing round commutes with conjugation (via `uniqueMem_transport`). | — |
+| `Deck.seedMap_conj` | 452-461 | The seed transports. | — |
+| `Deck.propagate_conj` | 463-479 | The full propagation commutes with conjugation (round-by-round induction). | — |
+| `Deck.deckFun_conj` | 481-490 | The candidate map conjugates pointwise. | — |
+| `Deck.deckCand_conj` | 509-527 | The candidate transports up to conjugation, **including its failure mode** — the `swapCand_conj` analogue, so supply equivariance is the standard proof. | — |
+| `Deck.deckSupply` | 531-537 | **★ The propagation supply**: every branch-cell pair seeds a propagation candidate; gates + `IsColAut` filter the junk. Cost billed flat at `|cell|²·n⁵`. | Definition |
+| `Deck.mem_gens_deckSupply_iff` | 539-550 | Membership in the emitted generators = some branch-cell seed pair whose (spec) candidate is the generator. | — |
+| `Deck.gensEquivariant_deckSupply` | 554-576 | **★★ The propagation supply is equivariant** — cell enumeration transports, candidate conjugates; no representative ever chosen (trap #7). | — |
+| `Deck.supplyEquivariant_deckSupply` | 578-579 | `①c` in the form the resolver reads — from `gensEquivariant_deckSupply`. | — |
+| `Deck.wordReach_deckSupply` | 583-595 | Graded firing, per pair: a verified propagation candidate carrying `u₁` to `u₂` puts the pair into the verified `WordReach`. | — |
+| `Deck.cellIsOrbit_deckSupply` | 597-606 | **★★★ The oracle fires**: verified propagation candidates connecting every branch-cell pair certify the cell as one orbit — no refinement involved, at any generator order. | — |
+| `Deck.deckSupply_guarded_canonizer` | 610-616 | **★★★ The guarded (blind) mixed canonizer over the propagation supply** — no carried hypotheses. | — |
+| `Deck.deckSupply_selNode_canonizer` | 618-624 | **★★★ The fused (resolver-aware) canonizer over the propagation supply** — no carried hypotheses. | — |
+| `Deck.appendSupply` | 628-630 | Supply concatenation: generators appended, costs summed — one supply object composing several harvests. | Definition |
+| `Deck.mem_gens_appendSupply_iff` | 632-635 | Membership in a concatenated supply = membership in either part. | — |
+| `Deck.gensEquivariant_appendSupply` | 637-649 | Concatenation preserves generator equivariance — the obligation splits. | — |
+| `Deck.supplyEquivariant_appendSupply` | 651-654 | Concatenation preserves supply equivariance (the resolver-facing form). | — |
+| `Deck.foldDeckSupply_selNode_canonizer` | 656-664 | **★★★ The fused canonizer over `foldSupply ++ deckSupply`** — one supply object covering mirror-tied folds (copy swaps) AND cyclic towers (rotations); guarded on both witness families. | — |

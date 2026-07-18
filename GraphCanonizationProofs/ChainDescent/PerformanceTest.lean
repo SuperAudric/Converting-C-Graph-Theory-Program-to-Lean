@@ -194,4 +194,63 @@ def vfold3SwappedRoot : Refine.ColData 15 := Refine.warmRefineVec vfold3Swapped 
 
 #guard (narrow (consume (Fold.foldSupply)) vfold3Swapped vfold3SwappedRoot.col).length = 1
 
+/-! ## 9. `F2b` — arbitrary ARITY and HEIGHT (`Regression` §11 is the gate; plan §4b)
+
+The weighted cycles `C_{3s}` have `Aut = Z_s` with no involutions for odd `s`: every matching/involution
+mechanism on both sides is structurally out — the C# `TryDoublingPeel` requires `s % 2 = 0`, so odd part ≥ 7
+has NO C# path at any size. `Deck.deckSupply` constructs the order-`s` rotation in one propagation per seed:
+arity is arbitrary, and a `Z_{p^k}` deck (tower height `k`) is the SAME single propagation constructing the
+order-`p^k` generator — height enters only through `n`. -/
+
+def wcyc15 : AdjMatrix 15 := ⟨fun i j => Regression.wEdge 15 i.val j.val⟩
+def wcyc15Root : Refine.ColData 15 := Refine.warmRefineVec wcyc15 (fun _ => 0)
+
+#eval ((Consume.verified (Deck.deckSupply) wcyc15 wcyc15Root.col).length,
+       (narrow (consume (Deck.deckSupply)) wcyc15 wcyc15Root.col).length,
+       Consume.supplyCost (Deck.deckSupply) wcyc15 wcyc15Root.col)
+-- (25, 1, 18984375): all 5² seeds complete to order-5 rotations, ONE branch (flat |cell|²·n⁵ bill)
+
+/-! `Z₉` — odd part 9 ≥ 7 (the case with no C# path) and height 2 (9 = 3²): the harvested generator has
+order 9. -/
+def wcyc27 : AdjMatrix 27 := ⟨fun i j => Regression.wEdge 27 i.val j.val⟩
+def wcyc27Root : Refine.ColData 27 := Refine.warmRefineVec wcyc27 (fun _ => 0)
+
+#eval (narrow (consume (Deck.deckSupply)) wcyc27 wcyc27Root.col).length
+-- 1: the 9-fan collapses; no involution emitter can touch this cell
+
+#eval ((Deck.deckCandFast wcyc27 wcyc27Root.col ⟨1, by omega⟩ ⟨4, by omega⟩).map
+  (fun g => (decide (g ^ 9 = 1), decide (g ^ 3 = 1), decide (g = 1))))
+-- some (true, false, false): a genuine order-9 generator from ONE propagation
+
+/-! The voltage-ring cover — the true tower-gadget shape: rigid 6-vertex core `a,b,d,p₁,p₂,q` (edges `a–d`,
+`b–d`, `a–p₁`, `p₁–p₂`, `b–q`), cross edge `(c,a)–(c+1,b)` = voltage 1. Deck `Z₃` exactly; the asymmetric
+pendant paths kill the WL reversal ghost AND every reflection, so `Aut` is involution-free. The
+involution-based structural supply is dead; the propagation supply collapses the cell. -/
+def vringB (s a b : Nat) : Bool :=
+  let ca := a / 6; let pa := a % 6; let cb := b / 6; let pb := b % 6
+  (ca == cb && ((pa == 0 && pb == 2) || (pa == 2 && pb == 0)
+             || (pa == 1 && pb == 2) || (pa == 2 && pb == 1)
+             || (pa == 0 && pb == 3) || (pa == 3 && pb == 0)
+             || (pa == 3 && pb == 4) || (pa == 4 && pb == 3)
+             || (pa == 1 && pb == 5) || (pa == 5 && pb == 1)))
+  || (cb == (ca + 1) % s && pa == 0 && pb == 1)
+  || (ca == (cb + 1) % s && pb == 0 && pa == 1)
+
+def vring18 : AdjMatrix 18 := ⟨fun i j => if vringB 3 i.val j.val then 1 else 0⟩
+def vring18Root : Refine.ColData 18 := Refine.warmRefineVec vring18 (fun _ => 0)
+
+#eval ((narrow (consume (Fold.foldSupply)) vring18 vring18Root.col).length,
+       (Consume.verified (Deck.deckSupply) vring18 vring18Root.col).length,
+       (narrow (consume (Deck.deckSupply)) vring18 vring18Root.col).length)
+-- (3, 9, 1): involutions dead, propagation fires — refinement-free
+
+/-! End-to-end: the FUSED canonizer over `foldSupply ++ deckSupply` (capstone
+`foldDeckSupply_selNode_canonizer`) ANSWERS on the involution-free weighted cycle. -/
+def gDeckCycle : Option (List Nat) :=
+  (Select.canonFormFastS? Residue.constKey
+    (Deck.appendSupply Fold.foldSupply Deck.deckSupply) Regression.wcyc9).map flatten
+
+#eval gDeckCycle.isSome
+-- true
+
 end ChainDescent.Perf

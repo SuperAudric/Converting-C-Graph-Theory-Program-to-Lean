@@ -206,7 +206,9 @@ the shortest line. Concretely:
 - **Rigid node-4 (the F₂/ring-multipede): TRANSFERS / handled** ⚠ **for odd-part(fold) ≤ 5 (scoped 2026-07-17;
   the 2026-07-16 audit found F_k fold covers with odd-part ≥ 7 are linear-over-a-ring yet unhandled BOTH sides —
   inside this leg's stated boundary. Closure plan = [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md):
-  F1 `partialMatchSupply` landed in Lean; F3 CRT/Smith coset ordering is the odd-part fix).** The F₂→ring
+  the Lean CONSUME half is complete 2026-07-18 — F1 `partialMatchSupply` + F2a `foldSupply` + F2b `deckSupply`
+  (propagation harvest, generators of any order: the symmetric/gauge side has NO odd-part cap in Lean any more);
+  the remaining odd-part fix = F3 CRT/Smith coset ordering, the DISTINGUISHABLE-copy force half, open both sides).** The F₂→ring
   (Smith-normal-form) solver canonizes it — validated end-to-end (D-M0–M4) *and* for `Z₄` (IR §11.11). `Z_{2^k}` is
   **inside** the iterative engine, not the floor. Lichter's FPC+rank lower bound does **not** bind it: Lichter is
   individualization-free; this solver individualizes.

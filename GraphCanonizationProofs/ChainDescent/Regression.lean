@@ -5,6 +5,7 @@ import ChainDescent.PrunedSupply
 import ChainDescent.PartialMatch
 import ChainDescent.SelectNode
 import ChainDescent.FoldSupply
+import ChainDescent.DeckSupply
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -300,5 +301,51 @@ class `{1,3}` really is merged (a 4-cell) — the blindness is present, not hypo
 /-! **Structural detection FIRES** — 4 verified candidates (the copy swap from each seed pair), ONE branch. -/
 #guard (Consume.verified (Fold.foldSupply) vfold2 vfold2Root.col).length = 4
 #guard (narrow (consume (Fold.foldSupply)) vfold2 vfold2Root.col).length = 1
+
+/-! ## 11. `F2b` — the propagation supply catches generators of ANY order (the odd-arity gap)
+
+Every consume-side constructor before it emits INVOLUTIONS only, so a cover whose deck group is cyclic of odd
+order — no involutions in `Aut` at all — is beyond `matchCol`, F1, F2a AND the C# (`TryDoublingPeel` is
+`s % 2 ≠ 0 → null`; odd part ≥ 7 has no C# path at any size). Witness: the weighted cycle `C₉`, edge weights
+(1,2,3) repeating — `Aut = Z₃` exactly (rotations by 3; the weight pattern kills every reflection), WL-stable
+at three 3-cells. `Fold.foldSupply` degenerates (no vertical fibers ⟹ its lookup yields the identity) and
+cannot narrow; `Deck.deckSupply` propagates every seed to the full rotation and collapses the cell. (On this
+small witness a PIN discretizes the cycle, so the matching supplies also fire — the machine-checked separation
+here is against the involution-based structural supply; the odd-arity/refinement-free value is
+`PerformanceTest` §9 and the plan doc §4b.) **Do not delete** — the non-vacuity witness for `deckSupply`. -/
+
+/-- Weighted cycle `C_N` (`N = 3s`): edge `i — i+1` has weight `i % 3 + 1`; `Aut = Z_s`, involution-free for
+odd `s`. -/
+def wEdge (N a b : Nat) : Nat :=
+  if (a + 1) % N == b then a % 3 + 1
+  else if (b + 1) % N == a then b % 3 + 1
+  else 0
+
+def wcyc9 : AdjMatrix 9 := ⟨fun i j => wEdge 9 i.val j.val⟩
+def wcyc9Root : Refine.ColData 9 := Refine.warmRefineVec wcyc9 (fun _ => 0)
+
+#guard (branches wcyc9Root.col).map Fin.val = [1, 4, 7]
+
+/-! **The involution-based structural supply is DEAD** (identity-only candidates; the cell stays a 3-fan). -/
+#guard (narrow (consume (Fold.foldSupply)) wcyc9 wcyc9Root.col).length = 3
+
+/-! **The propagation supply FIRES**: all 9 seed pairs complete — the three order-3 rotations, unreachable by
+any involution emitter — and the cell collapses to ONE branch. -/
+#guard (Consume.verified (Deck.deckSupply) wcyc9 wcyc9Root.col).length = 9
+#guard (narrow (consume (Deck.deckSupply)) wcyc9 wcyc9Root.col).length = 1
+
+/-! `①c`, behavioural (theorem form `gensEquivariant_deckSupply`). -/
+def wcyc9Swapped : AdjMatrix 9 := relabelAdj (Equiv.swap 0 5) wcyc9
+def wcyc9SwappedRoot : Refine.ColData 9 := Refine.warmRefineVec wcyc9Swapped (fun _ => 0)
+#guard (narrow (consume (Deck.deckSupply)) wcyc9Swapped wcyc9SwappedRoot.col).length = 1
+
+/-! **Complementarity, machine-checked**: on the mirror-tied fold the propagation STALLS — the surviving mirror
+gives every cross-copy seed two extensions, so no forcing step on the mirror class is ever unique; only the
+diagonal seeds complete (to the identity), and the copy cell stays un-narrowed — exactly where `foldSupply`
+fires. And vice versa on the cycle. `Deck.appendSupply` covers both families with ONE supply object
+(`foldDeckSupply_selNode_canonizer` is its capstone). -/
+#guard (narrow (consume (Deck.deckSupply)) vfold2 vfold2Root.col).length = 2
+#guard (narrow (consume (Deck.appendSupply Fold.foldSupply Deck.deckSupply)) vfold2 vfold2Root.col).length = 1
+#guard (narrow (consume (Deck.appendSupply Fold.foldSupply Deck.deckSupply)) wcyc9 wcyc9Root.col).length = 1
 
 end ChainDescent.Regression

@@ -227,8 +227,11 @@
 > - **Fold covers of multiplicity `s > 6` — ⚠ RESOLVED ONLY FOR odd-part(s) ≤ 5 (headline corrected 2026-07-17; the
 >   original "poly, any s" OVERSTATED its own scope note below — the 2026-07-16 blocker audit flagged it, and odd-part ≥ 7
 >   is unhandled on BOTH the C# and Lean sides. Resolution plan for the full family, incl. the Lean supplies and the
->   CRT/Smith replacement for the peel: [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md); its F1
->   `partialMatchSupply` is landed in Lean 2026-07-17).** (a) FULLY-SYMMETRIC: identity order via
+>   CRT/Smith replacement for the peel: [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md); its
+>   Lean consume half is COMPLETE 2026-07-18 — F1 `partialMatchSupply` + F2a `foldSupply` + F2b `deckSupply` (the
+>   propagation harvest: generators of ANY order, so the SYMMETRIC/gauge side no longer has an odd-part cap in Lean —
+>   measured order-9 rotation, `Z₉` cover narrow 9→1). What keeps this banner's cap accurate is the DISTINGUISHABLE
+>   ordering (this Q's actual content) = the plan's F3, still open both sides; the C# cap is unchanged).** (a) FULLY-SYMMETRIC: identity order via
 >   the copy-swap automorphism check (validated `K_s` cover s=8,12). (b) DISTINGUISHABLE (a **Z₂ᵏ tower** — ⚠ NOT the only
 >   distinguishable case: nested odd covers (Z₃² etc., rook's-graph fibers) are constructible and fail below; corrected
 >   2026-07-17 — and vertex-transitive on copies, so refinement can't order them and the flat `s!` is exponential):
