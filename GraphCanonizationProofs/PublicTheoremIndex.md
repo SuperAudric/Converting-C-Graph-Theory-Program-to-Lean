@@ -3677,3 +3677,17 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 | `Deck.gensEquivariant_appendSupply` | 637-649 | Concatenation preserves generator equivariance — the obligation splits. | — |
 | `Deck.supplyEquivariant_appendSupply` | 651-654 | Concatenation preserves supply equivariance (the resolver-facing form). | — |
 | `Deck.foldDeckSupply_selNode_canonizer` | 656-664 | **★★★ The fused canonizer over `foldSupply ++ deckSupply`** — one supply object covering mirror-tied folds (copy swaps) AND cyclic towers (rotations); guarded on both witness families. | — |
+## ChainDescent/HolKey.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Hol.KeySeparates` | 69-75 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
+| `Hol.keyV_eq_of_mem_keepMin` | 77-89 | Members of the narrowed set all attain the minimum key value. | — |
+| `Hol.keepMin_pairwise_aut_of_separates` | 91-113 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
+| `Hol.partnerTo` | 117-121 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
+| `Hol.walkOk` | 123-127 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
+| `Hol.holMoved` | 129-143 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
+| `Hol.holSig` | 145-150 | **The holonomy signature**: sorted, deduplicated moved-counts over ALL target pairs — representative-free (trap #7) and multiplicity-free. | Definition |
+| `Hol.holKey` | 152-156 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3|3 where `lookaheadKey` keeps 6. | Definition |
+| `Hol.keyV_holKey` | 158-159 | The key's value projection is `holSig`. | `@[simp]` |
+| `Hol.keyCost_holKey` | 161-162 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |

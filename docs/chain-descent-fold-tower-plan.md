@@ -319,6 +319,78 @@ is ≤ s, so the cap can go entirely); keep `CopySwapAut` harvest as-is. Until t
 
 ---
 
+## 5b. F3 SCOPED AND STAGED (2026-07-18 scoping pass — read this before starting F3 work)
+
+**What the re-based contract makes F3 (from IR §11.12's 2026-07-13 re-base + handoff §6.3):** a `Force.Key`
+whose ONLY ① obligation is `KeyEquivariant`; all P1/P3 content is **firing/②** — a `KeySeparates` predicate
+(force's dual of `CellIsOrbit`) plus measured separation and honestly-charged cost. No solve-correctness
+theorem is owed for soundness.
+
+**Scoping findings (each changes the build):**
+1. **`lookaheadKey` already covers the pin-discretizing half.** Its leaf-matrix branch is a complete invariant
+   of the pinned refinement, so any distinguishable fold whose copies discretize under one pin is ALREADY
+   ordered canonically — including odd-part ≥ 7 (no C# analog needed on that half). The genuine F3 residue is
+   **distinguishable-but-WL-merged**: twisted covers where the pin leaves ties (the mirror survives) and the
+   histogram/leaf branches are blind. This is the CFI-parity family — exactly where the C# needs the solve.
+2. **Propagation-signature keys are NOT the vehicle.** Two independent reasons: (a) the C#'s own B1d finding —
+   unit propagation stalls on cyclic constraint graphs (m ≥ 8 circulants) and needed the *simultaneous* Smith
+   solve; a key built from `deckSupply`-style forcing traces inherits that ceiling; (b) the twist invariant is
+   **coset/solvability** data — kernels, ranks and local forcing profiles are IDENTICAL for twisted vs
+   untwisted covers (both sides of the witness below have the same gauge kernel; the twist sits in the
+   inhomogeneous class). Local signatures cannot rank it.
+3. **The structurally-readable form of the coset data is the HOLONOMY of the fold.** Compose the vertical
+   matchings (F2a's unique-fiber-partner maps) around closed walks of the copy graph: the composite is a
+   permutation of the start fiber — identity for straight cycles, the mirror/deck twist otherwise. This is the
+   cover's monodromy: gauge-independent (no reference pairing is ever chosen — composition of canonical partner
+   maps), arbitrary-arity (a `Z_s` twist appears as an order-`s` composite), and it is precisely the object the
+   Smith solve canonicalizes, read combinatorially. Conjugation (choice of base copy) is quotiented by using
+   conjugation-invariant signatures (cycle types); tree/walk enumeration is quotiented by enumerating ALL
+   closed walks of bounded length (no spanning-tree choice — trap #7).
+4. **The measured witness (F3 probes 2026-07-18, n = 30):** `U3 ⊔ T3` — vfold3 (all-straight triangle of
+   matchings over the mirror-tied `C₄`+pendant core) unioned with its one-pair-twisted variant (`1₀—3₁,
+   3₀—1₁` on copy-pair (0,1); construction recipe: copy `c = i/5`, core `v = i%5` with `Regression.vcoreB`,
+   vertical `vᵢ—vⱼ` iff `v` equal — except the (0,1)-pair's `{1,3}` fiber crossed in `T3`; union
+   block-diagonal at 15). Twist parity around the copy triangle ⟹ `T3 ≇ U3`; the gauge (per-copy mirrors)
+   makes each component's pendant cell ONE orbit; 1-WL merges the two components. Measured: branch cell = all
+   6 pendants `[4,9,14,19,24,29]` (WL-merged ✓); `lookaheadKey` keeps all 6 (dead ✓). Consume cannot resolve
+   the cell as a matter of principle — a verified generator is an automorphism and no automorphism maps
+   between non-isomorphic components — so the root cell holds ≥ 2 orbits ⟹ **the union needs force, and only
+   a beyond-1-WL key fires**. **The L = 3 holonomy signature separates it 3|3, measured:** every U-pendant
+   gets the value set `{0, 5}` (straight triangles = identity holonomy; cross-component walks all-undefined)
+   and every T-pendant `{2, 5}` (the twisted triangle moves exactly the two mirror vertices), uniform within
+   each orbit, ~0.5 s interpreted with materialised id-tables. (Disjoint union is the minimal form; a
+   connected variant — path-joined at one pendant each — keeps the WL-merge and is the follow-on witness.)
+
+**The staging:**
+- **F3a — `KeySeparates` infrastructure + the holonomy key (`holKey`). ▶ FIRST TRANCHE LANDED 2026-07-18
+  (`ChainDescent/HolKey.lean`, compile-clean, axiom-clean, in `build.sh`):** `KeySeparates` (force's firing
+  dual of `CellIsOrbit`) + **the firing theorem `keepMin_pairwise_aut_of_separates`** (separates ⟹ the kept
+  branches are pairwise `Aut`-equivalent — inside ONE orbit, which consume then collapses; the graded mirror
+  of `cellIsOrbit_*`), and the spec-level key: `partnerTo` (the one-sided F2a partner lookup, target copy
+  designated by a VERTEX — no ids, no representatives), `walkOk`/`holMoved`/`holSig` (moved-count of the
+  composite `copy(v) → copy(t₁) → copy(t₂) → copy(v)`, sorted dedup over ALL target pairs; `L = 3` is the v1
+  grading — the witness's parity lives there; the ladder extends like every other oracle's `d`), `holKey` with
+  flat `n⁵` cost. **STAGED (the remaining tranche):** (i) the **component-closure lemma set** — `relComp` of a
+  symmetric relation is membership-equivalence (closedness after `n` monotone rounds; the convergence content
+  F2a deliberately never needed, F3a genuinely does: well-definedness of vertex copy-designators is what the
+  evaluation twin's per-copy dedup and several transport steps factor through); (ii) the **evaluation twins**
+  (materialised id-tables, the probe's shape — the spec forms recompute `relComp` per membership test, trap
+  #1's shape, do not `#eval` them at `n ≥ 15`); (iii) **`KeyEquivariant holKey`** via the F2a toolkit
+  (matchings conjugate by `uniqueMem_transport` + `mem_relComp_transport`; walk enumeration reindexes;
+  dedup+sort invariant); (iv) witness guards (`holKey` splits the 6-pendant cell 3|3 where `lookaheadKey`
+  keeps 6) + capstone `forceThenConsume holKey (appendSupply foldSupply deckSupply)` + fused mirror.
+- **F3b — the Smith/CRT coset canonicalization** (= §11.12 P3's real weight, §5 above): needed where holonomy
+  *signatures* exist but must be ORDERED at the module level (large holonomy groups; native-arity gadget
+  systems with no fold skeleton; canonical coset reps of `coker`). **Gated on a concrete witness where F3a
+  measurably fails to separate** — do not build speculatively. Mathlib has Smith over PIDs; the computable +
+  equivariance story is the heavy build the plan always priced.
+- **C# parity** unchanged (§8 item 5: CRT peel; odd-part ≥ 7 red-bar test first).
+- **Sequencing vs §6.4 (duplicate-refine):** `holKey` does no refinement look-ahead, so it sidesteps the
+  triple-refine loss entirely; `lookaheadKey`'s hand-forward retirement stays coupled to the §6.1 interface
+  work, not to F3a.
+
+---
+
 ## 6. Polynomial accounting (per descent node; single guarded path ⟹ ≤ n+1 nodes)
 
 | move | trigger | per-node cost | closes |
