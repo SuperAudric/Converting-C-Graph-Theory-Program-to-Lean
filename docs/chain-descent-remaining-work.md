@@ -13,7 +13,14 @@
 > reduction + the pruning license). **Handoff §6.0 / §6.2 / §6.2b are authoritative; the list below is superseded.**
 >
 > **The open items, in priority order** (handoff §6):
-> 1. **`P3c`** — **✅ FIRST HALF LANDED (2026-07-16, `PrunedSupply.lean`, axiom-clean)**; second half open.
+> 1. **`P3c`** — **✅✅ CLOSED 2026-07-18. BOTH HALVES LANDED** (`PrunedSupply.lean` + `TreePrune.lean`, axiom-clean),
+>    **and the `viaSpielman` POC import with them** (`SealDepthBridge.lean` §5 — the two predicates were
+>    *definitionally* equal as predicted). ⚠ **But read the scope correction:** the second half is a real
+>    `|Aut|`-fold cut (`C₇`: table 399→30 at `d≤2`, 2800→202 at `d≤3`, still finding all 14 of `D₇`) and **NOT** the
+>    quasipoly→poly ladder-break the plan projected — pruning by a **fixed** group divides by at most its order, and
+>    per-level growth is unchanged. A genuine per-level collapse needs the ⛔-banned **stabilizer chain**, so
+>    **`d = Θ(log n)` stays OPEN and P3c is not the route to it** (handoff §6.2b's MEASURED box is authoritative).
+>    Historical detail of the first half and of the second half's design follows.
 >    **Also landed: `P2b`/`P2c` (`SealDepthBridge.lean`, 2026-07-15)** — the seal's DEPTH reaches the supply
 >    (`separatesAt_of_cascadesFrom`; `deepCol_pathCol`; `cellIsOrbit_pathCol_of_seal`), so `theorem_1_HOR_*` / the
 >    form families / `viaSpielman` now literally import. **⛔ The "orbit-pruned FIXPOINT" framing above is

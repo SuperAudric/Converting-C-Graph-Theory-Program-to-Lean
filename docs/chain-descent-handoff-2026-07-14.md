@@ -50,6 +50,7 @@ whole frontier.
 | `ChainDescent/PartialMatch.lean` | **F1 — THE SUPPORT-LOCAL ORACLE** (2026-07-17, fold/tower plan). `partialMatch`: forward/backward singleton matching + identity, so an INVOLUTION with a **half-discretized support** (a copy transposition with ONE copy pinned) is caught at `d` independent of the fold multiplicity. Subsumes `deepMatchSupply` firing (`supportSeparatesAt_of_separatesAt`). See §6.6. |
 | `ChainDescent/FoldSupply.lean` | **F2a — THE STRUCTURAL FOLD SUPPLY** (2026-07-18, fold/tower plan). Fibers/copies read off the CELL structure (`relComp`); fiber-wise copy swaps from branch-cell seed pairs; fires where **refinement-based matching is provably dead** (mirror-tied covers). Capstones for the guarded AND fused objects. See §6.6. |
 | `ChainDescent/PrunedSupply.lean` | **P3c FIRST HALF** (2026-07-16). `prunedSupply d` — reference-matching, `\|table\|` not `\|table\|²`; `SameOrbits` ⟹ ①/②/③ transfer. See §6.2b. |
+| `ChainDescent/TreePrune.lean` | **P3c SECOND HALF** (2026-07-18). `treeSupply seed K d` — the search space grown **level by level as a tree**, each level orbit-pruned by an untrusted **seed** group; every drop carries its witness. ★ `exists_rep` (the tree induction) + `Reaches`/`wordReach_of_reaches` (products → `WordReach`) ⟹ `sameOrbits_treeSupply` — a genuine **group-closure**, not the first half's set-equality. ⚠ **Measured `|Aut|`-fold, NOT a ladder-break** (`C₇`: 399→30, 2800→202 ≈ `\|D₇\|`; per-level growth unchanged). See §6.2b. |
 | `ChainDescent/HandledBridge.lean` | **THE `Handled` POPULATION BRIDGE** (2026-07-16). `reaches_pathCol` (every reached node IS a `pathCol`) + **`handled_of_seal`** — the first theorem instances of `Residue.Handled`. See the §4 update box. |
 | `ChainDescent/Select.lean` | **THE SEL REWRITE, increments 1+2** (2026-07-17). `NodeRes` (node resolver: children WITH their refined colourings, `[] = flag` = true mutual stall — §6.1 AND §6.4 in one interface), `descendS`, ★ `descendS_blind` (EXACT `CostM` equation vs `descend` — the safety net), `descendS_sound` (①a **unconditional**), `NodeTransport` + `descendS_transport` ⟹ capstone `isCanonicalFormOptS_canonFormS?`, and ★ `nodeTransport_blindNode` (**conservativity** — every proved `NarrowTransport` instance discharges the new contract at the blind instance). See §6.1's design-pass block. |
 | `ChainDescent/SelectNode.lean` | **THE SEL REWRITE, increments 3–5** (2026-07-17/18). The fused `selNode` (least RESOLVABLE colour; `[] = flag` = TRUE mutual stall, `selNode_stall_iff`), ★ dominance `canonFormS?_selNode_dominates`, `selNode_canonizer` (+ `_pruned_` via `SameOrbits`), `HandledS`/`handledS_of_seal`, one-place record `selNode_pruned_record`, rfl-twins `selNodeFast`/`canonFormFastS?`, `allCellsMatchSupply`. See §6.1's build-state block. |
@@ -518,7 +519,14 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
     whole-descent statement is now the theorem `CascadesAt + (∀ T, CellsAreOrbits) ⟹ Handled`, with the reachable-node
     induction (`reaches_pathCol`) discharged. What remains is **per-family localisation** — `∀ T, CellsAreOrbits` for
     each sealed family (the HOR theorems give depth + endpoint localisation only).
-  - **▶ TODO — `viaSpielman` POC import (small; mostly proof-of-concept).** `Cascade.SeparatesAtBoundedBase S bound`
+  - **✅ LANDED 2026-07-18 — the `viaSpielman` POC import** (`SealDepthBridge.lean` §5, axiom-clean, compiled first
+    try). `cascadesAt_of_separatesAtBoundedBase` is the one-line unfold (the two predicates are **definitionally
+    equal**, exactly as predicted — `Refine.constP n` *is* the seal's `fun _ _ => POE.unknown`), and
+    `cellIsOrbit_pathCol_of_spielman` composes it with the P2c capstone: **a scheme separating at a bounded base
+    fires `deepMatchSupply bound` at every committed path of the descent on its own adjacency**, given localisation
+    there. Both scope caveats are carried in the file's §5 docstring (claw-bounded SRGs only; fires on `schemeAdj S`
+    not on a graph realizing `S`). The original TODO text follows.
+  - **▶ (original TODO text) — `viaSpielman` POC import (small; mostly proof-of-concept).** `Cascade.SeparatesAtBoundedBase S bound`
     is **definitionally** `CascadesAt (schemeAdj S) (Refine.constP n) bound` (same `∃ S₀ ≤ bound, Discrete(warmRefine ∘
     individualizedColouring)`; `constP n = fun _ _ => POE.unknown`). So `cascadesFrom_pathCol_of_cascadesAt` /
     `cellIsOrbit_pathCol_of_seal` apply **directly** at `adj := schemeAdj S`: a one-lemma bridge
@@ -620,7 +628,40 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
 > (`Consume.lean`). The pruning license needs this: a candidate reconstructed as a product/conjugate of verified
 > generators must itself certify as an automorphism.
 >
-> **⚠⚠ THE SECOND HALF IS A GROUP-CLOSURE PROOF, NOT SET-EQUALITY — measured and pinned down (2026-07-16).** The first
+> **✅✅ P3c SECOND HALF LANDED — `ChainDescent/TreePrune.lean` (2026-07-18, axiom-clean, in `build.sh`).** The
+> group-closure proof anticipated below is **built**, and it came in cleaner than the "~200+ lines of Schreier-Sims"
+> estimate because the closure is a **fold invariant, not a BFS**. The object: grow the `(branch, sequence)` space
+> **level by level as a tree** and orbit-prune each level by a **seed** group — an entry is dropped the moment it is
+> exhibited as `w · e` for an already-kept `e` and a `w` in `wordsOf G K`. **Every drop carries its witness**, so
+> word-list completeness (`K`) is a pure efficiency knob: a short list prunes less, **never wrongly**. Three bricks:
+> - **★ `exists_rep`** — the tree induction. Every full-enumeration entry is a seed-word image of a **kept** one,
+>   because a dropped node's descendants are the `w`-images of the kept representative's:
+>   `(v, s ++ [x]) = w · (t.1, t.2 ++ [w⁻¹ x])`. This is the nauty tree-prune shape, proved.
+> - **`OrbitPrune.matchCol_left_mul`** — a dropped entry's candidate is `u * c` with `c` **kept**.
+> - **`IsColAut.one/comp/inv`** — `c = u⁻¹ * g` is an automorphism, so the kept candidate itself **verifies**. (This
+>   is precisely where the `inv` brick is load-bearing.)
+>
+> §1's **`Reaches` / `wordReach_of_reaches`** is the piece that had no analogue before: it converts "`g` is a
+> **product** of verified generators" into `WordReach`, which is one-generator-at-a-time and could not otherwise
+> cross. **`sameOrbits_treeSupply` holds for an ARBITRARY UNTRUSTED seed supply** ⟹ `treeSupply_guarded_canonizer` /
+> `_lookahead_canonizer` / `cellIsOrbit_treeSupply` transfer ①/②/③ with no equivariance proof. `Regression` §13
+> guards it behaviourally (same answer as the unpruned oracle; ①c under relabelling).
+>
+> **⚠⚠⚠ MEASURED — AND IT CORRECTS THE SCOPE CLAIM BELOW. READ THIS BEFORE PLANNING ON P3c's PAYOFF.**
+> On `C₇`: full table `399` rows at `d ≤ 2` vs **`30`** pruned; `2800` vs **`202`** at `d ≤ 3`; and the pruned tree
+> still finds **all 14** automorphisms (`|D₇|`). Both ratios sit just under `|Aut| = 14` — and that is the **honest
+> ceiling**, not an artifact: pruning by a **fixed** group divides the enumeration by at most its order.
+> **Per-level growth is unchanged** (`30 → 202` is still a factor of `≈ n`). ⟹ **the `n^d → SUM` collapse is NOT
+> delivered by this, and the "quasipoly→poly ladder-break" framing in the SCOPE NOTE below is RETRACTED.** What the
+> theorem delivers is an **`|Aut|`-fold cut** — which is large exactly on the symmetric graphs where the deep oracle
+> is needed at all, so it is worth having, but it is a *constant in `d`*, not a change of regime.
+> **⛔ And the missing ingredient is one we have already settled as unavailable:** a genuine per-level collapse needs
+> the **stabilizer chain** (the group must *grow* as the level deepens), which is banned — no iso-invariant
+> within-cell vertex pick exists (`①b` **and** `①c` fail). So do **not** re-attempt "make P3c collapse the ladder"
+> by strengthening the pruning; the ladder-break, if it exists, is not on this route.
+>
+> **⚠⚠ (Original 2026-07-16 analysis, retained — it is what the build was aimed at, and its route was correct.)** The
+> first
 > half worked because the verified sets were *equal* (`verified_mem_iff`). **Sequence pruning breaks that**, and the
 > measurement shows exactly how: keeping the group-canonical sequences on `C₇`/`d=1` retains **14 of 56** entries, and
 > matching *within* the kept set finds **10** automorphisms — **not all 14** (`|D₇|`). The missing 4 are **words** of
@@ -639,11 +680,15 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
 > tree pruning** (keep the search tree, harvest autos from ref-vs-node matches, prune the *subtrees* of nodes proven
 > auto-equivalent to a kept node) — whose autos in a pruned subtree are **conjugates** of kept ones.
 >
-> **▶ SCOPE NOTE — the first half already closes the POLY regime.** At **bounded `d`** the reference-matching supply
-> is already polynomial (`|table| = |cell|·n^d`, poly for fixed `d`); the `|table|²→|table|` cut is a constant-factor
-> improvement there. The second half's payoff is the **quasipoly→poly** ladder-break at `d = Θ(log n)` (turning `n^d`
-> into a sum), **conditional on localisation at every level** — the seal's own open hypothesis. So it is the
-> high-value-but-conditional piece, not on the critical path for the poly-or-flag headline.
+> **▶ SCOPE NOTE — ⚠ HALF RETRACTED 2026-07-18 (see the MEASURED box at the top of this block).** What still stands:
+> at **bounded `d`** the reference-matching supply is already polynomial (`|table| = |cell|·n^d`, poly for fixed
+> `d`), so the first half's `|table|²→|table|` cut is a constant-factor improvement in the poly regime. **What is
+> RETRACTED:** the projection that the second half would deliver a **quasipoly→poly ladder-break at `d = Θ(log n)`**
+> by turning `n^d` into a sum. It is built and it does not do that — it divides by `|Aut|` and leaves the per-level
+> growth intact, and the per-level collapse would require the ⛔-banned stabilizer chain. **⟹ the `d = Θ(log n)`
+> ladder remains OPEN, and P3c is no longer the route to it.** (Both P3c halves are real cost wins; neither changes
+> the regime. The regime change, if available, has to come from somewhere else — most plausibly the *force* side
+> (F3/`HolKey`) rather than a cheaper consume enumeration.)
 >
 > **▶ HOW TO REPRODUCE THE P3c MEASUREMENTS (two gotchas that each cost real time).** The numbers above came from a
 > throwaway scratch file importing `ChainDescent.OrbitPrune` / `ChainDescent.PrunedSupply` (deleted — it is 20 lines,

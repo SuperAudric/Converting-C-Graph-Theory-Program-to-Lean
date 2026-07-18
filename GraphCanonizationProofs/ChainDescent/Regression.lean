@@ -2,6 +2,7 @@ import ChainDescent.Residue
 import ChainDescent.MatchSupply
 import ChainDescent.DeepMatchSupply
 import ChainDescent.PrunedSupply
+import ChainDescent.TreePrune
 import ChainDescent.PartialMatch
 import ChainDescent.SelectNode
 import ChainDescent.FoldSupply
@@ -395,5 +396,48 @@ def utRoot : Refine.ColData 30 := Refine.warmRefineVec ut (fun _ => 0)
 the identity), the T-pendants' does not (the twisted triangle moves the mirror pair) — presence-first
 encoding, so `keepMin` keeps exactly the straight triple, ONE genuine orbit. -/
 #guard (Force.keepMin Hol.holKeyFast ut utRoot.col (branches utRoot.col)).map Fin.val = [4, 9, 14]
+
+
+
+/-! ## 13. `P3c` SECOND HALF — the TREE-PRUNED supply answers identically, and the tree really is smaller
+
+`TreePrune.treeSupply` grows the `(branch, sequence)` search space level by level and orbit-prunes each level by a
+**seed** group. `sameOrbits_treeSupply` proves it reaches the same orbits as the full enumeration for an *arbitrary
+untrusted seed*, so the guarded canonizer is the **same function** — and that is exactly what these guards check
+behaviourally, since a wiring bug (pruning an entry whose witness is bogus, or failing to emit the seed) would
+change the answer and fail the build.
+
+⚠ **Read the second guard for what the pruning actually buys.** On `C₇` at `d ≤ 2` the full table has `399` rows and
+the pruned tree keeps `30`; at `d ≤ 3` it is `2800` vs `202`. Both ratios sit just under `|Aut(C₇)| = |D₇| = 14`, and
+that is the honest ceiling: pruning by a **fixed** group divides the enumeration by (at most) its order — it does
+**not** turn `n^d` into a sum, because per-level growth is unchanged (`30 → 202` is still a factor of `≈ n`). The
+`n^d → sum` collapse would need the *stabilizer chain*, which is ⛔ settled-banned (no iso-invariant within-cell
+vertex pick). So this is an `|Aut|`-fold cut — large exactly on the symmetric graphs where the deep oracle is
+needed, and worth having — not the quasipoly→poly ladder-break the earlier P3c prose projected. -/
+
+def C7 : AdjMatrix 7 := ⟨fun i j => if (i.val + 1) % 7 = j.val ∨ (j.val + 1) % 7 = i.val then 1 else 0⟩
+
+def gTree {m : Nat} (seed : Consume.Supply m) (K d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
+  (canonForm? encodeFreeFast
+    (guard (forceThenConsume lookaheadKey (TreePrune.treeSupply seed K d))) a).map flatten
+
+/-! **Same answer as the unpruned oracle** — the behavioural witness of `sameOrbits_treeSupply`. -/
+#guard gTree (PrunedSupply.prunedSupply 0) 1 1 C4 = gDeep 1 C4
+
+/-! `①c` for the tree-pruned object: it has **no** equivariance proof of its own (it picks orbit
+representatives); iso-invariance is inherited through the `SameOrbits` reduction. Measured. -/
+#guard gTree (PrunedSupply.prunedSupply 0) 1 1 C4
+     = gTree (PrunedSupply.prunedSupply 0) 1 1 (relabelAdj (Equiv.swap 0 1) C4)
+
+/-! **The tree really is pruned** — `|Aut|`-fold, and it still finds the whole group (`14 = |D₇|`). -/
+def c7Root : Colouring 7 := (Refine.warmRefineVec C7 (fun _ => 0)).col
+def c7Seed : List (Equiv.Perm (Fin 7)) :=
+  (Consume.verified (PrunedSupply.prunedSupply 1) C7 c7Root).dedup
+
+#guard c7Seed.length = 14
+#guard ((DeepMatch.deepTable C7 c7Root 2).length,
+        (TreePrune.prunedEntries c7Seed 1 c7Root 2).length) = (399, 30)
+#guard (Consume.verified (TreePrune.treeSupply (PrunedSupply.prunedSupply 1) 1 2) C7 c7Root).dedup.length
+     = (Consume.verified (DeepMatch.deepMatchSupply 1) C7 c7Root).dedup.length
 
 end ChainDescent.Regression

@@ -126,6 +126,26 @@ Live-doc homes referenced below: **build doc** = `chain-descent-general-cc-separ
   discretizing oracle can't harvest a multi-step moved orbit; that symmetry must go cross-branch / Part A. (Topic file
   `project_discretizing_oracle_limit_2026-06-03.md`.)
 
+- **⛔ Orbit-pruning the supply's enumeration is NOT a route to the `d = Θ(log n)` ladder-break — settled by
+  construction + measurement, 2026-07-18.** `P3c` is *built and closed* (`PrunedSupply.lean` + `TreePrune.lean`,
+  axiom-clean): the first half cut `|table|² → |table|`, the second grows the `(branch, sequence)` space level by
+  level as a tree and orbit-prunes each level by a seed group, with the group-closure proof landed
+  (`sameOrbits_treeSupply`). **Measured on `C₇`: 399 → 30 rows at `d ≤ 2`, 2800 → 202 at `d ≤ 3`, still recovering
+  all 14 of `D₇`.** Both ratios sit just under `|Aut| = 14`, and that is the **structural ceiling, not a tuning
+  artifact: pruning by a FIXED group divides the enumeration by at most its order, and per-level growth is
+  unchanged** (`30 → 202` is still `≈ n`). A genuine per-level collapse needs the group to *grow* as the level
+  deepens — i.e. the **stabilizer chain**, which is separately settled-banned (no iso-invariant within-cell vertex
+  pick ⟹ `①b` **and** `①c` fail). ⟹ **Do not re-attempt "make the consume enumeration collapse the ladder" by
+  strengthening the pruning, lengthening `wordsOf`, or iterating to a fixpoint** — the win is `|Aut|`-fold in every
+  variant. **⚠ And the ceiling is IMPLEMENTATION-INDEPENDENT, so head off the obvious counter-proposal ("prune each
+  subtree by the per-node STABILIZER instead of the global group"):** the kept set at level `k` is, at best, one
+  representative per `G`-orbit on that level, and by orbit-stabilizer `#orbits ≥ |level| / |G|` — per-node
+  stabilizers are just a *way of computing* those orbits, never a way of getting fewer nodes than there are orbits.
+  So `≥ |branches| · n^k / |Aut|` survives at every level under **any** group-based pruning scheme. Beating `n^d`
+  therefore requires not enumerating all sequences at all — a smarter *choice* of what to individualize, which is
+  the selector/force side of the object, not the consume side. The earlier "`n^d` becomes a SUM" projection (handoff §6.2b, pre-2026-07-18) is **retracted**; if a
+  regime change exists it is more plausibly force-side (F3/`HolKey`) than a cheaper consume enumeration.
+
 - **`decide`-checking a hard-coded `SchurianScheme` is INFEASIBLE — do not attempt.** The `schurian` axiom is
   `∃`-over-auts `∀`-over-pairs ≈ 8M kernel checks; splitting helps a constant factor, not enough; `orbitalScheme` is
   `noncomputable`. Concrete witnesses stay at `AssociationScheme`/`Discrete` level. (Build doc §7, 2026-06-13.)

@@ -3169,36 +3169,40 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 44-45 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 47-49 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 51-58 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 60-63 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 67-68 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 77-78 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 101-102 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 111-112 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 140-143 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 158 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 160-162 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 177-181 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 197-200 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 202 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 204-206 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 208-210 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 211 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
-| `Regression.gSel` | 246-247 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
-| `Regression.gSelDeep` | 249-250 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
-| `Regression.vcoreB` | 282-286 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
-| `Regression.vfold2` | 288-291 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
-| `Regression.vfold2Root` | 293 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wEdge` | 323-328 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
-| `Regression.wcyc9` | 330 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
-| `Regression.wcyc9Root` | 331-333 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wcyc9Swapped` | 344 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
-| `Regression.wcyc9SwappedRoot` | 345-346 | Its materialized root (trap #1). | Definition |
-| `Regression.vfoldT` | 371-378 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
-| `Regression.ut` | 380-384 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
-| `Regression.utRoot` | 386 | Materialized root colouring (trap #1). | Definition |
+| `Regression.C5` | 45-46 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 48-50 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 52-59 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 61-64 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 68-69 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 78-79 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 102-103 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 112-113 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 141-144 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 159 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 161-163 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 178-182 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 198-201 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 203 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 205-207 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 209-211 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 212 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 247-248 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 250-251 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.vcoreB` | 283-287 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
+| `Regression.vfold2` | 289-292 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
+| `Regression.vfold2Root` | 294 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wEdge` | 324-329 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
+| `Regression.wcyc9` | 331 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
+| `Regression.wcyc9Root` | 332-334 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wcyc9Swapped` | 345 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Regression.wcyc9SwappedRoot` | 346-347 | Its materialized root (trap #1). | Definition |
+| `Regression.vfoldT` | 372-379 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
+| `Regression.ut` | 381-385 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
+| `Regression.utRoot` | 387 | Materialized root colouring (trap #1). | Definition |
+| `Regression.C7` | 418 | — | Definition |
+| `Regression.gTree` | 420-422 | — | Definition |
+| `Regression.c7Root` | 433 | — | Definition |
+| `Regression.c7Seed` | 434-441 | — | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3309,6 +3313,8 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `SealDepthBridge.deepCol_pathCol` | 143-156 | **★ DEEPENING A DESCENT NODE = COMMITTING THE LONGER PATH.** `deepCol adj (SealBridge.pathCol adj p) s = SealBridge.pathCol adj (s.reverse ++ p)` — an **exact** equality, because `pathCol adj (v :: p)` is definitionally `warmRefineR adj (indivOne (pathCol adj p) v)` = exactly `deepCol`'s step. The whole `P2c` vocabulary bridge rests on this one line. | — |
 | `SealDepthBridge.cascadesFrom_pathCol_of_cascadesAt` | 158-175 | **★★★ THE SEAL'S DEPTH HYPOTHESIS, AT A DESCENT NODE.** `CascadesAt adj (constP n) k` (a **global** bounded-base discreteness witness, `= SeparatesAtBoundedBase`) ⟹ the descent-side `CascadesFrom adj (pathCol adj p) k` at **every** committed path `p`, from the *same* `S₀`: deepening reaches the longer path (`deepCol_pathCol`), whose partition is `warmRefine ∘ individualizedColouring` (`pathCol_samePartition`), and a superset individualization stays discrete. | — |
 | `SealDepthBridge.cellIsOrbit_pathCol_of_seal` | 177-190 | **★★★ THE FULL SEAL → DEEP FIRING BRIDGE.** Depth (`CascadesAt`) **and** localisation (`CellsAreOrbits`) — both discharged by the sealed families (`theorem_1_HOR_*`, the four form families, `viaSpielman`) — together fire `deepMatchSupply k` at the descent node `pathCol adj p`, so `consume` collapses the branch cell. Both halves are now imports; the depth+localisation completion of P0's `cellIsOrbit_of_cellsAreOrbits` (which had only localisation). | — |
+| `SealDepthBridge.cascadesAt_of_separatesAtBoundedBase` | 207-210 | The seal's engine interface **is** the descent's depth hypothesis: `SeparatesAtBoundedBase S bound` unfolds to `CascadesAt (schemeAdj S) (constP n) bound`. Definitionally equal — `Refine.constP n` *is* the seal's own `fun _ _ => POE.unknown`, so no PMatrix translation layer exists or is needed. | — |
+| `SealDepthBridge.cellIsOrbit_pathCol_of_spielman` | 212-221 | **★★ THE `viaSpielman` POC IMPORT.** A scheme separating at a bounded base fires `deepMatchSupply bound` at every committed path of the descent on the scheme's own adjacency, given localisation there — demonstrating the seal→supply import is generic in the bound, sub-exponential rung included. ⚠ Scope: Spielman's `Õ(n^{1/3})` is citable for claw-bounded SRGs only, and this fires on `schemeAdj S`, not on a graph *realizing* `S` (that hop is `RouteCTransport`). The **poly** rungs (`theorem_1_HOR_*`) are the real workhorse. | — |
 ## ChainDescent/PrunedSupply.lean
 
 | Name | Line | Description | Notes |
@@ -3760,3 +3766,75 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `MultipedeWitness.dmp72` | 92-96 | The matched double: two copies + the perfect matching `i ↔ 36+i` (`Aut = Z₂`, rigid core). | Definition |
 | `MultipedeWitness.dmpTypes` | 98 | The doubled typed seed. | Definition |
 | `MultipedeWitness.dmp72Root` | 100 | Materialised root colouring of the double. | Definition |
+## ChainDescent/ScratchTreeMeasure.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ScratchTreeMeasure.cyc` | 11-12 | — | Definition |
+| `ScratchTreeMeasure.rootCol` | 14-17 | — | Definition |
+| `ScratchTreeMeasure.a7` | 18 | — | Definition |
+| `ScratchTreeMeasure.c7` | 19-21 | — | Definition |
+| `ScratchTreeMeasure.seed7` | 22-38 | — | Definition |
+
+## ChainDescent/TreePrune.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `TreePrune.GWord` | 67-70 | `w` is a **product of elements of `G`** (empty product = `1`). The pruning's witness type: an entry is dropped only when exhibited as `w · e` for such a `w`. | Inductive |
+| `TreePrune.GWord.comp` | 72-76 | `GWord` is closed under multiplication — needed because the tree induction composes a level's word with the prefix's. | — |
+| `TreePrune.isColAut_of_gword` | 78-84 | A word in **verified** generators is itself a colouring-preserving automorphism (`IsColAut.one`/`comp`). This is what lets `deepCol_aut` apply to a pruning witness. | — |
+| `TreePrune.Reaches` | 86-89 | `g` moves **every** point within its `WordReach` class over `K` — i.e. `g` acts inside the orbit partition `K` proves. The property that is closed under **products**, which `WordReach` (one generator at a time) is not. | Definition |
+| `TreePrune.Reaches.one` | 91-93 | The identity acts inside every orbit partition. | — |
+| `TreePrune.Reaches.gen` | 95-96 | A generator acts inside the partition it generates (one `WordReach` step). | — |
+| `TreePrune.Reaches.mul` | 98-101 | **`Reaches` is closed under composition** — the crux of the whole file: a pruned-away candidate is recovered as a *product*, and this is what makes that harmless. | — |
+| `TreePrune.Reaches.ofGWord` | 103-107 | Every word in a generator sublist acts inside the larger list's orbit partition. | — |
+| `TreePrune.wordReach_of_reaches` | 109-115 | **★ THE BRIDGE.** If every generator of `K₁` acts inside `K₂`'s orbit partition, `K₂` proves everything `K₁` does — `K₁`'s generators need not be *in* `K₂`, being **products** of `K₂`'s is enough. This is what `SameOrbits` needs and what set-equality arguments cannot supply. | — |
+| `TreePrune.Entry` | 123-124 | A search-tree node: branch vertex + the sequence individualized after it. | `abbrev` |
+| `TreePrune.actEntry` | 126-127 | The permutation action on an entry — **the whole entry, vertex included**. ⚠ Pruning the sequence while holding the vertex fixed is *not* licensed; `deepCol_aut` transports `v :: s` as a unit. | Definition |
+| `TreePrune.actEntry_one` | 129-130 | The action is unital (the base case of the tree induction). | — |
+| `TreePrune.actEntry_mul` | 132-134 | The action composes — how the tree induction chains a level's witness onto the prefix's. | — |
+| `TreePrune.wordsOf` | 136-140 | All products of at most `K` generators. **Completeness is not needed for correctness**: a shorter list prunes less, never wrongly, because every drop carries its own witness. `K` is a free efficiency knob. | Definition |
+| `TreePrune.gword_of_mem_wordsOf` | 142-153 | Everything `wordsOf` enumerates really is a `GWord` — the soundness of the pruning test's witness supply. | — |
+| `TreePrune.reducible` | 155-157 | The pruning test: has this entry already been exhibited as a known-word image of a kept one? Decidable, and it *produces* the witness it tests for. | Definition |
+| `TreePrune.reduceStep` | 159-162 | One pruning pass: keep an entry unless it is a known-word image of one already kept. | Definition |
+| `TreePrune.entryReduce` | 164-165 | Prune a whole level by folding `reduceStep` from the empty accumulator. | Definition |
+| `TreePrune.foldl_subset` | 167-178 | The accumulator only ever grows through the fold. | — |
+| `TreePrune.foldl_subset_append` | 180-196 | The fold's result stays inside `acc ++ L` — nothing is invented. | — |
+| `TreePrune.foldl_subset_cons` | 198-204 | One step of the accumulator-growth fact, extracted for reuse. | — |
+| `TreePrune.foldl_covers` | 206-228 | **★ THE PRUNING IS WITNESSED.** Everything fed to `entryReduce` is a known-word image of something kept. The fold invariant that replaces the Schreier-Sims BFS the design originally anticipated. | — |
+| `TreePrune.entryReduce_covers` | 230-233 | `foldl_covers` at the empty accumulator — the usable form. | — |
+| `TreePrune.entryReduce_subset` | 235-239 | Pruning only removes; the kept set is a sub-collection of the input level. | — |
+| `TreePrune.entryLevels` | 241-247 | **The pruned search tree, level by level.** Level `0` is the branch cell (already pruned — the `v`-side prune); level `k+1` extends each **kept** level-`k` entry by every vertex and prunes again. Descendants of a dropped node are never generated. | Definition |
+| `TreePrune.entryLevels_spec` | 249-265 | Every kept entry is a genuine `(branch vertex, sequence of that exact length)` pair. | — |
+| `TreePrune.exists_rep` | 267-301 | **★★★ THE TREE COVERS THE FULL ENUMERATION.** Every `(branch, sequence)` pair of the *unpruned* space is the image, under a **word in `G`**, of an entry the tree actually kept. The induction is the whole point: `(v, s ++ [x]) = w · (t.1, t.2 ++ [w⁻¹ x])`, and that child is *generated* from the kept `t`. This is nauty's tree-prune correctness, proved. | — |
+| `TreePrune.prunedEntries` | 303-306 | The kept entries at depth `d` — every level up to `d`. | Definition |
+| `TreePrune.mem_prunedEntries_of_level` | 308-311 | A kept level-`k` entry (`k ≤ d`) is a kept depth-`d` entry. | — |
+| `TreePrune.prunedEntries_spec` | 313-317 | Kept entries are genuine branch/short-sequence pairs — so they are rows of the **full** table too. | — |
+| `TreePrune.exists_rep_prunedEntries` | 319-324 | `exists_rep` packaged at depth `d`: every full-space entry reduces to a pruned one. | — |
+| `TreePrune.entryData` | 328-330 | The colouring an entry reaches, materialised **once** as `ColData` (standing trap #1 — never a `… → Colouring n`). | Definition |
+| `TreePrune.entryData_col` | 332-336 | The materialised colouring **is** the reasoned-about `deepCol`. | — |
+| `TreePrune.mem_deepTable_of_prunedEntries` | 338-343 | A pruned entry is a genuine row of the full `deepTable` — so anything the tree finds, the full oracle also has. Direction A runs on this. | — |
+| `TreePrune.treeTable` | 345-348 | The pruned table: one materialised colouring per kept entry. | Definition |
+| `TreePrune.treeRef` | 350-352 | The reference entry of a pruned table: the first row that discretizes. | Definition |
+| `TreePrune.treeGens` | 354-357 | The emitted generators: the seed group (the words the pruning spent) **plus** the reference matches. Emitting the seed is what makes the closure argument land inside the tree's own verified list. | Definition |
+| `TreePrune.treeSupply` | 359-367 | **★ THE TREE-PRUNED ORACLE.** Grow the search tree level by level, prune each level by the seed group's orbits, match every survivor against one discrete reference, emit seed + matches. Untrusted on **both** counts — `Consume.verified` re-checks everything, so a junk seed costs pruning, never correctness. | Definition |
+| `TreePrune.gens_treeSupply` | 369-371 | The supply's generator projection, by `rfl`. | — |
+| `TreePrune.mem_treeGens` | 373-386 | Membership in the emitted list, unpacked into "seed element or reference match". | — |
+| `TreePrune.mem_treeGens_of_seed` | 388-392 | Once the reference exists, every seed generator is emitted. | — |
+| `TreePrune.mem_treeGens_of_match` | 394-399 | Once the reference exists, every reference match is emitted. | — |
+| `TreePrune.treeRef_mem` | 401-402 | The reference is one of the table's own rows. | — |
+| `TreePrune.discrete_treeRef` | 404-408 | The reference row is discrete (it is the `find?` predicate) — required for `matchCol` to fire at all. | — |
+| `TreePrune.treeRef_isSome_of_discrete` | 410-417 | A discrete row forces the reference to exist. | — |
+| `TreePrune.isColAut_of_gword_seed` | 434-435 | Every word in the seed group is an automorphism — the seed is read through `verified`, so this needs no hypothesis on the seed supply. | — |
+| `TreePrune.exists_pruned_transport` | 437-450 | **★ THE COVERING, IN COLOURINGS.** Every colouring the *full* space reaches is the `w`-transport of one the **pruned tree** reaches, for `w` an automorphism. `exists_rep` plus `OrbitPrune.deepCol_aut`. | — |
+| `TreePrune.exists_pruned_transport_word` | 452-464 | The same, carrying the word itself — needed to *left-multiply* the candidate in the closure step. | — |
+| `TreePrune.mem_treeTable` | 466-468 | A kept entry's row is in the pruned table. | — |
+| `TreePrune.exists_treeRef_of_full` | 470-483 | **The tree discretizes whenever the full table does.** A discrete full entry transports onto a pruned one and discreteness is transport-invariant — so the tree never silently loses its reference by pruning. | — |
+| `TreePrune.seed_subset_verified` | 485-492 | Every seed generator is emitted **and verified** by the tree — so the closure's `u` factor lands inside the tree's own verified list, not outside it. | — |
+| `TreePrune.exists_full_ref_of_mem_gens` | 496-505 | If the tree emits anything it found a discrete entry, which is a row of the full table too. | — |
+| `TreePrune.verified_tree_subset_deep` | 507-517 | **Direction A.** The tree emits only automorphisms, and once *any* entry discretizes the full oracle contains **every** automorphism (`PrunedSupply.exists_image_entry`) — so this direction needs no closure at all. | — |
+| `TreePrune.deep_reaches_tree` | 521-577 | **★★★ THE CLOSURE (direction B).** For a full-oracle generator `g`: the reference sits at a pruned entry `e`, the *full* entry `g · e` reduces to a pruned `t` by a word `u`, and `some g = matchCol r (g·r) = (matchCol r (deepCol t)).map (u * ·)` gives `g = u * c` with `c` **kept**. `c = u⁻¹ * g` is an automorphism (`IsColAut.inv`/`comp`) so `c` verifies; `u` is a seed word the tree also emits. Hence `g` acts inside the orbit partition the tree proves. | — |
+| `TreePrune.sameOrbits_treeSupply` | 583-591 | **★★★ `treeSupply` PROVES THE SAME ORBITS AS `deepMatchSupply`** — the *entire* `①` obligation of the tree-pruned supply, and it holds for an **arbitrary untrusted seed supply**. Direction A is membership; direction B is the group closure. | — |
+| `TreePrune.treeSupply_guarded_canonizer` | 593-602 | **★★★ THE TREE-PRUNED MIXED CANONIZER.** `①a`/`①b`/`①c` for the guarded composite over the orbit-pruned supply — inherited wholesale through the `SameOrbits` reduction, with **no** equivariance proof on `treeSupply` (which has none: it picks orbit representatives). | — |
+| `TreePrune.treeSupply_lookahead_canonizer` | 604-611 | The concrete instance: tree-pruned supply seeded by the reference-matching supply one level shallower, with `lookaheadKey`. | — |
+| `TreePrune.cellIsOrbit_treeSupply` | 613-618 | Firing transfers too — `Handled`/`CellIsOrbit`/`CellResolved` are unchanged by the pruning, which is exactly why running on `SameOrbits` rather than equivariance was the right architecture. | — |

@@ -107,7 +107,7 @@ theorem deepCol_cons_refines (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) 
 /-! ## 2. The depth hypothesis, in the descent's vocabulary, and the bridge -/
 
 /-- **The seal's depth content, restated on the descent's `deepCol`.** Some set `S₀` of size `≤ k` discretizes when
-individualized (with refinement) on top of `χ`. This is `Cascade.SeparatesAtBoundedBase` / `OrbitRecovery.CascadesAt`
+individualized (with refinement) on top of `χ`. This is `SeparatesAtBoundedBase` / `OrbitRecovery.CascadesAt`
 translated into the descent's own step; connecting the two objects at the partition level is the follow-on `P2c`. -/
 def CascadesFrom (adj : AdjMatrix n) (χ : Colouring n) (k : Nat) : Prop :=
   ∃ S₀ : Finset (Fin n), S₀.card ≤ k ∧ Discrete (deepCol adj χ S₀.toList)
@@ -188,6 +188,37 @@ theorem cellIsOrbit_pathCol_of_seal {adj : AdjMatrix n} {k : Nat} (p : List (Fin
   obtain ⟨c, hc, huc⟩ := Consume.exists_targetColour_of_mem hu
   have hwc : SealBridge.pathCol adj p w = c := (mem_branches_iff hc w).mp hw
   exact SealBridge.horb_of_cellsAreOrbits hco (by rw [huc, hwc])
+
+/-! ## 5. The `viaSpielman` POC import — the seal's *sub-exponential* rung, literally imported
+
+Proof of concept, not the workhorse. `SeparatesAtBoundedBase S bound` is **definitionally**
+`CascadesAt (schemeAdj S) (constP n) bound` — the same `∃ S₀, S₀.card ≤ bound ∧ Discrete (warmRefine …
+(individualizedColouring n S₀))`, since `Refine.constP n` *is* `fun _ _ => POE.unknown`, the seal's own PMatrix. So
+§4 applies at `adj := schemeAdj S` with **no translation layer**, and the whole ladder — including its
+sub-exponential top — feeds the descent's supply.
+
+⚠ **Scope, twice over.** (i) Spielman's `bound = Õ(n^{1/3})` is citable for **claw-bounded** primitive SRGs only;
+the Neumaier-exceptional Steiner / Latin-square families have base `Θ(√n)` and exit via Cameron (see `Cascade`'s
+`viaSpielman` docstring and the citation register). (ii) This fires on the scheme's **own** adjacency
+`schemeAdj S`, not yet on an arbitrary graph *realizing* `S` — that hop is `RouteCTransport`, deliberately out of
+scope here. The **poly** rungs (`theorem_1_HOR_*`) are what the real construction is built from; this rung exists
+to show the import is generic in the bound. -/
+
+/-- The seal's engine interface **is** the descent's depth hypothesis, on the scheme's own adjacency. -/
+theorem cascadesAt_of_separatesAtBoundedBase {m : Nat} (S : SchurianScheme m) (bound : Nat)
+    (h : SeparatesAtBoundedBase S bound) :
+    CascadesAt (schemeAdj S.toAssociationScheme) (Refine.constP m) bound := h
+
+/-- **★★ THE POC.** A scheme separating at a bounded base fires the bounded-depth oracle at every committed path
+of the descent on its own adjacency — given localisation there. Depth is the pure import; localisation is the
+seal's standing per-family obligation, carried here as a hypothesis exactly as everywhere else. -/
+theorem cellIsOrbit_pathCol_of_spielman {m : Nat} (S : SchurianScheme m) (bound : Nat)
+    (p : List (Fin m)) (hsep : SeparatesAtBoundedBase S bound)
+    (hco : CellsAreOrbits (schemeAdj S.toAssociationScheme) (Refine.constP m) p.toFinset) :
+    CellIsOrbit (deepMatchSupply (n := m) bound)
+      (schemeAdj S.toAssociationScheme)
+      (SealBridge.pathCol (schemeAdj S.toAssociationScheme) p) :=
+  cellIsOrbit_pathCol_of_seal p (cascadesAt_of_separatesAtBoundedBase S bound hsep) hco
 
 end SealDepthBridge
 end ChainDescent
