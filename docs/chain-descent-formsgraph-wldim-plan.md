@@ -12,6 +12,20 @@
 > — consult before re-walking anything. This live doc keeps only: what's proved + the reusable architecture (§1), the
 > difficulty calibration (§2), and the forward roadmap (§11).
 
+An out of place note I've temporarily stuck into this file for review, that should be verified and then distilled as needed or discarded.
+  **⚠ The good/bad-anchor node is a FORCE case, attacked key-first (settled 2026-07-18, pointed Q):** a
+  1-WL-merged multi-orbit cell (good vs bad anchors) is provably beyond consume's ceiling
+  (`rep_eq_iff_wordReach` — the narrowing counts orbits; a perfect supply still leaves ≥ 2 reps), and the
+  across-orbit selection is force's licensed domain (`narrow_eq_branches_of_orbit` complementarity;
+  `mem_keepMin_of_aut` = no within-cell pick, kept set is a union of orbits — the old "wrong pick ⟹ rigid
+  comparison of non-orbit families" catastrophe is structurally impossible; worst case = honest stall).
+  Firing needs a **pair-observable key** (`Z_u({t,t'})`/`χ(det G₂)` — the seal's B.1c-corrected observable;
+  singleton/lookahead-grade data is shell-blind via the `eᵢ`-swap, and the C# branches rather than separates,
+  confirming refinement doesn't see it). VO⁺'s exposure layer = the sel selector's job. **Fallback only if
+  the key is measured weak/expensive:** the T0 bounded-fan-out ② extension (branch over `bᵢ ≤ poly(q)` orbit
+  reps + lex-min, the C#'s measured mechanism) — currently unlicensed by the single-path guard and in
+  tension with the "deferral is the failure mode" principle; a deliberate design decision, not a default.
+
 ---
 
 ## STATUS (read first)
