@@ -379,17 +379,17 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Hol.nodup_iterate_relStep` | 148-153 | Every closure round is nodup (the `dedup` tail). | — |
-| `Hol.mem_iterate_relStep_mono` | 155-158 | Rounds are monotone on membership. | — |
-| `Hol.stab_succ` | 160-173 | A membership-stable round stays stable. | — |
-| `Hol.exists_stab` | 175-208 | Some round ≤ `n` is membership-stable (nodup + strict-growth pigeonhole on `toFinset` cards). | — |
-| `Hol.finRange_map_perm` | 374-380 | `σ`-image of `finRange` is a permutation of it (nodup + same `toFinset`). | — |
-| `Hol.countP_reindex` | 382-387 | `countP` over `finRange` is invariant under precomposition with `σ`. | — |
-| `Hol.foldr_min_le` | 477-483 | The fold-min is a lower bound of the list. | — |
-| `Hol.foldr_min_mem` | 485-502 | The fold-min of a nonempty `< n`-bounded list is a member. | — |
-| `Hol.foldr_min_congr` | 504-511 | Same members ⟹ same fold-min (antisymmetry via the two bounds). | — |
-| `Hol.pfT_eq` | 576-586 | The table partner lookup computes `partnerTo` (via `compIdx_eq_iff` + `uniqueFilter_eq_uniqueMem`). | — |
-| `Hol.walkOkT_eq` | 588-595 | The table walk validity computes `walkOk`. | — |
-| `Hol.tbl_filter_eq` | 597-603 | The table copy-sweep filter equals the spec membership filter. | — |
-| `Hol.holMovedT_eq` | 605-613 | The table moved-count computes `holMoved`. | — |
-| `Hol.any_walkVals_eq_holHas` | 615-638 | Scanning the materialised walk-value list equals the spec membership test `holHas`. | — |
+| `Hol.nodup_iterate_relStep` | 151-156 | Every closure round is nodup (the `dedup` tail). | — |
+| `Hol.mem_iterate_relStep_mono` | 158-161 | Rounds are monotone on membership. | — |
+| `Hol.stab_succ` | 163-176 | A membership-stable round stays stable. | — |
+| `Hol.exists_stab` | 178-211 | Some round ≤ `n` is membership-stable (nodup + strict-growth pigeonhole on `toFinset` cards). | — |
+| `Hol.finRange_map_perm` | 377-383 | `σ`-image of `finRange` is a permutation of it (nodup + same `toFinset`). | — |
+| `Hol.countP_reindex` | 385-390 | `countP` over `finRange` is invariant under precomposition with `σ`. | — |
+| `Hol.foldr_min_le` | 480-486 | The fold-min is a lower bound of the list. | — |
+| `Hol.foldr_min_mem` | 488-505 | The fold-min of a nonempty `< n`-bounded list is a member. | — |
+| `Hol.foldr_min_congr` | 507-514 | Same members ⟹ same fold-min (antisymmetry via the two bounds). | — |
+| `Hol.pfT_eq` | 579-589 | The table partner lookup computes `partnerTo` (via `compIdx_eq_iff` + `uniqueFilter_eq_uniqueMem`). | — |
+| `Hol.walkOkT_eq` | 591-598 | The table walk validity computes `walkOk`. | — |
+| `Hol.tbl_filter_eq` | 600-606 | The table copy-sweep filter equals the spec membership filter. | — |
+| `Hol.holMovedT_eq` | 608-616 | The table moved-count computes `holMoved`. | — |
+| `Hol.any_walkVals_eq_holHas` | 618-641 | Scanning the materialised walk-value list equals the spec membership test `holHas`. | — |

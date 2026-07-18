@@ -3,7 +3,8 @@
 > # ▶▶▶ SUPERSEDED BY [`chain-descent-handoff-2026-07-14.md`](./chain-descent-handoff-2026-07-14.md)
 >
 > That doc is the authoritative "what's left". **①/②/③ all have real theorems about the real object**; the frontier
-> is **resolver strength**, plus one object-level defect (the target-cell selector is blind to resolvability).
+> is **resolver strength**. (The old "one object-level defect — the target-cell selector is blind to resolvability"
+> is **CLOSED**: the resolver-aware selector landed 2026-07-17/18, item 2 below.)
 > Everything below is retained as the blow-by-blow record of how it got there.
 >
 > **✅ LANDED SINCE (2026-07-14): `P0`/`P1`/`P2`/`P3a`/`P3b`** — `SealBridge.lean` (the seal corpus now reaches the
@@ -12,9 +13,26 @@
 > reduction + the pruning license). **Handoff §6.0 / §6.2 / §6.2b are authoritative; the list below is superseded.**
 >
 > **The open items, in priority order** (handoff §6):
-> 1. **`P3c` — the ORBIT-PRUNED FIXPOINT.** `deepMatchSupply d` fires but does not *pay* (`n^{O(d)}`; 125× net loss
->    on `C₇`). Build `prunedSupply d` and prove the **single** theorem `SameOrbits (prunedSupply d)
->    (deepMatchSupply d)` — `OrbitPrune.lean` already makes this **pure combinatorics, with zero `①` exposure**.
+> 1. **`P3c`** — **✅ FIRST HALF LANDED (2026-07-16, `PrunedSupply.lean`, axiom-clean)**; second half open.
+>    **Also landed: `P2b`/`P2c` (`SealDepthBridge.lean`, 2026-07-15)** — the seal's DEPTH reaches the supply
+>    (`separatesAt_of_cascadesFrom`; `deepCol_pathCol`; `cellIsOrbit_pathCol_of_seal`), so `theorem_1_HOR_*` / the
+>    form families / `viaSpielman` now literally import. **⛔ The "orbit-pruned FIXPOINT" framing above is
+>    SUPERSEDED** — see handoff §6.2b:
+>    - **Done:** `prunedSupply d` = **reference-matching** (match from ONE discrete reference entry, not all pairs)
+>      ⟹ `|table|` matches, not `|table|²`. `SameOrbits` needed no Schreier-Sims: the enumeration is length-closed, so
+>      the two **verified sets are EQUAL as membership sets** (`verified_mem_iff`) ⟹ ①/②/③ transfer
+>      (`prunedSupply_guarded_canonizer`). Measured `C₇ d1`: supplyCost 192080→41160, `|verified|` 1764→42
+>      (**subsumes the dedup win**). Brick `IsColAut.inv` landed ⟹ `IsColAut` is a subgroup.
+>    - **⚠ Second half (the `n^d` INSIDE `|table|`, i.e. the sequence enumeration) is a GROUP-CLOSURE proof, not
+>      set-equality.** Measured `C₇ d1`: canonical-sequence pruning keeps **14 of 56** entries and within-kept
+>      matching finds **10 of 14** automorphisms — the missing 4 are **words**, so the pruned generators must be shown
+>      to *generate* the same orbits (Schreier-Sims-grade, ~200+ lines). Route: W-side orbit prune + BFS closure via
+>      `OrbitPrune.matchCol_left_mul`, shape of `Consume.orbit_closed`.
+>    - **⛔ NAIVE "keep one entry per orbit" is WRONG** — it deletes exactly the entry-vs-`G`-image matches the
+>      automorphisms come from. Correct shape = **nauty TREE pruning** (conjugate autos in pruned subtrees).
+>    - **▶ SCOPE:** the first half **already closes the POLY regime** (bounded `d` ⟹ `|cell|·n^d` poly). The second
+>      half's payoff is **quasipoly→poly at `d = Θ(log n)`**, *conditional on localisation* — high value but **not**
+>      poly-headline-critical. Also open (small, specified in handoff §6.2): the **`viaSpielman` POC import**.
 > 2. **Resolver-aware cell selector** — **✅ ALL FIVE INCREMENTS LANDED (2026-07-17/18; `Select.lean` +
 >    `SelectNode.lean`, axiom-clean, build green 135 s).** The fused instance `selNode` (least RESOLVABLE colour,
 >    `[] = flag` = the TRUE mutual stall — `selNode_stall_iff` is the Publication §1 flag semantics); ①

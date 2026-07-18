@@ -645,7 +645,18 @@ because the search space is characterised **purely by length** (`mem_allSeqs_map
 > into a sum), **conditional on localisation at every level** — the seal's own open hypothesis. So it is the
 > high-value-but-conditional piece, not on the critical path for the poly-or-flag headline.
 >
-> **(Original sketch, retained for the mechanism — but see the trap above for why "prune the table" is the wrong
+> **▶ HOW TO REPRODUCE THE P3c MEASUREMENTS (two gotchas that each cost real time).** The numbers above came from a
+> throwaway scratch file importing `ChainDescent.OrbitPrune` / `ChainDescent.PrunedSupply` (deleted — it is 20 lines,
+> re-create it rather than hunting for it). **Both gotchas silently produce NO `#eval` output** (`lean` discards
+> output on timeout — trap #1's companion), so a stalled measurement looks like a broken file:
+> 1. **The root colouring must be materialised through `ColData`.** `def rootCol a : Colouring m := Refine.warmRefineR a (fun _ => 0)`
+>    is `Colouring`-typed ⟹ **trap #1** ⟹ recomputed on *every colour lookup*. Use
+>    `(Refine.warmRefineVec a (fun _ => 0)).col` instead.
+> 2. **Dedup the harvested group BEFORE any `rep`/`orbit` call.** `verified (deepMatchSupply d)` returns ~400
+>    generators on `C₅` where 10 are distinct; `Consume.rep` runs `(orbStep G)^[n]` which `flatMap`s over **all** of
+>    `G` each round, so the duplicates make orbit computation ~40× slower and it appears to hang.
+>
+> **(Original sketch, retained for the mechanism — but see the traps above for why "prune the table" is the wrong
 > object):** prune the `(branch, sequence)` table by the orbits of the group found so far; harvest; repeat until
 > stable — monovariant = the number of orbits on the table, which strictly decreases, so `|table|` rounds suffice,
 > exactly the shape of `Consume.orbit_closed`'s convergence proof.
@@ -690,7 +701,13 @@ unconditional because `supplyCost` is whatever the supply reports.
 - ⚠ The seal "consumes all visible symmetry except Cameron / node-4" is itself **modulo {G3 citation + `hImprim`}** —
   keep that in the statement.
 
-### 6.3 The rigid key — **nothing exists beyond `lookaheadKey`**
+### 6.3 The rigid key — ⚠ **STALE BELOW; SUPERSEDED 2026-07-18**
+> **⛔ The paragraph below is out of date (flagged 2026-07-18 during handoff review).** The rigid key was **re-scoped
+> and built** as the fold-tower plan's **F3**: `ChainDescent/HolKey.lean` (F3a) is landed and in `build.sh`. The
+> authoritative scope is [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md) §5b, and
+> `HolKey.lean`'s module-doc *Build-state* block is the pickup point. Read those, **not** the text below. Retained
+> only for the ①-vs-②/firing framing, which is still correct.
+
 §11.12's P1–P4 are **not started** in Lean. The force route's *only* ① obligation is `KeyEquivariant`; its **firing**
 obligation is the exact dual of consume's: a `Force.KeySeparates` predicate (the key separates every non-automorphic
 pair in the cell). **Build consume first** — force is its mirror, so a design error there will surface by comparison

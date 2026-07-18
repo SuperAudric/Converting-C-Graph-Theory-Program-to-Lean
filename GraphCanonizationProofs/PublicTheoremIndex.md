@@ -3684,50 +3684,50 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Hol.KeySeparates` | 91-97 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
-| `Hol.keyV_eq_of_mem_keepMin` | 99-111 | Members of the narrowed set all attain the minimum key value. | — |
-| `Hol.keepMin_pairwise_aut_of_separates` | 113-135 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
-| `Hol.relComp_closed` | 210-226 | The closure really is closed: a `rel`-step out of `relComp` stays inside (monotone-rounds pigeonhole — the convergence content F2a never needed). | — |
-| `Hol.relComp_subset_of_closed` | 228-244 | Anything reachable from a member of a closed set is in it. | — |
-| `Hol.mem_relComp_self` | 246-251 | Component membership is reflexive. | — |
-| `Hol.mem_relComp_trans` | 253-256 | Component membership is transitive (via closedness). | — |
-| `Hol.mem_relComp_symm` | 258-275 | Component membership is symmetric — for a symmetric relation. | — |
-| `Hol.mem_relComp_congr` | 277-282 | **★ Copy-designator well-definedness**: any member of a component designates the same component. | — |
-| `Hol.symSame` | 291-293 | Symmetrized same-cell (vertical) adjacency — weak components; `AdjMatrix` guarantees no symmetry. | Definition |
-| `Hol.symCross` | 295-297 | Symmetrized cross-cell (horizontal) adjacency. | Definition |
-| `Hol.symSame_symm` | 299-300 | The symmetrized vertical relation is symmetric (by construction). | — |
-| `Hol.symCross_symm` | 302-303 | The symmetrized horizontal relation is symmetric (by construction). | — |
-| `Hol.symSame_transport` | 305-309 | The symmetrized vertical relation transports. | — |
-| `Hol.symCross_transport` | 311-315 | The symmetrized horizontal relation transports. | — |
-| `Hol.partnerTo` | 319-323 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
-| `Hol.walkOk` | 325-329 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
-| `Hol.holMoved` | 331-345 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
-| `Hol.holHas` | 347-350 | Is some valid walk's moved-count equal to `c`? — the signature's membership test. | Definition |
-| `Hol.holSig` | 352-358 | **The holonomy signature**: the indicator vector over `[0, n]` of attained moved-counts — representative-free (trap #7) and canonical BY CONSTRUCTION (no sort/dedup, so equivariance is existential reindexing). | Definition |
-| `Hol.holKey` | 360-364 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3-vs-3 where `lookaheadKey` keeps 6. | Definition |
-| `Hol.keyV_holKey` | 366-367 | The key's value projection is `holSig`. | `@[simp]` |
-| `Hol.keyCost_holKey` | 369-370 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |
-| `Hol.partnerTo_conj` | 389-396 | The partner lookup conjugates (`uniqueMem_transport` on the transported component memberships). | — |
-| `Hol.walkOk_conj` | 398-405 | Walk validity transports (three component-membership rewrites). | — |
-| `Hol.holMoved_conj` | 407-433 | The moved-count transports: `countP` fused over the filter, reindexed over `finRange` by σ, pointwise via the conjugated partner chain. | — |
-| `Hol.holHas_conj` | 435-454 | The membership test transports — pure existential reindexing (what the indicator form buys). | — |
-| `Hol.holSig_conj` | 456-459 | The signature is invariant under relabelling — map-congruence over `holHas_conj`. | — |
-| `Hol.keyEquivariant_holKey` | 461-467 | **★★ The holonomy key is equivariant** — the whole `①` obligation of a force key, discharged. | — |
-| `Hol.compIdx` | 513-515 | The component id: the least member index — INTERNAL (outputs consult only id-equality). | Definition |
-| `Hol.compIdx_eq_iff` | 517-545 | **★ Id-equality tests exactly component membership** (symmetric relation) — the well-definedness letting the twin replace membership scans with `O(1)` id comparisons. | — |
-| `Hol.compTbl` | 547-549 | The forced id-table (data, not a function — trap #1). | Definition |
-| `Hol.compTbl_get` | 551-553 | Table reads are `compIdx` values. | — |
-| `Hol.pfT` | 555-557 | Table-level partner lookup (`c` = the target copy's id). | Definition |
-| `Hol.walkOkT` | 559-561 | Table-level walk validity. | Definition |
-| `Hol.holMovedT` | 563-574 | Table-level holonomy moved-count. | Definition |
-| `Hol.holSigFast` | 640-647 | **The runnable signature** — two forced id-tables per call, then `O(1)` reads everywhere. | Definition |
-| `Hol.holSigFast_eq` | 649-654 | **The runnable signature computes exactly the reasoned-about one.** | — |
-| `Hol.holKeyFast` | 656-658 | The runnable key — value-equal to `holKey`, so every theorem transfers. | Definition |
-| `Hol.holKeyFast_eq` | 660-663 | The runnable key equals the spec key. | — |
-| `Hol.keyEquivariant_holKeyFast` | 665-667 | `①` for the runnable key, by transfer. | — |
-| `Hol.holKey_canonizer` | 671-679 | **★★★ The pure-force canonizer over the holonomy key** — sound, iso-invariant, always answers. | — |
-| `Hol.holKey_foldDeck_guarded_canonizer` | 681-691 | **★★★ The F3a canonizer of record for the fold family (guarded blind object)**: force = holonomy, consume = `foldSupply ++ deckSupply`. | — |
-| `Hol.holKey_foldDeck_selNode_canonizer` | 693-702 | **★★★ The fused (resolver-aware) mirror** — the selector probes every cell with the same force + supply pair. | — |
+| `Hol.KeySeparates` | 94-100 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
+| `Hol.keyV_eq_of_mem_keepMin` | 102-114 | Members of the narrowed set all attain the minimum key value. | — |
+| `Hol.keepMin_pairwise_aut_of_separates` | 116-138 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
+| `Hol.relComp_closed` | 213-229 | The closure really is closed: a `rel`-step out of `relComp` stays inside (monotone-rounds pigeonhole — the convergence content F2a never needed). | — |
+| `Hol.relComp_subset_of_closed` | 231-247 | Anything reachable from a member of a closed set is in it. | — |
+| `Hol.mem_relComp_self` | 249-254 | Component membership is reflexive. | — |
+| `Hol.mem_relComp_trans` | 256-259 | Component membership is transitive (via closedness). | — |
+| `Hol.mem_relComp_symm` | 261-278 | Component membership is symmetric — for a symmetric relation. | — |
+| `Hol.mem_relComp_congr` | 280-285 | **★ Copy-designator well-definedness**: any member of a component designates the same component. | — |
+| `Hol.symSame` | 294-296 | Symmetrized same-cell (vertical) adjacency — weak components; `AdjMatrix` guarantees no symmetry. | Definition |
+| `Hol.symCross` | 298-300 | Symmetrized cross-cell (horizontal) adjacency. | Definition |
+| `Hol.symSame_symm` | 302-303 | The symmetrized vertical relation is symmetric (by construction). | — |
+| `Hol.symCross_symm` | 305-306 | The symmetrized horizontal relation is symmetric (by construction). | — |
+| `Hol.symSame_transport` | 308-312 | The symmetrized vertical relation transports. | — |
+| `Hol.symCross_transport` | 314-318 | The symmetrized horizontal relation transports. | — |
+| `Hol.partnerTo` | 322-326 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
+| `Hol.walkOk` | 328-332 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
+| `Hol.holMoved` | 334-348 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
+| `Hol.holHas` | 350-353 | Is some valid walk's moved-count equal to `c`? — the signature's membership test. | Definition |
+| `Hol.holSig` | 355-361 | **The holonomy signature**: the indicator vector over `[0, n]` of attained moved-counts — representative-free (trap #7) and canonical BY CONSTRUCTION (no sort/dedup, so equivariance is existential reindexing). | Definition |
+| `Hol.holKey` | 363-367 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3-vs-3 where `lookaheadKey` keeps 6. | Definition |
+| `Hol.keyV_holKey` | 369-370 | The key's value projection is `holSig`. | `@[simp]` |
+| `Hol.keyCost_holKey` | 372-373 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |
+| `Hol.partnerTo_conj` | 392-399 | The partner lookup conjugates (`uniqueMem_transport` on the transported component memberships). | — |
+| `Hol.walkOk_conj` | 401-408 | Walk validity transports (three component-membership rewrites). | — |
+| `Hol.holMoved_conj` | 410-436 | The moved-count transports: `countP` fused over the filter, reindexed over `finRange` by σ, pointwise via the conjugated partner chain. | — |
+| `Hol.holHas_conj` | 438-457 | The membership test transports — pure existential reindexing (what the indicator form buys). | — |
+| `Hol.holSig_conj` | 459-462 | The signature is invariant under relabelling — map-congruence over `holHas_conj`. | — |
+| `Hol.keyEquivariant_holKey` | 464-470 | **★★ The holonomy key is equivariant** — the whole `①` obligation of a force key, discharged. | — |
+| `Hol.compIdx` | 516-518 | The component id: the least member index — INTERNAL (outputs consult only id-equality). | Definition |
+| `Hol.compIdx_eq_iff` | 520-548 | **★ Id-equality tests exactly component membership** (symmetric relation) — the well-definedness letting the twin replace membership scans with `O(1)` id comparisons. | — |
+| `Hol.compTbl` | 550-552 | The forced id-table (data, not a function — trap #1). | Definition |
+| `Hol.compTbl_get` | 554-556 | Table reads are `compIdx` values. | — |
+| `Hol.pfT` | 558-560 | Table-level partner lookup (`c` = the target copy's id). | Definition |
+| `Hol.walkOkT` | 562-564 | Table-level walk validity. | Definition |
+| `Hol.holMovedT` | 566-577 | Table-level holonomy moved-count. | Definition |
+| `Hol.holSigFast` | 643-650 | **The runnable signature** — two forced id-tables per call, then `O(1)` reads everywhere. | Definition |
+| `Hol.holSigFast_eq` | 652-657 | **The runnable signature computes exactly the reasoned-about one.** | — |
+| `Hol.holKeyFast` | 659-661 | The runnable key — value-equal to `holKey`, so every theorem transfers. | Definition |
+| `Hol.holKeyFast_eq` | 663-666 | The runnable key equals the spec key. | — |
+| `Hol.keyEquivariant_holKeyFast` | 668-670 | `①` for the runnable key, by transfer. | — |
+| `Hol.holKey_canonizer` | 674-682 | **★★★ The pure-force canonizer over the holonomy key** — sound, iso-invariant, always answers. | — |
+| `Hol.holKey_foldDeck_guarded_canonizer` | 684-694 | **★★★ The F3a canonizer of record for the fold family (guarded blind object)**: force = holonomy, consume = `foldSupply ++ deckSupply`. | — |
+| `Hol.holKey_foldDeck_selNode_canonizer` | 696-705 | **★★★ The fused (resolver-aware) mirror** — the selector probes every cell with the same force + supply pair. | — |
 ## ChainDescent/FoldFast.lean
 
 The F2a evaluation constant: `foldSupplyFast`, the materialised-table twin of `foldSupply` — component-MEMBERSHIP rows forced once per supply call (NOT the F3a `compIdx` id-tables: those need a symmetric relation and F2a's spec closures are directed), with a function-level equality so every `foldSupply` theorem transfers by rewriting. Unblocked the n = 30 F3a composite measurement (`PerformanceTest` §10).

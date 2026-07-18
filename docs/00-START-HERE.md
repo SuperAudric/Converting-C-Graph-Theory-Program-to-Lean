@@ -123,9 +123,17 @@ close it — is set out in
 > `DeepMatchSupply.deepMatchSupply d` (enumerate every length-`≤ d` individualization sequence) **fires** where the
 > one-step oracle cannot — `C₄` flags at `d = 0` and **answers at `d = 1`** — but its cost is `n^{O(d)}`: *exactly*
 > the seal's ladder and no better (`C₇` answers at `d=1` for **949 819** vs **7 568** exhaustive — a 125× **net
-> loss**). **Firing is not paying.** The next build (`P3c`, handoff §6.2b) is the **orbit-pruned fixpoint** that turns
-> that `n^d` into a **sum**; `OrbitPrune.lean` has already reduced it to pure combinatorics with **zero `①`
-> exposure**. The rigid key is still just a look-ahead heuristic, and one object-level defect remained: the
+> loss**). **Firing is not paying.** **(2026-07-15/16: `P2b`/`P2c` + `P3c` FIRST HALF LANDED — handoff §6.2/§6.2b.**
+> `SealDepthBridge.lean` makes the seal's **depth** (not just localisation) reach the supply, so `theorem_1_HOR_*` /
+> the form families / `viaSpielman` literally import. `PrunedSupply.lean` is **reference-matching** — match from ONE
+> discrete reference entry, not all pairs ⟹ `|table|` matches instead of `|table|²`, with `SameOrbits` proved by
+> **membership-set equality** (no Schreier-Sims needed); measured `C₇ d1` supplyCost 192080→41160. That **already
+> closes the POLY regime** (bounded `d`). ⚠ **The old "orbit-pruned fixpoint" framing is superseded**: what remains is
+> the `n^d` *inside* `|table|` (the sequence enumeration), whose collapse is a **group-closure** proof
+> (Schreier-Sims-grade — measured: canonical-seq pruning keeps 14/56 entries and finds 10 of 14 autos, the rest
+> **words**), paying off only at `d = Θ(log n)` and **conditional on localisation** — high value, not
+> poly-headline-critical.**) The rigid key was a look-ahead heuristic (**2026-07-18: re-scoped and built as F3 —
+> `HolKey.lean`; fold-tower plan §5b**), and one object-level defect remained: the
 > **target-cell selector was blind to resolvability** (fusion's live bite — handoff §6.1). **(2026-07-17/18: the
 > sel fix is LANDED, all five increments — `Select.lean` + `SelectNode.lean`: the fused `selNode` with the TRUE
 > mutual-stall flag, the dominance theorem, `HandledS`, rfl-twins; residuals in handoff §6.1's build-state
