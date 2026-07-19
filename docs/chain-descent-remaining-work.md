@@ -73,14 +73,38 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   (pairwise forcing cannot chain) and no weight-≤2 word exists (identity-default invalid) = **CFI
   cycle-space gauges**. Boundary: odd-degree-base CFI already exits via the DEPTH leg
   (`theorem_1_HOR_cfi_oddDeg` ⟹ `deepMatchSupply`); the open witness class is the **symmetric pin-blind
-  CFI cover** (multipede-style even-degree base, nontrivial cycle space). Two steps: (i) BUILD that witness
-  and measure the full stack dead (deep/partial/fold/deck/deck2 all predictably fail); (ii) the
-  constructor — candidate routes: `deck_k` bounded-arity seed enumeration (poly `n^{2k}` per fixed `k`;
-  covers weight-≤k-generated gauges — honest but not general: cycle-space girth grows), vs **the
-  linear-oracle route**: recover the F₂ gauge code itself (symbolic/Gaussian propagation — the IR solver
-  kernel run as a *consume supply*: solve for the kernel, emit a basis as candidates, `IsColAut` verify).
-  The latter is the §11.11 "solver kernel feeds de-fused symmetry back" loop landing on the consume side,
-  and connects to `LinearOracle.lean`; it is the likely mechanism, and F3b-adjacent.
+  CFI cover** (multipede-style even-degree base, nontrivial cycle space).
+  **✅ (i) WITNESS BUILT + MEASURED 2026-07-19 — `mp7`, the FANO MULTIPEDE (n = 42; `PerformanceTest`
+  §13, all `#guard`ed):** 7 foot-pair segments, 7 arity-3 checks = Fano lines (two checks share exactly
+  ONE segment — incidence girth 6), 4-vertex CFI gadgets; gauge = ker(incidence) = the [7,3,4] simplex
+  code (dim 3, min weight 4 — verified real: the weight-4 flip IS a colour-automorphism). Pin-blind
+  (6/42 colours after a pin ⟹ matching supplies structurally dead); fold narrows nothing; deck: the
+  gauge seed forces 1 vertex of 42 (girth kills chaining) and even the Z₇-translate seed stalls; deck2:
+  689-entry second stage, gauge continuation fails the gate; a THIRD seed (manual deck3) also fails —
+  the gadget layer never chains. Force cannot act (single-orbit cells). **TRUE mutual stall of the whole
+  stack; the constructor gate is OPEN and the route is DECIDED** (deck_k is dead on this shape at any
+  practical k, and growing-weight families kill fixed k in principle).
+  **(ii) THE CONSTRUCTOR — the KERNEL SUPPLY (next increment), design pinned:**
+  · *Extraction* (structural, choice-free — trap #7 clean): rail pairs = same-cell non-adjacent pairs
+    whose neighborhoods complement inside every shared gadget cluster (and conflict in none); clusters =
+    same-cell gadget vertices with equal rail-pair support (the F3a symmetrized-component toolkit).
+    Full enumeration; untrusted (junk recognition costs firing, never ①).
+  · *Solve*: variables = rail pairs, checks = clusters; F₂ Gaussian elimination ⟹ kernel basis. Poly,
+    computable, no proof obligations on the elimination itself.
+  · *Emission* per basis word: flip the word's rail pairs; each gadget vertex ↦ its unique same-cluster
+    partner matching the flipped adjacency (`uniqueFilter` — no choice); `permOf` gate; `IsColAut`
+    verify (soundness free, as always).
+  · *① route — NOT `GensEquivariant`*: the basis is pivot-order-dependent (a genuine trap-#7 choice).
+    But the GENERATED GROUP is basis-independent, and flips COMMUTE (a kernel word is the symmetric
+    difference of basis words = their product) — so ①/②/③ transfer by the **`SameOrbits` reduction**
+    against the set-level reference "all kernel flips" (definable and equivariant because the recovered
+    code is canonical; reachability = the P3b/`TreePrune` product-license, `wordReach_of_reaches`).
+    This is exactly the "any future supply optimization" reuse the P3c machinery was built for.
+  · *Cost*: extraction + elimination `O(n³)`, ≤ n emissions at `O(n²)` — explicit flat bill.
+  · *Acceptance*: `mp7` root cells narrow to 1 and `mp7` answers end-to-end with the record + kernel
+    supply appended; t3/wr3/ut guards unchanged.
+  This is the §11.11 "solver kernel feeds de-fused symmetry back" loop landing consume-side (connects
+  to `LinearOracle.lean`; F3b-adjacent — the same recovered system, kernel here, coset ordering there).
 - **C4 — large-Aut geometric families (Cameron: Johnson/Hamming/Grassmann; the forms graphs).** Symmetry is
   enormous but localisation at bounded depth fails or costs `n^{O(d)}` with growing `d` (forms base
   `O(log n)` ⟹ quasipoly; Steiner/Latin `Θ(√n)`). → **recognition + coordinatization as a SUPPLY**: recover
@@ -160,9 +184,11 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    untouched (the finalization steer stands).
 3. ✅ **C2 witness** — DONE 2026-07-19, outcome inverted: `wr3` built and measured, `deck2Supply` FIRES
    (identity-default mechanism) ⟹ C2 closed with no new code; C3 re-derived precisely (see §1C).
-3b. **C3 witness** — build the symmetric pin-blind CFI cover (multipede-style even-degree base,
-   nontrivial cycle-space gauge), measure the full stack dead, then decide the constructor route
-   (`deck_k` vs the linear-oracle supply — see §1C C3).
+3b. ✅ **C3 witness** — DONE 2026-07-19: `mp7` (Fano multipede) built and measured, full stack + a
+   manual deck3 DEAD (`PerformanceTest` §13, guarded); constructor route DECIDED = the kernel supply.
+3c. **C3 constructor — the KERNEL SUPPLY** (design pinned in §1C C3): structural rail/cluster
+   extraction → F₂ elimination → basis-flip emission → verify; ① via the `SameOrbits` reduction
+   (basis choice is group-invisible). Acceptance: `mp7` answers end-to-end.
 4. **T1 first family** — CFI odd-deg localisation through the weakest hook (de-risk on a C₆-style toy
    first). Output: the first real family in `HandledS` at the record = Publication's handled-half witness.
 5. **F1 / F3b** — gate review (the witnesses exist; confirm necessity), then the Smith/CRT key + C# wiring.

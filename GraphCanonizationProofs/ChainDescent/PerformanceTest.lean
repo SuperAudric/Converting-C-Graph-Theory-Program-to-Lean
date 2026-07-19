@@ -338,4 +338,96 @@ def wr3Root : Refine.ColData 15 := Refine.warmRefineVec wr3 (fun _ => 0)
       (Deck.appendSupply Deck.deckSupply Deck2.deck2Supply)) wr3).map flatten).isSome
 -- true (~2 min): the wreath witness answers end-to-end
 
+/-! ## 13. `C3` — the FANO MULTIPEDE `mp7`: the TRUE consume residual, measured (2026-07-19)
+
+The witness remaining-work §1C C3 predicted: a symmetric pin-blind CFI cover whose gauge is the kernel
+of arity-≥3 parity checks with min weight ≥ 3. Construction: 7 segments (foot pairs, index `2j+b`),
+7 checks = the Fano lines `δ(i) = {i,i+1,i+3} mod 7` (any two lines share exactly ONE segment —
+incidence girth 6 ⟹ no 2-overlap chaining), each check a 4-vertex CFI gadget (even subsets; index
+`14+4i+s`); n = 42. Gauge = ker(incidence) = the [7,3,4] simplex code: dim 3, **min weight 4** — no
+weight-≤2 words (deck2's identity-default has nothing valid to default to) and no chaining (one
+assigned wire leaves 2 candidates at every gadget).
+
+**MEASURED (all below):** 2 WL-cells; branch cell = the 28 gadget vertices; the weight-4 codeword
+flip IS a colour-automorphism (the gauge is real); PIN-BLIND (6 colours of 42 after pinning a foot ⟹
+every matching supply is structurally dead — cf. `MultipedeWitness`); fold narrows nothing (28);
+deck: the gauge seed constructs NOTHING (forces 1 vertex of 42 — girth 6 kills chaining) and even the
+Z₇-translate seed stalls (gauge words avoiding the seed compose ⟹ never unique; only the diagonal
+completes, to the identity); deck2: the second stage per first pair is 689 continuations and the gauge
+continuation FAILS the bijectivity gate; even a THIRD seed (the manual `deck3` step) leaves the gadget
+layer unassigned and fails the gate. Force cannot act (the cells are single `Aut`-orbits:
+`Z₂³ ⋊ (Z₇⋊...)` acts transitively on feet and on gadget vertices). **A true mutual stall of the whole
+built stack — the C3 constructor gate is OPEN.** Constructor decision recorded in remaining-work §1C:
+propagation-shaped mechanisms cannot reach weight-≥3 gauge words; the route is the KERNEL SUPPLY
+(structural rail-pair/cluster extraction → F₂ Gaussian elimination → emit basis flips → verify), with
+①c via the `SameOrbits` reduction (a Gaussian basis is pivot-order-dependent — trap #7 — but the
+GENERATED GROUP is basis-independent; flips commute, so kernel words are products = symmetric
+differences of basis words — exactly the P3b/TreePrune license shape). -/
+
+def onLine (i j : Nat) : Bool := j == i || j == (i+1) % 7 || j == (i+3) % 7
+
+def inS (i s j : Nat) : Bool :=
+  let a := i; let b := (i+1) % 7; let c := (i+3) % 7
+  if s == 1 then j == a || j == b
+  else if s == 2 then j == a || j == c
+  else if s == 3 then j == b || j == c
+  else false
+
+def mpfg (f g : Nat) : Bool :=
+  let j := f / 2; let bb := f % 2
+  let i := (g - 14) / 4; let s := (g - 14) % 4
+  onLine i j && (bb == (if inS i s j then 1 else 0))
+
+def mpB (x y : Nat) : Bool :=
+  if x < 14 && 14 ≤ y && y < 42 then mpfg x y
+  else if y < 14 && 14 ≤ x && x < 42 then mpfg y x
+  else false
+
+def mp7 : AdjMatrix 42 := ⟨fun i j => if mpB i.val j.val then 1 else 0⟩
+def mpRoot : Refine.ColData 42 := Refine.warmRefineVec mp7 (fun _ => 0)
+def mk42 (x : Nat) : Fin 42 := ⟨x % 42, by omega⟩
+
+#guard ((List.finRange 42).map mpRoot.col).dedup.length = 2
+#guard (branches mpRoot.col).map Fin.val = (List.range 28).map (· + 14)
+
+/-- The weight-4 gauge word: flip the foot pairs of `{2,4,5,6}` (= complement of line δ(0));
+gadget vertices follow by the unique parity-matched partner. -/
+def wSupp (j : Nat) : Bool := j == 2 || j == 4 || j == 5 || j == 6
+
+def gaugeFun (v : Fin 42) : Fin 42 :=
+  if v.val < 14 then
+    let j := v.val / 2
+    if wSupp j then mk42 (2*j + (1 - v.val % 2)) else v
+  else
+    let i := (v.val - 14) / 4; let s := (v.val - 14) % 4
+    let ok := fun s' => (List.range 7).all (fun j =>
+      !(onLine i j) || ((inS i s' j) == ((inS i s j) != wSupp j)))
+    match (List.range 4).filter ok with
+    | [s'] => mk42 (14 + 4*i + s')
+    | _ => v
+
+#guard (match Deck2.permOf gaugeFun with
+  | some ρ => decide (Consume.IsColAut mp7 mpRoot.col ρ)
+  | none => false)
+
+/-! Pin-blindness + the full stack, dead: -/
+def mpN2 : Refine.ColData 42 := Refine.warmRefineVec mp7 (indivOne mpRoot.col (mk42 0))
+#guard ((List.finRange 42).map mpN2.col).dedup.length = 6
+#guard (narrow (consume (Fold.foldSupplyFast)) mp7 mpRoot.col).length = 28
+#guard (Deck.deckCandFast mp7 mpRoot.col (mk42 0) (mk42 1)).isNone   -- the gauge seed
+#guard (Deck.deckCandFast mp7 mpRoot.col (mk42 0) (mk42 2)).isNone   -- the translate seed
+
+def mfG : Vector (Option (Fin 42)) 42 := Deck.propagateVec mp7 mpRoot.col (mk42 0) (mk42 1)
+#guard (List.finRange 42).countP (fun v => (mfG.get v).isNone) = 41  -- girth 6: NOTHING chains
+#guard (Deck2.secondsV mp7 mpRoot.col mfG).length = 689
+
+def cont1 (mf : Vector (Option (Fin 42)) 42) (v₁ v₂ : Fin 42) : Vector (Option (Fin 42)) 42 :=
+  (Deck.roundVecD mp7 mpRoot.col)^[42]
+    (Vector.ofFn (fun v => if v = v₁ then some v₂ else mf.get v))
+
+#guard (Deck2.permOf (fun x => ((cont1 mfG (mk42 2) (mk42 3)).get x).getD x)).isNone
+-- the deck2 gauge continuation fails the gate; a THIRD seed (deck3) fails too:
+#guard (Deck2.permOf (fun x =>
+  ((cont1 (cont1 mfG (mk42 2) (mk42 3)) (mk42 8) (mk42 9)).get x).getD x)).isNone
+
 end ChainDescent.Perf
