@@ -295,13 +295,47 @@ verify. Cheap cell-level gates are build-gating in `Regression` §14 (t3: fold 3
 - **`ut` (n = 30): the record ANSWERS end-to-end** — where every pre-F2c stack flagged below the root.
   ~20 min interpreted (dominated by the per-node deck2 second stage at n = 30 + `holKeyFast`); soundness of
   exactly this object is `Deck2.holKey_foldDeck2Fast_selNode_canonizer`. The fold family's known
-  constructible members now all answer; the next named consume gap is wreath-type per-copy gauges
-  (remaining-work §1C item C2 — `k ≥ 2` INDEPENDENT commuting decisions per seed, which one second seed
-  does not resolve). -/
+  constructible members now all answer. ⚠ The scope note that first shipped here ("next gap = wreath-type
+  per-copy gauges, which one second seed does not resolve") was WRONG — see §12: wreath gauges FIRE. -/
 
 #eval ((Select.canonFormFastS? Hol.holKeyFast
     (Deck.appendSupply Fold.foldSupplyFast
       (Deck.appendSupply Deck.deckSupply Deck2.deck2Supply)) Regression.ut).map flatten).isSome
 -- true (~20 min): the §10 open item, closed
+
+/-! ## 12. `F2c` reach is WIDER than designed — the WREATH gauge fires (the identity-default finding)
+
+`wr3` = 3 copies of the `C₄`+pendant core on a copy cycle, matched ONLY on the mirror-FIXED fibers
+`{0,2,4}` — so each copy's mirror `(1↔3)` is an INDEPENDENT automorphism: `Aut ⊇ Z₂³ ⋊ D₃`, the
+wreath-type gauge the C2 scope line claimed stalls `deck2Supply`. **Measured 2026-07-19: it does NOT
+stall — it fires.** The mechanism: `deck2Fun`'s `.getD v` identity-default on unassigned vertices is
+load-bearing — an ambiguity component *independent* of the resolved part defaults to the identity, and
+independence is exactly what makes that completion an automorphism, which `IsColAut` then verifies (the
+same default emits junk on coupled residuals, which verification rejects — sound either way). Root
+branch cell = the merged mirror class (6-cell): `foldSupplyFast` 6 (dead — within-copy pairs), `deck` 3
+(diagonal chains only), **`deck2Supply` → 1**; node-2 (pendant pinned): deck 2, **deck2 → 1** (96
+verified); end-to-end with the F2c record: ANSWERS (~2 min). Guards are here, not in `Regression` —
+the root-cell trio costs ~33 s, over the build-gating budget. Scope conclusions → `Deck2.lean` module
+doc + remaining-work §1C (the genuine residual = ≥3-ary coupled, min-weight-≥3 gauges — CFI cycle-space
+over pin-blind bases; odd-degree CFI is the depth leg's, `theorem_1_HOR_cfi_oddDeg`). -/
+
+def wrB (s a b : Nat) : Bool :=
+  let ca := a / 5; let va := a % 5; let cb := b / 5; let vb := b % 5
+  if ca == cb then Regression.vcoreB va vb
+  else if (ca + 1) % s == cb || (cb + 1) % s == ca then va == vb && va != 1 && va != 3
+  else false
+
+def wr3 : AdjMatrix 15 := ⟨fun i j => if wrB 3 i.val j.val then 1 else 0⟩
+def wr3Root : Refine.ColData 15 := Refine.warmRefineVec wr3 (fun _ => 0)
+
+#guard (branches wr3Root.col).map Fin.val = [1, 3, 6, 8, 11, 13]
+#guard (narrow (consume (Fold.foldSupplyFast)) wr3 wr3Root.col).length = 6
+#guard (narrow (consume (Deck.deckSupply)) wr3 wr3Root.col).length = 3
+#guard (narrow (consume Deck2.deck2Supply) wr3 wr3Root.col).length = 1
+
+#eval ((Select.canonFormFastS? Hol.holKeyFast
+    (Deck.appendSupply Fold.foldSupplyFast
+      (Deck.appendSupply Deck.deckSupply Deck2.deck2Supply)) wr3).map flatten).isSome
+-- true (~2 min): the wreath witness answers end-to-end
 
 end ChainDescent.Perf
