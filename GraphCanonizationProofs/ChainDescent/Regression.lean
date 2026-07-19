@@ -1,4 +1,5 @@
 import ChainDescent.Residue
+import ChainDescent.Deck2
 import ChainDescent.MatchSupply
 import ChainDescent.DeepMatchSupply
 import ChainDescent.PrunedSupply
@@ -439,5 +440,32 @@ def c7Seed : List (Equiv.Perm (Fin 7)) :=
         (TreePrune.prunedEntries c7Seed 1 c7Root 2).length) = (399, 30)
 #guard (Consume.verified (TreePrune.treeSupply (PrunedSupply.prunedSupply 1) 1 2) C7 c7Root).dedup.length
      = (Consume.verified (DeepMatch.deepMatchSupply 1) C7 c7Root).dedup.length
+
+/-! ## 14. `F2c` — the second-seed supply breaks the commuting-gauge stall
+
+The consume-side gap C1 (remaining-work §1C): on the twisted triple cover the global mirror `μ³` (per-copy
+mirrors composed through the TWISTED matchings) **commutes** with every copy swap, so every single-seed deck
+propagation has ≥ 2 viable extensions at the mirror class and stalls; `foldSupply`'s unique-partner lookup is
+ambiguous on the merged twisted fibers; the matching supplies are 1-WL-chirality-blind at every pin. This is
+exactly the measured `U3 ⊔ T3` end-to-end flag (`PerformanceTest` §10/§11). `deck2Supply` enumerates the
+stalled state's OWN ambiguity set (unassigned × viable) as second seeds — the added constraint forces which
+commuting extension completes, and the mirror composites (`μ³`-type and swap∘mirror-type) verify. Witness:
+`t3` = the one-pair-twisted triple cover alone (n = 15; `ut`'s T block). **Do not delete** — the non-vacuity
+witness for `deck2Supply` and the C1 regression gate. (The end-to-end record on `t3`/`ut` is measured in
+`PerformanceTest` §11 — ~20 s per descent, off the build path.) -/
+
+def t3 : AdjMatrix 15 := ⟨fun i j => if vfoldT true i.val j.val then 1 else 0⟩
+def t3Root : Refine.ColData 15 := Refine.warmRefineVec t3 (fun _ => 0)
+
+#guard (branches t3Root.col).map Fin.val = [4, 9, 14]
+
+/-! **The involution and single-seed structural supplies are DEAD** — the commuting mirror survives both. -/
+#guard (narrow (consume (Fold.foldSupplyFast)) t3 t3Root.col).length = 3
+#guard (narrow (consume (Deck.deckSupply)) t3 t3Root.col).length = 3
+
+/-! **The second-seed supply FIRES**: the ambiguity set completes to the mirror composites, and the pendant
+cell collapses to ONE branch. -/
+#guard (Consume.verified (Deck2.deck2Supply) t3 t3Root.col).length = 171
+#guard (narrow (consume (Deck2.deck2Supply)) t3 t3Root.col).length = 1
 
 end ChainDescent.Regression

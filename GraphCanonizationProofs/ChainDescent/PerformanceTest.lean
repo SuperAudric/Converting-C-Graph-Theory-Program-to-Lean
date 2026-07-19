@@ -276,6 +276,32 @@ the TWISTED matchings — is outside every built supply's reach (fold: the twist
 the unique-partner lookup is ambiguous; deck: a commuting copy swap gives every mirror seed ≥ 2 extensions;
 matching: the mirror tie survives every pin — 1-WL chirality-blindness). The root composite above is the
 F3a claim and it fires; canonizing `T3`'s inside is a CONSUME-side open item (a mirror-composite
-constructor), not a force one. -/
+constructor), not a force one.
+**✅ CLOSED 2026-07-19 by F2c (`ChainDescent/Deck2.lean`, `deck2Supply`) — see §11 below.** -/
+
+/-! ## 11. `F2c` — the second-seed supply closes §10's open item (the T-side gauge)
+
+The stall mechanism, precisely: the T-side gauge (per-copy mirrors composed through the twisted matchings)
+**commutes** with every copy swap, so single-seed propagation always retains ≥ 2 viable images at the mirror
+class — forcing never reaches uniqueness. `Deck2.deck2Supply` re-reads each stalled propagation's own
+ambiguity set (unassigned × viable, `seconds`) as second seeds on the shared stalled state; the added
+constraint forces which commuting extension completes, and the mirror composites (`μ³`-type and swap∘mirror)
+verify. Cheap cell-level gates are build-gating in `Regression` §14 (t3: fold 3 / deck 3 / deck2 → 1,
+171 verified).
+
+**MEASURED (2026-07-19):**
+- `t3` alone (n = 15): the F2c record (`holKeyFast` + `foldSupplyFast ++ deckSupply ++ deck2Supply`)
+  ANSWERS end-to-end (~20 s) and is relabel-invariant.
+- **`ut` (n = 30): the record ANSWERS end-to-end** — where every pre-F2c stack flagged below the root.
+  ~20 min interpreted (dominated by the per-node deck2 second stage at n = 30 + `holKeyFast`); soundness of
+  exactly this object is `Deck2.holKey_foldDeck2Fast_selNode_canonizer`. The fold family's known
+  constructible members now all answer; the next named consume gap is wreath-type per-copy gauges
+  (remaining-work §1C item C2 — `k ≥ 2` INDEPENDENT commuting decisions per seed, which one second seed
+  does not resolve). -/
+
+#eval ((Select.canonFormFastS? Hol.holKeyFast
+    (Deck.appendSupply Fold.foldSupplyFast
+      (Deck.appendSupply Deck.deckSupply Deck2.deck2Supply)) Regression.ut).map flatten).isSome
+-- true (~20 min): the §10 open item, closed
 
 end ChainDescent.Perf

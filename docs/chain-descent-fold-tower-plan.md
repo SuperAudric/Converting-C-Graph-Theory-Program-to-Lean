@@ -1,6 +1,28 @@
 # The fold/tower resolution — closing the F_k cover gap (native + tower, polynomial)
 
-> ## STATUS (2026-07-18 late: F2b LANDED — GENERALIZED; F2a landed same day; created 2026-07-17)
+> ## STATUS (2026-07-19: F2c LANDED — the §8-tail consume-side open item CLOSED; F2a/F2b 2026-07-18; created 2026-07-17)
+>
+> **✅✅✅ F2c LANDED (2026-07-19) — `ChainDescent/Deck2.lean` (`deck2Supply`, SECOND-SEED propagation; in
+> `build.sh`, axiom-clean; guards `Regression` §14, measurements `PerformanceTest` §11): the `U3 ⊔ T3`
+> T-side-gauge open item below is CLOSED.** The stall mechanism: a symmetry **commuting** with the seeded one
+> (the per-copy mirror composed through the twisted matchings commutes with every copy swap) leaves ≥ 2 viable
+> images at the mirror class forever, so F2b's unique-candidate forcing never fires there. `deck2Supply`
+> re-reads each stalled propagation's OWN ambiguity set — every unassigned vertex × every still-viable
+> candidate (`seconds`; equivariantly defined, nothing chosen, trap #7; EMPTY iff the propagation completed) —
+> as second seeds added onto the SHARED stalled state (trap #2), and forcing continues; a completed table
+> passes a **bijectivity gate** (`permOf`: table inversion replaces F2b's backward propagation; gate ⟺
+> `Function.Bijective`, labelling-independent ⟹ transports including failure) and `IsColAut` verification.
+> Soundness: the `m ⊆ ρ` invariant is per-STATE, not per-seed-map (`contFrom_sound` + `setSeed_sound`) ⟹
+> reconstruction `deck2Cand_eq_of_isColAut` — a `ρ` extending BOTH seeds with completed continuation IS the
+> candidate; the second seed is precisely "which commuting extension". Equivariance
+> `gensEquivariant_deck2Supply` (`mem_seconds_conj` + `contFrom_conj` + `permOf_conj`). Capstones both objects
+> + **the F2c record `holKey_foldDeck2_selNode_canonizer`** (+`_Fast`): force = holonomy, consume =
+> `foldSupply ++ deckSupply ++ deck2Supply`. **MEASURED:** `t3` (n = 15) root cell — fold 3 / deck 3 (both
+> stalled) vs deck2 → **1** (171 verified mirror composites: `μ³`-type and swap∘mirror); t3 end-to-end answers
+> ~20 s, relabel-invariant; **`ut` (n = 30) end-to-end ANSWERS (~20 min interpreted) where every pre-F2c stack
+> flagged — every known constructible member of the fold family now answers.** Honest graded scope: one
+> second seed resolves ONE commuting ambiguity; `k ≥ 2` INDEPENDENT per-copy decisions (wreath-type
+> `Z₂ ≀ Z_s`) still stall — that is remaining-work §1C item **C2**, the next leg, not this one.
 >
 > **✅✅ THE §8 TAIL CLOSED (2026-07-18, latest pass — supersedes the per-item "open"/"follow-on" notes
 > below and in §5b/§8):**
@@ -19,7 +41,8 @@
 >   the TWISTED matchings — is outside every built supply's reach (fold: merged twisted fibers ⟹ ambiguous
 >   partner; deck: a commuting copy swap ⟹ ≥ 2 extensions per mirror seed; matching: 1-WL chirality-blind).
 >   A CONSUME-side open item (a mirror-composite constructor), carried in `PerformanceTest` §10 — the root
->   composite is the F3a claim and it fires.
+>   composite is the F3a claim and it fires. **✅ CLOSED 2026-07-19 by F2c (`Deck2.lean`) — see the top box;
+>   `ut` now answers end-to-end (`PerformanceTest` §11).**
 > - **The MULTIPEDE FOLD witness at scale** (`ChainDescent/MultipedeWitness.lean`, OFF-build like
 >   `PerformanceTest`; ~2.5 min): the C# `BuildNativeMultipede` ported (native-Z₂, 6-circulant `{0,1,3}`,
 >   n = 36). **Exhaustive pin-blindness `#guard`ed** — no segment pin cascades (2 singletons ever, 34/36

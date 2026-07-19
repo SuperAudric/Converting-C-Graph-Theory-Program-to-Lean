@@ -52,12 +52,12 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
 
 ### 1C. Consume-side gaps (symmetry present, no built supply certifies it)
 
-- **C1 — mirror∘twisted-matching composite gauges** (MEASURED: `U3 ⊔ T3` flags below root,
-  `PerformanceTest` §10). The twisted component's gauge = per-copy mirrors composed through the twisted
-  matchings; fold sees ambiguous partners, deck seeds have ≥ 2 extensions, matching is 1-WL chirality-blind.
-  → **"F2c" constructor**: choice-free seed enumeration of (per-copy mirror × twisted-matching) composites,
-  `IsColAut` verify, `GensEquivariant`-or-`SameOrbits`, capstones both objects, `Regression` guard.
-  Acceptance: end-to-end `canonFormFastS?` on `ut` ANSWERS. ⚠ trap #7: both factors from enumerated seeds.
+- **✅ C1 — mirror∘twisted-matching composite gauges — CLOSED 2026-07-19 (F2c,
+  `ChainDescent/Deck2.lean` `deck2Supply`).** Second-seed propagation: the stalled F2b state's own ambiguity
+  set (unassigned × viable, equivariantly defined) enumerated as second seeds on the shared stalled state;
+  bijectivity gate (`permOf`) + `IsColAut` verify; record capstone `holKey_foldDeck2_selNode_canonizer`.
+  Acceptance MET: `ut` end-to-end ANSWERS (~20 min interpreted, `PerformanceTest` §11; `Regression` §14
+  gates t3). Honest scope: resolves ONE commuting ambiguity per seed — `k ≥ 2` independent decisions is C2.
 - **C2 — wreath-type per-copy gauges (`Z₂ ≀ Z_s`)**: per-copy *independent* involutions over a WL-blind
   core. ⚠ RE-SCOPED (2026-07-18): "outside the linear-over-a-ring leg by design" is a statement about **that
   leg's** scope, NOT a license to leave the family unhandled — it needs its **own leg**. First step: build a
@@ -139,8 +139,7 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
 ## 2. THE PLAN — near-term queue, then tracks
 
 **Near-term queue (do in this order; each lands green + guarded before the next):**
-1. **C1 / "F2c"** — the mirror-composite constructor. Measured witness, known recipe, closes an in-family
-   flag. Acceptance: `ut` answers end-to-end.
+1. ✅ **C1 / "F2c"** — DONE 2026-07-19 (`Deck2.lean`; `ut` answers end-to-end — see §1C).
 2. **Publication swap SPIKE** — compile-test the import cone + fill ①a against the current record. Cheap;
    retires the "swap never compile-tested" risk. Does NOT finalize statements (that steer stands).
 3. **C2 witness + constructor** — build the wreath-gauge witness, measure all supplies dead, then the

@@ -2698,23 +2698,23 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Showcase.Iso` | 74-77 | — | Definition |
-| `Showcase.UnhandledResidue` | 138-145 | — | Definition |
-| `Showcase.cameron_classification` | 166-171 | — | axiom |
-| `Showcase.skresanov_two_closure` | 172-175 | — | axiom |
-| `Showcase.liebeck_rank3` | 176-179 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 180-188 | — | axiom |
-| `Showcase.ftpg` | 189-195 | — | axiom |
-| `Showcase.buekenhout_shult` | 196-203 | — | axiom |
-| `Showcase.payne_thas` | 204-212 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 213 | — | axiom |
-| `Showcase.canon_sound` | 221-232 | — | — |
-| `Showcase.canon_complete` | 234-258 | — | — |
-| `Showcase.flag_iso_invariant` | 260-267 | — | — |
-| `Showcase.canon_poly_or_flag` | 269-291 | — | — |
-| `Showcase.residue_if_flag` | 293-302 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 304-310 | — | — |
-| `Showcase.canonizer` | 317-327 | — | — |
+| `Showcase.Iso` | 80-83 | — | Definition |
+| `Showcase.UnhandledResidue` | 144-151 | — | Definition |
+| `Showcase.cameron_classification` | 172-177 | — | axiom |
+| `Showcase.skresanov_two_closure` | 178-181 | — | axiom |
+| `Showcase.liebeck_rank3` | 182-185 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 186-194 | — | axiom |
+| `Showcase.ftpg` | 195-201 | — | axiom |
+| `Showcase.buekenhout_shult` | 202-209 | — | axiom |
+| `Showcase.payne_thas` | 210-218 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 219 | — | axiom |
+| `Showcase.canon_sound` | 227-238 | — | — |
+| `Showcase.canon_complete` | 240-264 | — | — |
+| `Showcase.flag_iso_invariant` | 266-273 | — | — |
+| `Showcase.canon_poly_or_flag` | 275-297 | — | — |
+| `Showcase.residue_if_flag` | 299-308 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 310-316 | — | — |
+| `Showcase.canonizer` | 323-333 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -3169,40 +3169,42 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 45-46 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 48-50 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 52-59 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 61-64 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 68-69 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 78-79 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 102-103 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 112-113 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 141-144 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 159 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 161-163 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 178-182 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 198-201 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 203 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 205-207 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 209-211 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 212 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
-| `Regression.gSel` | 247-248 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
-| `Regression.gSelDeep` | 250-251 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
-| `Regression.vcoreB` | 283-287 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
-| `Regression.vfold2` | 289-292 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
-| `Regression.vfold2Root` | 294 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wEdge` | 324-329 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
-| `Regression.wcyc9` | 331 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
-| `Regression.wcyc9Root` | 332-334 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wcyc9Swapped` | 345 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
-| `Regression.wcyc9SwappedRoot` | 346-347 | Its materialized root (trap #1). | Definition |
-| `Regression.vfoldT` | 372-379 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
-| `Regression.ut` | 381-385 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
-| `Regression.utRoot` | 387 | Materialized root colouring (trap #1). | Definition |
-| `Regression.C7` | 418 | — | Definition |
-| `Regression.gTree` | 420-422 | — | Definition |
-| `Regression.c7Root` | 433 | — | Definition |
-| `Regression.c7Seed` | 434-441 | — | Definition |
+| `Regression.C5` | 46-47 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 49-51 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 53-60 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 62-65 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 69-70 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 79-80 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 103-104 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 113-114 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 142-145 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 160 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 162-164 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 179-183 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 199-202 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 204 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 206-208 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 210-212 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 213 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 248-249 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 251-252 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.vcoreB` | 284-288 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
+| `Regression.vfold2` | 290-293 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
+| `Regression.vfold2Root` | 295 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wEdge` | 325-330 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
+| `Regression.wcyc9` | 332 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
+| `Regression.wcyc9Root` | 333-335 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wcyc9Swapped` | 346 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Regression.wcyc9SwappedRoot` | 347-348 | Its materialized root (trap #1). | Definition |
+| `Regression.vfoldT` | 373-380 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
+| `Regression.ut` | 382-386 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
+| `Regression.utRoot` | 388 | Materialized root colouring (trap #1). | Definition |
+| `Regression.C7` | 419 | — | Definition |
+| `Regression.gTree` | 421-423 | — | Definition |
+| `Regression.c7Root` | 434 | — | Definition |
+| `Regression.c7Seed` | 435-442 | — | Definition |
+| `Regression.t3` | 457 | The one-pair-twisted triple cover alone (n = 15; `ut`'s T block) — the F2c witness: its commuting mirror gauge stalls fold AND deck. | Definition |
+| `Regression.t3Root` | 458-460 | Root colouring of `t3` (ColData-materialised, trap #1). | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3838,3 +3840,42 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `TreePrune.treeSupply_guarded_canonizer` | 593-602 | **★★★ THE TREE-PRUNED MIXED CANONIZER.** `①a`/`①b`/`①c` for the guarded composite over the orbit-pruned supply — inherited wholesale through the `SameOrbits` reduction, with **no** equivariance proof on `treeSupply` (which has none: it picks orbit representatives). | — |
 | `TreePrune.treeSupply_lookahead_canonizer` | 604-611 | The concrete instance: tree-pruned supply seeded by the reference-matching supply one level shallower, with `lookaheadKey`. | — |
 | `TreePrune.cellIsOrbit_treeSupply` | 613-618 | Firing transfers too — `Handled`/`CellIsOrbit`/`CellResolved` are unchanged by the pruning, which is exactly why running on `SameOrbits` rather than equivariance was the right architecture. | — |
+## ChainDescent/Deck2.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deck2.contFrom` | 60-63 | Continue F2b forcing rounds from an arbitrary partial state (`propagate` = `contFrom` of the seed map); the second-seed continuation runs from the stalled state. | Definition |
+| `Deck2.setSeed` | 65-67 | Add a second seed `v₁ ↦ v₂` onto a (stalled) partial assignment. | Definition |
+| `Deck2.seconds` | 69-77 | The second-seed enumeration: every unassigned vertex × every still-viable candidate of the stalled state — the state's own ambiguity set, equivariantly defined (nothing chosen, trap #7); empty iff the first propagation completed. | Definition |
+| `Deck2.mem_seconds_iff` | 79-95 | Membership characterization of `seconds`: unassigned (`m p.1 = none`) and currently viable (`candPred`). | — |
+| `Deck2.invFun` | 99-102 | Computable inverse-by-table (first preimage in enumeration order); the `permOf` gate makes the order irrelevant. | Definition |
+| `Deck2.permOf` | 104-109 | The bijectivity gate: `some ⟨f, f⁻¹⟩` iff `f` is bijective, `none` otherwise — replaces F2b's backward propagation with one table inversion. | Definition |
+| `Deck2.gate_of_bijective` | 111-131 | A bijective table passes the two-sided-inverse gate (`find?` finds the unique preimage). | — |
+| `Deck2.bijective_of_gate` | 133-136 | The gate implies bijectivity — together with `gate_of_bijective`, gate ⟺ `Function.Bijective`, a labelling-independent predicate. | — |
+| `Deck2.permOf_eq_some_of_eq` | 138-146 | Reconstruction through the gate: a table pointwise equal to a permutation gates to exactly that permutation. | — |
+| `Deck2.bijective_conj_iff` | 148-157 | Bijectivity is invariant under conjugation by a permutation — the transport engine for the gate's failure mode. | — |
+| `Deck2.permOf_conj` | 159-170 | The gate transports including its failure mode: `permOf (σ ∘ f ∘ σ⁻¹) = (permOf f).map (σ * · * σ⁻¹)`. | — |
+| `Deck2.deck2Fun` | 174-177 | The two-seed forced table: continue the first propagation with the second seed added, identity-fill (junk is caught by the gate + verification). | Definition |
+| `Deck2.deck2Cand` | 179-183 | The second-seed candidate: gate the completed table into a `Perm`; `Consume.verified` still re-checks `IsColAut` (the supply stays untrusted). | Definition |
+| `Deck2.contFrom_sound` | 187-201 | The F2b invariant `m ⊆ ρ` survives any number of forcing rounds from ANY sound starting state — soundness is per-state, not per-seed-map. | — |
+| `Deck2.setSeed_sound` | 203-213 | Adding a second seed that `ρ` satisfies preserves the invariant `m ⊆ ρ`. | — |
+| `Deck2.deck2Cand_eq_of_isColAut` | 215-230 | ★★ RECONSTRUCTION: a colour-automorphism extending BOTH seeds + completed continuation ⟹ the candidate IS it. The second-seed hypothesis is the ambiguity being resolved: `ρ v₁ = v₂` picks which commuting extension the continuation forces. | — |
+| `Deck2.contFrom_conj` | 234-249 | Forcing-round iterates commute with relabelling from any transported state (`mconj`). | — |
+| `Deck2.setSeed_conj` | 251-260 | The second-seed insertion commutes with `mconj` transport. | — |
+| `Deck2.mem_seconds_conj` | 262-283 | The ambiguity set transports: membership in `seconds` on the relabelled graph is the σ-image of membership on the original — the equivariance of the second-seed enumeration. | — |
+| `Deck2.deck2Fun_conj` | 285-294 | The two-seed forced table conjugates pointwise under relabelling. | — |
+| `Deck2.deck2Cand_conj` | 296-305 | The candidate transports up to conjugation, including its failure mode (via `permOf_conj`). | — |
+| `Deck2.secondsV` | 309-315 | Vector-state twin of `seconds` (reads the forced base state, trap #1). | Definition |
+| `Deck2.secondsV_ofFn` | 317-325 | Bridge: `secondsV` on `Vector.ofFn m` is `seconds` on `m`. | — |
+| `Deck2.deck2Batch` | 327-334 | The per-first-pair evaluation batch: ONE base propagation (shared, trap #2), its ambiguity set, each continuation from the shared Vector state, gated by `permOf`. | Definition |
+| `Deck2.deck2Batch_eq` | 336-353 | The batch computes exactly the spec candidates over the spec enumeration (`propagateVec_eq` + `secondsV_ofFn` + `iterate_roundVecD`). | — |
+| `Deck2.deck2Supply` | 357-363 | ★ THE SECOND-SEED PROPAGATION SUPPLY (F2c): branch-cell first seeds, stalled-state ambiguity entries as second seeds, gate + verify. Breaks the commuting-gauge stall (mirror composites through twisted matchings) that defeats F2b. Cost flat `|B|²·(1+n²)·n⁵`. | Definition |
+| `Deck2.mem_gens_deck2Supply_iff` | 365-379 | Membership characterization of the emitted generators: a first pair from the branch cell, a second pair from the stalled state's ambiguity set, and a gated candidate. | — |
+| `Deck2.gensEquivariant_deck2Supply` | 383-413 | ★★ ①c: the supply is equivariant — both enumerations transport (branch cell; `mem_seconds_conj`) and the candidate conjugates including failure (`deck2Cand_conj`). No representative is ever chosen. | — |
+| `Deck2.supplyEquivariant_deck2Supply` | 415-416 | The verified-list form of equivariance (what the resolver reads). | — |
+| `Deck2.wordReach_deck2Supply` | 420-434 | Graded firing, per pair: a verified second-seed candidate carrying `u₁` to `u₂` puts the pair into the verified `WordReach`. | — |
+| `Deck2.cellIsOrbit_deck2Supply` | 436-445 | ★★★ THE ORACLE FIRES: every branch-cell pair connected by a verified second-seed candidate ⟹ the cell is certified one orbit — past the commuting-gauge stall, with no refinement. | — |
+| `Deck2.deck2Supply_guarded_canonizer` | 449-455 | ★★★ The guarded (blind) mixed canonizer over the second-seed supply — ①a/①b/①c + unconditional polynomiality, no carried hypotheses. | — |
+| `Deck2.deck2Supply_selNode_canonizer` | 457-463 | ★★★ The fused (resolver-aware) canonizer over the second-seed supply. | — |
+| `Deck2.holKey_foldDeck2_selNode_canonizer` | 465-476 | ★★★ THE F2c CANONIZER OF RECORD for the fold family: force = holonomy key, consume = `foldSupply ++ deckSupply ++ deck2Supply` — the object the `U3 ⊔ T3` end-to-end acceptance runs. | — |
+| `Deck2.holKey_foldDeck2Fast_selNode_canonizer` | 478-487 | The all-fast form of the F2c record (`foldSupplyFast` component) — identical by `foldSupplyFast_eq`; the form the measurements run. | — |
