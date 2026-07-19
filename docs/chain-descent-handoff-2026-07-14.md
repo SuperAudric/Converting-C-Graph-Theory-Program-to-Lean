@@ -6,7 +6,7 @@
 > retracted claims** that a reader could otherwise re-derive and act on.
 >
 > **Quality bar (unchanged, non-negotiable):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`;
-> full build green (`bash scripts/build.sh`, **~165 s** as of 2026-07-18); no `sorry`; no fresh `axiom` (cited
+> full build green (`bash scripts/build.sh`, **3-6 min** as of 2026-07-19); no `sorry`; no fresh `axiom` (cited
 > results are theorem hypotheses); **`native_decide` BANNED**; **`@[implemented_by]` AVOIDED** (it can assert a
 > false equation).
 
@@ -61,8 +61,10 @@ whole frontier.
 | `ChainDescent/HandledBridge.lean` | **THE `Handled` POPULATION BRIDGE** (2026-07-16). `reaches_pathCol` (every reached node IS a `pathCol`) + **`handled_of_seal`** — the first theorem instances of `Residue.Handled`. See the §4 update box. |
 | `ChainDescent/Select.lean` | **THE SEL REWRITE, increments 1+2** (2026-07-17). `NodeRes` (node resolver: children WITH their refined colourings, `[] = flag` = true mutual stall — §6.1 AND §6.4 in one interface), `descendS`, ★ `descendS_blind` (EXACT `CostM` equation vs `descend` — the safety net), `descendS_sound` (①a **unconditional**), `NodeTransport` + `descendS_transport` ⟹ capstone `isCanonicalFormOptS_canonFormS?`, and ★ `nodeTransport_blindNode` (**conservativity** — every proved `NarrowTransport` instance discharges the new contract at the blind instance). See §6.1's design-pass block. |
 | `ChainDescent/SelectNode.lean` | **THE SEL REWRITE, increments 3–5** (2026-07-17/18). The fused `selNode` (least RESOLVABLE colour; `[] = flag` = TRUE mutual stall, `selNode_stall_iff`), ★ dominance `canonFormS?_selNode_dominates`, `selNode_canonizer` (+ `_pruned_` via `SameOrbits`), `HandledS`/`handledS_of_seal`, one-place record `selNode_pruned_record`, rfl-twins `selNodeFast`/`canonFormFastS?`, `allCellsMatchSupply`. See §6.1's build-state block. |
-| `ChainDescent/Regression.lean` | the **build-gating** regression suite (~25 s: §8 F1 fold guards, §9 sel, §10 F2a mirror-tie guards added 2026-07-17/18). |
-| `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (~4 min). |
+| `ChainDescent/Deck2.lean` | **F2c — THE SECOND-SEED PROPAGATION SUPPLY** (2026-07-19). `deck2Supply`: each stalled F2b propagation's OWN ambiguity set (`seconds`) re-seeded on the shared stalled state; `permOf` bijectivity gate (⟺ `Function.Bijective` ⟹ transports incl. failure); per-STATE `m ⊆ ρ` invariant ⟹ `deck2Cand_eq_of_isColAut`; `gensEquivariant_deck2Supply`; record capstone `holKey_foldDeck2_selNode_canonizer`. **`ut` (n = 30) answers end-to-end** (`PerformanceTest` §11). ★ Measured reach is WIDER than designed: the `.getD` identity-default makes INDEPENDENT (wreath-type) gauges fire too (`wr3`, §12) — reach = coupled-chaining + independent + every ≤2-seed-generated gauge. Detail: fold-tower-plan STATUS + [[project-c3-kernel-supply-2026-07-19]]. |
+| `ChainDescent/KernelSupply.lean` | **C3a TRANCHE 1 — THE F₂ KERNEL SUPPLY** (2026-07-19). For gauges NO propagation reaches (kernels of arity-≥3 checks, min weight ≥ 3 = CFI cycle-space; witness `mp7` the Fano multipede, `PerformanceTest` §13): rails (unique disjoint-neighbourhood twins) → per-vertex pattern perps → `nullBasis` F₂ elimination (untrusted) → basis-flip emission → verify. ★ **The ALL-OR-NOTHING GATE** = the ①c design lock (emit the whole verified basis or nothing ⟹ the emitted GROUP is canonical despite the pivot-order-dependent basis). Measured: mp7's simplex code RECOVERED (dim 3, wt [4,4,4]), root cell 28 → 7 in one call (§14; wiring gate `Regression` §15). ⚠ NOT yet in the record object — gated on tranche 2 (the `SameOrbits` proof stack + Gaussian correctness); plan = remaining-work §1C C3. |
+| `ChainDescent/Regression.lean` | the **build-gating** regression suite (~1 min: §8 F1 fold guards, §9 sel, §10 F2a mirror-tie, §11 F2b deck, §12 F3a holKey, §14 F2c t3, §15 C3a kernel-wiring gates). |
+| `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (§11 `ut` end-to-end ~20 min; §12 wr3; §13 mp7 stall record; §14 kernel firing). |
 
 ---
 

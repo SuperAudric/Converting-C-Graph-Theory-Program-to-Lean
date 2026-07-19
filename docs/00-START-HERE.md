@@ -115,32 +115,30 @@ close it — is set out in
 > **defined** as the complement of a positive capability predicate, so it is not an asserted atom and it **shrinks**
 > whenever a resolver gets stronger, with no re-proof.
 >
-> **There is now a CONCRETE canonizer with no carried hypotheses** — `SupplyTransport.matchSupply_guarded_canonizer`
-> (encode-free refiner + `lookaheadKey` + the colour-match oracle) — and the seal corpus (`theorem_1_HOR_*`, the four
-> sealed form families, Spielman) **reaches it as imports** via `SealBridge.horb_of_cellsAreOrbits`.
+> **▶▶▶ THE TARGET (restated 2026-07-18, user steer): a COMPLETE canonizer** — every input handled,
+> polynomially; the flag provably never fires. Poly-or-flag is the *scaffold and measurement instrument*; a
+> named residue is only the recorded-exhaustion fallback. **The live plan + full gap enumeration =
+> [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) §0–§2** — read it right after the
+> handoff.
 >
-> **What is missing is resolver STRENGTH, and it is now a COST problem more than a reach problem.**
-> `DeepMatchSupply.deepMatchSupply d` (enumerate every length-`≤ d` individualization sequence) **fires** where the
-> one-step oracle cannot — `C₄` flags at `d = 0` and **answers at `d = 1`** — but its cost is `n^{O(d)}`: *exactly*
-> the seal's ladder and no better (`C₇` answers at `d=1` for **949 819** vs **7 568** exhaustive — a 125× **net
-> loss**). **Firing is not paying.** **(2026-07-15/16: `P2b`/`P2c` + `P3c` FIRST HALF LANDED — handoff §6.2/§6.2b.**
-> `SealDepthBridge.lean` makes the seal's **depth** (not just localisation) reach the supply, so `theorem_1_HOR_*` /
-> the form families / `viaSpielman` literally import. `PrunedSupply.lean` is **reference-matching** — match from ONE
-> discrete reference entry, not all pairs ⟹ `|table|` matches instead of `|table|²`, with `SameOrbits` proved by
-> **membership-set equality** (no Schreier-Sims needed); measured `C₇ d1` supplyCost 192080→41160. That **already
-> closes the POLY regime** (bounded `d`). ⚠ **The old "orbit-pruned fixpoint" framing is superseded**: what remains is
-> the `n^d` *inside* `|table|` (the sequence enumeration), whose collapse is a **group-closure** proof
-> (Schreier-Sims-grade — measured: canonical-seq pruning keeps 14/56 entries and finds 10 of 14 autos, the rest
-> **words**), paying off only at `d = Θ(log n)` and **conditional on localisation** — high value, not
-> poly-headline-critical.**) The rigid key was a look-ahead heuristic (**2026-07-18: re-scoped and built as F3 —
-> `HolKey.lean`; fold-tower plan §5b**), and one object-level defect remained: the
-> **target-cell selector was blind to resolvability** (fusion's live bite — handoff §6.1). **(2026-07-17/18: the
-> sel fix is LANDED, all five increments — `Select.lean` + `SelectNode.lean`: the fused `selNode` with the TRUE
-> mutual-stall flag, the dominance theorem, `HandledS`, rfl-twins; residuals in handoff §6.1's build-state
-> block.)** **(2026-07-17/18: the FOLD/TOWER track landed its first two moves — `PartialMatch.lean` (F1,
-> support-local matching) + `FoldSupply.lean` (F2a, structural copy-swap supply, fires where refinement-based
-> matching is provably dead); F2b/F3 open. Authoritative: handoff §6.6 +
-> [`chain-descent-fold-tower-plan.md`](./chain-descent-fold-tower-plan.md).)**
+> **The object of record** (2026-07-19): the **fused resolver-aware descent** — encode-free refiner +
+> `selNode` (true mutual-stall flag) with the **holonomy key** (`HolKey.lean`, force) and the composed
+> consume supply `foldSupply ++ deckSupply ++ deck2Supply`. `Publication.lean`'s `canonForm?` **is now this
+> real object and the whole ① trio is proven there axiom-clean** (no `sorryAx`, zero glue); the remaining
+> `sorryAx` in `canonizer` = ② (fillable per fixed cost pin) + ③ + non-vacuity.
+>
+> **The consume roster and its measured reach** (each landed with guards; do not re-derive — handoff §1
+> table + fold-tower STATUS + [[project-c3-kernel-supply-2026-07-19]]): matching (`matchSupply`, depth-`d`
+> `deepMatchSupply`/`partialMatchSupply`, pruned/tree-pruned variants), structural folds (`foldSupply` F2a),
+> propagation (`deckSupply` F2b — any generator order), second-seed propagation (`deck2Supply` F2c —
+> coupled-chaining gauges like the twisted triple `t3`/`ut` AND independent wreath gauges via the
+> load-bearing identity-default, measured `wr3`), and the **F₂ kernel supply** (`KernelSupply.lean` C3a
+> tranche 1 — recovers CFI cycle-space gauges by structural rail extraction + Gaussian elimination; measured
+> on `mp7`, the Fano multipede: the [7,3,4] simplex code recovered, the whole gauge consumed in one call;
+> **not yet in the record** — gated on its tranche-2 `SameOrbits` proof stack). The **frontier**: kernel
+> tranche 2, then **C3b deck-modulo-verified-subgroup** (mp7's translations), then T1 per-family
+> localisation, F3b Smith/CRT, the W1 recovery poly program, and the W2 wall — in that order
+> (remaining-work §2).
 >
 > **⛔⛔ SETTLED — do not re-propose a STABILIZER-CHAIN supply.** It must pick a **vertex inside a cell**, and cell
 > members are *precisely* what 1-WL cannot distinguish ⟹ no iso-invariant function picks one ⟹ **`①b` AND `①c` fail**
