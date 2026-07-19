@@ -118,6 +118,22 @@ Live-doc homes referenced below: **build doc** = `chain-descent-general-cc-separ
 
 ## 4. Dead / do-not-build
 
+- **⛔ "deck MODULO the verified subgroup" is DEAD as a standalone C3b mechanism — measured 2026-07-19
+  (`PerformanceTest` §15).** It was the *plan of record* in remaining-work §1C C3 (ii-c) and in the handoff, so it
+  looks endorsed in any doc snapshot before that date — it is not. The idea: once `kernelSupply` certifies the gauge
+  group `K`, let F2b/F2c propagation force uniqueness only *up to `K`* (candidates unique modulo `K`-orbits), a
+  P3b-licensed choice. **Why it fails:** the residual family it was aimed at (`mp7`, the Fano multipede) has
+  incidence **girth 6**, and §13 measured that the Z₇-translate seed forces **1 vertex of 42**. Quotienting by `K`
+  does not create chaining where there is none — propagation is not the vehicle on this family *at any modulus*.
+  ⚠ **Keep the licensing pattern, discard the mechanism:** "force only up to a verified subgroup, absorb the choice
+  into `SameOrbits`" is sound and is exactly what the live route uses; it simply had nothing to propagate on.
+  **Live replacement = base-graph recovery + lift** (remaining-work §1C C3 ii-c): the missing generator is an
+  automorphism of the *base* object `kernelSupply` already extracts (rails = segments, wire supports = checks). Its
+  ① license is strictly better — two lifts of one base automorphism differ by a pure gauge element ∈ `K`, and
+  **`WordReach` only needs each `v` and `ρ'(v)` connected, so PER-VERTEX gauge elements suffice; no single global
+  `k` is required.** That observation is what turns the coset obligation from a graph-dependent assumption into a
+  provable statement, and it is the reusable part of this episode.
+
 - **Unconditional A2-iii (block-visibility) is DEAD** — the **Shrikhande graph** refutes it (its own scheme is rank-4
   with a ClosedSubset 1-WL-from-v can't see). Block-visibility is depth-graded, collapses into the WL-dim boundary;
   keep `BlockRefinementVisible` a hypothesis.

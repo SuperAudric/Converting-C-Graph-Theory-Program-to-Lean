@@ -94,10 +94,10 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   basis = dim 3, weights [4,4,4] — *the simplex code recovered from raw structure*; gate passes; root
   gadget cell **28 → 7** (the whole gauge in one supply call); at the pinned node the basis restricts
   to dim 2 = exactly the codewords avoiding the pinned segment; 0 generators on t3/ut/wcyc9.
-  **Still open, scoped:**
+  **Follow-on state:**
   - **✅ (ii-b) Tranche 2 — the ① proof stack — COMPLETE 2026-07-19, all four parts landed** (four
-    modules in
-    `build.sh`, all axiom-clean `[propext, Classical.choice, Quot.sound]`; detail = module docs):
+    modules in `build.sh`, all axiom-clean `[propext, Classical.choice, Quot.sound]`; detail = module
+    docs; `kernelSupply` is now IN the record object):
     · **I `KernelGauss.lean`** — `span(kernelBasis) = L`: `dotB_nullBasis` (soundness) +
       `spans_nullBasis` (completeness), via the parity-count engine (`dotOn_eq_countP`,
       `countP_parity_single/_pair`) + the echelon invariant `PivInv` (unit / cross-zeros / `Nodup`
@@ -151,11 +151,15 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
       capstone, and the ① trio (`canon_sound`/`canon_complete`/`flag_iso_invariant`) stays
       axiom-clean `[propext, Classical.choice, Quot.sound]` — `canonizer`'s `sorryAx` is still
       exactly ②+③+non-vacuity.
-    **REMAINING housekeeping (not proof work):** regen `PublicTheoremIndex` (descriptions for the
-    ~80 new part I–IV declarations); an extended-record `Regression` guard.
-    Non-vacuity: `KernelGate` is instantiated by the existing `Regression` §15 mp7 guard
-    (`kernelGens.length = 3` forces the gate through); a cheap `kernelRefGens` guard on a small
-    witness is worth adding (probe the `allWords` 2^#rails cost first).
+    ✅ Theorem-index regen DONE (all 257 `Kernel.*` public rows + 4 private described).
+    **Optional, deliberately NOT done (judged low value, recorded so it is a choice and not an
+    oversight):** (a) an extended-record `Regression` guard — the existing §15 mp7 guards already
+    gate every kernel wiring path, and the record composite is exercised by the same object;
+    (b) a `kernelRefGens` firing guard — it is a `2^#rails` enumeration (128 words on mp7, so it
+    *would* run, but it is proof-side by construction and nothing executable reads it).
+    Non-vacuity is already instantiated: `KernelGate` holds at the `Regression` §15 mp7 guard
+    (`kernelGens.length = 3` forces the gate through), and `RefGate` follows by
+    `refGate_of_kernelGate`.
   - **(ii-c) = C3b — RE-SCOPED BY MEASUREMENT 2026-07-19 (`PerformanceTest` §15). The target is now
     exact, and the originally-named mechanism is RULED OUT.**
     **What is missing on mp7, measured:** the naive base translation (foot pair `j ↦ j+1`, gadget
@@ -297,7 +301,7 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    Gauss correctness `KernelGauss`, flip composition `KernelFlip`, reference + `sameOrbits_kernelRef`
    `KernelRef`, σ-equivariance + capstones `KernelTransport`; see §1C C3 ii-b). **`kernelSupply` is IN
    THE RECORD**: `Publication.canonForm?` consumes `fold ++ deck ++ deck2 ++ kernel` and the ① trio is
-   axiom-clean at it. Housekeeping only: theorem-index regen (~80 new declarations).
+   axiom-clean at it. ✅ Theorem-index regen also done (257 `Kernel.*` rows described). NOTHING LEFT.
 3e. **C3b — BASE-GRAPH RECOVERY + LIFT** (§1C C3 ii-c; RE-SCOPED 2026-07-19 by `PerformanceTest` §15).
    Measured: `mp7` answers at the root the moment ONE base-symmetry generator is supplied (kernel gens
    + the Z₇ translation ⟹ the 28-vertex branch cell is a single orbit). ⛔ The originally-planned

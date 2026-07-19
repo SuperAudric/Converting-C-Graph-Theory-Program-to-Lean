@@ -19,10 +19,14 @@ basis itself lies in `L` (`dotB_nullBasis`). When both gates pass, every referen
 *product* of kernel generators (the `TreePrune.Reaches` license) and every kernel generator is a
 reference generator; when both fail, both verified sets are empty. Either way the orbit relations
 coincide, and `OrbitPrune`'s reduction will hand `①` to the kernel supply from the reference's
-equivariance (part IV) with no equivariance proof on the pivot-dependent basis.
+equivariance with no equivariance proof on the pivot-dependent basis.
 
 `sameOrbits_appendSupply` extends the license through `appendSupply`, so the swap happens inside the
 record composite `fold ++ deck ++ deck2 ++ kernel`.
+
+The reference's own equivariance is **`KernelTransport.lean`** (part IV, LANDED 2026-07-19:
+`gensEquivariant_kernelRefSupply`), which also carries the capstones — so the reduction promised
+above is closed and `kernelSupply` is in the record object.
 -/
 
 namespace ChainDescent

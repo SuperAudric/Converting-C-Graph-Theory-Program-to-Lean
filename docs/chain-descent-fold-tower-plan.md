@@ -17,7 +17,12 @@
 > candidate; the second seed is precisely "which commuting extension". Equivariance
 > `gensEquivariant_deck2Supply` (`mem_seconds_conj` + `contFrom_conj` + `permOf_conj`). Capstones both objects
 > + **the F2c record `holKey_foldDeck2_selNode_canonizer`** (+`_Fast`): force = holonomy, consume =
-> `foldSupply ++ deckSupply ++ deck2Supply`. **MEASURED:** `t3` (n = 15) root cell — fold 3 / deck 3 (both
+> `foldSupply ++ deckSupply ++ deck2Supply`. ⚠ **This is no longer the record object** — later on
+> 2026-07-19 the C3a kernel supply was added, and the record is now
+> `Kernel.holKey_foldDeck2KernelFast_selNode_canonizer` over
+> `foldSupplyFast ++ deckSupply ++ deck2Supply ++ kernelSupply` (handoff §1 table; `Publication.canonForm?`
+> pins it). The F2c capstone below remains true and is still the right reference for the *fold family*.
+> **MEASURED:** `t3` (n = 15) root cell — fold 3 / deck 3 (both
 > stalled) vs deck2 → **1** (171 verified mirror composites: `μ³`-type and swap∘mirror); t3 end-to-end answers
 > ~20 s, relabel-invariant; **`ut` (n = 30) end-to-end ANSWERS (~20 min interpreted) where every pre-F2c stack
 > flagged — every known constructible member of the fold family now answers.**

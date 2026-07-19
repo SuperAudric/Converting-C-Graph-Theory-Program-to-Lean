@@ -476,7 +476,8 @@ simplex code (min weight 4 ⟹ no identity-default) — the C3 witness on which 
 manual deck3 are ALL measured dead (`PerformanceTest` §13). `Kernel.kernelSupply` recovers the system
 structurally and solves it: rails = the 7 foot pairs, basis = 3 weight-4 words, the all-or-nothing
 gate passes, and the root gadget cell narrows 28 → 7 (the WHOLE gauge — the standing 7 = the Z₇
-translations, deck's stalled territory = the C3b deck-mod-K follow-on). These two guards gate the
+translations, the C3b follow-on: **base-graph recovery + lift**, `PerformanceTest` §15 and
+remaining-work §1C C3 ii-c; ⛔ *not* deck-mod-K, which §15 measured dead). These two guards gate the
 extraction + elimination + emission + gate wiring end-to-end (~15 s); the narrow/pinned-node/
 harmlessness measurements live in `PerformanceTest` §14 (~40 s). **Do not delete** — the non-vacuity
 witness for the kernel supply. -/

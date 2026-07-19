@@ -52,9 +52,11 @@ capstones). This supply is now **in the record object** —
 
 Fires on: F₂-linear gauges over rail-pair structure with per-vertex-exact pattern spaces — the CFI /
 multipede / cycle-space class at ANY girth and weight (the whole point: `nullBasis` does not care).
-Does NOT touch: the copy/translation symmetry of such covers (deck's territory — but deck stalls when
-the gauge commutes with it, `PerformanceTest` §13 ⟹ the follow-on mechanism is deck-MODULO-the-verified
--kernel-group, remaining-work C3b); non-linear gauges (the named wall, W2). Measured on `mp7`
+Does NOT touch: the copy/translation symmetry of such covers — deck stalls there too, and ⛔ NOT because
+the gauge commutes with it in a way `K` could fix: `PerformanceTest` §15 measured that quotienting by `K`
+creates no chaining where girth kills it, so the follow-on mechanism is **base-graph recovery + lift**
+(remaining-work §1C C3 ii-c), not deck-modulo-`K`. Also does not touch non-linear gauges (the named wall,
+W2). Measured on `mp7`
 (`Regression` §15 gates the cheap cells; `PerformanceTest` §14 the rest): rails 7, basis dim 3, gate
 passes, root cell 28 → 7 = the gauge fully certified with the Z₇ translations honestly left standing.
 -/

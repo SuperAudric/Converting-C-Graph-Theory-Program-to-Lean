@@ -121,11 +121,12 @@ close it — is set out in
 > [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) §0–§2** — read it right after the
 > handoff.
 >
-> **The object of record** (2026-07-19): the **fused resolver-aware descent** — encode-free refiner +
-> `selNode` (true mutual-stall flag) with the **holonomy key** (`HolKey.lean`, force) and the composed
-> consume supply `foldSupply ++ deckSupply ++ deck2Supply`. `Publication.lean`'s `canonForm?` **is now this
-> real object and the whole ① trio is proven there axiom-clean** (no `sorryAx`, zero glue); the remaining
-> `sorryAx` in `canonizer` = ② (fillable per fixed cost pin) + ③ + non-vacuity.
+> **The object of record** (2026-07-19, extended later the same day): the **fused resolver-aware descent** —
+> encode-free refiner + `selNode` (true mutual-stall flag) with the **holonomy key** (`HolKey.lean`, force)
+> and the composed consume supply `foldSupply ++ deckSupply ++ deck2Supply ++ **kernelSupply**`.
+> `Publication.lean`'s `canonForm?` **is now this real object and the whole ① trio is proven there
+> axiom-clean** (no `sorryAx`, zero glue); the remaining `sorryAx` in `canonizer` = ② (fillable per fixed
+> cost pin) + ③ + non-vacuity.
 >
 > **The consume roster and its measured reach** (each landed with guards; do not re-derive — handoff §1
 > table + fold-tower STATUS + [[project-c3-kernel-supply-2026-07-19]]): matching (`matchSupply`, depth-`d`
@@ -135,10 +136,14 @@ close it — is set out in
 > load-bearing identity-default, measured `wr3`), and the **F₂ kernel supply** (`KernelSupply.lean` C3a
 > tranche 1 — recovers CFI cycle-space gauges by structural rail extraction + Gaussian elimination; measured
 > on `mp7`, the Fano multipede: the [7,3,4] simplex code recovered, the whole gauge consumed in one call;
-> **not yet in the record** — gated on its tranche-2 `SameOrbits` proof stack). The **frontier**: kernel
-> tranche 2, then **C3b deck-modulo-verified-subgroup** (mp7's translations), then T1 per-family
-> localisation, F3b Smith/CRT, the W1 recovery poly program, and the W2 wall — in that order
-> (remaining-work §2).
+> **✅ tranche 2 COMPLETE and IN THE RECORD** since 2026-07-19 — `KernelGauss`/`KernelFlip`/`KernelRef`/
+> `KernelTransport`). ★ Note the ① shape: `kernelSupply` is the first record supply that is provably **not**
+> `GensEquivariant` (pivot-order-dependent basis = trap #7); ① rides `OrbitPrune.SameOrbits` against an
+> equivariant set-level reference, so the executable object carries zero ① obligation — the recommended
+> shape for any future supply that must make an internal choice.
+> The **frontier**: **C3b base-graph recovery + lift** (⛔ NOT "deck modulo the verified subgroup" — that was
+> the plan of record until measured dead; `PerformanceTest` §15), then T1 per-family localisation, F3b
+> Smith/CRT, the W1 recovery poly program, and the W2 wall — in that order (remaining-work §2).
 >
 > **⛔⛔ SETTLED — do not re-propose a STABILIZER-CHAIN supply.** It must pick a **vertex inside a cell**, and cell
 > members are *precisely* what 1-WL cannot distinguish ⟹ no iso-invariant function picks one ⟹ **`①b` AND `①c` fail**

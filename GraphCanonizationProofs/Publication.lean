@@ -41,8 +41,9 @@ today.
     (plan: docs/chain-descent-remaining-work.md §0–§2). Nothing below changes until legs close; totality
     tightens the file at the end, not before.
 Per-obligation state:
-  · ① — ✅ SWAPPED (spike, 2026-07-19): `canonForm?` is the REAL fused record object (holonomy key +
-    `foldFast ++ deck ++ deck2`), and `canon_sound`/`canon_complete`/`flag_iso_invariant` are proven —
+  · ① — ✅ SWAPPED (spike, 2026-07-19; record EXTENDED later the same day with the C3a kernel supply):
+    `canonForm?` is the REAL fused record object (holonomy key +
+    `foldFast ++ deck ++ deck2 ++ kernel`), and `canon_sound`/`canon_complete`/`flag_iso_invariant` are proven —
     `#print axioms` = `[propext, Classical.choice, Quot.sound]`, no `sorryAx`, no citation axioms (① carries
     nothing, as designed). Zero glue was needed: `Labelled n` ≡ the matrix type, `Iso` ≡ `CanonSpec.GraphIso`,
     `canonFormFastS?_eq` is `rfl`. The record pin is PROVISIONAL (strengthening it = edit `canonForm?` +
