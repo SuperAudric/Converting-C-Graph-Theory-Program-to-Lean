@@ -393,3 +393,21 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `Hol.tbl_filter_eq` | 600-606 | The table copy-sweep filter equals the spec membership filter. | — |
 | `Hol.holMovedT_eq` | 608-616 | The table moved-count computes `holMoved`. | — |
 | `Hol.any_walkVals_eq_holHas` | 618-641 | Scanning the materialised walk-value list equals the spec membership test `holHas`. | — |
+## ChainDescent/KernelFlip.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.filter_eq_singleton` | 34-52 | A filter with a unique satisfier is that singleton — the `uniqueFilter` specification's core step. | — |
+
+## ChainDescent/KernelGauss.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.and_bne_distrib` | 117-118 | Bool distribution used in the linearity proofs. | — |
+| `Kernel.bne_eq_false` | 857-858 | `(a != b) = false` gives `a = b`. | — |
+
+## ChainDescent/KernelRef.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.filterMap_length_eq_iff` | 117-145 | A `filterMap` preserves length exactly when every element maps to `some` — the counting half of the all-or-nothing gate. | — |

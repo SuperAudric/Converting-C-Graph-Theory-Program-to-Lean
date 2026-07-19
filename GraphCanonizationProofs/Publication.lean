@@ -74,6 +74,7 @@ Per-obligation state:
 -/
 import ChainDescent.Spine
 import ChainDescent.Deck2
+import ChainDescent.KernelTransport
 
 namespace Showcase
 
@@ -102,19 +103,24 @@ with the real Lean definition (the descent model + cost accounting) is exactly t
     NOT "the algorithm flagged" (that makes §3 a tautology). See the firewall + the non-vacuity obligation. -/
 
 /-- **★ THE SWAP (spike, 2026-07-19): `canonForm?` is REAL — the fused canonizer of record** (encode-free
-refiner; force = the holonomy key; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply`), i.e. exactly
-the object the end-to-end acceptance measurements run (`PerformanceTest` §11/§12). ⚠ The record pin is
+refiner; force = the holonomy key; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply ++ kernelSupply`),
+i.e. exactly the object the end-to-end acceptance measurements run (`PerformanceTest` §11/§12/§14).
+**Extended 2026-07-19 (C3a tranche 2 complete)** with the F₂ kernel supply: `kernelSupply` is not — and
+provably cannot be — `GensEquivariant` (its Gaussian basis is pivot-order dependent), so its ① rides the
+`OrbitPrune.SameOrbits` reduction against the equivariant set-level reference. ⚠ The record pin is
 PROVISIONAL by design — strengthening the record later is this one definition plus `canonForm?_record`
 below; nothing downstream changes shape. (`cost` remains a stub: ② is not yet swapped.) -/
 def canonForm? (n : ℕ) (G : AdjMatrix n) : Option (Fin n → Fin n → Nat) :=
   Select.canonFormFastS? (Hol.holKeyFast (n := n))
     (Deck.appendSupply (Fold.foldSupplyFast (n := n))
-      (Deck.appendSupply (Deck.deckSupply (n := n)) (Deck2.deck2Supply (n := n)))) G
+      (Deck.appendSupply (Deck.deckSupply (n := n))
+        (Deck.appendSupply (Deck2.deck2Supply (n := n)) (Kernel.kernelSupply (n := n))))) G
 
-/-- The record object satisfies the full canonical-form spec — `Deck2.holKey_foldDeck2Fast_selNode_canonizer`
-read through the definitional bridge `SelectNode.canonFormFastS?_eq`. -/
+/-- The record object satisfies the full canonical-form spec —
+`Kernel.holKey_foldDeck2KernelFast_selNode_canonizer` read through the definitional bridge
+`SelectNode.canonFormFastS?_eq`. -/
 theorem canonForm?_record (n : ℕ) : CanonSpec.IsCanonicalFormOpt (canonForm? n) :=
-  Deck2.holKey_foldDeck2Fast_selNode_canonizer
+  Kernel.holKey_foldDeck2KernelFast_selNode_canonizer
 
 opaque cost (n : ℕ) (G : AdjMatrix n) : ℕ := 0
 

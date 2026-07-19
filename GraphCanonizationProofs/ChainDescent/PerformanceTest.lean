@@ -458,4 +458,51 @@ def mpPin : Refine.ColData 42 :=
 #guard (Kernel.kernelGens Regression.ut Regression.utRoot.col).length = 0
 #guard (Kernel.kernelGens Regression.wcyc9 Regression.wcyc9Root.col).length = 0
 
+/-! ## 15. `C3b` — WHAT IS ACTUALLY MISSING ON `mp7`, measured (2026-07-19)
+
+§14 leaves the Z₇ translations standing. This section pins down **exactly** what a C3b mechanism has
+to produce, and it is a single generator.
+
+* The naive base translation — foot pair `j ↦ j+1` (parity bit preserved), gadget `i ↦ i+1` (subset
+  type preserved) — **lifts unchanged**: it passes the bijectivity gate and IS a colour-automorphism
+  of `mp7`. (It must: `j ↦ j+1` preserves the Fano lines `δ(i) = {i, i+1, i+3}` setwise *and*
+  preserves each line's internal `{a,b,c}` labelling, so the incidence parities go across verbatim.)
+* Kernel generators alone: the orbit of a gadget vertex is **4** — the gadget's own even-subset quad,
+  i.e. exactly the gauge, exactly as designed.
+* Kernel generators **+ that one translation**: the gadget-vertex orbit is **28 = the whole branch
+  cell**, and the foot orbit is **14 = every foot**.
+
+⟹ **`mp7` answers at the root the moment ONE base-symmetry generator is supplied.** The kernel
+supply already covers the entire rest of the group. This is the C3b acceptance, reduced to a target
+small enough to design against.
+
+⚠ And it rules a mechanism OUT. "deck modulo the verified subgroup" cannot be the answer *by itself*:
+§13 measured that the translate seed forces **1 vertex of 42** — girth 6 means nothing chains, and
+quotienting by `K` does not create chaining where there is none. Propagation is not the vehicle here
+at any modulus. What the translation *is*, structurally, is an automorphism of the **base** object
+the kernel supply already extracts (rails = the 7 segments, wire supports = the 7 checks; their
+incidence IS the Fano plane). So the C3b route is **base-graph recovery + lift**, and the lift's
+choice-dependence is licensed the same way the Gaussian basis was — two lifts of the same base
+automorphism differ by an automorphism inducing the identity on the base, i.e. by a pure gauge
+element, i.e. by an element of `K`, which the kernel supply already emits. Design note:
+remaining-work §1C C3 (ii-c). -/
+
+def transFun (v : Fin 42) : Fin 42 :=
+  if v.val < 14 then mk42 (2 * ((v.val / 2 + 1) % 7) + v.val % 2)
+  else mk42 (14 + 4 * (((v.val - 14) / 4 + 1) % 7) + (v.val - 14) % 4)
+
+#guard (match Deck2.permOf transFun with
+  | some ρ => decide (Consume.IsColAut Regression.mp7 Regression.mp7Root.col ρ)
+  | none => false)
+
+def orbitOf (gs : List (Equiv.Perm (Fin 42))) (x : Fin 42) : List (Fin 42) :=
+  (fun s => (s ++ s.flatMap (fun y => gs.map (fun g => g y))).dedup)^[8] [x]
+
+def mpKernelGens : List (Equiv.Perm (Fin 42)) :=
+  Kernel.kernelGens Regression.mp7 Regression.mp7Root.col
+
+#guard (orbitOf mpKernelGens (mk42 14)).length = 4                              -- the gauge alone
+#guard (orbitOf (mpKernelGens ++ (Deck2.permOf transFun).toList) (mk42 14)).length = 28
+#guard (orbitOf (mpKernelGens ++ (Deck2.permOf transFun).toList) (mk42 0)).length = 14
+
 end ChainDescent.Perf

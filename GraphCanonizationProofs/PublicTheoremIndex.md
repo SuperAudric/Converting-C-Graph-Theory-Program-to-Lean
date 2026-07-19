@@ -2698,25 +2698,25 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Showcase.Iso` | 84-87 | — | Definition |
-| `Showcase.canonForm?` | 104-112 | **THE SWAP (spike 2026-07-19): the showcase canonizer is REAL** — the fused record object (encode-free refiner; force = `holKeyFast`; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply`), exactly what the end-to-end acceptance measurements run. Record pin provisional: strengthening it = this def + `canonForm?_record`, nothing downstream. | Definition |
-| `Showcase.canonForm?_record` | 114-119 | The record object satisfies the full canonical-form spec — `Deck2.holKey_foldDeck2Fast_selNode_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
-| `Showcase.UnhandledResidue` | 162-169 | — | Definition |
-| `Showcase.cameron_classification` | 190-195 | — | axiom |
-| `Showcase.skresanov_two_closure` | 196-199 | — | axiom |
-| `Showcase.liebeck_rank3` | 200-203 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 204-212 | — | axiom |
-| `Showcase.ftpg` | 213-219 | — | axiom |
-| `Showcase.buekenhout_shult` | 220-227 | — | axiom |
-| `Showcase.payne_thas` | 228-236 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 237 | — | axiom |
-| `Showcase.canon_sound` | 245-252 | — | — |
-| `Showcase.canon_complete` | 254-279 | — | — |
-| `Showcase.flag_iso_invariant` | 281-287 | — | — |
-| `Showcase.canon_poly_or_flag` | 289-311 | — | — |
-| `Showcase.residue_if_flag` | 313-322 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 324-330 | — | — |
-| `Showcase.canonizer` | 337-347 | — | — |
+| `Showcase.Iso` | 85-88 | — | Definition |
+| `Showcase.canonForm?` | 105-117 | **THE SWAP (spike 2026-07-19): the showcase canonizer is REAL** — the fused record object (encode-free refiner; force = `holKeyFast`; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply`), exactly what the end-to-end acceptance measurements run. Record pin provisional: strengthening it = this def + `canonForm?_record`, nothing downstream. | Definition |
+| `Showcase.canonForm?_record` | 119-125 | The record object satisfies the full canonical-form spec — `Deck2.holKey_foldDeck2Fast_selNode_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
+| `Showcase.UnhandledResidue` | 168-175 | — | Definition |
+| `Showcase.cameron_classification` | 196-201 | — | axiom |
+| `Showcase.skresanov_two_closure` | 202-205 | — | axiom |
+| `Showcase.liebeck_rank3` | 206-209 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 210-218 | — | axiom |
+| `Showcase.ftpg` | 219-225 | — | axiom |
+| `Showcase.buekenhout_shult` | 226-233 | — | axiom |
+| `Showcase.payne_thas` | 234-242 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 243 | — | axiom |
+| `Showcase.canon_sound` | 251-258 | — | — |
+| `Showcase.canon_complete` | 260-285 | — | — |
+| `Showcase.flag_iso_invariant` | 287-293 | — | — |
+| `Showcase.canon_poly_or_flag` | 295-317 | — | — |
+| `Showcase.residue_if_flag` | 319-328 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 330-336 | — | — |
+| `Showcase.canonizer` | 343-353 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -3906,24 +3906,275 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Kernel.isAdj` | 70-72 | Symmetric adjacency presence test (weights compared elsewhere; rails need presence only). | Definition |
-| `Kernel.twinP` | 74-77 | Twin candidacy: same colour, distinct, non-adjacent, DISJOINT neighbourhoods — the rail-pair discriminator (correctly rejects the fold family's mirror pairs, which share neighbours). | Definition |
-| `Kernel.twin` | 79-81 | The unique twin via `uniqueFilter` — ambiguity means no rail, never a choice (trap #7). | Definition |
-| `Kernel.rails` | 83-89 | The rail pairs (gauge wires): mutually-unique twins, listed once at the lower index — an INTERNAL labelling the ① story never depends on (see the all-or-nothing gate). | Definition |
-| `Kernel.onRail` | 91-93 | Is a vertex a rail endpoint? | Definition |
-| `Kernel.touches` | 97-99 | Does a vertex see either endpoint of a rail? | Definition |
-| `Kernel.patOf` | 101-112 | The flip pattern a shape-matched same-cell partner realizes: bit = touched and crossed. `none` when touch shapes differ. | Definition |
-| `Kernel.pats` | 114-117 | All realizable local flip patterns at a vertex (the vertex itself contributes zero — a CFI gadget's patterns are exactly its even subsets). | Definition |
-| `Kernel.xorRow` | 121 | F₂ row addition. | Definition |
-| `Kernel.reduceRow` | 123-124 | Reduce a row by the current pivot list. | Definition |
-| `Kernel.echelon` | 126-133 | Reduced row echelon form as a pivot list — UNTRUSTED (correctness = tranche 2's `span(kernelBasis) = L`). | Definition |
-| `Kernel.nullBasis` | 135-144 | A basis of the null space of the row space: one word per free column, pivots back-substituted. Untrusted; used twice (local perps, the global kernel). | Definition |
-| `Kernel.restrictCols` | 146-147 | Restrict a row to a column subset (patterns → wire support). | Definition |
-| `Kernel.embedCols` | 149-153 | Re-embed a restricted row into the full width with zeros elsewhere. | Definition |
-| `Kernel.wiresOf` | 157-162 | The wire support of a vertex: rail indices it touches. | Definition |
-| `Kernel.localRows` | 164-170 | A vertex's constraint rows = the perp of the span of its patterns, computed inside its wire support and re-embedded — the extracted parity checks (mp7: exactly the Fano line checks). | Definition |
-| `Kernel.kernelBasis` | 172-175 | A Gaussian basis of the gauge space L = the null space of every vertex's constraints (mp7: the [7,3,4] simplex code, dim 3, weights 4). | Definition |
-| `Kernel.railImg` | 179-184 | The rail image of a vertex under a flip word (`none` off the rails). | Definition |
-| `Kernel.flipFunK` | 186-204 | The candidate table for a word: rails flip; a non-rail vertex touching a flipped rail moves to its unique same-colour partner matching the flipped adjacency (full weights, both directions); untouched vertices stay. Junk dies at the gate/verify. | Definition |
-| `Kernel.kernelGens` | 208-214 | ★ The ALL-OR-NOTHING gate: emit the whole basis (as gated, verified flips) or nothing. "Whole basis verifies" ⟺ "every word of L verifies" (products of automorphisms) — a CANONICAL predicate, so the emitted GROUP is a canonical function of (adj, χ) despite the pivot-order-dependent basis: the ①c design lock; the ① theorems ride the SameOrbits reduction (tranche 2). | Definition |
-| `Kernel.kernelSupply` | 216-220 | ★ THE KERNEL SUPPLY (C3a): recognition and solving untrusted, every generator re-verified; flat n⁵ bill. Measured (mp7): the root gadget cell 28 → 7 = the whole gauge in one supply call — what no propagation shape can reach at any seed count. | Definition |
+| `Kernel.isAdj` | 74-76 | Symmetric adjacency presence test (weights compared elsewhere; rails need presence only). | Definition |
+| `Kernel.twinP` | 78-81 | Twin candidacy: same colour, distinct, non-adjacent, DISJOINT neighbourhoods — the rail-pair discriminator (correctly rejects the fold family's mirror pairs, which share neighbours). | Definition |
+| `Kernel.twin` | 83-85 | The unique twin via `uniqueFilter` — ambiguity means no rail, never a choice (trap #7). | Definition |
+| `Kernel.rails` | 87-93 | The rail pairs (gauge wires): mutually-unique twins, listed once at the lower index — an INTERNAL labelling the ① story never depends on (see the all-or-nothing gate). | Definition |
+| `Kernel.onRail` | 95-97 | Is a vertex a rail endpoint? | Definition |
+| `Kernel.touches` | 101-103 | Does a vertex see either endpoint of a rail? | Definition |
+| `Kernel.patOf` | 105-116 | The flip pattern a shape-matched same-cell partner realizes: bit = touched and crossed. `none` when touch shapes differ. | Definition |
+| `Kernel.pats` | 118-121 | All realizable local flip patterns at a vertex (the vertex itself contributes zero — a CFI gadget's patterns are exactly its even subsets). | Definition |
+| `Kernel.xorRow` | 125 | F₂ row addition. | Definition |
+| `Kernel.reduceRow` | 127-128 | Reduce a row by the current pivot list. | Definition |
+| `Kernel.echelon` | 130-137 | Reduced row echelon form as a pivot list — UNTRUSTED (correctness = tranche 2's `span(kernelBasis) = L`). | Definition |
+| `Kernel.nullBasis` | 139-148 | A basis of the null space of the row space: one word per free column, pivots back-substituted. Untrusted; used twice (local perps, the global kernel). | Definition |
+| `Kernel.restrictCols` | 150-151 | Restrict a row to a column subset (patterns → wire support). | Definition |
+| `Kernel.embedCols` | 153-157 | Re-embed a restricted row into the full width with zeros elsewhere. | Definition |
+| `Kernel.wiresOf` | 161-166 | The wire support of a vertex: rail indices it touches. | Definition |
+| `Kernel.localRows` | 168-174 | A vertex's constraint rows = the perp of the span of its patterns, computed inside its wire support and re-embedded — the extracted parity checks (mp7: exactly the Fano line checks). | Definition |
+| `Kernel.kernelBasis` | 176-179 | A Gaussian basis of the gauge space L = the null space of every vertex's constraints (mp7: the [7,3,4] simplex code, dim 3, weights 4). | Definition |
+| `Kernel.railImg` | 183-188 | The rail image of a vertex under a flip word (`none` off the rails). | Definition |
+| `Kernel.flipFunK` | 190-208 | The candidate table for a word: rails flip; a non-rail vertex touching a flipped rail moves to its unique same-colour partner matching the flipped adjacency (full weights, both directions); untouched vertices stay. Junk dies at the gate/verify. | Definition |
+| `Kernel.kernelGens` | 212-218 | ★ The ALL-OR-NOTHING gate: emit the whole basis (as gated, verified flips) or nothing. "Whole basis verifies" ⟺ "every word of L verifies" (products of automorphisms) — a CANONICAL predicate, so the emitted GROUP is a canonical function of (adj, χ) despite the pivot-order-dependent basis: the ①c design lock; the ① theorems ride the SameOrbits reduction (tranche 2). | Definition |
+| `Kernel.kernelSupply` | 220-224 | ★ THE KERNEL SUPPLY (C3a): recognition and solving untrusted, every generator re-verified; flat n⁵ bill. Measured (mp7): the root gadget cell 28 → 7 = the whole gauge in one supply call — what no propagation shape can reach at any seed count. | Definition |
+## ChainDescent/KernelFlip.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.uniqueFilter_eq_some_iff` | 54-77 | `uniqueFilter` returns `some w` exactly when `w` satisfies the predicate and is the only such element — no choice is ever made. | — |
+| `Kernel.uniqueFilter_transport` | 79-83 | `uniqueFilter` transports along a permutation of the domain. | — |
+| `Kernel.mem_rails_iff` | 87-109 | Rail membership: mutual-unique twins listed at the lower index. | — |
+| `Kernel.twinP_of_twin_eq_some` | 111-114 | A recorded twin satisfies the twin predicate. | — |
+| `Kernel.rails_endpoint_eq` | 116-138 | ★ Rails are vertex-DISJOINT: two rails sharing an endpoint are equal (twin uniqueness). | — |
+| `Kernel.rails_ne` | 140-146 | A rail's two endpoints are distinct. | — |
+| `Kernel.onRail_iff` | 148-159 | `onRail` membership unfolded to an endpoint witness. | — |
+| `Kernel.onRail_rails_iff` | 161-185 | Being on a rail is exactly having a mutual-unique twin. | — |
+| `Kernel.railImg_eq_none_iff` | 189-225 | `railImg` fails exactly off the rails. | — |
+| `Kernel.findSome?_rail_lookup` | 227-271 | The generic disjoint-scan value lemma: at an endpoint of a listed rail the scan returns that rail's flip value. | — |
+| `Kernel.permOf_apply` | 275-281 | A gated permutation acts as the table it was gated from. | — |
+| `Kernel.isAdj_comm` | 283-285 | Rail-detection adjacency is symmetric. | — |
+| `Kernel.isAdj_aut` | 287-291 | Adjacency is automorphism-stable. | — |
+| `Kernel.isAdj_eq_false_iff` | 293-297 | Non-adjacency unfolded to both matrix entries being zero. | — |
+| `Kernel.all_finRange_perm` | 299-307 | `all` over `finRange` is invariant under precomposition with a permutation. | — |
+| `Kernel.twinP_aut` | 309-326 | The twin predicate is automorphism-stable. | — |
+| `Kernel.twin_aut` | 328-332 | The twin map commutes with an automorphism. | — |
+| `Kernel.onRail_aut` | 334-369 | Rails are structural: an automorphism maps rail endpoints to rail endpoints. | — |
+| `Kernel.rails_map_fst_nodup` | 373-395 | Rail first-components are distinct. | — |
+| `Kernel.rails_nodup` | 397-398 | The rail list has no duplicates. | — |
+| `Kernel.zip_entry_unique` | 400-419 | Two zip entries carrying the same rail carry the same bit. | — |
+| `Kernel.zip_huniq` | 421-436 | Any zip entry sharing an endpoint with `(p, b)` *is* `(p, b)` — the uniqueness input to the scan lemmas. | — |
+| `Kernel.condFun` | 440-445 | The per-rail flipped-adjacency condition inside `flipFunK` (`x` is the candidate). | Definition |
+| `Kernel.satP` | 447-450 | The satisfier predicate inside `flipFunK`: same colour, off the rails, and matching flipped adjacency on every rail. | Definition |
+| `Kernel.flipGuard` | 452-454 | The flip guard: the vertex touches a rail the word flips. | Definition |
+| `Kernel.flipFunK_eq` | 456-466 | `flipFunK` factored through `railImg` / `flipGuard` / `satP`. | — |
+| `Kernel.emitted_rail_action` | 468-492 | The emitted permutation acts on every zipped rail exactly as the word's flip. | — |
+| `Kernel.touched_moves` | 494-539 | ★ Under a VERIFYING flip a vertex touching a flipped rail cannot stay fixed (twin neighbourhood-disjointness) — this rules the identity-default out of every verified table and closes the `uniqueFilter`-ambiguity hole for compound words. | — |
+| `Kernel.getElem_xorRow'` | 543-546 | Indexed view of `xorRow`. | — |
+| `Kernel.mem_zip_iff_getElem'` | 548-560 | Indexed view of zip membership. | — |
+| `Kernel.all_zip_iff` | 562-574 | `all` over the labelled word, at the index level. | — |
+| `Kernel.any_zip_iff` | 576-588 | `any` over the labelled word, at the index level. | — |
+| `Kernel.condFun_mk` | 590-596 | `condFun` on an explicit pair/bit. | — |
+| `Kernel.condFun_untouched` | 598-616 | Untouched-rail conditions are bit-independent. | — |
+| `Kernel.flip_pt_comp` | 618-623 | The rail endpoint action composes under XOR of the two bits. | — |
+| `Kernel.condFun_conj_flip` | 625-634 | The per-rail condition transports through a verified flip's endpoint action. | — |
+| `Kernel.flipGuard_congr` | 638-659 | Guards agree for words agreeing on the rails a vertex touches. | — |
+| `Kernel.satP_congr_touch` | 661-682 | Satisfier predicates agree for words agreeing on the rails a vertex touches. | — |
+| `Kernel.satP_conj_flip` | 684-716 | ★ THE SATISFIER BIJECTION: a verified `w`-flip maps the satisfier set of `(w', v)` onto that of `(w ⊕ w', v)`, so `uniqueFilter` transports. | — |
+| `Kernel.satP_self_of_guard_false` | 718-752 | With the guard off a vertex is its own satisfier — the untouched case. | — |
+| `Kernel.flipFunK_xor` | 756-868 | ★★★ THE PRODUCT LEMMA: if the flips of `w` and `w'` both emit and verify then `flip (w ⊕ w') = flip w ∘ flip w'`. This is the theorem behind the all-or-nothing gate — verifying the basis propagates to every word of the span, so the emitted GROUP is canonical. | — |
+
+## ChainDescent/KernelGauss.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.xorList` | 27-28 | XOR-fold of a Bool list. | Definition |
+| `Kernel.xorList_nil` | 30 | XOR of the empty list is `false`. | `@[simp]` |
+| `Kernel.xorList_cons` | 32-33 | XOR unfolds at the head. | `@[simp]` |
+| `Kernel.xorList_eq_count` | 35-50 | XOR over a Bool list is the parity of its `true` count — the entry point to the counting view. | — |
+| `Kernel.getD_in` | 52-54 | `getD` at an in-range index is `getElem` (the `List.getD` bridge used throughout the F₂ layer). | — |
+| `Kernel.dotB` | 56-57 | The F₂ dot product: parity of the common support. | Definition |
+| `Kernel.dotOn` | 59-61 | The F₂ dot product over an explicit index list — the form all support-splitting arguments use. | Definition |
+| `Kernel.xorList_map_eq_countP` | 63-70 | XOR over a mapped list is a `countP` parity. | — |
+| `Kernel.dotOn_eq_countP` | 72-75 | ★ The workhorse view: the index-list dot product is a `countP` parity, so all support-splitting becomes counting. | — |
+| `Kernel.zipWith_and_eq_range_map` | 77-87 | A length-`m` pointwise-AND list is the range-map of its pointwise values. | — |
+| `Kernel.dotB_eq_dotOn` | 89-92 | `dotB` over length-`m` operands is `dotOn` over `range m`. | — |
+| `Kernel.dotB_comm` | 94-98 | The F₂ dot product is symmetric. | — |
+| `Kernel.xorList_zipWith_bne` | 102-115 | XOR of a pointwise XOR is the XOR of the XORs — linearity at the list level. | — |
+| `Kernel.dotB_xorRow_right` | 120-129 | `dotB` is additive in its right argument. | — |
+| `Kernel.dotB_xorRow_left` | 131-134 | `dotB` is additive in its left argument. | — |
+| `Kernel.zeroW` | 136-137 | The zero word of length `m`. | Definition |
+| `Kernel.length_zeroW` | 139 | The zero word has length `m`. | `@[simp]` |
+| `Kernel.getElem_zeroW` | 141-142 | Every bit of the zero word is `false`. | `@[simp]` |
+| `Kernel.dotB_zeroW_right` | 144-149 | Everything is orthogonal to the zero word. | — |
+| `Kernel.length_xorRow` | 153-154 | `xorRow` preserves length (min of the two). | — |
+| `Kernel.xorRow_zeroW_left` | 156-159 | Zero is a left identity for `xorRow`. | — |
+| `Kernel.xorRow_zeroW_right` | 161-164 | Zero is a right identity for `xorRow`. | — |
+| `Kernel.xorRow_self_cancel` | 166-172 | `xorRow` is an involution: a word XOR itself is zero (F₂ characteristic 2). | — |
+| `Kernel.xorRow_assoc` | 174-180 | `xorRow` is associative. | — |
+| `Kernel.getD_xorRow` | 182-186 | The `i`-th bit of an `xorRow` is the XOR of the `i`-th bits. | — |
+| `Kernel.Spans` | 190-193 | F₂ span as an inductive XOR-combination relation — the reduction's notion of "generated by the basis". | Inductive |
+| `Kernel.Spans.length` | 195-199 | A spanned word has the ambient length `m`. | — |
+| `Kernel.Spans.mem` | 201-204 | Every basis element is spanned by the basis. | — |
+| `Kernel.Spans.xor_closed` | 206-214 | The span is closed under `xorRow` — it is an F₂ subspace. | — |
+| `Kernel.Spans.trans_basis` | 216-222 | Spanning is transitive through a basis whose members are themselves spanned. | — |
+| `Kernel.dotB_eq_false_of_spans` | 224-232 | Orthogonality extends over a span — `dotB`-linearity folded along the derivation. | — |
+| `Kernel.parity_add` | 236-246 | Parity of a sum is the XOR of the parities. | — |
+| `Kernel.countP_eq_zero_of_support` | 248-252 | A predicate false on every member counts zero. | — |
+| `Kernel.countP_parity_single` | 254-267 | Parity bookkeeping over a `Nodup` index list when exactly one index is distinguished. | — |
+| `Kernel.countP_parity_pair` | 269-283 | Parity bookkeeping over a `Nodup` index list when exactly two indices are distinguished — the pivot/free-column split. | — |
+| `Kernel.xorRow_comm` | 287-292 | `xorRow` is commutative. | — |
+| `Kernel.xorRow_cancel_right` | 294-297 | Right cancellation for `xorRow`. | — |
+| `Kernel.combo` | 299-300 | The XOR-combination of a list of words. | Definition |
+| `Kernel.combo_nil` | 302 | The empty combination is zero. | `@[simp]` |
+| `Kernel.combo_cons` | 304-305 | `combo` unfolds as an `xorRow` at the head. | — |
+| `Kernel.combo_length` | 307-314 | An XOR-combination of length-`m` words has length `m`. | — |
+| `Kernel.spans_combo` | 316-323 | Any XOR-combination of basis words is spanned. | — |
+| `Kernel.getD_combo` | 325-337 | The `i`-th bit of a combination is the XOR of the `i`-th bits. | — |
+| `Kernel.Spans.mono` | 339-344 | Spanning is monotone in the generating list. | — |
+| `Kernel.PivInv` | 348-358 | The reduced-row-echelon invariant carried through the elimination fold: pivot rows unit at their own column and zero at every other pivot column, pivot columns `Nodup`, and BOTH directions of same-row-space. | Structure |
+| `Kernel.pivInv_nil` | 360-361 | The echelon invariant holds vacuously at the empty pivot list. | — |
+| `Kernel.reduceRow_cons` | 363-364 | `reduceRow` unfolds one pivot step. | — |
+| `Kernel.reduceRow_length` | 366-380 | `reduceRow` preserves row length. | — |
+| `Kernel.reduceRow_spec` | 382-414 | The reduced row differs from the input by a combination of pivot rows (`∃ q, Spans … ∧ reduceRow P r = xorRow q r`) — the same-row-space direction. | — |
+| `Kernel.reduceRow_getD_const` | 416-435 | `reduceRow` leaves columns untouched by any pivot unchanged. | — |
+| `Kernel.reduceRow_pivot_zero` | 437-481 | After reduction the row is zero at every pivot column — the defining property of reduced form. | — |
+| `Kernel.echStep` | 483-490 | One elimination step: reduce the incoming row against the pivots, then install it as a new pivot and back-substitute. | Definition |
+| `Kernel.echelon_eq_foldl` | 492 | `echelon` is the left fold of `echStep` — the form the invariant is proved against. | — |
+| `Kernel.pivInv_step` | 494-688 | ★ The heart of part I: one fold step preserves the full echelon invariant (unit / cross-zeros / `Nodup` columns / both directions of same-row-space). | — |
+| `Kernel.pivInv_foldl` | 690-708 | The invariant propagates through the whole fold by induction on the row list. | — |
+| `Kernel.pivInv_echelon` | 710-716 | ★ `echelon rows` satisfies `PivInv` — reduced row echelon form, certified. | — |
+| `Kernel.nbWord` | 720-725 | The null-space basis word emitted for a given free column. | Definition |
+| `Kernel.freeCols` | 727-729 | The non-pivot (free) columns — one emitted basis word each. | Definition |
+| `Kernel.nullBasis_eq` | 731-732 | `nullBasis` is the free columns mapped through `nbWord` — the form the soundness/completeness proofs read. | — |
+| `Kernel.length_nbWord` | 734-735 | An emitted basis word has the ambient length. | `@[simp]` |
+| `Kernel.getD_nbWord` | 737-744 | The bits of an emitted basis word: `1` at its own free column, the pivot row's entry at a pivot column, `0` elsewhere. | — |
+| `Kernel.mem_freeCols_iff` | 746-748 | Free-column membership: in range and not a pivot column. | — |
+| `Kernel.freeCols_nodup` | 750-751 | The free columns are distinct. | — |
+| `Kernel.find?_col_eq` | 753-764 | Pivot lookup by column returns a pivot at that column. | — |
+| `Kernel.find?_col_none` | 766-772 | Pivot lookup fails exactly at non-pivot columns. | — |
+| `Kernel.getD_nbWord_self` | 774-777 | A basis word is `1` at its own free column. | — |
+| `Kernel.getD_nbWord_pivot` | 779-783 | A basis word at a pivot column equals the pivot row's free-column entry. | — |
+| `Kernel.getD_nbWord_free` | 785-788 | A basis word is `0` at every other free column. | — |
+| `Kernel.dotB_pivot_nbWord` | 792-828 | Every pivot row is orthogonal to every emitted basis word — the per-row case of soundness. | — |
+| `Kernel.dotB_nullBasis` | 830-846 | ★★ SOUNDNESS: every emitted basis word is orthogonal to every input row. | — |
+| `Kernel.length_mem_nullBasis` | 848-853 | Emitted basis words have the ambient length `m`. | — |
+| `Kernel.spans_nullBasis` | 860-981 | ★★★ COMPLETENESS: every word orthogonal to all input rows is an XOR-combination of the emitted basis. With `dotB_nullBasis` this is `span (kernelBasis) = L`. | — |
+
+## ChainDescent/KernelRef.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.allWords` | 40-43 | All Bool words of length `m` — a proof-side enumeration (`2^m`), never executed by the canonizer. | Definition |
+| `Kernel.mem_allWords_iff` | 45-60 | The proof-side enumeration `allWords m` is exactly the words of length `m`. | — |
+| `Kernel.sysRows` | 62-65 | The global constraint system the kernel basis eliminates (every vertex's local rows). | Definition |
+| `Kernel.kernelBasis_eq` | 67-68 | `kernelBasis` is `nullBasis` of the global system rows (definitional). | — |
+| `Kernel.length_embedCols` | 70-71 | A re-embedded word has the ambient length. | `@[simp]` |
+| `Kernel.mem_sysRows_length` | 73-84 | System rows have rail-list length. | — |
+| `Kernel.inL` | 88-91 | Decidable membership in the gauge space `L`: null against every system row. | Definition |
+| `Kernel.kernelWords` | 93-95 | Every word of `L` — the canonical SET the reference supply flips. | Definition |
+| `Kernel.kernelRefGens` | 97-103 | The set-level reference generators: flips of every `L`-word, under the same all-or-nothing gate. | Definition |
+| `Kernel.kernelRefSupply` | 105-107 | **The reference supply** — proof-side only (exponential enumeration, never billed because it never enters the record object); it exists to carry equivariance for the executable kernel supply. | Definition |
+| `Kernel.gens_kernelSupply` | 109-110 | The kernel supply's generators are `kernelGens` (definitional). | — |
+| `Kernel.gens_kernelRefSupply` | 112-113 | The reference supply's generators are `kernelRefGens` (definitional). | — |
+| `Kernel.gate_true_iff` | 147-178 | The all-or-nothing gate over a word list is exactly "every word emits and verifies". | — |
+| `Kernel.KernelGate` | 180-183 | The kernel gate, in `Prop` form: every basis word emits and verifies. | Definition |
+| `Kernel.RefGate` | 185-188 | The reference gate: every `L`-word emits and verifies. Equivalent to `KernelGate`, and canonical where it is not. | Definition |
+| `Kernel.kernelGens_pos` | 190-194 | With the gate passing, `kernelGens` is the whole emitted basis. | — |
+| `Kernel.kernelGens_neg` | 196-199 | With the gate failing, `kernelGens` is empty — all or nothing. | — |
+| `Kernel.refGens_pos` | 201-205 | With the gate passing, the reference emits every `L`-word's flip. | — |
+| `Kernel.refGens_neg` | 207-210 | With the gate failing, the reference emits nothing. | — |
+| `Kernel.flipFunK_zeroW` | 214-248 | The zero word's flip is the identity table. | — |
+| `Kernel.flip_emits_of_spans` | 250-277 | ★★ Span induction: if every basis flip emits and verifies then so does every spanned word's flip, and each such flip `Reaches` the kernel-generated group (the P3b product license). | — |
+| `Kernel.basis_mem_kernelWords` | 279-288 | Basis words lie in `L` — `nullBasis` soundness read into the reference's word list. | — |
+| `Kernel.spans_of_mem_kernelWords` | 290-303 | Every `L`-word is spanned by the basis — `nullBasis` completeness read into the reference's word list. | — |
+| `Kernel.basis_emits_of_kernelGate` | 305-316 | The kernel gate unpacked: every basis word emits and verifies. | — |
+| `Kernel.refGate_of_kernelGate` | 318-325 | ★ The canonicity content: "the whole basis verifies" ⟹ "every word of `L` verifies" — so the gate is a canonical predicate, not a pivot-order artefact. | — |
+| `Kernel.kernelGate_of_refGate` | 327-330 | The converse gate implication (basis ⊆ `L`). | — |
+| `Kernel.sameOrbits_kernelRef` | 334-366 | ★★★ The set-level reference and the executable kernel supply prove the SAME ORBITS: gates pass ⟹ mutual `Reaches`; gates fail ⟹ both verified lists empty. This is what ① rides on, in place of an (impossible) pointwise equivariance of the Gaussian basis. | — |
+| `Kernel.verified_appendSupply_mem` | 370-384 | Membership in a concatenated supply's verified list. | — |
+| `Kernel.sameOrbits_appendSupply` | 386-409 | ★★ Orbit-equality is a CONGRUENCE for `appendSupply` — a `SameOrbits`-licensed swap stays licensed inside a composite record object. | — |
+
+## ChainDescent/KernelTransport.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.IsoTo` | 47-51 | `σ` carries `(adj, χ)` to `(adj', χ')` — the isomorphism the whole transport stack is stated against (the `IsColAut` lemmas are its `adj' = adj` case). | Structure |
+| `Kernel.isoTo_relabel` | 53-57 | `σ` is an isomorphism from `(adj, χ)` to its relabelling — the instance the equivariance obligation is stated at. | — |
+| `Kernel.IsoTo.symm` | 59-70 | The inverse isomorphism. | — |
+| `Kernel.isAdj_iso` | 72-76 | Adjacency transports along an isomorphism. | — |
+| `Kernel.twinP_iso` | 78-95 | The twin predicate transports along an isomorphism. | — |
+| `Kernel.twin_iso` | 97-101 | The twin map transports along an isomorphism. | — |
+| `Kernel.sPair` | 103-104 | The pair `{a, b}` listed at its lower index — the rail list's internal endpoint-order convention. | Definition |
+| `Kernel.sPair_cases` | 106-109 | `sPair` is one of the two orderings of its arguments. | — |
+| `Kernel.sPair_lt` | 111-116 | `sPair` puts the lower index first. | — |
+| `Kernel.sPair_comm` | 118-123 | `sPair` is symmetric in distinct arguments. | — |
+| `Kernel.sPair_self` | 125-126 | `sPair` fixes an already-ordered pair. | — |
+| `Kernel.railMap` | 128-129 | The rail correspondence map: transport the endpoints, then re-normalize the endpoint order. | Definition |
+| `Kernel.mem_rails_sPair` | 131-137 | Mutual-unique twins give a rail, at whichever endpoint order the rail list uses. | — |
+| `Kernel.mem_rails_conj` | 139-191 | ★ RAILS TRANSPORT, MEMBERWISE: the rail list ORDER is an internal labelling; what is canonical is the rail SET, and `σ` carries it onto the relabelled graph's rail set (up to endpoint order — hence `railMap`). | — |
+| `Kernel.railMap_injOn` | 193-211 | `railMap σ` is injective on rails. | — |
+| `Kernel.rails_perm_conj` | 213-230 | ★ The rail lists are `List.Perm` along `railMap σ` — not an equality (the order is a labelling), and a `Perm` is exactly what every count argument downstream needs. | — |
+| `Kernel.rails_length_conj` | 232-236 | The two rail lists have equal length. | — |
+| `Kernel.onRail_conj` | 238-269 | Being on a rail transports. | — |
+| `Kernel.touches_swap` | 271-275 | `touches` is endpoint-order invariant. | — |
+| `Kernel.touches_conj` | 277-287 | `touches` transports, through the `sPair` normalization. | — |
+| `Kernel.lookupBit` | 297-299 | The bit a word assigns to the rail with a given endpoint (`false` off the rails). | Definition |
+| `Kernel.transportWordR` | 301-304 | Transport a word between rail lists along `σ`, by endpoint lookup — `σ` permutes rail POSITIONS arbitrarily, so bits are re-read, not re-indexed. | Definition |
+| `Kernel.findSome?_bit_lookup` | 306-329 | The scan-value lemma for the bit lookup (the `railImg` analogue is `findSome?_rail_lookup`). | — |
+| `Kernel.zip_getElem_mem` | 331-334 | The `i`-th labelled bit is in the zip. | — |
+| `Kernel.exists_zip_bit` | 336-341 | Every rail carries a bit when the word has rail-list length. | — |
+| `Kernel.lookupBit_eq` | 343-349 | The endpoint lookup returns the rail's paired bit. | — |
+| `Kernel.lookupBit_off` | 351-364 | The endpoint lookup is `false` off the rails. | — |
+| `Kernel.map_lookupBit_self` | 366-373 | Reading every rail's bit back reproduces the word. | — |
+| `Kernel.transport_perm` | 375-398 | Transport permutes the bits — it is a reindexing along the rail bijection. | — |
+| `Kernel.mem_zip_transport` | 400-440 | ★★ THE CENTRAL LEMMA: the labelled word `rails.zip w` transports as a SET of labelled bits. Every `any`/`all` in the guard and satisfier conditions is a statement at exactly this level, so all of them transport. | — |
+| `Kernel.transportWordR_length` | 442-444 | A transported word has target-rail-list length. | — |
+| `Kernel.lookupBit_and` | 446-462 | The lookup is multiplicative in the word — the step that lets `dotB` transport. | — |
+| `Kernel.dotB_transport` | 464-483 | ★ `dotB` is transport-invariant: both arguments are re-read along the same rail bijection, so the parity of the coincidence count is unchanged. | — |
+| `Kernel.railImg_endpoint` | 491-504 | `railImg` at each endpoint of a listed rail. | — |
+| `Kernel.railImg_conj` | 506-533 | The rail action transports (including its `none` case, off the rails). | — |
+| `Kernel.condFun_swap` | 535-542 | `condFun` is endpoint-order invariant (it constrains both endpoints symmetrically). | — |
+| `Kernel.condFun_conj` | 544-559 | The per-rail flipped-adjacency condition transports. | — |
+| `Kernel.flipGuard_conj` | 561-579 | The flip guard transports (memberwise over the labelled word). | — |
+| `Kernel.satP_conj` | 581-601 | The satisfier predicate transports (memberwise over the labelled word). | — |
+| `Kernel.flipFunK_conj` | 603-621 | ★ EMISSION TRANSPORTS: the candidate table on the relabelled graph, at the transported word, is the `σ`-conjugate of the table here. | — |
+| `Kernel.getD_gen` | 630-632 | `getD` at an in-range index is `getElem` (general element type). | — |
+| `Kernel.getD_range_map` | 634-637 | Indexing a range-map at an in-range index applies the function. | — |
+| `Kernel.getD_embedCols` | 639-643 | The bits of an embedded word, by column lookup. | — |
+| `Kernel.findIdx?_nodup_self` | 645-651 | In a `Nodup` list, searching for the `k`-th element finds index `k`. | — |
+| `Kernel.getD_restrictCols` | 653-657 | The `k`-th bit of a restricted word is the ambient bit at the `k`-th column. | — |
+| `Kernel.embedCols_support` | 659-668 | An embedded word is supported inside its column list. | — |
+| `Kernel.embed_restrict` | 670-690 | Restricting then re-embedding is the identity on words supported in the column list. | — |
+| `Kernel.map_getD_range_self` | 692-697 | A list is the range-map of its own indexing. | — |
+| `Kernel.countP_range_eq_countP` | 699-713 | Counting over the full range equals counting over a `Nodup` sublist that contains the whole support. | — |
+| `Kernel.dotB_embed` | 715-746 | ★ THE EMBED/RESTRICT ADJUNCTION: `dotB (embedCols m cols y) u = dotB y (restrictCols cols u)` — the counting lemma that lets the per-vertex local system and the global one talk to each other. | — |
+| `Kernel.mem_wiresOf_iff` | 756-767 | Wire-support membership: an in-range rail index the vertex touches. | — |
+| `Kernel.wiresOf_nodup` | 769-770 | A vertex's wire indices are distinct. | — |
+| `Kernel.wiresOf_lt` | 772-773 | Wire indices are in range. | — |
+| `Kernel.length_mem_pats` | 775-781 | Realizable patterns have rail-list length. | — |
+| `Kernel.mem_localRows` | 783-794 | A local constraint row is an embedded null-basis word at a non-rail vertex. | — |
+| `Kernel.mem_localRows_mpr` | 796-803 | Embedded null-basis words at a non-rail vertex are local constraint rows. | — |
+| `Kernel.mem_sysRows_iff` | 805-811 | The global system is the union of the per-vertex local systems. | — |
+| `Kernel.SuppAt` | 813-815 | The word is supported in a vertex's wire set (only rails it touches carry a bit). | Definition |
+| `Kernel.suppAt_iff_index` | 817-834 | Wire-support, membership form ⟺ index form. | — |
+| `Kernel.Lc` | 836-840 | **`L`, basis-free**: `w` is killed by every wire-supported functional that kills the local patterns. Unlike `inL` this names no basis, so it transports memberwise — the form that makes the reference supply equivariant. | Definition |
+| `Kernel.inL_iff_Lc` | 842-902 | ★ THE BRIDGE: the executable, pivot-DEPENDENT `inL` agrees with the basis-free `Lc` (killed by every wire-supported functional that kills the local patterns). It rides on part I being both sound and complete, over the embed/restrict adjunction — and it is what makes `L` transportable at all. | — |
+| `Kernel.shapeP` | 911-915 | The per-rail shape condition inside `patOf`. | Definition |
+| `Kernel.patBit` | 917-919 | The pattern bit `patOf` emits per rail. | Definition |
+| `Kernel.patOf_eq` | 921-925 | `patOf` factored into its shape condition and its emitted bits. | — |
+| `Kernel.shapeP_swap` | 927-931 | The per-rail shape condition is endpoint-order invariant. | — |
+| `Kernel.patBit_swap_of_shape` | 933-938 | ★ The emitted pattern bit reads the rail's FIRST endpoint, so it is endpoint-order invariant only UNDER `patOf`'s own shape condition (single-sided touch on both sides, matching touch support) — the fact `patOf_conj` turns on. | — |
+| `Kernel.shapeP_base` | 940-945 | The shape condition transports at the un-normalized pair. | — |
+| `Kernel.patBit_base` | 947-952 | The pattern bit transports at the un-normalized pair. | — |
+| `Kernel.shapeP_conj` | 954-960 | The shape condition transports, through the `sPair` normalization. | — |
+| `Kernel.patBit_conj` | 962-971 | The pattern bit transports, through the `sPair` normalization (using the shape condition). | — |
+| `Kernel.patOf_conj` | 973-1019 | ★ Local patterns transport: a pattern's image is exactly `transportWordR` of it. | — |
+| `Kernel.mem_pats_conj` | 1021-1028 | The realizable pattern SET transports memberwise. | — |
+| `Kernel.transportWordR_roundtrip` | 1030-1055 | Transport is invertible: `σ.symm` undoes it. | — |
+| `Kernel.Lc_transport` | 1057-1090 | ★ The basis-free gauge space transports — the statement `inL` could not make, because `localRows` is pivot-dependent. | — |
+| `Kernel.inL_conj` | 1098-1110 | `L`-membership transports (via the bridge and `Lc_transport`). | — |
+| `Kernel.mem_kernelWords_conj` | 1112-1136 | The reference's word list transports: `kernelWords` on the relabelled graph is the transport of `kernelWords` here. | — |
+| `Kernel.length_mem_kernelWords` | 1138-1140 | `L`-words have rail-list length. | — |
+| `Kernel.permOf_flipFunK_conj` | 1142-1155 | Emission plus gate, conjugated — `Deck2.permOf_conj` moves the gate INCLUDING its failure mode. | — |
+| `Kernel.refGate_conj` | 1157-1178 | The all-or-nothing gate is labelling-independent. | — |
+| `Kernel.gensEquivariant_kernelRefSupply` | 1180-1206 | ★★★ The set-level reference supply IS equivariant: `L` transports (§4), emission transports (§3), and the gate is a statement about `L`'s flips — so the generator SET on the relabelled graph is exactly the set of `σ`-conjugates. | — |
+| `Kernel.supplyEquivariant_kernelRefSupply` | 1208-1210 | The verified-list form of the reference's equivariance. | — |
+| `Kernel.kernelSupply_guarded_canonizer` | 1220-1227 | ★★★ ① for the guarded (blind) mixed object at the kernel supply — via `SameOrbits`, with ZERO equivariance obligation on the executable object. | — |
+| `Kernel.kernelSupply_selNode_canonizer` | 1229-1236 | ★★★ ① for the FUSED (resolver-aware) object at the kernel supply. | — |
+| `Kernel.recordRefSupply` | 1238-1242 | The kernel-extended record's equivariant REFERENCE composite (proof-side only). | `abbrev` |
+| `Kernel.recordSupply` | 1244-1248 | The kernel-extended record consume-side supply: `fold ++ deck ++ deck2 ++ kernel`. | `abbrev` |
+| `Kernel.supplyEquivariant_recordRefSupply` | 1250-1255 | The reference composite is equivariant (each component is). | — |
+| `Kernel.sameOrbits_recordSupply` | 1257-1259 | The reference composite and the record prove the same orbits — `sameOrbits_appendSupply` applied through the three concatenations. | — |
+| `Kernel.holKey_foldDeck2Kernel_selNode_canonizer` | 1261-1271 | ★★★ THE C3a CANONIZER OF RECORD: force = the holonomy key, consume = `foldSupply ++ deckSupply ++ deck2Supply ++ kernelSupply`. The F₂ kernel supply is inside the record object, with ① discharged through the `SameOrbits` reduction rather than by a pointwise equivariance the Gaussian basis cannot have. | — |
+| `Kernel.holKey_foldDeck2KernelFast_selNode_canonizer` | 1273-1283 | The all-fast form of the extended record — the form the measurements run, and the object `Publication.canonForm?` pins. | — |
+| `Kernel.handledS_recordSupply` | 1285-1290 | ③ transfers too: the residue predicate is read off the same narrowing, so a `HandledS` certificate for the reference composite is one for the record. | — |
