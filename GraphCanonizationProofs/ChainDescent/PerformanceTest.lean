@@ -430,4 +430,32 @@ def cont1 (mf : Vector (Option (Fin 42)) 42) (v₁ v₂ : Fin 42) : Vector (Opti
 #guard (Deck2.permOf (fun x =>
   ((cont1 (cont1 mfG (mk42 2) (mk42 3)) (mk42 8) (mk42 9)).get x).getD x)).isNone
 
+/-! ## 14. `C3a` — the KERNEL supply RECOVERS AND SOLVES the mp7 gauge (tranche 1, 2026-07-19)
+
+The constructor §13's verdict demanded, measured. `Kernel.kernelSupply` (see `KernelSupply.lean`):
+rails = **exactly the 7 foot pairs** (unique-twin detection from raw structure); constraint extraction
++ F₂ elimination recover **the [7,3,4] simplex code** (basis dim 3, weights [4,4,4]); the
+all-or-nothing gate passes (3 verified generators); the root gadget cell narrows **28 → 7** — the
+ENTIRE gauge consumed in one supply call, no propagation, no depth. The standing 7 = the Z₇
+translations: deck stalls on them precisely because the gauge commutes (§13) — that composition is
+the C3b follow-on (deck-modulo-the-verified-kernel-group), not a kernel-supply defect. At the pinned
+node the recovered basis RESTRICTS to dim 2 = exactly the simplex words avoiding the pinned segment
+(the theory's prediction, measured), and the 6-cell target narrows 6 → 3. Harmless elsewhere:
+0 generators on t3 / ut / wcyc9. Wiring gate = `Regression` §15. -/
+
+#guard (Kernel.rails Regression.mp7 Regression.mp7Root.col).map (fun p => (p.1.val, p.2.val))
+    = [(0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11), (12, 13)]
+#guard (Kernel.kernelBasis Regression.mp7 Regression.mp7Root.col
+    (Kernel.rails Regression.mp7 Regression.mp7Root.col)).map (fun w => w.countP id) = [4, 4, 4]
+#guard (narrow (consume Kernel.kernelSupply) Regression.mp7 Regression.mp7Root.col).length = 7
+
+def mpPin : Refine.ColData 42 :=
+  Refine.warmRefineVec Regression.mp7 (indivOne Regression.mp7Root.col (mk42 0))
+#guard (Kernel.rails Regression.mp7 mpPin.col).length = 6
+#guard (Kernel.kernelGens Regression.mp7 mpPin.col).length = 2
+#guard (branches mpPin.col).map Fin.val = [14, 17, 30, 31, 38, 40]
+#guard (narrow (consume Kernel.kernelSupply) Regression.mp7 mpPin.col).length = 3
+#guard (Kernel.kernelGens Regression.ut Regression.utRoot.col).length = 0
+#guard (Kernel.kernelGens Regression.wcyc9 Regression.wcyc9Root.col).length = 0
+
 end ChainDescent.Perf

@@ -2956,6 +2956,19 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Perf.wrB` | 322-326 | The WREATH witness edge predicate: `s` copies of the C₄+pendant core on a copy cycle, matched ONLY on the mirror-FIXED fibers {0,2,4} — each copy's mirror is an INDEPENDENT automorphism (`Aut ⊇ Z₂^s ⋊ D_s`). | Definition |
 | `Perf.wr3` | 328 | `wrB` at s = 3 (n = 15) — the C2 wreath witness. Measured: `deck2Supply` FIRES on it (the identity-default finding, §12), falsifying the earlier claim that wreath gauges stall. | Definition |
 | `Perf.wr3Root` | 329-339 | Root colouring of `wr3` (materialised through `ColData`, trap #1). | Definition |
+| `Perf.onLine` | 367 | — | Definition |
+| `Perf.inS` | 369-374 | — | Definition |
+| `Perf.mpfg` | 376-379 | — | Definition |
+| `Perf.mpB` | 381-384 | — | Definition |
+| `Perf.mp7` | 386 | — | Definition |
+| `Perf.mpRoot` | 387 | — | Definition |
+| `Perf.mk42` | 388-391 | — | Definition |
+| `Perf.wSupp` | 393-395 | — | Definition |
+| `Perf.gaugeFun` | 397-411 | — | Definition |
+| `Perf.mpN2` | 414-418 | — | Definition |
+| `Perf.mfG` | 420-422 | — | Definition |
+| `Perf.cont1` | 424-431 | — | Definition |
+| `Perf.mpPin` | 452-459 | — | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3174,42 +3187,47 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 46-47 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 49-51 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 53-60 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 62-65 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 69-70 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 79-80 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 103-104 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 113-114 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 142-145 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 160 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 162-164 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 179-183 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 199-202 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 204 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 206-208 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 210-212 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 213 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
-| `Regression.gSel` | 248-249 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
-| `Regression.gSelDeep` | 251-252 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
-| `Regression.vcoreB` | 284-288 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
-| `Regression.vfold2` | 290-293 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
-| `Regression.vfold2Root` | 295 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wEdge` | 325-330 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
-| `Regression.wcyc9` | 332 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
-| `Regression.wcyc9Root` | 333-335 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wcyc9Swapped` | 346 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
-| `Regression.wcyc9SwappedRoot` | 347-348 | Its materialized root (trap #1). | Definition |
-| `Regression.vfoldT` | 373-380 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
-| `Regression.ut` | 382-386 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
-| `Regression.utRoot` | 388 | Materialized root colouring (trap #1). | Definition |
-| `Regression.C7` | 419 | — | Definition |
-| `Regression.gTree` | 421-423 | — | Definition |
-| `Regression.c7Root` | 434 | — | Definition |
-| `Regression.c7Seed` | 435-442 | — | Definition |
-| `Regression.t3` | 457 | The one-pair-twisted triple cover alone (n = 15; `ut`'s T block) — the F2c witness: its commuting mirror gauge stalls fold AND deck. | Definition |
-| `Regression.t3Root` | 458-460 | Root colouring of `t3` (ColData-materialised, trap #1). | Definition |
+| `Regression.C5` | 47-48 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 50-52 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 54-61 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 63-66 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 70-71 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 80-81 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 104-105 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 114-115 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 143-146 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 161 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 163-165 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 180-184 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 200-203 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 205 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 207-209 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 211-213 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 214 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 249-250 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 252-253 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.vcoreB` | 285-289 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
+| `Regression.vfold2` | 291-294 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
+| `Regression.vfold2Root` | 296 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wEdge` | 326-331 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
+| `Regression.wcyc9` | 333 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
+| `Regression.wcyc9Root` | 334-336 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wcyc9Swapped` | 347 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Regression.wcyc9SwappedRoot` | 348-349 | Its materialized root (trap #1). | Definition |
+| `Regression.vfoldT` | 374-381 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
+| `Regression.ut` | 383-387 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
+| `Regression.utRoot` | 389 | Materialized root colouring (trap #1). | Definition |
+| `Regression.C7` | 420 | — | Definition |
+| `Regression.gTree` | 422-424 | — | Definition |
+| `Regression.c7Root` | 435 | — | Definition |
+| `Regression.c7Seed` | 436-443 | — | Definition |
+| `Regression.t3` | 458 | The one-pair-twisted triple cover alone (n = 15; `ut`'s T block) — the F2c witness: its commuting mirror gauge stalls fold AND deck. | Definition |
+| `Regression.t3Root` | 459-461 | Root colouring of `t3` (ColData-materialised, trap #1). | Definition |
+| `Regression.mpOnLine` | 484 | Fano line membership `{i, i+1, i+3} mod 7` for the mp7 witness. | Definition |
+| `Regression.mpInS` | 485-490 | Even-subset membership for the mp7 CFI gadgets. | Definition |
+| `Regression.mpFG` | 491-494 | Foot–gadget adjacency of the Fano multipede. | Definition |
+| `Regression.mp7` | 495-498 | The FANO MULTIPEDE (n = 42): the C3 witness — symmetric pin-blind CFI cover, gauge = the [7,3,4] simplex code (arity-3 checks, girth 6, min weight 4); fold/deck/deck2 + manual deck3 all measured dead (`PerformanceTest` §13); the kernel supply consumes its whole gauge (§14, `Regression` §15). | Definition |
+| `Regression.mp7Root` | 499-502 | mp7's root colouring (ColData — trap #1). | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3884,3 +3902,28 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deck2.deck2Supply_selNode_canonizer` | 471-477 | ★★★ The fused (resolver-aware) canonizer over the second-seed supply. | — |
 | `Deck2.holKey_foldDeck2_selNode_canonizer` | 479-490 | ★★★ THE F2c CANONIZER OF RECORD for the fold family: force = holonomy key, consume = `foldSupply ++ deckSupply ++ deck2Supply` — the object the `U3 ⊔ T3` end-to-end acceptance runs. | — |
 | `Deck2.holKey_foldDeck2Fast_selNode_canonizer` | 492-501 | The all-fast form of the F2c record (`foldSupplyFast` component) — identical by `foldSupplyFast_eq`; the form the measurements run. | — |
+## ChainDescent/KernelSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.isAdj` | 70-72 | Symmetric adjacency presence test (weights compared elsewhere; rails need presence only). | Definition |
+| `Kernel.twinP` | 74-77 | Twin candidacy: same colour, distinct, non-adjacent, DISJOINT neighbourhoods — the rail-pair discriminator (correctly rejects the fold family's mirror pairs, which share neighbours). | Definition |
+| `Kernel.twin` | 79-81 | The unique twin via `uniqueFilter` — ambiguity means no rail, never a choice (trap #7). | Definition |
+| `Kernel.rails` | 83-89 | The rail pairs (gauge wires): mutually-unique twins, listed once at the lower index — an INTERNAL labelling the ① story never depends on (see the all-or-nothing gate). | Definition |
+| `Kernel.onRail` | 91-93 | Is a vertex a rail endpoint? | Definition |
+| `Kernel.touches` | 97-99 | Does a vertex see either endpoint of a rail? | Definition |
+| `Kernel.patOf` | 101-112 | The flip pattern a shape-matched same-cell partner realizes: bit = touched and crossed. `none` when touch shapes differ. | Definition |
+| `Kernel.pats` | 114-117 | All realizable local flip patterns at a vertex (the vertex itself contributes zero — a CFI gadget's patterns are exactly its even subsets). | Definition |
+| `Kernel.xorRow` | 121 | F₂ row addition. | Definition |
+| `Kernel.reduceRow` | 123-124 | Reduce a row by the current pivot list. | Definition |
+| `Kernel.echelon` | 126-133 | Reduced row echelon form as a pivot list — UNTRUSTED (correctness = tranche 2's `span(kernelBasis) = L`). | Definition |
+| `Kernel.nullBasis` | 135-144 | A basis of the null space of the row space: one word per free column, pivots back-substituted. Untrusted; used twice (local perps, the global kernel). | Definition |
+| `Kernel.restrictCols` | 146-147 | Restrict a row to a column subset (patterns → wire support). | Definition |
+| `Kernel.embedCols` | 149-153 | Re-embed a restricted row into the full width with zeros elsewhere. | Definition |
+| `Kernel.wiresOf` | 157-162 | The wire support of a vertex: rail indices it touches. | Definition |
+| `Kernel.localRows` | 164-170 | A vertex's constraint rows = the perp of the span of its patterns, computed inside its wire support and re-embedded — the extracted parity checks (mp7: exactly the Fano line checks). | Definition |
+| `Kernel.kernelBasis` | 172-175 | A Gaussian basis of the gauge space L = the null space of every vertex's constraints (mp7: the [7,3,4] simplex code, dim 3, weights 4). | Definition |
+| `Kernel.railImg` | 179-184 | The rail image of a vertex under a flip word (`none` off the rails). | Definition |
+| `Kernel.flipFunK` | 186-204 | The candidate table for a word: rails flip; a non-rail vertex touching a flipped rail moves to its unique same-colour partner matching the flipped adjacency (full weights, both directions); untouched vertices stay. Junk dies at the gate/verify. | Definition |
+| `Kernel.kernelGens` | 208-214 | ★ The ALL-OR-NOTHING gate: emit the whole basis (as gated, verified flips) or nothing. "Whole basis verifies" ⟺ "every word of L verifies" (products of automorphisms) — a CANONICAL predicate, so the emitted GROUP is a canonical function of (adj, χ) despite the pivot-order-dependent basis: the ①c design lock; the ① theorems ride the SameOrbits reduction (tranche 2). | Definition |
+| `Kernel.kernelSupply` | 216-220 | ★ THE KERNEL SUPPLY (C3a): recognition and solving untrusted, every generator re-verified; flat n⁵ bill. Measured (mp7): the root gadget cell 28 → 7 = the whole gauge in one supply call — what no propagation shape can reach at any seed count. | Definition |

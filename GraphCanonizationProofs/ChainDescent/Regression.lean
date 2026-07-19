@@ -1,5 +1,6 @@
 import ChainDescent.Residue
 import ChainDescent.Deck2
+import ChainDescent.KernelSupply
 import ChainDescent.MatchSupply
 import ChainDescent.DeepMatchSupply
 import ChainDescent.PrunedSupply
@@ -467,5 +468,37 @@ def t3Root : Refine.ColData 15 := Refine.warmRefineVec t3 (fun _ => 0)
 cell collapses to ONE branch. -/
 #guard (Consume.verified (Deck2.deck2Supply) t3 t3Root.col).length = 171
 #guard (narrow (consume (Deck2.deck2Supply)) t3 t3Root.col).length = 1
+
+/-! ## 15. `C3a` — the KERNEL supply wiring gate (the Fano multipede; full set = `PerformanceTest` §14)
+
+`mp7`: 7 foot-pair segments, checks = the Fano lines (girth 6 ⟹ no chaining), gauge = the [7,3,4]
+simplex code (min weight 4 ⟹ no identity-default) — the C3 witness on which fold/deck/deck2 and a
+manual deck3 are ALL measured dead (`PerformanceTest` §13). `Kernel.kernelSupply` recovers the system
+structurally and solves it: rails = the 7 foot pairs, basis = 3 weight-4 words, the all-or-nothing
+gate passes, and the root gadget cell narrows 28 → 7 (the WHOLE gauge — the standing 7 = the Z₇
+translations, deck's stalled territory = the C3b deck-mod-K follow-on). These two guards gate the
+extraction + elimination + emission + gate wiring end-to-end (~15 s); the narrow/pinned-node/
+harmlessness measurements live in `PerformanceTest` §14 (~40 s). **Do not delete** — the non-vacuity
+witness for the kernel supply. -/
+
+def mpOnLine (i j : Nat) : Bool := j == i || j == (i+1) % 7 || j == (i+3) % 7
+def mpInS (i s j : Nat) : Bool :=
+  let a := i; let b := (i+1) % 7; let c := (i+3) % 7
+  if s == 1 then j == a || j == b
+  else if s == 2 then j == a || j == c
+  else if s == 3 then j == b || j == c
+  else false
+def mpFG (f g : Nat) : Bool :=
+  let j := f / 2; let bb := f % 2
+  let i := (g - 14) / 4; let s := (g - 14) % 4
+  mpOnLine i j && (bb == (if mpInS i s j then 1 else 0))
+def mp7 : AdjMatrix 42 := ⟨fun i j =>
+  if (if i.val < 14 && 14 ≤ j.val && j.val < 42 then mpFG i.val j.val
+      else if j.val < 14 && 14 ≤ i.val && i.val < 42 then mpFG j.val i.val
+      else false) then 1 else 0⟩
+def mp7Root : Refine.ColData 42 := Refine.warmRefineVec mp7 (fun _ => 0)
+
+#guard (Kernel.kernelGens mp7 mp7Root.col).length = 3
+#guard (Kernel.kernelGens t3 t3Root.col).length = 0
 
 end ChainDescent.Regression

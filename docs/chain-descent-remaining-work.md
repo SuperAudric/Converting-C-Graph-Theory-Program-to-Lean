@@ -84,7 +84,30 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   the gadget layer never chains. Force cannot act (single-orbit cells). **TRUE mutual stall of the whole
   stack; the constructor gate is OPEN and the route is DECIDED** (deck_k is dead on this shape at any
   practical k, and growing-weight families kill fixed k in principle).
-  **(ii) THE CONSTRUCTOR — the KERNEL SUPPLY (next increment), design pinned:**
+  **✅ (ii-a) THE KERNEL SUPPLY, TRANCHE 1 LANDED 2026-07-19** (`ChainDescent/KernelSupply.lean`, in
+  `build.sh`, compiles clean; wiring gate `Regression` §15, full measured set `PerformanceTest` §14):
+  the executable pipeline exactly as designed below, **plus the design lock found during the build —
+  the ALL-OR-NOTHING GATE**: a pivot-order-dependent basis with *partial* verification would make the
+  emitted subgroup depend on the pivot choice (①c genuinely false); emitting all-or-nothing makes the
+  gate ⟺ "every word of `L` verifies" (products of automorphisms) — canonical — so the emitted GROUP
+  is a canonical function of `(adj, χ)`. **MEASURED on `mp7`**: rails = exactly the 7 foot pairs;
+  basis = dim 3, weights [4,4,4] — *the simplex code recovered from raw structure*; gate passes; root
+  gadget cell **28 → 7** (the whole gauge in one supply call); at the pinned node the basis restricts
+  to dim 2 = exactly the codewords avoiding the pinned segment; 0 generators on t3/ut/wcyc9.
+  **Still open, scoped:**
+  - **(ii-b) Tranche 2 — the ① proof stack**: rails/patterns/`flipFunK` transport lemmas; `L` as a
+    canonical SUBSPACE (the row span is pattern-determined though rows are not); the
+    elimination-correctness lemma `span(kernelBasis) = L` (Gaussian soundness + completeness — the
+    largest single proof item, self-contained); the set-level reference supply + its equivariance;
+    `SameOrbits`(kernel, reference) via the commuting-flips product argument; capstones through
+    `…_of_sameOrbits`. Until it lands, `kernelSupply` stays OUT of the record object.
+  - **(ii-c) = C3b, NEW MECHANISM (found at the witness): deck-MODULO-the-verified-subgroup.** The
+    kernel certifies the gauge but mp7's translations still stand: deck stalls on them *because* the
+    gauge commutes (measured §13) — with the kernel group K known, propagation should force
+    uniqueness only up to K (candidates unique modulo K-orbits), a choice licensed the P3b way. This
+    is the composition step that turns "gauge certified" into "mp7 answers end-to-end" — the C3
+    acceptance moves to C3b.
+  **The original design (as built):**
   · *Extraction* (structural, choice-free — trap #7 clean): rail pairs = same-cell non-adjacent pairs
     whose neighborhoods complement inside every shared gadget cluster (and conflict in none); clusters =
     same-cell gadget vertices with equal rail-pair support (the F3a symmetrized-component toolkit).
@@ -186,9 +209,13 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    (identity-default mechanism) ⟹ C2 closed with no new code; C3 re-derived precisely (see §1C).
 3b. ✅ **C3 witness** — DONE 2026-07-19: `mp7` (Fano multipede) built and measured, full stack + a
    manual deck3 DEAD (`PerformanceTest` §13, guarded); constructor route DECIDED = the kernel supply.
-3c. **C3 constructor — the KERNEL SUPPLY** (design pinned in §1C C3): structural rail/cluster
-   extraction → F₂ elimination → basis-flip emission → verify; ① via the `SameOrbits` reduction
-   (basis choice is group-invisible). Acceptance: `mp7` answers end-to-end.
+3c. ✅ **C3 constructor tranche 1** — DONE 2026-07-19 (`KernelSupply.lean` in build; mp7's whole gauge
+   consumed in one supply call, 28 → 7 at the root; the all-or-nothing gate = the ①c design lock).
+3d. **C3 tranche 2 — the ① proof stack** (§1C C3 ii-b): transport lemmas, `L` canonicity, Gaussian
+   correctness `span(kernelBasis) = L`, the reference supply, `SameOrbits`, capstones. Gates entry
+   of `kernelSupply` into the record object.
+3e. **C3b — deck-modulo-verified-subgroup** (§1C C3 ii-c): propagation with uniqueness mod the
+   kernel group. Acceptance (moved from 3c): `mp7` answers end-to-end.
 4. **T1 first family** — CFI odd-deg localisation through the weakest hook (de-risk on a C₆-style toy
    first). Output: the first real family in `HandledS` at the record = Publication's handled-half witness.
 5. **F1 / F3b** — gate review (the witnesses exist; confirm necessity), then the Smith/CRT key + C# wiring.
