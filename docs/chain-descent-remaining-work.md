@@ -95,12 +95,58 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   gadget cell **28 → 7** (the whole gauge in one supply call); at the pinned node the basis restricts
   to dim 2 = exactly the codewords avoiding the pinned segment; 0 generators on t3/ut/wcyc9.
   **Still open, scoped:**
-  - **(ii-b) Tranche 2 — the ① proof stack**: rails/patterns/`flipFunK` transport lemmas; `L` as a
-    canonical SUBSPACE (the row span is pattern-determined though rows are not); the
-    elimination-correctness lemma `span(kernelBasis) = L` (Gaussian soundness + completeness — the
-    largest single proof item, self-contained); the set-level reference supply + its equivariance;
-    `SameOrbits`(kernel, reference) via the commuting-flips product argument; capstones through
-    `…_of_sameOrbits`. Until it lands, `kernelSupply` stays OUT of the record object.
+  - **(ii-b) Tranche 2 — the ① proof stack — PARTS I–III LANDED 2026-07-19** (three modules in
+    `build.sh`, all axiom-clean `[propext, Classical.choice, Quot.sound]`; detail = module docs):
+    · **I `KernelGauss.lean`** — `span(kernelBasis) = L`: `dotB_nullBasis` (soundness) +
+      `spans_nullBasis` (completeness), via the parity-count engine (`dotOn_eq_countP`,
+      `countP_parity_single/_pair`) + the echelon invariant `PivInv` (unit / cross-zeros / `Nodup`
+      columns / both directions of same-row-space through the fold). Plus the `Spans` toolkit
+      (`xor_closed`, `trans_basis`, `combo`) the reduction consumes.
+    · **II `KernelFlip.lean`** — the flip-composition PRODUCT lemma **`flipFunK_xor`**
+      (`flip(w⊕w') = flip w ∘ flip w'` for verified flips — the theorem behind the all-or-nothing
+      gate): rails are vertex-disjoint (`rails_endpoint_eq`), `emitted_rail_action`,
+      ★`touched_moves` (a VERIFYING flip cannot fix a touched vertex — twin
+      neighbourhood-disjointness; this closes the identity-default / `uniqueFilter`-ambiguity hole
+      for compound words), ★`satP_conj_flip` (the satisfier bijection), `condFun_untouched` +
+      `flipGuard_congr`/`satP_congr_touch` (the guard case-analysis pieces).
+    · **III `KernelRef.lean`** — the set-level reference `kernelRefSupply` (flips of ALL of `L`,
+      same all-or-nothing gate; `allWords`-enumerated, proof-side only) with **gate equivalence**
+      (`refGate_of_kernelGate` via the span induction `flip_emits_of_spans` = completeness +
+      product lemma, each spanned flip also `Reaches` the kernel group = the P3b license; converse
+      via `basis_mem_kernelWords` = soundness) ⟹ **`sameOrbits_kernelRef`**, and
+      **`sameOrbits_appendSupply`** (orbit-equality is a congruence for `appendSupply` — the swap
+      is licensed inside the record composite).
+    **REMAINING — part IV (`KernelTransport.lean`, NOT built) + capstones. The worked plan:**
+    (a) σ-conj stack mirroring the Aut-specialized versions in `KernelFlip` §4: `twinP_conj` /
+        `twin_conj` (via `uniqueFilter_transport`), `onRail_conj`, `mem_rails_conj` (pairs
+        transport up to endpoint order — use `sPair a b := if a.val < b.val then (a,b) else (b,a)`;
+        every downstream predicate is endpoint-order-invariant, add `condFun_swap`), `touches_conj`.
+    (b) word transport: `lookupBit rl w x` (bit of the rail containing endpoint `x` — a `findSome?`
+        lookup like `findSome?_rail_lookup`) and `transportWord σ w := (rails adj' χ').map (fun q =>
+        lookupBit (rails adj χ) w (σ.symm q.1))`; zip-membership correspondence + round trips;
+        `flipFunK_conj` (railImg by the lookup lemma; guard/satP MEMBERSHIP-level via
+        `any/all_eq_true` — the two zips are NOT index-aligned, use the pair correspondence);
+        `Deck2.permOf_conj` then transports emission.
+    (c) the `inL` bridge (the only place part I re-enters): `localRows` is pivot-dependent and does
+        NOT transport pointwise — first prove the basis-free characterization
+        `inL w ⟺ ∀ v non-rail, ∀ Y length-rl supported-in-`wiresOf v` with Y ⊥ pats v, Y ⊥ w`
+        via the embed/restrict adjunction `dotB_embed : dotB (embedCols m cols y) u = dotB y
+        (restrictCols cols u)` (a counting lemma; `wiresOf` is `Nodup`, entries `< rl.length`) +
+        patterns supported in their wire set + `nullBasis` sound/complete on the restricted system;
+        the basis-free form transports memberwise (`patOf_conj` — a pattern's transport IS
+        `transportWord` of it; `dotB` is transportWord-invariant by the Perm-count argument:
+        `rails'` is a `List.Perm` of the `sPair∘σ` image, `List.perm_ext_iff_of_nodup`).
+    (d) `GensEquivariant kernelRefSupply` from (a)–(c) (membership-level — list order free), then
+        `supplyEquivariant_of_gensEquivariant` + `Deck.gensEquivariant_appendSupply`, and the
+        capstone `Select.selNode_canonizer_of_sameOrbits` with reference = `fold ++ deck ++ deck2 ++
+        kernelRef` and `sameOrbits_appendSupply ∘ sameOrbits_kernelRef` = ① for the kernel-extended
+        record; `handledS_of_sameOrbits` transfers ③. Then swap the record supply in
+        `Showcase`/`Publication` (statement shapes unchanged), add the extended-record Regression
+        guard, and regen `PublicTheoremIndex` (descriptions for the ~60 new part I–III declarations
+        are ALSO still pending).
+    Non-vacuity: `KernelGate` is instantiated by the existing `Regression` §15 mp7 guard
+    (`kernelGens.length = 3` forces the gate through); a cheap `kernelRefGens` guard on a small
+    witness is worth adding with part IV (probe the `allWords` 2^#rails cost first).
   - **(ii-c) = C3b, NEW MECHANISM (found at the witness): deck-MODULO-the-verified-subgroup.** The
     kernel certifies the gauge but mp7's translations still stand: deck stalls on them *because* the
     gauge commutes (measured §13) — with the kernel group K known, propagation should force
@@ -211,9 +257,11 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    manual deck3 DEAD (`PerformanceTest` §13, guarded); constructor route DECIDED = the kernel supply.
 3c. ✅ **C3 constructor tranche 1** — DONE 2026-07-19 (`KernelSupply.lean` in build; mp7's whole gauge
    consumed in one supply call, 28 → 7 at the root; the all-or-nothing gate = the ①c design lock).
-3d. **C3 tranche 2 — the ① proof stack** (§1C C3 ii-b): transport lemmas, `L` canonicity, Gaussian
-   correctness `span(kernelBasis) = L`, the reference supply, `SameOrbits`, capstones. Gates entry
-   of `kernelSupply` into the record object.
+3d. **C3 tranche 2 — the ① proof stack**: parts I–III LANDED 2026-07-19 (Gauss correctness
+   `KernelGauss`, flip composition `KernelFlip`, reference + `sameOrbits_kernelRef` +
+   `sameOrbits_appendSupply` `KernelRef` — all in build, axiom-clean; see §1C C3 ii-b). REMAINING:
+   part IV (σ-equivariance of the reference — `KernelTransport.lean`, worked plan in ii-b) +
+   capstones + record entry + theorem-index regen. Gates entry of `kernelSupply` into the record.
 3e. **C3b — deck-modulo-verified-subgroup** (§1C C3 ii-c): propagation with uniqueness mod the
    kernel group. Acceptance (moved from 3c): `mp7` answers end-to-end.
 4. **T1 first family** — CFI odd-deg localisation through the weakest hook (de-risk on a C₆-style toy

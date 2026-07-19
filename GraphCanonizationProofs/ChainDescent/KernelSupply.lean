@@ -41,7 +41,11 @@ but the `OrbitPrune.SameOrbits` reduction against the set-level reference "flips
 same gate" (equivariant because `L` and the gate are canonical; reachability = flips commute, so a
 kernel word is the symmetric difference = product of basis words — the P3b/`TreePrune` license shape).
 That proof stack is **tranche 2** (with the elimination-correctness lemma `span(kernelBasis) = L` it
-rides on); this file is tranche 1: the executable object and its measured firing.
+rides on); this file is tranche 1: the executable object and its measured firing. Tranche-2 parts
+I–III are LANDED (2026-07-19): `KernelGauss.lean` (`span(kernelBasis) = L`), `KernelFlip.lean`
+(the product lemma `flipFunK_xor` + `touched_moves`), `KernelRef.lean` (`sameOrbits_kernelRef` +
+`sameOrbits_appendSupply`). Part IV (σ-equivariance of the reference) + capstones remain —
+worked plan in `docs/chain-descent-remaining-work.md` §1C C3 (ii-b).
 
 ## Scope, honestly
 
