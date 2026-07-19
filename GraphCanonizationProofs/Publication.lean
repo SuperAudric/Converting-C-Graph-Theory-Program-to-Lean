@@ -41,9 +41,12 @@ today.
     (plan: docs/chain-descent-remaining-work.md §0–§2). Nothing below changes until legs close; totality
     tightens the file at the end, not before.
 Per-obligation state:
-  · ① — swap-ready and mechanical, EXCEPT the import cone: this file imports only `ChainDescent.Spine`, which does
-    NOT reach `Descend`/`Stall`/`Residue`/`PrunedSupply`. Fix the import at swap time (one line; the swap has never
-    been compile-tested).
+  · ① — ✅ SWAPPED (spike, 2026-07-19): `canonForm?` is the REAL fused record object (holonomy key +
+    `foldFast ++ deck ++ deck2`), and `canon_sound`/`canon_complete`/`flag_iso_invariant` are proven —
+    `#print axioms` = `[propext, Classical.choice, Quot.sound]`, no `sorryAx`, no citation axioms (① carries
+    nothing, as designed). Zero glue was needed: `Labelled n` ≡ the matrix type, `Iso` ≡ `CanonSpec.GraphIso`,
+    `canonFormFastS?_eq` is `rfl`. The record pin is PROVISIONAL (strengthening it = edit `canonForm?` +
+    `canonForm?_record`, nothing downstream). `cost`/the ③ atoms remain stubs; ②/③/non-vacuity remain `sorry`.
   · ② — now fillable PER FIXED DEPTH `d`: pin the canonizer-of-record (encode-free refiner + `lookaheadKey` +
     `prunedSupply d`) and `SupplyCost.descentCost_pruned_lookahead_le` supplies the explicit polynomial for
     `costConst`/`costDeg`. The status comment inside `canon_poly_or_flag` below is SUPERSEDED (see its banner).
@@ -70,6 +73,7 @@ Per-obligation state:
     and does NOT transfer to the record object.
 -/
 import ChainDescent.Spine
+import ChainDescent.Deck2
 
 namespace Showcase
 
@@ -97,7 +101,21 @@ with the real Lean definition (the descent model + cost accounting) is exactly t
     domain; the unhandled IR residue in the rigid domain). Must be an *independent* geometric predicate,
     NOT "the algorithm flagged" (that makes §3 a tautology). See the firewall + the non-vacuity obligation. -/
 
-opaque canonForm? (n : ℕ) (G : AdjMatrix n) : Option (Fin n → Fin n → Nat) := none
+/-- **★ THE SWAP (spike, 2026-07-19): `canonForm?` is REAL — the fused canonizer of record** (encode-free
+refiner; force = the holonomy key; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply`), i.e. exactly
+the object the end-to-end acceptance measurements run (`PerformanceTest` §11/§12). ⚠ The record pin is
+PROVISIONAL by design — strengthening the record later is this one definition plus `canonForm?_record`
+below; nothing downstream changes shape. (`cost` remains a stub: ② is not yet swapped.) -/
+def canonForm? (n : ℕ) (G : AdjMatrix n) : Option (Fin n → Fin n → Nat) :=
+  Select.canonFormFastS? (Hol.holKeyFast (n := n))
+    (Deck.appendSupply (Fold.foldSupplyFast (n := n))
+      (Deck.appendSupply (Deck.deckSupply (n := n)) (Deck2.deck2Supply (n := n)))) G
+
+/-- The record object satisfies the full canonical-form spec — `Deck2.holKey_foldDeck2Fast_selNode_canonizer`
+read through the definitional bridge `SelectNode.canonFormFastS?_eq`. -/
+theorem canonForm?_record (n : ℕ) : CanonSpec.IsCanonicalFormOpt (canonForm? n) :=
+  Deck2.holKey_foldDeck2Fast_selNode_canonizer
+
 opaque cost (n : ℕ) (G : AdjMatrix n) : ℕ := 0
 
 /-! ### `UnhandledResidue` — the firewall valve, given its structural shape.
@@ -229,13 +247,9 @@ input — so equal canonical forms ⟹ isomorphic inputs. -/
 theorem canon_sound (n : ℕ) (G : AdjMatrix n) (cG : Fin n → Fin n → Nat)
     (h : canonForm? n G = some cG) :
     ∃ π : Equiv.Perm (Fin n), cG = labelledAdj π G := by
-  -- ★ DISCHARGED (2026-07-13) against the REAL branching object: `ChainDescent.Descend.soundOpt_canonForm?`
-  -- (`ChainDescent/Descend.lean`, axiom-clean, in build.sh). `Descend.canonForm? refine R : AdjMatrix n →
-  -- Option (Labelled n)` is the computable, resolver-parameterized branching descent (mixed-composition
-  -- Stage 0b); `soundOpt_canonForm?` has EXACTLY this shape, and holds for ANY `refine` and ANY resolver.
-  -- Remaining = the opaque swap `canonForm? n G := Descend.canonForm? refine R G` (done once, with ②/③,
-  -- after `refine` is instantiated with the encode-free round). Then this body is `soundOpt_canonForm? … G cG h`.
-  sorry
+  -- ★ SWAPPED (spike 2026-07-19): the record's `SoundOpt` half, applied directly — `Labelled n` is
+  -- definitionally `Fin n → Fin n → Nat`, so no glue.
+  exact (canonForm?_record n).1 G cG h
 
 /-- **①b Completeness (UNCONDITIONAL).** Whenever it answers on both inputs, the canonical forms coincide
 iff the graphs are isomorphic — a complete isomorphism invariant. "Never wrong", for every input. -/
@@ -260,17 +274,17 @@ theorem canon_complete (n : ℕ) (G H : AdjMatrix n) (cG cH : Fin n → Fin n �
   -- provably VALUE-INVISIBLE (`Descend.canonForm?_eq_deferAll_of_covering`), which pins the object to the
   -- exhaustive branch-min (the retired `canonMin` anchor) and would force the rigid solver to KNOW THE ANSWER.
   --
-  -- Remaining = the opaque swap (below), done once together with ②/③.
-  sorry
+  -- ★ SWAPPED (spike 2026-07-19): `Iso` is definitionally `CanonSpec.GraphIso`, so ①b is the free payoff
+  -- applied verbatim.
+  exact CanonSpec.complete_of_isCanonicalFormOpt (canonForm?_record n) G H cG cH hG hH
 
 /-- **①c The flag is iso-invariant (UNCONDITIONAL).** Flagging is a property of the isomorphism class, not
 of the labelling — so "flagged" is a well-defined statement about a graph up to iso. -/
 theorem flag_iso_invariant (n : ℕ) (G H : AdjMatrix n) (h : Iso G H) :
     (canonForm? n G = none) ↔ (canonForm? n H = none) := by
-  -- ★ DISCHARGED (2026-07-13): `ChainDescent.Descend.canonForm?_flag_iso_invariant`; its hypotheses are now
-  -- BOTH discharged (see ①b above) — ① carries nothing. Free, because `IsoInvariantOpt` is a single equation on
-  -- `Option`s — "relabelling changes nothing", the answer AND whether it flagged. No separate flag obligation.
-  sorry
+  -- ★ SWAPPED (spike 2026-07-19): free from the record's `IsoInvariantOpt` half — a single equation on
+  -- `Option`s carries the answer AND the flag; no separate flag obligation.
+  exact CanonSpec.flag_iso_invariant_of_isoInvariantOpt (canonForm?_record n).2 h
 
 /-- **② Poly-or-flag (the budget guarantee — the ONLY cost claim).** The descent either runs within the
 explicit polynomial budget or it emits an honest flag. No residue predicate appears here. -/
@@ -340,6 +354,12 @@ CURRENT output includes `sorryAx` — the visible "remaining work" marker. -/
 
 #print axioms canonizer
 #print axioms unhandledResidue_nonvacuous
+
+/-! The ① trio after the spike swap — expected `[propext, Classical.choice, Quot.sound]`, NO `sorryAx`:
+the correctness half of the showcase is real, today, for the record object. -/
+#print axioms canon_sound
+#print axioms canon_complete
+#print axioms flag_iso_invariant
 
 
 end Showcase

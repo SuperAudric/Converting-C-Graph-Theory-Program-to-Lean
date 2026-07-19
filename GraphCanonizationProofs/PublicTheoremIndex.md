@@ -2698,23 +2698,25 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Showcase.Iso` | 80-83 | — | Definition |
-| `Showcase.UnhandledResidue` | 144-151 | — | Definition |
-| `Showcase.cameron_classification` | 172-177 | — | axiom |
-| `Showcase.skresanov_two_closure` | 178-181 | — | axiom |
-| `Showcase.liebeck_rank3` | 182-185 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 186-194 | — | axiom |
-| `Showcase.ftpg` | 195-201 | — | axiom |
-| `Showcase.buekenhout_shult` | 202-209 | — | axiom |
-| `Showcase.payne_thas` | 210-218 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 219 | — | axiom |
-| `Showcase.canon_sound` | 227-238 | — | — |
-| `Showcase.canon_complete` | 240-264 | — | — |
-| `Showcase.flag_iso_invariant` | 266-273 | — | — |
-| `Showcase.canon_poly_or_flag` | 275-297 | — | — |
-| `Showcase.residue_if_flag` | 299-308 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 310-316 | — | — |
-| `Showcase.canonizer` | 323-333 | — | — |
+| `Showcase.Iso` | 84-87 | — | Definition |
+| `Showcase.canonForm?` | 104-112 | **THE SWAP (spike 2026-07-19): the showcase canonizer is REAL** — the fused record object (encode-free refiner; force = `holKeyFast`; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply`), exactly what the end-to-end acceptance measurements run. Record pin provisional: strengthening it = this def + `canonForm?_record`, nothing downstream. | Definition |
+| `Showcase.canonForm?_record` | 114-119 | The record object satisfies the full canonical-form spec — `Deck2.holKey_foldDeck2Fast_selNode_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
+| `Showcase.UnhandledResidue` | 162-169 | — | Definition |
+| `Showcase.cameron_classification` | 190-195 | — | axiom |
+| `Showcase.skresanov_two_closure` | 196-199 | — | axiom |
+| `Showcase.liebeck_rank3` | 200-203 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 204-212 | — | axiom |
+| `Showcase.ftpg` | 213-219 | — | axiom |
+| `Showcase.buekenhout_shult` | 220-227 | — | axiom |
+| `Showcase.payne_thas` | 228-236 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 237 | — | axiom |
+| `Showcase.canon_sound` | 245-252 | — | — |
+| `Showcase.canon_complete` | 254-279 | — | — |
+| `Showcase.flag_iso_invariant` | 281-287 | — | — |
+| `Showcase.canon_poly_or_flag` | 289-311 | — | — |
+| `Showcase.residue_if_flag` | 313-322 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 324-330 | — | — |
+| `Showcase.canonizer` | 337-347 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -2951,6 +2953,9 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Perf.vring18` | 239 | `Z₃` voltage-ring cover (the true tower-gadget shape), deck `Z₃` exactly, `Aut` involution-free. | Definition |
 | `Perf.vring18Root` | 240-245 | Materialized root (trap #1). | Definition |
 | `Perf.gDeckCycle` | 249-254 | End-to-end fused descent over `foldSupply ++ deckSupply` on the involution-free cycle — answers. | Definition |
+| `Perf.wrB` | 322-326 | The WREATH witness edge predicate: `s` copies of the C₄+pendant core on a copy cycle, matched ONLY on the mirror-FIXED fibers {0,2,4} — each copy's mirror is an INDEPENDENT automorphism (`Aut ⊇ Z₂^s ⋊ D_s`). | Definition |
+| `Perf.wr3` | 328 | `wrB` at s = 3 (n = 15) — the C2 wreath witness. Measured: `deck2Supply` FIRES on it (the identity-default finding, §12), falsifying the earlier claim that wreath gauges stall. | Definition |
+| `Perf.wr3Root` | 329-339 | Root colouring of `wr3` (materialised through `ColData`, trap #1). | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3844,38 +3849,38 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Deck2.contFrom` | 60-63 | Continue F2b forcing rounds from an arbitrary partial state (`propagate` = `contFrom` of the seed map); the second-seed continuation runs from the stalled state. | Definition |
-| `Deck2.setSeed` | 65-67 | Add a second seed `v₁ ↦ v₂` onto a (stalled) partial assignment. | Definition |
-| `Deck2.seconds` | 69-77 | The second-seed enumeration: every unassigned vertex × every still-viable candidate of the stalled state — the state's own ambiguity set, equivariantly defined (nothing chosen, trap #7); empty iff the first propagation completed. | Definition |
-| `Deck2.mem_seconds_iff` | 79-95 | Membership characterization of `seconds`: unassigned (`m p.1 = none`) and currently viable (`candPred`). | — |
-| `Deck2.invFun` | 99-102 | Computable inverse-by-table (first preimage in enumeration order); the `permOf` gate makes the order irrelevant. | Definition |
-| `Deck2.permOf` | 104-109 | The bijectivity gate: `some ⟨f, f⁻¹⟩` iff `f` is bijective, `none` otherwise — replaces F2b's backward propagation with one table inversion. | Definition |
-| `Deck2.gate_of_bijective` | 111-131 | A bijective table passes the two-sided-inverse gate (`find?` finds the unique preimage). | — |
-| `Deck2.bijective_of_gate` | 133-136 | The gate implies bijectivity — together with `gate_of_bijective`, gate ⟺ `Function.Bijective`, a labelling-independent predicate. | — |
-| `Deck2.permOf_eq_some_of_eq` | 138-146 | Reconstruction through the gate: a table pointwise equal to a permutation gates to exactly that permutation. | — |
-| `Deck2.bijective_conj_iff` | 148-157 | Bijectivity is invariant under conjugation by a permutation — the transport engine for the gate's failure mode. | — |
-| `Deck2.permOf_conj` | 159-170 | The gate transports including its failure mode: `permOf (σ ∘ f ∘ σ⁻¹) = (permOf f).map (σ * · * σ⁻¹)`. | — |
-| `Deck2.deck2Fun` | 174-177 | The two-seed forced table: continue the first propagation with the second seed added, identity-fill (junk is caught by the gate + verification). | Definition |
-| `Deck2.deck2Cand` | 179-183 | The second-seed candidate: gate the completed table into a `Perm`; `Consume.verified` still re-checks `IsColAut` (the supply stays untrusted). | Definition |
-| `Deck2.contFrom_sound` | 187-201 | The F2b invariant `m ⊆ ρ` survives any number of forcing rounds from ANY sound starting state — soundness is per-state, not per-seed-map. | — |
-| `Deck2.setSeed_sound` | 203-213 | Adding a second seed that `ρ` satisfies preserves the invariant `m ⊆ ρ`. | — |
-| `Deck2.deck2Cand_eq_of_isColAut` | 215-230 | ★★ RECONSTRUCTION: a colour-automorphism extending BOTH seeds + completed continuation ⟹ the candidate IS it. The second-seed hypothesis is the ambiguity being resolved: `ρ v₁ = v₂` picks which commuting extension the continuation forces. | — |
-| `Deck2.contFrom_conj` | 234-249 | Forcing-round iterates commute with relabelling from any transported state (`mconj`). | — |
-| `Deck2.setSeed_conj` | 251-260 | The second-seed insertion commutes with `mconj` transport. | — |
-| `Deck2.mem_seconds_conj` | 262-283 | The ambiguity set transports: membership in `seconds` on the relabelled graph is the σ-image of membership on the original — the equivariance of the second-seed enumeration. | — |
-| `Deck2.deck2Fun_conj` | 285-294 | The two-seed forced table conjugates pointwise under relabelling. | — |
-| `Deck2.deck2Cand_conj` | 296-305 | The candidate transports up to conjugation, including its failure mode (via `permOf_conj`). | — |
-| `Deck2.secondsV` | 309-315 | Vector-state twin of `seconds` (reads the forced base state, trap #1). | Definition |
-| `Deck2.secondsV_ofFn` | 317-325 | Bridge: `secondsV` on `Vector.ofFn m` is `seconds` on `m`. | — |
-| `Deck2.deck2Batch` | 327-334 | The per-first-pair evaluation batch: ONE base propagation (shared, trap #2), its ambiguity set, each continuation from the shared Vector state, gated by `permOf`. | Definition |
-| `Deck2.deck2Batch_eq` | 336-353 | The batch computes exactly the spec candidates over the spec enumeration (`propagateVec_eq` + `secondsV_ofFn` + `iterate_roundVecD`). | — |
-| `Deck2.deck2Supply` | 357-363 | ★ THE SECOND-SEED PROPAGATION SUPPLY (F2c): branch-cell first seeds, stalled-state ambiguity entries as second seeds, gate + verify. Breaks the commuting-gauge stall (mirror composites through twisted matchings) that defeats F2b. Cost flat `|B|²·(1+n²)·n⁵`. | Definition |
-| `Deck2.mem_gens_deck2Supply_iff` | 365-379 | Membership characterization of the emitted generators: a first pair from the branch cell, a second pair from the stalled state's ambiguity set, and a gated candidate. | — |
-| `Deck2.gensEquivariant_deck2Supply` | 383-413 | ★★ ①c: the supply is equivariant — both enumerations transport (branch cell; `mem_seconds_conj`) and the candidate conjugates including failure (`deck2Cand_conj`). No representative is ever chosen. | — |
-| `Deck2.supplyEquivariant_deck2Supply` | 415-416 | The verified-list form of equivariance (what the resolver reads). | — |
-| `Deck2.wordReach_deck2Supply` | 420-434 | Graded firing, per pair: a verified second-seed candidate carrying `u₁` to `u₂` puts the pair into the verified `WordReach`. | — |
-| `Deck2.cellIsOrbit_deck2Supply` | 436-445 | ★★★ THE ORACLE FIRES: every branch-cell pair connected by a verified second-seed candidate ⟹ the cell is certified one orbit — past the commuting-gauge stall, with no refinement. | — |
-| `Deck2.deck2Supply_guarded_canonizer` | 449-455 | ★★★ The guarded (blind) mixed canonizer over the second-seed supply — ①a/①b/①c + unconditional polynomiality, no carried hypotheses. | — |
-| `Deck2.deck2Supply_selNode_canonizer` | 457-463 | ★★★ The fused (resolver-aware) canonizer over the second-seed supply. | — |
-| `Deck2.holKey_foldDeck2_selNode_canonizer` | 465-476 | ★★★ THE F2c CANONIZER OF RECORD for the fold family: force = holonomy key, consume = `foldSupply ++ deckSupply ++ deck2Supply` — the object the `U3 ⊔ T3` end-to-end acceptance runs. | — |
-| `Deck2.holKey_foldDeck2Fast_selNode_canonizer` | 478-487 | The all-fast form of the F2c record (`foldSupplyFast` component) — identical by `foldSupplyFast_eq`; the form the measurements run. | — |
+| `Deck2.contFrom` | 74-77 | Continue F2b forcing rounds from an arbitrary partial state (`propagate` = `contFrom` of the seed map); the second-seed continuation runs from the stalled state. | Definition |
+| `Deck2.setSeed` | 79-81 | Add a second seed `v₁ ↦ v₂` onto a (stalled) partial assignment. | Definition |
+| `Deck2.seconds` | 83-91 | The second-seed enumeration: every unassigned vertex × every still-viable candidate of the stalled state — the state's own ambiguity set, equivariantly defined (nothing chosen, trap #7); empty iff the first propagation completed. | Definition |
+| `Deck2.mem_seconds_iff` | 93-109 | Membership characterization of `seconds`: unassigned (`m p.1 = none`) and currently viable (`candPred`). | — |
+| `Deck2.invFun` | 113-116 | Computable inverse-by-table (first preimage in enumeration order); the `permOf` gate makes the order irrelevant. | Definition |
+| `Deck2.permOf` | 118-123 | The bijectivity gate: `some ⟨f, f⁻¹⟩` iff `f` is bijective, `none` otherwise — replaces F2b's backward propagation with one table inversion. | Definition |
+| `Deck2.gate_of_bijective` | 125-145 | A bijective table passes the two-sided-inverse gate (`find?` finds the unique preimage). | — |
+| `Deck2.bijective_of_gate` | 147-150 | The gate implies bijectivity — together with `gate_of_bijective`, gate ⟺ `Function.Bijective`, a labelling-independent predicate. | — |
+| `Deck2.permOf_eq_some_of_eq` | 152-160 | Reconstruction through the gate: a table pointwise equal to a permutation gates to exactly that permutation. | — |
+| `Deck2.bijective_conj_iff` | 162-171 | Bijectivity is invariant under conjugation by a permutation — the transport engine for the gate's failure mode. | — |
+| `Deck2.permOf_conj` | 173-184 | The gate transports including its failure mode: `permOf (σ ∘ f ∘ σ⁻¹) = (permOf f).map (σ * · * σ⁻¹)`. | — |
+| `Deck2.deck2Fun` | 188-191 | The two-seed forced table: continue the first propagation with the second seed added, identity-fill (junk is caught by the gate + verification). | Definition |
+| `Deck2.deck2Cand` | 193-197 | The second-seed candidate: gate the completed table into a `Perm`; `Consume.verified` still re-checks `IsColAut` (the supply stays untrusted). | Definition |
+| `Deck2.contFrom_sound` | 201-215 | The F2b invariant `m ⊆ ρ` survives any number of forcing rounds from ANY sound starting state — soundness is per-state, not per-seed-map. | — |
+| `Deck2.setSeed_sound` | 217-227 | Adding a second seed that `ρ` satisfies preserves the invariant `m ⊆ ρ`. | — |
+| `Deck2.deck2Cand_eq_of_isColAut` | 229-244 | ★★ RECONSTRUCTION: a colour-automorphism extending BOTH seeds + completed continuation ⟹ the candidate IS it. The second-seed hypothesis is the ambiguity being resolved: `ρ v₁ = v₂` picks which commuting extension the continuation forces. | — |
+| `Deck2.contFrom_conj` | 248-263 | Forcing-round iterates commute with relabelling from any transported state (`mconj`). | — |
+| `Deck2.setSeed_conj` | 265-274 | The second-seed insertion commutes with `mconj` transport. | — |
+| `Deck2.mem_seconds_conj` | 276-297 | The ambiguity set transports: membership in `seconds` on the relabelled graph is the σ-image of membership on the original — the equivariance of the second-seed enumeration. | — |
+| `Deck2.deck2Fun_conj` | 299-308 | The two-seed forced table conjugates pointwise under relabelling. | — |
+| `Deck2.deck2Cand_conj` | 310-319 | The candidate transports up to conjugation, including its failure mode (via `permOf_conj`). | — |
+| `Deck2.secondsV` | 323-329 | Vector-state twin of `seconds` (reads the forced base state, trap #1). | Definition |
+| `Deck2.secondsV_ofFn` | 331-339 | Bridge: `secondsV` on `Vector.ofFn m` is `seconds` on `m`. | — |
+| `Deck2.deck2Batch` | 341-348 | The per-first-pair evaluation batch: ONE base propagation (shared, trap #2), its ambiguity set, each continuation from the shared Vector state, gated by `permOf`. | Definition |
+| `Deck2.deck2Batch_eq` | 350-367 | The batch computes exactly the spec candidates over the spec enumeration (`propagateVec_eq` + `secondsV_ofFn` + `iterate_roundVecD`). | — |
+| `Deck2.deck2Supply` | 371-377 | ★ THE SECOND-SEED PROPAGATION SUPPLY (F2c): branch-cell first seeds, stalled-state ambiguity entries as second seeds, gate + verify. Breaks the commuting-gauge stall (mirror composites through twisted matchings) that defeats F2b. Cost flat `|B|²·(1+n²)·n⁵`. | Definition |
+| `Deck2.mem_gens_deck2Supply_iff` | 379-393 | Membership characterization of the emitted generators: a first pair from the branch cell, a second pair from the stalled state's ambiguity set, and a gated candidate. | — |
+| `Deck2.gensEquivariant_deck2Supply` | 397-427 | ★★ ①c: the supply is equivariant — both enumerations transport (branch cell; `mem_seconds_conj`) and the candidate conjugates including failure (`deck2Cand_conj`). No representative is ever chosen. | — |
+| `Deck2.supplyEquivariant_deck2Supply` | 429-430 | The verified-list form of equivariance (what the resolver reads). | — |
+| `Deck2.wordReach_deck2Supply` | 434-448 | Graded firing, per pair: a verified second-seed candidate carrying `u₁` to `u₂` puts the pair into the verified `WordReach`. | — |
+| `Deck2.cellIsOrbit_deck2Supply` | 450-459 | ★★★ THE ORACLE FIRES: every branch-cell pair connected by a verified second-seed candidate ⟹ the cell is certified one orbit — past the commuting-gauge stall, with no refinement. | — |
+| `Deck2.deck2Supply_guarded_canonizer` | 463-469 | ★★★ The guarded (blind) mixed canonizer over the second-seed supply — ①a/①b/①c + unconditional polynomiality, no carried hypotheses. | — |
+| `Deck2.deck2Supply_selNode_canonizer` | 471-477 | ★★★ The fused (resolver-aware) canonizer over the second-seed supply. | — |
+| `Deck2.holKey_foldDeck2_selNode_canonizer` | 479-490 | ★★★ THE F2c CANONIZER OF RECORD for the fold family: force = holonomy key, consume = `foldSupply ++ deckSupply ++ deck2Supply` — the object the `U3 ⊔ T3` end-to-end acceptance runs. | — |
+| `Deck2.holKey_foldDeck2Fast_selNode_canonizer` | 492-501 | The all-fast form of the F2c record (`foldSupplyFast` component) — identical by `foldSupplyFast_eq`; the form the measurements run. | — |

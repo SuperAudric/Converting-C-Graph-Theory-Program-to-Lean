@@ -152,8 +152,12 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
 
 **Near-term queue (do in this order; each lands green + guarded before the next):**
 1. ✅ **C1 / "F2c"** — DONE 2026-07-19 (`Deck2.lean`; `ut` answers end-to-end — see §1C).
-2. **Publication swap SPIKE** — compile-test the import cone + fill ①a against the current record. Cheap;
-   retires the "swap never compile-tested" risk. Does NOT finalize statements (that steer stands).
+2. ✅ **Publication swap SPIKE** — DONE 2026-07-19, better than scoped: `canonForm?` swapped to the real
+   record (fused holKey + fold++deck++deck2) and the WHOLE ① trio filled — `canon_sound`/`canon_complete`/
+   `flag_iso_invariant` are `[propext, Classical.choice, Quot.sound]`-clean, no `sorryAx`, no citation
+   axioms; zero glue needed (all definitional). `canonizer`'s remaining `sorryAx` = ② + ③ + non-vacuity
+   exactly. Record pin provisional by construction (one def + one theorem to strengthen). Statements
+   untouched (the finalization steer stands).
 3. ✅ **C2 witness** — DONE 2026-07-19, outcome inverted: `wr3` built and measured, `deck2Supply` FIRES
    (identity-default mechanism) ⟹ C2 closed with no new code; C3 re-derived precisely (see §1C).
 3b. **C3 witness** — build the symmetric pin-blind CFI cover (multipede-style even-degree base,
