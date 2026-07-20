@@ -2698,25 +2698,25 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Showcase.Iso` | 85-88 | — | Definition |
-| `Showcase.canonForm?` | 105-117 | **THE SWAP (spike 2026-07-19): the showcase canonizer is REAL** — the fused record object (encode-free refiner; force = `holKeyFast`; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply`), exactly what the end-to-end acceptance measurements run. Record pin provisional: strengthening it = this def + `canonForm?_record`, nothing downstream. | Definition |
-| `Showcase.canonForm?_record` | 119-125 | The record object satisfies the full canonical-form spec — `Deck2.holKey_foldDeck2Fast_selNode_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
-| `Showcase.UnhandledResidue` | 168-175 | — | Definition |
-| `Showcase.cameron_classification` | 196-201 | — | axiom |
-| `Showcase.skresanov_two_closure` | 202-205 | — | axiom |
-| `Showcase.liebeck_rank3` | 206-209 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 210-218 | — | axiom |
-| `Showcase.ftpg` | 219-225 | — | axiom |
-| `Showcase.buekenhout_shult` | 226-233 | — | axiom |
-| `Showcase.payne_thas` | 234-242 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 243 | — | axiom |
-| `Showcase.canon_sound` | 251-258 | — | — |
-| `Showcase.canon_complete` | 260-285 | — | — |
-| `Showcase.flag_iso_invariant` | 287-293 | — | — |
-| `Showcase.canon_poly_or_flag` | 295-317 | — | — |
-| `Showcase.residue_if_flag` | 319-328 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 330-336 | — | — |
-| `Showcase.canonizer` | 343-353 | — | — |
+| `Showcase.Iso` | 86-89 | — | Definition |
+| `Showcase.canonForm?` | 106-118 | **THE SWAP (spike 2026-07-19): the showcase canonizer is REAL** — the fused record object (encode-free refiner; force = `holKeyFast`; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply`), exactly what the end-to-end acceptance measurements run. Record pin provisional: strengthening it = this def + `canonForm?_record`, nothing downstream. | Definition |
+| `Showcase.canonForm?_record` | 120-126 | The record object satisfies the full canonical-form spec — `Deck2.holKey_foldDeck2Fast_selNode_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
+| `Showcase.UnhandledResidue` | 169-176 | — | Definition |
+| `Showcase.cameron_classification` | 197-202 | — | axiom |
+| `Showcase.skresanov_two_closure` | 203-206 | — | axiom |
+| `Showcase.liebeck_rank3` | 207-210 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 211-219 | — | axiom |
+| `Showcase.ftpg` | 220-226 | — | axiom |
+| `Showcase.buekenhout_shult` | 227-234 | — | axiom |
+| `Showcase.payne_thas` | 235-243 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 244 | — | axiom |
+| `Showcase.canon_sound` | 252-259 | — | — |
+| `Showcase.canon_complete` | 261-286 | — | — |
+| `Showcase.flag_iso_invariant` | 288-294 | — | — |
+| `Showcase.canon_poly_or_flag` | 296-318 | — | — |
+| `Showcase.residue_if_flag` | 320-329 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 331-337 | — | — |
+| `Showcase.canonizer` | 344-354 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -2932,43 +2932,47 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Refine.gForce` | 234-250 | Guarded **force** canonical form (no supply ⟹ equivariant narrowing ⟹ its flag is iso-invariant). Regression-gate helper. | Definition |
 | `Refine.gMix` | 251-259 | Guarded **mixed** canonical form with a supply that really generates `Aut(Cₙ)`. Regression-gate helper. | Definition |
 | `Refine.gMatch` | 307-330 | Guarded mixed canonical form with the **structural** cascade-oracle supply (no hand-supplied generators). Regression-gate helper. | Definition |
-| `Perf.F12` | 36-42 | The **Frucht graph** — smallest asymmetric cubic graph; 1-WL leaves one cell of 12. Kept **off the build path** (`Regression.G8` covers the same property 8× cheaper); it is the honest large-`n` cost sample. Definition. | Definition |
-| `Perf.C7` | 44 | The 7-cycle (large-`n` symmetric sample, off the build path). Definition. | Definition |
-| `Perf.gForce` | 71-81 | Guarded force form (perf file). Definition. | Definition |
-| `Perf.gMatch` | 85-97 | Guarded mixed form with the structural supply (perf file). Definition. | Definition |
-| `Perf.gDeep` | 121-130 | — | Definition |
-| `Perf.gPartialFold` | 141-144 | The fold end-to-end **ANSWER**: guarded mixed descent, `constKey` + `partialMatchSupply 0`, `n = 24` — a full canonical form in ~3.5 min interpreted. | Definition |
-| `Perf.gDeepFold` | 146-151 | The fold end-to-end **FLAG**: the same descent with `deepMatchSupply 0` stalls at the root copies cell. | Definition |
-| `Perf.fold4Swapped` | 156 | Cross-copy relabelling of the fold — the supply-level `①c` observation's graph. | Definition |
-| `Perf.fold4SwappedRoot` | 157-159 | Its materialized root (trap #1). | Definition |
-| `Perf.vfold3` | 174-176 | The `s = 3` mirror-tied vertical cover (n = 15) — the F2a measurement graph. | Definition |
-| `Perf.vfold3Root` | 178-188 | Materialized root (trap #1). | Definition |
-| `Perf.vfold3Swapped` | 192 | Cross-copy relabelling — the supply-level `①c` observation's graph. | Definition |
-| `Perf.vfold3SwappedRoot` | 193-195 | Its materialized root (trap #1). | Definition |
-| `Perf.wcyc15` | 205 | Weighted `C₁₅` — `Aut = Z₅`: 25/25 seeds complete to order-5 rotations, narrow → 1. | Definition |
-| `Perf.wcyc15Root` | 206-211 | Materialized root (trap #1). | Definition |
-| `Perf.wcyc27` | 215 | Weighted `C₂₇` — `Aut = Z₉`: odd part 9 ≥ 7 (no C# path at any size) and height 2 (9 = 3²). | Definition |
-| `Perf.wcyc27Root` | 216-223 | Materialized root (trap #1). | Definition |
-| `Perf.vringB` | 229-237 | The voltage-ring edge predicate: rigid 6-vertex core, cross edge `(c,a)–(c+1,b)` = voltage 1; asymmetric pendant paths kill the WL reversal ghost and every reflection. | Definition |
-| `Perf.vring18` | 239 | `Z₃` voltage-ring cover (the true tower-gadget shape), deck `Z₃` exactly, `Aut` involution-free. | Definition |
-| `Perf.vring18Root` | 240-245 | Materialized root (trap #1). | Definition |
-| `Perf.gDeckCycle` | 249-254 | End-to-end fused descent over `foldSupply ++ deckSupply` on the involution-free cycle — answers. | Definition |
-| `Perf.wrB` | 322-326 | The WREATH witness edge predicate: `s` copies of the C₄+pendant core on a copy cycle, matched ONLY on the mirror-FIXED fibers {0,2,4} — each copy's mirror is an INDEPENDENT automorphism (`Aut ⊇ Z₂^s ⋊ D_s`). | Definition |
-| `Perf.wr3` | 328 | `wrB` at s = 3 (n = 15) — the C2 wreath witness. Measured: `deck2Supply` FIRES on it (the identity-default finding, §12), falsifying the earlier claim that wreath gauges stall. | Definition |
-| `Perf.wr3Root` | 329-339 | Root colouring of `wr3` (materialised through `ColData`, trap #1). | Definition |
-| `Perf.onLine` | 367 | — | Definition |
-| `Perf.inS` | 369-374 | — | Definition |
-| `Perf.mpfg` | 376-379 | — | Definition |
-| `Perf.mpB` | 381-384 | — | Definition |
-| `Perf.mp7` | 386 | — | Definition |
-| `Perf.mpRoot` | 387 | — | Definition |
-| `Perf.mk42` | 388-391 | — | Definition |
-| `Perf.wSupp` | 393-395 | — | Definition |
-| `Perf.gaugeFun` | 397-411 | — | Definition |
-| `Perf.mpN2` | 414-418 | — | Definition |
-| `Perf.mfG` | 420-422 | — | Definition |
-| `Perf.cont1` | 424-431 | — | Definition |
-| `Perf.mpPin` | 452-459 | — | Definition |
+| `Perf.F12` | 38-44 | The **Frucht graph** — smallest asymmetric cubic graph; 1-WL leaves one cell of 12. Kept **off the build path** (`Regression.G8` covers the same property 8× cheaper); it is the honest large-`n` cost sample. Definition. | Definition |
+| `Perf.C7` | 46 | The 7-cycle (large-`n` symmetric sample, off the build path). Definition. | Definition |
+| `Perf.gForce` | 73-83 | Guarded force form (perf file). Definition. | Definition |
+| `Perf.gMatch` | 87-99 | Guarded mixed form with the structural supply (perf file). Definition. | Definition |
+| `Perf.gDeep` | 123-132 | — | Definition |
+| `Perf.gPartialFold` | 143-146 | The fold end-to-end **ANSWER**: guarded mixed descent, `constKey` + `partialMatchSupply 0`, `n = 24` — a full canonical form in ~3.5 min interpreted. | Definition |
+| `Perf.gDeepFold` | 148-153 | The fold end-to-end **FLAG**: the same descent with `deepMatchSupply 0` stalls at the root copies cell. | Definition |
+| `Perf.fold4Swapped` | 158 | Cross-copy relabelling of the fold — the supply-level `①c` observation's graph. | Definition |
+| `Perf.fold4SwappedRoot` | 159-161 | Its materialized root (trap #1). | Definition |
+| `Perf.vfold3` | 176-178 | The `s = 3` mirror-tied vertical cover (n = 15) — the F2a measurement graph. | Definition |
+| `Perf.vfold3Root` | 180-190 | Materialized root (trap #1). | Definition |
+| `Perf.vfold3Swapped` | 194 | Cross-copy relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Perf.vfold3SwappedRoot` | 195-197 | Its materialized root (trap #1). | Definition |
+| `Perf.wcyc15` | 207 | Weighted `C₁₅` — `Aut = Z₅`: 25/25 seeds complete to order-5 rotations, narrow → 1. | Definition |
+| `Perf.wcyc15Root` | 208-213 | Materialized root (trap #1). | Definition |
+| `Perf.wcyc27` | 217 | Weighted `C₂₇` — `Aut = Z₉`: odd part 9 ≥ 7 (no C# path at any size) and height 2 (9 = 3²). | Definition |
+| `Perf.wcyc27Root` | 218-225 | Materialized root (trap #1). | Definition |
+| `Perf.vringB` | 231-239 | The voltage-ring edge predicate: rigid 6-vertex core, cross edge `(c,a)–(c+1,b)` = voltage 1; asymmetric pendant paths kill the WL reversal ghost and every reflection. | Definition |
+| `Perf.vring18` | 241 | `Z₃` voltage-ring cover (the true tower-gadget shape), deck `Z₃` exactly, `Aut` involution-free. | Definition |
+| `Perf.vring18Root` | 242-247 | Materialized root (trap #1). | Definition |
+| `Perf.gDeckCycle` | 251-256 | End-to-end fused descent over `foldSupply ++ deckSupply` on the involution-free cycle — answers. | Definition |
+| `Perf.wrB` | 324-328 | The WREATH witness edge predicate: `s` copies of the C₄+pendant core on a copy cycle, matched ONLY on the mirror-FIXED fibers {0,2,4} — each copy's mirror is an INDEPENDENT automorphism (`Aut ⊇ Z₂^s ⋊ D_s`). | Definition |
+| `Perf.wr3` | 330 | `wrB` at s = 3 (n = 15) — the C2 wreath witness. Measured: `deck2Supply` FIRES on it (the identity-default finding, §12), falsifying the earlier claim that wreath gauges stall. | Definition |
+| `Perf.wr3Root` | 331-341 | Root colouring of `wr3` (materialised through `ColData`, trap #1). | Definition |
+| `Perf.onLine` | 369 | — | Definition |
+| `Perf.inS` | 371-376 | — | Definition |
+| `Perf.mpfg` | 378-381 | — | Definition |
+| `Perf.mpB` | 383-386 | — | Definition |
+| `Perf.mp7` | 388 | — | Definition |
+| `Perf.mpRoot` | 389 | — | Definition |
+| `Perf.mk42` | 390-393 | — | Definition |
+| `Perf.wSupp` | 395-397 | — | Definition |
+| `Perf.gaugeFun` | 399-413 | — | Definition |
+| `Perf.mpN2` | 416-420 | — | Definition |
+| `Perf.mfG` | 422-424 | — | Definition |
+| `Perf.cont1` | 426-433 | — | Definition |
+| `Perf.mpPin` | 454-461 | — | Definition |
+| `Perf.transFun` | 492-498 | — | Definition |
+| `Perf.orbitOf` | 500-501 | — | Definition |
+| `Perf.mpKernelGens` | 503-508 | — | Definition |
+| `Perf.mpDeepenGens` | 533-541 | — | Definition |
 ## ChainDescent/Consume.lean
 
 | Name | Line | Description | Notes |
@@ -3223,11 +3227,11 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Regression.c7Seed` | 436-443 | — | Definition |
 | `Regression.t3` | 458 | The one-pair-twisted triple cover alone (n = 15; `ut`'s T block) — the F2c witness: its commuting mirror gauge stalls fold AND deck. | Definition |
 | `Regression.t3Root` | 459-461 | Root colouring of `t3` (ColData-materialised, trap #1). | Definition |
-| `Regression.mpOnLine` | 484 | Fano line membership `{i, i+1, i+3} mod 7` for the mp7 witness. | Definition |
-| `Regression.mpInS` | 485-490 | Even-subset membership for the mp7 CFI gadgets. | Definition |
-| `Regression.mpFG` | 491-494 | Foot–gadget adjacency of the Fano multipede. | Definition |
-| `Regression.mp7` | 495-498 | The FANO MULTIPEDE (n = 42): the C3 witness — symmetric pin-blind CFI cover, gauge = the [7,3,4] simplex code (arity-3 checks, girth 6, min weight 4); fold/deck/deck2 + manual deck3 all measured dead (`PerformanceTest` §13); the kernel supply consumes its whole gauge (§14, `Regression` §15). | Definition |
-| `Regression.mp7Root` | 499-502 | mp7's root colouring (ColData — trap #1). | Definition |
+| `Regression.mpOnLine` | 485 | Fano line membership `{i, i+1, i+3} mod 7` for the mp7 witness. | Definition |
+| `Regression.mpInS` | 486-491 | Even-subset membership for the mp7 CFI gadgets. | Definition |
+| `Regression.mpFG` | 492-495 | Foot–gadget adjacency of the Fano multipede. | Definition |
+| `Regression.mp7` | 496-499 | The FANO MULTIPEDE (n = 42): the C3 witness — symmetric pin-blind CFI cover, gauge = the [7,3,4] simplex code (arity-3 checks, girth 6, min weight 4); fold/deck/deck2 + manual deck3 all measured dead (`PerformanceTest` §13); the kernel supply consumes its whole gauge (§14, `Regression` §15). | Definition |
+| `Regression.mp7Root` | 500-503 | mp7's root colouring (ColData — trap #1). | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -3906,27 +3910,27 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Kernel.isAdj` | 74-76 | Symmetric adjacency presence test (weights compared elsewhere; rails need presence only). | Definition |
-| `Kernel.twinP` | 78-81 | Twin candidacy: same colour, distinct, non-adjacent, DISJOINT neighbourhoods — the rail-pair discriminator (correctly rejects the fold family's mirror pairs, which share neighbours). | Definition |
-| `Kernel.twin` | 83-85 | The unique twin via `uniqueFilter` — ambiguity means no rail, never a choice (trap #7). | Definition |
-| `Kernel.rails` | 87-93 | The rail pairs (gauge wires): mutually-unique twins, listed once at the lower index — an INTERNAL labelling the ① story never depends on (see the all-or-nothing gate). | Definition |
-| `Kernel.onRail` | 95-97 | Is a vertex a rail endpoint? | Definition |
-| `Kernel.touches` | 101-103 | Does a vertex see either endpoint of a rail? | Definition |
-| `Kernel.patOf` | 105-116 | The flip pattern a shape-matched same-cell partner realizes: bit = touched and crossed. `none` when touch shapes differ. | Definition |
-| `Kernel.pats` | 118-121 | All realizable local flip patterns at a vertex (the vertex itself contributes zero — a CFI gadget's patterns are exactly its even subsets). | Definition |
-| `Kernel.xorRow` | 125 | F₂ row addition. | Definition |
-| `Kernel.reduceRow` | 127-128 | Reduce a row by the current pivot list. | Definition |
-| `Kernel.echelon` | 130-137 | Reduced row echelon form as a pivot list — UNTRUSTED (correctness = tranche 2's `span(kernelBasis) = L`). | Definition |
-| `Kernel.nullBasis` | 139-148 | A basis of the null space of the row space: one word per free column, pivots back-substituted. Untrusted; used twice (local perps, the global kernel). | Definition |
-| `Kernel.restrictCols` | 150-151 | Restrict a row to a column subset (patterns → wire support). | Definition |
-| `Kernel.embedCols` | 153-157 | Re-embed a restricted row into the full width with zeros elsewhere. | Definition |
-| `Kernel.wiresOf` | 161-166 | The wire support of a vertex: rail indices it touches. | Definition |
-| `Kernel.localRows` | 168-174 | A vertex's constraint rows = the perp of the span of its patterns, computed inside its wire support and re-embedded — the extracted parity checks (mp7: exactly the Fano line checks). | Definition |
-| `Kernel.kernelBasis` | 176-179 | A Gaussian basis of the gauge space L = the null space of every vertex's constraints (mp7: the [7,3,4] simplex code, dim 3, weights 4). | Definition |
-| `Kernel.railImg` | 183-188 | The rail image of a vertex under a flip word (`none` off the rails). | Definition |
-| `Kernel.flipFunK` | 190-208 | The candidate table for a word: rails flip; a non-rail vertex touching a flipped rail moves to its unique same-colour partner matching the flipped adjacency (full weights, both directions); untouched vertices stay. Junk dies at the gate/verify. | Definition |
-| `Kernel.kernelGens` | 212-218 | ★ The ALL-OR-NOTHING gate: emit the whole basis (as gated, verified flips) or nothing. "Whole basis verifies" ⟺ "every word of L verifies" (products of automorphisms) — a CANONICAL predicate, so the emitted GROUP is a canonical function of (adj, χ) despite the pivot-order-dependent basis: the ①c design lock; the ① theorems ride the SameOrbits reduction (tranche 2). | Definition |
-| `Kernel.kernelSupply` | 220-224 | ★ THE KERNEL SUPPLY (C3a): recognition and solving untrusted, every generator re-verified; flat n⁵ bill. Measured (mp7): the root gadget cell 28 → 7 = the whole gauge in one supply call — what no propagation shape can reach at any seed count. | Definition |
+| `Kernel.isAdj` | 77-79 | Symmetric adjacency presence test (weights compared elsewhere; rails need presence only). | Definition |
+| `Kernel.twinP` | 81-84 | Twin candidacy: same colour, distinct, non-adjacent, DISJOINT neighbourhoods — the rail-pair discriminator (correctly rejects the fold family's mirror pairs, which share neighbours). | Definition |
+| `Kernel.twin` | 86-88 | The unique twin via `uniqueFilter` — ambiguity means no rail, never a choice (trap #7). | Definition |
+| `Kernel.rails` | 90-96 | The rail pairs (gauge wires): mutually-unique twins, listed once at the lower index — an INTERNAL labelling the ① story never depends on (see the all-or-nothing gate). | Definition |
+| `Kernel.onRail` | 98-100 | Is a vertex a rail endpoint? | Definition |
+| `Kernel.touches` | 104-106 | Does a vertex see either endpoint of a rail? | Definition |
+| `Kernel.patOf` | 108-119 | The flip pattern a shape-matched same-cell partner realizes: bit = touched and crossed. `none` when touch shapes differ. | Definition |
+| `Kernel.pats` | 121-124 | All realizable local flip patterns at a vertex (the vertex itself contributes zero — a CFI gadget's patterns are exactly its even subsets). | Definition |
+| `Kernel.xorRow` | 128 | F₂ row addition. | Definition |
+| `Kernel.reduceRow` | 130-131 | Reduce a row by the current pivot list. | Definition |
+| `Kernel.echelon` | 133-140 | Reduced row echelon form as a pivot list — UNTRUSTED (correctness = tranche 2's `span(kernelBasis) = L`). | Definition |
+| `Kernel.nullBasis` | 142-151 | A basis of the null space of the row space: one word per free column, pivots back-substituted. Untrusted; used twice (local perps, the global kernel). | Definition |
+| `Kernel.restrictCols` | 153-154 | Restrict a row to a column subset (patterns → wire support). | Definition |
+| `Kernel.embedCols` | 156-160 | Re-embed a restricted row into the full width with zeros elsewhere. | Definition |
+| `Kernel.wiresOf` | 164-169 | The wire support of a vertex: rail indices it touches. | Definition |
+| `Kernel.localRows` | 171-177 | A vertex's constraint rows = the perp of the span of its patterns, computed inside its wire support and re-embedded — the extracted parity checks (mp7: exactly the Fano line checks). | Definition |
+| `Kernel.kernelBasis` | 179-182 | A Gaussian basis of the gauge space L = the null space of every vertex's constraints (mp7: the [7,3,4] simplex code, dim 3, weights 4). | Definition |
+| `Kernel.railImg` | 186-191 | The rail image of a vertex under a flip word (`none` off the rails). | Definition |
+| `Kernel.flipFunK` | 193-211 | The candidate table for a word: rails flip; a non-rail vertex touching a flipped rail moves to its unique same-colour partner matching the flipped adjacency (full weights, both directions); untouched vertices stay. Junk dies at the gate/verify. | Definition |
+| `Kernel.kernelGens` | 215-221 | ★ The ALL-OR-NOTHING gate: emit the whole basis (as gated, verified flips) or nothing. "Whole basis verifies" ⟺ "every word of L verifies" (products of automorphisms) — a CANONICAL predicate, so the emitted GROUP is a canonical function of (adj, χ) despite the pivot-order-dependent basis: the ①c design lock; the ① theorems ride the SameOrbits reduction (tranche 2). | Definition |
+| `Kernel.kernelSupply` | 223-227 | ★ THE KERNEL SUPPLY (C3a): recognition and solving untrusted, every generator re-verified; flat n⁵ bill. Measured (mp7): the root gadget cell 28 → 7 = the whole gauge in one supply call — what no propagation shape can reach at any seed count. | Definition |
 ## ChainDescent/KernelFlip.lean
 
 | Name | Line | Description | Notes |
@@ -4054,35 +4058,35 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Kernel.allWords` | 40-43 | All Bool words of length `m` — a proof-side enumeration (`2^m`), never executed by the canonizer. | Definition |
-| `Kernel.mem_allWords_iff` | 45-60 | The proof-side enumeration `allWords m` is exactly the words of length `m`. | — |
-| `Kernel.sysRows` | 62-65 | The global constraint system the kernel basis eliminates (every vertex's local rows). | Definition |
-| `Kernel.kernelBasis_eq` | 67-68 | `kernelBasis` is `nullBasis` of the global system rows (definitional). | — |
-| `Kernel.length_embedCols` | 70-71 | A re-embedded word has the ambient length. | `@[simp]` |
-| `Kernel.mem_sysRows_length` | 73-84 | System rows have rail-list length. | — |
-| `Kernel.inL` | 88-91 | Decidable membership in the gauge space `L`: null against every system row. | Definition |
-| `Kernel.kernelWords` | 93-95 | Every word of `L` — the canonical SET the reference supply flips. | Definition |
-| `Kernel.kernelRefGens` | 97-103 | The set-level reference generators: flips of every `L`-word, under the same all-or-nothing gate. | Definition |
-| `Kernel.kernelRefSupply` | 105-107 | **The reference supply** — proof-side only (exponential enumeration, never billed because it never enters the record object); it exists to carry equivariance for the executable kernel supply. | Definition |
-| `Kernel.gens_kernelSupply` | 109-110 | The kernel supply's generators are `kernelGens` (definitional). | — |
-| `Kernel.gens_kernelRefSupply` | 112-113 | The reference supply's generators are `kernelRefGens` (definitional). | — |
-| `Kernel.gate_true_iff` | 147-178 | The all-or-nothing gate over a word list is exactly "every word emits and verifies". | — |
-| `Kernel.KernelGate` | 180-183 | The kernel gate, in `Prop` form: every basis word emits and verifies. | Definition |
-| `Kernel.RefGate` | 185-188 | The reference gate: every `L`-word emits and verifies. Equivalent to `KernelGate`, and canonical where it is not. | Definition |
-| `Kernel.kernelGens_pos` | 190-194 | With the gate passing, `kernelGens` is the whole emitted basis. | — |
-| `Kernel.kernelGens_neg` | 196-199 | With the gate failing, `kernelGens` is empty — all or nothing. | — |
-| `Kernel.refGens_pos` | 201-205 | With the gate passing, the reference emits every `L`-word's flip. | — |
-| `Kernel.refGens_neg` | 207-210 | With the gate failing, the reference emits nothing. | — |
-| `Kernel.flipFunK_zeroW` | 214-248 | The zero word's flip is the identity table. | — |
-| `Kernel.flip_emits_of_spans` | 250-277 | ★★ Span induction: if every basis flip emits and verifies then so does every spanned word's flip, and each such flip `Reaches` the kernel-generated group (the P3b product license). | — |
-| `Kernel.basis_mem_kernelWords` | 279-288 | Basis words lie in `L` — `nullBasis` soundness read into the reference's word list. | — |
-| `Kernel.spans_of_mem_kernelWords` | 290-303 | Every `L`-word is spanned by the basis — `nullBasis` completeness read into the reference's word list. | — |
-| `Kernel.basis_emits_of_kernelGate` | 305-316 | The kernel gate unpacked: every basis word emits and verifies. | — |
-| `Kernel.refGate_of_kernelGate` | 318-325 | ★ The canonicity content: "the whole basis verifies" ⟹ "every word of `L` verifies" — so the gate is a canonical predicate, not a pivot-order artefact. | — |
-| `Kernel.kernelGate_of_refGate` | 327-330 | The converse gate implication (basis ⊆ `L`). | — |
-| `Kernel.sameOrbits_kernelRef` | 334-366 | ★★★ The set-level reference and the executable kernel supply prove the SAME ORBITS: gates pass ⟹ mutual `Reaches`; gates fail ⟹ both verified lists empty. This is what ① rides on, in place of an (impossible) pointwise equivariance of the Gaussian basis. | — |
-| `Kernel.verified_appendSupply_mem` | 370-384 | Membership in a concatenated supply's verified list. | — |
-| `Kernel.sameOrbits_appendSupply` | 386-409 | ★★ Orbit-equality is a CONGRUENCE for `appendSupply` — a `SameOrbits`-licensed swap stays licensed inside a composite record object. | — |
+| `Kernel.allWords` | 44-47 | All Bool words of length `m` — a proof-side enumeration (`2^m`), never executed by the canonizer. | Definition |
+| `Kernel.mem_allWords_iff` | 49-64 | The proof-side enumeration `allWords m` is exactly the words of length `m`. | — |
+| `Kernel.sysRows` | 66-69 | The global constraint system the kernel basis eliminates (every vertex's local rows). | Definition |
+| `Kernel.kernelBasis_eq` | 71-72 | `kernelBasis` is `nullBasis` of the global system rows (definitional). | — |
+| `Kernel.length_embedCols` | 74-75 | A re-embedded word has the ambient length. | `@[simp]` |
+| `Kernel.mem_sysRows_length` | 77-88 | System rows have rail-list length. | — |
+| `Kernel.inL` | 92-95 | Decidable membership in the gauge space `L`: null against every system row. | Definition |
+| `Kernel.kernelWords` | 97-99 | Every word of `L` — the canonical SET the reference supply flips. | Definition |
+| `Kernel.kernelRefGens` | 101-107 | The set-level reference generators: flips of every `L`-word, under the same all-or-nothing gate. | Definition |
+| `Kernel.kernelRefSupply` | 109-111 | **The reference supply** — proof-side only (exponential enumeration, never billed because it never enters the record object); it exists to carry equivariance for the executable kernel supply. | Definition |
+| `Kernel.gens_kernelSupply` | 113-114 | The kernel supply's generators are `kernelGens` (definitional). | — |
+| `Kernel.gens_kernelRefSupply` | 116-117 | The reference supply's generators are `kernelRefGens` (definitional). | — |
+| `Kernel.gate_true_iff` | 151-182 | The all-or-nothing gate over a word list is exactly "every word emits and verifies". | — |
+| `Kernel.KernelGate` | 184-187 | The kernel gate, in `Prop` form: every basis word emits and verifies. | Definition |
+| `Kernel.RefGate` | 189-192 | The reference gate: every `L`-word emits and verifies. Equivalent to `KernelGate`, and canonical where it is not. | Definition |
+| `Kernel.kernelGens_pos` | 194-198 | With the gate passing, `kernelGens` is the whole emitted basis. | — |
+| `Kernel.kernelGens_neg` | 200-203 | With the gate failing, `kernelGens` is empty — all or nothing. | — |
+| `Kernel.refGens_pos` | 205-209 | With the gate passing, the reference emits every `L`-word's flip. | — |
+| `Kernel.refGens_neg` | 211-214 | With the gate failing, the reference emits nothing. | — |
+| `Kernel.flipFunK_zeroW` | 218-252 | The zero word's flip is the identity table. | — |
+| `Kernel.flip_emits_of_spans` | 254-281 | ★★ Span induction: if every basis flip emits and verifies then so does every spanned word's flip, and each such flip `Reaches` the kernel-generated group (the P3b product license). | — |
+| `Kernel.basis_mem_kernelWords` | 283-292 | Basis words lie in `L` — `nullBasis` soundness read into the reference's word list. | — |
+| `Kernel.spans_of_mem_kernelWords` | 294-307 | Every `L`-word is spanned by the basis — `nullBasis` completeness read into the reference's word list. | — |
+| `Kernel.basis_emits_of_kernelGate` | 309-320 | The kernel gate unpacked: every basis word emits and verifies. | — |
+| `Kernel.refGate_of_kernelGate` | 322-329 | ★ The canonicity content: "the whole basis verifies" ⟹ "every word of `L` verifies" — so the gate is a canonical predicate, not a pivot-order artefact. | — |
+| `Kernel.kernelGate_of_refGate` | 331-334 | The converse gate implication (basis ⊆ `L`). | — |
+| `Kernel.sameOrbits_kernelRef` | 338-370 | ★★★ The set-level reference and the executable kernel supply prove the SAME ORBITS: gates pass ⟹ mutual `Reaches`; gates fail ⟹ both verified lists empty. This is what ① rides on, in place of an (impossible) pointwise equivariance of the Gaussian basis. | — |
+| `Kernel.verified_appendSupply_mem` | 374-388 | Membership in a concatenated supply's verified list. | — |
+| `Kernel.sameOrbits_appendSupply` | 390-413 | ★★ Orbit-equality is a CONGRUENCE for `appendSupply` — a `SameOrbits`-licensed swap stays licensed inside a composite record object. | — |
 
 ## ChainDescent/KernelTransport.lean
 
@@ -4178,3 +4182,62 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Kernel.holKey_foldDeck2Kernel_selNode_canonizer` | 1261-1271 | ★★★ THE C3a CANONIZER OF RECORD: force = the holonomy key, consume = `foldSupply ++ deckSupply ++ deck2Supply ++ kernelSupply`. The F₂ kernel supply is inside the record object, with ① discharged through the `SameOrbits` reduction rather than by a pointwise equivariance the Gaussian basis cannot have. | — |
 | `Kernel.holKey_foldDeck2KernelFast_selNode_canonizer` | 1273-1283 | The all-fast form of the extended record — the form the measurements run, and the object `Publication.canonForm?` pins. | — |
 | `Kernel.handledS_recordSupply` | 1285-1290 | ③ transfers too: the residue predicate is read off the same narrowing, so a `HandledS` certificate for the reference composite is one for the record. | — |
+## ChainDescent/DeepenCrux.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.GateAt` | 72-79 | §1 The all-singletons gate outcome at a given anchor — exactly the condition `deepenGens` tests before emitting. | Definition |
+| `Deepen.DeepenGateInvariant` | 83-88 | §2 **CRUX (i), OPEN.** The gate outcome is labelling-invariant. Given `DeepenTransport` (every other stage transports), this predicate is the ENTIRE residue of `deepenSupply`'s ①c. | Definition |
+| `Deepen.DeepenForcedMatch` | 90-96 | §2 **CRUX (ii), OPEN.** When the gate passes, the emitted relation is the true `Aut`-orbit relation. The `→` direction is proved (`deepenGens_isColAut`); the `←` (completeness) direction is the open content. | Definition |
+| `Deepen.deepenGens_isColAut` | 100-106 | §3 **Every emitted generator is a genuine colour-automorphism** — untrusted construction, verified emission. The proved `→` half of `DeepenForcedMatch`. | — |
+| `Deepen.deepenGens_sound` | 108-114 | §3 The emitted orbit relation is **contained in the true one**: the supply can only under-report orbits, never over-merge (over-splitting costs a branch; over-merging would be unsound). | — |
+
+## ChainDescent/DeepenSupply.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.classOf` | 121-123 | §1 The members of a vertex's 1-WL colour class — the footprint primitive the gates count. | Definition |
+| `Deepen.coupled` | 125-129 | §1 **The coupled component**: the vertices whose PARENT cell split under the child colouring. `O(n³)` — compute once per level and thread it (trap #2). | Definition |
+| `Deepen.allSingletonsK` | 131-133 | §1 The **forced-matching gate**: every sub-cell of the coupled component is a singleton, so the colour-match is a forced bijection rather than an arbitrary within-cell pick. | Definition |
+| `Deepen.chooseIdK` | 135-140 | §1 The lowest child-colour id among the NON-singleton sub-cells — the iso-invariant choice of *which cell* to descend (choosing a cell is canonical; choosing a vertex in it is not). | Definition |
+| `Deepen.step` | 144-146 | §2 One individualize + warm-refine step, materialised as `ColData` (trap #1: never store a `Colouring`). | Definition |
+| `Deepen.deepen` | 148-163 | §2 **`DeepenAnchor`.** Descend the lowest-id non-singleton sub-cell until the footprint is all-singletons, recording the chosen cell ids; parent stays fixed at the node colouring. A single path, never a branch over representatives. | Definition |
+| `Deepen.replay` | 165-175 | §2 **`ReplayDeepening`.** Follow the anchor's recorded cell-id sequence from another representative; `none` if it cannot be followed (⟹ no candidate, sound). | Definition |
+| `Deepen.deepenGens` | 179-209 | §3 **The emitted generators**: for EVERY anchor of the branch cell, deepen → replay from each other representative → match footprint colours on the coupled component → `permOf` + `IsColAut` verify. ⚠ All anchors is REQUIRED, not an optimisation — a single anchor is measured to break ①c (the `G8` falsifier). | Definition |
+| `Deepen.deepenSupply` | 211-213 | §3 **★ THE DEEPENING SUPPLY** (C3b tranche 1) — the BASE-symmetry constructor, reaching what propagation cannot (girth kills chaining) and what the gauge supply does not see. Cost billed flat at `n⁶`. Deliberately NOT yet in the record object: its ①c stack is tranche 2, still open. | Definition |
+
+## ChainDescent/DeepenTransport.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.transport_apply` | 56-60 | §1 The transported colouring agrees with the original after `σ` — the pointwise fact every other transport lemma in the deepening pipeline rests on. | — |
+| `Deepen.transport_apply'` | 62-64 | §1 The same, read at an arbitrary point through `σ.symm`. | — |
+| `Deepen.mem_classOf_iff` | 68-71 | §2 Membership in a 1-WL colour class is just colour equality — the unfolding consumers use. | — |
+| `Deepen.classOf_nodup` | 73-74 | §2 A colour class is `Nodup` (it filters `finRange`) — the side condition every `List.Perm` argument here needs. | — |
+| `Deepen.mem_classOf_transport` | 76-79 | §2 Colour-class membership transports: `u` lies in the transported class of `σ v` iff `σ.symm u` lies in the original. | — |
+| `Deepen.classOf_perm_transport` | 81-90 | §2 A colour class transports **up to `List.Perm`**, not equality — `classOf` filters `finRange` in index order, which `σ` need not respect (the `rails_perm_conj` lesson). | — |
+| `Deepen.classOf_length_transport` | 92-95 | §2 **Class SIZE is invariant** under relabelling — the quantity the all-singletons and non-singleton gates actually read. | — |
+| `Deepen.mem_coupled_iff` | 99-103 | §3 Unfolding of the coupled component: `v` is coupled iff its parent cell carries more than one child colour. | — |
+| `Deepen.parentCell_perm_transport` | 105-117 | §3 The parent cell of `v` transports up to `List.Perm`. | — |
+| `Deepen.mem_coupled_transport` | 119-136 | §3 **Membership in the coupled component transports** — the footprint's support is labelling-independent. | — |
+| `Deepen.allSingletonsK_transport` | 140-147 | §4 The all-singletons gate is an **invariant `Bool`**: relabelling cannot change whether the footprint is forced. | — |
+| `Deepen.chooseIdK_transport` | 149-180 | §4 **★ THE LOAD-BEARING TRANSPORT LEMMA.** The chosen cell id is an **invariant `Nat`** (equal, not conjugated), so the id sequence `deepen` records is labelling-independent — this is what reduces the route-(a) crux to "which member of a fixed cell does replay pick?". | — |
+| `Deepen.step_transport` | 184-191 | §5 One individualize+refine step commutes with relabelling (`indivOne_transport` + `refineEquivariant_encodeFree`). | — |
+
+## ChainDescent/KernelBase.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Kernel.nonRails` | 104-106 | — | Definition |
+| `Kernel.supports` | 108-110 | — | Definition |
+| `Kernel.suppCode` | 112-117 | — | Definition |
+| `Kernel.baseSize` | 119-122 | — | Definition |
+| `Kernel.baseAdj` | 124-135 | — | Definition |
+| `Kernel.baseCol` | 137-145 | — | Definition |
+| `Kernel.liftFun` | 149-164 | — | Definition |
+| `Kernel.railImgList` | 166-171 | — | Definition |
+| `Kernel.liftGen` | 173-181 | — | Definition |
+| `Kernel.baseStack` | 185-190 | — | Definition |
+| `Kernel.baseGens` | 192-199 | — | Definition |
+| `Kernel.baseSupply` | 201-205 | — | Definition |
+

@@ -25,6 +25,17 @@ to a statement about *which member of a fixed cell* is picked, rather than about
 order, which `σ` need not respect) — the `rails_perm_conj` lesson from `KernelTransport`. Membership,
 length and `Nodup` are what the pipeline actually consumes, so those are the shapes proved.
 
+**⚠⚠ HOW STRONG IS THE EVIDENCE, HONESTLY (measured 2026-07-20 — read before trusting it).**
+The random-graph sweeps are **DEGENERATE and near-worthless**: at `n = 8` every generated graph has a
+branch cell of size **0 or 2** (ZERO graphs with a cell ≥ 4). The reason is structural — **random
+graphs are almost surely asymmetric**, so refinement discretizes them and an orbit-valued property has
+nothing to bite on. So "400 random graphs, 302 firing" and "200 random graphs" mean much less than the
+sample sizes suggest. **The real evidence is only the structured witnesses:** `G8` (cell 8, profile
+`[2,2,2,2,4,4,4,4]` — the one RICH partially-firing case), `t3`/`wcyc9` `[3,3,3]`, `ut`
+`[3,3,3,3,3,3]`, and `mp7` (cell 28 but fires TOTALLY, so it cannot falsify). That is ~4 useful
+witnesses, one of them rich. **A proper search needs graphs WITH symmetry** — Cayley graphs, CFI/
+multipede constructions, vertex-transitive families — not uniform random graphs.
+
 ## What is NOT here
 
 The crux itself: `deepen` picks `w :: _`, the lowest-index member of the chosen sub-cell, and that

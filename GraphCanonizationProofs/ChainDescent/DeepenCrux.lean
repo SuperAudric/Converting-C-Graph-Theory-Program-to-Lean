@@ -43,10 +43,15 @@ the *gate outcome* is exactly what upgrades to labelling-invariance.
 ## Evidence (recorded so the next session need not re-measure)
 
 * `DeepenGateInvariant`: no counterexample — gate outcomes agree under the lowest-index and
-  highest-index rules across **200 random `n = 8` graphs** (151 with a non-empty branch cell), plus
-  `G8` (all 8 anchors pass under both), `t3` and `ut`.
-* Rule-independence of the emitted relation itself: 400 random `n = 8` graphs, 0 mismatches, 302
-  firing; and 8 labellings x 4 partially-firing witnesses.
+  highest-index rules on `G8` (all 8 anchors pass under both), `t3`, `wcyc9`, `ut`, and across 200
+  random `n = 8` graphs.
+* Rule-independence of the emitted relation itself: `G8` + `t3` + `wcyc9` + `ut` under two rules and
+  under 8 labellings each; plus 400 random `n = 8` graphs (0 mismatches, 302 firing).
+* ⚠⚠ **BUT THE RANDOM SWEEPS ARE DEGENERATE — measured, do not over-trust them.** At `n = 8` every
+  generated graph has a branch cell of size **0 or 2** (ZERO with a cell ≥ 4), because **random
+  graphs are almost surely asymmetric** so refinement discretizes them. The real evidence is the
+  handful of structured witnesses, of which **`G8` is the only rich partially-firing one**. A proper
+  search needs graphs WITH symmetry (Cayley / CFI / vertex-transitive families).
 * ⚠ **Methodological caveat, recorded because it bit once already** (the `G8` falsifier): all this
   evidence comes from instances where the algorithm appears *complete*. A discriminating test needs
   an instance where the supply fires but is strictly incomplete, and none was found at `n ≤ 8`. Until

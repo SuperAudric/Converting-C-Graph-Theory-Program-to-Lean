@@ -195,8 +195,8 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     license). Acceptance unchanged: `mp7` answers end-to-end.
 
     ### ⚠⚠ 2026-07-20 — C3b SCOPED AND MEASURED. Q(1)/Q(3) ANSWERED; A NEW, SHARPER GAP FOUND.
-    Probe = `ChainDescent/ScratchBase.lean` (SCRATCH, not in build.sh — the measurement record until
-    it is folded into `PerformanceTest` §16). Executable draft = `ChainDescent/KernelBase.lean`
+    Probe: the base-recovery/lift scratch file has been DELETED (route superseded and parked — see
+    below); every number it produced is recorded verbatim in this block, which is now the record. Executable draft = `ChainDescent/KernelBase.lean`
     (NOT in build.sh — see the verdict below before landing it).
     **✅ What the measurement CONFIRMS (do not re-derive):**
     1. **Base recovery works and is faithful, with no new extraction code.** `kernelSupply`'s own

@@ -74,6 +74,17 @@ picks** — expected mechanism, the all-singletons gate. NOT yet proven.
 sub-cell not related by any automorphism of the individualized graph) before investing in the proof.
 Absence of a falsifier over 5 witnesses is not proof — the `G8` episode above is exactly why.
 
+**⚠⚠ HOW STRONG IS THE EVIDENCE, HONESTLY (measured 2026-07-20 — read before trusting it).**
+The random-graph sweeps are **DEGENERATE and near-worthless**: at `n = 8` every generated graph has a
+branch cell of size **0 or 2** (ZERO graphs with a cell ≥ 4). The reason is structural — **random
+graphs are almost surely asymmetric**, so refinement discretizes them and an orbit-valued property has
+nothing to bite on. So "400 random graphs, 302 firing" and "200 random graphs" mean much less than the
+sample sizes suggest. **The real evidence is only the structured witnesses:** `G8` (cell 8, profile
+`[2,2,2,2,4,4,4,4]` — the one RICH partially-firing case), `t3`/`wcyc9` `[3,3,3]`, `ut`
+`[3,3,3,3,3,3]`, and `mp7` (cell 28 but fires TOTALLY, so it cannot falsify). That is ~4 useful
+witnesses, one of them rich. **A proper search needs graphs WITH symmetry** — Cayley graphs, CFI/
+multipede constructions, vertex-transitive families — not uniform random graphs.
+
 ## Performance notes (measured — these are not micro-optimisations)
 
 A first prototype took **> 1 hour** on `mp7`; the version below takes **~3 minutes** for the whole

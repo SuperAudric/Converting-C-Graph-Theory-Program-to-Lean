@@ -44,14 +44,43 @@ whole frontier.
 > supply that must make an internal choice: **make the choice, prove the GROUP is canonical, and let `SameOrbits`
 > carry ①/②/③.** The executable object then carries zero ① obligation.
 >
-> **Next on this track = C3b, and it was re-scoped by measurement — read `PerformanceTest` §15 before designing.**
-> mp7 answers at the root the moment ONE base-symmetry generator is supplied (kernel gens + the Z₇ translation ⟹
-> the 28-vertex branch cell is a single orbit; the translation lifts unchanged). ⛔ The mechanism this doc and
-> remaining-work previously named — "deck modulo the verified subgroup" — is **dead standalone**: girth 6 means the
-> translate seed forces 1 vertex of 42, and quotienting by `K` creates no chaining where there is none. The live
-> route is **base-graph recovery + lift** (remaining-work §1C C3 ii-c), whose ① license is *better*: two lifts of one
-> base automorphism differ by a pure gauge element ∈ `K`, and `WordReach` needs only per-vertex gauge elements, not
-> a global one.
+> **▶▶▶ 2026-07-20 — C3b IS LANDED (tranche 1) AND ITS ① STACK IS PART-BUILT. Three new modules (§1).**
+> `ChainDescent/DeepenSupply.lean` (`deepenSupply`) is the **base-symmetry** constructor — what survives after
+> `kernelSupply` certifies the gauge, and what no propagation-shaped supply can reach (girth 6 ⟹ a seed forces 1
+> vertex of 42, at any number of seeds). **Ported from the C# `ChainDescent.cs` `HarvestTwists`; the mechanism is
+> "stop propagating — REPLAY A DEEPENING AND COMPARE FOOTPRINTS".** Measured (`PerformanceTest` §16): mp7's branch
+> cell 28 and foot cell 14 each collapse to a **single orbit**. C# cross-check on the same object: |Aut| = 1344 =
+> 8 × 168 (`FanoMultipedeProbe.cs` — a case the C# suite had never covered, running only `7 ∤ m` with a fine
+> colouring that excludes the base symmetry by fiat).
+> ⛔ **Base-graph recovery + lift — the route this doc named above — is SUPERSEDED and PARKED** (`KernelBase.lean`,
+> compiles, NOT in `build.sh`). Its measured facts stand (recovery is faithful; the `Z₇` lift admits exactly
+> `8 = |L|` orientations) but nothing needs them: the base symmetry is reached without recovering a base object.
+>
+> **⚠⚠ THE ①c LESSON OF THIS INCREMENT — read before adding any supply that makes a within-cell choice.**
+> `deepenSupply` quantifies over **every anchor**, and that is REQUIRED, not an optimisation: with a single anchor
+> ①c is **measured FALSE** (⛔ the **`G8` falsifier** — five relabellings give branch-cell orbit profiles
+> `[2,2,2,2,4,4,4,4]` vs `[1,1,2,2,2,2,2,2]`, genuinely different partitions, so no equivariant reference can match
+> it). ★ **`mp7` CANNOT detect this** — it fires *totally*, so its profile is `[28]` down any path. **An
+> equivariance falsifier must be run on a PARTIALLY-FIRING witness.**
+>
+> **Tranche 2 is OPEN, not merely unbuilt, and `deepenSupply` is deliberately NOT in the record object.**
+> ✅ Part I (`DeepenTransport.lean`): every pipeline stage TRANSPORTS except the per-level vertex pick ⟹ the whole
+> ①c residue is the single line `w :: _`. ★ `chooseIdK_transport` — the chosen cell id is an INVARIANT `Nat`.
+> ✅ Part II (`DeepenCrux.lean`): the crux is DECOMPOSED into `DeepenGateInvariant` + `DeepenForcedMatch`, with the
+> soundness half proved (`deepenGens_isColAut`/`_sound` — emitted ⊆ true, can only under-report, never over-merge).
+> ▶ **Part III = discharge those two predicates**; read remaining-work §1C C3 (ii-c) first.
+>
+> **⚠⚠ TWO RETRACTIONS FROM THIS INCREMENT — do not re-derive** (both caught by the user, both recorded in full in
+> remaining-work §1C C3 ii-c):
+> 1. **I argued "emitted = true orbits ⟹ GI ∈ P, therefore false".** That is the **BANNED** argument form (§5's
+>    standing steer: a perfect key IS GI∈P, the TARGET — the inference is circular). Withdrawn.
+> 2. **I asserted "on hard instances the gate fails"** as justification. It was **never measured and is
+>    CONTRADICTED**: 0 gate failures on `t3`, `wcyc9`, `ut`, `mp7`. Withdrawn. **Orbit-equality is UNFALSIFIED, not
+>    refuted** — and not asserted; the predicates are gate-conditional either way.
+> **⚠ AND THE EVIDENCE IS THINNER THAN IT LOOKS:** the random-graph sweeps (400 / 200 graphs) are **DEGENERATE** —
+> at `n = 8` every generated graph has a branch cell of size 0 or 2, because **random graphs are almost surely
+> asymmetric**. The real evidence is ~4 structured witnesses, of which `G8` is the only rich partially-firing one.
+> A proper search needs graphs WITH symmetry (Cayley / CFI / vertex-transitive).
 
 ---
 
@@ -89,8 +118,11 @@ whole frontier.
 | `ChainDescent/KernelFlip.lean` | **C3a TRANCHE 2 part II — THE PRODUCT LEMMA** (2026-07-19). ★ `flipFunK_xor`: verified flips COMPOSE (`flip (w ⊕ w') = flip w ∘ flip w'`) — the theorem behind the all-or-nothing gate, i.e. why "the basis verifies" propagates to every word of the span. Key sub-results: rails are vertex-DISJOINT (`rails_endpoint_eq`), ★ `touched_moves` (a VERIFYING flip cannot fix a touched vertex — twin neighbourhood-disjointness; this closes the identity-default/`uniqueFilter`-ambiguity hole for compound words), ★ `satP_conj_flip` (the satisfier bijection). |
 | `ChainDescent/KernelRef.lean` | **C3a TRANCHE 2 part III — THE REFERENCE + `SameOrbits`** (2026-07-19). `kernelRefSupply` = flips of EVERY word of `L` (`allWords`-enumerated, proof-side only) under the SAME all-or-nothing gate; the gates are EQUIVALENT (`refGate_of_kernelGate` — the canonicity content) ⟹ ★ `sameOrbits_kernelRef`. Plus ★ `sameOrbits_appendSupply` (orbit-equality is a CONGRUENCE for `appendSupply` — the swap is licensed inside a composite record). |
 | `ChainDescent/KernelTransport.lean` | **C3a TRANCHE 2 part IV + THE CAPSTONES** (2026-07-19). ★★★ `gensEquivariant_kernelRefSupply` and, with part III, ★★★ `holKey_foldDeck2Kernel_selNode_canonizer` = the kernel-extended **canonizer of record**; also the two single-supply capstones and ③ transfer `handledS_recordSupply`. **The point:** `kernelSupply` is NOT and CANNOT be `GensEquivariant` (a Gaussian basis is pivot-order dependent — trap #7), so ① is discharged **entirely** through the `SameOrbits` reduction against the equivariant reference; the executable object carries ZERO ① obligation. Stack: `IsoTo` + structural conj (rails transport only up to endpoint order — `sPair`/`railMap`, and `rails_perm_conj` is a `List.Perm`, not an equality) → word transport (`transportWordR` re-reads bits by endpoint lookup because σ permutes rail POSITIONS; ★ `mem_zip_transport` + ★ `dotB_transport` carry everything) → `flipFunK_conj` → ★ the `inL` bridge (`localRows` is pivot-dependent ⟹ `L` re-characterized basis-free as `Lc`; `inL_iff_Lc` needs part I sound AND complete, over the adjunction `dotB_embed`). ⚠ `patOf`'s emitted bit reads the rail's FIRST endpoint, so `patOf_conj` holds **only under `patOf`'s own shape condition** (`patBit_swap_of_shape`). |
+| `ChainDescent/DeepenSupply.lean` | **C3b TRANCHE 1 — THE ANCHOR-DEEPENING SUPPLY** (2026-07-20). `deepenSupply`: the BASE-symmetry constructor, ported from the C# `HarvestTwists`. Deepen an anchor to an all-singleton footprint recording the chosen cell ids → replay that id sequence from every other representative → match footprint colours on the coupled component → `permOf` + `IsColAut` verify. Reaches what propagation cannot because it does not propagate. Measured on `mp7` (`PerformanceTest` §16): branch cell 28 and foot cell 14 each a SINGLE ORBIT. ⚠ Quantifies over EVERY anchor — required, not an optimisation (the `G8` falsifier). **NOT in the record object**: its ①c stack is open. ⚠ Perf: prototype > 1 h → ~3 min (materialise the twist as a `Vector` — trap #1; hoist the per-rep refinement; `coupled` once per level). |
+| `ChainDescent/DeepenTransport.lean` | **C3b TRANCHE 2 part I — THE PIPELINE TRANSPORTS** (2026-07-20). Every stage of the deepening pipeline is equivariant **except the per-level vertex pick**, which isolates the whole ①c obligation to one line of `deepen`. ★ `chooseIdK_transport`: the chosen cell id is an **invariant `Nat`** (equal, not conjugated) ⟹ the recorded id sequence is labelling-independent — exactly the "cell-id sequence matches" step of the crux. Also `step_transport`, `mem_coupled_transport`, `allSingletonsK_transport`, `classOf_length_transport`. ⚠ Lists transport only up to `List.Perm` (`classOf` filters `finRange` in INDEX order) — the `rails_perm_conj` lesson. |
+| `ChainDescent/DeepenCrux.lean` | **C3b TRANCHE 2 part II — THE CRUX, DECOMPOSED** (2026-07-20). States what remains as two predicates: `DeepenGateInvariant` (the gate outcome is labelling-invariant — given part I, the ENTIRE residue of ①c) and `DeepenForcedMatch` (gate passes ⟹ emitted relation = true orbit relation). **Proved unconditionally:** `deepenGens_isColAut` + `deepenGens_sound` (emitted ⊆ true — the supply can only under-report orbits, never over-merge). ⚠ Carries the two retractions and the evidence-strength warning; read its header before attempting part III. |
 | `ChainDescent/Regression.lean` | the **build-gating** regression suite (~1 min: §8 F1 fold guards, §9 sel, §10 F2a mirror-tie, §11 F2b deck, §12 F3a holKey, §14 F2c t3, §15 C3a kernel-wiring gates). |
-| `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (§11 `ut` end-to-end ~20 min; §12 wr3; §13 mp7 stall record; §14 kernel firing; §15 **the C3b target, measured** — mp7 answers at the root the moment ONE base-symmetry generator is supplied). |
+| `ChainDescent/PerformanceTest.lean` | measurements — **deliberately NOT in `build.sh`**; run with `lake build ChainDescent.PerformanceTest` (§11 `ut` end-to-end ~20 min; §12 wr3; §13 mp7 stall record; §14 kernel firing; §15 the C3b target as first measured; **§16 the DEEPENING supply — mp7's branch cell 28 and foot cell 14 each a single orbit**). |
 
 ---
 

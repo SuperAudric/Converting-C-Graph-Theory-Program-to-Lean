@@ -410,4 +410,4 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Kernel.filterMap_length_eq_iff` | 117-145 | A `filterMap` preserves length exactly when every element maps to `some` — the counting half of the all-or-nothing gate. | — |
+| `Kernel.filterMap_length_eq_iff` | 121-149 | A `filterMap` preserves length exactly when every element maps to `some` — the counting half of the all-or-nothing gate. | — |

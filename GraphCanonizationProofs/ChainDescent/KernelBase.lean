@@ -51,8 +51,9 @@ same supply for the licence above to be available.
 ## ⛔⛔ STATUS 2026-07-20 — THIS FILE IS **NOT IN `build.sh`** AND MUST NOT BE LANDED YET.
 
 It compiles, and the recovery and lift halves are *measured correct*, but as written the supply emits
-nothing but identities on the witness. Measurements: `ChainDescent/ScratchBase.lean` (SCRATCH); the
-full write-up is remaining-work §1C C3 (ii-c), 2026-07-20 block. Read that before touching this file.
+nothing but identities on the witness. Measurements: the scratch probe has been DELETED (this route is
+superseded by `DeepenSupply`); every number is recorded in remaining-work §1C C3 (ii-c), 2026-07-20
+block, which is the record. Read it before touching this file.
 
 **✅ Confirmed by measurement (do not re-derive):**
 · Base recovery is faithful, with no new extraction code: on `mp7`, rails = the 7 foot pairs,
@@ -84,11 +85,18 @@ object Lean uses (uniform colouring, `n = 42`): canonical, 4 nodes, depth 3,
 "fine colouring" gives every segment and cluster its own colour, excluding the base symmetry by
 fiat, and the existing suite covers only `7 ∤ m` (the rigid case).
 
-**▶ The architectural catch (the real open question).** C# gets those automorphisms by harvesting
-**coinciding leaf matrices** (nauty-style, a posteriori) into a Schreier–Sims chain — which requires
-exploring several leaves, while ② demands a single path of `≤ n+1` nodes or a flag. So the C#
-success does not transfer for free. Settle first whether the base graph is solvable on a single
-path at all; only then is the supply shape here worth completing.
+**⛔⛔ THIS WHOLE FILE IS SUPERSEDED AND PARKED — 2026-07-20. Do not complete it.**
+⚠ An earlier version of this paragraph guessed that C# succeeds by harvesting **coinciding leaf
+matrices** (nauty-style) and therefore "does not transfer" to ②'s single path. **That was measured
+FALSE: `leaves = 1`** (4 nodes, depth 3, well inside `n+1`, and `EnableRigidSolver` ON/OFF is
+identical). The real mechanism is `ChainDescent.cs` `HarvestTwists` — deepen an anchor, replay the
+recorded cell-id sequence from each other representative, match refinement footprints, verify — and
+it IS single-path, hence portable.
+**It has been ported: `ChainDescent/DeepenSupply.lean` (`deepenSupply`), which is in `build.sh` and
+solves `mp7` (branch cell 28 and foot cell 14 each a single orbit).** That supersedes base-graph
+recovery entirely: the base symmetry is reached without recovering a base object at all. This file is
+kept only for its two measured facts (recovery is faithful; the `Z₇` lift admits exactly `8 = |L|`
+orientations, confirming the coset theory) — neither is on the critical path.
 -/
 
 namespace ChainDescent
