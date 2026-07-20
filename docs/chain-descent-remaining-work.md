@@ -314,7 +314,30 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
       succeed independently of which member of the id-`cid` cell replay picks?** Expected mechanism:
       the ALL-SINGLETONS GATE forces it (it demands the coupled component be fully discretized). That
       is the load-bearing step and it is NOT yet proven.
-    **⚠ STEP 0 OF (a) IS ADVERSARIAL — do it before investing in the proof:** try to CONSTRUCT a
+    **✅ STEP 0 DONE 2026-07-20 — the adversarial hunt came back CLEAN and NON-VACUOUS.** A search over
+    400 random graphs on `Fin 8`, comparing the emitted orbit profile under the lowest-index rule vs
+    the highest-index rule (rule changed on BOTH sides — anchor deepening AND replay), found **zero**
+    mismatches, and **302 of the 400 actually fire** (so the search had real coverage, not a sweep
+    over inert graphs). Together with the earlier sweeps, route (a) survives every test available.
+    ★ The reframing that made the hunt sharp, and that the proof will use: the executable uses the
+    **same selection rule on both sides**, so the conjecture is not "the choice does not matter" but
+    "the emitted orbit relation is independent of the rule, *provided the same rule is used on both
+    sides*". Note robustness canNOT come from equivariance of the rule — a lowest-index rule does not
+    commute with an automorphism `t`, so replay generally reaches a DIFFERENT discrete colouring than
+    `t`'s image. It has to come from the **all-singletons gate** making the colour ids canonical 1-WL
+    ranks, so the match is between canonically-labelled structures whichever discrete colouring was
+    reached. That is the mechanism the crux proof must exploit.
+    **✅ TRANCHE 2 PART I LANDED 2026-07-20 — `ChainDescent/DeepenTransport.lean`, in `build.sh`, all
+    axiom-clean.** The unconditional half: **every stage of the pipeline transports except the vertex
+    pick.** ★ `chooseIdK_transport` is the load-bearing one — the chosen cell id is an INVARIANT `Nat`
+    (equal, not conjugated), so the recorded id sequence is labelling-independent, which is exactly
+    the "cell-id sequence matches" step of the crux. Also `step_transport` (individualize+refine
+    commutes with σ), `mem_coupled_transport`, `allSingletonsK_transport` (invariant `Bool`),
+    `classOf_length_transport` (invariant size), `classOf_perm_transport`. ⚠ Lists transport only up
+    to `List.Perm` (`classOf` filters `finRange` in INDEX order) — the `rails_perm_conj` lesson.
+    **▶ REMAINING = tranche 2 part II: the crux alone.** Everything else is now proved, so the ①c
+    obligation is isolated to the single line `w :: _` in `deepen`.
+    **(superseded, kept for the record) STEP 0 OF (a) WAS ADVERSARIAL:** try to CONSTRUCT a
     witness where the per-level choice matters (two vertices in the chosen sub-cell not related by any
     automorphism of the individualized graph), rather than only sweeping existing witnesses. Absence
     of a falsifier across 5 witnesses is not proof, and the `G8` episode is exactly why. If such a
