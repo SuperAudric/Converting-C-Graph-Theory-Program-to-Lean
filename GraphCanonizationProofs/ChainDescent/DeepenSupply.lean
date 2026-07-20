@@ -34,15 +34,33 @@ footprints**:
 4. **verify** — `permOf` gates bijectivity and `Consume.verified` re-checks `IsColAut` as always.
    The construction only *proposes*; verification disposes. Junk costs firing, never ①.
 
-## ★ The ①c story (NOT `GensEquivariant` — the `kernelSupply` shape again)
+## ⚠⚠ The ①c story — A SINGLE ANCHOR IS **MEASURED FALSE**. ALL ANCHORS ARE REQUIRED.
 
-The anchor is the head of `Descend.branches`, i.e. a **within-cell pick**, and the recorded sequence
-also breaks ties by vertex index. So the emitted transversal `{t : r₁ ↦ rⱼ}` is labelling-dependent
-and `GensEquivariant` is false pointwise — exactly as for `kernelSupply`'s pivot-dependent basis
-(trap #7). What IS labelling-independent is the **orbit** the transversal generates. So ① rides
-`OrbitPrune.SameOrbits` against the anchor-independent set-level reference (all pairs of the cell,
-same gate), and the executable object carries zero ① obligation. The licensing machinery for this
-already exists and is proven: `sameOrbits_appendSupply` (`KernelRef.lean`).
+The anchor is a **within-cell pick** and each deepening level breaks ties by vertex index, so the
+supply runs a *different computation* under relabelling. `SameOrbits` (hence ①c) needs the emitted
+**orbit relation** to be labelling-independent, and with ONE anchor it is not:
+
+> **⛔ THE `G8` FALSIFIER (2026-07-20 — do not re-introduce a single-anchor variant).** Scrambling
+> `G8` by five relabellings, the single-anchor supply gives branch-cell orbit profiles
+> `[2,2,2,2,4,4,4,4]` under two of them and `[1,1,2,2,2,2,2,2]` under the other two — genuinely
+> different partitions (one has fixed points, the other orbits of size 4). ⟹ ①c FALSE, and
+> `SameOrbits` against **any** equivariant reference is therefore false too, since an equivariant
+> reference has a labelling-independent orbit relation by definition. `mp7` cannot detect this: it
+> fires *totally* there (whole cell = one orbit), so its profile is `[28]` whatever path is taken —
+> **the falsifier must be a PARTIALLY-firing witness.**
+
+Quantifying over **all anchors** repairs it, measured: the same five `G8` labellings then all give
+`[2,2,2,2,4,4,4,4]`, and the union fires strictly more (it is the richer partition). That is why
+`deepenGens` below loops over every anchor rather than the head of `Descend.branches`, at a cost of
+`|cell|` extra deepenings.
+
+**The residual ①c obligation (tranche 2, OPEN).** All-anchors removes the *anchor* choice but not
+the **per-deepening-level vertex choice** (`w :: _` — the lowest-index member of the chosen
+sub-cell). No falsifier is known for that layer, but none is proven absent either, so the ① route is
+NOT yet settled. The two candidate routes: (a) show the emitted orbit relation is invariant under
+the per-level choice, giving `SameOrbits` against the all-anchors-all-paths reference; or (b) find a
+canonical tie-break. **Do not assume (a) — it is exactly the shape the `G8` falsifier just broke at
+the anchor layer.**
 
 ## Performance notes (measured — these are not micro-optimisations)
 
@@ -61,9 +79,10 @@ measurement file. Three faults, all instances of the project's standing traps:
 This file is **tranche 1**: the executable object and its measured firing. The ① proof stack (the
 `SameOrbits` reduction above) is **tranche 2 and is NOT built**, so this supply is deliberately
 **not** in `Publication.canonForm?`'s record object yet — exactly how `kernelSupply` was staged.
-Measured on `mp7` (`PerformanceTest` §16): branch cell 28, **27 verified generators from one
-anchor**, and the gadget cell (28) *and* the foot cell (14) each collapse to a **single orbit** —
-the standing `Z₇`/`PGL(3,2)` base symmetry that `kernelSupply` honestly left, now certified.
+Measured on `mp7` (`PerformanceTest` §16): branch cell 28, and the gadget cell (28) *and* the foot
+cell (14) each collapse to a **single orbit** — the standing `Z₇`/`PGL(3,2)` base symmetry that
+`kernelSupply` honestly left, now certified. (The single-anchor variant gave 27 generators there;
+the all-anchors design required by the `G8` falsifier gives correspondingly more.)
 -/
 
 namespace ChainDescent
@@ -134,24 +153,28 @@ def replay (adj : AdjMatrix n) : List Nat → Refine.ColData n → Option (Refin
 
 /-! ## 3. The supply -/
 
-/-- **★ THE DEEPENING SUPPLY.** One anchor per branch cell; every value not depending on `rⱼ` is
-hoisted, and the twist is materialised as a `Vector` (trap #1). Recognition is UNTRUSTED —
+/-- **★ THE DEEPENING SUPPLY.** EVERY anchor of the branch cell (the `G8` falsifier above forbids a
+single anchor); every value not depending on `rⱼ` is hoisted, and the twist is materialised as a
+`Vector` (trap #1). Recognition is UNTRUSTED —
 `Consume.verified` re-checks every emitted generator, so junk costs firing and never ①. Cost billed
 flat at `n⁶`: `≤ n` representatives × `≤ n` deepening levels × a warm refinement (`≤ n³`), plus
 `≤ n` verifications at `n²` — generous, honest. -/
 def deepenGens (adj : AdjMatrix n) (χ : Colouring n) : List (Equiv.Perm (Fin n)) :=
-  match Descend.branches χ with
-  | [] => []
-  | r1 :: rest =>
-      match deepen adj χ n (step adj χ r1) [] with
-      | none => []
-      | some (d1, seq) =>
-          let χ1 := d1.col
-          let K := coupled χ χ1
-          if K.isEmpty || !allSingletonsK K χ1 then []
-          else
-            rest.filterMap (fun rj =>
-              match replay adj seq (step adj χ rj) with
+  let cell := Descend.branches χ
+  -- the first individualize+refine of each representative is anchor-independent: compute the
+  -- `|cell|` of them ONCE rather than `|cell|²` times (trap #2 — recomputation you cannot see).
+  let firsts : List (Fin n × Refine.ColData n) := cell.map (fun r => (r, step adj χ r))
+  firsts.flatMap (fun p1 =>
+    match deepen adj χ n p1.2 [] with
+    | none => []
+    | some (d1, seq) =>
+        let χ1 := d1.col
+        let K := coupled χ χ1
+        if K.isEmpty || !allSingletonsK K χ1 then []
+        else
+          firsts.filterMap (fun pj =>
+            if pj.1 == p1.1 then none
+            else match replay adj seq pj.2 with
               | none => none
               | some dj =>
                   let χj := dj.col
@@ -160,7 +183,7 @@ def deepenGens (adj : AdjMatrix n) (χ : Colouring n) : List (Equiv.Perm (Fin n)
                       if K.contains v then (K.find? (fun w => χj w == χ1 v)).getD v else v)
                   match permOf (fun v => img.get v) with
                   | none => none
-                  | some ρ => if decide (IsColAut adj χ ρ) then some ρ else none)
+                  | some ρ => if decide (IsColAut adj χ ρ) then some ρ else none))
 
 /-- The supply. -/
 def deepenSupply : Supply n := fun adj χ =>

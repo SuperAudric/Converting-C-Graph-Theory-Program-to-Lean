@@ -257,20 +257,35 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
         non-singleton sub-cell is refinement-indistinguishable and admits no iso-invariant match, so
         those are rejected outright;
     (4) `permOf` + `IsColAut` verify — propose/dispose, junk costs firing and never ①.
-    **✅ MEASURED (`PerformanceTest` §16, `#guard`ed):** branch cell **28**; ONE anchor yields
-    **27 verified generators**; and the gadget cell (28) **and** the foot cell (14) each collapse to
+    **✅ MEASURED (`PerformanceTest` §16, `#guard`ed):** branch cell **28**; the supply yields
+    **756 = 28 × 27 verified generators** (all anchors); and the gadget cell (28) **and** the foot cell (14) each collapse to
     a **SINGLE ORBIT — from the deepen gens alone**. Compare §14 (kernel alone → gadget orbit 4, the
     gauge) and §15 (the translation had to be supplied by hand to reach 28). **That is the C3
     acceptance.** Cross-check: C# reports |Aut| = 1344 = 8 × 168 on the same object.
-    **★ The ①c story is the `kernelSupply` shape, NOT `GensEquivariant`.** The anchor is the head of
-    `Descend.branches` — a within-cell pick — and the recorded sequence breaks ties by vertex index,
-    so the emitted transversal `{t : r₁ ↦ rⱼ}` is labelling-dependent (trap #7 again). What is
-    labelling-independent is the **orbit** it generates ⟹ ① rides `OrbitPrune.SameOrbits` against
-    the anchor-independent all-pairs reference. **The licensing machinery already exists and is
-    proven: `sameOrbits_appendSupply` (`KernelRef.lean`).**
-    **▶ REMAINING (tranche 2, NOT built):** the `SameOrbits` reduction, then the record entry. Until
-    it exists `deepenSupply` is deliberately **not** in `Publication.canonForm?` — exactly how
-    `kernelSupply` was staged. `KernelBase.lean` (base recovery + lift) is **superseded by this
+    **WARNING ①c — RETRACTED AND CORRECTED 2026-07-20 (same day). An earlier version of this block
+    said "① rides `SameOrbits`, the licensing machinery already exists and is proven". That was
+    WRONG as stated — with the single-anchor supply ①c is MEASURED FALSE.**
+    > **STOP: THE `G8` FALSIFIER — do not re-introduce a single-anchor variant, and do not attempt a
+    > `SameOrbits` proof for one.** Scrambling `G8` by five relabellings, the single-anchor supply
+    > gives branch-cell orbit profiles `[2,2,2,2,4,4,4,4]` under two and `[1,1,2,2,2,2,2,2]` under
+    > two others — genuinely different partitions (fixed points vs orbits of size 4). Hence ①c is
+    > false, and `SameOrbits` against **any** equivariant reference is then false too (an equivariant
+    > reference has a labelling-independent orbit relation by definition).
+    > **Why `mp7` could not catch it, and the reusable lesson:** `mp7` fires *totally* (whole cell
+    > = one orbit), so its profile is `[28]` down any path. **An equivariance falsifier must be run
+    > on a PARTIALLY-firing witness** — a totally-firing one is structurally incapable of falsifying.
+    **THE FIX, MEASURED: quantify over ALL ANCHORS.** The same five `G8` labellings then all give
+    `[2,2,2,2,4,4,4,4]`, and the union fires strictly MORE (it is the richer partition). The landed
+    `deepenGens` loops over every anchor, with the per-representative first refinement hoisted so the
+    cost is `|cell|` refinements + replays, not `|cell|` squared (trap #2).
+    **REMAINING (tranche 2, OPEN — NOT merely unbuilt).** All-anchors removes the *anchor* choice
+    but **not the per-deepening-level vertex choice** (lowest-index member of the chosen sub-cell).
+    No falsifier is known for that layer and none is proven absent, so the ① route is **not settled**.
+    Routes: (a) prove the emitted orbit relation invariant under the per-level choice, giving
+    `SameOrbits` vs an all-anchors-all-paths reference; or (b) find a canonical tie-break. **Do not
+    assume (a) — it is exactly the shape that just broke at the anchor layer.** First action either
+    way: rerun the falsifier sweep on partially-firing witnesses against the per-level choice.
+    Until settled `deepenSupply` stays out of `Publication.canonForm?`. `KernelBase.lean` (base recovery + lift) is **superseded by this
     route and parked** — it is not in `build.sh` and is not needed.
     **⚠ PERF, recorded because it recurs:** a first prototype ran **> 1 hour** on `mp7`; the landed
     version measures in ~3 min. Three faults, all standing traps: the twist was a **closure**, so

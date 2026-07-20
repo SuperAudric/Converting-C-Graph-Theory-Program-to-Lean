@@ -150,13 +150,17 @@ close it — is set out in
 > from the C# `HarvestTwists`: **stop propagating — replay a deepening and compare footprints.** Deepen an
 > anchor to an all-singleton footprint recording the chosen cell ids; replay that id sequence from every other
 > representative; match footprint colours on the coupled component; `permOf` + `IsColAut` verify.
-> **MEASURED (`PerformanceTest` §16):** branch cell 28, **27 verified gens from ONE anchor**, and the gadget
+> **MEASURED (`PerformanceTest` §16):** branch cell 28, **756 = 28×27 verified gens (ALL anchors)**, and the gadget
 > cell (28) *and* foot cell (14) each collapse to a **SINGLE ORBIT** = the C3 acceptance. C# cross-check on the
 > same object: |Aut| = 1344 = 8 × 168 (`FanoMultipedeProbe.cs`).
-> **★ ①c = the `kernelSupply` shape, not `GensEquivariant`:** the anchor is a within-cell pick so the emitted
-> transversal is labelling-dependent, but its ORBIT is not ⟹ `SameOrbits` vs the all-pairs reference, licensed
-> by the already-proven `sameOrbits_appendSupply`. **Tranche 2 (that reduction + the record entry) is NOT
-> built**, so `deepenSupply` is deliberately not yet in `Publication.canonForm?`.
+> **WARNING — ①c RETRACTED/CORRECTED same day: `SameOrbits` is NOT ready to prove.** With a SINGLE anchor
+> ①c is **measured FALSE**: the **`G8` falsifier** — five relabellings give branch-cell orbit profiles
+> `[2,2,2,2,4,4,4,4]` vs `[1,1,2,2,2,2,2,2]`, genuinely different partitions, so no equivariant reference can
+> match it. **`mp7` cannot detect this** (it fires totally, so the profile is `[28]` down any path) — **an
+> equivariance falsifier must be run on a PARTIALLY-firing witness.** Fix, measured: quantify over **all
+> anchors** (profiles then agree, and it fires strictly more) — that is what is landed. **Tranche 2 is OPEN,
+> not merely unbuilt:** the per-deepening-level vertex choice remains unaddressed, so `deepenSupply` stays out
+> of `Publication.canonForm?`.
 > ⛔ `KernelBase.lean` (base recovery + lift) is **superseded by this route and parked** — not in `build.sh`.
 > **⚠⚠ STANDING TRAP: `Consume.gens` returns UNVERIFIED candidates** (junk is filtered by `Consume.verified`
 > downstream) — any probe reading it directly MUST filter by `IsColAut` first; reading it raw produced a wrong

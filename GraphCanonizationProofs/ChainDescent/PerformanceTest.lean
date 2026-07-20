@@ -163,8 +163,8 @@ def fold4SwappedRoot : Refine.ColData 24 := Refine.warmRefineVec fold4Swapped (f
 /-! `deepMatchSupply` needs `d = k − 2 = 2` on a 4-fold cover; at `d = 1` it is still dead and already 132× the
 firing supply's cost. -/
 --#eval ((narrow (consume (DeepMatch.deepMatchSupply 1)) Regression.fold4 Regression.fold4Root.col).length,
-       Consume.supplyCost (DeepMatch.deepMatchSupply 1) Regression.fold4 Regression.fold4Root.col,
-       Consume.supplyCost (PartialMatch.partialMatchSupply 0) Regression.fold4 Regression.fold4Root.col)
+--       Consume.supplyCost (DeepMatch.deepMatchSupply 1) Regression.fold4 Regression.fold4Root.col,
+--       Consume.supplyCost (PartialMatch.partialMatchSupply 0) Regression.fold4 Regression.fold4Root.col)
 -- (4, 8524800, 64512)
 
 /-! ## 8. `F2a` — the structural fold supply at `s = 3` (`Regression` §10 is the `s = 2` gate)
@@ -516,10 +516,14 @@ the answer to what §15 measured as missing — the `Z₇`/`PGL(3,2)` BASE symme
 `kernelSupply` certifies the gauge, and that no propagation-shaped supply reaches (girth 6 ⟹ a seed
 forces 1 vertex of 42 and nothing chains, at any number of seeds).
 
-Measured here: the branch cell has 28 members; ONE anchor yields **27 verified generators**; and the
-gadget cell (28) and the foot cell (14) each collapse to a **SINGLE ORBIT** — compare §14, where the
-kernel alone gives a gadget orbit of 4 (the gauge), and §15, where supplying the translation by hand
-was needed to reach 28. Cross-check: the C# canonizer reports |Aut| = 1344 = 8 × 168 on the same
+Measured here: the branch cell has 28 members; the supply yields **756 = 28 × 27 verified
+generators** (every ordered pair of representatives); and the gadget cell (28) and the foot cell (14)
+each collapse to a **SINGLE ORBIT** — compare §14, where the kernel alone gives a gadget orbit of 4
+(the gauge), and §15, where supplying the translation by hand was needed to reach 28.
+
+⚠ It quantifies over EVERY anchor, not one: with a single anchor ①c is measured FALSE (the `G8`
+falsifier — see the `DeepenSupply` header). `mp7` cannot detect that, because it fires totally here;
+an equivariance falsifier needs a PARTIALLY-firing witness. Cross-check: the C# canonizer reports |Aut| = 1344 = 8 × 168 on the same
 object (`FanoMultipedeProbe.cs`), i.e. gauge × the full Fano collineation group.
 
 ⚠ Cost note (~3 min): a first prototype of this measurement ran **> 1 hour**. The cures are the
@@ -529,10 +533,10 @@ of the inner loop, and compute the `O(n³)` `coupled` once per level rather than
 def mpDeepenGens : List (Equiv.Perm (Fin 42)) :=
   Deepen.deepenGens Regression.mp7 Regression.mp7Root.col
 
---#guard (Descend.branches Regression.mp7Root.col).length = 28
---#guard mpDeepenGens.length = 27
+#guard (Descend.branches Regression.mp7Root.col).length = 28
+#guard mpDeepenGens.length = 756
 -- ★ THE C3 ACCEPTANCE: both cells are single orbits, from the deepen gens ALONE
---#guard (orbitOf mpDeepenGens (mk42 14)).length = 28
+#guard (orbitOf mpDeepenGens (mk42 14)).length = 28
 #guard (orbitOf (mpKernelGens ++ mpDeepenGens) (mk42 14)).length = 28
 #guard (orbitOf (mpKernelGens ++ mpDeepenGens) (mk42 0)).length = 14
 
