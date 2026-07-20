@@ -278,13 +278,47 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     `[2,2,2,2,4,4,4,4]`, and the union fires strictly MORE (it is the richer partition). The landed
     `deepenGens` loops over every anchor, with the per-representative first refinement hoisted so the
     cost is `|cell|` refinements + replays, not `|cell|` squared (trap #2).
-    **REMAINING (tranche 2, OPEN — NOT merely unbuilt).** All-anchors removes the *anchor* choice
-    but **not the per-deepening-level vertex choice** (lowest-index member of the chosen sub-cell).
-    No falsifier is known for that layer and none is proven absent, so the ① route is **not settled**.
-    Routes: (a) prove the emitted orbit relation invariant under the per-level choice, giving
-    `SameOrbits` vs an all-anchors-all-paths reference; or (b) find a canonical tie-break. **Do not
-    assume (a) — it is exactly the shape that just broke at the anchor layer.** First action either
-    way: rerun the falsifier sweep on partially-firing witnesses against the per-level choice.
+    **▶ TRANCHE 2 — ROUTE DECIDED 2026-07-20: (a), the path-independence proof. (b) = recorded fallback.**
+    All-anchors removes the *anchor* choice but not the **per-deepening-level vertex choice**
+    (lowest-index member of the chosen sub-cell), so the ① route had to be chosen on evidence.
+    **The evidence (all measured this day):**
+    · **No falsifier for the per-level layer.** Two tie-break rules (lowest- vs highest-index) give
+      IDENTICAL branch-cell orbit profiles on `G8` `[2,2,2,2,4,4,4,4]`, `t3`/`wcyc9` `[3,3,3]`, `ut`
+      `[3,3,3,3,3,3]`; and **8 labellings x those 4 PARTIALLY-FIRING witnesses all agree** (dedup
+      length 1 each) for the landed all-anchors supply. These same tests caught the anchor-layer bug,
+      so they demonstrably have teeth.
+    · **Path counts measured** (for costing (b)): `G8` [] or [2], `wcyc9` [] (depth 0), `t3` [2,2]=4,
+      `ut` [2,3,2,2,2]=48, `mp7` [12,4]=48.
+    **WHY (a) WINS — the decisive criterion is the NO-EXPONENTIALS requirement (user steer):**
+    (a) is **polynomial by construction** — it IS the landed executable (`|cell|` deepenings +
+    `|cell|`-squared replays, bounded refinements each, billed `n⁶`); no budget, no firing cliff.
+    (b) cannot avoid an exponential unaided: the deepening tree is a PRODUCT of sub-cell sizes over
+    levels (worst case `2^(n/2)`), and it is worse than it first looks because **`replay` also picks
+    `members[0]`**, so (b) needs paths-x-paths per pair (~1.7M constructions on `mp7` alone).
+    **⚠ HARD REQUIREMENT ON (b) IF IT IS EVER TAKEN:** it must ship with either a PROOF that the
+    deepening tree is poly-bounded, or an imposed **budget gate** — enumerate up to `B(n)` leaves and
+    EMIT NOTHING beyond it. The budget form stays canonical (the tree branches over ALL vertices of
+    the canonically-chosen sub-cell, so it makes no choice; its leaf count is a canonical number and
+    "≤ B" a canonical predicate), and exceeding `B` is a firing loss, never an ① loss.
+    **▶ ROUTE (a), SCOPED.** Reference `deepenRefSupply` (PROOF-SIDE ONLY, never executed — the
+    `kernelRef` `2^#rails` pattern): all anchors x ALL deepening paths x ALL replay paths, same
+    all-singletons gate; equivariant because it makes no choices.
+    · *Direction 1 (easy):* `exec ⊆ ref` — the canonical path is one of the paths, `WordReach` is
+      monotone.
+    · *Direction 2 (THE CRUX):* if for anchor `r₁` SOME deepening path `P` and replay path `Q` yield
+      a verified twist `t` with `t r₁ = rⱼ`, then `rⱼ` is `WordReach`-able from `r₁` using the
+      CANONICAL-path generators. Sketch: `t` is a genuine automorphism, so applying it to the
+      canonical deepening from `r₁` transports it to a valid deepening from `rⱼ` with vertex choices
+      `t(wᵢ)`; colours are preserved so the CELL-ID SEQUENCE MATCHES, and the only gap is that replay
+      picks a different member of the SAME cell. So the crux reduces to: **does the twist construction
+      succeed independently of which member of the id-`cid` cell replay picks?** Expected mechanism:
+      the ALL-SINGLETONS GATE forces it (it demands the coupled component be fully discretized). That
+      is the load-bearing step and it is NOT yet proven.
+    **⚠ STEP 0 OF (a) IS ADVERSARIAL — do it before investing in the proof:** try to CONSTRUCT a
+    witness where the per-level choice matters (two vertices in the chosen sub-cell not related by any
+    automorphism of the individualized graph), rather than only sweeping existing witnesses. Absence
+    of a falsifier across 5 witnesses is not proof, and the `G8` episode is exactly why. If such a
+    witness exists, (a) is dead and the fallback is (b)+budget.
     Until settled `deepenSupply` stays out of `Publication.canonForm?`. `KernelBase.lean` (base recovery + lift) is **superseded by this
     route and parked** — it is not in `build.sh` and is not needed.
     **⚠ PERF, recorded because it recurs:** a first prototype ran **> 1 hour** on `mp7`; the landed

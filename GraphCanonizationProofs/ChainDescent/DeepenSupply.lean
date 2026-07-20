@@ -54,13 +54,25 @@ Quantifying over **all anchors** repairs it, measured: the same five `G8` labell
 `deepenGens` below loops over every anchor rather than the head of `Descend.branches`, at a cost of
 `|cell|` extra deepenings.
 
-**The residual ①c obligation (tranche 2, OPEN).** All-anchors removes the *anchor* choice but not
-the **per-deepening-level vertex choice** (`w :: _` — the lowest-index member of the chosen
-sub-cell). No falsifier is known for that layer, but none is proven absent either, so the ① route is
-NOT yet settled. The two candidate routes: (a) show the emitted orbit relation is invariant under
-the per-level choice, giving `SameOrbits` against the all-anchors-all-paths reference; or (b) find a
-canonical tie-break. **Do not assume (a) — it is exactly the shape the `G8` falsifier just broke at
-the anchor layer.**
+**The residual ①c obligation (tranche 2, OPEN) — ROUTE DECIDED 2026-07-20: (a).** All-anchors
+removes the *anchor* choice but not the **per-deepening-level vertex choice** (`w :: _` — the
+lowest-index member of the chosen sub-cell). Measured before deciding: no falsifier for that layer
+(lowest- vs highest-index tie-break identical on `G8`/`t3`/`wcyc9`/`ut`, and 8 labellings x those 4
+PARTIALLY-FIRING witnesses all agree). **(a) = prove the orbit relation invariant under the per-level
+choice**, giving `SameOrbits` against a proof-side all-anchors-all-paths reference. It wins on the
+no-exponentials requirement: (a) is polynomial **by construction** (it is this executable), whereas
+(b) "enumerate all paths" has a deepening tree that is a PRODUCT of sub-cell sizes (worst case
+`2^(n/2)`) and `replay` picks `members[0]` too, so it needs paths-x-paths per pair. **If (b) is ever
+taken it MUST carry a poly bound or a budget gate** (enumerate ≤ `B(n)` leaves, else emit nothing —
+canonical, and exceeding `B` is a firing loss, never an ① loss).
+**The crux of (a):** an emitted `t` is a genuine automorphism, so it transports the canonical
+deepening from `r₁` to a valid deepening from `rⱼ`; colours are preserved so the CELL-ID SEQUENCE
+MATCHES, and the only gap is that replay picks a different member of the SAME cell. So the crux is
+**whether the twist construction succeeds independently of which member of the id-`cid` cell replay
+picks** — expected mechanism, the all-singletons gate. NOT yet proven.
+**⚠ STEP 0 IS ADVERSARIAL:** try to CONSTRUCT a per-level falsifier (two vertices in the chosen
+sub-cell not related by any automorphism of the individualized graph) before investing in the proof.
+Absence of a falsifier over 5 witnesses is not proof — the `G8` episode above is exactly why.
 
 ## Performance notes (measured — these are not micro-optimisations)
 
