@@ -193,6 +193,75 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     recovery is stated generally or per-recognized-family (the retarget's per-family recovery leg);
     (3) whether the lift needs the gate to have passed (probably yes — `K` must be available for the
     license). Acceptance unchanged: `mp7` answers end-to-end.
+
+    ### ⚠⚠ 2026-07-20 — C3b SCOPED AND MEASURED. Q(1)/Q(3) ANSWERED; A NEW, SHARPER GAP FOUND.
+    Probe = `ChainDescent/ScratchBase.lean` (SCRATCH, not in build.sh — the measurement record until
+    it is folded into `PerformanceTest` §16). Executable draft = `ChainDescent/KernelBase.lean`
+    (NOT in build.sh — see the verdict below before landing it).
+    **✅ What the measurement CONFIRMS (do not re-derive):**
+    1. **Base recovery works and is faithful, with no new extraction code.** `kernelSupply`'s own
+       `rails`/`wiresOf` already contain the base object. Measured on `mp7`: rails = the 7 foot
+       pairs, supports = the 7 Fano lines `{i, i+1, i+3}`, base graph = **14 vertices, 2 refinement
+       cells** — the Fano incidence (Heawood) graph. The known `Z₇` translation IS a
+       colour-automorphism of the *recovered* base graph (`IsColAut bA bRoot.col transBase = true`),
+       which is the faithfulness check.
+    2. **★ THE LIFT/COSET THEORY IS CONFIRMED QUANTITATIVELY.** Over all `2⁷ = 128` endpoint
+       orientations, the `Z₇` translation admits **exactly 8 = |L| = 2³** verified lifts. That is the
+       ① license argument — "two lifts differ by a pure gauge element" — measured, not assumed: the
+       valid orientations form precisely a coset of the gauge space `L`. Q(3) is therefore **YES**:
+       the lift needs `K`, and `baseSupply` is only sound appended AFTER `kernelSupply`.
+    3. **⛔ The naive (`lower↦lower`) orientation is USELESS, not merely lossy.** Of 301 deck2 base
+       gens, all 301 pass `permOf` but **exactly 1 verifies — the identity**. Orientation must be
+       SOLVED, never guessed. (The solve is cheap and already designed: valid orientations are the
+       solution set of an *affine* F₂ system whose homogeneous part is exactly the `localRows` system
+       `kernelBasis` already solves — same elimination, augmented matrix.)
+    **⛔⛔ THE GAP: NO SUPPLY SOLVES THE BASE GRAPH. (Q(1) answered in the negative.)**
+    **⚠ RETRACTED SAME DAY — an earlier version of this block claimed the gap was that liftability is
+    a KERNEL of `Aut(base) → H¹` and so unreachable by per-generator filtering. That was derived from
+    JUNK DATA and is WRONG — do not resurrect it.** The bug: `Consume.gens` returns **UNVERIFIED**
+    candidates (junk is filtered by `Consume.verified` downstream, not by `gens`), and the first pass
+    never applied `IsColAut` to the BASE gens. Corrected numbers below. **⚠ STANDING TRAP: any probe
+    reading `Consume.gens` directly must filter by `IsColAut` first.**
+    **Corrected measurement:** of deck2's **301** raw base gens, exactly **1** is a genuine base
+    colour-automorphism — the **identity**; **zero** move a rail. fold (49) and deck (7) likewise emit
+    no non-trivial base automorphism. So all three supplies **fail to solve the 14-vertex base graph**;
+    the earlier "210 non-identity, rail-transitive" figures were junk artifacts.
+    **The lift was never the problem.** The `Z₇` control stands (exactly `8 = |L|` verified lifts), and
+    the C# cross-check (below) shows the FULL Fano collineation group lifts. There is **no evidence of
+    any kernel/`H¹` obstruction** — that diagnosis is withdrawn.
+    **▶ C# CROSS-CHECK (2026-07-20, `GraphCanonizationProject.Tests/FanoMultipedeProbe.cs`) — the C#
+    canonizer DOES handle `mp7`.** ⚠ First, the fixture trap: `MultipedeGenerator.BuildCirculant(m)`
+    applies a **fine colouring** giving every segment its own colour and every gadget cluster its own
+    colour, which excludes the base symmetry BY FIAT (`Z₇` maps segment `w ↦ w+1`, different colours) —
+    and the existing suite runs only `m = 5,6,8,9,10,12` with `AssertRigid`, i.e. **7 ∤ m**, so the
+    non-rigid case was never covered. Run on the SAME object Lean uses (UNIFORM colouring, `m = 7`,
+    `n = 42`): **canonical, 4 nodes, depth 3, |residual| = 1344 = 8 × 168 = |L| × |PGL(3,2)|** — the
+    whole gauge times the whole collineation group. (Fine-coloured: 1 node, residual 1; `m = 9`
+    rigid-base control: residual 9.)
+    **▶▶ THE MECHANISM IS IDENTIFIED AND IS ②-COMPATIBLE — this is the C3b route.**
+    ⚠ A first reading of this guessed the C# success came from nauty-style **leaf-collision**
+    harvesting (several leaves ⟹ incompatible with ②'s single path). **Measured and FALSE:
+    `leaves = 1`** — one leaf, 4 nodes, depth 3, well inside `n+1 = 43`, and `EnableRigidSolver`
+    ON/OFF makes no difference (so it is not `Option2Solver` either). The run is single-path, hence
+    portable in principle. **⛔ Do not repeat the leaf-collision guess.**
+    **The actual mechanism = `ChainDescent.cs` `HarvestTwists`** (with `DeepenAnchor` /
+    `ReplayDeepening` / `TwistConstruction.TryConstruct` / `IsAutomorphism`): pick an anchor `r1` in a
+    cell and **deepen** it (an iterated individualize–refine sequence, recording a footprint); for each
+    other `rj` in the same cell **replay that same sequence** from `rj`; construct the candidate
+    permutation from the two refinement footprints; **verify** it; keep it if it is an automorphism.
+    That is exactly a Lean `Supply`: it fires at ONE node, emits candidates, and verification filters
+    junk — and it is structurally unlike deck (one-step propagation) and deck2 (two seeds), because the
+    work is done by *replaying a deepening sequence and comparing footprints*, which is precisely what
+    girth-6 defeats propagation from doing.
+    **▶ The ① story is already solved by the tranche-2 pattern.** The anchor `r1` is a within-cell pick,
+    so the emitted transversal `{t : r1 ↦ rj}` is anchor-dependent — but the ORBIT of the cell is not.
+    That is the same shape as `kernelSupply`: ① rides `OrbitPrune.SameOrbits` against the
+    anchor-independent set-level reference (all pairs), NOT `GensEquivariant`. So the licensing
+    machinery this needs already exists and is proven.
+    **▶ NEXT, in order:** (a) port `HarvestTwists` as a Lean supply (`deepenSupply`), ① via
+    `SameOrbits` + `sameOrbits_appendSupply` exactly as tranche 2; (b) re-measure `mp7` end-to-end;
+    (c) the affine orientation solve and base recovery are **not needed for this route** — park
+    `KernelBase.lean` rather than completing it. Acceptance unchanged: `mp7` answers end-to-end.
   **The original design (as built):**
   · *Extraction* (structural, choice-free — trap #7 clean): rail pairs = same-cell non-adjacent pairs
     whose neighborhoods complement inside every shared gadget cluster (and conflict in none); clusters =

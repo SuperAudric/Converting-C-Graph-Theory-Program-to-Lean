@@ -144,6 +144,18 @@ close it — is set out in
 > The **frontier**: **C3b base-graph recovery + lift** (⛔ NOT "deck modulo the verified subgroup" — that was
 > the plan of record until measured dead; `PerformanceTest` §15), then T1 per-family localisation, F3b
 > Smith/CRT, the W1 recovery poly program, and the W2 wall — in that order (remaining-work §2).
+> **⚠ C3b SCOPED + MEASURED 2026-07-20 — read remaining-work §1C C3 (ii-c) 2026-07-20 block first.**
+> Recovery is faithful and the lift/coset theory is CONFIRMED (`Z₇` on `mp7`: exactly `8 = |L|` valid
+> orientations). ⛔ **The gap: NO SUPPLY SOLVES THE BASE GRAPH** — of deck2's 301 raw base gens exactly 1 is
+> a real base automorphism (the identity); fold/deck emit none. The lift was never implicated.
+> **⚠⚠ STANDING TRAP: `Consume.gens` returns UNVERIFIED candidates** (junk is filtered by
+> `Consume.verified` downstream) — any probe reading it directly MUST filter by `IsColAut` first. A
+> same-day "liftability = kernel of `Aut(base) → H¹`" diagnosis came from that junk and is RETRACTED.
+> ✅ **The C# canonizer DOES handle `mp7`** (`FanoMultipedeProbe.cs`; uniform colouring, n=42 → canonical,
+> 4 nodes, |residual| = 1344 = 8 × 168 = gauge × full `PGL(3,2)`). ⚠ But it harvests automorphisms from
+> **coinciding leaf matrices** (nauty-style) into a Schreier–Sims chain — several leaves, whereas ② demands
+> a single path. So it does NOT transfer for free. `ChainDescent/KernelBase.lean` compiles but is
+> deliberately **not in `build.sh`**.
 >
 > **⛔⛔ SETTLED — do not re-propose a STABILIZER-CHAIN supply.** It must pick a **vertex inside a cell**, and cell
 > members are *precisely* what 1-WL cannot distinguish ⟹ no iso-invariant function picks one ⟹ **`①b` AND `①c` fail**
