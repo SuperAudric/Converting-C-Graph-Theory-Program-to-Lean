@@ -238,30 +238,46 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     `n = 42`): **canonical, 4 nodes, depth 3, |residual| = 1344 = 8 × 168 = |L| × |PGL(3,2)|** — the
     whole gauge times the whole collineation group. (Fine-coloured: 1 node, residual 1; `m = 9`
     rigid-base control: residual 9.)
-    **▶▶ THE MECHANISM IS IDENTIFIED AND IS ②-COMPATIBLE — this is the C3b route.**
-    ⚠ A first reading of this guessed the C# success came from nauty-style **leaf-collision**
-    harvesting (several leaves ⟹ incompatible with ②'s single path). **Measured and FALSE:
-    `leaves = 1`** — one leaf, 4 nodes, depth 3, well inside `n+1 = 43`, and `EnableRigidSolver`
-    ON/OFF makes no difference (so it is not `Option2Solver` either). The run is single-path, hence
-    portable in principle. **⛔ Do not repeat the leaf-collision guess.**
-    **The actual mechanism = `ChainDescent.cs` `HarvestTwists`** (with `DeepenAnchor` /
-    `ReplayDeepening` / `TwistConstruction.TryConstruct` / `IsAutomorphism`): pick an anchor `r1` in a
-    cell and **deepen** it (an iterated individualize–refine sequence, recording a footprint); for each
-    other `rj` in the same cell **replay that same sequence** from `rj`; construct the candidate
-    permutation from the two refinement footprints; **verify** it; keep it if it is an automorphism.
-    That is exactly a Lean `Supply`: it fires at ONE node, emits candidates, and verification filters
-    junk — and it is structurally unlike deck (one-step propagation) and deck2 (two seeds), because the
-    work is done by *replaying a deepening sequence and comparing footprints*, which is precisely what
-    girth-6 defeats propagation from doing.
-    **▶ The ① story is already solved by the tranche-2 pattern.** The anchor `r1` is a within-cell pick,
-    so the emitted transversal `{t : r1 ↦ rj}` is anchor-dependent — but the ORBIT of the cell is not.
-    That is the same shape as `kernelSupply`: ① rides `OrbitPrune.SameOrbits` against the
-    anchor-independent set-level reference (all pairs), NOT `GensEquivariant`. So the licensing
-    machinery this needs already exists and is proven.
-    **▶ NEXT, in order:** (a) port `HarvestTwists` as a Lean supply (`deepenSupply`), ① via
-    `SameOrbits` + `sameOrbits_appendSupply` exactly as tranche 2; (b) re-measure `mp7` end-to-end;
-    (c) the affine orientation solve and base recovery are **not needed for this route** — park
-    `KernelBase.lean` rather than completing it. Acceptance unchanged: `mp7` answers end-to-end.
+    **▶▶ ✅ C3b LANDED (tranche 1) 2026-07-20 — `ChainDescent/DeepenSupply.lean`, in `build.sh`.**
+    ⚠ A first reading guessed the C# success came from nauty-style **leaf-collision** harvesting
+    (several leaves ⟹ incompatible with ②'s single path). **Measured and FALSE: `leaves = 1`** —
+    one leaf, 4 nodes, depth 3, well inside `n+1 = 43`, and `EnableRigidSolver` ON/OFF is identical
+    (so not `Option2Solver` either). ⛔ Do not repeat the leaf-collision guess.
+    **The mechanism, ported from `ChainDescent.cs` `HarvestTwists`: stop propagating — REPLAY A
+    DEEPENING AND COMPARE FOOTPRINTS.**
+    (1) `deepen` individualizes the anchor and repeatedly individualizes the **lowest-id
+        NON-singleton sub-cell of the footprint** (the diff against the node colouring, held fixed
+        as parent) until the footprint is all-singletons, recording the chosen cell ids — one
+        sub-cell, one vertex per level, a **single path**, never a branch over representatives;
+    (2) `replay` follows the SAME id sequence from each other representative (unfollowable ⟹ no
+        candidate — sound, the representatives just stay separate);
+    (3) `twist` matches `r₁`'s colour-`c` vertex to `rⱼ`'s colour-`c` vertex on the coupled
+        component, identity off it. 1-WL gives corresponding vertices of isomorphic branches equal
+        canonical colours, so under the **all-singletons gate** this is a forced bijection; a
+        non-singleton sub-cell is refinement-indistinguishable and admits no iso-invariant match, so
+        those are rejected outright;
+    (4) `permOf` + `IsColAut` verify — propose/dispose, junk costs firing and never ①.
+    **✅ MEASURED (`PerformanceTest` §16, `#guard`ed):** branch cell **28**; ONE anchor yields
+    **27 verified generators**; and the gadget cell (28) **and** the foot cell (14) each collapse to
+    a **SINGLE ORBIT — from the deepen gens alone**. Compare §14 (kernel alone → gadget orbit 4, the
+    gauge) and §15 (the translation had to be supplied by hand to reach 28). **That is the C3
+    acceptance.** Cross-check: C# reports |Aut| = 1344 = 8 × 168 on the same object.
+    **★ The ①c story is the `kernelSupply` shape, NOT `GensEquivariant`.** The anchor is the head of
+    `Descend.branches` — a within-cell pick — and the recorded sequence breaks ties by vertex index,
+    so the emitted transversal `{t : r₁ ↦ rⱼ}` is labelling-dependent (trap #7 again). What is
+    labelling-independent is the **orbit** it generates ⟹ ① rides `OrbitPrune.SameOrbits` against
+    the anchor-independent all-pairs reference. **The licensing machinery already exists and is
+    proven: `sameOrbits_appendSupply` (`KernelRef.lean`).**
+    **▶ REMAINING (tranche 2, NOT built):** the `SameOrbits` reduction, then the record entry. Until
+    it exists `deepenSupply` is deliberately **not** in `Publication.canonForm?` — exactly how
+    `kernelSupply` was staged. `KernelBase.lean` (base recovery + lift) is **superseded by this
+    route and parked** — it is not in `build.sh` and is not needed.
+    **⚠ PERF, recorded because it recurs:** a first prototype ran **> 1 hour** on `mp7`; the landed
+    version measures in ~3 min. Three faults, all standing traps: the twist was a **closure**, so
+    each of `IsColAut`'s ~`2n²` applications re-ran `List.contains`/`List.find?` at `O(n)` (**trap
+    #1** — cure: materialise as a `Vector`); the per-representative refinement was recomputed once
+    per (anchor, `rⱼ`) pair (`|cell|²` warm refinements where `|cell|` suffice); and the `O(n³)`
+    `coupled` was computed twice per level and again per pair instead of once and threaded.
   **The original design (as built):**
   · *Extraction* (structural, choice-free — trap #7 clean): rail pairs = same-cell non-adjacent pairs
     whose neighborhoods complement inside every shared gadget cluster (and conflict in none); clusters =

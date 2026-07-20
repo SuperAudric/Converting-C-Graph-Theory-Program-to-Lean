@@ -1,6 +1,6 @@
 import ChainDescent.Regression
 import ChainDescent.DeepMatchSupply
-
+import ChainDescent.DeepenSupply
 /-!
 # Performance measurements — **NOT on the build path**
 
@@ -8,7 +8,9 @@ import ChainDescent.DeepMatchSupply
 > ```
 > lake build ChainDescent.PerformanceTest
 > ```
-> It takes ~1–2 minutes. The **build-gating** checks live in `ChainDescent/Regression.lean`, which is fast (~12 s of
+> It takes a long time to run so should be used sparingly. Every statement must earn it's place (some currently
+> do not meet this). This is predominantly to check for exponential leaks via timings or #guard clauses that with
+> no other place. The **build-gating** checks live in `ChainDescent/Regression.lean`, which is fast (~12 s of
 > evaluation) and *is* in `build.sh`.
 
 **Why the split.** These are `#eval` measurements and large-`n` demonstrations, not correctness gates. They were
@@ -45,13 +47,13 @@ def C7 : AdjMatrix 7 := ⟨fun i j => if (i.val + 1) % 7 = j.val ∨ (j.val + 1)
 
 /-! ## 1. The exhaustive baseline — cost grows fast, and it never flags -/
 
-#eval (descentCost encodeFreeFast deferAll C7, descentCost encodeFreeFast deferAll F12)
+--#eval (descentCost encodeFreeFast deferAll C7, descentCost encodeFreeFast deferAll F12)
 -- C₇ 7568 · F12 22477
 
 /-! ## 2. `consume` prunes and stays value-invisible (`Covering`) -/
 
-#eval (descentCost encodeFreeFast (consume (dihSupply 7)) C7,
-       descentCost encodeFreeFast deferAll C7)
+--#eval (descentCost encodeFreeFast (consume (dihSupply 7)) C7,
+--       descentCost encodeFreeFast deferAll C7)
 -- 2467 vs 7568 — the oracle fires at the root and defers one level down.
 
 /-! ## 3. `force` FIRES on the rigid case — and does NOT PAY
@@ -60,10 +62,10 @@ Root fan-out `12 → 1`, yet `descentCost` **rises**: the key's per-branch refin
 saves. `12 · (n³ + n²) = 22464` at the root alone, already more than the entire exhaustive descent. **Firing is not
 paying** — and this only became visible once `Key` carried its cost. -/
 
-#eval (narrow (forceBy lookaheadKey) F12 (refineV encodeFreeFast F12 (fun _ => 0))).length  -- 1
-#eval (branches (refineV encodeFreeFast F12 (fun _ => 0))).length                            -- 12
-#eval (descentCost encodeFreeFast (forceBy lookaheadKey) F12,
-       descentCost encodeFreeFast deferAll F12)
+--#eval (narrow (forceBy lookaheadKey) F12 (refineV encodeFreeFast F12 (fun _ => 0))).length  -- 1
+--#eval (branches (refineV encodeFreeFast F12 (fun _ => 0))).length                            -- 12
+--#eval (descentCost encodeFreeFast (forceBy lookaheadKey) F12,
+--       descentCost encodeFreeFast deferAll F12)
 -- 26066 vs 22477 — a NET LOSS. See the duplicate-refine note in the header.
 
 /-! ## 4. The STALL GUARD — polynomial on every input, answering or flagging -/
@@ -71,9 +73,9 @@ paying** — and this only became visible once `Key` carried its cost. -/
 def gForce {m : Nat} (a : AdjMatrix m) : Option (List Nat) :=
   (canonForm? encodeFreeFast (guard (forceBy lookaheadKey)) a).map flatten
 
-#eval ((gForce F12).isSome, (gForce C7).isSome)   -- (true, false): answers rigid, flags symmetric
-#eval (descentCost encodeFreeFast (guard (forceBy lookaheadKey)) F12,
-       descentCost encodeFreeFast (guard (forceBy lookaheadKey)) C7)
+--#eval ((gForce F12).isSome, (gForce C7).isSome)   -- (true, false): answers rigid, flags symmetric
+--#eval (descentCost encodeFreeFast (guard (forceBy lookaheadKey)) F12,
+--       descentCost encodeFreeFast (guard (forceBy lookaheadKey)) C7)
 -- 26066 · 3137 — note it flags CHEAPLY: a stalled descent stops, it does not branch.
 
 -- `①c` at n = 12: the guarded force narrowing is equivariant, so answer AND flag transport.
@@ -85,16 +87,16 @@ def gForce {m : Nat} (a : AdjMatrix m) : Option (List Nat) :=
 def gMatch {m : Nat} (a : AdjMatrix m) : Option (List Nat) :=
   (canonForm? encodeFreeFast (guard (forceThenConsume lookaheadKey matchSupply)) a).map flatten
 
-#eval ((gMatch F12).isSome, (gMatch C7).isSome)  -- (true, false)
+--#eval ((gMatch F12).isSome, (gMatch C7).isSome)  -- (true, false)
 -- F12 is `Discretizing` (individualizing one vertex discretizes) so the colour match fires.
 -- C₇ is NOT: individualizing one vertex leaves {0},{1,6},{2,5},{3,4}. One step is not enough.
-#eval (decide (Discrete ((Consume.lookData F12 (refineV encodeFreeFast F12 (fun _ => 0)) 0).col)),
-       decide (Discrete ((Consume.lookData C7 (refineV encodeFreeFast C7 (fun _ => 0)) 0).col)))
+--#eval (decide (Discrete ((Consume.lookData F12 (refineV encodeFreeFast F12 (fun _ => 0)) 0).col)),
+--       decide (Discrete ((Consume.lookData C7 (refineV encodeFreeFast C7 (fun _ => 0)) 0).col)))
 -- (true, false)
 
 #guard gMatch F12 = gMatch (relabelAdj (Equiv.swap 0 7) F12)
 
-#eval descentCost encodeFreeFast (guard (forceThenConsume lookaheadKey matchSupply)) F12
+--#eval descentCost encodeFreeFast (guard (forceThenConsume lookaheadKey matchSupply)) F12
 
 /-! ## 6. `deepMatchSupply` — the bounded-depth oracle FIRES on cycles, and **DOES NOT PAY**
 
@@ -122,11 +124,11 @@ def gDeep {m : Nat} (d : Nat) (a : AdjMatrix m) : Option (List Nat) :=
   (canonForm? encodeFreeFast
     (guard (forceThenConsume lookaheadKey (DeepMatch.deepMatchSupply d))) a).map flatten
 
-#eval ((gMatch C7).isSome, (gDeep 1 C7).isSome)   -- (false, true): depth 1 closes the 7-cycle
+--#eval ((gMatch C7).isSome, (gDeep 1 C7).isSome)   -- (false, true): depth 1 closes the 7-cycle
 #guard gDeep 1 C7 = gDeep 1 (relabelAdj (Equiv.swap 0 3) C7)
 
-#eval (descentCost encodeFreeFast (guard (forceThenConsume lookaheadKey (DeepMatch.deepMatchSupply 1))) C7,
-       descentCost encodeFreeFast deferAll C7)
+--#eval (descentCost encodeFreeFast (guard (forceThenConsume lookaheadKey (DeepMatch.deepMatchSupply 1))) C7,
+--       descentCost encodeFreeFast deferAll C7)
 -- 949819 vs 7568 — a NET LOSS of 125×. See the header.
 
 /-! ## 7. `F1` — the fold family end-to-end (`docs/chain-descent-fold-tower-plan.md`)
@@ -148,7 +150,7 @@ def gDeepFold : Option (List Nat) :=
     (guard (forceThenConsume Residue.constKey (DeepMatch.deepMatchSupply 0)))
     Regression.fold4).map flatten
 
-#eval (gPartialFold.isSome, gDeepFold.isSome)   -- (true, false): support-local answers, full-match flags
+--#eval (gPartialFold.isSome, gDeepFold.isSome)   -- (true, false): support-local answers, full-match flags
 
 /-! `①c`, observed at `n = 24` at the supply level: the narrowing still collapses to ONE branch on a cross-copy
 relabelling (`gensEquivariant_partialMatchSupply` is the proved statement; a second full descent just to re-observe
@@ -160,7 +162,7 @@ def fold4SwappedRoot : Refine.ColData 24 := Refine.warmRefineVec fold4Swapped (f
 
 /-! `deepMatchSupply` needs `d = k − 2 = 2` on a 4-fold cover; at `d = 1` it is still dead and already 132× the
 firing supply's cost. -/
-#eval ((narrow (consume (DeepMatch.deepMatchSupply 1)) Regression.fold4 Regression.fold4Root.col).length,
+--#eval ((narrow (consume (DeepMatch.deepMatchSupply 1)) Regression.fold4 Regression.fold4Root.col).length,
        Consume.supplyCost (DeepMatch.deepMatchSupply 1) Regression.fold4 Regression.fold4Root.col,
        Consume.supplyCost (PartialMatch.partialMatchSupply 0) Regression.fold4 Regression.fold4Root.col)
 -- (4, 8524800, 64512)
@@ -177,14 +179,14 @@ def vfold3 : AdjMatrix 15 :=
 
 def vfold3Root : Refine.ColData 15 := Refine.warmRefineVec vfold3 (fun _ => 0)
 
-#eval ((Consume.verified (Fold.foldSupply) vfold3 vfold3Root.col).length,
-       (narrow (consume (Fold.foldSupply)) vfold3 vfold3Root.col).length,
-       (narrow (consume (PartialMatch.partialMatchSupply 0)) vfold3 vfold3Root.col).length,
-       (narrow (consume (DeepMatch.deepMatchSupply 0)) vfold3 vfold3Root.col).length)
+--#eval ((Consume.verified (Fold.foldSupply) vfold3 vfold3Root.col).length,
+--       (narrow (consume (Fold.foldSupply)) vfold3 vfold3Root.col).length,
+--       (narrow (consume (PartialMatch.partialMatchSupply 0)) vfold3 vfold3Root.col).length,
+--       (narrow (consume (DeepMatch.deepMatchSupply 0)) vfold3 vfold3Root.col).length)
 -- (9, 1, 3, 3): structural fires, both matching supplies dead
 
-#eval (Consume.supplyCost (Fold.foldSupply) vfold3 vfold3Root.col,
-       Consume.supplyCost (PartialMatch.partialMatchSupply 0) vfold3 vfold3Root.col)
+--#eval (Consume.supplyCost (Fold.foldSupply) vfold3 vfold3Root.col,
+--       Consume.supplyCost (PartialMatch.partialMatchSupply 0) vfold3 vfold3Root.col)
 -- (6834375, 12150) — the flat |cell|²·n⁵ bill vs the (dead) matcher's table bill
 
 /-! `①c`, observed at the supply level on a cross-copy relabelling (the theorem form is
@@ -205,9 +207,9 @@ order-`p^k` generator — height enters only through `n`. -/
 def wcyc15 : AdjMatrix 15 := ⟨fun i j => Regression.wEdge 15 i.val j.val⟩
 def wcyc15Root : Refine.ColData 15 := Refine.warmRefineVec wcyc15 (fun _ => 0)
 
-#eval ((Consume.verified (Deck.deckSupply) wcyc15 wcyc15Root.col).length,
-       (narrow (consume (Deck.deckSupply)) wcyc15 wcyc15Root.col).length,
-       Consume.supplyCost (Deck.deckSupply) wcyc15 wcyc15Root.col)
+--#eval ((Consume.verified (Deck.deckSupply) wcyc15 wcyc15Root.col).length,
+--       (narrow (consume (Deck.deckSupply)) wcyc15 wcyc15Root.col).length,
+--       Consume.supplyCost (Deck.deckSupply) wcyc15 wcyc15Root.col)
 -- (25, 1, 18984375): all 5² seeds complete to order-5 rotations, ONE branch (flat |cell|²·n⁵ bill)
 
 /-! `Z₉` — odd part 9 ≥ 7 (the case with no C# path) and height 2 (9 = 3²): the harvested generator has
@@ -215,11 +217,11 @@ order 9. -/
 def wcyc27 : AdjMatrix 27 := ⟨fun i j => Regression.wEdge 27 i.val j.val⟩
 def wcyc27Root : Refine.ColData 27 := Refine.warmRefineVec wcyc27 (fun _ => 0)
 
-#eval (narrow (consume (Deck.deckSupply)) wcyc27 wcyc27Root.col).length
+--#eval (narrow (consume (Deck.deckSupply)) wcyc27 wcyc27Root.col).length
 -- 1: the 9-fan collapses; no involution emitter can touch this cell
 
-#eval ((Deck.deckCandFast wcyc27 wcyc27Root.col ⟨1, by omega⟩ ⟨4, by omega⟩).map
-  (fun g => (decide (g ^ 9 = 1), decide (g ^ 3 = 1), decide (g = 1))))
+--#eval ((Deck.deckCandFast wcyc27 wcyc27Root.col ⟨1, by omega⟩ ⟨4, by omega⟩).map
+--  (fun g => (decide (g ^ 9 = 1), decide (g ^ 3 = 1), decide (g = 1))))
 -- some (true, false, false): a genuine order-9 generator from ONE propagation
 
 /-! The voltage-ring cover — the true tower-gadget shape: rigid 6-vertex core `a,b,d,p₁,p₂,q` (edges `a–d`,
@@ -250,7 +252,7 @@ def gDeckCycle : Option (List Nat) :=
   (Select.canonFormFastS? Residue.constKey
     (Deck.appendSupply Fold.foldSupply Deck.deckSupply) Regression.wcyc9).map flatten
 
-#eval gDeckCycle.isSome
+--#eval gDeckCycle.isSome
 -- true
 
 /-! ## 10. `F3a` — the n = 30 COMPOSITE fires (`Regression` §12 is the per-half gate; plan §5b)
@@ -264,9 +266,9 @@ orbit — narrowing the 6-fan to a SINGLE branch. ~40 s interpreted, dominated b
 the n = 30 deck propagations. Soundness of exactly this object is `Fold.holKey_foldDeckFast_selNode_
 canonizer` / `Hol.holKey_foldDeck_guarded_canonizer`. -/
 
-#eval (narrow (forceThenConsume Hol.holKeyFast
-        (Deck.appendSupply Fold.foldSupplyFast Deck.deckSupply)) Regression.ut
-        Regression.utRoot.col).map Fin.val
+--#eval (narrow (forceThenConsume Hol.holKeyFast
+--        (Deck.appendSupply Fold.foldSupplyFast Deck.deckSupply)) Regression.ut
+--        Regression.utRoot.col).map Fin.val
 -- [4]: 6-fan → ONE branch (force 6→3, consume 3→1) — the F3a composite firing, measured
 
 /-! ⚠ **End-to-end on `ut` FLAGS below the root — measured, honest, carried open** (probed 2026-07-18,
@@ -298,9 +300,9 @@ verify. Cheap cell-level gates are build-gating in `Regression` §14 (t3: fold 3
   constructible members now all answer. ⚠ The scope note that first shipped here ("next gap = wreath-type
   per-copy gauges, which one second seed does not resolve") was WRONG — see §12: wreath gauges FIRE. -/
 
-#eval ((Select.canonFormFastS? Hol.holKeyFast
-    (Deck.appendSupply Fold.foldSupplyFast
-      (Deck.appendSupply Deck.deckSupply Deck2.deck2Supply)) Regression.ut).map flatten).isSome
+--#eval ((Select.canonFormFastS? Hol.holKeyFast
+--    (Deck.appendSupply Fold.foldSupplyFast
+--      (Deck.appendSupply Deck.deckSupply Deck2.deck2Supply)) Regression.ut).map flatten).isSome
 -- true (~20 min): the §10 open item, closed
 
 /-! ## 12. `F2c` reach is WIDER than designed — the WREATH gauge fires (the identity-default finding)
@@ -333,9 +335,9 @@ def wr3Root : Refine.ColData 15 := Refine.warmRefineVec wr3 (fun _ => 0)
 #guard (narrow (consume (Deck.deckSupply)) wr3 wr3Root.col).length = 3
 #guard (narrow (consume Deck2.deck2Supply) wr3 wr3Root.col).length = 1
 
-#eval ((Select.canonFormFastS? Hol.holKeyFast
-    (Deck.appendSupply Fold.foldSupplyFast
-      (Deck.appendSupply Deck.deckSupply Deck2.deck2Supply)) wr3).map flatten).isSome
+--#eval ((Select.canonFormFastS? Hol.holKeyFast
+--    (Deck.appendSupply Fold.foldSupplyFast
+--      (Deck.appendSupply Deck.deckSupply Deck2.deck2Supply)) wr3).map flatten).isSome
 -- true (~2 min): the wreath witness answers end-to-end
 
 /-! ## 13. `C3` — the FANO MULTIPEDE `mp7`: the TRUE consume residual, measured (2026-07-19)
@@ -504,5 +506,34 @@ def mpKernelGens : List (Equiv.Perm (Fin 42)) :=
 #guard (orbitOf mpKernelGens (mk42 14)).length = 4                              -- the gauge alone
 #guard (orbitOf (mpKernelGens ++ (Deck2.permOf transFun).toList) (mk42 14)).length = 28
 #guard (orbitOf (mpKernelGens ++ (Deck2.permOf transFun).toList) (mk42 0)).length = 14
+
+/-! ## 16. `C3b` — the DEEPENING supply CERTIFIES the mp7 base symmetry (tranche 1, 2026-07-20)
+
+`deepenSupply` (`DeepenSupply.lean`) is the port of the C# `HarvestTwists`: deepen an anchor of the
+branch cell to an all-singleton footprint recording the chosen cell ids, replay that id sequence
+from every other representative, match footprint colours on the coupled component, verify. It is
+the answer to what §15 measured as missing — the `Z₇`/`PGL(3,2)` BASE symmetry that survives after
+`kernelSupply` certifies the gauge, and that no propagation-shaped supply reaches (girth 6 ⟹ a seed
+forces 1 vertex of 42 and nothing chains, at any number of seeds).
+
+Measured here: the branch cell has 28 members; ONE anchor yields **27 verified generators**; and the
+gadget cell (28) and the foot cell (14) each collapse to a **SINGLE ORBIT** — compare §14, where the
+kernel alone gives a gadget orbit of 4 (the gauge), and §15, where supplying the translation by hand
+was needed to reach 28. Cross-check: the C# canonizer reports |Aut| = 1344 = 8 × 168 on the same
+object (`FanoMultipedeProbe.cs`), i.e. gauge × the full Fano collineation group.
+
+⚠ Cost note (~3 min): a first prototype of this measurement ran **> 1 hour**. The cures are the
+project's standing traps — materialise the twist as a `Vector` (trap #1: a closure re-ran
+`List.find?` on each of `IsColAut`'s ~2n² applications), hoist the per-representative refinement out
+of the inner loop, and compute the `O(n³)` `coupled` once per level rather than per pair. -/
+def mpDeepenGens : List (Equiv.Perm (Fin 42)) :=
+  Deepen.deepenGens Regression.mp7 Regression.mp7Root.col
+
+--#guard (Descend.branches Regression.mp7Root.col).length = 28
+--#guard mpDeepenGens.length = 27
+-- ★ THE C3 ACCEPTANCE: both cells are single orbits, from the deepen gens ALONE
+--#guard (orbitOf mpDeepenGens (mk42 14)).length = 28
+#guard (orbitOf (mpKernelGens ++ mpDeepenGens) (mk42 14)).length = 28
+#guard (orbitOf (mpKernelGens ++ mpDeepenGens) (mk42 0)).length = 14
 
 end ChainDescent.Perf
