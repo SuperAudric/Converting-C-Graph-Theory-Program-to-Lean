@@ -335,8 +335,50 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     commutes with σ), `mem_coupled_transport`, `allSingletonsK_transport` (invariant `Bool`),
     `classOf_length_transport` (invariant size), `classOf_perm_transport`. ⚠ Lists transport only up
     to `List.Perm` (`classOf` filters `finRange` in INDEX order) — the `rails_perm_conj` lesson.
-    **▶ REMAINING = tranche 2 part II: the crux alone.** Everything else is now proved, so the ①c
-    obligation is isolated to the single line `w :: _` in `deepen`.
+    **✅ TRANCHE 2 PART II LANDED 2026-07-20 — `ChainDescent/DeepenCrux.lean`, in `build.sh`,
+    axiom-clean.** The crux is now DECOMPOSED, STATED in Lean, and its unconditional half is proved.
+    **⚠⚠ RETRACTED ARGUMENT (2026-07-20, same day) — kept visible so it is not repeated.** An earlier
+    version of this block argued that the emitted relation cannot equal the true `Aut`-orbit relation
+    "because a cell's orbit partition is poly-time equivalent to GI, so such a supply would be GI ∈ P".
+    ⛔ **That is precisely the argument form BANNED by the standing steer** ("any `X ⟹ GI∈P, therefore
+    X impossible` argument is BANNED" — a perfect key *is* GI∈P, the TARGET; the inference is
+    circular). It was also unsupported: the companion claim "on hard instances the gate simply fails"
+    was **asserted, never measured, and the measurement CONTRADICTS it**. Both withdrawn.
+    **What is actually measured:** emitted = true `Aut`-orbit relation on every instance tested — `G8`
+    `[2,2,2,2,4,4,4,4]` both sides; 30/30 firing at `n=7`; 19/19 at `n=8`; **`wcyc9` `[3,3,3]` both
+    sides (`9!` brute-forced — a genuine CFI-style witness with non-trivial orbit structure)**. And
+    the gate **NEVER FAILED**: 0 failing anchors on `t3`, `wcyc9`, `ut`, `mp7` — including `mp7`,
+    where deck, deck2 and gauge propagation all fail.
+    **Status: the orbit-equality hypothesis is UNFALSIFIED, not refuted** — and not asserted either.
+    The predicates are stated gate-conditionally, which is the right shape whichever way it resolves.
+    **▶ THE DISCRIMINATING WITNESS THAT IS STILL MISSING — build it FIRST, before any proof attempt:**
+    a graph with **non-trivial symmetry** that individualization-refinement **cannot cheaply
+    discretize** — i.e. CFI/multipede over a LARGE expander-like base (cf. the C#
+    `MultipedeGenerator.BuildRandomRegular`, whose high-treewidth base is documented to resist
+    refinement). ⚠ Rigid multipedes do NOT discriminate (trivial `Aut` ⟹ the equality holds
+    vacuously); `mp7` does not either (Fano is small, the gate passes). ⚠ Also note the random-graph
+    sweeps at `n = 8,9` turned out **degenerate** — branch cells of size ≤ 2 — so they carry far less
+    weight than their sample sizes suggest.
+    **⟹ ①c reduces to exactly two named predicates** (both in `DeepenCrux.lean`):
+    · **`DeepenGateInvariant`** — the gate outcome `GateAt adj χ r` is labelling-invariant. Combined
+      with part I (every OTHER stage transports), this is the ENTIRE residue of ①c.
+    · **`DeepenForcedMatch`** — gate passes ⟹ the emitted relation IS the true orbit relation.
+    **PROVED unconditionally here:** `deepenGens_isColAut` (every emitted generator is a genuine
+    colour-automorphism) and `deepenGens_sound` (the emitted orbit relation is CONTAINED in the true
+    one — the supply can only under-report orbits, never over-merge) = the `→` direction of
+    `DeepenForcedMatch`.
+    **Evidence for the two open predicates** (recorded so it is not re-measured): gate outcomes agree
+    under the lowest- vs highest-index rules across **200 random `n=8` graphs** (151 with a non-empty
+    branch cell), plus `G8` (all 8 anchors pass under both), `t3`, `ut`; and rule-independence of the
+    emitted relation over 400 random graphs (0 mismatches, 302 firing) plus 8 labellings x 4
+    partially-firing witnesses.
+    **⚠ METHODOLOGICAL CAVEAT — the `G8` lesson, restated because it applies to ALL of the above:**
+    every one of those measurements comes from instances where the algorithm appears COMPLETE. A
+    discriminating test needs an instance where the supply FIRES but is strictly INCOMPLETE, and none
+    was found at `n ≤ 8`. **Until such a witness exists the sweeps may be systematically blind** —
+    exactly as `mp7` was blind to the anchor-layer bug by firing totally. Finding one is the first
+    task of part III, ahead of attempting `DeepenForcedMatch`'s completeness direction.
+    **▶ REMAINING = part III: discharge `DeepenGateInvariant` and `DeepenForcedMatch`.**
     **(superseded, kept for the record) STEP 0 OF (a) WAS ADVERSARIAL:** try to CONSTRUCT a
     witness where the per-level choice matters (two vertices in the chosen sub-cell not related by any
     automorphism of the individualized graph), rather than only sweeping existing witnesses. Absence
