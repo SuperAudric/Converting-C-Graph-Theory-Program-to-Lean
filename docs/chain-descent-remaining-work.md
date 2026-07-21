@@ -379,6 +379,74 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     exactly as `mp7` was blind to the anchor-layer bug by firing totally. Finding one is the first
     task of part III, ahead of attempting `DeepenForcedMatch`'s completeness direction.
     **▶ REMAINING = part III: discharge `DeepenGateInvariant` and `DeepenForcedMatch`.**
+
+    ### ▶▶ 2026-07-21 — PART III STARTED: the ALL-PATHS REFERENCE + the easy inclusion (`DeepenRef.lean`, in build)
+    The ①c target is restated the way `kernelSupply` closed its own — through `OrbitPrune.SameOrbits`
+    against an EQUIVARIANT reference, NOT against `Aut` (this is what retires the retracted GI∈P
+    framing). `DeepenRef.lean` builds `deepenRefSupply` = the same deepen/replay/twist pipeline but
+    branching over EVERY member of the chosen sub-cell at each level (`deepenAll`/`replayAll`), through
+    a shared `twistOf` (extracted into `DeepenSupply` so "an exec generator IS a reference generator"
+    is a defeq). Proof-side only, exponential, never shipped.
+    **LANDED (axiom-clean):** `deepen_mem_deepenAll` / `replay_mem_replayAll` (the single canonical pick
+    `w :: _` is the head branch of the all-picks `flatMap`) ⟹ `deepenGens_subset_ref` ⟹
+    `verified_deepen_subset_ref` ⟹ **`wordReach_ref_of_deepen`** — the easy half of `SameOrbits`
+    (exec orbits ⊆ ref orbits), via `wordReach_mono`.
+    **▶ ADVERSARIAL STEP-0 PASSED (`ScratchPickTest`, since deleted):** the all-picks reference reaches
+    the SAME orbit partition as the single canonical pick on every partially-firing witness — `G8` exec
+    16 / ref 28 generators but BOTH `[2,2,4]`; `t3` exec 6 / ref **96** but both `[3]`; `wcyc9` both
+    `[3]`. The surplus reference generators are already WORDS in the executable's. So the reverse
+    inclusion is UNFALSIFIED against the genuine all-picks reference (not just a two-rule comparison).
+    **▶ THE RESIDUAL, now two crisp obligations (`DeepenRef.lean` §6), superseding the truth-framed
+    `DeepenForcedMatch`:** (R1) the REVERSE `SameOrbits` direction = route (a)'s "the pick is
+    interchangeable" (the all-picks reference proves no orbit the single pick misses); (R2)
+    `deepenRefSupply` equivariant = the `KernelTransport.gensEquivariant_kernelRefSupply` analog (σ
+    permutes the all-picks set bijectively; part I absorbs the one non-transporting pick). **Route (b)**
+    restates the crux against this reference, needing only (R2) + a gate-conditional match — never "the
+    executable recovers the true orbit". `DeepenGateInvariant`/`DeepenForcedMatch` remain the
+    truth-framed statements of the same content in `DeepenCrux`; (R1)/(R2) are the reference-framed form
+    that closes ①c through the existing `OrbitPrune` reduction.
+
+    ### ▶▶ 2026-07-20 — HOW STRONG IS IT, MEASURED ON THE C# SIDE (`DeepenStrengthProbe.cs`)
+    The Lean-side evidence was 4 structured witnesses, so the strength question was taken to the C#
+    `HarvestTwists` across every family the repo can generate (39 rows: CFI K4/K33/Rook3x3/Petersen
+    even+odd, circulant multipedes m=4..9 in BOTH colourings, random-regular *expander*-base
+    multipedes, Cameron Johnson/Hamming/Kneser, T(8), Chang-A/B). Reproduce with
+    `dotnet test --filter "FullyQualifiedName~DeepenStrengthProbe"`.
+    · **STARVATION IS ZERO ON ALL 39 ROWS** (`ClassifyStarved` = `BranchStarved` = 0). Class 2 — the
+      documented "Route-A provability breaker" — never fired once. This is real support for
+      `RruDepthProbe.cs:19-23`'s hypothesis H1 that class 2 is unreachable, now tested well beyond
+      the families that hypothesis was formed on. **It is not a proof:** the probe covers the
+      generable families, not all graphs.
+    · **Every checkable row is COMPLETE** (harvested `|Aut|` == ground truth) — including all 7
+      Cameron rows against their closed-form orders. Rows with `CAPPED` truth are unchecked, not
+      passed.
+    · ⚠ **THE Chang-A "LEAK" RECORD IS STALE — RETRACT IT.** The archive
+      (`chain-descent-remaining-work-archive-2026-07-18.md:391`) records "the cascade certifies order
+      **24** of `|Aut|=384`". Measured now: **Chang-A is COMPLETE, 384/384**, 17 nodes, 4 leaves,
+      zero starvation. What survives is the **fusion** signature, and it is real and reproduced:
+      `A_stall < A_full`, i.e. part of the group is certifiable only *after* rigid decisions — the
+      user's "360/384 then new symmetry appears" description. **Fusion costs deferral, not
+      completeness.** Chang-B shows no fusion (11 nodes, 5 leaves, 96/96).
+    · ⚠ **THE EXPANDER-BASE MULTIPEDES DO NOT DISCRIMINATE.** `MP-rr(c6..c10,d3)` — the family this
+      doc names as the missing discriminating witness — are all **rigid** (true `|Aut|` = 1) and
+      terminate in 1 node. They cannot separate "emitted = true" from "emitted ⊊ true", in either
+      colouring. **The part-III witness search must not go here**; the requirement is non-trivial
+      `Aut` *and* refinement-resistance, and BuildRandomRegular delivers only the second.
+    · ★ **THE ONE GENUINE INCOMPLETENESS FOUND — and it is the C3 gap itself.** The FINE-COLOURED
+      Fano multipede (`MP-circ7-typed`, n=42) has type-preserving `|Aut| = 8` (the F₂ gauge) and the
+      descent harvests **1, in a single node, with zero harvest calls** — it *presents as locally
+      rigid while an order-8 group exists*. Cross-checked both ways because the two instruments
+      cannot both be right (refinement cannot discretize a graph with 8 colour-automorphisms):
+      ground truth recounted by plain type-preserving backtracking with no WL involved (still 8; the
+      rigid m=8 control gives 1), and the canonical form **is stable across 8 relabellings** — so
+      this is a harvest miss, **not** a soundness failure. This is exactly what Lean `kernelSupply`
+      was built to close, now reproduced on the C# side. It also answers the user's framing: there
+      IS a known case where the descent reaches an apparently-rigid state while symmetry remains.
+    · **Bearing on part III.** The miss above fires *zero* harvest calls, so it is still not the
+      discriminating witness part III needs (one where the supply FIRES and is strictly INCOMPLETE).
+      The search stays open, but two candidate directions are now closed by measurement: expander
+      multipedes (rigid) and Chang (complete).
+
     **(superseded, kept for the record) STEP 0 OF (a) WAS ADVERSARIAL:** try to CONSTRUCT a
     witness where the per-level choice matters (two vertices in the chosen sub-cell not related by any
     automorphism of the individualized graph), rather than only sweeping existing witnesses. Absence

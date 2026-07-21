@@ -102,8 +102,27 @@ emission: this is the `→` direction of `DeepenForcedMatch`, and it holds with 
 theorem deepenGens_isColAut (adj : AdjMatrix n) (χ : Colouring n)
     {ρ : Equiv.Perm (Fin n)} (h : ρ ∈ deepenGens adj χ) : IsColAut adj χ ρ := by
   unfold deepenGens at h
-  simp only [List.mem_flatMap, List.mem_filterMap] at h
-  aesop
+  rw [List.mem_flatMap] at h
+  obtain ⟨p1, _, h⟩ := h
+  cases hd : deepen adj χ n p1.2 [] with
+  | none => rw [hd] at h; simp at h
+  | some ds =>
+      obtain ⟨d1, seq⟩ := ds
+      rw [hd] at h; dsimp only at h
+      by_cases hgate :
+          ((coupled χ d1.col).isEmpty || !allSingletonsK (coupled χ d1.col) d1.col) = true
+      · rw [if_pos hgate] at h; simp at h
+      · rw [if_neg hgate] at h
+        rw [List.mem_filterMap] at h
+        obtain ⟨pj, _, h⟩ := h
+        by_cases heq : (pj.1 == p1.1) = true
+        · rw [if_pos heq] at h; simp at h
+        · rw [if_neg heq] at h
+          cases hr : replay adj seq pj.2 with
+          | none => rw [hr] at h; simp at h
+          | some dj =>
+              rw [hr] at h; dsimp only at h
+              exact twistOf_isColAut adj χ d1.col _ dj.col h
 
 /-- Consequence: the emitted orbit relation is contained in the true one — the supply can only ever
 under-report orbits, never over-report. (Over-splitting costs a branch; over-merging would be

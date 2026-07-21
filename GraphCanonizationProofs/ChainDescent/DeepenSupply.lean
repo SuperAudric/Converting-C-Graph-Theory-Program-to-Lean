@@ -176,6 +176,33 @@ def replay (adj : AdjMatrix n) : List Nat → Refine.ColData n → Option (Refin
 
 /-! ## 3. The supply -/
 
+/-- **The verified twist** from one deep anchor `(χ1, K)` and one replayed rep colouring `χj`:
+match footprint colours on the coupled component `K`, materialise as a `Vector` (trap #1), gate
+bijectivity with `permOf`, and re-check `IsColAut`. Shared by the executable and the proof-side
+all-paths reference (`DeepenRef`) so that "an exec generator IS a reference generator" is a `rfl`. -/
+def twistOf (adj : AdjMatrix n) (χ χ1 : Colouring n) (K : List (Fin n)) (χj : Colouring n) :
+    Option (Equiv.Perm (Fin n)) :=
+  let img : Vector (Fin n) n :=
+    Vector.ofFn (fun v =>
+      if K.contains v then (K.find? (fun w => χj w == χ1 v)).getD v else v)
+  match permOf (fun v => img.get v) with
+  | none => none
+  | some ρ => if decide (IsColAut adj χ ρ) then some ρ else none
+
+/-- `twistOf` only ever returns a **verified** automorphism — the `IsColAut` re-check gates it. -/
+theorem twistOf_isColAut (adj : AdjMatrix n) (χ χ1 : Colouring n) (K : List (Fin n))
+    (χj : Colouring n) {ρ : Equiv.Perm (Fin n)} (h : twistOf adj χ χ1 K χj = some ρ) :
+    IsColAut adj χ ρ := by
+  unfold twistOf at h
+  dsimp only at h
+  split at h
+  · exact absurd h (by simp)
+  · split at h
+    · rename_i hdec
+      rw [Option.some.injEq] at h; subst h
+      exact of_decide_eq_true hdec
+    · exact absurd h (by simp)
+
 /-- **★ THE DEEPENING SUPPLY.** EVERY anchor of the branch cell (the `G8` falsifier above forbids a
 single anchor); every value not depending on `rⱼ` is hoisted, and the twist is materialised as a
 `Vector` (trap #1). Recognition is UNTRUSTED —
@@ -199,14 +226,7 @@ def deepenGens (adj : AdjMatrix n) (χ : Colouring n) : List (Equiv.Perm (Fin n)
             if pj.1 == p1.1 then none
             else match replay adj seq pj.2 with
               | none => none
-              | some dj =>
-                  let χj := dj.col
-                  let img : Vector (Fin n) n :=
-                    Vector.ofFn (fun v =>
-                      if K.contains v then (K.find? (fun w => χj w == χ1 v)).getD v else v)
-                  match permOf (fun v => img.get v) with
-                  | none => none
-                  | some ρ => if decide (IsColAut adj χ ρ) then some ρ else none))
+              | some dj => twistOf adj χ χ1 K dj.col))
 
 /-- The supply. -/
 def deepenSupply : Supply n := fun adj χ =>
