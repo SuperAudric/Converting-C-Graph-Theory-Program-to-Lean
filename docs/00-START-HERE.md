@@ -141,9 +141,10 @@ close it — is set out in
 > `GensEquivariant` (pivot-order-dependent basis = trap #7); ① rides `OrbitPrune.SameOrbits` against an
 > equivariant set-level reference, so the executable object carries zero ① obligation — the recommended
 > shape for any future supply that must make an internal choice.
-> The **frontier**: **C3b base-graph recovery + lift** (⛔ NOT "deck modulo the verified subgroup" — that was
-> the plan of record until measured dead; `PerformanceTest` §15), then T1 per-family localisation, F3b
-> Smith/CRT, the W1 recovery poly program, and the W2 wall — in that order (remaining-work §2).
+> The **frontier**: **C3b `deepenSupply`'s ①c — R1, the WL-completeness crux** (base-graph recovery + lift
+> was the earlier C3b plan, now SUPERSEDED by the deepen supply; the C3b state is the CURRENT-STATE block just
+> below + the tracker's "▶ CURRENT FRONTIER"), then T1 per-family localisation, F3b Smith/CRT, the W1 recovery
+> poly program, and the W2 wall — in that order (remaining-work §2).
 > **✅ C3b LANDED (tranche 1) 2026-07-20 — `ChainDescent/DeepenSupply.lean` `deepenSupply`, in `build.sh`.**
 > The constructor for **base** symmetry — what survives after `kernelSupply` certifies the gauge, and what no
 > propagation-shaped supply reaches (girth 6 ⟹ a seed forces 1 vertex of 42, at any number of seeds). Ported
@@ -153,14 +154,25 @@ close it — is set out in
 > **MEASURED (`PerformanceTest` §16):** branch cell 28, **756 = 28×27 verified gens (ALL anchors)**, and the gadget
 > cell (28) *and* foot cell (14) each collapse to a **SINGLE ORBIT** = the C3 acceptance. C# cross-check on the
 > same object: |Aut| = 1344 = 8 × 168 (`FanoMultipedeProbe.cs`).
-> **WARNING — ①c RETRACTED/CORRECTED same day: `SameOrbits` is NOT ready to prove.** With a SINGLE anchor
-> ①c is **measured FALSE**: the **`G8` falsifier** — five relabellings give branch-cell orbit profiles
-> `[2,2,2,2,4,4,4,4]` vs `[1,1,2,2,2,2,2,2]`, genuinely different partitions, so no equivariant reference can
-> match it. **`mp7` cannot detect this** (it fires totally, so the profile is `[28]` down any path) — **an
-> equivariance falsifier must be run on a PARTIALLY-firing witness.** Fix, measured: quantify over **all
-> anchors** (profiles then agree, and it fires strictly more) — that is what is landed. **Tranche 2 is OPEN,
-> not merely unbuilt:** the per-deepening-level vertex choice remains unaddressed, so `deepenSupply` stays out
-> of `Publication.canonForm?`.
+> **WARNING — ①c needs ALL ANCHORS: single-anchor is measured FALSE** (the **`G8` falsifier**: five
+> relabellings give profiles `[2,2,2,2,4,4,4,4]` vs `[1,1,2,2,2,2,2,2]`; `mp7` can't detect it — it fires
+> totally, profile `[28]`, so an equivariance falsifier must be PARTIALLY-firing). The landed supply quantifies
+> over all anchors.
+>
+> **▶▶▶ C3b ①c — CURRENT STATE (2026-07-21): tranche 2 built out and REDUCED TO ONE CRUX. See the live
+> tracker [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) "▶ CURRENT FRONTIER" +
+> §1C C3 (ii-c), and the module headers.** ①c is discharged the `kernelSupply` way — `OrbitPrune.SameOrbits`
+> against an EQUIVARIANT proof-side all-picks reference `deepenRefSupply`, NOT vs `Aut`. Landed axiom-clean,
+> in `build.sh`: `DeepenTransport` (part I: every stage transports but the pick), `DeepenCrux` (part II:
+> soundness + predicates), `DeepenRef` (the reference + the EASY `SameOrbits` half), `DeepenRefTransport`
+> (R2 core `twistOf_transport`: the twist conjugates under σ), `DeepenR1` (**R1 reduced to the predicate
+> `DeepenRefInExec`**). ①c = R1 + R2; **R2 remainder is mechanical**; **R1 is the crux**, traced (measured
+> whole-graph discreteness of the deepening) to **"WL-refinement is complete on the class"** — the
+> harvest-completeness statement (C# linear-oracle §L.4 "FIRM but CONJECTURAL"; NOT the banned GI∈P form).
+> Route (b) (budgeted reference) is OFF THE TABLE (flags ⟹ incomplete). NEXT = the WL-completeness strategy,
+> a step back first. `deepenSupply` stays out of `Publication.canonForm?` until R1+R2 close. Also measured
+> (`DeepenStrengthProbe.cs`, 39 rows): starvation = 0 everywhere, every checkable row COMPLETE, the Chang-A
+> "leak" RETRACTED (384/384, survivor = fusion), expander multipedes rigid (can't discriminate).
 > ⛔ `KernelBase.lean` (base recovery + lift) is **superseded by this route and parked** — not in `build.sh`.
 > **⚠⚠ STANDING TRAP: `Consume.gens` returns UNVERIFIED candidates** (junk is filtered by `Consume.verified`
 > downstream) — any probe reading it directly MUST filter by `IsColAut` first; reading it raw produced a wrong

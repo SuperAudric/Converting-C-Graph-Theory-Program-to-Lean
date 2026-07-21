@@ -46,6 +46,36 @@ transfer). "Complete" = the flag provably never fires.
 
 ---
 
+## ▶ CURRENT FRONTIER (2026-07-21) — the one live task, for a fresh reader
+
+**Where work stopped: C3b `deepenSupply`'s ①c, reduced to a single crux.** The full arc is §1C C3 (ii-c)
+below; this is the pickup summary.
+
+- **Landed, in `build.sh`, all axiom-clean** (`[propext, Classical.choice, Quot.sound]`):
+  `DeepenSupply` (the executable), `DeepenTransport` (part I — every pipeline stage transports except the
+  vertex pick), `DeepenCrux` (part II — soundness + the two truth-framed predicates), `DeepenRef`
+  (the proof-side all-picks reference `deepenRefSupply` + the EASY `SameOrbits` half `wordReach_ref_of_deepen`),
+  `DeepenRefTransport` (R2 algebraic core `twistOf_transport` — the twist conjugates under σ), `DeepenR1`
+  (**R1 reduced to the predicate `DeepenRefInExec`** + residue isolated to the non-canonical-pick twists).
+- **①c for `deepenSupply` = R1 + R2**, both discharged through `OrbitPrune.SameOrbits` against the equivariant
+  reference. **R2 remainder is MECHANICAL** (the `deepenAll`/`replayAll` transport assembly → `GensEquivariant`;
+  independent of R1; subtlety recorded in the `DeepenRefTransport` header). **R1 is THE crux.**
+- **R1 = `DeepenRefInExec`, traced (2026-07-21) to one theorem:** ★ MEASURED (`ScratchDisc`, deleted) that the
+  canonical deepening DISCRETISES THE WHOLE GRAPH on every partially-firing witness (G8/t3/wcyc9/mp7), so
+  R1 ⟺ **"the id-cells the deepening picks are `Stab`-orbit-cells" ⟺ WL-refinement is COMPLETE on the class**
+  (the harvest-completeness statement; C# linear-oracle §L.4 "[FIRM behavior, CONJECTURAL characterization]";
+  NOT the banned GI∈P form). The all-picks reference is EXPONENTIAL, so larger witnesses can't be checked.
+- **NEXT (user, 2026-07-21): pursue the WL-completeness strategy "or something of its ilk — a STEP BACK
+  COMES FIRST."** I.e. before grinding the WL-completeness proof, re-examine the framing (the discreteness
+  fact, the `twistOf_conj` tool + the `g ∈ ⟨exec⟩` gap, and whether a twist REDESIGN that is pick-independent
+  under discreteness — the all-or-nothing backup — is cleaner than proving completeness of the current one).
+  Route (b) (poly-budgeted reference) is OFF THE TABLE: it flags on `2^{n/2}` deepening trees, and the target
+  is a COMPLETE canonizer (flag never fires). `deepenSupply` stays out of `Publication.canonForm?` until R1+R2 close.
+- **Read for detail:** `DeepenR1.lean` header (the full trace + the crux), `DeepenRefTransport.lean` header
+  (R2 + the assembly subtlety), §1C C3 (ii-c) below, and [[project-c3-kernel-supply-2026-07-19]] (topic memory).
+
+---
+
 ## 1. THE GAP ENUMERATION — everything between the current design and handling every input
 
 Grouped by decision type. Each entry: what it is → the mechanism that should close it → where it is recorded.
@@ -405,6 +435,45 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     executable recovers the true orbit". `DeepenGateInvariant`/`DeepenForcedMatch` remain the
     truth-framed statements of the same content in `DeepenCrux`; (R1)/(R2) are the reference-framed form
     that closes ①c through the existing `OrbitPrune` reduction.
+
+    ### ▶▶ 2026-07-21 — R1 REDUCED TO ONE PREDICATE + RESIDUE ISOLATED (`DeepenR1.lean`, in build, axiom-clean)
+    R1 = reverse `SameOrbits` (ref orbits ⊆ exec orbits). Since `exec ⊆ ref` as generator sets
+    (⟨exec⟩ ⊆ ⟨ref⟩, the easy half), **R1 ⟺ the extra reference generators merge no exec-orbit ⟺ every
+    reference generator's action is a WORD in the executable's verified gens** = the predicate
+    `DeepenRefInExec`. **PROVED axiom-clean:** `wordReach_deepen_of_ref` (R1 ⟸ the predicate, by
+    `WordReach` induction), `sameOrbits_of_core` (predicate ⟹ full `SameOrbits`, with the easy half),
+    `refInExec_of_mem_deepenGens` (a ref gen that is ALSO an exec gen satisfies it trivially ⟹ **the
+    residue is exactly the NON-canonical-pick twists**).
+    **⚠ HONEST STATUS OF THE CORE.** Unrolled: a non-canonical-pick twist (verified Aut carrying
+    `r₁ ↦ rⱼ`) must be recovered by the canonical single-pick harvest. The id-sequence is pick-INVARIANT
+    (`chooseIdK_transport`), so it reduces to "individualising a different member of a FIXED id-cell
+    reaches the same orbit connection" — TRUE when the picked cells are orbit-cells (conjugate
+    deepenings), and the residue is precisely firing cells with colour-equal NON-automorphic vertices
+    (the still-missing fires-but-incomplete witness). **This is the HARVEST-COMPLETENESS statement, which
+    the C# side records CONJECTURAL beyond the abelian regime** (`chain-descent-linear-oracle.md` §L.4
+    "[FIRM behavior, CONJECTURAL characterization]"). MEASURED to hold on `G8`/`t3`/`wcyc9`; larger
+    witnesses can't be checked (the all-picks reference is exponential — `ut` n=30 did not finish).
+    **▶ ROUTE (a) CHOSEN (user, 2026-07-21) — flag must never arise, so route (b)'s firing cost is not
+    a solution.** R1's core traced to ONE crisp theorem:
+    · The residue is only the NON-canonical-pick twists (`refInExec_of_mem_deepenGens`), and the id-
+      sequence is pick-INVARIANT (`chooseIdK_transport`), so picks differ only in WHICH vertex of a fixed
+      id-cell.
+    · **★ MEASURED (`ScratchDisc`, since deleted): the canonical deepening DISCRETISES THE WHOLE GRAPH**
+      on `G8`/`t3`/`wcyc9`/`mp7` (fully discrete `d1.col`, distinct-colour-count = `n`). ⟹ the graph is
+      RIGID after deepening, the twist is a genuine automorphism, and the branch-cell orbit relation is
+      exactly "some verified twist connects `r₁,rⱼ`".
+    · So **R1 ⟺ "individualising a different member of a fixed id-cell (following the canonical id-
+      sequence to discreteness) yields an ISOMORPHIC coloured graph" ⟺ "the picked id-cells are
+      `Stab`-orbit-cells" ⟺ WL-refinement is COMPLETE on this graph class.** That is the genuine crux —
+      the harvest/WL-completeness statement (C# §L.4 "[FIRM behavior, CONJECTURAL characterization]").
+      Discreteness constrains it hard but does not close it (two discrete same-id-sequence deepenings are
+      isomorphic iff the differing picks are `Stab`-related = the completeness being asked for).
+    · **Tools for the attempt:** `twistOf_transport` at `σ = g ∈ Aut` (via `Consume.IsColAut.relabel`/
+      `.transport`) ⟹ `twistOf_conj` (twist conjugates under an automorphism); the gap is the relating
+      `g ∈ ⟨exec⟩` not merely `Aut`. **Open sub-decision:** attempt the WL-completeness proof for the
+      class (research-level), or REDESIGN the twist to compute pick-independently under discreteness
+      (a change to the landed executable — the "all-or-nothing / alternate gate" backup). NOT the banned
+      GI∈P reasoning — it is an empirically-firm, unproven WL-completeness characterisation.
 
     ### ▶▶ 2026-07-21 — R2 ALGEBRAIC CORE LANDED (`DeepenRefTransport.lean`, in build, axiom-clean)
     R2 = `SupplyEquivariant deepenRefSupply`, the exact hypothesis `OrbitPrune.guarded_mixed_canonizer_
