@@ -406,6 +406,22 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     truth-framed statements of the same content in `DeepenCrux`; (R1)/(R2) are the reference-framed form
     that closes ①c through the existing `OrbitPrune` reduction.
 
+    ### ▶▶ 2026-07-21 — R2 ALGEBRAIC CORE LANDED (`DeepenRefTransport.lean`, in build, axiom-clean)
+    R2 = `SupplyEquivariant deepenRefSupply`, the exact hypothesis `OrbitPrune.guarded_mixed_canonizer_
+    of_sameOrbits` needs of the reference (⟸ `GensEquivariant` via `supplyEquivariant_of_gensEquivariant`).
+    **DONE — the hard algebraic step:** `twistOf_transport` — the twist on the relabelled graph is the
+    σ-CONJUGATE of the twist here (verification included): `twistOf (relabelAdj σ adj) (transp σ χ)
+    (transp σ χ1) (K.map σ) (transp σ χj) = (twistOf adj χ χ1 K χj).map (σ·σ⁻¹)`. Built from
+    `imgFun_transport` (colour-match function conjugates, via `List.find?_map`), `Deck2.permOf_conj`, and
+    `Consume.isColAut_conj_iff`.
+    **▶ REMAINING for R2 (mechanical assembly):** `deepenAll`/`replayAll` leaf-set correspondence under σ
+    (induction on fuel via part-I `step_transport`/`chooseIdK_transport`/`mem_coupled_transport` +
+    `branches_transport_perm`), lifting `twistOf_transport` to `GensEquivariant deepenRefSupply`.
+    ⚠ **Subtlety found + recorded** (`DeepenRefTransport` header): the transported ref calls `twistOf`
+    with `coupled (transp χ)(transp χ1)`, only a `List.Perm` of `(coupled χ χ1).map σ` (index order), and
+    `find?` is order-dependent — but under the `allSingletonsK` gate the colour-match is UNIQUE, so the
+    assembly needs "`twistOf` invariant under a `Perm` of `K` when `allSingletonsK K χ1`", then composes.
+
     ### ▶▶ 2026-07-20 — HOW STRONG IS IT, MEASURED ON THE C# SIDE (`DeepenStrengthProbe.cs`)
     The Lean-side evidence was 4 structured witnesses, so the strength question was taken to the C#
     `HarvestTwists` across every family the repo can generate (39 rows: CFI K4/K33/Rook3x3/Petersen
