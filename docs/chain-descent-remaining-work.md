@@ -65,14 +65,60 @@ below; this is the pickup summary.
   R1 ⟺ **"the id-cells the deepening picks are `Stab`-orbit-cells" ⟺ WL-refinement is COMPLETE on the class**
   (the harvest-completeness statement; C# linear-oracle §L.4 "[FIRM behavior, CONJECTURAL characterization]";
   NOT the banned GI∈P form). The all-picks reference is EXPONENTIAL, so larger witnesses can't be checked.
-- **NEXT (user, 2026-07-21): pursue the WL-completeness strategy "or something of its ilk — a STEP BACK
-  COMES FIRST."** I.e. before grinding the WL-completeness proof, re-examine the framing (the discreteness
-  fact, the `twistOf_conj` tool + the `g ∈ ⟨exec⟩` gap, and whether a twist REDESIGN that is pick-independent
-  under discreteness — the all-or-nothing backup — is cleaner than proving completeness of the current one).
-  Route (b) (poly-budgeted reference) is OFF THE TABLE: it flags on `2^{n/2}` deepening trees, and the target
-  is a COMPLETE canonizer (flag never fires). `deepenSupply` stays out of `Publication.canonForm?` until R1+R2 close.
-- **Read for detail:** `DeepenR1.lean` header (the full trace + the crux), `DeepenRefTransport.lean` header
-  (R2 + the assembly subtlety), §1C C3 (ii-c) below, and [[project-c3-kernel-supply-2026-07-19]] (topic memory).
+- **▶▶ 2026-07-21 REFRAME — the framing corrections (user) that reset the target.** (1) §L.4
+  ("forced candidate fires iff branches iso") is a FORCE-resolver result; it is an ANALOGY for the consume
+  side, NOT a proof deepen can't close. (2) "Miyazaki defeats it" was RETRACTED — deepen takes a SINGLE path
+  per anchor (not the search tree), so tree-exponentiality doesn't touch it, and canonicalization-cost ≠
+  consume-completeness. (3) The obligation is **symmetry-consumption completeness, NOT I-R/WL completeness**:
+  colour-equal-but-NON-automorphic pairs are FORCE's job (decision limits output), so the reference's VERIFIED
+  twists only ever connect genuinely-automorphic vertices ⟹ **R1 needs no external single-orbit hypothesis; the
+  verification gate supplies it.** CFI-hardness SPLITS away (gauge→kernel, WL-merge→force); deepen is never
+  asked to distinguish non-isomorphic things.
+- **▶▶ VALIDATION (2026-07-21, `ScratchR1Probe`, deleted): NO R1 FALSIFIER.** exec-orbits == ref-orbits on
+  **G8 ×7 relabellings** (rich [4,2,2] partition, multiset relabelling-invariant), **cG8** (complement,
+  4-regular, same Aut / different deepening), **t3**/**wcyc9**; rigid control **F12** (Frucht) = all-singletons
+  BOTH sides (ref does NOT falsely merge — gate sound). ★ **TIGHT:** G8 exec = **16 = Σ k(k−1) over {4,2,2}**
+  = one DIRECT verifying twist per same-orbit ordered pair (no words). Plus the C# 39-family sweep
+  (harvested==|Aut| ⟹ exec==Aut==ref ⟹ R1) is direct R1 evidence on symmetric families. ⚠ Validation checked
+  the BRANCH CELL only (see K-coverage risk below); the ONE untested regime = a `¬Amenable` FIRING witness
+  (= the still-missing part-III "fires-but-incomplete" graph).
+- **▶▶ SCOPED (2026-07-21, user: give the design its best chance before the backup) — R1's crux FACTORS,
+  it is NOT a monolithic conjecture.** `R1 ⟸ (Amenable ⟹ R1) + Amenable`, where **`Amenable adj χ` := at
+  every deepening level the `chooseIdK`-selected cell is a single orbit of the pointwise-stabilizer of the
+  vertices individualized so far.** ⚠ **Firing does NOT imply `Amenable`** (a WL-merged multi-orbit cell can
+  still discretize — a nested force-decision the greedy pick resolves arbitrarily), so `Amenable` is a genuine
+  domain hypothesis.
+    - **LAYER 1 `Amenable ⟹ R1` — MECHANICAL, provable now.** Engine = a **re-relating induction**, invariant:
+      *the deepen-from-`a` and replay-from-`b` descents (a~b via ρ∈Aut) stay related by an automorphism ρ′
+      mapping a's individualized sequence to b's pointwise.* Per level: same id (`chooseIdK_transport`);
+      `C_b=ρ′(C_a)` single-orbit under `Stab(indiv_b)` (= `Amenable`) ⟹ ∃τ∈Stab(indiv_b) fixing the
+      lowest-index mismatch `ρ′(u_a)↦u_b` ⟹ `τρ′` re-establishes the invariant. At discreteness leaves are
+      automorphism-related ⟹ colour-matchable ⟹ exec twist for (a,b) VERIFIES ⟹ direct WordReach. Uses existing
+      `refineEquivariant`/`step_transport`/`chooseIdK_transport`/`twistOf_isColAut`. ⚠ **SUB-RISK (settle FIRST):**
+      `SameOrbits` is over ALL vertices but the induction gives completeness on the BRANCH CELL (anchors); the
+      twists also move `K∖cell`, so K-coverage needs the induction extended to `K` or a "cell controls `K`" arg.
+    - **LAYER 2 `Amenable` — discharge aiming GENERAL, via BOUNDED WL-DIMENSION** (user: bounded categorizations
+      generalize the amenability property across families). **The unifying categorization = bounded WL-dimension.**
+      `Amenable` = IR-amenability along the canonical path (1-WL = orbit partition at each individualized stage);
+      FALSE universally, and the boundary is CRISP: **unbounded WL-dim = CFI/multipede over expander bases =
+      exactly what is carved to force (WL-merge) + kernel (gauge).** Bounded-WL-dim families (bounded-degree,
+      planar ≤3, bounded-genus/treewidth, bounded-rank coherent configs / association schemes — incl. mp7's
+      `PGL(3,2)` base, affine/projective) are amenable after a BOUNDED individualization budget (= path length),
+      which also tightens the poly-cost story. Connect to EXISTING seals (Route-C `reachesRigidOrCameron_*`,
+      forms-graph quasipoly, Cameron) as INSTANCES of the one bound. ⚠ **CAVEAT (real):** `Amenable` demands
+      single-orbit cells at EVERY level — STRONGER than "WL-dim ≤ d ⟹ complete after d individualizations" (an
+      intermediate 1-WL-stable cell can still be multi-orbit for a bounded-WL-dim graph). So the exact class is
+      "orbit-exact along the greedy tower", a refinement of bounded-WL-dim; the ANCHOR individualization (which
+      fixes e.g. G8's [8]→[4,2,2] over-merge) is load-bearing. The runtime gate (backup) is the per-instance
+      version that sidesteps needing the exact general class.
+- **BACKUP (held, poly, ①c-by-construction) — the all-or-nothing gate.** Per deepening level, check whether
+  individualizing EACH member of the chosen id-cell gives the same footprint-partition; emit all-or-nothing
+  (defer on failure). Poly (≤n members × ≤n levels × a refine), CHECKS `Amenable` locally instead of proving it
+  (①c by construction — canonical gate + pick-independent ⟹ canonical group), gate-failure = honest deferral.
+  Strictly better than route (b). **Only if Layer 1 K-coverage or Layer 2 discharge truly stalls.**
+- **Read for detail:** `DeepenR1.lean` header (the factoring + `Amenable` + the re-relating induction),
+  `DeepenRefTransport.lean` header (R2 + the assembly subtlety), §1C C3 (ii-c) below, and
+  [[project-c3-kernel-supply-2026-07-19]] (topic memory).
 
 ---
 
@@ -453,27 +499,26 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
     the C# side records CONJECTURAL beyond the abelian regime** (`chain-descent-linear-oracle.md` §L.4
     "[FIRM behavior, CONJECTURAL characterization]"). MEASURED to hold on `G8`/`t3`/`wcyc9`; larger
     witnesses can't be checked (the all-picks reference is exponential — `ut` n=30 did not finish).
-    **▶ ROUTE (a) CHOSEN (user, 2026-07-21) — flag must never arise, so route (b)'s firing cost is not
-    a solution.** R1's core traced to ONE crisp theorem:
-    · The residue is only the NON-canonical-pick twists (`refInExec_of_mem_deepenGens`), and the id-
-      sequence is pick-INVARIANT (`chooseIdK_transport`), so picks differ only in WHICH vertex of a fixed
-      id-cell.
-    · **★ MEASURED (`ScratchDisc`, since deleted): the canonical deepening DISCRETISES THE WHOLE GRAPH**
-      on `G8`/`t3`/`wcyc9`/`mp7` (fully discrete `d1.col`, distinct-colour-count = `n`). ⟹ the graph is
-      RIGID after deepening, the twist is a genuine automorphism, and the branch-cell orbit relation is
-      exactly "some verified twist connects `r₁,rⱼ`".
-    · So **R1 ⟺ "individualising a different member of a fixed id-cell (following the canonical id-
-      sequence to discreteness) yields an ISOMORPHIC coloured graph" ⟺ "the picked id-cells are
-      `Stab`-orbit-cells" ⟺ WL-refinement is COMPLETE on this graph class.** That is the genuine crux —
-      the harvest/WL-completeness statement (C# §L.4 "[FIRM behavior, CONJECTURAL characterization]").
-      Discreteness constrains it hard but does not close it (two discrete same-id-sequence deepenings are
-      isomorphic iff the differing picks are `Stab`-related = the completeness being asked for).
-    · **Tools for the attempt:** `twistOf_transport` at `σ = g ∈ Aut` (via `Consume.IsColAut.relabel`/
-      `.transport`) ⟹ `twistOf_conj` (twist conjugates under an automorphism); the gap is the relating
-      `g ∈ ⟨exec⟩` not merely `Aut`. **Open sub-decision:** attempt the WL-completeness proof for the
-      class (research-level), or REDESIGN the twist to compute pick-independently under discreteness
-      (a change to the landed executable — the "all-or-nothing / alternate gate" backup). NOT the banned
-      GI∈P reasoning — it is an empirically-firm, unproven WL-completeness characterisation.
+    **▶▶ SUPERSEDED 2026-07-21 by the framing reframe + the FACTORING (see the CURRENT FRONTIER block at
+    the top of this file for the authoritative version).** The old framing below ("R1 ⟺ WL-refinement
+    COMPLETE on the class", the discreteness `ScratchDisc` reduction, the `twistOf_conj`/`g∈⟨exec⟩`
+    sub-decision) is RETAINED FOR PROVENANCE but three corrections apply:
+    · The obligation is **symmetry-consumption completeness, NOT WL/I-R completeness** — colour-equal
+      NON-automorphic pairs are FORCE's job, so R1's residue is genuinely-automorphic pairs only; the
+      verification gate supplies the single-orbit restriction. §L.4 is a FORCE-side analogy, not a proof;
+      "Miyazaki defeats it" was RETRACTED (deepen takes a single path, not the tree).
+    · **Firing does NOT imply the single-orbit-cell property** (a WL-merged multi-orbit cell discretizes
+      too), so it is a genuine domain hypothesis `Amenable`, not a consequence of discreteness.
+    · R1's crux **FACTORS**: `R1 ⟸ (Amenable ⟹ R1) + Amenable`. **LAYER 1** (`Amenable ⟹ R1`) is
+      MECHANICAL — the re-relating induction (invariant: the two descents stay automorphism-related; the
+      single-orbit cell absorbs the lowest-index mismatch via a `τ∈Stab`); ⚠ settle the K-coverage sub-risk
+      first (`SameOrbits` is over all vertices, induction gives the branch cell). **LAYER 2** (`Amenable`) =
+      IR-amenability along the canonical path, discharged PER-FAMILY aiming general (bounded categorisations
+      → generalisable amenability), via existing WL-completeness seals; resisters route to force/kernel.
+      Backup = the poly all-or-nothing gate (CHECK `Amenable` per level, defer on failure; ①c by
+      construction). VALIDATION: no R1 falsifier (G8×7/cG8/F12/t3/wcyc9 + C# 39-family); 16 = exact
+      same-orbit pair count on G8. **NOT the banned GI∈P reasoning** — `Amenable` is a concrete,
+      measured-true, per-family-dischargeable hypothesis.
 
     ### ▶▶ 2026-07-21 — R2 ALGEBRAIC CORE LANDED (`DeepenRefTransport.lean`, in build, axiom-clean)
     R2 = `SupplyEquivariant deepenRefSupply`, the exact hypothesis `OrbitPrune.guarded_mixed_canonizer_
