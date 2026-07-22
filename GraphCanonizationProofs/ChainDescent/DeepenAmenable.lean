@@ -77,6 +77,81 @@ theorem step_rerelate {adj : AdjMatrix n} {σ τ : Equiv.Perm (Fin n)} (ψa : Co
   rw [hτ.transport] at h1
   rw [h1, step_aut hσ ψa ua, transportColouring_comp]
 
+/-! ## 1b. Cell-transport helpers for the fuel induction
+
+`deepen`/`replay` individualize the head of the id-`cid` cell `(finRange n).filter (χc · == cid)`.
+Under a graph-automorphism the two descents' cells correspond by `σ` (up to `List.Perm`, index order),
+exactly as `classOf` does — these are the lemmas the joint induction reads. -/
+
+/-- The id-`cid` cell — the vertices `deepen` picks the head of. -/
+def cidCell (χc : Colouring n) (cid : Nat) : List (Fin n) :=
+  (List.finRange n).filter (fun v => χc v == cid)
+
+theorem mem_cidCell_iff (χc : Colouring n) (cid : Nat) (u : Fin n) :
+    u ∈ cidCell χc cid ↔ χc u = cid := by
+  unfold cidCell; simp [List.mem_filter, List.mem_finRange]
+
+theorem cidCell_nodup (χc : Colouring n) (cid : Nat) : (cidCell χc cid).Nodup :=
+  List.Nodup.filter _ (List.nodup_finRange n)
+
+theorem mem_cidCell_transport (σ : Equiv.Perm (Fin n)) (χc : Colouring n) (cid : Nat) (u : Fin n) :
+    u ∈ cidCell (transportColouring σ χc) cid ↔ σ.symm u ∈ cidCell χc cid := by
+  rw [mem_cidCell_iff, mem_cidCell_iff, transport_apply' σ χc u]
+
+/-- **The id-cell transports up to permutation** (index order — same shape as `classOf_perm_transport`). -/
+theorem cidCell_perm_transport (σ : Equiv.Perm (Fin n)) (χc : Colouring n) (cid : Nat) :
+    (cidCell (transportColouring σ χc) cid).Perm ((cidCell χc cid).map σ) := by
+  apply (List.perm_ext_iff_of_nodup (cidCell_nodup _ _)
+    (List.Nodup.map σ.injective (cidCell_nodup _ _))).mpr
+  intro u
+  rw [mem_cidCell_transport σ χc cid u, List.mem_map]
+  constructor
+  · intro h; exact ⟨σ.symm u, h, by simp⟩
+  · rintro ⟨w, hw, rfl⟩; simpa using hw
+
+/-- The id-cell's **membership** is `σ`-image: `σ` maps `a`'s id-cell onto `b`'s. -/
+theorem mem_cidCell_transport_apply (σ : Equiv.Perm (Fin n)) (χc : Colouring n) (cid : Nat)
+    (u : Fin n) (h : u ∈ cidCell χc cid) : σ u ∈ cidCell (transportColouring σ χc) cid := by
+  rw [mem_cidCell_transport]; simpa using h
+
+/-- The id-cell **length** is invariant — so `a`'s cell is nonempty iff `b`'s is (replay can follow). -/
+theorem cidCell_length_transport (σ : Equiv.Perm (Fin n)) (χc : Colouring n) (cid : Nat) :
+    (cidCell (transportColouring σ χc) cid).length = (cidCell χc cid).length := by
+  rw [(cidCell_perm_transport σ χc cid).length_eq, List.length_map]
+
+/-! ## 1c. Refinement monotonicity — piece 1 of the fuel induction
+
+The `τ` that `Amenable` supplies stabilizes the CURRENT colouring `ψ` (a refinement of the parent `χ`).
+For the joint induction's invariant `σ' ∈ IsColAut adj χ` to survive `σ' ↦ τσ'`, that `τ` must also
+stabilize the PARENT. It does, because a step only ever refines: `ψ x = ψ y ⟹ χ x = χ y`, and `IsColAut`'s
+colour clause is `∀ v, χ (α v) = χ v`, so refinement transfers stabilization down to any coarsening. -/
+
+/-- **`indivOne` refines its input.** Equal marked-colours ⟹ equal original colours (off the pin by
+`indivOne_refines_off`; at the pin by `indivOne_singleton`). -/
+theorem indivOne_refines (χ : Colouring n) (v : Fin n) {x y : Fin n}
+    (h : Descend.indivOne χ v x = Descend.indivOne χ v y) : χ x = χ y := by
+  by_cases hx : x = v <;> by_cases hy : y = v
+  · rw [hx, hy]
+  · rw [hx] at h; exact absurd h.symm (Descend.indivOne_singleton χ v y hy)
+  · rw [hy] at h; exact absurd h (Descend.indivOne_singleton χ v x hx)
+  · exact (Descend.indivOne_refines_off χ v x y hx hy).mp h
+
+/-- **★ ONE STEP REFINES THE PARENT.** `step = warmRefineVec ∘ indivOne`; the warm round refines
+(`refineSplits_encodeFreeFast`) and `indivOne` refines, so the composite does. -/
+theorem step_refines (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) {x y : Fin n}
+    (h : (step adj χ v).col x = (step adj χ v).col y) : χ x = χ y := by
+  unfold step at h
+  rw [Refine.warmRefineVec_col_eq, ← Refine.refineV_encodeFreeFast] at h
+  exact indivOne_refines χ v (Refine.refineSplits_encodeFreeFast adj (Descend.indivOne χ v) x y h)
+
+/-- **★ STABILIZATION TRANSFERS DOWN A REFINEMENT.** If `ψ` refines `χ`, a colour-automorphism of `ψ`
+is one of `χ` — the adjacency clause is shared, the colour clause follows pointwise from `refines`. This
+is what keeps the running composite `σ' = τσ` in the PARENT-stabilizer through the induction. -/
+theorem isColAut_parent_of_refines {adj : AdjMatrix n} {χ ψ : Colouring n}
+    (hrefine : ∀ x y, ψ x = ψ y → χ x = χ y) {τ : Equiv.Perm (Fin n)}
+    (hτ : IsColAut adj ψ τ) : IsColAut adj χ τ :=
+  ⟨hτ.1, fun v => hrefine (τ v) v (hτ.2 v)⟩
+
 /-! ## 2. `Amenable`, the rigid obstruction, and the G2 attribution
 
 `Amenable` is the domain hypothesis of Layer 1: every level of the canonical deepening individualizes a
@@ -129,6 +204,23 @@ only single-orbit cells. `Amenable ⟹ R1` is the re-relating induction (Layer 1
 complement is a rigid obstruction (`rigidObstruction_of_not_cellSingleOrbit`). -/
 def Amenable (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
   ∀ r ∈ Descend.branches χ, AmenablePath adj χ n (step adj χ r)
+
+/-- **★ `CellSingleOrbit` TRANSPORTS under an automorphism (piece 2a).** `b`'s id-cell is the σ-image
+of `a`'s and its stabilizer is the σ-conjugate, so a single orbit stays a single orbit. This is why
+`Amenable` (stated about the `a`-descent) delivers the `τ ∈ Stab(cur_b.col)` the re-relating step needs
+on the `b`-descent. Uses `Consume.isColAut_conj_iff` (the verification check conjugates). -/
+theorem cellSingleOrbit_transport {adj : AdjMatrix n} {χc : Colouring n} {σ : Equiv.Perm (Fin n)}
+    (hσ : relabelAdj σ adj = adj) {cid : Nat} (h : CellSingleOrbit adj χc cid) :
+    CellSingleOrbit adj (transportColouring σ χc) cid := by
+  intro u' w' hu' hw'
+  have hu : χc (σ.symm u') = cid := hu'
+  have hw : χc (σ.symm w') = cid := hw'
+  obtain ⟨ρ, hρ, hρuw⟩ := h (σ.symm u') (σ.symm w') hu hw
+  refine ⟨σ * ρ * σ⁻¹, ?_, ?_⟩
+  · have hc := (Consume.isColAut_conj_iff σ (adj := adj) (χ := χc) (α := ρ)).mpr hρ
+    rwa [hσ] at hc
+  · show σ (ρ (σ.symm u')) = w'
+    rw [hρuw]; exact Equiv.apply_symm_apply σ w'
 
 /-! ## 3. The capstone — `(R1 ∧ R2) → ①c`, and the `Amenable`-gated form
 
