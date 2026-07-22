@@ -492,6 +492,101 @@ theorem twistOf_of_transport_fixing {adj : AdjMatrix n} {χ χ1 : Colouring n} {
   rw [hpm]
   simp [hσ']
 
+/-! ## 2e. Reference-gen bridge infrastructure (the `hL1 ⟸ ORBIT_K` reduction, §9.1.1)
+
+Clean, `hfix`-independent pieces the bridge reduction runs on: reference gens are `IsColAut` (so a ref
+gen's action is an automorphism), and `twistOf` is the identity off `K` (so `∀ x` is `refl` off `K`,
+leaving only `x ∈ K`). -/
+
+/-- `permOf` forward: if it gates to `ρ`, then `ρ` IS the input function pointwise. -/
+theorem permOf_apply {f : Fin n → Fin n} {ρ : Equiv.Perm (Fin n)}
+    (h : Deck2.permOf f = some ρ) (v : Fin n) : ρ v = f v := by
+  unfold Deck2.permOf at h
+  split at h
+  · rw [Option.some.injEq] at h; subst h; rfl
+  · exact absurd h (by simp)
+
+/-- **`twistOf` is the identity off `K`.** So a reference generator moves nothing outside its coupled
+component, and `DeepenRefInExec`'s `∀ x` is `refl` for `x ∉ K`. -/
+theorem twistOf_id_off_K {adj : AdjMatrix n} {χ χ1 : Colouring n} {K : List (Fin n)} {χj : Colouring n}
+    {ρ : Equiv.Perm (Fin n)} (h : twistOf adj χ χ1 K χj = some ρ)
+    {v : Fin n} (hv : K.contains v = false) : ρ v = v := by
+  rw [twistOf_eq_imgFun] at h
+  cases hp : Deck2.permOf (imgFun χ1 K χj) with
+  | none => rw [hp] at h; simp at h
+  | some ρ' =>
+      rw [hp] at h
+      dsimp only at h
+      by_cases hia : decide (IsColAut adj χ ρ') = true
+      · rw [if_pos hia, Option.some.injEq] at h
+        subst h
+        rw [permOf_apply hp v]
+        unfold imgFun; rw [if_neg (by rw [hv]; simp)]
+      · rw [if_neg hia] at h; exact absurd h (by simp)
+
+/-- **Every reference generator is a colour-automorphism** — the ref analog of `deepenGens_isColAut`
+(same `twistOf_isColAut` emission gate, all paths). So a ref gen `ρ` gives `IsColAut adj χ ρ`, hence
+`ρ x` lies in `x`'s `IsColAut`-orbit — the input to `ORBIT_K`. -/
+theorem deepenRefGens_isColAut (adj : AdjMatrix n) (χ : Colouring n)
+    {ρ : Equiv.Perm (Fin n)} (h : ρ ∈ deepenRefGens adj χ) : IsColAut adj χ ρ := by
+  unfold deepenRefGens at h
+  rw [List.mem_flatMap] at h
+  obtain ⟨p1, _, h⟩ := h
+  rw [List.mem_flatMap] at h
+  obtain ⟨ds, _, h⟩ := h
+  dsimp only at h
+  by_cases hgate :
+      ((coupled χ ds.1.col).isEmpty || !allSingletonsK (coupled χ ds.1.col) ds.1.col) = true
+  · rw [if_pos hgate] at h; simp at h
+  · rw [if_neg hgate] at h
+    rw [List.mem_flatMap] at h
+    obtain ⟨pj, _, h⟩ := h
+    by_cases heq : (pj.1 == p1.1) = true
+    · rw [if_pos heq] at h; simp at h
+    · rw [if_neg heq] at h
+      rw [List.mem_filterMap] at h
+      obtain ⟨dj, _, h⟩ := h
+      exact twistOf_isColAut adj χ ds.1.col _ dj.col h
+
+/-- **Each reference generator is the identity off SOME `K`** (its anchor's coupled component). Extracts
+the `K` for the `hL1` reduction's off-`K` = `refl` branch. -/
+theorem refGen_id_off (adj : AdjMatrix n) (χ : Colouring n) {ρ : Equiv.Perm (Fin n)}
+    (h : ρ ∈ deepenRefGens adj χ) : ∃ K : List (Fin n), ∀ v, K.contains v = false → ρ v = v := by
+  unfold deepenRefGens at h
+  rw [List.mem_flatMap] at h
+  obtain ⟨p1, _, h⟩ := h
+  rw [List.mem_flatMap] at h
+  obtain ⟨ds, _, h⟩ := h
+  dsimp only at h
+  by_cases hgate :
+      ((coupled χ ds.1.col).isEmpty || !allSingletonsK (coupled χ ds.1.col) ds.1.col) = true
+  · rw [if_pos hgate] at h; simp at h
+  · rw [if_neg hgate] at h
+    rw [List.mem_flatMap] at h
+    obtain ⟨pj, _, h⟩ := h
+    by_cases heq : (pj.1 == p1.1) = true
+    · rw [if_pos heq] at h; simp at h
+    · rw [if_neg heq] at h
+      rw [List.mem_filterMap] at h
+      obtain ⟨dj, _, hd⟩ := h
+      exact ⟨coupled χ ds.1.col, fun v hv => twistOf_id_off_K hd hv⟩
+
+/-- **★ THE `hL1 ⟸ ORBIT_K` REDUCTION (§9.1.1).** `DeepenRefInExec` follows from the on-`K` coverage
+`hreach` (each ref gen reaches every `x` in its coupled component `K`) — the off-`K` case is `refl`
+because a ref gen fixes everything outside `K` (`refGen_id_off`). So the whole bridge reduces to proving
+`hreach`, which splits into the branch-cell half (clean) and the `K∖cell` crux (§9.1.1). -/
+theorem deepenRefInExec_of_reachOnK
+    (hreach : ∀ (adj : AdjMatrix n) (χ : Colouring n) (ρ : Equiv.Perm (Fin n)),
+        ρ ∈ deepenRefGens adj χ →
+        ∀ K : List (Fin n), (∀ v, K.contains v = false → ρ v = v) →
+        ∀ x, K.contains x = true → Consume.WordReach (Consume.verified deepenSupply adj χ) x (ρ x)) :
+    ∀ (adj : AdjMatrix n) (χ : Colouring n), DeepenRefInExec adj χ := by
+  intro adj χ ρ hρ x
+  obtain ⟨K, hoff⟩ := refGen_id_off adj χ hρ
+  by_cases hxK : K.contains x = true
+  · exact hreach adj χ ρ hρ K hoff x hxK
+  · rw [hoff x (by simpa using hxK)]; exact Consume.WordReach.refl x
+
 /-! ## 3. The capstone — `(R1 ∧ R2) → ①c`, and the `Amenable`-gated form
 
 Mirrors `KernelTransport.kernelSupply_guarded_canonizer`: ①c for the executable `deepenSupply` is

@@ -341,6 +341,11 @@ prose.
 
 ### 9.1.1 THE REFERENCE-GEN BRIDGE — the plan (2026-07-22)
 
+> **▶ LANDED 2026-07-22 (axiom-clean):** the reduction and its infrastructure — `deepenRefGens_isColAut`,
+> `twistOf_id_off_K`, `permOf_apply`, `refGen_id_off`, and **`deepenRefInExec_of_reachOnK`** (the whole
+> `hL1 ⟸ on-K` reduction; off-`K` is `refl`). So **`hL1` now reduces to `hreach`** := *each ref gen reaches
+> every `x` in its coupled component `K`*. The detailed route analysis for `hreach` is **§9.1.2**.
+
 `joint` (b2) + piece 3 close the **canonical** story: under `Amenable`, the canonical exec twist for a
 σ-related pair verifies and equals `σ_final` on `K`. But `hL1` targets `DeepenRefInExec`, which quantifies
 over **arbitrary** `deepenRefGens` (all `deepenAll`/`replayAll` paths). This subsection is the plan to bridge
@@ -405,6 +410,80 @@ tractable, and shared with `branch_determines_K`.
 **all-or-nothing backup gate** (§9.3, `①c` by construction, sidesteps the group-completeness entirely) becomes
 the pragmatic pivot. Recommended order: land the branch-cell half + `hfix` discharge (real progress, clean),
 THEN attack `K∖cell` with a hard look at Route α-2's group-completeness vs the backup.
+
+### 9.1.2 `hreach` — DETAILED ROUTE ANALYSIS (2026-07-22)
+
+`hreach` := *`∀ ρ ∈ deepenRefGens, ∀ x ∈ K_ρ, WordReach exec x (ρ x)`.* Since `ρ ∈ IsColAut` and `ρ x ∈ K_ρ`,
+this is: **for `x, y ∈ K` in the same `IsColAut(χ)`-orbit, `WordReach exec x y`** — i.e. *the anchor-to-rep
+twists generate the full automorphism action on `K`*. Landing the infra sharpened three things below.
+
+**The shared obligation `[INV]` — `K` is `σ_final`-invariant (⟺ `hfix`).** `twistOf`'s `imgFun` sends `v ∈ K`
+to `σ_final v` **only if `σ_final v ∈ K`**; else `find?` misses and the map breaks (not a bijection ⟹ `permOf`
+fails ⟹ `twistOf = none` ⟹ NO exec gen). Since `coupled χ (transportColouring σ_final χ1) = σ_final(coupled χ
+χ1)` (coupled transports — provable), `[INV] ⟺ coupled χ (dj.col) = coupled χ χ1 ⟺ σ_final(K) = K`. **This is
+not automatic** — off-`K` = non-`χ1`-splitting cells, which `σ_final` can move. It gates BOTH piece 3's `hfix`
+AND the branch-cell existence. **Discharge:** `[DISC]` — the deepening discretizes the WHOLE graph (MEASURED
+on G8/t3/wcyc9/mp7) ⟹ `K` = union of non-singleton `χ`-cells (a function of `χ` alone, so `σ_final`-invariant)
+and off-`K` = `χ`-singletons (`σ_final`-fixed). `[DISC]` is a firing-completeness domain fact, plausibly
+provable per-family; it is the honest cost of the clean half too. **Priority infra.**
+
+**The clean half — branch cell — is genuinely clean modulo `[INV]`.** For `x, y ∈ cell`, `g_{x,y}` maps
+`x ↦ y` because both are individualized into the SAME anchor colour-slot (`img x = y`; and `σ_final x = y`
+since the per-level `τ`'s fix the already-individualized rep `y` — a singleton). So `WordReach exec x y` in one
+step, given `g_{x,y}` exists (= `[INV]`). Formally `= ` the `←` of `DeepenForcedMatch` (`DeepenCrux`). **Land as
+`exec_recovers_cell_orbits` once `[INV]` is in hand.**
+
+**The crux — `K∖cell` — characterized precisely.** Exec gens `= {σ_final(a,b)}` on `K`, each moving the cell
+(`a↦b`, `b≠a`). Need `⟨σ_final(a,b)⟩`-orbits on `K` `=` `IsColAut`-orbits on `K`. The hard content is
+**`ker φ`** (`φ : IsColAut → Sym(cell)`, `β ↦ β|_cell`): automorphisms that FIX the branch cell but move
+`K∖cell` (e.g. a `K∖cell` swap fixing the cell). **No single exec gen is in `ker φ`** (all move the cell), so
+`ker φ` must be recovered as WORDS in cell-moving gens. Measured recovered (t3 `K∖cell` size-6 orbit matches).
+
+**ROUTE α — `branch_determines_K` + branch-cell group completeness. ⚠ HAS A FLAW.**
+  - α1 `branch_determines_K`: an `IsColAut` fixing the cell pointwise is `id` on `K`. **FALSE in general** —
+    `deepen` individualizes a *sequence* (cell vertex, then `K∖cell` picks at deeper levels); the cell alone
+    need not discretize `K`, so a `K∖cell` swap can fix the cell (`ker φ ≠ 1`). α1 holds only in the
+    "single-level coupling" special case (cell individualization alone discretizes `K`). **Route α is
+    incomplete on its own** — it handles `ker φ = 1` only.
+
+**ROUTE β — per-level / `K`-extended reachability.** A `K∖cell` vertex `x` is individualized at some deepening
+level `ℓ`; read off `WordReach` from a pair whose level-`ℓ` pick is `x` vs `α x`. Content: the deeper-level
+member-swaps must be exec-reachable. **This IS the `ker φ` recovery**, re-expressed per level: it recurses
+(level-`ℓ` cells are single-orbit under `Amenable`, and their member-swaps are what deeper exec structure must
+generate). Viable but needs a nested induction; the risk is `chooseIdK`'s lowest-index pick — hitting a chosen
+`x` needs the **all-anchors × all-picks** quantification (which is exactly why the reference is all-picks and
+why all-anchors was forced by G8).
+
+**ROUTE ε (NEW — most promising native route) — direct `ref ⊆ exec` via a path-difference induction.** Do NOT
+route through `Aut`-completeness. A ref gen `ρ = σ'_P` (path `P`) differs from the canonical `g_{a,b} =
+σ_final` by the sequence of "pick a different member of a single-orbit cell at each level". **Induct on the
+deepening depth:** at each level the two picks lie in one `Amenable` single-orbit cell, so they differ by a
+`τ ∈ Stab`; if each such `τ`'s action is exec-reachable, compose. This turns the crux into a *local* claim —
+"each single-orbit-cell member-swap is exec-reachable" — instead of a global group-generation theorem, and it
+reuses the `joint`/`step_rerelate` machinery already built. **The bottom of the recursion** (level-0 = the
+branch cell) is the clean half. The open part is whether deeper-level swaps bottom out via all-anchors coverage
+or need their own sub-induction — but this is the route that most directly leverages what is already landed.
+
+**ROUTE ζ (NEW — merges with existing project work) — import the recovery / `CellsAreOrbits` machinery.**
+`hreach` = "cells become orbits at the deepening depth" = the project's **`RecoverableByDepth` / `CellsAreOrbits`**
+notion (`CascadeOracle`, `SealDepthBridge`, `HandledBridge`). `deepen`'s `K`-discretization IS a bounded-depth
+individualization; the seal machinery already proves *cells-are-orbits at bounded depth* for the recoverable
+families. So for **seal-covered families the crux discharges by IMPORT**, not fresh proof — exactly the
+"merge with the WL-dimension / recovery work" the user flagged. Scope: this covers the metric/DRG/Cameron
+families the seal reaches; the residue is whatever `deepen` targets beyond them (the base symmetry of `mp7`,
+`PGL(3,2)` — check whether `theorem_1_HOR_*` / Route-C reach it).
+
+**VERDICT — HYBRID is most viable.**
+1. **Land `[DISC]`/`[INV]` + the branch-cell half first** (`exec_recovers_cell_orbits`) — real, clean, and
+   shared by every route. This closes `ker φ = 1` (the branch cell controls `K`) entirely via α1-where-valid.
+2. **For `K∖cell` / `ker φ`: pursue ROUTE ε** (path-difference induction) as the native attack — it localizes
+   the crux and reuses `joint`/`step_rerelate`; **in parallel probe ROUTE ζ** (import) for the seal-covered
+   families, which may discharge large sub-families for free and shrink ε's residue.
+3. **ROUTE α** is not standalone (α1 false in general) but its valid special case (single-level coupling) is
+   the `ker φ = 1` base that ε's induction bottoms out on — so α is *absorbed into the hybrid*, not discarded.
+4. **ROUTE β** ≡ ε viewed per-level; keep ε's framing (cleaner recursion, reuses landed machinery).
+5. If ε's deeper-level recursion and ζ's import both stall on the same residual family, THAT family is the
+   honest trigger for the **all-or-nothing backup gate** — but not before (per the standing steer).
 
 ### 9.2 R2 — mechanical assembly
 
