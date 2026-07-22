@@ -939,6 +939,29 @@ theorem deepenSupply_guarded_canonizer_direct
     (SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport
       Force.keyEquivariant_lookahead (deepen_branchOrbit_transport hAmen hfires))
 
+/-! ## 2b‴. The rigid handoff — deepen DEFERS SOUNDLY on a rigid obstruction
+
+`①c` is conditional on `Amenable`; an `Amenable`-violation is a `RigidObstructionAt`
+(`rigidObstruction_of_not_cellSingleOrbit`). This subsection nails the SOUND half of the rigid handoff at the
+branch cell: deepen can never *mishandle* a rigid pair, so it hands it, untouched, to the force / rigid side.
+What remains is the WALL (force actually separating the rigid cell = `CellResolved`'s force branch =
+`hSmallAutThin`) + the fusion/scheduling gap (the `Amenable` obstruction lives at a deep level; the
+interleaving must peel it before consume) — both totality obligations, neither a new conjecture. -/
+
+/-- **★ DEEPEN DEFERS SOUNDLY ON A RIGID OBSTRUCTION.** A same-colour NON-automorphic branch pair `(u, w)` can
+never be connected by deepen's verified generators — they are all `IsColAut`, so a `WordReach u w` would furnish
+the very automorphism ruled out. Hence `CellIsOrbit` FAILS on a rigid cell: deepen emit-nothings and the pair
+passes, untouched, to force. This is the exact `RigidObstructionAt` that G2 attributes an `Amenable`-violation
+to — the SAME 1-WL-merged non-automorphic pair the rigid solver / §11.14 classification already own, not a new
+obstruction type. -/
+theorem rigidObstruction_imp_not_cellIsOrbit {adj : AdjMatrix n} {χ : Colouring n}
+    {u w : Fin n} (hu : u ∈ Descend.branches χ) (hw : w ∈ Descend.branches χ)
+    (hrig : ∀ β : Equiv.Perm (Fin n), IsColAut adj χ β → β u ≠ w) :
+    ¬ Consume.CellIsOrbit deepenSupply adj χ := by
+  intro h
+  obtain ⟨β, hβ, hβu⟩ := wordReach_imp_isColAut (h u hu w hw)
+  exact hrig β hβ hβu
+
 /-! ## 2c. Route ε — the whole-node target `ExecReachesAut` and its reduction
 
 `ExecRecoversKMinusCell` reframes to the honest whole-hog statement: `⟨verified deepenSupply⟩` recovers the

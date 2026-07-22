@@ -303,17 +303,23 @@ Chang-A) is where `Amenable`/`①c` could break. Per the framing, consume's resi
 
 ## 7. The gap ledger (provability status)
 
+**▶ SUPERSEDED 2026-07-22 — the reference (R1/R2) is ELIMINATED (§2b″).** `①c` closes REFERENCE-FREE modulo
+`{Amenable, AnchorFires}` only. The table below is updated; the L0/R1/R2 rows are retired to provenance.
+
 | Link | Statement | Status |
 |---|---|---|
-| **L0** | `(R1 ∧ R2) → ①c` | **PROVED** (`deepenSupply_guarded_canonizer_of`) |
-| **L1** | `Amenable → R1` (`DeepenRefInExec`) | `joint` (2b, anchor-tracking) + piece 3 + **reduction `hL1 ⟸ hreach`** + **branch-cell half** LANDED; remaining = `[INV]` discharge (`offCoupled_singleton`) + **`K∖cell` crux** (Route ε primary, ζ parallel — §9.1.2) |
-| **L2 / G2** | `¬Amenable → rigid obstruction` (attribution) | **PROVED** (`rigidObstruction_of_not_cellSingleOrbit`) |
-| **R2** | `SupplyEquivariant deepenRefSupply` | core (`twistOf_transport`) landed; set-level assembly remains |
-| **G1** | `rigid obstruction ⟹ F_k` | the **shared wall** — NOT needed for `①c`, only totality |
+| **①c** | `{Amenable, AnchorFires} → ①c` (reference-free) | **PROVED** (`deepenSupply_guarded_canonizer_direct`) — via deepen-branch-orbit = `IsColAut`-orbit, transports; no `deepenRefSupply`, no R1, no R2 |
+| **AnchorFires** | per-anchor: `deepen` succeeds + gate + `Discrete` leaf | **domain fact** — a `deepen`-discretizes lemma (firing-completeness, NOT a wall); undischarged |
+| **L2 / G2** | `¬Amenable → RigidObstructionAt` (attribution) | **PROVED** (`rigidObstruction_of_not_cellSingleOrbit`) |
+| **rigid handoff** | `RigidObstructionAt → ¬CellIsOrbit` (deepen defers SOUNDLY) | **PROVED** (`rigidObstruction_imp_not_cellIsOrbit`) — deepen never mishandles a rigid pair; it is the SAME obstruction type the rigid solver / §11.14 own |
+| **G1 / force-sep** | `RigidObstructionAt → CellResolved`'s force branch (key injective on branches) | the **shared wall** (`hSmallAutThin`) — totality only, NOT `①c` |
+| **fusion** | deep-level `Amenable` obstruction peeled before consume sees the cell | **totality scheduling** (the interleaving) — G2's *avoidance* direction |
+| ~~L0~~ ~~R1~~ ~~R2~~ | `(R1∧R2)→①c` / `Amenable→R1` / `SupplyEquivariant deepenRefSupply` | **RETIRED** (reference eliminated); `deepenRefSupply` route kept for provenance only |
 
-Everything conjectural lives in **G1** (the shared wall, covered whenever anyone covers it) and the
-**Schurian-delivery** scheduling piece (G2's *avoidance* direction, a totality obligation). Nothing else is
-prose.
+Everything conjectural lives in **G1** (the shared wall, covered whenever anyone covers it) + the **fusion
+scheduling** (a totality obligation). `①c` itself is prose-free modulo the two domain facts `{Amenable,
+AnchorFires}`; the rigid **handoff is sound** (deepen defers, never mishandles), so deepen introduces **no new
+obstruction** — only the shared wall + scheduling remain.
 
 ---
 
@@ -373,6 +379,8 @@ prose.
     reduction: branch-only orbit agreement suffices). In `DeepenAmenable` — **`wordReach_deepen_of_ref_on_branch`**
     · **`sameOrbitsOnBranches_of_cell`** · **`deepenSupply_guarded_canonizer_of_cell`** (`①c` modulo
     `{R2, Amenable, AnchorFires}` — the `deepenRefSupply` route, superseded).
+  - *rigid handoff (2026-07-22, §2b‴):* **`rigidObstruction_imp_not_cellIsOrbit`** (deepen defers SOUNDLY on a
+    rigid pair — `¬CellIsOrbit`; the same obstruction the rigid solver / §11.14 own, no new type).
   - *★★★★ the REFERENCE-FREE close (2026-07-22) — the intended `①c`:* in `SupplyTransport` —
     **`stallEquivariant_forceThenConsume_of_branchOrbitTransport`** (generic: `StallEquivariant` from branch-orbit
     transport, no `SupplyEquivariant`). In `DeepenAmenable` — **`wordReach_imp_isColAut`** · **`deepen_branch_orbit_iff_aut`**
