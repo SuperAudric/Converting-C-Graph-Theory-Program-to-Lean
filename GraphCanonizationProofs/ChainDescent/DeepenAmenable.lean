@@ -640,6 +640,44 @@ theorem transportColouring_isColAut {adj : AdjMatrix n} {χ : Colouring n} {t : 
   rw [Equiv.apply_symm_apply] at h
   exact h.symm
 
+/-- Elements of a list of length `≤ 1` are all equal. -/
+theorem eq_of_mem_of_length_le_one {α : Type*} {l : List α}
+    (h : l.length ≤ 1) {a b : α} (ha : a ∈ l) (hb : b ∈ l) : a = b := by
+  cases l with
+  | nil => simp at ha
+  | cons x t =>
+    cases t with
+    | nil => rw [List.mem_singleton] at ha hb; rw [ha, hb]
+    | cons y s => simp only [List.length_cons] at h; omega
+
+/-- **`[DISC] ⟹ [INV]` — off the coupled component, every vertex is a `χ`-singleton.** When the leaf
+colouring `χc` is discrete (the whole-graph discretization measured on every firing witness), a vertex `w`
+whose `χ`-cell does not split under `χc` (`w ∉ coupled χ χc`) is alone in its `χ`-cell: the cell has a
+CONSTANT `χc` value (that is what `∉ coupled` means), and discreteness collapses a constant-`χc` set to a
+single vertex. Discharges the `hinv`/`[INV]` hypothesis of `exec_recovers_cell_orbits` from the single
+domain fact `[DISC]`. -/
+theorem offCoupled_singleton {χ χc : Colouring n} (hdisc : Discrete χc) {w : Fin n}
+    (hw : (coupled χ χc).contains w = false) :
+    ∀ u, χ u = χ w → u = w := by
+  intro u huw
+  have hnm : w ∉ coupled χ χc := by
+    rw [List.contains_eq_mem] at hw; exact of_decide_eq_false hw
+  -- `w ∉ coupled` unfolds to: its `χ`-cell, mapped through `χc`, dedups to `≤ 1` value
+  have hlen : (((List.finRange n).filter (fun z => χ z == χ w)).map χc).dedup.length ≤ 1 := by
+    by_contra hcon
+    rw [Nat.not_le] at hcon
+    exact hnm (by rw [coupled, List.mem_filter]; exact ⟨List.mem_finRange w, by simpa using hcon⟩)
+  -- `u` and `w` both lie in that `χ`-cell, so their `χc` values coincide in the deduped list
+  have hu : u ∈ (List.finRange n).filter (fun z => χ z == χ w) :=
+    List.mem_filter.mpr ⟨List.mem_finRange u, by simp [huw]⟩
+  have hwm : w ∈ (List.finRange n).filter (fun z => χ z == χ w) :=
+    List.mem_filter.mpr ⟨List.mem_finRange w, by simp⟩
+  have hcu : χc u ∈ (((List.finRange n).filter (fun z => χ z == χ w)).map χc).dedup :=
+    List.mem_dedup.mpr (List.mem_map.mpr ⟨u, hu, rfl⟩)
+  have hcw : χc w ∈ (((List.finRange n).filter (fun z => χ z == χ w)).map χc).dedup :=
+    List.mem_dedup.mpr (List.mem_map.mpr ⟨w, hwm, rfl⟩)
+  exact hdisc u w (eq_of_mem_of_length_le_one hlen hcu hcw)
+
 /-- **★★ THE BRANCH-CELL HALF — `exec_recovers_cell_orbits`.** For anchor `r₁` and rep `rⱼ` in the branch
 cell related by a colour-automorphism `t` (`t r₁ = rⱼ`), the executable emits a verified generator mapping
 `r₁ ↦ rⱼ`, so `WordReach exec r₁ rⱼ`. Assembles `joint` (anchor-tracking gives `σf r₁ = rⱼ`) + piece 3
@@ -653,7 +691,7 @@ theorem exec_recovers_cell_orbits (adj : AdjMatrix n) (χ : Colouring n) {r₁ r
     (hdeepen : deepen adj χ n (step adj χ r₁) [] = some (d1, seq))
     (hgate : ((coupled χ d1.col).isEmpty || !allSingletonsK (coupled χ d1.col) d1.col) = false)
     (hAmen : AmenablePath adj χ n (step adj χ r₁))
-    (hinv : ∀ w, (coupled χ d1.col).contains w = false → ∀ u, χ u = χ w → u = w) :
+    (hdisc : Discrete d1.col) :
     Consume.WordReach (Consume.verified deepenSupply adj χ) r₁ rⱼ := by
   -- `b`-state is the `t`-transport of `a`-state
   have hrel : (step adj χ rⱼ).col = transportColouring t (step adj χ r₁).col := by
@@ -674,7 +712,7 @@ theorem exec_recovers_cell_orbits (adj : AdjMatrix n) (χ : Colouring n) {r₁ r
     rcases Bool.or_eq_false_iff.mp hgate with ⟨_, h2⟩
     simpa using h2
   have hfix : ∀ w, (coupled χ d1.col).contains w = false → σf w = w := fun w hw =>
-    isColAut_fixes_singleton hσf (hinv w hw)
+    isColAut_fixes_singleton hσf (offCoupled_singleton hdisc hw)
   have htwist : twistOf adj χ d1.col (coupled χ d1.col) leaf_b.col = some σf := by
     rw [hleaf]; exact twistOf_of_transport_fixing hall hfix hσf
   -- membership + verification, then the one-step `WordReach`

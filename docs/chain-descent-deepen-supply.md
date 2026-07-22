@@ -15,8 +15,9 @@
 ## ▶ STATUS (2026-07-22)
 
 > **UPDATE 2026-07-22 — Layer-1 core + the BRIDGE REDUCTION + the BRANCH-CELL HALF all LANDED axiom-clean**
-> (`DeepenAmenable.lean`; full `build.sh` green). Reading order: this STATUS → §7 ledger → §8 inventory →
-> §9.1.1 (reduction) → §9.1.2 (route ledger for the crux).
+> (`DeepenAmenable.lean`; full `build.sh` green). Reading order: this STATUS → **§2.1 (why deepen not the
+> already-closed index-free `deepMatchSupply` — the poly/quasipoly division + the `viaSpielman` sub-exp→poly
+> payoff, NEW 2026-07-22)** → §7 ledger → §8 inventory → §9.1.1 (reduction) → §9.1.2 (route ledger for the crux).
 >
 > - **Landed this session** (all `[propext, Classical.choice, Quot.sound]`): `b1` (`chooseIdK_mem`); `b2`
 >   (**`joint`** — the re-relating induction, now with **anchor-tracking** `σ' a₀ = σ a₀` via the atoms
@@ -26,16 +27,17 @@
 >   `exec_recovers_cell_orbits` (+ `mem_deepenGens_of`). K-coverage VALIDATED (`ScratchKCov`, deleted: exec-orbit
 >   == ref-orbit over ALL vertices, incl. `t3`'s size-6 `K∖cell` orbit, exec-6 vs ref-96 IDENTICAL).
 > - **`hreach`** (what `hL1` reduces to) = *"the anchor-to-rep twists generate the full `IsColAut`-action on
->   `K`"*. Branch-cell half DONE; **remaining = (a) discharge `[INV]`** (off-coupled = `χ`-singleton; the parked
->   `offCoupled_singleton`, which fought the `coupled`-unfold — `exec_recovers_cell_orbits` currently carries
->   `[INV]` as a hypothesis) **+ (b) the `K∖cell` crux = `ker φ` recovery.**
+>   `K`"*. Branch-cell half DONE, and **`[INV]` now discharged from `[DISC]`** (`offCoupled_singleton`, LANDED
+>   axiom-clean 2026-07-22 — `exec_recovers_cell_orbits` now carries the single clean domain fact `Discrete
+>   d1.col` instead of the ad-hoc `hinv`). **Remaining = (b) the `K∖cell` crux = `ker φ` recovery.**
 > - **The crux (b)** — automorphisms that fix the cell but move `K∖cell`; no single exec gen is in `ker φ`, so
 >   they must be recovered as WORDS. **Route ε** (native ref⊆exec path-difference induction, reuses `joint`)
 >   primary; **Route ζ** (import `RecoverableByDepth`/`CellsAreOrbits`) parallel; **α** flawed (absorbed as ε's
 >   base case). Empirically solid (t3 96-vs-6) but the genuinely hard part. The poly **all-or-nothing backup
 >   gate** sidesteps it by construction — the fallback ONLY if ε+ζ stall on the same family (per standing steer).
-> - **NEXT for a fresh reader:** (1) land `offCoupled_singleton` (unblocks `exec_recovers_cell_orbits`'s last
->   hypothesis — a `coupled`-unfold + a `List.dedup` length argument; see §9.1.2 `[INV]`); (2) open Route ε.
+> - **NEXT for a fresh reader:** the branch-cell half is fully discharged (down to `[DISC]` = `Discrete
+>   d1.col`, the whole-graph leaf-discretization domain fact). **Open Route ε** (the `K∖cell` = `ker φ` crux,
+>   §9.1.2) — native path-difference induction reusing `joint`; probe Route ζ (import) in parallel.
 
 ## ▶ STATUS (2026-07-21)
 
@@ -147,6 +149,45 @@ The reduction splits into:
 The easy half (`exec orbits ⊆ ref orbits`, `wordReach_ref_of_deepen`) is landed, and the R2 algebraic core
 (`twistOf_transport` — the twist conjugates under `σ`) is landed.
 
+### 2.1 Why deepen, not the index-free `deepMatchSupply` — the poly/quasipoly division (2026-07-22)
+
+`deepMatchSupply d` (`DeepMatchSupply.lean`, LANDED, sorry-free capstone `deepMatchSupply_guarded_canonizer`)
+solves the *same* job a different way: enumerate **every** individualization sequence of length `≤ d` and
+colour-match all pairs. Because it makes **no choice** it is **index-free**, so its `①c` (`SupplyEquivariant`)
+is **free and already closed** — no `joint`, no `hreach`, no crux. So why deepen at all? They are duals; the
+axis is **cost vs. `①c`**:
+
+| | `①c` | firing hypothesis | cost |
+|---|---|---|---|
+| **`deepMatchSupply d`** | **free** (index-free) | external `CellsAreOrbits` (seal import) + `SeparatesAt d` | `n^{O(d)}` — poly at fixed `d`, **quasipoly at `d = Θ(log n)`, exp at `d = Θ(n)`** |
+| **`deepenSupply`** | **hard** (the crux) | **self-certified** (verification gate; `deepenGens_sound`) — needs `Amenable`, not external `CellsAreOrbits` | **single greedy path — poly at ANY depth** |
+
+**Deepen's whole value is the cost column.** A single greedy path individualizes `≤ |K| ≤ n` vertices before
+the cell discretizes, so it is polynomial *regardless of separation depth*. `deepMatchSupply` pays `n^{O(d)}`
+to hedge against not knowing *which* sequence separates; deepen commits to one (greedy) and pays for that
+commitment in `①c`. So `deepMatchSupply` already covers every family deepen does **at bounded `d`** — deepen's
+marginal contribution is exactly the **super-constant-depth** regime where `n^{O(d)}` stops being polynomial.
+
+**This is why the WL-dim wall (§5, `cxt-scoping.md`) does not bite deepen — the *cost* side of §5's "not
+is-WL-dim-bounded".** For `deepMatchSupply`/`viaSpielman` the target genuinely *is* bounded WL-dim
+(`c(X_T)=O(1) ⟺ bounded b(X) ⟺ bounded WL-dim`, `cxt-scoping:59`), because `n^{WL-dim}` must stay poly —
+unbounded WL-dim (the linear `0.15n` ceiling, Schneider–Schweitzer) makes it exponential. For deepen,
+**`WL-dim < cell-size` is a free construction fact** (individualizing a cell's own vertices discretizes it, so
+no cell ever needs more than its own size in individualizations — `WL-dim ≥ cell-size` is vacuous), and a
+single path of that length is poly *at any WL-dim up to `0.15n`*. So deepen **relocates the obstruction off
+the WL-dim/cost axis onto `Amenable`** (single-orbit per greedy level, §5), which is *orthogonal*:
+high-WL-dim + `Amenable` ⟹ deepen poly-complete exactly where `deepMatchSupply` goes exponential. That is
+deepen's reason to exist, and it is precisely the A2 wall the seal has been stalled on.
+
+**Concrete payoff — `viaSpielman` sub-exp → poly.** `reachesRigidOrCameron_viaSpielman`
+(`PublicTheoremIndex:1128`) carries `SeparatesAtBoundedBase S (Õ(n^{1/3}))` and today fires `deepMatchSupply`
+at **sub-exponential** `n^{O(n^{1/3})}` (`SealDepthBridge.cellIsOrbit_pathCol_of_spielman`). Deepen needs only
+that *some* path separates (its own greedy one, poly-length — it does **not** need the `Õ(n^{1/3})` *bound*),
+so **if the `①c` crux closes and ζ imports the separation, the claw-bounded-SRG floor upgrades sub-exp → poly**
+(conditional on `Amenable` there; the `schemeAdj S`→realizing-graph step is the `RouteCTransport` hop, and
+Spielman is claw-bounded-only — the `Θ(√n)`-base Neumaier families exit via Cameron). This is the sharpest
+single motivation for closing the crux.
+
 ---
 
 ## 3. The reframe — what the obligation actually is (grounding; read before any R1 work)
@@ -196,7 +237,8 @@ decision the greedy pick resolves arbitrarily). So `Amenable` is a genuine domai
 
 ## 5. Layer 2 = the WL-obstruction classification (imports no new conjecture)
 
-The question is **not** "is WL-dimension bounded" (unbounded WL-dim exists — CFI — and is irrelevant). It is
+The question is **not** "is WL-dimension bounded" (unbounded WL-dim exists — CFI — and is irrelevant; the
+*cost* side of this — why a single greedy path is poly at any WL-dim — is **§2.1**). It is
 "**every `Amenable`-obstruction is a known WL-obstruction type with a handler.**"
 
 > **`Amenable`-violation ⟺ a RIGID (non-symmetric) WL-obstruction in a cell deepen visits.** A WL-stable
@@ -310,8 +352,9 @@ prose.
     · **`deepenRefGens_isColAut`** · **`refGen_id_off`** · **`deepenRefInExec_of_reachOnK`** (★ `hL1 ⟸ hreach`;
     off-`K` = `refl`).
   - *branch-cell half (2026-07-22, §9.1.2):* `transportColouring_isColAut` · **`mem_deepenGens_of`** (forward
-    membership in `deepenGens`) · **`exec_recovers_cell_orbits`** (★ `x,y ∈ cell` + automorphism ⟹
-    `WordReach exec x y`; carries `[INV]` as a hypothesis).
+    membership in `deepenGens`) · `eq_of_mem_of_length_le_one` · **`offCoupled_singleton`** (★ `[DISC] ⟹
+    [INV]`: `Discrete` leaf ⟹ off-coupled = `χ`-singleton) · **`exec_recovers_cell_orbits`** (★ `x,y ∈ cell` +
+    automorphism ⟹ `WordReach exec x y`; now carries the single clean domain fact `Discrete d1.col`).
   - *capstones:* **`deepenSupply_guarded_canonizer_of`** · **`deepenSupply_canonizer_of_amenable`**.
 
 ---
@@ -461,9 +504,12 @@ provable per-family; it is the honest cost of the clean half too. **Priority inf
 `σ' a₀ = σ a₀` conclusion — the per-level `τ`'s fix the protected singleton `y` via the new atoms
 `isColAut_fixes_singleton`/`step_preserves_singleton`/`step_indiv_singleton`) gives `σf x = y`; **piece 3**
 (`hfix` from `[INV]`) gives `twistOf = some σf`; **`mem_deepenGens_of`** (new) reconstructs `σf ∈ deepenGens`.
-Carries the firing/domain facts as hypotheses: `deepen` succeeds, gate passes, `Amenable`, and **`[INV]`**
-(off-coupled = `χ`-singleton). ⚠ **Remaining for this half:** discharge `[INV]` from `[DISC]` — the deferred
-`offCoupled_singleton` (a `coupled`-unfold; fought the build, parked as a clean sub-lemma).
+Carries the firing/domain facts as hypotheses: `deepen` succeeds, gate passes, `Amenable`, and **`[DISC]`**
+(`Discrete d1.col`). ✅ **`[INV]` discharged from `[DISC]`** (2026-07-22, `offCoupled_singleton`, axiom-clean):
+`w ∉ coupled χ χc` means `w`'s `χ`-cell has constant `χc`, and `Discrete χc` collapses a constant-`χc` set to
+one vertex ⟹ `w` is a `χ`-singleton, which every `IsColAut` fixes. So the half is complete modulo the single
+named domain fact `[DISC]` (whole-graph leaf discretization — measured on every firing witness, plausibly
+provable per-family; shared with the crux).
 
 **The crux — `K∖cell` — characterized precisely.** Exec gens `= {σ_final(a,b)}` on `K`, each moving the cell
 (`a↦b`, `b≠a`). Need `⟨σ_final(a,b)⟩`-orbits on `K` `=` `IsColAut`-orbits on `K`. The hard content is
