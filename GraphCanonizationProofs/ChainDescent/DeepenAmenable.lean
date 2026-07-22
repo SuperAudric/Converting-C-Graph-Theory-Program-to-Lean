@@ -222,6 +222,39 @@ theorem cellSingleOrbit_transport {adj : AdjMatrix n} {χc : Colouring n} {σ : 
   · show σ (ρ (σ.symm u')) = w'
     rw [hρuw]; exact Equiv.apply_symm_apply σ w'
 
+/-! ## 2c. `deepen` structural lemmas for the joint fuel induction (piece 2b) -/
+
+/-- **The accumulator only prefixes the output.** `deepen … acc` returns the same leaf as `deepen … []`
+with `acc.reverse` prepended to the recorded id sequence. Lets the joint induction work at `acc = []`
+(the recursion's `[cid]` accumulator becomes `cid ::` on the sequence). -/
+theorem deepen_acc (adj : AdjMatrix n) (χp : Colouring n) (fuel : Nat) :
+    ∀ (cur : Refine.ColData n) (acc : List Nat),
+      deepen adj χp fuel cur acc
+        = (deepen adj χp fuel cur []).map (fun p => (p.1, acc.reverse ++ p.2)) := by
+  induction fuel with
+  | zero => intro cur acc; rfl
+  | succ fuel ih =>
+      intro cur acc
+      unfold deepen
+      dsimp only
+      cases hK : (coupled χp cur.col).isEmpty with
+      | true => simp [hK]
+      | false =>
+          rw [if_neg (by simp [hK]), if_neg (by simp [hK])]
+          generalize chooseIdK (coupled χp cur.col) cur.col = co
+          cases co with
+          | none => simp
+          | some cid =>
+              dsimp only
+              split
+              · rfl
+              · rename_i _ w _ _
+                rw [ih (step adj cur.col w) (cid :: acc), ih (step adj cur.col w) [cid],
+                    Option.map_map]
+                congr 1
+                funext p
+                simp [Function.comp, List.reverse_cons, List.append_assoc]
+
 /-! ## 3. The capstone — `(R1 ∧ R2) → ①c`, and the `Amenable`-gated form
 
 Mirrors `KernelTransport.kernelSupply_guarded_canonizer`: ①c for the executable `deepenSupply` is

@@ -25,9 +25,12 @@
   single-orbit cell.
   - **`(G1 ∧ G2) → ①c` is FORMALIZED** (gate-conditional capstones + the G2 attribution) — the open links
     are explicit Lean hypotheses, not prose.
-  - **Layer 1 (`Amenable ⟹ R1`) = a mechanical re-relating induction.** Its engine + monotonicity +
-    cell-transport bricks are **landed axiom-clean**; the remaining core is one ~100–200-line joint fuel
-    induction (piece 2b) plus pieces 3 (twistOf verifies) and 4 (K-coverage).
+  - **Layer 1 (`Amenable ⟹ R1`) = a mechanical re-relating induction.** All its bricks are **landed
+    axiom-clean** — engine (`step_rerelate`), monotonicity (piece 1: `step_refines`,
+    `isColAut_parent_of_refines`), cell transport (`cidCell_*`), the `Amenable`-transfer (piece 2a:
+    `cellSingleOrbit_transport`), and the accumulator lemma (piece 2b-b0: `deepen_acc`). The remaining core
+    is the joint fuel induction body (piece 2b, which composes those bricks) plus pieces 3 (twistOf verifies)
+    and 4 (K-coverage).
   - **Layer 2 (`Amenable` holds on the residue) = the WL-obstruction classification**, which **imports no
     new conjecture** — it is gated on the project's existing single shared wall (claim #2 / `hSmallAutThin`).
 - **The one genuinely-open thing touching `①c`** is finishing Layer 1's induction (`hL1`) + R2. `G1` (the
@@ -267,6 +270,8 @@ prose.
   - *predicates + attribution:* `CellSingleOrbit` · `RigidObstructionAt` ·
     **`rigidObstruction_of_not_cellSingleOrbit`** (G2) · `AmenablePath` · `Amenable`.
   - *piece 2a:* **`cellSingleOrbit_transport`** (Amenable transfers a-descent → b-descent).
+  - *piece 2b-b0:* **`deepen_acc`** (the accumulator only prefixes the output seq — reduces the joint
+    induction to `acc = []`).
   - *capstones:* **`deepenSupply_guarded_canonizer_of`** · **`deepenSupply_canonizer_of_amenable`**.
 
 ---
@@ -278,13 +283,22 @@ prose.
 1. ✅ **piece 1 (refinement monotonicity)** — `indivOne_refines`, `step_refines`, `isColAut_parent_of_refines`.
    Keeps the running composite `σ' = τσ` in the parent-stabilizer.
 2a. ✅ **piece 2a (`cellSingleOrbit_transport`)** — `Amenable` (about the a-descent) delivers `τ ∈ Stab(cur_b.col)`.
-2b. ⏳ **piece 2b — the joint fuel induction** (~100–200 lines, the remaining core). Invariant
-   `cur_b.col = transportColouring σ' cur_a.col`, `σ' ∈ IsColAut adj χ`, + carry "`cur_a.col` refines χ".
-   Seq accumulator: `seq.drop acc.length` = choices-from-here (`deepen` returns `reverse(acc) ++ choices`;
-   top-level `acc = []`). Base = `chooseIdK` none. Step: replay-b picks head `w_b` of b's cid-cell (nonempty
-   by `cidCell_length_transport`); `cellSingleOrbit_transport` + `Amenable` give `τ` with `τ(σ' w_a) = w_b`;
-   `step_rerelate` carries the invariant; `replay (cid::rest) cur_b = replay rest cur_b'` threads to the IH.
-   Concludes: deepen-a leaf & replay-b leaf are `σ_final`-related.
+2b. **piece 2b — the joint fuel induction** (the remaining core). Substructure:
+   - **b0 ✅ `deepen_acc`** — the accumulator only prefixes the output seq, so the joint induction works at
+     `acc = []` (the recursion's `[cid]` accumulator becomes `cid ::` on the seq). ⚠ Its proof needed the
+     `deepen` match-reduction recipe now recorded in §11 — reuse it for the body below.
+   - **b1 ⏳ `chooseIdK_mem`** — `chooseIdK … = some cid ⟹ (cidCell χc cid).length ≥ 2` (from `chooseIdK`
+     folding min over the `classOf ≥ 2` cells), so replay's `mem.length < 2` guard passes on the b-side
+     (via `cidCell_length_transport`). A `foldl`-min lemma.
+   - **b2 ⏳ the joint induction body.** Invariant `cur_b.col = transportColouring σ' cur_a.col`,
+     `σ' ∈ IsColAut adj χ`, + carry "`cur_a.col` refines χ". At `acc = []` (`deepen_acc` handles the rest):
+     base = `chooseIdK` none. Step: replay-b picks head `w_b` of b's cid-cell (nonempty by
+     `cidCell_length_transport` + b1); `cellSingleOrbit_transport` + `Amenable` give `τ` with `τ(σ' w_a) = w_b`;
+     `step_rerelate` carries the invariant (`step_refines` maintains the "refines χ" side-invariant,
+     `isColAut_parent_of_refines` keeps `τσ'` in the parent-stabilizer); `replay (cid::rest) cur_b = replay
+     rest cur_b'` threads to the IH. Concludes: deepen-a leaf & replay-b leaf are `σ_final`-related.
+   **All five bricks it composes are landed** (`step_rerelate`, `step_refines`, `isColAut_parent_of_refines`,
+   `cellSingleOrbit_transport`, `deepen_acc`); b2 is the assembly, materially de-risked by the §11 recipe.
 3. ⏳ **piece 3 — twistOf verifies:** `σ_final`-related discrete leaves ⟹ the colour-match
    `twistOf adj χ χ1 K χj` = `σ_final` on all `K` ⟹ returns `some` ⟹ an exec verified gen `a ↦ b` ⟹
    `WordReach exec a b`.
@@ -349,6 +363,22 @@ plan.
   `let`/`have`; `rw` under `decide` breaks the motive → use `simp only [iff_lemma]`; `Subgroup` is NOT
   imported; `Vector.get` reduces via `rw [Vector.get]; simp`; for `¬CellSingleOrbit`, `push_neg` yields the
   `RigidObstructionAt` shape; `subst` on `x = v` may eliminate `v` — use `rw` when you need `v` to survive.
+- **★ THE `deepen` MATCH-REDUCTION RECIPE** (13 iterations to find; reuse it for the joint induction body,
+  which reduces `deepen`/`replay` the same way). To reason about `deepen adj χp (fuel+1) cur acc = …`:
+  1. `unfold deepen; dsimp only` (zeta-reduce the `let χc := cur.col; let K := …`).
+  2. `cases hK : (coupled χp cur.col).isEmpty with | true => … | false => …` (it is a **Bool** if).
+  3. `rw [if_neg (by simp [hK]), if_neg (by simp [hK])]` — reduces the `if` on **both** sides of the
+     equation (LHS bare + RHS under `Option.map`).
+  4. **`generalize chooseIdK (coupled χp cur.col) cur.col = co` BEFORE any `split`/`cases`** — else they
+     descend into `chooseIdK`'s internal `foldl` and expose a spurious `acc✝ : Option ℕ`.
+  5. `cases co with | none => simp | some cid => …`; in the `some` case `dsimp only` to iota-reduce the
+     `match some cid`.
+  6. **`split` for the filter** (safe now — `chooseIdK` is opaque). Order = **`[]` first, then `cons`**
+     (`· rfl` for nil = `none = map none`; `· rename_i _ w _ _` for cons — 4 inaccessibles
+     `x✝ w✝ tail✝ heq✝`). ⚠ `generalize` on the filter FAILS (lambda-elaboration mismatch); `‹Fin n›` is
+     unreliable — name via `rename_i`.
+  7. Map-equalities close with `rw […, Option.map_map]; congr 1; funext p; simp [Function.comp,
+     List.reverse_cons, List.append_assoc]`.
 
 ---
 

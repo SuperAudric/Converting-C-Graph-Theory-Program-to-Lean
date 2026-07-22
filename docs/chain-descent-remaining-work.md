@@ -97,6 +97,11 @@ below; this is the pickup summary.
       `refineEquivariant`/`step_transport`/`chooseIdK_transport`/`twistOf_isColAut`. ⚠ **SUB-RISK (settle FIRST):**
       `SameOrbits` is over ALL vertices but the induction gives completeness on the BRANCH CELL (anchors); the
       twists also move `K∖cell`, so K-coverage needs the induction extended to `K` or a "cell controls `K`" arg.
+      **▶ STATUS (2026-07-21): all bricks LANDED axiom-clean in `DeepenAmenable.lean`** — `step_rerelate`,
+      piece 1 (`step_refines`/`isColAut_parent_of_refines`), `cidCell_*`, piece 2a (`cellSingleOrbit_transport`),
+      piece 2b-b0 (`deepen_acc`) + capstones. **Remaining = the joint fuel induction body** (b1 `chooseIdK_mem`
+      + b2 assembly), pieces 3+4. **Authoritative detail + the `deepen` match-reduction recipe: the DEEPEN DOC
+      `docs/chain-descent-deepen-supply.md` §9.1 + §11.**
     - **LAYER 2 `Amenable` — discharge via the WL-OBSTRUCTION CLASSIFICATION (user reframe, 2026-07-21; MERGES
       with existing work).** Not "is WL-dim bounded" (unbounded WL-dim exists — CFI — and is irrelevant) but
       "**every `Amenable`-obstruction is a KNOWN WL-obstruction type with a handler.**" ★ **`Amenable`-violation
