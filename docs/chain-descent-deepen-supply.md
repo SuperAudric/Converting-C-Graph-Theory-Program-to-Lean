@@ -35,17 +35,18 @@
 >   primary; **Route ζ** (import `RecoverableByDepth`/`CellsAreOrbits`) parallel; **α** flawed (absorbed as ε's
 >   base case). Empirically solid (t3 96-vs-6) but the genuinely hard part. The poly **all-or-nothing backup
 >   gate** sidesteps it by construction — the fallback ONLY if ε+ζ stall on the same family (per standing steer).
-> - **★★★ THE `K∖cell` CRUX IS OFF THE CRITICAL PATH (2026-07-22, axiom-clean).** The object narrows only
->   through `rep` on `forcedSet ⊆ branches`, and a branch source's orbit stays in the branch cell
->   (`orbit_subset_branches`) — so `①c` needs the reference and executable to agree on orbits **only for branch
->   sources** (`OrbitPrune.SameOrbitsOnBranches`, the weakened reduction), which is EXACTLY the landed cell
->   coverage. **`deepenSupply_guarded_canonizer_of_cell` gives `①c` modulo `{R2, Amenable, AnchorFires}` ONLY** —
->   no `ExecRecoversKMinusCell`, no `ker φ` group-recovery. The `K∖cell` crux was an artifact of the over-strong
->   full `SameOrbits`; the greedy pick's `K∖cell` action is invisible to the object.
-> - **NEXT for a fresh reader:** R1 is closed modulo domain facts. Remaining for `①c`: **R2**
->   (`SupplyEquivariant deepenRefSupply`, mechanical, §9.2) + the domain facts **`Amenable`** (Layer 2, §5) and
->   **`AnchorFires`** (per-anchor firing+`[DISC]`). `ExecRecoversKMinusCell`/Route ε kept only for the (unneeded)
->   full-`SameOrbits` route.
+> - **★★★ `①c` CLOSED modulo `{Amenable, AnchorFires}` ONLY — REFERENCE ELIMINATED (2026-07-22, axiom-clean,
+>   `deepenSupply_guarded_canonizer_direct`).** The object's flag reads the supply only through `rep` on
+>   `forcedSet ⊆ branches`, so `StallEquivariant` needs only that deepen's **branch-orbit relation transports** —
+>   and it does, because deepen's branch orbits EQUAL the `IsColAut`-orbits (`deepen_branch_orbit_iff_aut`), which
+>   conjugate under `σ`. Fed to `Residue.guarded_mixed_canonizer` via the new generic
+>   `stallEquivariant_forceThenConsume_of_branchOrbitTransport`. **The whole reference apparatus —
+>   `deepenRefSupply`, R1 (`SameOrbits`), R2 (`twistOf`-transport) — is DISCARDED.** (Both the `K∖cell` crux and
+>   the R2 `twistOf` order-dependence subtlety are now moot; `SameOrbitsOnBranches`/`deepenRefSupply` kept only
+>   for provenance.)
+> - **NEXT for a fresh reader:** `①c` is closed modulo two **domain facts** only: **`Amenable`** (Layer 2 → the
+>   shared rigid-obstruction wall `hSmallAutThin`, §5) and **`AnchorFires`** (per-anchor: `deepen` succeeds +
+>   gate + `Discrete` leaf `[DISC]` — a firing lemma). No mechanical obligations remain.
 
 ## ▶ STATUS (2026-07-21)
 
@@ -370,8 +371,13 @@ prose.
   - *★★★ the `K∖cell`-free close (2026-07-22):* in `OrbitPrune` — `rep_congr_at` · **`SameOrbitsOnBranches`** ·
     `narrow_forceThenConsume_congr_branch` · **`guarded_mixed_canonizer_of_sameOrbitsOnBranches`** (weakened
     reduction: branch-only orbit agreement suffices). In `DeepenAmenable` — **`wordReach_deepen_of_ref_on_branch`**
-    · **`sameOrbitsOnBranches_of_cell`** (from cell coverage alone) · **`deepenSupply_guarded_canonizer_of_cell`**
-    (★ `①c` modulo `{R2, Amenable, AnchorFires}` — the intended R1 close, no `K∖cell`).
+    · **`sameOrbitsOnBranches_of_cell`** · **`deepenSupply_guarded_canonizer_of_cell`** (`①c` modulo
+    `{R2, Amenable, AnchorFires}` — the `deepenRefSupply` route, superseded).
+  - *★★★★ the REFERENCE-FREE close (2026-07-22) — the intended `①c`:* in `SupplyTransport` —
+    **`stallEquivariant_forceThenConsume_of_branchOrbitTransport`** (generic: `StallEquivariant` from branch-orbit
+    transport, no `SupplyEquivariant`). In `DeepenAmenable` — **`wordReach_imp_isColAut`** · **`deepen_branch_orbit_iff_aut`**
+    (deepen branch-orbits = `IsColAut`-orbits) · **`deepen_branchOrbit_transport`** · **`deepenSupply_guarded_canonizer_direct`**
+    (★★★ `①c` modulo `{Amenable, AnchorFires}` ONLY — no reference, no R1/R2).
   - *capstones:* **`deepenSupply_guarded_canonizer_of`** · **`deepenSupply_canonizer_of_amenable`**.
 
 ---
@@ -549,6 +555,24 @@ deepenSupply` follows from the cell coverage ALONE (`wordReach_deepen_of_ref_on_
 step landing in the cell): **`①c` closes modulo `{R2, Amenable, AnchorFires}` only.** The `K∖cell` group-recovery
 was an artifact of the over-strong full `SameOrbits`; the greedy pick's `K∖cell` action is invisible to the
 canonizer. `ExecRecoversKMinusCell` / Route ε below are retained only as the (now-unneeded) full-`SameOrbits` route.
+
+**★★★ THE REFERENCE IS ELIMINATED — `①c` modulo `{Amenable, AnchorFires}` ONLY, no `deepenRefSupply`/R1/R2
+(2026-07-22, `deepenSupply_guarded_canonizer_direct`, axiom-clean).** Reconsidering *what introduced R1/R2* (the
+equivariant-reference detour): the object's flag reads the supply only through `rep` on `forcedSet ⊆ branches`,
+so `StallEquivariant` needs only that deepen's **branch-orbit relation transports** — and it does, because
+deepen's branch orbits EQUAL the `IsColAut`-orbits (`deepen_branch_orbit_iff_aut`: `⟹` soundness
+`wordReach_imp_isColAut`, `⟸` the branch-cell half), which conjugate under `σ` (`isColAut_conj_iff`). The generic
+`SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport` (no `SupplyEquivariant`) feeds this to
+`Residue.guarded_mixed_canonizer`. **So the entire reference apparatus — `deepenRefSupply`, R1 (`SameOrbits`),
+R2 (`twistOf`-transport) — is discarded, and the `twistOf` order-dependence subtlety (below) is MOOT.** The
+`SameOrbits`/`SameOrbitsOnBranches` route and everything about `deepenRefSupply` are kept only for provenance.
+
+> **⚠ R2 / `twistOf`-transport RETIRED (2026-07-22).** While building R2 (`SupplyEquivariant deepenRefSupply`),
+> found `twistOf` is **order-dependent even on emitted gens**: `K=[w,w']`, gate on `χ1` passes, but `χj` collides
+> (`χj w=χj w'`) with `χ1 w'` unmatched ⟹ `imgFun=id` (`permOf` some) under one `K`-order, non-injective
+> (`permOf` none) under the reverse. So `permOf`-success does NOT force `χj`-injective-on-`K`; R2 would need a
+> `replayAll`-discretizes-`K` lemma (possibly false). The reference-free route above sidesteps it entirely — the
+> reference is never used, so its equivariance is never needed.
 
 **The crux — `K∖cell` — characterized precisely.** Exec gens `= {σ_final(a,b)}` on `K`, each moving the cell
 (`a↦b`, `b≠a`). Need `⟨σ_final(a,b)⟩`-orbits on `K` `=` `IsColAut`-orbits on `K`. The hard content is

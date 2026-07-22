@@ -865,6 +865,80 @@ theorem deepenSupply_guarded_canonizer_of_cell
   OrbitPrune.guarded_mixed_canonizer_of_sameOrbitsOnBranches Force.keyEquivariant_lookahead hR2
     (sameOrbitsOnBranches_of_cell hAmen hfires)
 
+/-! ## 2b″. ★★★ THE REFERENCE-FREE CLOSE — `①c` with NO `deepenRefSupply`, NO R2
+
+The reference `deepenRefSupply` existed only to give an *equivariant* object to compare deepen against
+(`SameOrbits`). But `StallEquivariant` needs only that deepen's **branch-orbit relation transports**
+(`SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport`) — and it does, because deepen's
+branch orbits EQUAL the `IsColAut`-orbits (⟸ = the branch-cell half; ⟹ = soundness), which transport under `σ`
+by `isColAut_conj_iff`. So `①c` closes with **no reference, no R1, no R2** — only `{Amenable, AnchorFires}`. This
+supersedes both the `SameOrbits`/`SameOrbitsOnBranches` route and the `twistOf`-transport (R2) obligation, and
+sidesteps the `twistOf` order-dependence entirely (`deepenRefSupply` is never mentioned). -/
+
+/-- A `WordReach` in deepen's verified generators is realized by a single colour-automorphism (soundness at the
+group level — the word composes to one `IsColAut`). -/
+theorem wordReach_imp_isColAut {adj : AdjMatrix n} {χ : Colouring n} {u w : Fin n}
+    (h : Consume.WordReach (Consume.verified deepenSupply adj χ) u w) :
+    ∃ β : Equiv.Perm (Fin n), IsColAut adj χ β ∧ β u = w := by
+  induction h with
+  | refl => exact ⟨1, IsColAut.one adj χ, rfl⟩
+  | @step m _ g hg ih =>
+      obtain ⟨β, hβ, hβu⟩ := ih
+      exact ⟨g * β, (Consume.isColAut_of_mem_verified hg).comp hβ, by
+        rw [Equiv.Perm.mul_apply, hβu]⟩
+
+/-- **★ deepen's branch orbits ARE the `IsColAut`-orbits.** For a branch source `u`, `WordReach exec u w` iff `u`
+and `w` lie in the same colour-automorphism orbit. `⟹` is `wordReach_imp_isColAut`; `⟸` is the branch-cell half
+`exec_recovers_refgen_on_cell`. -/
+theorem deepen_branch_orbit_iff_aut (adj : AdjMatrix n) (χ : Colouring n)
+    (hAmen : Amenable adj χ) (hfires : ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
+    {u : Fin n} (hu : u ∈ Descend.branches χ) {w : Fin n} :
+    Consume.WordReach (Consume.verified deepenSupply adj χ) u w
+      ↔ ∃ β : Equiv.Perm (Fin n), IsColAut adj χ β ∧ β u = w := by
+  constructor
+  · exact wordReach_imp_isColAut
+  · rintro ⟨β, hβ, rfl⟩
+    exact exec_recovers_refgen_on_cell adj χ hβ hAmen hfires hu
+
+/-- **★★ deepen's branch-orbit relation TRANSPORTS.** Both sides equal the `IsColAut`-orbit relation, which
+conjugates under `σ` (`isColAut_conj_iff`). Needs `{Amenable, AnchorFires}` on every graph (they are ∀-quantified
+domain facts, so they hold on the relabelled graph too). -/
+theorem deepen_branchOrbit_transport
+    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
+    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
+    (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (a b : Fin n)
+    (ha : a ∈ Descend.branches χ) (hb : b ∈ Descend.branches χ) :
+    Consume.WordReach (Consume.verified deepenSupply (relabelAdj σ adj) (transportColouring σ χ)) (σ a) (σ b)
+      ↔ Consume.WordReach (Consume.verified deepenSupply adj χ) a b := by
+  have hσa : σ a ∈ Descend.branches (transportColouring σ χ) :=
+    (Descend.branches_transport_perm σ χ).mem_iff.mpr (List.mem_map_of_mem ha)
+  rw [deepen_branch_orbit_iff_aut _ _ (hAmen _ _) (hfires _ _) hσa,
+      deepen_branch_orbit_iff_aut _ _ (hAmen _ _) (hfires _ _) ha]
+  constructor
+  · rintro ⟨β, hβ, hβa⟩
+    refine ⟨σ⁻¹ * β * σ, ?_, ?_⟩
+    · have := (Consume.isColAut_conj_iff σ (adj := adj) (χ := χ) (α := σ⁻¹ * β * σ)).mp
+      rw [show σ * (σ⁻¹ * β * σ) * σ⁻¹ = β by group] at this
+      exact this hβ
+    · simp [Equiv.Perm.mul_apply, hβa]
+  · rintro ⟨β, hβ, hβa⟩
+    refine ⟨σ * β * σ⁻¹, (Consume.isColAut_conj_iff σ).mpr hβ, ?_⟩
+    simp [Equiv.Perm.mul_apply, hβa]
+
+/-- **★★★ `①c` FOR `deepenSupply` — REFERENCE-FREE, modulo `{Amenable, AnchorFires}` ONLY.** No `deepenRefSupply`,
+no R1, no R2, no `twistOf`-transport. deepen's flag is equivariant because its branch orbits are the
+`IsColAut`-orbits, which transport. This is the intended, clean close of `①c`. -/
+theorem deepenSupply_guarded_canonizer_direct
+    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
+    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a) :
+    CanonSpec.IsCanonicalFormOpt
+      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
+          (deepenSupply (n := n))))) :=
+  Residue.guarded_mixed_canonizer Force.keyEquivariant_lookahead
+    (SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport
+      Force.keyEquivariant_lookahead (deepen_branchOrbit_transport hAmen hfires))
+
 /-! ## 2c. Route ε — the whole-node target `ExecReachesAut` and its reduction
 
 `ExecRecoversKMinusCell` reframes to the honest whole-hog statement: `⟨verified deepenSupply⟩` recovers the

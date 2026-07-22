@@ -196,6 +196,37 @@ theorem stallEquivariant_forceThenConsume {key : Key n} (hk : KeyEquivariant key
   rw [Consume.rep_eq_iff_wordReach, Consume.rep_eq_iff_wordReach]
   exact wordReach_conj_iff hmemG'
 
+/-- **★★ `StallEquivariant` FROM BRANCH-ORBIT TRANSPORT — no `SupplyEquivariant` needed.** The narrowing reads the
+supply only through `rep` on `forcedSet ⊆ branches`, and `rep` there depends only on the branch-orbit relation. So a
+supply whose **branch-orbit relation transports** (even one whose generator *list* does NOT σ-conjugate — e.g. a
+greedy-pick supply) still has an equivariant flag. This is the reference-free route to `①c`: prove the branch orbits
+equal the (equivariant) `IsColAut`-orbits and feed the transport `↔` here directly. -/
+theorem stallEquivariant_forceThenConsume_of_branchOrbitTransport {key : Key n} (hk : KeyEquivariant key)
+    {S : Supply n}
+    (horb : ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (a b : Fin n),
+      a ∈ Descend.branches χ → b ∈ Descend.branches χ →
+      (Consume.WordReach (verified S (relabelAdj σ adj) (transportColouring σ χ)) (σ a) (σ b)
+        ↔ Consume.WordReach (verified S adj χ) a b)) :
+    StallEquivariant (forceThenConsume key S) := by
+  intro σ adj χ
+  rw [Composite.narrow_forceThenConsume, Composite.narrow_forceThenConsume]
+  have hperm : (forcedSet key (relabelAdj σ adj) (transportColouring σ χ)).Perm
+      ((forcedSet key adj χ).map σ) := Composite.narrowFnEquivariant_forcedSet hk σ adj χ
+  have hFin : (forcedSet key (relabelAdj σ adj) (transportColouring σ χ)).toFinset
+      = (forcedSet key adj χ).toFinset.image σ := by
+    ext x
+    simp only [List.mem_toFinset, Finset.mem_image]
+    rw [hperm.mem_iff]
+    simp [List.mem_map]
+  rw [dedup_map_length_eq_card_image, dedup_map_length_eq_card_image, hFin, Finset.image_image]
+  refine card_image_congr_of_iff ?_
+  intro a ha b hb
+  simp only [Function.comp_apply]
+  rw [Consume.rep_eq_iff_wordReach, Consume.rep_eq_iff_wordReach]
+  exact horb σ adj χ a b
+    (Composite.forcedSet_subset key adj χ (List.mem_toFinset.mp ha))
+    (Composite.forcedSet_subset key adj χ (List.mem_toFinset.mp hb))
+
 /-- **★★★ THE GUARDED MIXED CANONIZER, WITH NO CARRIED FLAG HYPOTHESIS.** Sound, iso-invariant, complete, and
 unconditionally polynomial — for **any** equivariant key and **any** equivariant supply. This is the first form
 of the mixed capstone whose hypotheses a concrete resolver stack can actually discharge. -/
