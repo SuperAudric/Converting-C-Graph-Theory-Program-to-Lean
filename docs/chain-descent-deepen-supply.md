@@ -427,11 +427,15 @@ on G8/t3/wcyc9/mp7) ⟹ `K` = union of non-singleton `χ`-cells (a function of `
 and off-`K` = `χ`-singletons (`σ_final`-fixed). `[DISC]` is a firing-completeness domain fact, plausibly
 provable per-family; it is the honest cost of the clean half too. **Priority infra.**
 
-**The clean half — branch cell — is genuinely clean modulo `[INV]`.** For `x, y ∈ cell`, `g_{x,y}` maps
-`x ↦ y` because both are individualized into the SAME anchor colour-slot (`img x = y`; and `σ_final x = y`
-since the per-level `τ`'s fix the already-individualized rep `y` — a singleton). So `WordReach exec x y` in one
-step, given `g_{x,y}` exists (= `[INV]`). Formally `= ` the `←` of `DeepenForcedMatch` (`DeepenCrux`). **Land as
-`exec_recovers_cell_orbits` once `[INV]` is in hand.**
+**The clean half — branch cell — ✅ LANDED 2026-07-22 (`exec_recovers_cell_orbits`, axiom-clean).** For
+`x, y ∈ cell` related by `t ∈ IsColAut` (`t x = y`), the executable emits a verified gen mapping `x ↦ y`, so
+`WordReach exec x y` in one step. Assembly: **`joint` strengthened with ANCHOR-TRACKING** (new
+`σ' a₀ = σ a₀` conclusion — the per-level `τ`'s fix the protected singleton `y` via the new atoms
+`isColAut_fixes_singleton`/`step_preserves_singleton`/`step_indiv_singleton`) gives `σf x = y`; **piece 3**
+(`hfix` from `[INV]`) gives `twistOf = some σf`; **`mem_deepenGens_of`** (new) reconstructs `σf ∈ deepenGens`.
+Carries the firing/domain facts as hypotheses: `deepen` succeeds, gate passes, `Amenable`, and **`[INV]`**
+(off-coupled = `χ`-singleton). ⚠ **Remaining for this half:** discharge `[INV]` from `[DISC]` — the deferred
+`offCoupled_singleton` (a `coupled`-unfold; fought the build, parked as a clean sub-lemma).
 
 **The crux — `K∖cell` — characterized precisely.** Exec gens `= {σ_final(a,b)}` on `K`, each moving the cell
 (`a↦b`, `b≠a`). Need `⟨σ_final(a,b)⟩`-orbits on `K` `=` `IsColAut`-orbits on `K`. The hard content is

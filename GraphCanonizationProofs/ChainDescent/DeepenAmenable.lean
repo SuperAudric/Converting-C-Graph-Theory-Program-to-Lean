@@ -153,6 +153,33 @@ theorem isColAut_parent_of_refines {adj : AdjMatrix n} {χ ψ : Colouring n}
     (hτ : IsColAut adj ψ τ) : IsColAut adj χ τ :=
   ⟨hτ.1, fun v => hrefine (τ v) v (hτ.2 v)⟩
 
+/-- **★ ANCHOR ATOM — a colour-automorphism fixes a singleton-colour vertex.** If `v` is the unique
+vertex of colour `ψ v`, any `IsColAut adj ψ τ` fixes `v` (`τ v` has the same colour, so `= v`). This is
+the engine of anchor-tracking: the individualized rep stays put under every per-level `τ ∈ Stab`. -/
+theorem isColAut_fixes_singleton {adj : AdjMatrix n} {ψ : Colouring n} {τ : Equiv.Perm (Fin n)}
+    (hτ : IsColAut adj ψ τ) {v : Fin n} (hv : ∀ u, ψ u = ψ v → u = v) : τ v = v :=
+  hv (τ v) (hτ.2 v)
+
+/-- **★ ANCHOR ATOM — a step preserves a singleton.** `step` only refines, so a vertex that is the
+unique carrier of its colour stays unique. Keeps the anchor a singleton through the deepening. -/
+theorem step_preserves_singleton (adj : AdjMatrix n) (ψ : Colouring n) {v : Fin n}
+    (hv : ∀ u, ψ u = ψ v → u = v) (w : Fin n) :
+    ∀ u, (step adj ψ w).col u = (step adj ψ w).col v → u = v :=
+  fun u h => hv u (step_refines adj ψ w h)
+
+/-- **★ ANCHOR ATOM — the individualized vertex is a singleton after a step.** `step adj χ v`
+individualizes `v` (a singleton by `indivOne_singleton`) then refines (which only splits), so `v` is the
+unique carrier of its colour in `(step adj χ v).col`. This is the base of anchor-tracking: `step χ r`
+makes the anchor `r` a protected singleton. -/
+theorem step_indiv_singleton (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    ∀ u, (step adj χ v).col u = (step adj χ v).col v → u = v := by
+  intro u h
+  unfold step at h
+  rw [Refine.warmRefineVec_col_eq, ← Refine.refineV_encodeFreeFast] at h
+  have hi := Refine.refineSplits_encodeFreeFast adj (Descend.indivOne χ v) u v h
+  by_contra hne
+  exact absurd hi (Descend.indivOne_singleton χ v u hne)
+
 /-! ## 2. `Amenable`, the rigid obstruction, and the G2 attribution
 
 `Amenable` is the domain hypothesis of Layer 1: every level of the canonical deepening individualizes a
@@ -301,22 +328,23 @@ the relation is over every vertex, validated 2026-07-22). Each level: `chooseIdK
 `τ ∈ Stab(cur_b.col)` absorbing the pick mismatch; `step_rerelate` carries the invariant; `step_refines`+
 `isColAut_parent_of_refines` keep `τσ` in the parent-stabilizer. -/
 theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
-    ∀ (fuel : Nat) (cur_a cur_b : Refine.ColData n) (σ : Equiv.Perm (Fin n)),
+    ∀ (fuel : Nat) (cur_a cur_b : Refine.ColData n) (σ : Equiv.Perm (Fin n)) (a₀ : Fin n),
       IsColAut adj χp σ →
       cur_b.col = transportColouring σ cur_a.col →
       (∀ x y, cur_a.col x = cur_a.col y → χp x = χp y) →
       (∀ x y, cur_b.col x = cur_b.col y → χp x = χp y) →
+      (∀ u, cur_b.col u = cur_b.col (σ a₀) → u = σ a₀) →
       AmenablePath adj χp fuel cur_a →
       ∀ (leaf_a : Refine.ColData n) (seq : List Nat),
         deepen adj χp fuel cur_a [] = some (leaf_a, seq) →
         ∃ (σ' : Equiv.Perm (Fin n)) (leaf_b : Refine.ColData n),
           IsColAut adj χp σ' ∧ replay adj seq cur_b = some leaf_b ∧
-          leaf_b.col = transportColouring σ' leaf_a.col := by
+          leaf_b.col = transportColouring σ' leaf_a.col ∧ σ' a₀ = σ a₀ := by
   intro fuel
   induction fuel with
-  | zero => intro cur_a cur_b σ _ _ _ _ _ leaf_a seq h; simp [deepen] at h
+  | zero => intro cur_a cur_b σ a₀ _ _ _ _ _ _ leaf_a seq h; simp [deepen] at h
   | succ fuel ih =>
-      intro cur_a cur_b σ hσ hrel hrefa hrefb hAmen leaf_a seq h
+      intro cur_a cur_b σ a₀ hσ hrel hrefa hrefb hb0 hAmen leaf_a seq h
       -- reduce `deepen (fuel+1) cur_a []`
       unfold deepen at h
       dsimp only at h
@@ -332,7 +360,7 @@ theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
               dsimp only at h
               simp only [List.reverse_nil, Option.some.injEq, Prod.mk.injEq] at h
               obtain ⟨rfl, rfl⟩ := h
-              exact ⟨σ, cur_b, hσ, rfl, hrel⟩
+              exact ⟨σ, cur_b, hσ, rfl, hrel, rfl⟩
           | some cid =>
               rw [hco] at h
               dsimp only at h
@@ -399,12 +427,19 @@ theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
                       → χp x = χp y := fun x y hxy => hrefb x y (step_refines adj cur_b.col w_b hxy)
                   -- the recursive Amenable premise
                   have hAmen' : AmenablePath adj χp fuel (step adj cur_a.col w_a) := hAmen_rec
+                  -- ANCHOR TRACKING: `τ` fixes the protected singleton `σ a₀`, so `(τσ) a₀ = σ a₀`,
+                  -- and it stays a singleton after the step
+                  have hτfix : τ (σ a₀) = σ a₀ := isColAut_fixes_singleton hτ hb0
+                  have hnew_a0 : (τ * σ) a₀ = σ a₀ := by rw [Equiv.Perm.mul_apply]; exact hτfix
+                  have hb0' : ∀ u, (step adj cur_b.col w_b).col u
+                      = (step adj cur_b.col w_b).col ((τ * σ) a₀) → u = (τ * σ) a₀ := by
+                    rw [hnew_a0]; exact step_preserves_singleton adj cur_b.col hb0 w_b
                   -- apply IH on the `b`-side head `w_b`
-                  obtain ⟨σ', leaf_b, hσ', hrepl, hleaf⟩ :=
-                    ih (step adj cur_a.col w_a) (step adj cur_b.col w_b) (τ * σ) hτσ
-                      hstep_rel hrefa' hrefb' hAmen' la inner hinner
+                  obtain ⟨σ', leaf_b, hσ', hrepl, hleaf, ha0⟩ :=
+                    ih (step adj cur_a.col w_a) (step adj cur_b.col w_b) (τ * σ) a₀ hτσ
+                      hstep_rel hrefa' hrefb' hb0' hAmen' la inner hinner
                   -- reduce `replay (cid :: inner) cur_b` to the recursive replay on `w_b`
-                  refine ⟨σ', leaf_b, hσ', ?_, hleaf⟩
+                  refine ⟨σ', leaf_b, hσ', ?_, hleaf, ha0.trans hnew_a0⟩
                   show replay adj (cid :: inner) cur_b = some leaf_b
                   unfold replay
                   dsimp only
@@ -570,6 +605,85 @@ theorem refGen_id_off (adj : AdjMatrix n) (χ : Colouring n) {ρ : Equiv.Perm (F
       rw [List.mem_filterMap] at h
       obtain ⟨dj, _, hd⟩ := h
       exact ⟨coupled χ ds.1.col, fun v hv => twistOf_id_off_K hd hv⟩
+
+/-- **Forward membership in `deepenGens`** — reconstructs that the twist for anchor `r₁`, rep `rⱼ` is an
+emitted executable generator, from the pipeline facts (deepen succeeds, gate passes, replay succeeds,
+twist verifies). The structural half of the branch-cell reachability. -/
+theorem mem_deepenGens_of (adj : AdjMatrix n) (χ : Colouring n) {r₁ rⱼ : Fin n}
+    {d1 dj : Refine.ColData n} {seq : List Nat} {g : Equiv.Perm (Fin n)}
+    (hr1 : r₁ ∈ Descend.branches χ) (hrj : rⱼ ∈ Descend.branches χ) (hne : (rⱼ == r₁) = false)
+    (hdeepen : deepen adj χ n (step adj χ r₁) [] = some (d1, seq))
+    (hgate : ((coupled χ d1.col).isEmpty || !allSingletonsK (coupled χ d1.col) d1.col) = false)
+    (hrepl : replay adj seq (step adj χ rⱼ) = some dj)
+    (htwist : twistOf adj χ d1.col (coupled χ d1.col) dj.col = some g) :
+    g ∈ deepenGens adj χ := by
+  unfold deepenGens
+  dsimp only
+  rw [List.mem_flatMap]
+  refine ⟨(r₁, step adj χ r₁), List.mem_map.mpr ⟨r₁, hr1, rfl⟩, ?_⟩
+  dsimp only
+  rw [hdeepen]
+  dsimp only
+  rw [if_neg (by rw [hgate]; simp)]
+  rw [List.mem_filterMap]
+  refine ⟨(rⱼ, step adj χ rⱼ), List.mem_map.mpr ⟨rⱼ, hrj, rfl⟩, ?_⟩
+  dsimp only
+  rw [if_neg (by rw [hne]; simp), hrepl]
+  exact htwist
+
+/-- A colour-automorphism leaves its colouring transport-invariant: `transportColouring t χ = χ`. -/
+theorem transportColouring_isColAut {adj : AdjMatrix n} {χ : Colouring n} {t : Equiv.Perm (Fin n)}
+    (ht : IsColAut adj χ t) : transportColouring t χ = χ := by
+  funext u
+  show χ (t.symm u) = χ u
+  have h := ht.2 (t.symm u)
+  rw [Equiv.apply_symm_apply] at h
+  exact h.symm
+
+/-- **★★ THE BRANCH-CELL HALF — `exec_recovers_cell_orbits`.** For anchor `r₁` and rep `rⱼ` in the branch
+cell related by a colour-automorphism `t` (`t r₁ = rⱼ`), the executable emits a verified generator mapping
+`r₁ ↦ rⱼ`, so `WordReach exec r₁ rⱼ`. Assembles `joint` (anchor-tracking gives `σf r₁ = rⱼ`) + piece 3
+(`twistOf = some σf`, `hfix` from `[INV]`) + `mem_deepenGens_of`. Carries the firing/domain facts: `deepen`
+succeeds, the gate passes, `Amenable`, and **`[INV]`** (off the coupled component every vertex is a
+`χ`-singleton — the discharge `[DISC] ⟹ [INV]` is the deferred `offCoupled_singleton`). -/
+theorem exec_recovers_cell_orbits (adj : AdjMatrix n) (χ : Colouring n) {r₁ rⱼ : Fin n}
+    {d1 : Refine.ColData n} {seq : List Nat} {t : Equiv.Perm (Fin n)}
+    (hr1 : r₁ ∈ Descend.branches χ) (hrj : rⱼ ∈ Descend.branches χ) (hne : (rⱼ == r₁) = false)
+    (ht : IsColAut adj χ t) (htrj : t r₁ = rⱼ)
+    (hdeepen : deepen adj χ n (step adj χ r₁) [] = some (d1, seq))
+    (hgate : ((coupled χ d1.col).isEmpty || !allSingletonsK (coupled χ d1.col) d1.col) = false)
+    (hAmen : AmenablePath adj χ n (step adj χ r₁))
+    (hinv : ∀ w, (coupled χ d1.col).contains w = false → ∀ u, χ u = χ w → u = w) :
+    Consume.WordReach (Consume.verified deepenSupply adj χ) r₁ rⱼ := by
+  -- `b`-state is the `t`-transport of `a`-state
+  have hrel : (step adj χ rⱼ).col = transportColouring t (step adj χ r₁).col := by
+    have hs := step_isColAut ht χ r₁
+    rw [transportColouring_isColAut ht, htrj] at hs; exact hs
+  -- refinement + protected-singleton invariants for `joint`
+  have hrefa : ∀ x y, (step adj χ r₁).col x = (step adj χ r₁).col y → χ x = χ y :=
+    fun x y h => step_refines adj χ r₁ h
+  have hrefb : ∀ x y, (step adj χ rⱼ).col x = (step adj χ rⱼ).col y → χ x = χ y :=
+    fun x y h => step_refines adj χ rⱼ h
+  have hb0 : ∀ u, (step adj χ rⱼ).col u = (step adj χ rⱼ).col (t r₁) → u = t r₁ := by
+    rw [htrj]; exact step_indiv_singleton adj χ rⱼ
+  -- run `joint`: get `σf` with `σf r₁ = rⱼ`
+  obtain ⟨σf, leaf_b, hσf, hrepl, hleaf, ha0⟩ :=
+    joint adj χ n (step adj χ r₁) (step adj χ rⱼ) t r₁ ht hrel hrefa hrefb hb0 hAmen d1 seq hdeepen
+  -- gate ⟹ all-singletons; `[DISC]` ⟹ `hfix`; piece 3 ⟹ the twist verifies to `σf`
+  have hall : allSingletonsK (coupled χ d1.col) d1.col = true := by
+    rcases Bool.or_eq_false_iff.mp hgate with ⟨_, h2⟩
+    simpa using h2
+  have hfix : ∀ w, (coupled χ d1.col).contains w = false → σf w = w := fun w hw =>
+    isColAut_fixes_singleton hσf (hinv w hw)
+  have htwist : twistOf adj χ d1.col (coupled χ d1.col) leaf_b.col = some σf := by
+    rw [hleaf]; exact twistOf_of_transport_fixing hall hfix hσf
+  -- membership + verification, then the one-step `WordReach`
+  have hmem : σf ∈ deepenGens adj χ := mem_deepenGens_of adj χ hr1 hrj hne hdeepen hgate hrepl htwist
+  have hver : σf ∈ Consume.verified deepenSupply adj χ := by
+    rw [Consume.verified, List.mem_filter]
+    exact ⟨hmem, decide_eq_true (deepenGens_isColAut adj χ hmem)⟩
+  have hwr := (Consume.WordReach.refl r₁).step hver
+  rwa [ha0.trans htrj] at hwr
 
 /-- **★ THE `hL1 ⟸ ORBIT_K` REDUCTION (§9.1.1).** `DeepenRefInExec` follows from the on-`K` coverage
 `hreach` (each ref gen reaches every `x` in its coupled component `K`) — the off-`K` case is `refl`
