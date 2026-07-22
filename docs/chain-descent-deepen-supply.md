@@ -14,20 +14,28 @@
 
 ## ▶ STATUS (2026-07-22)
 
-> **UPDATE 2026-07-22 — K-coverage VALIDATED + Layer-1 core (b1+b2) LANDED.** (1) The decisive K-coverage
-> probe ran (`ScratchKCov`, deleted): exec-orbit == ref-orbit over ALL vertices on partially-firing witnesses
-> with nonempty `K∖cell` — `t3` (exec **6** gens vs ref **96**, K∖cell orbits incl. size-6, partition
-> IDENTICAL) and `wcyc9`. So the surplus reference gens enlarge no orbit on OR off the branch cell. (2) `b1`
-> (`chooseIdK_mem`), `b2` (`joint`, the re-relating induction — the doc's "remaining core"), and **piece 3**
-> (`twistOf_of_transport_fixing` + `gate_unique`) are landed axiom-clean in `DeepenAmenable.lean`. **`joint`
-> proves: under `Amenable`, the CANONICAL deepen-a and replay-b leaves are `σ_final`-related over the whole
-> colouring; piece 3 turns that into `twistOf = some σ_final`** (given `σ_final` fixes off-`K` = `hfix`,
-> empirically vacuous). ⚠ **What remains for `hL1`** (honest, PLANNED in §9.1.1): the **reference-gen bridge**
-> — `hL1` targets `DeepenRefInExec` (ARBITRARY `deepenRefGens`), `joint` is canonical-only. **Reduction
-> `hL1 ⟸ ORBIT_K` is clean** ("exec recovers full `IsColAut`-orbits on `K`"); the **branch-cell half is clean**
-> (`g_{x,y}` maps anchor↦rep directly — LAND NEXT as `exec_recovers_cell_orbits`); the **`K∖cell` half is THE
-> crux** (`Stab`-reachability / branch-cell group completeness), empirically solid (t3 96-vs-6) but hard. The poly
-> **all-or-nothing backup gate** sidesteps this bridge by construction and stays the clean fallback if it resists.
+> **UPDATE 2026-07-22 — Layer-1 core + the BRIDGE REDUCTION + the BRANCH-CELL HALF all LANDED axiom-clean**
+> (`DeepenAmenable.lean`; full `build.sh` green). Reading order: this STATUS → §7 ledger → §8 inventory →
+> §9.1.1 (reduction) → §9.1.2 (route ledger for the crux).
+>
+> - **Landed this session** (all `[propext, Classical.choice, Quot.sound]`): `b1` (`chooseIdK_mem`); `b2`
+>   (**`joint`** — the re-relating induction, now with **anchor-tracking** `σ' a₀ = σ a₀` via the atoms
+>   `isColAut_fixes_singleton`/`step_preserves_singleton`/`step_indiv_singleton`); **piece 3**
+>   (`twistOf_of_transport_fixing`); the **bridge reduction `hL1 ⟸ hreach`** (`deepenRefInExec_of_reachOnK` +
+>   `deepenRefGens_isColAut`/`twistOf_id_off_K`/`refGen_id_off`; off-`K` = `refl`); and the **BRANCH-CELL HALF**
+>   `exec_recovers_cell_orbits` (+ `mem_deepenGens_of`). K-coverage VALIDATED (`ScratchKCov`, deleted: exec-orbit
+>   == ref-orbit over ALL vertices, incl. `t3`'s size-6 `K∖cell` orbit, exec-6 vs ref-96 IDENTICAL).
+> - **`hreach`** (what `hL1` reduces to) = *"the anchor-to-rep twists generate the full `IsColAut`-action on
+>   `K`"*. Branch-cell half DONE; **remaining = (a) discharge `[INV]`** (off-coupled = `χ`-singleton; the parked
+>   `offCoupled_singleton`, which fought the `coupled`-unfold — `exec_recovers_cell_orbits` currently carries
+>   `[INV]` as a hypothesis) **+ (b) the `K∖cell` crux = `ker φ` recovery.**
+> - **The crux (b)** — automorphisms that fix the cell but move `K∖cell`; no single exec gen is in `ker φ`, so
+>   they must be recovered as WORDS. **Route ε** (native ref⊆exec path-difference induction, reuses `joint`)
+>   primary; **Route ζ** (import `RecoverableByDepth`/`CellsAreOrbits`) parallel; **α** flawed (absorbed as ε's
+>   base case). Empirically solid (t3 96-vs-6) but the genuinely hard part. The poly **all-or-nothing backup
+>   gate** sidesteps it by construction — the fallback ONLY if ε+ζ stall on the same family (per standing steer).
+> - **NEXT for a fresh reader:** (1) land `offCoupled_singleton` (unblocks `exec_recovers_cell_orbits`'s last
+>   hypothesis — a `coupled`-unfold + a `List.dedup` length argument; see §9.1.2 `[INV]`); (2) open Route ε.
 
 ## ▶ STATUS (2026-07-21)
 
@@ -247,7 +255,7 @@ Chang-A) is where `Amenable`/`①c` could break. Per the framing, consume's resi
 | Link | Statement | Status |
 |---|---|---|
 | **L0** | `(R1 ∧ R2) → ①c` | **PROVED** (`deepenSupply_guarded_canonizer_of`) |
-| **L1** | `Amenable → R1` (`DeepenRefInExec`) | engine + bricks landed; joint induction (2b/3/4) remain |
+| **L1** | `Amenable → R1` (`DeepenRefInExec`) | `joint` (2b, anchor-tracking) + piece 3 + **reduction `hL1 ⟸ hreach`** + **branch-cell half** LANDED; remaining = `[INV]` discharge (`offCoupled_singleton`) + **`K∖cell` crux** (Route ε primary, ζ parallel — §9.1.2) |
 | **L2 / G2** | `¬Amenable → rigid obstruction` (attribution) | **PROVED** (`rigidObstruction_of_not_cellSingleOrbit`) |
 | **R2** | `SupplyEquivariant deepenRefSupply` | core (`twistOf_transport`) landed; set-level assembly remains |
 | **G1** | `rigid obstruction ⟹ F_k` | the **shared wall** — NOT needed for `①c`, only totality |
@@ -289,6 +297,21 @@ prose.
   - *piece 2a:* **`cellSingleOrbit_transport`** (Amenable transfers a-descent → b-descent).
   - *piece 2b-b0:* **`deepen_acc`** (the accumulator only prefixes the output seq — reduces the joint
     induction to `acc = []`).
+  - *piece 2b-b1 (2026-07-22):* **`chooseIdK_mem`** + `foldl_min_mem` (`chooseIdK = some cid ⟹ id-cell ≥ 2`;
+    passes replay's guard).
+  - *piece 2b-b2 (2026-07-22) — THE CORE:* **`joint`** — the joint re-relating induction. Canonical deepen-a
+    & replay-b leaves are `σ_final`-related over the WHOLE colouring, **AND** (anchor-tracking) `σ' a₀ = σ a₀`.
+  - *anchor atoms (2026-07-22):* **`isColAut_fixes_singleton`** (an `IsColAut` fixes a singleton-colour vertex)
+    · **`step_preserves_singleton`** · **`step_indiv_singleton`** (the individualized vertex is a singleton) —
+    the engine of `joint`'s anchor-tracking.
+  - *piece 3 (2026-07-22):* **`twistOf_of_transport_fixing`** (`twistOf = some σ'` from the σ-relation + gate
+    + `hfix`) + **`gate_unique`** (gate ⟹ each `χ1`-colour globally unique).
+  - *bridge reduction (2026-07-22, §9.1.1):* `permOf_apply` · **`twistOf_id_off_K`** (`twistOf` is `id` off `K`)
+    · **`deepenRefGens_isColAut`** · **`refGen_id_off`** · **`deepenRefInExec_of_reachOnK`** (★ `hL1 ⟸ hreach`;
+    off-`K` = `refl`).
+  - *branch-cell half (2026-07-22, §9.1.2):* `transportColouring_isColAut` · **`mem_deepenGens_of`** (forward
+    membership in `deepenGens`) · **`exec_recovers_cell_orbits`** (★ `x,y ∈ cell` + automorphism ⟹
+    `WordReach exec x y`; carries `[INV]` as a hypothesis).
   - *capstones:* **`deepenSupply_guarded_canonizer_of`** · **`deepenSupply_canonizer_of_amenable`**.
 
 ---
@@ -296,6 +319,11 @@ prose.
 ## 9. Remaining work
 
 ### 9.1 Layer 1 — finish `hL1 : Amenable → DeepenRefInExec` (4 pieces)
+
+> **▶ READER: the current structure is §9.1.1 (the `hL1 ⟸ hreach` reduction, LANDED) + §9.1.2 (the route
+> analysis for `hreach`).** This "4 pieces" list is the ORIGINAL Layer-1 plan; pieces 1/2a/2b/3 are all
+> LANDED and "piece 4 (K-coverage)" was reframed by the reduction — it is now the branch-cell half
+> (LANDED, `exec_recovers_cell_orbits`) + the `K∖cell` crux (OPEN, §9.1.2). Read §9.1.1/§9.1.2 for what's live.
 
 1. ✅ **piece 1 (refinement monotonicity)** — `indivOne_refines`, `step_refines`, `isColAut_parent_of_refines`.
    Keeps the running composite `σ' = τσ` in the parent-stabilizer.

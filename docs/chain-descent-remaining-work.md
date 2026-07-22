@@ -46,7 +46,22 @@ transfer). "Complete" = the flag provably never fires.
 
 ---
 
-## ▶ CURRENT FRONTIER (2026-07-21) — the one live task, for a fresh reader
+## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
+
+> **▶▶▶ UPDATE 2026-07-22 — READ `docs/chain-descent-deepen-supply.md` FIRST (authoritative + self-contained).**
+> The C3b ①c crux (R1) advanced substantially. **R1 ⟸ (Amenable⟹R1)+Amenable** [`Amenable` = every deepening
+> cell is a single Stab-orbit]. **`Amenable⟹R1` = the re-relating induction `joint` — LANDED axiom-clean**
+> (`DeepenAmenable.lean`), now with **anchor-tracking**. **The whole thing reduces `hL1 ⟸ hreach`** (LANDED:
+> `deepenRefInExec_of_reachOnK`; off-`K` = `refl`), where **`hreach` = "the anchor-to-rep twists generate the
+> full `IsColAut`-action on `K`".** `hreach` splits: **branch-cell half LANDED** (`exec_recovers_cell_orbits`);
+> **remaining = (a) discharge `[INV]`** (off-coupled = χ-singleton, `offCoupled_singleton`, parked) **+ (b) the
+> `K∖cell` crux = `ker φ` recovery** — **Route ε** (native ref⊆exec path-difference induction, reuses `joint`)
+> primary, **Route ζ** (import `RecoverableByDepth`/`CellsAreOrbits`) parallel; backup all-or-nothing gate only
+> if ε+ζ stall. Full plan + route ledger = deepen doc **§9.1.1 / §9.1.2**; theorem inventory = **§8**.
+> K-coverage was VALIDATED (t3 exec-6/ref-96, `K∖cell` orbits IDENTICAL). **Everything below (2026-07-21) is
+> the prior framing — superseded on the R1 mechanics by the deepen doc; still correct on R2 + Layer 2.**
+
+## ▶ CURRENT FRONTIER (2026-07-21) — the prior framing (superseded on R1 by the deepen doc)
 
 **Where work stopped: C3b `deepenSupply`'s ①c, reduced to a single crux.** The full arc is §1C C3 (ii-c)
 below; this is the pickup summary.

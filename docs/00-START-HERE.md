@@ -159,9 +159,11 @@ close it — is set out in
 > totally, profile `[28]`, so an equivariance falsifier must be PARTIALLY-firing). The landed supply quantifies
 > over all anchors.
 >
-> **▶▶▶ C3b ①c — CURRENT STATE (2026-07-21): tranche 2 built out and REDUCED TO ONE CRUX. See the live
-> tracker [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) "▶ CURRENT FRONTIER" +
-> §1C C3 (ii-c), and the module headers.** ①c is discharged the `kernelSupply` way — `OrbitPrune.SameOrbits`
+> **▶▶▶ C3b ①c — CURRENT STATE: read [`chain-descent-deepen-supply.md`](./chain-descent-deepen-supply.md)
+> (authoritative, self-contained).** 2026-07-22: `joint` (re-relating induction + anchor-tracking) + the bridge
+> reduction `hL1 ⟸ hreach` + the branch-cell half `exec_recovers_cell_orbits` LANDED axiom-clean; remaining =
+> `[INV]` discharge + the `K∖cell` crux (Route ε primary, ζ parallel). The 2026-07-21 snapshot below is prior
+> framing. ①c is discharged the `kernelSupply` way — `OrbitPrune.SameOrbits`
 > against an EQUIVARIANT proof-side all-picks reference `deepenRefSupply`, NOT vs `Aut`. Landed axiom-clean,
 > in `build.sh`: `DeepenTransport` (part I: every stage transports but the pick), `DeepenCrux` (part II:
 > soundness + predicates), `DeepenRef` (the reference + the EASY `SameOrbits` half), `DeepenRefTransport`
