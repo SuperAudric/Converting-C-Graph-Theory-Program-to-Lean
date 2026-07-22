@@ -816,6 +816,76 @@ theorem deepenRefInExec_of_cell_and_crux
       (hfires adj χ) hxb
   · exact hcrux adj χ ρ hρ K hoff x hxK hxb
 
+/-! ## 2b′. ★★ THE `K∖cell`-FREE CLOSE — branch-only same-orbits suffices for `①c`
+
+The object narrows only through `rep` on `forcedSet ⊆ branches` (`OrbitPrune.SameOrbitsOnBranches`), and a
+branch source's orbit stays inside the branch cell (`orbit_subset_branches`). So `①c` needs the reference and
+executable to agree on orbits **only for branch sources** — which is EXACTLY the cell coverage already landed
+(`exec_recovers_refgen_on_cell`). The `K∖cell` crux (`ExecRecoversKMinusCell`) is invisible to the object and
+NOT on the critical path. This is the clean close; `ExecReachesAut` / `ExecRecoversKMinusCell` (§2c) remain the
+statements for the *stronger* full-`SameOrbits` route, kept only for reference. -/
+
+/-- **Ref ⊆ exec on branch sources.** A `WordReach` in the reference from a branch vertex is matched
+step-by-step by the executable: each ref gen maps the current branch vertex within the cell
+(`isColAut_mem_branches`) and the executable reaches that image (`exec_recovers_refgen_on_cell`). -/
+theorem wordReach_deepen_of_ref_on_branch (adj : AdjMatrix n) (χ : Colouring n)
+    (hAmen : Amenable adj χ) (hfires : ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
+    {u : Fin n} (hu : u ∈ Descend.branches χ) {w : Fin n}
+    (h : Consume.WordReach (Consume.verified deepenRefSupply adj χ) u w) :
+    Consume.WordReach (Consume.verified deepenSupply adj χ) u w := by
+  induction h with
+  | refl => exact Consume.WordReach.refl u
+  | @step m hsub ρ hg ih =>
+      have hm : m ∈ Descend.branches χ :=
+        Consume.orbit_subset_branches hu (Consume.mem_orbit_of_wordReach hsub)
+      exact ih.trans
+        (exec_recovers_refgen_on_cell adj χ (Consume.isColAut_of_mem_verified hg) hAmen hfires hm)
+
+/-- **★★ `SameOrbitsOnBranches` for `deepenRefSupply`/`deepenSupply` — from cell coverage alone.** The `⊇`
+half is `wordReach_ref_of_deepen`; the `⊆` half is `wordReach_deepen_of_ref_on_branch`. No `K∖cell`. -/
+theorem sameOrbitsOnBranches_of_cell
+    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
+    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a) :
+    OrbitPrune.SameOrbitsOnBranches (deepenRefSupply (n := n)) (deepenSupply (n := n)) :=
+  fun adj χ u hu w =>
+    ⟨wordReach_deepen_of_ref_on_branch adj χ (hAmen adj χ) (hfires adj χ) hu,
+     wordReach_ref_of_deepen adj χ u w⟩
+
+/-- **★★★ `①c` FOR `deepenSupply` — modulo `{R2, Amenable, AnchorFires}` ONLY.** The `K∖cell` group-recovery
+crux is off the critical path: branch-only same-orbits suffices, and it follows from the landed cell coverage.
+This is the intended close of R1. -/
+theorem deepenSupply_guarded_canonizer_of_cell
+    (hR2 : SupplyTransport.SupplyEquivariant (deepenRefSupply (n := n)))
+    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
+    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a) :
+    CanonSpec.IsCanonicalFormOpt
+      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
+          (deepenSupply (n := n))))) :=
+  OrbitPrune.guarded_mixed_canonizer_of_sameOrbitsOnBranches Force.keyEquivariant_lookahead hR2
+    (sameOrbitsOnBranches_of_cell hAmen hfires)
+
+/-! ## 2c. Route ε — the whole-node target `ExecReachesAut` and its reduction
+
+`ExecRecoversKMinusCell` reframes to the honest whole-hog statement: `⟨verified deepenSupply⟩` recovers the
+full `IsColAut`-action on `K`. A ref gen is an `IsColAut` (`deepenRefGens_isColAut`) that fixes off-`K`, so
+`ExecRecoversKMinusCell ⟸ ExecReachesAut` directly. This is the target the Route-ε path-difference induction
+aims at; its `K∖cell` content is the `ker φ` group-recovery. -/
+
+/-- **The whole-node group-recovery statement.** Exec reaches every `IsColAut`-image of every `K`-point —
+i.e. `⟨exec⟩ ⊇ IsColAut` orbit-wise on `K`. The `⊆` is free (exec gens are `IsColAut`); this is the `⊇`
+content. IMPLIES `ExecRecoversKMinusCell`. -/
+def ExecReachesAut (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ (β : Equiv.Perm (Fin n)), IsColAut adj χ β →
+    ∀ (K : List (Fin n)), (∀ v, K.contains v = false → β v = v) →
+    ∀ x, K.contains x = true → Consume.WordReach (Consume.verified deepenSupply adj χ) x (β x)
+
+/-- `ExecRecoversKMinusCell` follows from the whole-node recovery `ExecReachesAut` (a ref gen is an
+`IsColAut`; drop the `x ∉ cell` side-condition). -/
+theorem execRecoversKMinusCell_of_execReachesAut {adj : AdjMatrix n} {χ : Colouring n}
+    (h : ExecReachesAut adj χ) : ExecRecoversKMinusCell adj χ :=
+  fun ρ hρ K hoff x hxK _ => h ρ (deepenRefGens_isColAut adj χ hρ) K hoff x hxK
+
 /-! ## 3. The capstone — `(R1 ∧ R2) → ①c`, and the `Amenable`-gated form
 
 Mirrors `KernelTransport.kernelSupply_guarded_canonizer`: ①c for the executable `deepenSupply` is

@@ -132,6 +132,60 @@ theorem canonForm?_congr {rf : Refiner n} {R₁ R₂ : Resolver n}
     canonForm? rf R₁ adj = canonForm? rf R₂ adj :=
   descend_val_congr hn adj n _
 
+/-! ## 2b. `SameOrbitsOnBranches` — the WEAKER hypothesis that already suffices
+
+The narrowing (`Composite.narrow_forceThenConsume`) applies `rep` only to `forcedSet key adj χ ⊆ branches χ`
+(`forcedSet_subset`), and `rep G b` for a branch `b` depends only on `b`'s orbit — which stays inside the
+branch cell (`orbit_subset_branches`). So the reduction needs the two supplies to agree on orbits **only for
+branch sources**, not over all of `Fin n`. This weaker hypothesis is what a greedy-pick supply can discharge
+from its branch-cell coverage alone, WITHOUT the `K∖cell` group-recovery crux. -/
+
+/-- `rep` at a single point depends only on that point's orbit relation (`rep_congr` needs `h` only at `b`). -/
+theorem rep_congr_at {G₁ G₂ : List (Equiv.Perm (Fin n))} {b : Fin n}
+    (h : ∀ w : Fin n, WordReach G₁ b w ↔ WordReach G₂ b w) : rep G₁ b = rep G₂ b :=
+  minList_congr b (fun x => by
+    rw [Consume.mem_orbit_iff_wordReach, Consume.mem_orbit_iff_wordReach]; exact h x)
+
+/-- **Two supplies prove the same orbits FOR BRANCH SOURCES.** All the object can see of a supply is the
+narrowing, which reps only `forcedSet ⊆ branches`; so this is exactly as strong as `SameOrbits` for the
+reduction, while being far cheaper to prove (branch-cell coverage, no `K∖cell`). -/
+def SameOrbitsOnBranches (S₁ S₂ : Supply n) : Prop :=
+  ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ u ∈ branches χ, ∀ w : Fin n,
+    WordReach (verified S₁ adj χ) u w ↔ WordReach (verified S₂ adj χ) u w
+
+/-- The mixed resolver's narrowing is unchanged under `SameOrbitsOnBranches` — the reps it uses live on
+`forcedSet ⊆ branches`, where the two supplies agree. -/
+theorem narrow_forceThenConsume_congr_branch {key : Key n} {S₁ S₂ : Supply n}
+    (h : SameOrbitsOnBranches S₁ S₂) (adj : AdjMatrix n) (χ : Colouring n) :
+    narrow (forceThenConsume key S₁) adj χ = narrow (forceThenConsume key S₂) adj χ := by
+  rw [Composite.narrow_forceThenConsume, Composite.narrow_forceThenConsume]
+  have hmap : (Composite.forcedSet key adj χ).map (rep (verified S₁ adj χ))
+      = (Composite.forcedSet key adj χ).map (rep (verified S₂ adj χ)) :=
+    List.map_congr_left (fun b hb =>
+      rep_congr_at (h adj χ b (Composite.forcedSet_subset key adj χ hb)))
+  rw [hmap]
+
+/-- The guarded mixed canonizers of two `SameOrbitsOnBranches` supplies are the **same function**. -/
+theorem canonForm?_eq_of_sameOrbitsOnBranches {rf : Refiner n} {key : Key n} {S₁ S₂ : Supply n}
+    (h : SameOrbitsOnBranches S₁ S₂) :
+    canonForm? rf (Stall.guard (forceThenConsume key S₁))
+      = canonForm? rf (Stall.guard (forceThenConsume key S₂)) :=
+  funext (canonForm?_congr
+    (fun adj χ => narrow_guard_congr (narrow_forceThenConsume_congr_branch h) adj χ))
+
+/-- **★★★ `①` TRANSFERS from branch-only orbit agreement.** The weaker-hypothesis analogue of
+`guarded_mixed_canonizer_of_sameOrbits`: a supply that proves the same orbits **on branch sources** as an
+already-certified equivariant one inherits `①a`/`①b`/`①c`. This is the version a greedy-pick supply uses —
+its `K∖cell` action is invisible to the object, so it need not be recovered. -/
+theorem guarded_mixed_canonizer_of_sameOrbitsOnBranches {key : Key n} (hk : KeyEquivariant key)
+    {S₁ S₂ : Supply n} (h1 : SupplyEquivariant S₁) (h : SameOrbitsOnBranches S₁ S₂) :
+    CanonSpec.IsCanonicalFormOpt
+      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (forceThenConsume key S₂))) := by
+  have hcert := SupplyTransport.guarded_mixed_canonizer hk h1
+  rwa [canonForm?_eq_of_sameOrbitsOnBranches (rf := Refine.encodeFreeFast (n := n)) (key := key) h]
+    at hcert
+
 /-! ## 3. ★★★ THE REDUCTION — `①` transfers across `SameOrbits`, for free -/
 
 /-- The guarded mixed canonizers of two `SameOrbits` supplies are the **same function**. -/

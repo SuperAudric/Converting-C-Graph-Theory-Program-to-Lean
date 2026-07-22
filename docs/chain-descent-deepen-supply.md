@@ -35,13 +35,17 @@
 >   primary; **Route ζ** (import `RecoverableByDepth`/`CellsAreOrbits`) parallel; **α** flawed (absorbed as ε's
 >   base case). Empirically solid (t3 96-vs-6) but the genuinely hard part. The poly **all-or-nothing backup
 >   gate** sidesteps it by construction — the fallback ONLY if ε+ζ stall on the same family (per standing steer).
-> - **R1 IS NOW REDUCED TO ONE PREDICATE** (`deepenRefInExec_of_cell_and_crux`, axiom-clean 2026-07-22): the
->   whole cell is covered (`exec_recovers_refgen_on_cell` — the branch-cell half at every anchor), off-`K` is
->   `refl`, so **the entire remaining content of R1 is `ExecRecoversKMinusCell`** (the `K∖cell` = `ker φ` crux),
->   modulo the domain facts `{Amenable, AnchorFires}`.
-> - **NEXT for a fresh reader:** attack `ExecRecoversKMinusCell` via **Route ε** (native path-difference
->   induction reusing `joint`/`step_rerelate`; foundations `wordReach_of_mem_verified`/`_symm`/
->   `isColAut_mem_branches` landed) — probe Route ζ (import `RecoverableByDepth`/`CellsAreOrbits`) in parallel.
+> - **★★★ THE `K∖cell` CRUX IS OFF THE CRITICAL PATH (2026-07-22, axiom-clean).** The object narrows only
+>   through `rep` on `forcedSet ⊆ branches`, and a branch source's orbit stays in the branch cell
+>   (`orbit_subset_branches`) — so `①c` needs the reference and executable to agree on orbits **only for branch
+>   sources** (`OrbitPrune.SameOrbitsOnBranches`, the weakened reduction), which is EXACTLY the landed cell
+>   coverage. **`deepenSupply_guarded_canonizer_of_cell` gives `①c` modulo `{R2, Amenable, AnchorFires}` ONLY** —
+>   no `ExecRecoversKMinusCell`, no `ker φ` group-recovery. The `K∖cell` crux was an artifact of the over-strong
+>   full `SameOrbits`; the greedy pick's `K∖cell` action is invisible to the object.
+> - **NEXT for a fresh reader:** R1 is closed modulo domain facts. Remaining for `①c`: **R2**
+>   (`SupplyEquivariant deepenRefSupply`, mechanical, §9.2) + the domain facts **`Amenable`** (Layer 2, §5) and
+>   **`AnchorFires`** (per-anchor firing+`[DISC]`). `ExecRecoversKMinusCell`/Route ε kept only for the (unneeded)
+>   full-`SameOrbits` route.
 
 ## ▶ STATUS (2026-07-21)
 
@@ -360,9 +364,14 @@ prose.
     [INV]`: `Discrete` leaf ⟹ off-coupled = `χ`-singleton) · **`exec_recovers_cell_orbits`** (★ `x,y ∈ cell` +
     automorphism ⟹ `WordReach exec x y`; now carries the single clean domain fact `Discrete d1.col`).
   - *Route ε foundations + crux isolation (2026-07-22, §9.1.2):* `wordReach_of_mem_verified` · `wordReach_symm`
-    · `isColAut_mem_branches` · `AnchorFires` (per-anchor firing bundle) · **`ExecRecoversKMinusCell`** (the
-    isolated `K∖cell` crux) · **`exec_recovers_refgen_on_cell`** (★ whole-cell coverage for a ref gen) ·
-    **`deepenRefInExec_of_cell_and_crux`** (★ R1 = `{Amenable, AnchorFires, ExecRecoversKMinusCell}`).
+    · `isColAut_mem_branches` · `AnchorFires` (per-anchor firing bundle) · **`exec_recovers_refgen_on_cell`**
+    (★ whole-cell coverage for a ref gen) · `ExecRecoversKMinusCell` / `deepenRefInExec_of_cell_and_crux` /
+    `ExecReachesAut` (the now-UNNEEDED full-`SameOrbits` route, kept for reference).
+  - *★★★ the `K∖cell`-free close (2026-07-22):* in `OrbitPrune` — `rep_congr_at` · **`SameOrbitsOnBranches`** ·
+    `narrow_forceThenConsume_congr_branch` · **`guarded_mixed_canonizer_of_sameOrbitsOnBranches`** (weakened
+    reduction: branch-only orbit agreement suffices). In `DeepenAmenable` — **`wordReach_deepen_of_ref_on_branch`**
+    · **`sameOrbitsOnBranches_of_cell`** (from cell coverage alone) · **`deepenSupply_guarded_canonizer_of_cell`**
+    (★ `①c` modulo `{R2, Amenable, AnchorFires}` — the intended R1 close, no `K∖cell`).
   - *capstones:* **`deepenSupply_guarded_canonizer_of`** · **`deepenSupply_canonizer_of_amenable`**.
 
 ---
@@ -525,11 +534,21 @@ The branch-cell half holds for ANY anchor-rep pair, and a ref gen `ρ ∈ IsColA
 directly. Thus the **cell part of `hreach` needs no `K∖cell` content**, discharged from the domain bundle
 `AnchorFires` (deepen succeeds + gate + `Discrete` leaf, all anchors) + `Amenable`.
 
-**★ R1 REDUCED TO ONE PREDICATE (2026-07-22, `deepenRefInExec_of_cell_and_crux`, axiom-clean).** `hreach`
-now splits cleanly: off-`K` = `refl`, cell = `exec_recovers_refgen_on_cell` (done), so **the ENTIRE remaining
-content of R1 is the isolated `K∖cell` crux `ExecRecoversKMinusCell`** — for a ref gen `ρ` and a
-coupled-but-non-cell `x ∉ branches`, `WordReach exec x (ρ x)`. Everything else in R1 is landed; the capstone
-takes exactly `{Amenable, AnchorFires, ExecRecoversKMinusCell}` as its three domain inputs.
+**★ R1 (full-`SameOrbits` route) REDUCED TO ONE PREDICATE (2026-07-22, `deepenRefInExec_of_cell_and_crux`,
+axiom-clean).** For the FULL `SameOrbits` route, `hreach` splits: off-`K` = `refl`, cell =
+`exec_recovers_refgen_on_cell` (done), so the entire remaining content is the isolated `K∖cell` crux
+`ExecRecoversKMinusCell` — for a ref gen `ρ` and a coupled-but-non-cell `x ∉ branches`, `WordReach exec x (ρ x)`.
+
+**★★★ BUT THE `K∖cell` CRUX IS NOT NEEDED (2026-07-22, `deepenSupply_guarded_canonizer_of_cell`, axiom-clean).**
+The object narrows only through `rep` on `forcedSet ⊆ branches` (`Composite.narrow_forceThenConsume` +
+`forcedSet_subset`), and `rep` at a branch source depends only on that source's orbit, which stays inside the
+branch cell (`orbit_subset_branches`). So `①c` needs orbit agreement **only for branch sources** — the weakened
+reduction `OrbitPrune.SameOrbitsOnBranches` (lemmas `rep_congr_at`, `narrow_forceThenConsume_congr_branch`,
+`guarded_mixed_canonizer_of_sameOrbitsOnBranches`, landed). And `SameOrbitsOnBranches deepenRefSupply
+deepenSupply` follows from the cell coverage ALONE (`wordReach_deepen_of_ref_on_branch` inducts a ref word, each
+step landing in the cell): **`①c` closes modulo `{R2, Amenable, AnchorFires}` only.** The `K∖cell` group-recovery
+was an artifact of the over-strong full `SameOrbits`; the greedy pick's `K∖cell` action is invisible to the
+canonizer. `ExecRecoversKMinusCell` / Route ε below are retained only as the (now-unneeded) full-`SameOrbits` route.
 
 **The crux — `K∖cell` — characterized precisely.** Exec gens `= {σ_final(a,b)}` on `K`, each moving the cell
 (`a↦b`, `b≠a`). Need `⟨σ_final(a,b)⟩`-orbits on `K` `=` `IsColAut`-orbits on `K`. The hard content is
@@ -577,10 +596,12 @@ families the seal reaches; the residue is whatever `deepen` targets beyond them 
    `exec_recovers_cell_orbits` → `offCoupled_singleton` (`[INV]⟸[DISC]`) → `exec_recovers_refgen_on_cell`
    (all cell vertices) → `deepenRefInExec_of_cell_and_crux` (R1 = `{Amenable, AnchorFires, ExecRecoversKMinusCell}`).
    The entire remaining content of R1 is now the single predicate `ExecRecoversKMinusCell`.
-2. **For `K∖cell` / `ker φ` = `ExecRecoversKMinusCell`: pursue ROUTE ε** (path-difference induction) as the
-   native attack — it localizes the crux and reuses `joint`/`step_rerelate`; **in parallel probe ROUTE ζ**
-   (import) for the seal-covered families, which may discharge large sub-families for free and shrink ε's residue.
-   Foundations landed (`wordReach_of_mem_verified`, `wordReach_symm`, `isColAut_mem_branches`).
+2. **★★★ SUPERSEDED — the `K∖cell` crux is OFF the critical path (2026-07-22).** Attacking
+   `ExecRecoversKMinusCell` revealed it is not needed: `①c` narrows only through branch-cell reps, so
+   `OrbitPrune.SameOrbitsOnBranches` (branch-only orbit agreement) suffices, and that follows from the landed
+   cell coverage. `deepenSupply_guarded_canonizer_of_cell` closes R1 modulo `{R2, Amenable, AnchorFires}`. Route
+   ε / `ExecRecoversKMinusCell` remain only for the (unneeded) full-`SameOrbits` route. **Remaining for `①c`:
+   R2 (§9.2) + the domain facts `Amenable` (§5) and `AnchorFires`.**
 3. **ROUTE α** is not standalone (α1 false in general) but its valid special case (single-level coupling) is
    the `ker φ = 1` base that ε's induction bottoms out on — so α is *absorbed into the hybrid*, not discarded.
 4. **ROUTE β** ≡ ε viewed per-level; keep ε's framing (cleaner recursion, reuses landed machinery).
