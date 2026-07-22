@@ -962,6 +962,36 @@ theorem rigidObstruction_imp_not_cellIsOrbit {adj : AdjMatrix n} {χ : Colouring
   obtain ⟨β, hβ, hβu⟩ := wordReach_imp_isColAut (h u hu w hw)
   exact hrig β hβ hβu
 
+/-- **★★ A CONSUME-PATH FAILURE EXPOSES A RIGID DECISION.** If the deepening path from a state is NOT
+`AmenablePath` — exactly when consume can fail to recover a genuinely same-orbit pair (fusion: symmetry over a
+deeper rigid obstruction) — then some cell *along that path* carries a `RigidObstructionAt`: a concrete
+same-colour non-automorphic pair, force-actionable. So a consume-stall never dead-ends — it always surfaces one
+exposed rigid node (possibly deeper than the compared pair, which itself may be automorphic). This is the honest
+handoff target: NOT "the compared pair is rigid" (false under fusion), but "a rigid decision is exposed for
+force," which is what makes the force⇄consume interleaving terminate. -/
+theorem not_amenablePath_imp_rigidObstruction (adj : AdjMatrix n) (χp : Colouring n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n), ¬ AmenablePath adj χp fuel cur →
+      ∃ (χc : Colouring n) (cid : Nat), RigidObstructionAt adj χc cid := by
+  intro fuel
+  induction fuel with
+  | zero => intro cur h; exact absurd trivial h
+  | succ fuel ih =>
+      intro cur h
+      unfold AmenablePath at h
+      dsimp only at h
+      split at h
+      · exact absurd trivial h
+      · split at h
+        · exact absurd trivial h
+        · rename_i cid _
+          rw [not_and_or] at h
+          rcases h with hcso | htail
+          · exact ⟨cur.col, cid, rigidObstruction_of_not_cellSingleOrbit adj cur.col cid hcso⟩
+          · split at htail
+            · exact absurd trivial htail
+            · rename_i w _ _
+              exact ih (step adj cur.col w) htail
+
 /-! ## 2c. Route ε — the whole-node target `ExecReachesAut` and its reduction
 
 `ExecRecoversKMinusCell` reframes to the honest whole-hog statement: `⟨verified deepenSupply⟩` recovers the

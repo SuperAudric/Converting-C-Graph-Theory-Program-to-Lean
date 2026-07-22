@@ -313,7 +313,9 @@ Chang-A) is where `Amenable`/`①c` could break. Per the framing, consume's resi
 | **L2 / G2** | `¬Amenable → RigidObstructionAt` (attribution) | **PROVED** (`rigidObstruction_of_not_cellSingleOrbit`) |
 | **rigid handoff** | `RigidObstructionAt → ¬CellIsOrbit` (deepen defers SOUNDLY) | **PROVED** (`rigidObstruction_imp_not_cellIsOrbit`) — deepen never mishandles a rigid pair; it is the SAME obstruction type the rigid solver / §11.14 own |
 | **G1 / force-sep** | `RigidObstructionAt → CellResolved`'s force branch (key injective on branches) | the **shared wall** (`hSmallAutThin`) — totality only, NOT `①c` |
-| **fusion** | deep-level `Amenable` obstruction peeled before consume sees the cell | **totality scheduling** (the interleaving) — G2's *avoidance* direction |
+| **exposed-rigid** | `¬AmenablePath → ∃ RigidObstructionAt` (a consume-stall surfaces a concrete rigid node) | **PROVED** (`not_amenablePath_imp_rigidObstruction`) — the honest handoff: a stall never dead-ends, it exposes a force-actionable rigid pair (possibly DEEPER than the compared pair, which may itself be automorphic = fusion) |
+| **fusion** | deep-level `Amenable` obstruction peeled before consume sees the cell | **totality scheduling** (the interleaving): stall → exposed-rigid → force distinguishes → re-expose symmetry → retry → fixpoint. `Amenable`-on-residue holds because force peels every exposed node first |
+| **force-complete** | force distinguishes each *exposed* non-automorphic pair | the **shared wall** `hSmallAutThin`, now LOCALIZED to concrete exposed pairs (not a global `Amenable` assumption) |
 | ~~L0~~ ~~R1~~ ~~R2~~ | `(R1∧R2)→①c` / `Amenable→R1` / `SupplyEquivariant deepenRefSupply` | **RETIRED** (reference eliminated); `deepenRefSupply` route kept for provenance only |
 
 Everything conjectural lives in **G1** (the shared wall, covered whenever anyone covers it) + the **fusion
@@ -380,7 +382,10 @@ obstruction** — only the shared wall + scheduling remain.
     · **`sameOrbitsOnBranches_of_cell`** · **`deepenSupply_guarded_canonizer_of_cell`** (`①c` modulo
     `{R2, Amenable, AnchorFires}` — the `deepenRefSupply` route, superseded).
   - *rigid handoff (2026-07-22, §2b‴):* **`rigidObstruction_imp_not_cellIsOrbit`** (deepen defers SOUNDLY on a
-    rigid pair — `¬CellIsOrbit`; the same obstruction the rigid solver / §11.14 own, no new type).
+    rigid pair — `¬CellIsOrbit`; the same obstruction the rigid solver / §11.14 own, no new type) ·
+    **`not_amenablePath_imp_rigidObstruction`** (★ a consume-stall EXPOSES a concrete `RigidObstructionAt` — the
+    honest handoff: never dead-ends, surfaces a force-actionable rigid node, DEEPER than the compared pair under
+    fusion).
   - *★★★★ the REFERENCE-FREE close (2026-07-22) — the intended `①c`:* in `SupplyTransport` —
     **`stallEquivariant_forceThenConsume_of_branchOrbitTransport`** (generic: `StallEquivariant` from branch-orbit
     transport, no `SupplyEquivariant`). In `DeepenAmenable` — **`wordReach_imp_isColAut`** · **`deepen_branch_orbit_iff_aut`**
