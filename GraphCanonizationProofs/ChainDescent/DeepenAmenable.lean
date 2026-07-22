@@ -1,4 +1,5 @@
 import ChainDescent.DeepenR1
+import ChainDescent.DeepenRefTransport
 import ChainDescent.OrbitPrune
 
 /-!
@@ -254,6 +255,242 @@ theorem deepen_acc (adj : AdjMatrix n) (χp : Colouring n) (fuel : Nat) :
                 congr 1
                 funext p
                 simp [Function.comp, List.reverse_cons, List.append_assoc]
+
+/-- The `chooseIdK` fold takes a `min` over `χc v` of the `classOf ≥ 2` cells, so its `some` result is
+`χc v` for one such `v` (the argmin). A `foldl`-min "result is an element" lemma. -/
+theorem foldl_min_mem (χc : Colouring n) {cid : Nat} :
+    ∀ (L : List (Fin n)) (acc : Option Nat),
+      (L.foldl (fun acc v => match acc with
+        | none => some (χc v) | some m => some (min m (χc v))) acc = some cid) →
+      acc = some cid ∨ ∃ v ∈ L, χc v = cid := by
+  intro L
+  induction L with
+  | nil => intro acc h; left; simpa using h
+  | cons v L ih =>
+      intro acc h
+      simp only [List.foldl_cons] at h
+      rcases ih _ h with h' | ⟨w, hw, hwc⟩
+      · cases acc with
+        | none => right; exact ⟨v, List.mem_cons_self .., by simpa using h'⟩
+        | some m =>
+            simp only [Option.some.injEq] at h'
+            rcases Nat.le_total m (χc v) with hle | hle
+            · left; rw [Nat.min_eq_left hle] at h'; rw [h']
+            · right; exact ⟨v, List.mem_cons_self .., by rw [Nat.min_eq_right hle] at h'; exact h'⟩
+      · right; exact ⟨w, List.mem_cons_of_mem _ hw, hwc⟩
+
+/-- **★ b1 — `chooseIdK` picks a `≥ 2` cell.** `chooseIdK K χc = some cid ⟹ (cidCell χc cid).length ≥ 2`.
+So on the `b`-descent `replay`'s `mem.length < 2` guard passes (via `cidCell_length_transport`). -/
+theorem chooseIdK_mem (K : List (Fin n)) (χc : Colouring n) {cid : Nat}
+    (h : chooseIdK K χc = some cid) : 2 ≤ (cidCell χc cid).length := by
+  unfold chooseIdK at h
+  rcases foldl_min_mem χc _ none h with h' | ⟨v, hv, hvc⟩
+  · exact absurd h' (by simp)
+  · rw [List.mem_filter] at hv
+    have hlen : 2 ≤ (classOf χc v).length := by simpa using hv.2
+    have hcell : cidCell χc cid = classOf χc v := by
+      unfold cidCell classOf; congr 1; funext u; rw [hvc]
+    rw [hcell]; exact hlen
+
+/-- **★★ b2 — THE JOINT RE-RELATING INDUCTION (canonical paths).** Under `Amenable`, the canonical
+`deepen`-from-`a` and canonical `replay`-from-`b` (with `b`-state the `σ`-transport of `a`-state, `σ` a
+parent-automorphism) reach leaves related by an automorphism `σ'` via the WHOLE-COLOURING transport
+equation. So the emitted twist is a genuine graph-automorphism on all of `K` (K-coverage is subsumed —
+the relation is over every vertex, validated 2026-07-22). Each level: `chooseIdK_mem`+
+`cidCell_length_transport` pass replay's `≥2` guard; `cellSingleOrbit_transport`+`Amenable` supply
+`τ ∈ Stab(cur_b.col)` absorbing the pick mismatch; `step_rerelate` carries the invariant; `step_refines`+
+`isColAut_parent_of_refines` keep `τσ` in the parent-stabilizer. -/
+theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
+    ∀ (fuel : Nat) (cur_a cur_b : Refine.ColData n) (σ : Equiv.Perm (Fin n)),
+      IsColAut adj χp σ →
+      cur_b.col = transportColouring σ cur_a.col →
+      (∀ x y, cur_a.col x = cur_a.col y → χp x = χp y) →
+      (∀ x y, cur_b.col x = cur_b.col y → χp x = χp y) →
+      AmenablePath adj χp fuel cur_a →
+      ∀ (leaf_a : Refine.ColData n) (seq : List Nat),
+        deepen adj χp fuel cur_a [] = some (leaf_a, seq) →
+        ∃ (σ' : Equiv.Perm (Fin n)) (leaf_b : Refine.ColData n),
+          IsColAut adj χp σ' ∧ replay adj seq cur_b = some leaf_b ∧
+          leaf_b.col = transportColouring σ' leaf_a.col := by
+  intro fuel
+  induction fuel with
+  | zero => intro cur_a cur_b σ _ _ _ _ _ leaf_a seq h; simp [deepen] at h
+  | succ fuel ih =>
+      intro cur_a cur_b σ hσ hrel hrefa hrefb hAmen leaf_a seq h
+      -- reduce `deepen (fuel+1) cur_a []`
+      unfold deepen at h
+      dsimp only at h
+      cases hK : (coupled χp cur_a.col).isEmpty with
+      | true => simp [hK] at h
+      | false =>
+          rw [if_neg (by simp [hK])] at h
+          -- the id `chooseIdK` picks
+          cases hco : chooseIdK (coupled χp cur_a.col) cur_a.col with
+          | none =>
+              -- `chooseIdK = none` is the terminal LEAF (footprint discrete on the coupled component)
+              rw [hco] at h
+              dsimp only at h
+              simp only [List.reverse_nil, Option.some.injEq, Prod.mk.injEq] at h
+              obtain ⟨rfl, rfl⟩ := h
+              exact ⟨σ, cur_b, hσ, rfl, hrel⟩
+          | some cid =>
+              rw [hco] at h
+              dsimp only at h
+              -- `a`'s id-cell (= the deepen/AmenablePath filter, defeq `cidCell`)
+              cases hfl : (List.finRange n).filter (fun v => cur_a.col v == cid) with
+              | nil => rw [hfl] at h; simp at h
+              | cons w_a rest_a =>
+                  rw [hfl] at h
+                  dsimp only at h
+                  -- deepen recurses on `step cur_a.col w_a` with accumulator `[cid]`
+                  rw [deepen_acc adj χp fuel (step adj cur_a.col w_a) [cid]] at h
+                  rw [Option.map_eq_some_iff] at h
+                  obtain ⟨⟨la, inner⟩, hinner, heq⟩ := h
+                  simp only [List.reverse_cons, List.reverse_nil, List.nil_append,
+                    Prod.mk.injEq] at heq
+                  obtain ⟨rfl, rfl⟩ := heq
+                  -- so leaf_a = la, seq = cid :: inner
+                  -- `w_a` is the head of `a`'s id-cell
+                  have hwa_mem : w_a ∈ cidCell cur_a.col cid := by
+                    show w_a ∈ (List.finRange n).filter (fun v => cur_a.col v == cid)
+                    rw [hfl]; exact List.mem_cons_self ..
+                  -- `chooseIdK_mem`: `a`'s id-cell has ≥ 2, so does `b`'s
+                  have hlen_a : 2 ≤ (cidCell cur_a.col cid).length := chooseIdK_mem _ _ hco
+                  have hlen_b : 2 ≤ (cidCell cur_b.col cid).length := by
+                    rw [hrel, cidCell_length_transport]; exact hlen_a
+                  -- head `w_b` of `b`'s id-cell
+                  obtain ⟨w_b, rest_b, hmb⟩ :
+                      ∃ w_b rest_b, cidCell cur_b.col cid = w_b :: rest_b := by
+                    cases hmb : cidCell cur_b.col cid with
+                    | nil => rw [hmb] at hlen_b; simp at hlen_b
+                    | cons w_b rest_b => exact ⟨w_b, rest_b, rfl⟩
+                  have hwb_mem : w_b ∈ cidCell cur_b.col cid := by rw [hmb]; exact List.mem_cons_self ..
+                  -- unpack `Amenable` at this level
+                  unfold AmenablePath at hAmen
+                  dsimp only at hAmen
+                  rw [if_neg (by simp [hK]), hco] at hAmen
+                  dsimp only at hAmen
+                  rw [hfl] at hAmen
+                  dsimp only at hAmen
+                  obtain ⟨hcell_a, hAmen_rec⟩ := hAmen
+                  -- transport the single-orbit cell to `b`, get `τ`
+                  have hcell_b : CellSingleOrbit adj cur_b.col cid := by
+                    rw [hrel]; exact cellSingleOrbit_transport hσ.relabel hcell_a
+                  have hσwa : cur_b.col (σ w_a) = cid := by
+                    have : σ w_a ∈ cidCell cur_b.col cid := by
+                      rw [hrel]; exact mem_cidCell_transport_apply σ cur_a.col cid w_a hwa_mem
+                    exact (mem_cidCell_iff _ _ _).mp this
+                  have hwbcid : cur_b.col w_b = cid := (mem_cidCell_iff _ _ _).mp hwb_mem
+                  obtain ⟨τ, hτ, hτeq⟩ := hcell_b (σ w_a) w_b hσwa hwbcid
+                  -- `τ ∈ Stab(cur_b.col)` transfers to the parent, and `τσ` is a parent-automorphism
+                  have hτp : IsColAut adj χp τ := isColAut_parent_of_refines hrefb hτ
+                  have hτσ : IsColAut adj χp (τ * σ) := hτp.comp hσ
+                  -- the invariant across this level (`step_rerelate`)
+                  have hτ' : IsColAut adj (transportColouring σ cur_a.col) τ := by rw [← hrel]; exact hτ
+                  have hstep_rel : (step adj cur_b.col w_b).col
+                      = transportColouring (τ * σ) (step adj cur_a.col w_a).col := by
+                    have hr := step_rerelate cur_a.col w_a hσ.relabel hτ'
+                    rw [hτeq] at hr
+                    rw [hrel]; exact hr
+                  -- parent-refinement survives a step, both sides
+                  have hrefa' : ∀ x y, (step adj cur_a.col w_a).col x = (step adj cur_a.col w_a).col y
+                      → χp x = χp y := fun x y hxy => hrefa x y (step_refines adj cur_a.col w_a hxy)
+                  have hrefb' : ∀ x y, (step adj cur_b.col w_b).col x = (step adj cur_b.col w_b).col y
+                      → χp x = χp y := fun x y hxy => hrefb x y (step_refines adj cur_b.col w_b hxy)
+                  -- the recursive Amenable premise
+                  have hAmen' : AmenablePath adj χp fuel (step adj cur_a.col w_a) := hAmen_rec
+                  -- apply IH on the `b`-side head `w_b`
+                  obtain ⟨σ', leaf_b, hσ', hrepl, hleaf⟩ :=
+                    ih (step adj cur_a.col w_a) (step adj cur_b.col w_b) (τ * σ) hτσ
+                      hstep_rel hrefa' hrefb' hAmen' la inner hinner
+                  -- reduce `replay (cid :: inner) cur_b` to the recursive replay on `w_b`
+                  refine ⟨σ', leaf_b, hσ', ?_, hleaf⟩
+                  show replay adj (cid :: inner) cur_b = some leaf_b
+                  unfold replay
+                  dsimp only
+                  rw [show (List.finRange n).filter (fun v => cur_b.col v == cid) = w_b :: rest_b from hmb,
+                      if_neg (by
+                        have hle : ¬ (w_b :: rest_b).length < 2 := by
+                          have hlift : (w_b :: rest_b).length = (cidCell cur_b.col cid).length := by rw [hmb]
+                          rw [hlift]; exact Nat.not_lt.mpr hlen_b
+                        exact hle)]
+                  exact hrepl
+
+/-! ## 2d. Piece 3 — `twistOf` verifies from the σ-relation
+
+`joint` delivers `χj = transportColouring σ_final χ1` with `σ_final ∈ IsColAut adj χ` (whole-colouring).
+Piece 3 turns that into the exec generator: `twistOf` reconstructs `σ_final` on `K`. The `allSingletonsK`
+gate makes each `χ1`-colour GLOBALLY unique (`classOf` length 1 over all `finRange`), so the colour-match
+is forced; when `σ'` fixes off-`K` (empirically always — every measured witness has support `= K`), the
+match IS `σ'` and `twistOf = some σ'`. -/
+
+/-- **Gate ⟹ global colour-uniqueness.** For `v ∈ K` under the all-singletons gate, `χ1 v` is unique in
+the WHOLE graph: `χ1 u = χ1 v ⟹ u = v`. (`classOf` filters `finRange`, so length 1 pins `v` globally.) -/
+theorem gate_unique {χ1 : Colouring n} {K : List (Fin n)} (hgate : allSingletonsK K χ1 = true)
+    {v : Fin n} (hv : v ∈ K) {u : Fin n} (hu : χ1 u = χ1 v) : u = v := by
+  have h1 : (classOf χ1 v).length = 1 := by
+    have hb : ((classOf χ1 v).length == 1) = true := List.all_eq_true.mp hgate v hv
+    simpa using hb
+  obtain ⟨w, hw⟩ := List.length_eq_one_iff.mp h1
+  have hmemv : v ∈ classOf χ1 v := by
+    unfold classOf; simp [List.mem_filter, List.mem_finRange]
+  have hmemu : u ∈ classOf χ1 v := by
+    unfold classOf; simp [List.mem_filter, List.mem_finRange, hu]
+  rw [hw, List.mem_singleton] at hmemv hmemu
+  exact hmemu.trans hmemv.symm
+
+/-- **★ Piece 3 — `twistOf` reconstructs `σ'`.** Under the gate, with `σ'` an `IsColAut` that fixes off
+`K` (so it permutes `K`), `imgFun`'s colour-match against `transportColouring σ' χ1` IS `σ'`, so
+`twistOf adj χ χ1 K (transportColouring σ' χ1) = some σ'`. The exec generator for the σ-related pair. -/
+theorem twistOf_of_transport_fixing {adj : AdjMatrix n} {χ χ1 : Colouring n} {K : List (Fin n)}
+    {σ' : Equiv.Perm (Fin n)} (hgate : allSingletonsK K χ1 = true)
+    (hfix : ∀ v, K.contains v = false → σ' v = v) (hσ' : IsColAut adj χ σ') :
+    twistOf adj χ χ1 K (transportColouring σ' χ1) = some σ' := by
+  -- `σ'` maps `K` into `K` (its complement is fixed)
+  have hKclosed : ∀ v, v ∈ K → σ' v ∈ K := by
+    intro v hv
+    by_contra hnv
+    have hc : K.contains (σ' v) = false := by
+      rw [List.contains_eq_mem]; exact decide_eq_false hnv
+    have h1 : σ' (σ' v) = σ' v := hfix _ hc
+    have h2 : σ' v = v := σ'.injective h1
+    rw [h2] at hnv; exact hnv hv
+  -- the colour-match image function equals `σ'`
+  have himg : imgFun χ1 K (transportColouring σ' χ1) = fun v => σ' v := by
+    funext v
+    unfold imgFun
+    by_cases hc : K.contains v
+    · rw [if_pos hc]
+      have hvK : v ∈ K := by
+        have h := hc; rw [List.contains_eq_mem] at h; exact of_decide_eq_true h
+      have hσvK : σ' v ∈ K := hKclosed v hvK
+      -- `σ' v` satisfies the find? predicate, and is the unique such member
+      have hpred : (transportColouring σ' χ1 (σ' v) == χ1 v) = true := by
+        have : transportColouring σ' χ1 (σ' v) = χ1 v := by
+          show χ1 (σ'.symm (σ' v)) = χ1 v; rw [Equiv.symm_apply_apply]
+        simp [this]
+      cases hf : K.find? (fun w => transportColouring σ' χ1 w == χ1 v) with
+      | none =>
+          exfalso
+          have hsome : (K.find? (fun w => transportColouring σ' χ1 w == χ1 v)).isSome := by
+            rw [List.find?_isSome]; exact ⟨σ' v, hσvK, hpred⟩
+          rw [hf] at hsome; simp at hsome
+      | some u =>
+          have hupred : (transportColouring σ' χ1 u == χ1 v) = true := by
+            have h := List.find?_some (p := fun w => transportColouring σ' χ1 w == χ1 v) hf
+            simpa using h
+          have hueq : χ1 (σ'.symm u) = χ1 v := by simpa [transportColouring] using hupred
+          have : σ'.symm u = v := gate_unique hgate hvK hueq
+          have : u = σ' v := by rw [← this]; exact (Equiv.apply_symm_apply σ' u).symm
+          simp [this]
+    · rw [if_neg hc]
+      exact (hfix v (by simpa using hc)).symm
+  -- `permOf` reads it back as `σ'`, and the `IsColAut` gate passes
+  rw [twistOf_eq_imgFun, himg]
+  have hpm : Deck2.permOf (fun v => (σ' : Fin n → Fin n) v) = some σ' :=
+    Deck2.permOf_eq_some_of_eq (fun _ => rfl)
+  rw [hpm]
+  simp [hσ']
 
 /-! ## 3. The capstone — `(R1 ∧ R2) → ①c`, and the `Amenable`-gated form
 

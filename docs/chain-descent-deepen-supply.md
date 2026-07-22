@@ -12,6 +12,23 @@
 
 ---
 
+## ▶ STATUS (2026-07-22)
+
+> **UPDATE 2026-07-22 — K-coverage VALIDATED + Layer-1 core (b1+b2) LANDED.** (1) The decisive K-coverage
+> probe ran (`ScratchKCov`, deleted): exec-orbit == ref-orbit over ALL vertices on partially-firing witnesses
+> with nonempty `K∖cell` — `t3` (exec **6** gens vs ref **96**, K∖cell orbits incl. size-6, partition
+> IDENTICAL) and `wcyc9`. So the surplus reference gens enlarge no orbit on OR off the branch cell. (2) `b1`
+> (`chooseIdK_mem`), `b2` (`joint`, the re-relating induction — the doc's "remaining core"), and **piece 3**
+> (`twistOf_of_transport_fixing` + `gate_unique`) are landed axiom-clean in `DeepenAmenable.lean`. **`joint`
+> proves: under `Amenable`, the CANONICAL deepen-a and replay-b leaves are `σ_final`-related over the whole
+> colouring; piece 3 turns that into `twistOf = some σ_final`** (given `σ_final` fixes off-`K` = `hfix`,
+> empirically vacuous). ⚠ **What remains for `hL1`** (honest, PLANNED in §9.1.1): the **reference-gen bridge**
+> — `hL1` targets `DeepenRefInExec` (ARBITRARY `deepenRefGens`), `joint` is canonical-only. **Reduction
+> `hL1 ⟸ ORBIT_K` is clean** ("exec recovers full `IsColAut`-orbits on `K`"); the **branch-cell half is clean**
+> (`g_{x,y}` maps anchor↦rep directly — LAND NEXT as `exec_recovers_cell_orbits`); the **`K∖cell` half is THE
+> crux** (`Stab`-reachability / branch-cell group completeness), empirically solid (t3 96-vs-6) but hard. The poly
+> **all-or-nothing backup gate** sidesteps this bridge by construction and stays the clean fallback if it resists.
+
 ## ▶ STATUS (2026-07-21)
 
 - **The executable is landed and measured** (`DeepenSupply.lean`, in `build.sh`): `deepenSupply` solves
@@ -287,24 +304,107 @@ prose.
    - **b0 ✅ `deepen_acc`** — the accumulator only prefixes the output seq, so the joint induction works at
      `acc = []` (the recursion's `[cid]` accumulator becomes `cid ::` on the seq). ⚠ Its proof needed the
      `deepen` match-reduction recipe now recorded in §11 — reuse it for the body below.
-   - **b1 ⏳ `chooseIdK_mem`** — `chooseIdK … = some cid ⟹ (cidCell χc cid).length ≥ 2` (from `chooseIdK`
-     folding min over the `classOf ≥ 2` cells), so replay's `mem.length < 2` guard passes on the b-side
-     (via `cidCell_length_transport`). A `foldl`-min lemma.
-   - **b2 ⏳ the joint induction body.** Invariant `cur_b.col = transportColouring σ' cur_a.col`,
-     `σ' ∈ IsColAut adj χ`, + carry "`cur_a.col` refines χ". At `acc = []` (`deepen_acc` handles the rest):
-     base = `chooseIdK` none. Step: replay-b picks head `w_b` of b's cid-cell (nonempty by
-     `cidCell_length_transport` + b1); `cellSingleOrbit_transport` + `Amenable` give `τ` with `τ(σ' w_a) = w_b`;
-     `step_rerelate` carries the invariant (`step_refines` maintains the "refines χ" side-invariant,
-     `isColAut_parent_of_refines` keeps `τσ'` in the parent-stabilizer); `replay (cid::rest) cur_b = replay
-     rest cur_b'` threads to the IH. Concludes: deepen-a leaf & replay-b leaf are `σ_final`-related.
-   **All five bricks it composes are landed** (`step_rerelate`, `step_refines`, `isColAut_parent_of_refines`,
-   `cellSingleOrbit_transport`, `deepen_acc`); b2 is the assembly, materially de-risked by the §11 recipe.
-3. ⏳ **piece 3 — twistOf verifies:** `σ_final`-related discrete leaves ⟹ the colour-match
-   `twistOf adj χ χ1 K χj` = `σ_final` on all `K` ⟹ returns `some` ⟹ an exec verified gen `a ↦ b` ⟹
-   `WordReach exec a b`.
-4. ⏳ **piece 4 — K-coverage** (`x ∈ K ∖ branch-cell`): collapses under full discreteness (trivial `Stab` at
-   a discrete leaf ⟹ unique relating automorphism ⟹ ref twist = exec twist on all `K`, membership not
-   words). ⚠ the least-validated piece; the missing part-III `¬Amenable` witness lives here.
+   - **b1 ✅ `chooseIdK_mem`** (2026-07-22, axiom-clean) — `chooseIdK … = some cid ⟹ (cidCell χc cid).length ≥ 2`
+     via a `foldl`-min "result is an element" lemma (`foldl_min_mem`), so replay's `mem.length < 2` guard
+     passes on the b-side (through `cidCell_length_transport`).
+   - **b2 ✅ `joint`** (2026-07-22, axiom-clean `[propext, Classical.choice, Quot.sound]`) — THE joint
+     re-relating induction. Invariant `cur_b.col = transportColouring σ' cur_a.col`, `σ' ∈ IsColAut adj χp`,
+     + both-sides "refines χp" side-invariants. At `acc = []` (`deepen_acc` handles the rest): base cases =
+     `K` empty (contra) / `chooseIdK` none (terminal leaf, `σ' = σ`). Step: `deepen_acc` splits `seq = cid ::
+     inner`; replay-b picks head `w_b` of b's cid-cell (nonempty by b1 + `cidCell_length_transport`);
+     `cellSingleOrbit_transport` + `Amenable` give `τ ∈ Stab(cur_b.col)` with `τ(σ w_a) = w_b`; `step_rerelate`
+     carries the invariant with `σ'' = τσ`; `step_refines`+`isColAut_parent_of_refines` keep `τσ` a
+     parent-automorphism; the IH threads `replay inner (step..w_b)`. **Concludes: canonical deepen-a leaf &
+     canonical replay-b leaf are `σ_final`-related over the WHOLE colouring** (so K-coverage is built in).
+   **All five bricks + b1 composed and landed.**
+3. ✅ **piece 3 — twistOf verifies** (2026-07-22, axiom-clean: `twistOf_of_transport_fixing` + `gate_unique`).
+   Given the σ-relation `χj = transportColouring σ' χ1`, the all-singletons gate (⟹ each `χ1`-colour GLOBALLY
+   unique, so the colour-match is forced), `σ'` fixing off-`K`, and `IsColAut adj χ σ'`, then
+   `twistOf adj χ χ1 K (transportColouring σ' χ1) = some σ'` — the exec generator IS `σ'` on `K`. ⚠ Carries
+   the hypothesis **`hfix`: `σ'` fixes off-`K`** — empirically vacuous (every measured witness has
+   support `= K`); discharging it (or K = support) is a bridge obligation (§9.1.1).
+4. ⏳ **piece 4 — K-coverage** (`x ∈ K ∖ branch-cell`). ✅ **VALIDATED 2026-07-22 (`ScratchKCov`, deleted)** —
+   the decisive cheap test the prior branch-cell-only probe never ran: exec-orbit partition == ref-orbit
+   partition over **all** vertices (not just the cell) on partially-firing witnesses with **nonempty `K∖cell`**:
+   `wcyc9` (cell `[1,4,7]`, K∖cell orbits `[0,3,6]`/`[2,5,8]`, EQUAL) and — the strong one — **`t3`
+   (exec **6** gens vs ref **96** gens; K∖cell orbits incl. a **size-6** `[1,3,6,8,11,13]`; partition over all
+   15 vertices IDENTICAL)**. So the 16×-larger reference generator set enlarges no orbit on OR off the cell.
+   **CORRECTION to the mechanism:** R1 is an **orbit** statement (`WordReach exec x (ρ x)`, the word may depend
+   on `x`), NOT `ρ ∈ ⟨exec⟩` — a reference gen `ρ` and exec gen `g_{a,b}` are NOT equal pointwise (they differ
+   by a `Stab(a)` element), they agree at the orbit level, which is all R1 needs. The earlier "trivial Stab ⟹
+   ref twist = exec twist" one-liner was imprecise. **The clean closure:** b2's invariant is already the
+   WHOLE-COLOURING equation `cur_b.col = transportColouring σ' cur_a.col`, so the re-relating automorphism is
+   whole-graph and `twistOf`'s off-`K`=id support coincides with it (exec-support == full on every witness) —
+   **piece 4 is SUBSUMED by the b2 invariant, not a separate wall.** `twistOf` is `id` off `K` (`DeepenSupply`
+   :187), so `∀ x` is `refl` for `x ∉ K` — K-coverage is only about `x ∈ K`. ⚠ The missing part-III `¬Amenable`
+   witness is still the one untested regime (unrelated to K-coverage).
+
+### 9.1.1 THE REFERENCE-GEN BRIDGE — the plan (2026-07-22)
+
+`joint` (b2) + piece 3 close the **canonical** story: under `Amenable`, the canonical exec twist for a
+σ-related pair verifies and equals `σ_final` on `K`. But `hL1` targets `DeepenRefInExec`, which quantifies
+over **arbitrary** `deepenRefGens` (all `deepenAll`/`replayAll` paths). This subsection is the plan to bridge
+that gap. **THE STRUCTURE — a clean reduction, a clean half, and one crux.**
+
+**The reduction (clean): `hL1 ⟸ ORBIT_K`.**
+`DeepenRefInExec := ∀ ρ ∈ deepenRefGens, ∀ x, WordReach (verified deepenSupply) x (ρ x)`.
+- Every `ρ ∈ deepenRefGens` is `IsColAut adj χ` (need `deepenRefGens_isColAut`, the ref analog of the landed
+  `deepenGens_isColAut` — mechanical) and is **`id` off its `K_ρ`** (`twistOf` :187).
+- So for `x ∉ K_ρ`: `ρ x = x`, `WordReach` is `refl` — **nothing to prove off `K`.**
+- For `x ∈ K_ρ`: `ρ x ∈ K_ρ` (ρ bijects `K_ρ`) and `ρ x` is in `x`'s `IsColAut`-orbit (witness `ρ`). So it
+  suffices to prove:
+  > **`ORBIT_K`** — *for `x, y ∈ K` in the same `IsColAut adj χ`-orbit* (`∃ α, IsColAut adj χ α ∧ α x = y`),
+  > `WordReach (verified deepenSupply adj χ) x y`. (i.e. **exec recovers the full automorphism orbits on `K`**.)
+  Under the discreteness regime the `K_ρ` all coincide with `K = ` union of non-singleton `χ`-cells (a
+  function of the node colouring), which is `IsColAut`-invariant — so "the `K`" is well-defined. `ORBIT_K`'s
+  `⊆` (exec-orbit ⊆ IsColAut-orbit) is free (exec gens are `IsColAut`); `ORBIT_K` is the `⊇` content.
+
+**The clean half — `ORBIT_K` on the BRANCH CELL.** For `x, y` both in the branch cell, `α x = y`,
+`α ∈ IsColAut`: the **exec generator `g_{x,y}` maps `x ↦ y` directly** (`img x = y`, because `x` is
+individualized into the anchor colour-slot and `y` into the same slot on the replay — `img anchor = rep`,
+independent of the `Stab` difference). So `WordReach exec x y` in ONE step. Needs, all tractable:
+  (i) `deepen` **terminates** from the anchor under `Amenable` (reaches `chooseIdK = none` within fuel `n` —
+      each level adds a singleton; a small monotonicity lemma);
+  (ii) `joint` applied with `σ := α` (via `step_isColAut`, `cur_b = step χ (α x)` transports) ⟹ the replay
+       succeeds, so `g_{x,y} ∈ deepenGens`;
+  (iii) `img anchor = rep` (the "same colour slot" lemma) ⟹ `g_{x,y} x = y`.
+**This closes the branch cell — a large fraction of `DeepenRefInExec`, and worth landing next as its own
+theorem** (`exec_recovers_cell_orbits`).
+
+**The crux — `ORBIT_K` on `K∖cell`.** For `x ∈ K∖cell`, `y = α x`, need `WordReach exec x y`. `x` is not an
+anchor, so no `g_{x,·}` maps it directly. The exec gens `g_{a,b} = σ_final(a,b)` DO move `K∖cell` (piece 3:
+`= σ_final` on all `K`), but `σ_final(a,b) x ≠ α x` in general. This is the genuine **`Stab`-reachability**
+residue (surplus ref gens differ from exec gens by a `Stab(a)` element). Two candidate routes:
+- **Route α — "branch cell determines `K`" + branch-cell GROUP completeness.**
+  1. **`branch_determines_K`** (clean, from discreteness): an `IsColAut adj χ` that fixes the branch cell
+     pointwise is the identity on `K`. *Why:* individualizing the branch cell + refinement discretizes `K`
+     (that is exactly what `deepen` does — all-singletons on `K` at the leaf), and a colour-automorphism of a
+     discrete colouring is `id`. This is a `deepen`-discreteness lemma (`SealDepthBridge`-style).
+  2. **branch-cell group completeness:** `⟨exec gens⟩` restricted to the branch cell `= IsColAut` restricted
+     to the branch cell (as groups). Then a word `w ∈ ⟨exec⟩` with `w = α` on the branch cell exists; by (1)
+     `w = α` on all `K`, so `w x = α x = y` ⟹ `WordReach exec x y`. **This step is the hard part** — it is a
+     genuine "the `g_{a,b}` generate the full branch-cell action group", not a one-liner. The clean half gives
+     TRANSITIVITY (every pair `x→y`), which yields the full symmetric group on each orbit only if the orbit
+     maps compose correctly; whether transitivity ⟹ the full group here needs the `g`'s to realize not just
+     `anchor↦rep` but the whole `σ_final` consistently. **Assess before committing.**
+- **Route β — direct orbit transitivity on `K` via a `K`-extended `joint`.** Generalise `joint`/`g_{x,y}` so
+  the anchor-to-rep map is proved for `K∖cell` vertices too: since `deepen` individualizes a SEQUENCE that
+  eventually singletons `K∖cell` vertices, a `K∖cell` vertex `x` is individualized at some deepening level `ℓ`;
+  run the pair `(a, b)` whose level-`ℓ` pick is `x` vs `α x` and read off `WordReach` for `x`. Risk: the level-`ℓ`
+  pick is `chooseIdK`'s lowest-index, not freely `x`; needs the all-anchors/all-levels quantification to hit `x`.
+
+**The `hfix` obligation (piece 3's hypothesis).** `twistOf_of_transport_fixing` needs `σ'` to fix off-`K`.
+Empirically vacuous (support `= K` on every witness). To discharge: prove `K = ` union of non-singleton
+`χ`-cells at the leaf (so off-`K` = fixed `χ`-singletons, which every `IsColAut` fixes) — i.e. **off-`K`
+vertices are `χ`-singletons**, hence `σ_final`-fixed. This is a `coupled`/`allSingletonsK`-discreteness lemma,
+tractable, and shared with `branch_determines_K`.
+
+**Difficulty ledger.** reduction `hL1 ⟸ ORBIT_K` = EASY (plumbing + `deepenRefGens_isColAut`). Branch-cell half
+= MEDIUM (deepen-terminates + `img anchor = rep` + joint plumbing) — **land next.** `hfix` discharge = MEDIUM
+(discreteness). `K∖cell` (Route α step 2 / Route β) = **HARD, the crux** — this is where, if it stalls, the
+**all-or-nothing backup gate** (§9.3, `①c` by construction, sidesteps the group-completeness entirely) becomes
+the pragmatic pivot. Recommended order: land the branch-cell half + `hfix` discharge (real progress, clean),
+THEN attack `K∖cell` with a hard look at Route α-2's group-completeness vs the backup.
 
 ### 9.2 R2 — mechanical assembly
 
