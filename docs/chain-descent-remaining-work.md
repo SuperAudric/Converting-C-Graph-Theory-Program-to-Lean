@@ -125,9 +125,12 @@ below; this is the pickup summary.
   (defer on failure). Poly (≤n members × ≤n levels × a refine), CHECKS `Amenable` locally instead of proving it
   (①c by construction — canonical gate + pick-independent ⟹ canonical group), gate-failure = honest deferral.
   Strictly better than route (b). **Only if Layer 1 K-coverage or Layer 2 discharge truly stalls.**
-- **Read for detail:** `DeepenR1.lean` header (the factoring + `Amenable` + the re-relating induction),
-  `DeepenRefTransport.lean` header (R2 + the assembly subtlety), §1C C3 (ii-c) below, and
-  [[project-c3-kernel-supply-2026-07-19]] (topic memory).
+- **▶ THE DEDICATED DEEPEN DOC (authoritative, self-contained): `docs/chain-descent-deepen-supply.md`** —
+  STATUS block, the mechanism, the ①c reduction, the reframe, the `Amenable` factoring, Layer 2 = the
+  WL-obstruction classification, the gap ledger, the Lean file map + theorem inventory, the remaining 4-piece
+  Layer-1 plan, the evidence record, and the traps. **Read it first for anything deepen.**
+- **Read for detail:** the deepen doc above; `DeepenR1.lean` / `DeepenAmenable.lean` headers;
+  `DeepenRefTransport.lean` header (R2 subtlety); §1C C3 (ii-c) below; [[project-c3-kernel-supply-2026-07-19]].
 
 ---
 
