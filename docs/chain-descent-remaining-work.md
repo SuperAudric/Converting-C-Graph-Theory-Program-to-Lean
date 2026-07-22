@@ -97,20 +97,29 @@ below; this is the pickup summary.
       `refineEquivariant`/`step_transport`/`chooseIdK_transport`/`twistOf_isColAut`. ⚠ **SUB-RISK (settle FIRST):**
       `SameOrbits` is over ALL vertices but the induction gives completeness on the BRANCH CELL (anchors); the
       twists also move `K∖cell`, so K-coverage needs the induction extended to `K` or a "cell controls `K`" arg.
-    - **LAYER 2 `Amenable` — discharge aiming GENERAL, via BOUNDED WL-DIMENSION** (user: bounded categorizations
-      generalize the amenability property across families). **The unifying categorization = bounded WL-dimension.**
-      `Amenable` = IR-amenability along the canonical path (1-WL = orbit partition at each individualized stage);
-      FALSE universally, and the boundary is CRISP: **unbounded WL-dim = CFI/multipede over expander bases =
-      exactly what is carved to force (WL-merge) + kernel (gauge).** Bounded-WL-dim families (bounded-degree,
-      planar ≤3, bounded-genus/treewidth, bounded-rank coherent configs / association schemes — incl. mp7's
-      `PGL(3,2)` base, affine/projective) are amenable after a BOUNDED individualization budget (= path length),
-      which also tightens the poly-cost story. Connect to EXISTING seals (Route-C `reachesRigidOrCameron_*`,
-      forms-graph quasipoly, Cameron) as INSTANCES of the one bound. ⚠ **CAVEAT (real):** `Amenable` demands
-      single-orbit cells at EVERY level — STRONGER than "WL-dim ≤ d ⟹ complete after d individualizations" (an
-      intermediate 1-WL-stable cell can still be multi-orbit for a bounded-WL-dim graph). So the exact class is
-      "orbit-exact along the greedy tower", a refinement of bounded-WL-dim; the ANCHOR individualization (which
-      fixes e.g. G8's [8]→[4,2,2] over-merge) is load-bearing. The runtime gate (backup) is the per-instance
-      version that sidesteps needing the exact general class.
+    - **LAYER 2 `Amenable` — discharge via the WL-OBSTRUCTION CLASSIFICATION (user reframe, 2026-07-21; MERGES
+      with existing work).** Not "is WL-dim bounded" (unbounded WL-dim exists — CFI — and is irrelevant) but
+      "**every `Amenable`-obstruction is a KNOWN WL-obstruction type with a handler.**" ★ **`Amenable`-violation
+      ⟺ a RIGID (non-symmetric) WL-obstruction in a cell deepen visits** — because a WL-stable cell fails
+      single-orbit exactly when it WL-merges NON-automorphic vertices (symmetric merges give a single orbit =
+      no obstruction; that is what deepen consumes). The project ALREADY classifies rigid obstructions (EOL
+      `exhaustive-obstruction.md:998`; the §11.14 2×2 `ir-blindspot-solver.md:1538-1547`): rigid-**LINEAR**
+      (multipede / CFI / `Z_{2^k}` gauge) = the **rigid solver's** domain (BUILT, `EnableRigidSolver` on;
+      poly-complete modulo the one open `hSmallAutThin` wall) + rigid-**NON-LINEAR** = **the wall** (open,
+      claim #3, no constructible witness). **⟹ Layer 2 imports NO NEW conjecture — it is gated on the SAME
+      boundary as the whole project:** claim #2 "every rigid obstruction is linear over an abelian ring"
+      (`ir-blindspot-solver.md:1068`, CONJECTURE, 0 falsifiers, broader than F₂ per Lichter) + the interleaving
+      schedule delivering Schurian (pure-symmetry) cells to consume. So **deepen's completeness = exactly the
+      project's rigid-obstruction-coverage frontier** — no independent WL-dim bound needed. Deepen is complete
+      on the Schurian residue (1-WL = orbits ⟹ `Amenable` provable); on rigid cells it soundly emit-nothing
+      (verification gate) and hands off. ⚠ **Deepen-specific NEW sub-question (a totality/T-gap piece, not a new
+      wall):** the interleaving must deliver Schurian cells to consume (rigid decisions resolved first) — a
+      MIXED/FUSION cell (symmetry + a rigid obstruction at a deeper level, cf. Chang-A) is where `Amenable`/①c
+      could break. Per the Explore sweep, consume's residue completeness rests on the §11.11 consume-schedule +
+      verify-by-reconstruction iso-invariance, and does NOT rest on no-rigid-Cameron (that only touches the flag
+      floor). Landed CFI infra to connect to: `theorem_1_HOR_cfi_oddDeg` (`CFI.lean:3179`, axiom-free
+      CFI⇒cascade-at-base-depth), `cfiFlipAut` (the `Z₂^β` gauge). (Bounded-WL-dim was the coarse first cut;
+      this obstruction-classification is the refined version that merges with the existing wall/EOL program.)
 - **BACKUP (held, poly, ①c-by-construction) — the all-or-nothing gate.** Per deepening level, check whether
   individualizing EACH member of the chosen id-cell gives the same footprint-partition; emit all-or-nothing
   (defer on failure). Poly (≤n members × ≤n levels × a refine), CHECKS `Amenable` locally instead of proving it
