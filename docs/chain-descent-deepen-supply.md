@@ -35,9 +35,13 @@
 >   primary; **Route ζ** (import `RecoverableByDepth`/`CellsAreOrbits`) parallel; **α** flawed (absorbed as ε's
 >   base case). Empirically solid (t3 96-vs-6) but the genuinely hard part. The poly **all-or-nothing backup
 >   gate** sidesteps it by construction — the fallback ONLY if ε+ζ stall on the same family (per standing steer).
-> - **NEXT for a fresh reader:** the branch-cell half is fully discharged (down to `[DISC]` = `Discrete
->   d1.col`, the whole-graph leaf-discretization domain fact). **Open Route ε** (the `K∖cell` = `ker φ` crux,
->   §9.1.2) — native path-difference induction reusing `joint`; probe Route ζ (import) in parallel.
+> - **R1 IS NOW REDUCED TO ONE PREDICATE** (`deepenRefInExec_of_cell_and_crux`, axiom-clean 2026-07-22): the
+>   whole cell is covered (`exec_recovers_refgen_on_cell` — the branch-cell half at every anchor), off-`K` is
+>   `refl`, so **the entire remaining content of R1 is `ExecRecoversKMinusCell`** (the `K∖cell` = `ker φ` crux),
+>   modulo the domain facts `{Amenable, AnchorFires}`.
+> - **NEXT for a fresh reader:** attack `ExecRecoversKMinusCell` via **Route ε** (native path-difference
+>   induction reusing `joint`/`step_rerelate`; foundations `wordReach_of_mem_verified`/`_symm`/
+>   `isColAut_mem_branches` landed) — probe Route ζ (import `RecoverableByDepth`/`CellsAreOrbits`) in parallel.
 
 ## ▶ STATUS (2026-07-21)
 
@@ -355,6 +359,10 @@ prose.
     membership in `deepenGens`) · `eq_of_mem_of_length_le_one` · **`offCoupled_singleton`** (★ `[DISC] ⟹
     [INV]`: `Discrete` leaf ⟹ off-coupled = `χ`-singleton) · **`exec_recovers_cell_orbits`** (★ `x,y ∈ cell` +
     automorphism ⟹ `WordReach exec x y`; now carries the single clean domain fact `Discrete d1.col`).
+  - *Route ε foundations + crux isolation (2026-07-22, §9.1.2):* `wordReach_of_mem_verified` · `wordReach_symm`
+    · `isColAut_mem_branches` · `AnchorFires` (per-anchor firing bundle) · **`ExecRecoversKMinusCell`** (the
+    isolated `K∖cell` crux) · **`exec_recovers_refgen_on_cell`** (★ whole-cell coverage for a ref gen) ·
+    **`deepenRefInExec_of_cell_and_crux`** (★ R1 = `{Amenable, AnchorFires, ExecRecoversKMinusCell}`).
   - *capstones:* **`deepenSupply_guarded_canonizer_of`** · **`deepenSupply_canonizer_of_amenable`**.
 
 ---
@@ -511,11 +519,24 @@ one vertex ⟹ `w` is a `χ`-singleton, which every `IsColAut` fixes. So the hal
 named domain fact `[DISC]` (whole-graph leaf discretization — measured on every firing witness, plausibly
 provable per-family; shared with the crux).
 
+**✅ CELL COVERAGE — extended to the WHOLE cell (2026-07-22, `exec_recovers_refgen_on_cell`, axiom-clean).**
+The branch-cell half holds for ANY anchor-rep pair, and a ref gen `ρ ∈ IsColAut` maps each cell vertex `x` to
+`ρ x` in `x`'s orbit — so applying the half at anchor `x` (rep `ρ x`; `ρ x = x` is `refl`) reaches `ρ x`
+directly. Thus the **cell part of `hreach` needs no `K∖cell` content**, discharged from the domain bundle
+`AnchorFires` (deepen succeeds + gate + `Discrete` leaf, all anchors) + `Amenable`.
+
+**★ R1 REDUCED TO ONE PREDICATE (2026-07-22, `deepenRefInExec_of_cell_and_crux`, axiom-clean).** `hreach`
+now splits cleanly: off-`K` = `refl`, cell = `exec_recovers_refgen_on_cell` (done), so **the ENTIRE remaining
+content of R1 is the isolated `K∖cell` crux `ExecRecoversKMinusCell`** — for a ref gen `ρ` and a
+coupled-but-non-cell `x ∉ branches`, `WordReach exec x (ρ x)`. Everything else in R1 is landed; the capstone
+takes exactly `{Amenable, AnchorFires, ExecRecoversKMinusCell}` as its three domain inputs.
+
 **The crux — `K∖cell` — characterized precisely.** Exec gens `= {σ_final(a,b)}` on `K`, each moving the cell
 (`a↦b`, `b≠a`). Need `⟨σ_final(a,b)⟩`-orbits on `K` `=` `IsColAut`-orbits on `K`. The hard content is
 **`ker φ`** (`φ : IsColAut → Sym(cell)`, `β ↦ β|_cell`): automorphisms that FIX the branch cell but move
 `K∖cell` (e.g. a `K∖cell` swap fixing the cell). **No single exec gen is in `ker φ`** (all move the cell), so
 `ker φ` must be recovered as WORDS in cell-moving gens. Measured recovered (t3 `K∖cell` size-6 orbit matches).
+This is exactly `ExecRecoversKMinusCell` — the Route-ε target.
 
 **ROUTE α — `branch_determines_K` + branch-cell group completeness. ⚠ HAS A FLAW.**
   - α1 `branch_determines_K`: an `IsColAut` fixing the cell pointwise is `id` on `K`. **FALSE in general** —
@@ -552,11 +573,14 @@ families the seal reaches; the residue is whatever `deepen` targets beyond them 
 `PGL(3,2)` — check whether `theorem_1_HOR_*` / Route-C reach it).
 
 **VERDICT — HYBRID is most viable.**
-1. **Land `[DISC]`/`[INV]` + the branch-cell half first** (`exec_recovers_cell_orbits`) — real, clean, and
-   shared by every route. This closes `ker φ = 1` (the branch cell controls `K`) entirely via α1-where-valid.
-2. **For `K∖cell` / `ker φ`: pursue ROUTE ε** (path-difference induction) as the native attack — it localizes
-   the crux and reuses `joint`/`step_rerelate`; **in parallel probe ROUTE ζ** (import) for the seal-covered
-   families, which may discharge large sub-families for free and shrink ε's residue.
+1. ✅ **DONE (2026-07-22): `[DISC]`/`[INV]` + branch-cell half + WHOLE-cell coverage + R1-reduced-to-one-predicate.**
+   `exec_recovers_cell_orbits` → `offCoupled_singleton` (`[INV]⟸[DISC]`) → `exec_recovers_refgen_on_cell`
+   (all cell vertices) → `deepenRefInExec_of_cell_and_crux` (R1 = `{Amenable, AnchorFires, ExecRecoversKMinusCell}`).
+   The entire remaining content of R1 is now the single predicate `ExecRecoversKMinusCell`.
+2. **For `K∖cell` / `ker φ` = `ExecRecoversKMinusCell`: pursue ROUTE ε** (path-difference induction) as the
+   native attack — it localizes the crux and reuses `joint`/`step_rerelate`; **in parallel probe ROUTE ζ**
+   (import) for the seal-covered families, which may discharge large sub-families for free and shrink ε's residue.
+   Foundations landed (`wordReach_of_mem_verified`, `wordReach_symm`, `isColAut_mem_branches`).
 3. **ROUTE α** is not standalone (α1 false in general) but its valid special case (single-level coupling) is
    the `ker φ = 1` base that ε's induction bottoms out on — so α is *absorbed into the hybrid*, not discarded.
 4. **ROUTE β** ≡ ε viewed per-level; keep ε's framing (cleaner recursion, reuses landed machinery).

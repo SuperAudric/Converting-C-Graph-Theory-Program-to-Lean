@@ -739,6 +739,83 @@ theorem deepenRefInExec_of_reachOnK
   · exact hreach adj χ ρ hρ K hoff x hxK
   · rw [hoff x (by simpa using hxK)]; exact Consume.WordReach.refl x
 
+/-! ## 2b. Route ε — `hreach` split into cell-coverage (LANDED) + the `K∖cell` crux (isolated)
+
+`hreach` (what `hL1` reduces to) asks: every ref gen `ρ` reaches every `x` in its coupled component `K`.
+Since `K = cell ⊎ (K∖cell)` we split it. The **cell** half is now fully covered — the branch-cell half
+`exec_recovers_cell_orbits` holds for ANY anchor-rep pair related by an automorphism, and `ρ ∈ IsColAut`
+maps each cell vertex `x` to `ρ x` in `x`'s orbit, so applying it at anchor `x` reaches `ρ x` directly.
+The **`K∖cell`** half is the `ker φ` crux (§9.1.2), isolated below as `ExecRecoversKMinusCell` — the target
+of the Route-ε path-difference induction. -/
+
+/-- A verified generator reaches `x ↦ g x` in one step (the base atom of every exec word). -/
+theorem wordReach_of_mem_verified {S : Consume.Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    {g : Equiv.Perm (Fin n)} (hg : g ∈ Consume.verified S adj χ) (x : Fin n) :
+    Consume.WordReach (Consume.verified S adj χ) x (g x) :=
+  (Consume.WordReach.refl x).step hg
+
+/-- Word-reachability is symmetric (the orbit is inverse-closed). -/
+theorem wordReach_symm {G : List (Equiv.Perm (Fin n))} {u w : Fin n}
+    (h : Consume.WordReach G u w) : Consume.WordReach G w u :=
+  Consume.mem_orbit_iff_wordReach.mp (Consume.self_mem_orbit_of_wordReach h)
+
+/-- A colour-automorphism preserves the branch cell (it fixes the target colour). -/
+theorem isColAut_mem_branches {adj : AdjMatrix n} {χ : Colouring n} {β : Equiv.Perm (Fin n)}
+    (hβ : IsColAut adj χ β) {x : Fin n} (hx : x ∈ Descend.branches χ) :
+    β x ∈ Descend.branches χ := by
+  obtain ⟨c, hc, hxc⟩ := Consume.exists_targetColour_of_mem hx
+  exact (Descend.mem_branches_iff hc (β x)).mpr (by rw [hβ.2 x]; exact hxc)
+
+/-- **The per-anchor firing bundle.** Anchor `a`'s canonical deepening succeeds, its gate passes (all
+singletons over a non-empty coupled component), and the leaf is discrete (`[DISC]`). These are exactly the
+domain facts `exec_recovers_cell_orbits` needs; measured to hold on every firing witness (all anchors). -/
+def AnchorFires (adj : AdjMatrix n) (χ : Colouring n) (a : Fin n) : Prop :=
+  ∃ (d1 : Refine.ColData n) (seq : List Nat),
+    deepen adj χ n (step adj χ a) [] = some (d1, seq) ∧
+    ((coupled χ d1.col).isEmpty || !allSingletonsK (coupled χ d1.col) d1.col) = false ∧
+    Discrete d1.col
+
+/-- **The `K∖cell` crux, isolated (§9.1.2 `ker φ` recovery).** For a ref gen `ρ` and a coupled-but-non-cell
+vertex `x`, the executable reaches `ρ x`. No single exec gen does this (they all move the cell); it is the
+content of the Route-ε path-difference induction. Everything else in `hreach` is now discharged. -/
+def ExecRecoversKMinusCell (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ (ρ : Equiv.Perm (Fin n)), ρ ∈ deepenRefGens adj χ →
+    ∀ K : List (Fin n), (∀ v, K.contains v = false → ρ v = v) →
+    ∀ x, K.contains x = true → x ∉ Descend.branches χ →
+      Consume.WordReach (Consume.verified deepenSupply adj χ) x (ρ x)
+
+/-- **★ CELL COVERAGE — a ref gen is exec-reachable on the whole branch cell.** For `x ∈ cell`, the
+branch-cell half applied at anchor `x` (rep `ρ x`, automorphism `ρ`) reaches `ρ x` directly; `ρ x = x` is
+`refl`. So the cell part of `hreach` needs no `K∖cell` content. -/
+theorem exec_recovers_refgen_on_cell (adj : AdjMatrix n) (χ : Colouring n)
+    {ρ : Equiv.Perm (Fin n)} (hρaut : IsColAut adj χ ρ) (hAmen : Amenable adj χ)
+    (hfires : ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
+    {x : Fin n} (hx : x ∈ Descend.branches χ) :
+    Consume.WordReach (Consume.verified deepenSupply adj χ) x (ρ x) := by
+  by_cases hfix : ρ x = x
+  · rw [hfix]; exact Consume.WordReach.refl x
+  · have hρx : ρ x ∈ Descend.branches χ := isColAut_mem_branches hρaut hx
+    obtain ⟨d1, seq, hd, hg, hDisc⟩ := hfires x hx
+    have hne : (ρ x == x) = false := by rw [beq_eq_false_iff_ne]; exact hfix
+    exact exec_recovers_cell_orbits adj χ hx hρx hne hρaut rfl hd hg (hAmen x hx) hDisc
+
+/-- **★★ R1 REDUCED TO THE `K∖cell` CRUX.** `DeepenRefInExec` (= R1) follows from three clean domain
+inputs: `Amenable`, the all-anchors firing bundle `AnchorFires`, and the isolated `K∖cell` crux
+`ExecRecoversKMinusCell`. The cell half is discharged (`exec_recovers_refgen_on_cell`); off-`K` is `refl`
+(`deepenRefInExec_of_reachOnK`). So the ENTIRE remaining content of R1 is `ExecRecoversKMinusCell` — the
+Route-ε target. -/
+theorem deepenRefInExec_of_cell_and_crux
+    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
+    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
+    (hcrux : ∀ (adj : AdjMatrix n) (χ : Colouring n), ExecRecoversKMinusCell adj χ) :
+    ∀ (adj : AdjMatrix n) (χ : Colouring n), DeepenRefInExec adj χ := by
+  apply deepenRefInExec_of_reachOnK
+  intro adj χ ρ hρ K hoff x hxK
+  by_cases hxb : x ∈ Descend.branches χ
+  · exact exec_recovers_refgen_on_cell adj χ (deepenRefGens_isColAut adj χ hρ) (hAmen adj χ)
+      (hfires adj χ) hxb
+  · exact hcrux adj χ ρ hρ K hoff x hxK hxb
+
 /-! ## 3. The capstone — `(R1 ∧ R2) → ①c`, and the `Amenable`-gated form
 
 Mirrors `KernelTransport.kernelSupply_guarded_canonizer`: ①c for the executable `deepenSupply` is
