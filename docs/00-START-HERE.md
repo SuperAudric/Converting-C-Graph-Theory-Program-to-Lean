@@ -169,9 +169,13 @@ close it — is set out in
 > SOLE remaining ①c condition, `Amenable`, IS `CellsAreOrbits`** (`CascadeOracle`) — free at discreteness
 > (`cellsAreOrbits_of_discrete`), so NOT a GI∈P assumption; its failure is an *exposed* rigid decision
 > (`not_amenablePath_imp_rigidObstruction`). **`deepenSupply` stays out of `Publication.canonForm?` until
-> `Amenable`/`CellsAreOrbits` totality is populated per family (T1); NEXT = the RIGID SEAL**
-> ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md)), which discharges `Amenable` per family AND
-> is the other seal. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
+> `Amenable`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
+> ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Amenable`
+> per family AND is the other seal. **✅ R0a + R0b LANDED 2026-07-23** (`ChainDescent/RigidSeal.lean`, axiom-clean):
+> force separates non-automorphic pairs on the discretizing regime via the augmented key `leafColKey` (the plain
+> `Force.lookaheadKey` is insufficient), and R0b reduces the rest to the wall `SmallAutThinAt` (= `hSmallAutThin`).
+> The mixed-cell/fusion question is SETTLED — the "Progress" predicate is the already-built sel-rewrite
+> `Select.HandledS`/`NodeResolved`. NEXT: P1 (extraction) · P3 (Smith, discharges the wall) · R6(c). Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
 > `hL1`/`K∖cell`, WL-completeness framing) is **SUPERSEDED PROVENANCE**. Measured (`DeepenStrengthProbe.cs`, 39
 > rows): starvation = 0, every checkable row COMPLETE, Chang-A 384/384 (survivor = fusion), expander multipedes rigid.
 > ⛔ `KernelBase.lean` (base recovery + lift) **parked** — not in `build.sh`.

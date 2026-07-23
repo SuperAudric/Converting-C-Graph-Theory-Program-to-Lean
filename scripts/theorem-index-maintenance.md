@@ -16,7 +16,7 @@ likely for just a handful of entries.
 | Column | Owner | How |
 |--------|-------|-----|
 | **Name** | script | from source (qualified, displayed `ChainDescent.`-stripped) |
-| **Line** | script | `--with-line-numbers`; header+body source range |
+| **Line** | script | on by default (`--no-line-numbers` omits); header+body source range |
 | **Notes** | script | computed: infra-kind + `noncomputable` + `@[…]` tags (`private` omitted) |
 | **Description** | **human/agent** | hand-written, preserved across regens; bulk-applied via `--descriptions` |
 
@@ -32,8 +32,17 @@ markdown; the script won't touch it.
 ## 1. Routine refresh (after any source edit)
 
 ```bash
-python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers
+python3 scripts/GenerateTheoremIndexes.py rewrite
 ```
+
+The `Line` column is on by **default** now; pass `--no-line-numbers` only if you want it
+omitted. (`--with-line-numbers` still works as a redundant explicit opt-in.)
+
+A row is refreshed from source (gains/updates its Line) when its Name is a **single
+declaration** — either it already carries a Line cell *or* it is a lone identifier. So a
+row that is missing its Line cell (e.g. after a `--no-line-numbers` regen, or hand-written
+without one) **regains it** on the next `rewrite`. Only genuine *conceptual* rows — several
+decls in one cell (`a / b`) or a def shown with args (`AutGroup adj`) — stay verbatim.
 
 Refreshes Line + Notes, discovers new decls (adds rows, creating `## <path>` sections as
 needed), and migrates rows between public/private/active/archive as their source status
@@ -59,7 +68,7 @@ Two equivalent options:
 - **Via JSON** (keeps source-of-truth in one place): add entries to a JSON map and apply:
   ```bash
   echo '{"ChainDescent.foo_lemma": "§X What it achieves …"}' > /tmp/d.json
-  python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers --descriptions /tmp/d.json
+  python3 scripts/GenerateTheoremIndexes.py rewrite --descriptions /tmp/d.json
   ```
   Keys may be the qualified name (`ChainDescent.OrbitPartition.refl`), the display name
   (`OrbitPartition.refl`), or the bare last segment (`foo_lemma`) — most specific wins.
@@ -95,7 +104,7 @@ lemma, or a demonstrative example/refutation.
 # 2. Build-verify — a wrongly-privatized (externally-used) decl breaks here, naming itself:
 bash scripts/build.sh        # serial, ~60 s in RAM; see its header for why not `lake build`
 # 3. Regenerate; the decl migrates to PrivateTheoremIndex.md automatically:
-python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers --descriptions /tmp/d.json
+python3 scripts/GenerateTheoremIndexes.py rewrite --descriptions /tmp/d.json
 ```
 A `private` decl does not need a doc-comment noting *why* it's private; if it turns out to be
 needed elsewhere, just remove `private` (always builds) and regen.
@@ -127,7 +136,7 @@ list (no missing/extra). Build `all_desc.json = {qualified: description}` and a 
 **4.5 Privatize** the flagged decls in source (§3 mechanism, applied in bulk: insert
 `private ` before the keyword, skipping any already-private), then `bash scripts/build.sh`.
 
-**4.6 Apply**: `rewrite --with-line-numbers --descriptions all_desc.json`. Verify idempotent
+**4.6 Apply**: `rewrite --descriptions all_desc.json`. Verify idempotent
 (run twice → no diff), public prose preserved, private index populated.
 
 **4.7 Headers/legend**: edit the four preambles by hand if the column semantics changed

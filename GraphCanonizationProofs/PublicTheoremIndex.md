@@ -237,43 +237,39 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 
 | Name | Description | Notes |
 |------|-------------|-------|
-| `card_symmDiff_mod_two` | **Parity helper.** `|S ∆ T| ≡ |S| + |T| (mod 2)` — the fact behind "an even subgraph preserves the even-subset invariant." | private |
-| `CFIBase.flipSet` | The `F`-incident neighbours of `v` (`F : Fin m → Fin m → Bool` an even subgraph), as a subset of `N(v)`. | Definition |
-| `CFIBase.symmDiff_flipSet_mem_even` | **Even-subset invariant preserved.** If every `flipSet F v` is even (`F` an even subgraph), `S ∆ flipSet F v` stays an even subset of `N(v)`. | — |
-| `CFIBase.cfiFlip` | **The cycle-space gadget flip** on `CFIVertex H`: toggles endpoint parities along `F` (`e^b_{v→w} ↦ e^{b⊕F v w}_{v→w}`) and complements subsets (`a_S^v ↦ a_{S ∆ flipSet F v}^v`). | Definition (Phase 1) |
-| `CFIBase.cfiFlip_involutive` | The gadget flip is an involution (`(S ∆ F) ∆ F = S`; `(b⊕c)⊕c = b`). | — |
-| `CFIBase.cfiFlipEquiv` | The gadget flip as an `Equiv.Perm CFIVertex` (self-inverse). | Definition |
+| `CFIBase.flipSet` | 3243-3247 | The `F`-incident neighbours of `v` (`F : Fin m → Fin m → Bool` an even subgraph), as a subset of `N(v)`. | Definition |
+| `CFIBase.symmDiff_flipSet_mem_even` | 3259-3275 | **Even-subset invariant preserved.** If every `flipSet F v` is even (`F` an even subgraph), `S ∆ flipSet F v` stays an even subset of `N(v)`. | — |
+| `CFIBase.cfiFlip` | 3324-3334 | **The cycle-space gadget flip** on `CFIVertex H`: toggles endpoint parities along `F` (`e^b_{v→w} ↦ e^{b⊕F v w}_{v→w}`) and complements subsets (`a_S^v ↦ a_{S ∆ flipSet F v}^v`). | Definition |
+| `CFIBase.cfiFlipEquiv` | 3346-3350 | The gadget flip as an `Equiv.Perm CFIVertex` (self-inverse). | Definition |
 | `xor_eq_xor_iff` / `xor_ne_xor_iff` | Xor right-cancellation on `Bool` (`(a⊕c) = (b⊕c) ↔ a = b`, and the `≠` form). | private |
-| `CFIBase.decide_mem_symmDiff_flipSet` | **Phase 2 bridge.** For `w ∈ N(v)`, `w ∈ S ∆ flipSet F v ↔ (w∈S) ⊕ F v w` — endpoint parity and subset membership flip together. | — |
-| `CFIBase.cfiFlip_isAut` | **Phase 2 (the automorphism core).** For `F` an even subgraph that is symmetric (`F v w = F w v`), `cfiFlip F` preserves `cfiAdj` on every pair. Subset–endpoint: the `(w∈S)⊕b` invariant survives the joint flip; endpoint–endpoint bridge: the single edge `{v,w}` has one `F`-bit (symmetry), so `b₁=b₂` survives. | — |
-| `IsCFI'.cfiFlipAut` | **Phase 3.** The gadget flip transported to `adj`'s vertices `Fin n` via the CFI labelling `h.e`: `g = e⁻¹ ∘ cfiFlip F ∘ e`. | Definition |
-| `IsCFI'.e_cfiFlipAut` | Transport identity `e (g v) = cfiFlip F (e v)` — `e` intertwines the `Fin n` and `CFIVertex` flips. | — |
-| `IsCFI'.isAut_cfiFlipAut` | **Phase-3 deliverable.** For `F` an even symmetric subgraph, `cfiFlipAut F ∈ Aut(adj)` — an honest `IsAut … adj` (via `matching` + `cfiFlip_isAut`) the consumers (`configSwap_of_aut`, Tier-3a `hwit`) use. | — |
-| `IsCFI'.cfiFlipAut_involutive` | The lifted flip is an involution (needed where the decision pair must be *swapped*, `g a = b ∧ g b = a`). | — |
-| `CFIBase.gadget` | **Phase 4.** The base vertex (gadget) of a CFI vertex. | Definition |
-| `CFIBase.cfiFlip_eq_self_of_flipSet_empty` | **Locality.** If `F` has no edge at `x`'s gadget (`flipSet F (gadget x) = ∅`), the flip fixes `x` (`S ∆ ∅ = S`; empty flip set ⟹ `F v w = false` ⟹ parity unchanged). | — |
-| `IsCFI'.cfiFlipAut_eq_self_of_flipSet_empty` | Locality lifted to `Fin n`: `F` avoiding `i`'s gadget ⟹ `cfiFlipAut F` fixes `i`. | — |
-| `IsCFI'.disjoint_support_cfiFlipAut` | **Phase-4 deliverable.** If every vertex of a committed set `T` lives in an `F`-free gadget, then `Disjoint T (cfiFlipAut F).support` — the exact `Disjoint (committed set) π.support` the path-fixing consumers (`hwit`, `configSwap`) require. | — |
+| `CFIBase.decide_mem_symmDiff_flipSet` | 3354-3361 | **Phase 2 bridge.** For `w ∈ N(v)`, `w ∈ S ∆ flipSet F v ↔ (w∈S) ⊕ F v w` — endpoint parity and subset membership flip together. | — |
+| `CFIBase.cfiFlip_isAut` | 3363-3394 | **Phase 2 (the automorphism core).** For `F` an even subgraph that is symmetric (`F v w = F w v`), `cfiFlip F` preserves `cfiAdj` on every pair. Subset–endpoint: the `(w∈S)⊕b` invariant survives the joint flip; endpoint–endpoint bridge: the single edge `{v,w}` has one `F`-bit (symmetry), so `b₁=b₂` survives. | — |
+| `IsCFI'.cfiFlipAut` | 3720-3724 | **Phase 3.** The gadget flip transported to `adj`'s vertices `Fin n` via the CFI labelling `h.e`: `g = e⁻¹ ∘ cfiFlip F ∘ e`. | Definition |
+| `IsCFI'.e_cfiFlipAut` | 3726-3734 | Transport identity `e (g v) = cfiFlip F (e v)` — `e` intertwines the `Fin n` and `CFIVertex` flips. | — |
+| `IsCFI'.isAut_cfiFlipAut` | 3736-3746 | **Phase-3 deliverable.** For `F` an even symmetric subgraph, `cfiFlipAut F ∈ Aut(adj)` — an honest `IsAut … adj` (via `matching` + `cfiFlip_isAut`) the consumers (`configSwap_of_aut`, Tier-3a `hwit`) use. | — |
+| `IsCFI'.cfiFlipAut_involutive` | 3748-3755 | The lifted flip is an involution (needed where the decision pair must be *swapped*, `g a = b ∧ g b = a`). | — |
+| `CFIBase.gadget` | 3402-3405 | **Phase 4.** The base vertex (gadget) of a CFI vertex. | Definition |
+| `CFIBase.cfiFlip_eq_self_of_flipSet_empty` | 3407-3427 | **Locality.** If `F` has no edge at `x`'s gadget (`flipSet F (gadget x) = ∅`), the flip fixes `x` (`S ∆ ∅ = S`; empty flip set ⟹ `F v w = false` ⟹ parity unchanged). | — |
+| `IsCFI'.cfiFlipAut_eq_self_of_flipSet_empty` | 3757-3765 | Locality lifted to `Fin n`: `F` avoiding `i`'s gadget ⟹ `cfiFlipAut F` fixes `i`. | — |
+| `IsCFI'.disjoint_support_cfiFlipAut` | 3767-3777 | **Phase-4 deliverable.** If every vertex of a committed set `T` lives in an `F`-free gadget, then `Disjoint T (cfiFlipAut F).support` — the exact `Disjoint (committed set) π.support` the path-fixing consumers (`hwit`, `configSwap`) require. | — |
 | `CFIBase.cfiFlip_endpoint` / `_swap` | **C1b.0 recon.** The flip toggles `e^b_{v→w}`'s parity by `F v w`; so it swaps the parity-pair `e^0/e^1` iff `{v,w} ∈ F` — the primary flippable decision pair. | simp / — |
-| `CFIBase.cfiFlip_subset` | The flip symmetric-differences `a_S^v` by `flipSet F v` — swaps the subset-pair iff the gadget is `F`-touched (the second flippable kind). | — |
+| `CFIBase.cfiFlip_subset` | 3454-3460 | The flip symmetric-differences `a_S^v` by `flipSet F v` — swaps the subset-pair iff the gadget is `F`-touched (the second flippable kind). | — |
 | `IsCFI'.cfiFlipAut_endpointVertex` / `_swaps_endpointVertex` | **C1b.0 (lifted).** The `Fin n` swap fact: `cfiFlipAut F` swaps `endpointVertex hw false ↔ true` iff `F v w = true` — the foundational swap C1b.1 keys on. | — |
-| `triFlip_swaps_edge_01` | C1b.0 prototype validation: the triangle flip swaps the parity-pair on edge `{0,1}` (`decide`, independent confirmation). | — |
+| `triFlip_swaps_edge_01` | 3901-3909 | C1b.0 prototype validation: the triangle flip swaps the parity-pair on edge `{0,1}` (`decide`, independent confirmation). | — |
 | `CFIBase.isEdgeOf` / `triEdge` | **C1b.2a.** The triangle even-subgraph through edge `{v,w}` with apex `u` — the minimal even subgraph through an edge. | Definition |
 | `CFIBase.triEdge_eq_true` / `_iff` / `_symm` / `_cyclic` / `_apex` | Characterisation (membership, source-grouped), symmetry, cyclic invariance `{v,w,u}={w,u,v}`, and `F v w = true`. | — |
 | `CFIBase.flipSet_triEdge` / `_other` | The triangle's flip set is `{w,u}` at base vertex `v` (degree 2), and `∅` off `{v,w,u}` (the avoidance → D-locality). | — |
-| `CFIBase.triEdge_even` | The triangle is an even subgraph (every vertex F-degree 2 or 0). | — |
-| `CFIBase.exists_even_triangle` | **C1b.2a deliverable.** If the decision edge has a common neighbour `u` (distinct, in `N(v)∩N(w)`), an even symmetric `F` through `{v,w}` exists with support `{v,w,u}` (avoids everything else) — the concrete cycle `F` cascade-1b needs, for triangle-containing bases. General triangle-free bases (K₃,₃, Petersen) need C1b.2b. | — |
-| `CFIBase.evenPermEdge` | **C1b.2b.** The even-subgraph indicator of a permutation-cycle `σ` (the cycle's "next-vertex" map). A vertex's F-neighbours are `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | Definition |
+| `CFIBase.exists_even_triangle` | 3591-3603 | **C1b.2a deliverable.** If the decision edge has a common neighbour `u` (distinct, in `N(v)∩N(w)`), an even symmetric `F` through `{v,w}` exists with support `{v,w,u}` (avoids everything else) — the concrete cycle `F` cascade-1b needs, for triangle-containing bases. General triangle-free bases (K₃,₃, Petersen) need C1b.2b. | — |
+| `CFIBase.evenPermEdge` | 3613-3616 | **C1b.2b.** The even-subgraph indicator of a permutation-cycle `σ` (the cycle's "next-vertex" map). A vertex's F-neighbours are `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | Definition |
 | `CFIBase.evenPermEdge_eq_true` / `_symm` / `_iff_of_mem` | Membership characterisation, symmetry, and the moved-vertex F-neighbours `= {σ p, σ⁻¹ p}`. | — |
 | `CFIBase.flipSet_evenPermEdge_of_mem` / `_of_fixed` | Flip set `= {σ p, σ⁻¹ p}` at a moved vertex (degree 2), `∅` at a fixed point (avoidance). | — |
-| `CFIBase.evenPermEdge_even` | The permutation-cycle is an even subgraph (degree 2 on the cycle via no-2-cycle, 0 off it). | — |
-| `CFIBase.exists_even_cycle` | **C1b.2b deliverable.** A permutation-cycle `σ` through `{v,w}` (`σ v = w`) with H-edges (`hEdge`) and orbits ≥ 3 (`hNo2`) yields an even symmetric `F` through `{v,w}` avoiding every `σ`-fixed vertex. Subsumes the triangle; covers triangle-free bases. The cycle's *existence* in `H − Σ` is the isolated graph hypothesis (where treewidth enters). | — |
-| `IsCFI'.cfiFlipAut_preserves_P` | **Phase 5.** The gadget flip preserves any `P` that *every* `adj`-automorphism preserves (the descent's profile/trivial `P`) — transported through `isAut_cfiFlipAut`. Honest scope: a component-moving flip preserves exactly the automorphism-invariant `P`'s. | — |
-| `IsCFI'.cfiFlipAut_pathFixing_witness` | **Phase-5 deliverable (Tier-3a B1 `hwit` shape).** Assembles Phases 3–5 + `g v = w` into `∃ π, IsAut π adj ∧ (∀ x u, P (π x)(π u) = P x u) ∧ Disjoint T π.support ∧ π v = w` — exactly what `Cascade.cascadeComposition_pathFixing`'s `hwit` consumes. | — |
+| `CFIBase.exists_even_cycle` | 3691-3705 | **C1b.2b deliverable.** A permutation-cycle `σ` through `{v,w}` (`σ v = w`) with H-edges (`hEdge`) and orbits ≥ 3 (`hNo2`) yields an even symmetric `F` through `{v,w}` avoiding every `σ`-fixed vertex. Subsumes the triangle; covers triangle-free bases. The cycle's *existence* in `H − Σ` is the isolated graph hypothesis (where treewidth enters). | — |
+| `IsCFI'.cfiFlipAut_preserves_P` | 3788-3797 | **Phase 5.** The gadget flip preserves any `P` that *every* `adj`-automorphism preserves (the descent's profile/trivial `P`) — transported through `isAut_cfiFlipAut`. Honest scope: a component-moving flip preserves exactly the automorphism-invariant `P`'s. | — |
+| `IsCFI'.cfiFlipAut_pathFixing_witness` | 3799-3815 | **Phase-5 deliverable (Tier-3a B1 `hwit` shape).** Assembles Phases 3–5 + `g v = w` into `∃ π, IsAut π adj ∧ (∀ x u, P (π x)(π u) = P x u) ∧ Disjoint T π.support ∧ π v = w` — exactly what `Cascade.cascadeComposition_pathFixing`'s `hwit` consumes. | — |
 | `triFlipEdges` / `triFlip_even` | **Phase-0 prototype:** `triangleBase`'s unique nontrivial even subgraph (all 3 edges; β=1) and its even-flip-set fact. | Definition / — |
-| `triFlip_involutive_check` | Phase-0 smoke test: triangle gadget flip is an involution (`decide`, kernel, axiom-clean). | — |
-| `triFlip_isAut_check` | **Phase-0 crux:** the triangle gadget flip preserves `cfiAdj` on all 18×18 pairs (`decide`) — validates cycle-flip-is-automorphism on the smallest case before the general Phase-2 proof. | — |
-| `triFlip_nontrivial` | Phase-0 smoke test: the triangle gadget flip moves some vertex — a nontrivial `CFI(triangle)` automorphism. | — |
+| `triFlip_involutive_check` | 3878-3883 | Phase-0 smoke test: triangle gadget flip is an involution (`decide`, kernel, axiom-clean). | — |
+| `triFlip_isAut_check` | 3885-3892 | **Phase-0 crux:** the triangle gadget flip preserves `cfiAdj` on all 18×18 pairs (`decide`) — validates cycle-flip-is-automorphism on the smallest case before the general Phase-2 proof. | — |
+| `triFlip_nontrivial` | 3894-3899 | Phase-0 smoke test: the triangle gadget flip moves some vertex — a nontrivial `CFI(triangle)` automorphism. | — |
 
 | `CFIBase.mem_flipSet` | 3254-3257 | Membership in the flip set: `w ∈ flipSet F v ↔ w ∈ N(v) ∧ F v w`. | `@[simp]` |
 | `CFIBase.xorF` | 3285-3287 | **(CFI-cov.2)** Pointwise XOR of two flip-edge indicators — the cycle-space `Z₂` sum. | Definition |
@@ -634,9 +630,9 @@ per decision.
 
 | Name | Description | Notes |
 |------|-------------|-------|
-| `configSwap_of_cfiFlipAut` | **The CFI gadget twist is a config-swap** (unconditional bridge). `configSwap_of_aut` instantiated with `g := cfiFlipAut F` (an `Aut(adj)` involution by `isAut_cfiFlipAut`): if the flip swaps `(a,b)`, fixes `χι`, and carries `σ` off the pair, it is a `ConfigSwap`. The concrete soundness — the vertex-space gadget twist (the C#'s witness) fires the oracle, no rank-alignment. | Definition |
-| `CFIGadgetFlippable` | **The named cascade-1b residual.** Every leaf decision admits an even-symmetric cycle `F` whose gadget flip swaps `(a,b)`, fixes `χι`, carries `σ` off the pair. Commits the CFI witness to the gadget-flip mechanism (matching the C#); the open content is purely `F`'s existence per decision (cascade-1b). | Definition |
-| `configSwapRecoverable_of_cfi` | **`ConfigSwapRecoverable` for CFI via the gadget flip.** `CFIGadgetFlippable h → ConfigSwapRecoverable` — the discharge reduced to its irreducible combinatorial core (the decision-local even cycle's existence). Feeds the capstones ⟹ oracle fires on every CFI decision. | — |
+| `configSwap_of_cfiFlipAut` | 910-925 | **The CFI gadget twist is a config-swap** (unconditional bridge). `configSwap_of_aut` instantiated with `g := cfiFlipAut F` (an `Aut(adj)` involution by `isAut_cfiFlipAut`): if the flip swaps `(a,b)`, fixes `χι`, and carries `σ` off the pair, it is a `ConfigSwap`. The concrete soundness — the vertex-space gadget twist (the C#'s witness) fires the oracle, no rank-alignment. | Definition |
+| `CFIGadgetFlippable` | 927-941 | **The named cascade-1b residual.** Every leaf decision admits an even-symmetric cycle `F` whose gadget flip swaps `(a,b)`, fixes `χι`, carries `σ` off the pair. Commits the CFI witness to the gadget-flip mechanism (matching the C#); the open content is purely `F`'s existence per decision (cascade-1b). | Definition |
+| `configSwapRecoverable_of_cfi` | 943-953 | **`ConfigSwapRecoverable` for CFI via the gadget flip.** `CFIGadgetFlippable h → ConfigSwapRecoverable` — the discharge reduced to its irreducible combinatorial core (the decision-local even cycle's existence). Feeds the capstones ⟹ oracle fires on every CFI decision. | — |
 
 Open (not a `sorry`): **`CFIGadgetFlippable`** — that the decision-local even cycle `F` *exists* for every
 decision (the flip is built and proven sound; what remains is the cycle through the decision edge, local
@@ -650,20 +646,20 @@ cell-coherence), not the opaque `configSwap_of_aut` package.
 
 | Name | Description | Notes |
 |------|-------------|-------|
-| `swapsConfig_off_pair_of_local` | **The σ-off-pair reduction (general `g`, reusable).** Any `g` swapping `(a,b)`, fixing decided vertices off `{a,b}`, preserving the decided set and `P₀`, satisfies the off-pair condition given only **σ-cell-coherence** at `(a,b)`. Off-D via `agrees_off` + P₀-invariance; on-D via the coherence case-analysis. | — |
-| `preserves_D_of_involutive_local` | Decided-set preservation for an involutive local swap (`g x ∈ D ↔ x ∈ D` from `g²=id` + swap + fix-off-`{a,b}`). The `hgD` input above, discharged for the gadget flip. | — |
-| `cfiFlipAut_fixesχι_of_support` | **The `hgχ` reduction.** The flip fixes `χι` once it does on the F-touched gadgets — Phase-4 locality fixes every `F`-free gadget outright. Reduces global `hgχ` to χι-coherence on the (small) F-support. | — |
-| `configSwap_of_cfiFlipAut_local` | **The reduced bridge.** A `ConfigSwap` from {`F` even+symmetric, swap, **F is D-local**, σ-cell-coherent, `P₀` Aut-invariant, χι-coherent on F-support} — the three `configSwap_of_aut` conditions discharged via the reductions above. | Definition |
-| `CFIGadgetFlippableLocal` | The reduced per-decision predicate: an even-symmetric **D-local** `F` whose flip swaps `(a,b)`, with σ cell-coherent and χι coherent on the F-support. The conditions are now the descent-coherence / cycle-locality (cascade-1b) facts. | Definition |
-| `configSwapRecoverable_of_cfi_local` | `ConfigSwapRecoverable` from `CFIGadgetFlippableLocal` (+ `P₀` Aut-invariance) — the discharge via the decoupled hypotheses. | — |
+| `swapsConfig_off_pair_of_local` | 965-1012 | **The σ-off-pair reduction (general `g`, reusable).** Any `g` swapping `(a,b)`, fixing decided vertices off `{a,b}`, preserving the decided set and `P₀`, satisfies the off-pair condition given only **σ-cell-coherence** at `(a,b)`. Off-D via `agrees_off` + P₀-invariance; on-D via the coherence case-analysis. | — |
+| `preserves_D_of_involutive_local` | 1014-1034 | Decided-set preservation for an involutive local swap (`g x ∈ D ↔ x ∈ D` from `g²=id` + swap + fix-off-`{a,b}`). The `hgD` input above, discharged for the gadget flip. | — |
+| `cfiFlipAut_fixesχι_of_support` | 1036-1049 | **The `hgχ` reduction.** The flip fixes `χι` once it does on the F-touched gadgets — Phase-4 locality fixes every `F`-free gadget outright. Reduces global `hgχ` to χι-coherence on the (small) F-support. | — |
+| `configSwap_of_cfiFlipAut_local` | 1051-1078 | **The reduced bridge.** A `ConfigSwap` from {`F` even+symmetric, swap, **F is D-local**, σ-cell-coherent, `P₀` Aut-invariant, χι-coherent on F-support} — the three `configSwap_of_aut` conditions discharged via the reductions above. | Definition |
+| `CFIGadgetFlippableLocal` | 1080-1095 | The reduced per-decision predicate: an even-symmetric **D-local** `F` whose flip swaps `(a,b)`, with σ cell-coherent and χι coherent on the F-support. The conditions are now the descent-coherence / cycle-locality (cascade-1b) facts. | Definition |
+| `configSwapRecoverable_of_cfi_local` | 1097-1108 | `ConfigSwapRecoverable` from `CFIGadgetFlippableLocal` (+ `P₀` Aut-invariance) — the discharge via the decoupled hypotheses. | — |
 
 **§L.9 (C1b.1) — the CFI glue: parity-pair decisions.** Reduces `CFIGadgetFlippableLocal` to the
 explicit-edge form, discharging the swap obligation in advance (via C1b.0).
 
 | Name | Description | Notes |
 |------|-------------|-------|
-| `CFIParityDecisionFlippable` | The reduced cascade-1b hypothesis: every decision `(a,b)` is the parity-pair of a base edge `{v,w}` (`a = e^{b₀}_{v→w}`, `b = e^{¬b₀}`) admitting an even-symmetric cycle `F` with `{v,w} ∈ F`, D-local, σ/χι cell-coherent. The swap is no longer an obligation (it's `cfiFlipAut_swaps_endpointVertex`); only cycle existence + coherence remain. | Definition |
-| `cfiGadgetFlippableLocal_of_parity` | **The C1b.1 glue.** `CFIParityDecisionFlippable → CFIGadgetFlippableLocal` — the body's two swap conjuncts from `cfiFlipAut_endpointVertex` + `F v w = true`; the rest passes through. Open content narrows to C1b.2 (cycle exists) + C1b.3 (decisions are parity-pairs + coherence). | — |
+| `CFIParityDecisionFlippable` | 1120-1136 | The reduced cascade-1b hypothesis: every decision `(a,b)` is the parity-pair of a base edge `{v,w}` (`a = e^{b₀}_{v→w}`, `b = e^{¬b₀}`) admitting an even-symmetric cycle `F` with `{v,w} ∈ F`, D-local, σ/χι cell-coherent. The swap is no longer an obligation (it's `cfiFlipAut_swaps_endpointVertex`); only cycle existence + coherence remain. | Definition |
+| `cfiGadgetFlippableLocal_of_parity` | 1138-1151 | **The C1b.1 glue.** `CFIParityDecisionFlippable → CFIGadgetFlippableLocal` — the body's two swap conjuncts from `cfiFlipAut_endpointVertex` + `F v w = true`; the rest passes through. Open content narrows to C1b.2 (cycle exists) + C1b.3 (decisions are parity-pairs + coherence). | — |
 
 Transport chain it builds on (ChainDescent.lean `§16.2b`): `signature_transport`, `sigKey_transport`,
 `refineStep_transport`, `iterate_refineStep_transport`, `warmRefine_transport` — cross-config (two
@@ -721,7 +717,7 @@ medium-risk Mathlib gap gating B1.
 | Name | Description | Notes |
 |------|-------------|-------|
 | `LayerChain adj` | §A3 A finite descending chain `AutGroup adj = layer 0 ⊵ … ⊵ layer len = ⊥`, each layer relatively normal in its predecessor — the `H₀ ⊵ … ⊵ H_k` substrate Tier-3a (B1) reasons over. | Structure |
-| `LayerChain.trivial` | §A3 **The trivial chain** `AutGroup adj ⊵ ⊥` (length 1); witnesses `LayerChain` is inhabited. | Definition |
+| `LayerChain.trivial` | 155-172 | §A3 **The trivial chain** `AutGroup adj ⊵ ⊥` (length 1); witnesses `LayerChain` is inhabited. | Definition |
 
 ### A4 — quotient graph + cell = quotient-vertex
 
@@ -813,9 +809,9 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 
 | Name | Description | Notes |
 |------|-------------|-------|
-| `CFILayerGadgetFlippable` | Per-layer CFI gadget-flip existence: for each layer and same-orbit/same-cell pair `(v,w)`, an even-symmetric cycle `F` whose flip maps `v ↦ w` with `T i ∪ S i` in `F`-free gadgets. The `hwit` analog of the linear oracle's `CFIGadgetFlippableLocal`. | Definition |
-| `cfiLayer_pathFixing_hwit` | **The `hwit` drop-in.** `CFILayerGadgetFlippable` (+ `P` Aut-invariant) ⟹ the Tier-3a `hwit` hypothesis, directly via `cfiFlipAut_pathFixing_witness`. | — |
-| `cascadeComposition_cfi` | **Theorem 3a for CFI layers.** A CFI layering whose residual orbit maps are realised by committed-set-avoiding gadget flips reaches the discrete partition — `cascadeComposition_pathFixing` with `hwit` discharged by the Stage-3 flips (conditional only on the cascade-1b cycle existence). | — |
+| `CFILayerGadgetFlippable` | 341-352 | Per-layer CFI gadget-flip existence: for each layer and same-orbit/same-cell pair `(v,w)`, an even-symmetric cycle `F` whose flip maps `v ↦ w` with `T i ∪ S i` in `F`-free gadgets. The `hwit` analog of the linear oracle's `CFIGadgetFlippableLocal`. | Definition |
+| `cfiLayer_pathFixing_hwit` | 354-368 | **The `hwit` drop-in.** `CFILayerGadgetFlippable` (+ `P` Aut-invariant) ⟹ the Tier-3a `hwit` hypothesis, directly via `cfiFlipAut_pathFixing_witness`. | — |
+| `cascadeComposition_cfi` | 370-382 | **Theorem 3a for CFI layers.** A CFI layering whose residual orbit maps are realised by committed-set-avoiding gadget flips reaches the discrete partition — `cascadeComposition_pathFixing` with `hwit` discharged by the Stage-3 flips (conditional only on the cascade-1b cycle existence). | — |
 | `recoverableByDepth_of_pathFixing_layers` | 400-418 | **The harvest-window connector.** Lands `cascadeComposition_pathFixing`'s `Discrete` output onto the harvest `RecoverableByDepth` conclusion: a layer chain with per-layer path-fixing `hwit` and a base endpoint gives `RecoverableByDepth adj P b` at the chain-length bound. | — |
 | `recoverableByDepth_of_cascadeComposition_cfi` | 420-433 | **CFI corollary of the connector.** `RecoverableByDepth` for a CFI layering via `cascadeComposition_cfi` — the connector with `hwit` discharged by the Stage-3 gadget flips. | — |
 | `ResidualAut` | 448-454 | **Residual automorphism.** A `P`-preserving automorphism of `adj` fixing `S` pointwise — an element of the residual group `Aut_S^P`; the building block of the screen predicates. `OrbitPartition adj P S v w ↔ ∃ π, ResidualAut π ∧ π v = w`. | Definition |
@@ -833,7 +829,7 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `stabilizerAt_smul` | 608-610 | The subgroup action is permutation application: `g • v = ↑g v`. | `@[simp]` |
 | `mem_stabilizerAt_empty` | 612-618 | **Root = ambient `P`-preserving group.** `StabilizerAt adj P ∅` is exactly the `P`-preserving automorphisms (`FixesPointwise ∅` vacuous). | — |
 | `stabilizerAt_mono` | 620-626 | **Stabilizer containment.** `S ⊆ S' → StabilizerAt adj P S' ≤ StabilizerAt adj P S` (fixing more gives a smaller group; subgroup form of `OrbitPartition.mono`). | — |
-| `stabilizerAt_eq_bot_iff_isBase` | **`StabilizerAt = ⊥ ⟺ base.** The residual is trivial exactly when `S` is a base (`IsBase`). | **`StabilizerAt = ⊥ ⟺ base.** The residual is trivial exactly when `S` is a base (`IsBase`). | — |
+| `stabilizerAt_eq_bot_iff_isBase` | 628-642 | **`StabilizerAt = ⊥ ⟺ base.** The residual is trivial exactly when `S` is a base (`IsBase`). | **`StabilizerAt = ⊥ ⟺ base.** The residual is trivial exactly when `S` is a base (`IsBase`). | — |
 | `mem_orbit_stabilizerAt_iff` | 644-655 | **Per-node orbit bridge.** `MulAction.orbit (StabilizerAt adj P S) v` is exactly the `OrbitPartition` relation at `S` (generalizes Group.lean's root bridge off `S = ∅`). | — |
 | `residualAut_mem_stabilizerAt` | 677-680 | **(A2) Fold-in entry.** A verified `P`-preserving path-fixing automorphism is a member of `StabilizerAt adj P S`. | — |
 | `closure_le_stabilizerAt` | 682-689 | **(A2) The harvested chain stays inside the true residual.** If every harvested generator is a verified path-fixing automorphism, `Subgroup.closure gens ≤ StabilizerAt adj P S` — the over-split-sound contract, group side. | — |
@@ -1501,7 +1497,7 @@ Axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`.
 | `CoherentConfig.exists_balancedSplits_of_not_forall_majority` | 2169-2178 | §CC.21 (A2 Stage 1b) **No obstruction on a class ⟹ a balanced splitter exists** — if some point fails to see the confusion monochromatically, it balance-splits it (dichotomy). The bridge from "no geometric obstruction" to the splitter the closure mechanics consumes. Axiom-clean. | — |
 | `CoherentConfig.relOf_v_eq_of_confused` | 2190-2219 | §CC.22 (A2 Stage 1b, G-mech kill-lemma core) On a CC with `v` a **singleton fiber**, any `γ` failing to distinguish `α,β` (`relOf γ α = relOf γ β`) forces `v` not to distinguish them either (`relOf v α = relOf v β`). The singleton fiber isolates the triangle count through `v` to `z=v` (`relOf_diag_right_eq`+`SingletonFiber`), so `interNum (relOf γ v) b (relOf γ α) = [b = relOf v α]`; the same count against `β` (same class) is `[b = relOf v β]`, forcing equality. Pure `interNum` coherence — no construction internals/tower. Axiom-clean. | — |
 | `CoherentConfig.confusionSet_eq_empty_of_relOf_v_ne` | 2221-2229 | §CC.22 (A2 Stage 1b) **THE KILL LEMMA.** `v` a singleton fiber that *distinguishes* `α,β` (`relOf v α ≠ relOf v β`) ⟹ the confusion set `C(α,β)` is **empty** — individualizing `v` destroys that pair's indistinguishing class outright. The closure mechanism behind A2's per-step `c`-drop (route doc §4c): `c(X_{T∪v})` is bounded by the largest confusion among pairs `v` does *not* distinguish, so a `v` outside all over-half confusion sets halves `c`. Contrapositive of `relOf_v_eq_of_confused`. Axiom-clean. | — |
-| `CoherentConfig.indistinguishingNumber_pointExtension_insert_le` | §CC.22 (A2 Stage 1b, G-mech **the bound** — route doc §4c step 2) **The kill-lemma bound on `c(X_{T∪v})`.** If every pair `(α,β)` (`α≠β`) that `v` fails to distinguish in `X_T` (`relOf_{X_T} v α = relOf_{X_T} v β`) has `\|C_{X_T}(α,β)\| ≤ M`, then `c(pointExtension X (insert v T)) ≤ M`. Per non-reflexive `W`-class (rep pair `α≠β`): the kill lemma (`v` a singleton fiber of `W`) empties the confusion of every pair `v` *distinguishes`; each survivor is `⊆ C_{X_T}` (monotone via `Refines W X_T`) with `v` undistinguishing in `X_T` too, so `≤ M`. Dissolves the G-sim gap (one covering hypothesis replaces a per-class splitter). Step 3 consumes with `M = c(X_T)/2`. Axiom-clean. | §CC.22 (A2 Stage 1b, G-mech **the bound** — route doc §4c step 2) **The kill-lemma bound on `c(X_{T∪v})`.** If every pair `(α,β)` (`α≠β`) that `v` fails to distinguish in `X_T` (`relOf_{X_T} v α = relOf_{X_T} v β`) has `|C_{X_T}(α,β)| ≤ M`, then `c(pointExtension X (insert v T)) ≤ M`. Per non-reflexive `W`-class (rep pair `α≠β`): the kill lemma (`v` a singleton fiber of `W`) empties the confusion of every pair `v` *distinguishes`; each survivor is `⊆ C_{X_T}` (monotone via `Refines W X_T`) with `v` undistinguishing in `X_T` too, so `≤ M`. Dissolves the G-sim gap (one covering hypothesis replaces a per-class splitter). Step 3 consumes with `M = c(X_T)/2`. Axiom-clean. | — |
+| `CoherentConfig.indistinguishingNumber_pointExtension_insert_le` | 2231-2273 | ≤ M`, then `c(pointExtension X (insert v T)) ≤ M`. Per non-reflexive `W`-class (rep pair `α≠β`): the kill lemma (`v` a singleton fiber of `W`) empties the confusion of every pair `v` *distinguishes`; each survivor is `⊆ C_{X_T}` (monotone via `Refines W X_T`) with `v` undistinguishing in `X_T` too, so `≤ M`. Dissolves the G-sim gap (one covering hypothesis replaces a per-class splitter). Step 3 consumes with `M = c(X_T)/2`. Axiom-clean. | — |
 | `CoherentConfig.indistinguishingHalves_of_exists_avoiding_v` | 2275-2300 | §CC.22 (A2 Stage 1b, G-mech **the halving wiring** — route doc §4c step 3) **`IndistinguishingHalves` from an avoiding `v` per over-`B` base.** If every base `T` with `Φ T > B` admits a `v` avoiding all big confusion sets (every `v`-undistinguished pair `(α,β)`, `α≠β`, has `2·|C_{X_T}(α,β)| ≤ c(X_T)`), then `X.IndistinguishingHalves B`. Pure arithmetic on the step-2 bound at `M = c(X_T)/2`: gives `c(X_{T∪v}) ≤ c(X_T)/2`, hence `2·c(X_{T∪v}) ≤ c(X_T)`. Open content left = existence of the avoiding `v` (its negation = the `BigConfusionCover` obstruction, step 4). Axiom-clean. | — |
 | `CoherentConfig.BigConfusionCover` | 2313-2321 | §CC.22 (A2 Stage 1b, route doc §4c step 4) **The big-confusion-set covering obstruction.** The size-`>c(X)/2` confusion sets (`c(X) < 2·|C(α,β)|`, `α≠β`) **cover `Fin n`**: every vertex fails to distinguish some pair with an over-half confusion class. Exact negation of "an avoiding `v` exists" (step 3's hypothesis). A cover forces `n ≤ (#big sets)·c(X)` ⟹ `≥ n/c` near-maximal confusion sets = a partial-geometry / near-pencil line system, routed to `Cameron ∨ finite` by the cited Neumaier + primitive-CC dichotomy (G-cite, step 5); the residue, being neither, has no cover. | Definition |
 | `CoherentConfig.exists_avoiding_of_not_cover` | 2323-2338 | §CC.22 (A2 Stage 1b, route doc §4c step 4) **No cover ⟹ an avoiding `v` exists.** `¬ BigConfusionCover ⟹ ∃ v` outside all big confusion sets, i.e. every pair `(α,β)` (`α≠β`) with `relOf v α = relOf v β` has `2·|C(α,β)| ≤ c(X)` — exactly the avoiding-`v` hypothesis of `indistinguishingHalves_of_exists_avoiding_v`. Via `not_forall` + `not_le`. Axiom-clean. | — |
@@ -3268,10 +3264,11 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `SupplyTransport.wordReach_conj` | 139-151 | A word in `G` becomes the conjugate word in `G' = σGσ⁻¹`. | — |
 | `SupplyTransport.wordReach_conj_iff` | 153-162 | **★ P1 — ORBITS TRANSPORT.** The verified generators on `σ·G` connect `σu` to `σw` **iff** the originals connect `u` to `w`: the orbit *partition* of the branch cell is a genuine isomorphism invariant, even though the representative chosen from each orbit is not. | — |
 | `SupplyTransport.stallEquivariant_forceThenConsume` | 166-197 | **★★★ P1 — THE FLAG'S ISO-INVARIANCE, DISCHARGED.** `Stall.StallEquivariant` — carried by all three `Residue` capstones and instantiated by nothing — follows from `KeyEquivariant` + `SupplyEquivariant`. The proof never transports the (non-equivariant, least-index) `rep`: it transports the **orbit partition** and the **forced set**, and observes via `Consume.rep_eq_iff_wordReach` that the narrowing's *length* counts **orbits**. | — |
-| `SupplyTransport.guarded_mixed_canonizer` | 199-207 | **★★★ THE GUARDED MIXED CANONIZER WITH NO CARRIED FLAG HYPOTHESIS** — sound, iso-invariant, complete and unconditionally polynomial, for **any** equivariant key and **any** equivariant supply. | — |
-| `SupplyTransport.gensEquivariant_matchSupply` | 216-237 | **★★ `matchSupply` IS EQUIVARIANT** — the construction conjugates (`Consume.matchCandidate_conj`), *including its failure mode*: it declines on `σ·G` exactly where it declines on `G`. The non-vacuity witness for `GensEquivariant`. | — |
-| `SupplyTransport.supplyEquivariant_matchSupply` | 239-240 | `matchSupply` satisfies the verified-list form of the transport obligation. | — |
-| `SupplyTransport.matchSupply_guarded_canonizer` | 242-254 | **★★★ THE FIRST CONCRETE MIXED CANONIZER.** Every parameter is a named, built object — the encode-free refiner, the look-ahead key, the colour-match oracle — and **no hypothesis is carried**: ①a (sound), ①b (complete), ①c (iso-invariant answer *and* flag), plus unconditional polynomiality via `Stall.descentCost_guard_le`. Everything still open is a **firing** question, not a correctness one. | — |
+| `SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport` | 199-228 | — | — |
+| `SupplyTransport.guarded_mixed_canonizer` | 230-238 | **★★★ THE GUARDED MIXED CANONIZER WITH NO CARRIED FLAG HYPOTHESIS** — sound, iso-invariant, complete and unconditionally polynomial, for **any** equivariant key and **any** equivariant supply. | — |
+| `SupplyTransport.gensEquivariant_matchSupply` | 247-268 | **★★ `matchSupply` IS EQUIVARIANT** — the construction conjugates (`Consume.matchCandidate_conj`), *including its failure mode*: it declines on `σ·G` exactly where it declines on `G`. The non-vacuity witness for `GensEquivariant`. | — |
+| `SupplyTransport.supplyEquivariant_matchSupply` | 270-271 | `matchSupply` satisfies the verified-list form of the transport obligation. | — |
+| `SupplyTransport.matchSupply_guarded_canonizer` | 273-285 | **★★★ THE FIRST CONCRETE MIXED CANONIZER.** Every parameter is a named, built object — the encode-free refiner, the look-ahead key, the colour-match oracle — and **no hypothesis is carried**: ①a (sound), ①b (complete), ①c (iso-invariant answer *and* flag), plus unconditional polynomiality via `Stall.descentCost_guard_le`. Everything still open is a **firing** question, not a correctness one. | — |
 ## ChainDescent/DeepMatchSupply.lean
 
 | Name | Line | Description | Notes |
@@ -3313,19 +3310,24 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `OrbitPrune.narrow_guard_congr` | 98-109 | The **guard** reads only the narrowing, so it is unchanged too. | — |
 | `OrbitPrune.descend_val_congr` | 111-128 | **Resolvers with the same narrowing compute the same VALUE** — the *cost* may differ, which is exactly the point of pruning. | — |
 | `OrbitPrune.canonForm?_congr` | 130-133 | …and hence the same canonical form. | — |
-| `OrbitPrune.canonForm?_eq_of_sameOrbits` | 137-143 | **★★ The guarded mixed canonizers of two `SameOrbits` supplies are the SAME FUNCTION.** | — |
-| `OrbitPrune.guarded_mixed_canonizer_of_sameOrbits` | 145-154 | **★★★ P3 — `①` TRANSFERS ACROSS `SameOrbits`, FOR FREE.** A supply that proves the same orbits as an already-certified one inherits `①a`/`①b`/`①c` with **no equivariance obligation of its own**. This is the license every pruned/optimized supply runs on: it may make any internal choice it likes (a pruned enumeration *must* pick a representative sequence, so `GensEquivariant` is unavailable to it), provided the **group it generates** is unchanged. Reusable by any future supply optimization. | — |
-| `OrbitPrune.stallEquivariant_congr` | 156-162 | The **flag**'s iso-invariance transfers (it is read off the same narrowing). | — |
-| `OrbitPrune.cellIsOrbit_congr` | 164-167 | **Firing** transfers across `SameOrbits`. | — |
-| `OrbitPrune.cellResolved_congr` | 169-173 | `②`'s per-cell resolution predicate transfers. | — |
-| `OrbitPrune.handled_congr` | 175-177 | `③`'s `Handled` transfers — **the residue is unchanged** by pruning. | — |
-| `OrbitPrune.rankSwap_left_mul` | 181-189 | **★ P3/2 — the `w`-side identity.** Replacing the `w`-side colouring by its `g`-transport **left-multiplies** the colour-match by `g`: `rankSwap ψᵥ (g·ψ_w) = g · rankSwap ψᵥ ψ_w`. | — |
-| `OrbitPrune.rankSwap_right_mul` | 191-203 | **★ P3/2 — the `v`-side identity.** Replacing the `v`-side colouring by its `g`-transport **right-multiplies** by `g⁻¹`, so both sides of the enumeration may be pruned. | — |
-| `OrbitPrune.matchCol_left_mul` | 205-215 | The `w`-side identity, lifted to the candidate constructor (failure mode included). | — |
-| `OrbitPrune.matchCol_right_mul` | 217-227 | The `v`-side identity, lifted to the candidate constructor. | — |
-| `OrbitPrune.deepCol_aut` | 229-235 | Deepening along the `g`-image of a sequence gives the `g`-transported colouring, for `g` an automorphism the supply has already **verified**. | — |
-| `OrbitPrune.deepCandidate_left_mul` | 237-248 | **★★★ THE `w`-SIDE PRUNING LICENSE.** `deepCandidate v sv (g w) (g·sw) = g · deepCandidate v sv w sw`. A pruned-away candidate is `g · c` with **both** factors already in the generated group ⟹ the **group is unchanged**, and since `Consume.CellIsOrbit` is stated via `WordReach` (a *word* in the generators), the pruned-away element survives as a **product**. | — |
-| `OrbitPrune.deepCandidate_right_mul` | 250-258 | **★★★ THE `v`-SIDE PRUNING LICENSE** (right-multiplication by `g⁻¹`). | — |
+| `OrbitPrune.rep_congr_at` | 143-147 | — | — |
+| `OrbitPrune.SameOrbitsOnBranches` | 149-154 | — | Definition |
+| `OrbitPrune.narrow_forceThenConsume_congr_branch` | 156-166 | — | — |
+| `OrbitPrune.canonForm?_eq_of_sameOrbitsOnBranches` | 168-174 | — | — |
+| `OrbitPrune.guarded_mixed_canonizer_of_sameOrbitsOnBranches` | 176-187 | — | — |
+| `OrbitPrune.canonForm?_eq_of_sameOrbits` | 191-197 | **★★ The guarded mixed canonizers of two `SameOrbits` supplies are the SAME FUNCTION.** | — |
+| `OrbitPrune.guarded_mixed_canonizer_of_sameOrbits` | 199-208 | **★★★ P3 — `①` TRANSFERS ACROSS `SameOrbits`, FOR FREE.** A supply that proves the same orbits as an already-certified one inherits `①a`/`①b`/`①c` with **no equivariance obligation of its own**. This is the license every pruned/optimized supply runs on: it may make any internal choice it likes (a pruned enumeration *must* pick a representative sequence, so `GensEquivariant` is unavailable to it), provided the **group it generates** is unchanged. Reusable by any future supply optimization. | — |
+| `OrbitPrune.stallEquivariant_congr` | 210-216 | The **flag**'s iso-invariance transfers (it is read off the same narrowing). | — |
+| `OrbitPrune.cellIsOrbit_congr` | 218-221 | **Firing** transfers across `SameOrbits`. | — |
+| `OrbitPrune.cellResolved_congr` | 223-227 | `②`'s per-cell resolution predicate transfers. | — |
+| `OrbitPrune.handled_congr` | 229-231 | `③`'s `Handled` transfers — **the residue is unchanged** by pruning. | — |
+| `OrbitPrune.rankSwap_left_mul` | 235-243 | **★ P3/2 — the `w`-side identity.** Replacing the `w`-side colouring by its `g`-transport **left-multiplies** the colour-match by `g`: `rankSwap ψᵥ (g·ψ_w) = g · rankSwap ψᵥ ψ_w`. | — |
+| `OrbitPrune.rankSwap_right_mul` | 245-257 | **★ P3/2 — the `v`-side identity.** Replacing the `v`-side colouring by its `g`-transport **right-multiplies** by `g⁻¹`, so both sides of the enumeration may be pruned. | — |
+| `OrbitPrune.matchCol_left_mul` | 259-269 | The `w`-side identity, lifted to the candidate constructor (failure mode included). | — |
+| `OrbitPrune.matchCol_right_mul` | 271-281 | The `v`-side identity, lifted to the candidate constructor. | — |
+| `OrbitPrune.deepCol_aut` | 283-289 | Deepening along the `g`-image of a sequence gives the `g`-transported colouring, for `g` an automorphism the supply has already **verified**. | — |
+| `OrbitPrune.deepCandidate_left_mul` | 291-302 | **★★★ THE `w`-SIDE PRUNING LICENSE.** `deepCandidate v sv (g w) (g·sw) = g · deepCandidate v sv w sw`. A pruned-away candidate is `g · c` with **both** factors already in the generated group ⟹ the **group is unchanged**, and since `Consume.CellIsOrbit` is stated via `WordReach` (a *word* in the generators), the pruned-away element survives as a **product**. | — |
+| `OrbitPrune.deepCandidate_right_mul` | 304-312 | **★★★ THE `v`-SIDE PRUNING LICENSE** (right-multiplication by `g⁻¹`). | — |
 ## ChainDescent/SealDepthBridge.lean
 
 | Name | Line | Description | Notes |
@@ -4189,22 +4191,27 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.GateAt` | 72-79 | §1 The all-singletons gate outcome at a given anchor — exactly the condition `deepenGens` tests before emitting. | Definition |
 | `Deepen.DeepenGateInvariant` | 83-88 | §2 **CRUX (i), OPEN.** The gate outcome is labelling-invariant. Given `DeepenTransport` (every other stage transports), this predicate is the ENTIRE residue of `deepenSupply`'s ①c. | Definition |
 | `Deepen.DeepenForcedMatch` | 90-96 | §2 **CRUX (ii), OPEN.** When the gate passes, the emitted relation is the true `Aut`-orbit relation. The `→` direction is proved (`deepenGens_isColAut`); the `←` (completeness) direction is the open content. | Definition |
-| `Deepen.deepenGens_isColAut` | 100-106 | §3 **Every emitted generator is a genuine colour-automorphism** — untrusted construction, verified emission. The proved `→` half of `DeepenForcedMatch`. | — |
-| `Deepen.deepenGens_sound` | 108-114 | §3 The emitted orbit relation is **contained in the true one**: the supply can only under-report orbits, never over-merge (over-splitting costs a branch; over-merging would be unsound). | — |
+| `Deepen.deepenGens_isColAut` | 100-125 | §3 **Every emitted generator is a genuine colour-automorphism** — untrusted construction, verified emission. The proved `→` half of `DeepenForcedMatch`. | — |
+| `Deepen.deepenGens_sound` | 127-133 | §3 The emitted orbit relation is **contained in the true one**: the supply can only under-report orbits, never over-merge (over-splitting costs a branch; over-merging would be unsound). | — |
 
 ## ChainDescent/DeepenSupply.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Deepen.classOf` | 121-123 | §1 The members of a vertex's 1-WL colour class — the footprint primitive the gates count. | Definition |
-| `Deepen.coupled` | 125-129 | §1 **The coupled component**: the vertices whose PARENT cell split under the child colouring. `O(n³)` — compute once per level and thread it (trap #2). | Definition |
-| `Deepen.allSingletonsK` | 131-133 | §1 The **forced-matching gate**: every sub-cell of the coupled component is a singleton, so the colour-match is a forced bijection rather than an arbitrary within-cell pick. | Definition |
-| `Deepen.chooseIdK` | 135-140 | §1 The lowest child-colour id among the NON-singleton sub-cells — the iso-invariant choice of *which cell* to descend (choosing a cell is canonical; choosing a vertex in it is not). | Definition |
-| `Deepen.step` | 144-146 | §2 One individualize + warm-refine step, materialised as `ColData` (trap #1: never store a `Colouring`). | Definition |
-| `Deepen.deepen` | 148-163 | §2 **`DeepenAnchor`.** Descend the lowest-id non-singleton sub-cell until the footprint is all-singletons, recording the chosen cell ids; parent stays fixed at the node colouring. A single path, never a branch over representatives. | Definition |
-| `Deepen.replay` | 165-175 | §2 **`ReplayDeepening`.** Follow the anchor's recorded cell-id sequence from another representative; `none` if it cannot be followed (⟹ no candidate, sound). | Definition |
-| `Deepen.deepenGens` | 179-209 | §3 **The emitted generators**: for EVERY anchor of the branch cell, deepen → replay from each other representative → match footprint colours on the coupled component → `permOf` + `IsColAut` verify. ⚠ All anchors is REQUIRED, not an optimisation — a single anchor is measured to break ①c (the `G8` falsifier). | Definition |
-| `Deepen.deepenSupply` | 211-213 | §3 **★ THE DEEPENING SUPPLY** (C3b tranche 1) — the BASE-symmetry constructor, reaching what propagation cannot (girth kills chaining) and what the gauge supply does not see. Cost billed flat at `n⁶`. Deliberately NOT yet in the record object: its ①c stack is tranche 2, still open. | Definition |
+| `Deepen.classOf` | 123-125 | §1 The members of a vertex's 1-WL colour class — the footprint primitive the gates count. | Definition |
+| `Deepen.coupled` | 127-131 | §1 **The coupled component**: the vertices whose PARENT cell split under the child colouring. `O(n³)` — compute once per level and thread it (trap #2). | Definition |
+| `Deepen.allSingletonsK` | 133-135 | §1 The **forced-matching gate**: every sub-cell of the coupled component is a singleton, so the colour-match is a forced bijection rather than an arbitrary within-cell pick. | Definition |
+| `Deepen.chooseIdK` | 137-142 | §1 The lowest child-colour id among the NON-singleton sub-cells — the iso-invariant choice of *which cell* to descend (choosing a cell is canonical; choosing a vertex in it is not). | Definition |
+| `Deepen.step` | 146-148 | §2 One individualize + warm-refine step, materialised as `ColData` (trap #1: never store a `Colouring`). | Definition |
+| `Deepen.deepen` | 150-176 | §2 **`DeepenAnchor`.** Descend the lowest-id non-singleton sub-cell until the footprint is all-singletons, recording the chosen cell ids; parent stays fixed at the node colouring. A single path, never a branch over representatives. | Definition |
+| `Deepen.replay` | 178-188 | §2 **`ReplayDeepening`.** Follow the anchor's recorded cell-id sequence from another representative; `none` if it cannot be followed (⟹ no candidate, sound). | Definition |
+| `Deepen.twistOf` | 192-203 | — | Definition |
+| `Deepen.twistOf_isColAut` | 205-217 | — | — |
+| `Deepen.imgFun` | 219-223 | — | Definition |
+| `Deepen.vget_ofFn` | 225-227 | — | — |
+| `Deepen.twistOf_eq_imgFun` | 229-238 | — | — |
+| `Deepen.deepenGens` | 240-263 | §3 **The emitted generators**: for EVERY anchor of the branch cell, deepen → replay from each other representative → match footprint colours on the coupled component → `permOf` + `IsColAut` verify. ⚠ All anchors is REQUIRED, not an optimisation — a single anchor is measured to break ①c (the `G8` falsifier). | Definition |
+| `Deepen.deepenSupply` | 265-267 | §3 **★ THE DEEPENING SUPPLY** (C3b tranche 1) — the BASE-symmetry constructor, reaching what propagation cannot (girth kills chaining) and what the gauge supply does not see. Cost billed flat at `n⁶`. Deliberately NOT yet in the record object: its ①c stack is tranche 2, still open. | Definition |
 
 ## ChainDescent/DeepenTransport.lean
 
@@ -4228,16 +4235,124 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Kernel.nonRails` | 104-106 | — | Definition |
-| `Kernel.supports` | 108-110 | — | Definition |
-| `Kernel.suppCode` | 112-117 | — | Definition |
-| `Kernel.baseSize` | 119-122 | — | Definition |
-| `Kernel.baseAdj` | 124-135 | — | Definition |
-| `Kernel.baseCol` | 137-145 | — | Definition |
-| `Kernel.liftFun` | 149-164 | — | Definition |
-| `Kernel.railImgList` | 166-171 | — | Definition |
-| `Kernel.liftGen` | 173-181 | — | Definition |
-| `Kernel.baseStack` | 185-190 | — | Definition |
-| `Kernel.baseGens` | 192-199 | — | Definition |
-| `Kernel.baseSupply` | 201-205 | — | Definition |
+| `Kernel.nonRails` | 112-114 | — | Definition |
+| `Kernel.supports` | 116-118 | — | Definition |
+| `Kernel.suppCode` | 120-125 | — | Definition |
+| `Kernel.baseSize` | 127-130 | — | Definition |
+| `Kernel.baseAdj` | 132-143 | — | Definition |
+| `Kernel.baseCol` | 145-153 | — | Definition |
+| `Kernel.liftFun` | 157-172 | — | Definition |
+| `Kernel.railImgList` | 174-179 | — | Definition |
+| `Kernel.liftGen` | 181-189 | — | Definition |
+| `Kernel.baseStack` | 193-198 | — | Definition |
+| `Kernel.baseGens` | 200-207 | — | Definition |
+| `Kernel.baseSupply` | 209-213 | — | Definition |
 
+## ChainDescent/DeepenAmenable.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.transportColouring_comp` | 40-47 | — | — |
+| `Deepen.step_aut` | 49-60 | — | — |
+| `Deepen.step_isColAut` | 62-69 | — | — |
+| `Deepen.step_rerelate` | 71-83 | — | — |
+| `Deepen.cidCell` | 91-93 | — | Definition |
+| `Deepen.mem_cidCell_iff` | 95-97 | — | — |
+| `Deepen.cidCell_nodup` | 99-100 | — | — |
+| `Deepen.mem_cidCell_transport` | 102-104 | — | — |
+| `Deepen.cidCell_perm_transport` | 106-115 | — | — |
+| `Deepen.mem_cidCell_transport_apply` | 117-120 | — | — |
+| `Deepen.cidCell_length_transport` | 122-125 | — | — |
+| `Deepen.indivOne_refines` | 134-142 | — | — |
+| `Deepen.step_refines` | 144-150 | — | — |
+| `Deepen.isColAut_parent_of_refines` | 152-158 | — | — |
+| `Deepen.isColAut_fixes_singleton` | 160-165 | — | — |
+| `Deepen.step_preserves_singleton` | 167-172 | — | — |
+| `Deepen.step_indiv_singleton` | 174-185 | — | — |
+| `Deepen.CellSingleOrbit` | 196-199 | — | Definition |
+| `Deepen.RigidObstructionAt` | 201-205 | — | Definition |
+| `Deepen.rigidObstruction_of_not_cellSingleOrbit` | 207-215 | — | — |
+| `Deepen.AmenablePath` | 217-230 | — | Definition |
+| `Deepen.Amenable` | 232-236 | — | Definition |
+| `Deepen.cellSingleOrbit_transport` | 238-253 | — | — |
+| `Deepen.deepen_acc` | 257-282 | — | — |
+| `Deepen.foldl_min_mem` | 284-305 | — | — |
+| `Deepen.chooseIdK_mem` | 307-318 | — | — |
+| `Deepen.joint` | 320-446 | — | — |
+| `Deepen.gate_unique` | 456-469 | — | — |
+| `Deepen.twistOf_of_transport_fixing` | 471-522 | — | — |
+| `Deepen.permOf_apply` | 530-536 | — | — |
+| `Deepen.twistOf_id_off_K` | 538-554 | — | — |
+| `Deepen.mem_deepenGens_of` | 556-579 | — | — |
+| `Deepen.transportColouring_isColAut` | 581-588 | — | — |
+| `Deepen.eq_of_mem_of_length_le_one` | 590-598 | — | — |
+| `Deepen.offCoupled_singleton` | 600-626 | — | — |
+| `Deepen.exec_recovers_cell_orbits` | 628-671 | — | — |
+| `Deepen.wordReach_of_mem_verified` | 675-679 | — | — |
+| `Deepen.wordReach_symm` | 681-684 | — | — |
+| `Deepen.isColAut_mem_branches` | 686-691 | — | — |
+| `Deepen.foldl_min_isSome` | 701-709 | — | — |
+| `Deepen.discrete_of_chooseIdK_none` | 711-730 | — | — |
+| `Deepen.deepen_discrete` | 732-754 | — | — |
+| `Deepen.deepen_isSome` | 756-808 | — | — |
+| `Deepen.deepen_succeeds` | 810-822 | — | — |
+| `Deepen.allSingletonsK_of_discrete` | 824-849 | — | — |
+| `Deepen.gate_of_discrete` | 851-884 | — | — |
+| `Deepen.exec_recovers_refgen_on_cell` | 886-909 | — | — |
+| `Deepen.wordReach_imp_isColAut` | 921-931 | — | — |
+| `Deepen.deepen_branch_orbit_iff_aut` | 933-944 | — | — |
+| `Deepen.deepen_branchOrbit_transport` | 946-969 | — | — |
+| `Deepen.deepenSupply_guarded_canonizer_direct` | 971-984 | — | — |
+| `Deepen.rigidObstruction_imp_not_cellIsOrbit` | 995-1007 | — | — |
+| `Deepen.not_amenablePath_imp_rigidObstruction` | 1009-1035 | — | — |
+
+## ChainDescent/DeepenR1.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.DeepenRefInExec` | 87-91 | — | Definition |
+| `Deepen.wordReach_deepen_of_ref` | 93-103 | — | — |
+| `Deepen.sameOrbits_of_core` | 105-109 | — | — |
+| `Deepen.refInExec_of_mem_deepenGens` | 111-119 | — | — |
+
+## ChainDescent/DeepenRef.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.deepenAll` | 59-73 | — | Definition |
+| `Deepen.replayAll` | 75-82 | — | Definition |
+| `Deepen.deepenRefGens` | 86-98 | — | Definition |
+| `Deepen.deepenRefSupply` | 100-101 | — | Definition |
+| `Deepen.deepen_mem_deepenAll` | 105-134 | — | — |
+| `Deepen.replay_mem_replayAll` | 136-156 | — | — |
+| `Deepen.deepenGens_subset_ref` | 160-200 | — | — |
+| `Deepen.wordReach_mono` | 204-209 | — | — |
+| `Deepen.verified_deepen_subset_ref` | 211-217 | — | — |
+| `Deepen.wordReach_ref_of_deepen` | 219-226 | — | — |
+
+## ChainDescent/DeepenRefTransport.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.contains_map_apply` | 72-78 | — | — |
+| `Deepen.imgFun_transport` | 80-106 | — | — |
+| `Deepen.twistOf_transport` | 110-122 | — | — |
+
+## ChainDescent/RigidSeal.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RigidSeal.leafColKey` | 32-40 | The augmented force key (R0a): on the discretizing branch, ranks a vertex by the complete coloured-pointed invariant `(pin-rank, χ-in-rank-order, leaf-matrix)`; else the cell-size histogram. The plain `Force.lookaheadKey` (adjacency-only) is insufficient. | Definition |
+| `RigidSeal.keyV_leafColKey` | 42-48 | Unfolds `keyV leafColKey` into its discretizing / histogram branches. | `@[simp]` |
+| `RigidSeal.keyCost_leafColKey` | 50-52 | `leafColKey`'s per-branch cost: one warm refinement + `n²`, charged like `lookaheadKey`. | — |
+| `RigidSeal.rankInv_transport` | 56-64 | The rank-`i` vertex of a relabelled discrete colouring is `σ` of the original's — the χ-in-rank-order equivariance atom. | — |
+| `RigidSeal.r0a_core` | 68-93 | R0a core: from the three key component-equalities (leaf matrix, pin-rank, χ-in-rank-order) on discretizing pins, a colour-automorphism `u ↦ w` (`σ = π_w⁻¹π_u`). | — |
+| `RigidSeal.keyEquivariant_leafColKey` | 97-118 | `leafColKey` is equivariant (pin-rank via `vertexRank_transport`, χ-order via `rankInv_transport`, leaf-matrix via `leafMatrix_transport`). | — |
+| `RigidSeal.colAut_of_leafColKey_eq` | 122-146 | **R0a:** equal `leafColKey` values on the discretizing regime ⟹ a colour-automorphism `u ↦ w`. | — |
+| `RigidSeal.RigidResolved` | 150-154 | The rigid-seam predicate (§4): force distinguishes every non-automorphic branch pair. | Definition |
+| `RigidSeal.rigidResolved_leafColKey` | 156-164 | **R0a:** `leafColKey` discharges `RigidResolved` on the discretizing regime (contrapositive of `colAut_of_leafColKey_eq`), no wall. | — |
+| `RigidSeal.nodeResolved_leafColKey_of_rigid_discretizing` | 168-182 | **R0a:** a rigid discretizing branch cell ⟹ `Select.NodeResolved` (feeds `HandledS` via `answersS_of_handledS`), no wall. | — |
+| `RigidSeal.SmallAutThinAt` | 193-202 | The rigid seam's form of the wall `hSmallAutThin`: `leafColKey` separates non-automorphic pairs on the non-discretizing regime. Vacuous on the discretizing regime. | Definition |
+| `RigidSeal.smallAutThinAt_of_all_discretize` | 204-211 | `SmallAutThinAt` holds vacuously when every branch vertex discretizes (R0a needs no wall there). | — |
+| `RigidSeal.rigidResolved_of_smallAutThin` | 213-225 | **R0b:** `RigidResolved (leafColKey)` for the whole cell modulo exactly the wall `SmallAutThinAt` (discretizing pairs discharged by R0a). | — |
+| `RigidSeal.nodeResolved_leafColKey_of_rigid` | 227-239 | **R0b:** `Select.NodeResolved` on any rigid cell modulo the wall `SmallAutThinAt`. | — |

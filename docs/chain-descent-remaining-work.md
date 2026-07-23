@@ -48,6 +48,20 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
+> **▶▶▶ UPDATE 2026-07-23 (latest) — THE ACTIVE TRACK IS THE RIGID SEAL; R0a + R0b LANDED.**
+> **Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (STATUS + §8 + §10 ledger).**
+> The consume side is closed modulo `{Amenable}` (track A, below), and `Amenable`-violation ⟺ `RigidObstructionAt`
+> = the rigid side's job — so the rigid seal is now the frontier. **✅ R0a + R0b LANDED** (`ChainDescent/RigidSeal.lean`,
+> in `build.sh`, all axiom-clean, full gate green 158 s): force separates non-automorphic pairs on the
+> **discretizing** regime via the augmented key `leafColKey` (`(pin-rank, χ-in-rank-order, leaf-matrix)`; the plain
+> `Force.lookaheadKey` is INSUFFICIENT — adjacency-only), and R0b reduces the whole cell to the wall
+> `SmallAutThinAt` (= `hSmallAutThin` at the seam), shrinking the blanket assumed `hsep` to just the
+> non-discretizing residue. **Mixed-cell/fusion design question SETTLED:** the "Progress" completeness predicate IS
+> the already-built sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18) — no object change, `②`
+> single-path preserved; `¬HandledS` = the true mutual stall = a state that cannot progress. **NEXT (rigid-seal
+> §8): P1** (extraction-soundness, standalone F₂/matroid) · **P3** (Smith/ring solve — discharges `SmallAutThinAt`)
+> · **R6(c)** (force-separates-every-exposed-rigid-pair). Everything reduces to the shared wall `hSmallAutThin`.
+>
 > **▶▶▶ UPDATE 2026-07-23 (later) — TRACK A LANDED: `AnchorFires` ELIMINATED, ①c modulo `{Amenable}` ONLY.**
 > `deepen` now discretizes the WHOLE graph, making `[DISC]`/gate/termination STRUCTURAL
 > (`deepen_discrete`/`gate_of_discrete`/`deepen_succeeds`, all axiom-clean, full build green). The capstone

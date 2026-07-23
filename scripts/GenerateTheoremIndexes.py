@@ -7,7 +7,10 @@ privatization pass (with the subagent prompt template) — is documented in
 `scripts/theorem-index-maintenance.md`.
 
 Usage:
-  GenerateTheoremIndexes.py rewrite [--with-line-numbers] [--descriptions JSON]
+  GenerateTheoremIndexes.py rewrite [--no-line-numbers] [--descriptions JSON]
+
+  The `Line` column (source ranges) is ON by default; pass `--no-line-numbers`
+  to omit it. (`--with-line-numbers` still works as an explicit, redundant opt-in.)
 
 `rewrite` regenerates the four index files from the Lean source + the existing
 indices. What it does, per the current requirements:
@@ -17,8 +20,9 @@ indices. What it does, per the current requirements:
      is ensured to have a row in the table for its file, creating the `##
      <path>` section + table header if none exists. (Anonymous `instance` /
      `example` have no identifier and are skipped.)
-  2. **Line column** (`--with-line-numbers`): a `start-end` source range
-     covering the declaration's header (doc comment / attributes) and body.
+  2. **Line column** (on by default; `--no-line-numbers` omits it): a
+     `start-end` source range covering the declaration's header (doc comment /
+     attributes) and body.
   3. **Description** is hand-written and preserved verbatim — or bulk-applied
      from a `--descriptions JSON` map (`{decl_name: description}`), which
      overrides the column for the names it lists.
@@ -549,6 +553,14 @@ def _is_data_row(cells: list[str] | None) -> bool:
                 and cells[0].strip("`").strip() != "Name")
 
 
+def _is_single_decl_name(name: str) -> bool:
+    """True if a Name cell is a lone declaration identifier — as opposed to a
+    *conceptual* row that combines decls (`orbitMk / orbitMk_eq_iff`) or shows a
+    def with its arguments (`AutGroup adj`). Conceptual rows carry a `/` or
+    internal whitespace; a single decl does not."""
+    return bool(name) and "/" not in name and not any(c.isspace() for c in name)
+
+
 def parse_index_layout(path: Path) -> dict:
     """Capture a file as {"preamble": [str], "sections": [section]}.
 
@@ -556,10 +568,14 @@ def parse_index_layout(path: Path) -> dict:
     item    = ("prose", raw_line)
             | ("row", {name, raw, description, notes, tracked})
 
-    A row is `tracked` iff it carries a Line cell (≥4 cells with a line-range
-    2nd cell). Tracked rows are refreshed on re-render; 3-cell *conceptual*
-    rows (a def shown with its args, or several decls in one cell) are kept
-    verbatim.
+    A row is `tracked` (its Line + Notes are refreshed from source on re-render)
+    when it names a **single declaration** — either it already carries a Line
+    cell, OR its Name is a lone identifier (`_is_single_decl_name`). Keying
+    `tracked` on the Line cell *alone* was a footgun: a row that lost its Line
+    cell (a `--no-line-numbers` regen, or one written by hand without it) was
+    frozen as "conceptual" and could never regain a Line. Genuine *conceptual*
+    rows — several decls in one cell, or a def shown with its args — carry a `/`
+    or whitespace and stay verbatim.
     """
     if not path.exists():
         return {"preamble": [], "sections": []}
@@ -577,11 +593,12 @@ def parse_index_layout(path: Path) -> dict:
             continue
         cells = split_row(line)
         if _is_data_row(cells):
+            name = cells[0].strip().strip("`").strip()
             line_cell = cells[1].strip("` ").strip() if len(cells) >= 4 else ""
-            tracked = bool(LINE_CELL_RE.match(line_cell))
+            tracked = bool(LINE_CELL_RE.match(line_cell)) or _is_single_decl_name(name)
             m_hint = re.match(r"\d+", line_cell)
             cur["items"].append(("row", {
-                "name": cells[0].strip().strip("`").strip(),
+                "name": name,
                 "raw": line,
                 "description": cells[-2],
                 "notes": cells[-1],
@@ -705,7 +722,7 @@ _INDEX_PATHS = {
 
 def default_preamble(key: tuple[str, bool], with_line_numbers: bool) -> list[str]:
     out = [f"# {_INDEX_TITLES[key]}", "", _INDEX_DESCRIPTIONS[key], "",
-           "Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: "
+           "Maintained by `scripts/GenerateTheoremIndexes.py rewrite`: "
            "**Name**, **Line**, **Notes** are computed from source; **Description** is "
            "hand-written and preserved.", "## Legend", ""]
     if with_line_numbers:
@@ -953,8 +970,14 @@ def main() -> None:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = parser.add_subparsers(dest="command", required=True)
     p_rw = sp.add_parser("rewrite", help="Regenerate the four index files.")
-    p_rw.add_argument("--with-line-numbers", action="store_true",
-                      help="Include the 'Line' column (header + body source range).")
+    # Line numbers are ON by default. `--with-line-numbers` is kept as an explicit
+    # (redundant) opt-in for backward compatibility; `--no-line-numbers` opts out.
+    p_rw.add_argument("--with-line-numbers", dest="with_line_numbers",
+                      action="store_true", default=True,
+                      help="(default) Include the 'Line' column (header + body source range).")
+    p_rw.add_argument("--no-line-numbers", dest="with_line_numbers",
+                      action="store_false",
+                      help="Omit the 'Line' column (source ranges).")
     p_rw.add_argument("--descriptions", metavar="JSON",
                       help="Path to a JSON `{decl_name: description}` map whose "
                            "entries override the Description column.")

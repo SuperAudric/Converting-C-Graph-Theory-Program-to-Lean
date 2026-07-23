@@ -47,10 +47,11 @@
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
 >   §11.12). It solves CFI / multipede / `Z_{2^k}` / general-arity / `s`-fold covers. This is the **reference spec**
 >   the Lean must certify — not a lift (there is no Smith-normal-form in Lean yet).
-> - **Lean — NEARLY EMPTY.** What exists: the typed contract `Phase2.Solver`/`Sound`/`IsoInvariant`
->   (`Phase2Handoff.lean:74,78,85`) + `handoffBase_relabel`; the force resolver `lookaheadKey` +
->   `keyEquivariant_lookahead` (`Force.lean:564,592`, PROVED); the consume-handoff lemmas (§5). **No Lean
->   rigid-solver, no Smith/ring solve, no force-separation theorem, no P1–P4.** ⚠ The `RRU` namespace in
+> - **Lean — R0a/R0b LANDED; the SOLVER is still empty.** What exists: the typed contract
+>   `Phase2.Solver`/`Sound`/`IsoInvariant` (`Phase2Handoff.lean:74,78,85`) + `handoffBase_relabel`; the force
+>   resolvers `lookaheadKey` and now the augmented **`leafColKey`** (`RigidSeal.lean`); **the force-separation
+>   theorem on the discretizing regime (R0a) + the wall reduction (R0b), all axiom-clean.** **Still no Lean
+>   rigid-solver, no Smith/ring solve, no P1–P4, no `canonizesRigidResidue_or_flags`.** ⚠ The `RRU` namespace in
 >   `Phase2Handoff.lean` (the *sequential* R(G) handoff) is **RETIRED** for the interleaved model (`endgame §1a`) —
 >   do not build on it; the surviving seam is `Phase2.Solver`/`Sound`/`IsoInvariant`.
 > - **The handoff (NEW, from consume).** Consume (`deepenSupply`) now provably exposes, per node, a concrete
@@ -138,10 +139,14 @@ CellResolved key S adj χ := CellIsOrbit S adj χ ∨ (∀ u w ∈ branches χ, 
 ```
 The rigid side owns the **second disjunct** (force separates the cell). On a rigid cell the first disjunct is dead
 (`rigidObstruction_imp_not_cellIsOrbit`), so `CellResolved` reduces to **force distinguishing the exposed
-non-automorphic pair**. ⚠ **This is NOWHERE proved in Lean** — force separation is an *assumed* `hsep` hypothesis
-throughout (`Force.lean:409` `forceBy_singleton_of_separating`), named as the open obligation
-(`Composite.lean:238`, `DeepenAmenable.lean:947`). `Handled` (`Residue.lean:162`) quantifies `CellResolved` over
-the reachable non-discrete colourings; every current discharge goes through the *consume* branch, never force.
+non-automorphic pair**. ⚠ **UPDATED 2026-07-23 — this is now PARTLY PROVED (R0a/R0b, `RigidSeal.lean`).** The
+augmented key `leafColKey` provably separates every non-automorphic branch pair on the **discretizing regime**
+(`RigidSeal.rigidResolved_leafColKey`, axiom-clean), and R0b (`rigidResolved_of_smallAutThin`) reduces the whole
+cell to the wall `SmallAutThinAt` (non-discretizing pairs only). The blanket assumed `hsep`
+(`Force.lean:409` `forceBy_singleton_of_separating`; `Composite.lean:238`, `DeepenAmenable.lean:947`) is thus
+shrunk from *all* non-automorphic pairs to just the non-discretizing residue. `Handled` (`Residue.lean:162`) /
+`HandledS` (`SelectNode.lean:842`) quantify `CellResolved`/`NodeResolved` over the reachable non-discrete
+colourings; R0a is the **first** force-branch discharge (every prior discharge went through *consume*).
 
 **Level 2 — the solver-correctness obligation (`Phase2.Solver`, §1).** `Sound ∧ IsoInvariant`, and canonize-or-flag
 with the flag residual = the wall. This is the full rigid canonizer (Algorithm R), of which Level-1 force-separation
@@ -208,11 +213,17 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 
 ## 7. The Lean gap — what is NOT built
 
+> **▶ UPDATED 2026-07-23 — R0a/R0b changed this list.** `RigidSeal.lean` now builds the **force-separation
+> theorem on the discretizing regime** + the reduction to the wall. What remains unbuilt is the *solver* (P1–P4)
+> and the *non*-discretizing separation (`SmallAutThinAt`, = the wall). Corrected below.
+
 - **No rigid-solver object.** "Algorithm R" / "linear oracle" are C#/prose only; the Phase-1 linear oracle is
   `LinearOracle.configSwap_of_aut/twin` inside CFI, not a general solver.
 - **No Smith normal form / ring solve** anywhere in Lean.
-- **No force-separation theorem** — the whole `RigidResolved` / `CellResolved` force branch (§4) is open, an assumed
-  `hsep`.
+- **✅ Force-separation on the DISCRETIZING regime is now BUILT** (R0a, `RigidSeal.lean`, axiom-clean): the
+  augmented key `leafColKey` + `rigidResolved_leafColKey` + `nodeResolved_leafColKey_of_rigid_discretizing`.
+  **What is NOT built:** the *non*-discretizing separation — carried as the wall `SmallAutThinAt` (R0b's
+  `rigidResolved_of_smallAutThin`); it is discharged by the rigid solver (P3), not yet built.
 - **No `canonizesRigidResidue_or_flags`** — the capstone does not exist.
 - **`hSmallAutThin` is a hypothesis, not a lemma** (`CascadeAffine.lean:1320`).
 - The surviving Lean seam is only the **contract** (`Phase2.Solver`/`Sound`/`IsoInvariant` + `handoffBase_relabel`);
