@@ -4429,3 +4429,14 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RigidSolver.ptIsoInvariant_emitLabel` | 125-141 | — | — |
 | `RigidSolver.keyEquivariant_compKey_emitLabel` | 156-162 | — | — |
 | `RigidSolver.nodeResolved_compKey_emitLabel` | 164-175 | — | — |
+## ChainDescent/RigidRREF.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RigidRREF.rrefCanon` | 34-42 | The **canonical column-ordered F₂ RREF** — `Kernel.echelon rows` reordered so its pivots appear in increasing column order `0…m-1` (a `find?`-scan). Canonical *shape* (`gen` sub-brick A); canonicity as a subspace invariant is brick B. | Definition |
+| `RigidRREF.mem_echelon_of_mem_rrefCanon` | 44-55 | Every pivot of the canonical form is a pivot of `echelon rows` (the reorder loses nothing). | — |
+| `RigidRREF.mem_rrefCanon_of_mem_echelon` | 57-70 | Conversely every `echelon` pivot appears in the canonical form (at its own column); needs uniform-length rows for `pivInv_echelon`'s `col_lt`/`nodup`. | — |
+| `RigidRREF.mem_rrefCanon_iff` | 72-75 | The canonical form and `echelon rows` have exactly the same pivots (a reordering). | — |
+| `RigidRREF.rrefCanon_nodup` | 77-84 | The canonical pivot list is duplicate-free (distinct columns scanned once). | — |
+| `RigidRREF.rrefCanon_cols_nodup` | 86-94 | Its pivot **columns** are distinct — the `PivInv.nodup` field, transported. | — |
+| `RigidRREF.pivInv_rrefCanon` | 96-115 | **★ Row-space preservation for the canonical form**: `rrefCanon m rows` inherits `PivInv` — a reduced echelon system with the **same row space as the input, both directions**. The foundation bricks B/C/D build on. | — |

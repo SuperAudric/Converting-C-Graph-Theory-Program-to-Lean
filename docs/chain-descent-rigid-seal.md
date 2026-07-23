@@ -71,9 +71,13 @@
 > ⟹ `rowspace(H)` codeword, via P1) + `rowspace_eq_span_recoverable` (exact recovery mod carried generation).
 > **✅ P3-F₂ CORE LANDED 2026-07-23** (`RigidSolveF2.lean`): the F₂ rigid-solve determinacy `unique_solution_of_rigid`
 > (rigid `IsRigidF2` = trivial kernel ⟹ ≤1 solution to `Hx=b`, the unique-solve Gaussian gives where unit-prop stalls
-> at `2^{Θ(n)}`; rigidity is a `rowspace(H)`-only property via `dotP_zero_rowspace`). **Next:** wire the unique solve
-> under an iso-invariant frame into an equivariant `gen` (`GenEquivariant`+`hemit`, the `②`/poly framing+emit) →
-> P3-ring → R6(c)/P4. Residue = `¬HandledS` at non-linear rigid; `hSmallAutThin` = separate (Route-C, W1).
+> at `2^{Θ(n)}`; rigidity is a `rowspace(H)`-only property via `dotP_zero_rowspace`). **The concrete `gen` is SCOPED
+> into four sub-bricks (§8.2), reusing the already-built executable F₂ echelon (`Kernel.echelon`); ✅ sub-brick (A) —
+> the canonical column-ordered RREF `rrefCanon` — LANDED 2026-07-23** (`RigidRREF.lean`, axiom-clean, gate green:
+> `pivInv_rrefCanon` = the canonical form preserves the row space both ways). **Next:** (B) RREF-canonicity as a
+> subspace invariant → (C) the χ-frame (RREF is equivariant only per an iso-invariant column order) → (D) read the
+> labelling ⟹ `GenEquivariant`+`hemit` → P3-ring → R6(c)/P4. Residue = `¬HandledS` at non-linear rigid;
+> `hSmallAutThin` = separate (Route-C, W1).
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -410,7 +414,22 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
     at `2^{Θ(n)}`); `dotP_zero_rowspace`/`isRigidF2_rowspace` make rigidity a property of `rowspace(H)` alone
     (basis-independent, composes with P1/P2). ⚠ **Remaining** — wire this unique assignment, under an iso-invariant
     frame, into an equivariant `gen` (`GenEquivariant` + `hemit`); that framing + emit is graph-canonization of the
-    linear code and is where the `②`/poly content lives.
+    linear code and is where the `②`/poly content lives. **▶ SCOPED into four sub-bricks (2026-07-23), reusing the
+    EXISTING executable F₂ echelon** (`Kernel.echelon` + `pivInv_echelon`, `KernelGauss.lean`: the RREF algorithm is
+    already built and its span-preservation both-ways proved via `PivInv`):
+    - **✅ (A) canonical RREF object — LANDED 2026-07-23 (`ChainDescent/RigidRREF.lean`, axiom-clean, in `build.sh`).**
+      `echelon` returns pivots in fold-discovery order (a function of the generating *list*); `rrefCanon m rows`
+      reorders them to increasing **column order** `0…m-1` (`find?`-scan), a canonical *shape*. `mem_rrefCanon_iff`
+      (same pivots — a reorder, no loss) + `pivInv_rrefCanon` (the canonical form **inherits `PivInv`** — reduced
+      echelon, row space preserved both ways). `#eval`-tested. The foundation the labelling reads.
+    - **(B) canonicity as a subspace invariant — NEXT.** RREF is unique given the column order: `PivInv m r₁ P₁ →
+      PivInv m r₂ P₂ → sameRowspace r₁ r₂ → rrefCanon-normal P₁ = P₂`. The crux new theorem (uniqueness of reduced
+      echelon form).
+    - **(C) the χ-frame.** RREF is canonical **only per column order**, so it is *not* equivariant on raw indices
+      (permuting columns changes the pivot set). The order must come from χ (iso-invariant — the existing
+      `rankInv_transport`/`vertexRank_transport`). Compose (B) with the χ-order transport.
+    - **(D) read the labelling.** Turn the framed canonical RREF into the permutation `gen`; prove `GenEquivariant`
+      from (C) and `hemit` (totality on the linear residue). This closes P3-F₂'s `①`/`②` via P3-Sound's capstones.
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**
@@ -497,7 +516,7 @@ the two together, not as separate legs.
 | **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
 | **P3-Sound** | soundness is FREE (relabelling-emit) + `①` reduces to `GenEquivariant gen` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverSound.lean`) — `ptForm`/`colAut_of_ptForm_eq`/`emitLabel`/`ptSound_emitLabel`/`ptIsoInvariant_emitLabel` + capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` |
-| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **Remaining:** wire the unique solve under an iso-invariant frame into `gen` (the `②`/poly framing+emit) |
+| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF LANDED 2026-07-23** (`RigidRREF.lean`, `rrefCanon`/`mem_rrefCanon_iff`/`pivInv_rrefCanon`, axiom-clean — reuses `Kernel.echelon`). **Remaining:** (B) RREF-canonicity, (C) χ-frame, (D) read the labelling ⟹ `GenEquivariant`+`hemit` |
 | **P3-ring** | `Z_{2^k}`/finite-abelian: ring-inference + finite-ring Smith + 2-adic tower | **not built** — heavy; ring-inference carried (`IR §11.13`). ⚠ Mathlib Smith = noncomputable/existence-only |
 | **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
 | **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |
