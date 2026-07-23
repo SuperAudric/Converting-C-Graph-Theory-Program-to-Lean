@@ -55,9 +55,10 @@
 > `IsoInvariant`, structural given `KeyEquivariant sk`), `rigidResolved_compKey` (whole cell modulo
 > `SolverSeparates`), `nodeResolved_compKey_of_rigid` (the force half of "consume-can't-fire ⟹ force-fires"; the
 > consume half is the untouched `cellIsOrbit` disjunct of `NodeResolved`). `sk`/`SolverSeparates` are stubbed to
-> P3. **Next:** P1 (extraction, standalone F₂/matroid) → P3 (build `sk` = the ring solve, discharges
-> `SolverSeparates`) → R6(c)/P4. The residue is `¬HandledS` at non-linear rigid; `hSmallAutThin` stays home on the
-> Route-C symmetry seals (W1, a separate obligation).
+> P3. **✅ P1 LANDED 2026-07-23** (`ForcingCircuits.lean`, extraction-soundness, Mathlib-only standalone,
+> axiom-clean — `forced_certificate`: forced ⟹ backed by a `rowspace` codeword). **Next:** P3 (build `sk` = the
+> ring solve, discharges `SolverSeparates`) → R6(c)/P4. The residue is `¬HandledS` at non-linear rigid;
+> `hSmallAutThin` stays home on the Route-C symmetry seals (W1, a separate obligation).
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -325,8 +326,17 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 
 ### 8.2 Algorithm R Lean (P1–P4 — `endgame §3`, `IR §11.12`; do-not-rescope)
 
-- **P1 — extraction-soundness (do first; standalone / Mathlib-direct).** Minimal forcing-circuits generate
-  `rowspace(H)` — pure F₂/matroid, no graph model. The soundness of the linear-system recovery.
+- **✅ P1 — extraction-soundness — LANDED 2026-07-23 (`ChainDescent/ForcingCircuits.lean`, Mathlib-only standalone,
+  axiom-clean).** Pure F₂, no graph model. `Forced H S j` = unit-propagation closure `cl_up` over constraint rows
+  `H : Finset (ι → ZMod 2)`. **`forced_certificate`:** everything forced is backed by a genuine row-space codeword
+  — `Forced H S j ⟹ j ∈ S ∨ ∃ c ∈ rowspace H, c j ≠ 0 ∧ support(c) ⊆ insert j S`. ★ This is the **corrected,
+  unconditional** form of the prototype's minimality fix (§11.4a #2): the naive `e_W ∈ rowspace` is *unsound*
+  because `cl_up ≠ cl_lin`, so we extract the **actual codeword `c`** (not the indicator `e_W`) and no minimality
+  bookkeeping is needed. Proof = induction on the forcing derivation (base row + F₂-cancellation of the
+  intermediate certificates). Corollaries `certificate_of_forced_notMem` / `certificate_mem_rowspace`
+  (`cl_up ⊆ cl_lin` at the witness level — what P3's Smith/rank solve consumes). ⚠ The **generation** direction
+  (certificates *span* `rowspace(H)`) is the P2 model bridge, carried (needs rows = minimal circuits, a graph
+  property). This matches P1's name: *extraction-**soundness***.
 - **P2 — forcing-model bridge (carried, discharge later).** "1-WL forcing over `A` = ring-unit propagation" as a
   model hypothesis linking the graph to the recovered system.
 - **P3 — solve + canonical-form iso-invariance (the heavy new build).** Smith over the ring → canonical coset;
@@ -406,8 +416,8 @@ the two together, not as separate legs.
 | **R0b** | leafColKey precursor (non-discretizing separation) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`) — `smallAutThinAt_of_all_discretize` + `rigidResolved_of_smallAutThin` + `nodeResolved_leafColKey_of_rigid`. ⚠ `SmallAutThinAt` is the leafColKey-specialization, **NOT the scheme wall `hSmallAutThin`** and **not dischargeable**; superseded by `compKey` |
 | **compKey** | dischargeable seam: force key = `leafColKey` (disc, tag `1::`) ∘ solver key `sk` (non-disc rigid, tag `0::`); carried obligation = `SolverSeparates` (a solver property, discharged by P3's `Phase2.Sound`) | **✅ LANDED 2026-07-23, axiom-clean** (§9, `RigidSeal.lean`) — `compKey` + `keyEquivariant_compKey` (given `KeyEquivariant sk`) + `SolverSeparates` + `rigidResolved_compKey` + `nodeResolved_compKey_of_rigid`. `sk`/`SolverSeparates` stubbed to P3. The force half of "consume-can't-fire ⟹ force-fires." |
 | **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **Remaining = (c) force-separates-every-exposed-rigid-pair** (`RigidObstructionAt`'s pair gets distinct `keyV` ⟹ its cell `cellNarrow`s to ≤1 ⟹ `NodeResolved`) — the substance, tied to rigid-resolver STRENGTH, co-evolves with P3/P4. Deepest ③/totality claim. |
-| **P1** | minimal forcing-circuits generate `rowspace(H)` | **not built** — F₂/matroid, standalone, do first |
-| **P2** | forcing-model bridge (1-WL forcing = ring propagation) | **carried** — model hypothesis |
+| **P1** | extraction-soundness: forced ⟹ backed by a `rowspace(H)` codeword (support ⊆ `insert j S`) | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingCircuits.lean`, Mathlib-only standalone) — `Forced`/`cl_up` + `forced_certificate` (unconditional; the codeword not the indicator ⟹ no minimality needed) + `certificate_of_forced_notMem`/`certificate_mem_rowspace` |
+| **P2** | forcing-model bridge (1-WL forcing = ring propagation; certificates *generate* `rowspace`) | **carried** — model hypothesis (needs rows = minimal circuits) |
 | **P3** | build `sk` (solve Smith/ring) + canonical-form iso-invariance ⟹ **discharges `SolverSeparates`** (`Phase2.Sound`) + `KeyEquivariant sk` (`Phase2.IsoInvariant`) | **not built** — the heavy build |
 | **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
 | **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |
