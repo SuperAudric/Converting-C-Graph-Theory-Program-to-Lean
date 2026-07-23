@@ -19,7 +19,9 @@
 ## ▶ STATUS (2026-07-23)
 
 > **The C# rigid solver is COMPLETE; the Lean rigid seal is nearly empty; the consume side now feeds it a clean
-> per-node handoff object.** This is the next track to build.
+> per-node handoff object, AND discharging its own `Amenable` hypothesis is a rigid-side deliverable (§9.1).**
+> This is the next track to build. First concrete steps (all wall-free / design-level): resolve the mixed-cell
+> design question (§8.1), then R0a (§8.1); the heavy P3 Smith build waits until the design settles.
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -258,6 +260,27 @@ rigid-resolved (the force branch, via `RigidResolved`), with the interleaving ha
 supplies the force-branch discharge, conditional on `hSmallAutThin`. State the goal as the **conditional**
 ("canonized or unhandled rigid residue"), not "rigid GI ∈ P" — the conditional is exactly what ③ formalises and is
 robust to a non-empty residual (`endgame §3` design note).
+
+**⚠ Non-vacuity note (③).** `Residue.residue_nonvacuous` is proven for the real `Residue := ¬Handled` object; but
+`Publication.UnhandledResidue` is still three `opaque` atoms with a `sorry` non-vacuity. The ③ Publication-swap
+(opaque atoms → the real `¬Handled` residue) is **deliberately deferred** until this doc's build determines the
+rigid residue's final shape — the atoms should not be pinned before the rigid seal fixes what the rigid-obstruction
+atom actually is. When R0a/R0b/P4 land, the swap becomes mechanical and non-vacuity follows.
+
+### 9.1 The `Amenable` coupling — this is ALSO how consume's ①c closes
+
+The rigid seal is not merely a parallel second seal; it is **what discharges the consume side's last domain
+hypothesis.** `deepenSupply`'s ①c is closed modulo `{Amenable, AnchorFires}` (`deepenSupply_guarded_canonizer_direct`,
+`DeepenAmenable.lean:931`), and an **`Amenable`-violation is exactly a `RigidObstructionAt`**
+(`rigidObstruction_of_not_cellSingleOrbit`) — a same-colour non-automorphic pair, i.e. the rigid side's job. So
+"discharge `Amenable` on family `F`" is not a separate obligation from the rigid work; it **is** the statement that
+the interleaving delivers Schurian (pure-symmetry) cells to consume, with the rigid pairs peeled by force first.
+Concretely, per family this is a **totality/scheduling** obligation (not a new conjecture): show that every cell
+deepen visits on `F` is either a single Stab-orbit (Schurian → consume fires, `Amenable` holds) or carries a
+`RigidObstructionAt` that force separates first (→ refine → re-expose → the now-Schurian sub-cell is `Amenable`).
+Both branches route through the same shared wall `hSmallAutThin`. **Framing consequence:** every family the rigid
+seal handles (R2: CFI, `Z_{2^k}`, multipede) simultaneously discharges deepen's `Amenable` on that family — track
+the two together, not as separate legs.
 
 ---
 

@@ -322,9 +322,16 @@ resolver contract) before touching it.
    resolver instances now exist to cost against. **Fuel is per-layer, never threaded** (each resolver is poly-or-flag
    *locally*; do not "optimize" this into a global budget).
 2. **③** — `stalled ⟹ residueHiddenJohnson ∨ residueRigidObstruction` (D1 ∨ D2), plus non-vacuity.
-3. **The Publication swap** — `Publication.canonForm?` is still an `opaque` stub; substitute the real object. ⚠ Note
-   `unhandledResidue_nonvacuous` is currently **unprovable in principle**: the three residue atoms are `opaque … :
-   Prop` with no definition, so they can be neither inhabited nor refuted until they are defined.
+3. **The Publication ③ swap** — ⚠ **UPDATED 2026-07-23.** The ① half of the swap is DONE: `Publication.canonForm?`
+   is now the **real** fused record object (`fold++deck++deck2++kernel`), and the ① trio is axiom-clean at it —
+   the "still an `opaque` stub" claim is obsolete. What remains is the **③ swap**: `Publication.UnhandledResidue`
+   is still three `opaque … : Prop` atoms, so `unhandledResidue_nonvacuous` (Publication) stays a `sorry`. But the
+   "unprovable in principle" framing is now RECONCILED: `Residue.residue_nonvacuous` **IS proven** (`Residue.lean`,
+   for the real `Residue := ¬Handled` definition — provable exactly because `¬Handled` is a definition, not an
+   opaque atom). The remaining work is to swap Publication's opaque-atom `UnhandledResidue` onto the real `¬Handled`
+   object (mirroring the ① swap), which then makes non-vacuity provable. **That swap is DEFERRED until the rigid
+   residue is better determined** (the atoms' final shape depends on the rigid seal); see
+   [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) §9.
 
 **The executable RUNS** — exhaustive canonization of `C₃…C₇` in well under a second per graph, with
 `ChainDescent/PerformanceTest.lean` in `build.sh` as a **regression gate** (it `#guard`s iso-invariance,

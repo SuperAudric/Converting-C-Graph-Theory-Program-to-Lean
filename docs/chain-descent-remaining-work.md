@@ -48,18 +48,27 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
-> **▶▶▶ UPDATE 2026-07-22 — READ `docs/chain-descent-deepen-supply.md` FIRST (authoritative + self-contained).**
-> The C3b ①c crux (R1) advanced substantially. **R1 ⟸ (Amenable⟹R1)+Amenable** [`Amenable` = every deepening
-> cell is a single Stab-orbit]. **`Amenable⟹R1` = the re-relating induction `joint` — LANDED axiom-clean**
-> (`DeepenAmenable.lean`), now with **anchor-tracking**. **The whole thing reduces `hL1 ⟸ hreach`** (LANDED:
-> `deepenRefInExec_of_reachOnK`; off-`K` = `refl`), where **`hreach` = "the anchor-to-rep twists generate the
-> full `IsColAut`-action on `K`".** `hreach` splits: **branch-cell half LANDED** (`exec_recovers_cell_orbits`);
-> **remaining = (a) discharge `[INV]`** (off-coupled = χ-singleton, `offCoupled_singleton`, parked) **+ (b) the
-> `K∖cell` crux = `ker φ` recovery** — **Route ε** (native ref⊆exec path-difference induction, reuses `joint`)
-> primary, **Route ζ** (import `RecoverableByDepth`/`CellsAreOrbits`) parallel; backup all-or-nothing gate only
-> if ε+ζ stall. Full plan + route ledger = deepen doc **§9.1.1 / §9.1.2**; theorem inventory = **§8**.
-> K-coverage was VALIDATED (t3 exec-6/ref-96, `K∖cell` orbits IDENTICAL). **Everything below (2026-07-21) is
-> the prior framing — superseded on the R1 mechanics by the deepen doc; still correct on R2 + Layer 2.**
+> **▶▶▶ UPDATE 2026-07-23 — THE REFERENCE IS ELIMINATED; ①c IS CLOSED modulo `{Amenable, AnchorFires}`.
+> READ `docs/chain-descent-deepen-supply.md` FIRST (authoritative + self-contained).**
+> The whole reference apparatus — `deepenRefSupply`, R1 (`SameOrbits`), R2 (`twistOf`-transport), and with them
+> the `hL1 ⟸ hreach` reduction, the `K∖cell = ker φ` crux, and Routes ε/ζ — is **DISCARDED**. ①c now rides
+> `rep` on `forcedSet ⊆ branches` directly: the object's flag reads the supply only through the branch-orbit
+> relation, which transports because **deepen's branch orbits EQUAL the `IsColAut`-orbits**
+> (`deepen_branch_orbit_iff_aut`), which conjugate under σ. Capstone **`deepenSupply_guarded_canonizer_direct`
+> (`DeepenAmenable.lean:931`, axiom-clean)** discharges ①c modulo exactly two **domain facts**:
+> · **`Amenable`** — every deepening level's `chooseIdK` cell is a single orbit of the pointwise-stabilizer.
+>   An `Amenable`-violation ⟺ `RigidObstructionAt` (a same-colour non-automorphic pair) ⟹ it is the **rigid
+>   side's** job, gated on the SAME shared wall `hSmallAutThin` (§1W). This is the **coupling to the rigid seal**
+>   — discharging `Amenable` on a family = the interleaving delivering Schurian cells to consume. See
+>   [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md).
+> · **`AnchorFires`** — per-anchor: `deepen` succeeds + gate passes + `Discrete` leaf. A **firing lemma**, not a
+>   wall; the next concrete deepen task.
+> The rigid HANDOFF is landed axiom-clean: `rigidObstruction_imp_not_cellIsOrbit` (deepen defers soundly, :957)
+> + `not_amenablePath_imp_rigidObstruction` (a consume-stall always exposes a concrete rigid node, :972).
+> **⚠ EVERYTHING BELOW IN THIS AND THE FOLLOWING FRONTIER BLOCK (through §1C C3 ii-c) IS PROVENANCE ONLY** —
+> the reference/R1/R2/`K∖cell`/Route-ε-ζ mechanics it describes are superseded by the reference-free close
+> above. It is retained for the arc, not as live plan. `deepenRefSupply`/`SameOrbitsOnBranches` survive in the
+> source for provenance only.
 
 ## ▶ CURRENT FRONTIER (2026-07-21) — the prior framing (superseded on R1 by the deepen doc)
 

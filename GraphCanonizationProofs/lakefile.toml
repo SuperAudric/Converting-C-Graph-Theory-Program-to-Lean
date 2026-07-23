@@ -2,6 +2,16 @@ name = "GraphCanonizationProofs"
 version = "0.0.1"
 defaultTargets = ["ChainDescent", "ChainDescent.Spine", "ChainDescent.OrbitRecovery", "ChainDescent.ClosureCalculus", "ChainDescent.Saturation", "ChainDescent.GaussCount", "ChainDescent.CFI", "ChainDescent.Scheme", "ChainDescent.CascadeOracle", "ChainDescent.LinearOracle", "ChainDescent.Group", "ChainDescent.Cascade", "ChainDescent.CascadeAffine", "ChainDescent.FormsGraphConcrete"]
 
+# ⚠ `defaultTargets` above is a PARTIAL subset — it is what bare `lake build`
+# (no args) compiles, and it OMITS the whole active canonizer/resolver cluster
+# (Descend, Refine, Consume, Force, Composite, Cost, Residue, SupplyTransport,
+# Select/SelectNode, Fold/Deck/Deck2/Kernel*, Deepen*, Phase2Handoff, …) and
+# `Publication.lean`. The AUTHORITATIVE full gate is `bash scripts/build.sh`
+# (serial, ~215 s; its hand-maintained MODULES list = the real build set; the
+# `lean_lib ChainDescent` below makes every module a valid `lake build <mod>`
+# target regardless). Running bare `lake build` and concluding the cluster is
+# "off-build" is a known foot-gun — always verify against build.sh.
+
 # Active library: chain-descent canonizer correctness work.
 # The retired V4 lean stack (LeanGraphCanonizerV4, UniqueGraphsBySize,
 # LeanGraphCanonizerV4Tests, LeanGraphCanonizerV4Correctness, FullCorrectness/)
