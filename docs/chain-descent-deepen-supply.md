@@ -14,6 +14,34 @@
 
 ---
 
+## ▶ STATUS (2026-07-23) — ★★★ TRACK A: `AnchorFires` ELIMINATED, `①c` modulo `{Amenable}` ONLY
+
+> **The whole-graph-discretize redesign LANDED axiom-clean; full build green (155 s).** `deepen` now
+> individualizes to **whole-graph** discreteness (not just the anchor's coupled footprint), which makes
+> `[DISC]` — the leaf being discrete — **STRUCTURAL** rather than a carried firing hypothesis. Consequences,
+> all in `DeepenAmenable.lean`, all `[propext, Classical.choice, Quot.sound]`:
+> - **`AnchorFires` is DELETED.** Its three components are now theorems: `deepen_discrete` (a successful
+>   leaf is discrete, via `discrete_of_chooseIdK_none`), `deepen_succeeds` (termination — fuel `n` suffices
+>   by the colour-count measure `ncol_lt_indivOne_of_partner` + `ncol_le_refine`), and `gate_of_discrete`
+>   (the gate passes on a non-trivial branch cell). `allSingletonsK_of_discrete` supports the gate.
+> - **`deepenSupply_guarded_canonizer_direct` now takes ONLY `hAmen : ∀ adj χ, Amenable adj χ`.** `①c` closes
+>   modulo `{Amenable}` alone — no `AnchorFires`, no reference, no R1/R2.
+> - **The entire reference apparatus is REMOVED from the build** (not just superseded): `deepenRefGens`,
+>   `DeepenRefInExec`, `ExecRecoversKMinusCell`, `sameOrbitsOnBranches_of_cell`, `deepenRefSupply`, and the
+>   files `DeepenRef`/`DeepenRefTransport`/`DeepenR1` are parked out of `build.sh`. The `imgFun` /
+>   `twistOf_eq_imgFun` helpers moved to `DeepenSupply`.
+> - **`joint` / `deepen_acc` / `AmenablePath` re-proven** for the whole-graph loop; the rigid handoff
+>   (`rigidObstruction_imp_not_cellIsOrbit`, `not_amenablePath_imp_rigidObstruction`) re-proven — the
+>   exposed-rigid property survives.
+> - **`Amenable` is now the SOLE ①c condition** and it IS the "cells are orbits" domain (`CellsAreOrbits`,
+>   `CascadeOracle`) — free at discreteness (`cellsAreOrbits_of_discrete`), difficulty honestly on the rigid
+>   side, its failure an *exposed* rigid decision. See [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) §9.1.
+> - **Firing is UNCHANGED on every measured witness** (mp7/G8/t3/wcyc9 already whole-discretize); the change
+>   only adds behaviour on anchors that did not previously whole-discretize (they now defer soundly if a
+>   visited cell is rigid — the exposed-rigid handoff).
+>
+> **Everything below is the pre-track-A framing (reference/AnchorFires route), retained for provenance.**
+
 ## ▶ STATUS (2026-07-22)
 
 > **UPDATE 2026-07-22 — Layer-1 core + the BRIDGE REDUCTION + the BRANCH-CELL HALF all LANDED axiom-clean**

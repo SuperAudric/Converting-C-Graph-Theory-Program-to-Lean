@@ -48,7 +48,15 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
-> **▶▶▶ UPDATE 2026-07-23 — THE REFERENCE IS ELIMINATED; ①c IS CLOSED modulo `{Amenable, AnchorFires}`.
+> **▶▶▶ UPDATE 2026-07-23 (later) — TRACK A LANDED: `AnchorFires` ELIMINATED, ①c modulo `{Amenable}` ONLY.**
+> `deepen` now discretizes the WHOLE graph, making `[DISC]`/gate/termination STRUCTURAL
+> (`deepen_discrete`/`gate_of_discrete`/`deepen_succeeds`, all axiom-clean, full build green). The capstone
+> `deepenSupply_guarded_canonizer_direct` takes ONLY `hAmen`; the reference apparatus + `DeepenRef*`/`DeepenR1`
+> are removed from the build. **`Amenable` is now the sole ①c condition = `CellsAreOrbits`** (free at
+> discreteness; its failure is an exposed rigid decision). Authoritative: `docs/chain-descent-deepen-supply.md`
+> STATUS (2026-07-23). The `{Amenable, AnchorFires}` framing just below is superseded.
+>
+> **▶▶▶ UPDATE 2026-07-23 (earlier) — THE REFERENCE IS ELIMINATED; ①c IS CLOSED modulo `{Amenable, AnchorFires}`.
 > READ `docs/chain-descent-deepen-supply.md` FIRST (authoritative + self-contained).**
 > The whole reference apparatus — `deepenRefSupply`, R1 (`SameOrbits`), R2 (`twistOf`-transport), and with them
 > the `hL1 ⟸ hreach` reduction, the `K∖cell = ker φ` crux, and Routes ε/ζ — is **DISCARDED**. ①c now rides

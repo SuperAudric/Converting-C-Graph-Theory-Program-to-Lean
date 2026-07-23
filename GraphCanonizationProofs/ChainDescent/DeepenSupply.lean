@@ -145,17 +145,28 @@ def chooseIdK (K : List (Fin n)) (χc : Colouring n) : Option Nat :=
 def step (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : Refine.ColData n :=
   Refine.warmRefineVec adj (Descend.indivOne χ v)
 
-/-- **`DeepenAnchor`.** Descend the lowest-id non-singleton sub-cell until the footprint is
-all-singletons, recording the chosen cell ids. The parent colouring stays FIXED at the node
-colouring. `none` when nothing splits or the fuel (`n` levels) runs out. -/
+/-- **`DeepenAnchor` (track A — WHOLE-GRAPH discretization, 2026-07-23).** Descend the lowest-id
+non-singleton cell **of the whole graph** (not just the anchor's coupled footprint) until the entire
+colouring is discrete, recording the chosen cell ids. `none` only when the fuel (`n` levels) runs out.
+
+**Why whole-graph, not the coupled footprint (the design change that eliminates `AnchorFires`).** The
+emitted twist is identity off the coupled component `K = coupled χ leaf`; for it to verify as a genuine
+`IsColAut` on a *connected* graph, the off-`K` vertices must be inert, i.e. `χ`-singletons — which is
+exactly `Discrete leaf` (`[DISC]`). Stopping at *coupled-component* discreteness (the old design) left
+`[DISC]` as a carried, false-in-general firing hypothesis (`AnchorFires`). Individualizing to
+**whole-graph** discreteness makes `[DISC]` STRUCTURAL (deepen succeeds ⟹ `Discrete leaf`, by
+fuel-adequacy), so `offCoupled_singleton` holds for free and the sole remaining ①c condition is the
+symmetry condition = `CellsAreOrbits` (`CascadeOracle`), where cells-are-orbits is itself free at
+discreteness (`cellsAreOrbits_of_discrete`). ⚠ `χp` is now vestigial in this loop (the twist's support
+`coupled χ leaf` is computed downstream in the supply); it is kept in the signature to minimise churn.
+On every measured witness (`mp7`/`G8`/`t3`/`wcyc9`) the anchor already whole-discretizes, so firing is
+UNCHANGED there; the change only adds behaviour on anchors that did not previously whole-discretize. -/
 def deepen (adj : AdjMatrix n) (χp : Colouring n) :
     Nat → Refine.ColData n → List Nat → Option (Refine.ColData n × List Nat)
   | 0, _, _ => none
   | fuel + 1, cur, seq =>
       let χc := cur.col
-      let K := coupled χp χc
-      if K.isEmpty then none
-      else match chooseIdK K χc with
+      match chooseIdK (List.finRange n) χc with
         | none => some (cur, seq.reverse)
         | some cid =>
             match (List.finRange n).filter (fun v => χc v == cid) with
@@ -202,6 +213,27 @@ theorem twistOf_isColAut (adj : AdjMatrix n) (χ χ1 : Colouring n) (K : List (F
       rw [Option.some.injEq] at h; subst h
       exact of_decide_eq_true hdec
     · exact absurd h (by simp)
+
+/-- The colour-match function inside `twistOf`, named so it can be reasoned about. On the coupled
+component `K`, `v` maps to the first `K`-member whose replayed colour matches `v`'s anchor colour;
+off `K`, identity. -/
+def imgFun (χ1 : Colouring n) (K : List (Fin n)) (χj : Colouring n) : Fin n → Fin n :=
+  fun v => if K.contains v then (K.find? (fun w => χj w == χ1 v)).getD v else v
+
+/-- `Vector.ofFn` read back pointwise is the function. -/
+theorem vget_ofFn (g : Fin n → Fin n) (v : Fin n) : (Vector.ofFn g).get v = g v := by
+  rw [Vector.get]; simp
+
+/-- `twistOf` is `permOf` of `imgFun`, gated by `IsColAut` — the `Vector.ofFn` is just materialisation
+(trap #1) and `permOf` reads it back pointwise. -/
+theorem twistOf_eq_imgFun (adj : AdjMatrix n) (χ χ1 : Colouring n) (K : List (Fin n))
+    (χj : Colouring n) :
+    twistOf adj χ χ1 K χj =
+      match permOf (imgFun χ1 K χj) with
+      | none => none
+      | some ρ => if decide (IsColAut adj χ ρ) then some ρ else none := by
+  unfold twistOf imgFun
+  simp only [vget_ofFn]
 
 /-- **★ THE DEEPENING SUPPLY.** EVERY anchor of the branch cell (the `G8` falsifier above forbids a
 single anchor); every value not depending on `rⱼ` is hoisted, and the twist is materialised as a

@@ -270,8 +270,9 @@ atom actually is. When R0a/R0b/P4 land, the swap becomes mechanical and non-vacu
 ### 9.1 The `Amenable` coupling — this is ALSO how consume's ①c closes
 
 The rigid seal is not merely a parallel second seal; it is **what discharges the consume side's last domain
-hypothesis.** `deepenSupply`'s ①c is closed modulo `{Amenable, AnchorFires}` (`deepenSupply_guarded_canonizer_direct`,
-`DeepenAmenable.lean:931`), and an **`Amenable`-violation is exactly a `RigidObstructionAt`**
+hypothesis.** `deepenSupply`'s ①c is closed modulo **`{Amenable}` alone** (`deepenSupply_guarded_canonizer_direct`,
+`DeepenAmenable.lean`; the track-A whole-graph-discretize redesign made `[DISC]`/gate/termination structural and
+**eliminated `AnchorFires`** — 2026-07-23, axiom-clean), and an **`Amenable`-violation is exactly a `RigidObstructionAt`**
 (`rigidObstruction_of_not_cellSingleOrbit`) — a same-colour non-automorphic pair, i.e. the rigid side's job. So
 "discharge `Amenable` on family `F`" is not a separate obligation from the rigid work; it **is** the statement that
 the interleaving delivers Schurian (pure-symmetry) cells to consume, with the rigid pairs peeled by force first.

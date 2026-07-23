@@ -1,5 +1,6 @@
-import ChainDescent.DeepenR1
-import ChainDescent.DeepenRefTransport
+import ChainDescent.DeepenCrux
+import ChainDescent.SupplyTransport
+import ChainDescent.Composite
 import ChainDescent.OrbitPrune
 
 /-!
@@ -217,9 +218,7 @@ def AmenablePath (adj : AdjMatrix n) (χp : Colouring n) :
   | 0, _ => True
   | fuel + 1, cur =>
       let χc := cur.col
-      let K := coupled χp χc
-      if K.isEmpty then True
-      else match chooseIdK K χc with
+      match chooseIdK (List.finRange n) χc with
         | none => True
         | some cid =>
             CellSingleOrbit adj χc cid ∧
@@ -265,23 +264,19 @@ theorem deepen_acc (adj : AdjMatrix n) (χp : Colouring n) (fuel : Nat) :
       intro cur acc
       unfold deepen
       dsimp only
-      cases hK : (coupled χp cur.col).isEmpty with
-      | true => simp [hK]
-      | false =>
-          rw [if_neg (by simp [hK]), if_neg (by simp [hK])]
-          generalize chooseIdK (coupled χp cur.col) cur.col = co
-          cases co with
-          | none => simp
-          | some cid =>
-              dsimp only
-              split
-              · rfl
-              · rename_i _ w _ _
-                rw [ih (step adj cur.col w) (cid :: acc), ih (step adj cur.col w) [cid],
-                    Option.map_map]
-                congr 1
-                funext p
-                simp [Function.comp, List.reverse_cons, List.append_assoc]
+      generalize chooseIdK (List.finRange n) cur.col = co
+      cases co with
+      | none => simp
+      | some cid =>
+          dsimp only
+          split
+          · rfl
+          · rename_i _ w _ _
+            rw [ih (step adj cur.col w) (cid :: acc), ih (step adj cur.col w) [cid],
+                Option.map_map]
+            congr 1
+            funext p
+            simp [Function.comp, List.reverse_cons, List.append_assoc]
 
 /-- The `chooseIdK` fold takes a `min` over `χc v` of the `classOf ≥ 2` cells, so its `some` result is
 `χc v` for one such `v` (the argmin). A `foldl`-min "result is an element" lemma. -/
@@ -348,108 +343,104 @@ theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
       -- reduce `deepen (fuel+1) cur_a []`
       unfold deepen at h
       dsimp only at h
-      cases hK : (coupled χp cur_a.col).isEmpty with
-      | true => simp [hK] at h
-      | false =>
-          rw [if_neg (by simp [hK])] at h
-          -- the id `chooseIdK` picks
-          cases hco : chooseIdK (coupled χp cur_a.col) cur_a.col with
-          | none =>
-              -- `chooseIdK = none` is the terminal LEAF (footprint discrete on the coupled component)
-              rw [hco] at h
+      -- the id `chooseIdK` picks (over the WHOLE graph — track A: discretize everything)
+      cases hco : chooseIdK (List.finRange n) cur_a.col with
+      | none =>
+          -- `chooseIdK = none` is the terminal LEAF (whole graph discrete)
+          rw [hco] at h
+          dsimp only at h
+          simp only [List.reverse_nil, Option.some.injEq, Prod.mk.injEq] at h
+          obtain ⟨rfl, rfl⟩ := h
+          exact ⟨σ, cur_b, hσ, rfl, hrel, rfl⟩
+      | some cid =>
+          rw [hco] at h
+          dsimp only at h
+          -- `a`'s id-cell (= the deepen/AmenablePath filter, defeq `cidCell`)
+          cases hfl : (List.finRange n).filter (fun v => cur_a.col v == cid) with
+          | nil => rw [hfl] at h; simp at h
+          | cons w_a rest_a =>
+              rw [hfl] at h
               dsimp only at h
-              simp only [List.reverse_nil, Option.some.injEq, Prod.mk.injEq] at h
-              obtain ⟨rfl, rfl⟩ := h
-              exact ⟨σ, cur_b, hσ, rfl, hrel, rfl⟩
-          | some cid =>
-              rw [hco] at h
-              dsimp only at h
-              -- `a`'s id-cell (= the deepen/AmenablePath filter, defeq `cidCell`)
-              cases hfl : (List.finRange n).filter (fun v => cur_a.col v == cid) with
-              | nil => rw [hfl] at h; simp at h
-              | cons w_a rest_a =>
-                  rw [hfl] at h
-                  dsimp only at h
-                  -- deepen recurses on `step cur_a.col w_a` with accumulator `[cid]`
-                  rw [deepen_acc adj χp fuel (step adj cur_a.col w_a) [cid]] at h
-                  rw [Option.map_eq_some_iff] at h
-                  obtain ⟨⟨la, inner⟩, hinner, heq⟩ := h
-                  simp only [List.reverse_cons, List.reverse_nil, List.nil_append,
-                    Prod.mk.injEq] at heq
-                  obtain ⟨rfl, rfl⟩ := heq
-                  -- so leaf_a = la, seq = cid :: inner
-                  -- `w_a` is the head of `a`'s id-cell
-                  have hwa_mem : w_a ∈ cidCell cur_a.col cid := by
-                    show w_a ∈ (List.finRange n).filter (fun v => cur_a.col v == cid)
-                    rw [hfl]; exact List.mem_cons_self ..
-                  -- `chooseIdK_mem`: `a`'s id-cell has ≥ 2, so does `b`'s
-                  have hlen_a : 2 ≤ (cidCell cur_a.col cid).length := chooseIdK_mem _ _ hco
-                  have hlen_b : 2 ≤ (cidCell cur_b.col cid).length := by
-                    rw [hrel, cidCell_length_transport]; exact hlen_a
-                  -- head `w_b` of `b`'s id-cell
-                  obtain ⟨w_b, rest_b, hmb⟩ :
-                      ∃ w_b rest_b, cidCell cur_b.col cid = w_b :: rest_b := by
-                    cases hmb : cidCell cur_b.col cid with
-                    | nil => rw [hmb] at hlen_b; simp at hlen_b
-                    | cons w_b rest_b => exact ⟨w_b, rest_b, rfl⟩
-                  have hwb_mem : w_b ∈ cidCell cur_b.col cid := by rw [hmb]; exact List.mem_cons_self ..
-                  -- unpack `Amenable` at this level
-                  unfold AmenablePath at hAmen
-                  dsimp only at hAmen
-                  rw [if_neg (by simp [hK]), hco] at hAmen
-                  dsimp only at hAmen
-                  rw [hfl] at hAmen
-                  dsimp only at hAmen
-                  obtain ⟨hcell_a, hAmen_rec⟩ := hAmen
-                  -- transport the single-orbit cell to `b`, get `τ`
-                  have hcell_b : CellSingleOrbit adj cur_b.col cid := by
-                    rw [hrel]; exact cellSingleOrbit_transport hσ.relabel hcell_a
-                  have hσwa : cur_b.col (σ w_a) = cid := by
-                    have : σ w_a ∈ cidCell cur_b.col cid := by
-                      rw [hrel]; exact mem_cidCell_transport_apply σ cur_a.col cid w_a hwa_mem
-                    exact (mem_cidCell_iff _ _ _).mp this
-                  have hwbcid : cur_b.col w_b = cid := (mem_cidCell_iff _ _ _).mp hwb_mem
-                  obtain ⟨τ, hτ, hτeq⟩ := hcell_b (σ w_a) w_b hσwa hwbcid
-                  -- `τ ∈ Stab(cur_b.col)` transfers to the parent, and `τσ` is a parent-automorphism
-                  have hτp : IsColAut adj χp τ := isColAut_parent_of_refines hrefb hτ
-                  have hτσ : IsColAut adj χp (τ * σ) := hτp.comp hσ
-                  -- the invariant across this level (`step_rerelate`)
-                  have hτ' : IsColAut adj (transportColouring σ cur_a.col) τ := by rw [← hrel]; exact hτ
-                  have hstep_rel : (step adj cur_b.col w_b).col
-                      = transportColouring (τ * σ) (step adj cur_a.col w_a).col := by
-                    have hr := step_rerelate cur_a.col w_a hσ.relabel hτ'
-                    rw [hτeq] at hr
-                    rw [hrel]; exact hr
-                  -- parent-refinement survives a step, both sides
-                  have hrefa' : ∀ x y, (step adj cur_a.col w_a).col x = (step adj cur_a.col w_a).col y
-                      → χp x = χp y := fun x y hxy => hrefa x y (step_refines adj cur_a.col w_a hxy)
-                  have hrefb' : ∀ x y, (step adj cur_b.col w_b).col x = (step adj cur_b.col w_b).col y
-                      → χp x = χp y := fun x y hxy => hrefb x y (step_refines adj cur_b.col w_b hxy)
-                  -- the recursive Amenable premise
-                  have hAmen' : AmenablePath adj χp fuel (step adj cur_a.col w_a) := hAmen_rec
-                  -- ANCHOR TRACKING: `τ` fixes the protected singleton `σ a₀`, so `(τσ) a₀ = σ a₀`,
-                  -- and it stays a singleton after the step
-                  have hτfix : τ (σ a₀) = σ a₀ := isColAut_fixes_singleton hτ hb0
-                  have hnew_a0 : (τ * σ) a₀ = σ a₀ := by rw [Equiv.Perm.mul_apply]; exact hτfix
-                  have hb0' : ∀ u, (step adj cur_b.col w_b).col u
-                      = (step adj cur_b.col w_b).col ((τ * σ) a₀) → u = (τ * σ) a₀ := by
-                    rw [hnew_a0]; exact step_preserves_singleton adj cur_b.col hb0 w_b
-                  -- apply IH on the `b`-side head `w_b`
-                  obtain ⟨σ', leaf_b, hσ', hrepl, hleaf, ha0⟩ :=
-                    ih (step adj cur_a.col w_a) (step adj cur_b.col w_b) (τ * σ) a₀ hτσ
-                      hstep_rel hrefa' hrefb' hb0' hAmen' la inner hinner
-                  -- reduce `replay (cid :: inner) cur_b` to the recursive replay on `w_b`
-                  refine ⟨σ', leaf_b, hσ', ?_, hleaf, ha0.trans hnew_a0⟩
-                  show replay adj (cid :: inner) cur_b = some leaf_b
-                  unfold replay
-                  dsimp only
-                  rw [show (List.finRange n).filter (fun v => cur_b.col v == cid) = w_b :: rest_b from hmb,
-                      if_neg (by
-                        have hle : ¬ (w_b :: rest_b).length < 2 := by
-                          have hlift : (w_b :: rest_b).length = (cidCell cur_b.col cid).length := by rw [hmb]
-                          rw [hlift]; exact Nat.not_lt.mpr hlen_b
-                        exact hle)]
-                  exact hrepl
+              -- deepen recurses on `step cur_a.col w_a` with accumulator `[cid]`
+              rw [deepen_acc adj χp fuel (step adj cur_a.col w_a) [cid]] at h
+              rw [Option.map_eq_some_iff] at h
+              obtain ⟨⟨la, inner⟩, hinner, heq⟩ := h
+              simp only [List.reverse_cons, List.reverse_nil, List.nil_append,
+                Prod.mk.injEq] at heq
+              obtain ⟨rfl, rfl⟩ := heq
+              -- so leaf_a = la, seq = cid :: inner
+              -- `w_a` is the head of `a`'s id-cell
+              have hwa_mem : w_a ∈ cidCell cur_a.col cid := by
+                show w_a ∈ (List.finRange n).filter (fun v => cur_a.col v == cid)
+                rw [hfl]; exact List.mem_cons_self ..
+              -- `chooseIdK_mem`: `a`'s id-cell has ≥ 2, so does `b`'s
+              have hlen_a : 2 ≤ (cidCell cur_a.col cid).length := chooseIdK_mem _ _ hco
+              have hlen_b : 2 ≤ (cidCell cur_b.col cid).length := by
+                rw [hrel, cidCell_length_transport]; exact hlen_a
+              -- head `w_b` of `b`'s id-cell
+              obtain ⟨w_b, rest_b, hmb⟩ :
+                  ∃ w_b rest_b, cidCell cur_b.col cid = w_b :: rest_b := by
+                cases hmb : cidCell cur_b.col cid with
+                | nil => rw [hmb] at hlen_b; simp at hlen_b
+                | cons w_b rest_b => exact ⟨w_b, rest_b, rfl⟩
+              have hwb_mem : w_b ∈ cidCell cur_b.col cid := by rw [hmb]; exact List.mem_cons_self ..
+              -- unpack `Amenable` at this level
+              unfold AmenablePath at hAmen
+              dsimp only at hAmen
+              rw [hco] at hAmen
+              dsimp only at hAmen
+              rw [hfl] at hAmen
+              dsimp only at hAmen
+              obtain ⟨hcell_a, hAmen_rec⟩ := hAmen
+              -- transport the single-orbit cell to `b`, get `τ`
+              have hcell_b : CellSingleOrbit adj cur_b.col cid := by
+                rw [hrel]; exact cellSingleOrbit_transport hσ.relabel hcell_a
+              have hσwa : cur_b.col (σ w_a) = cid := by
+                have : σ w_a ∈ cidCell cur_b.col cid := by
+                  rw [hrel]; exact mem_cidCell_transport_apply σ cur_a.col cid w_a hwa_mem
+                exact (mem_cidCell_iff _ _ _).mp this
+              have hwbcid : cur_b.col w_b = cid := (mem_cidCell_iff _ _ _).mp hwb_mem
+              obtain ⟨τ, hτ, hτeq⟩ := hcell_b (σ w_a) w_b hσwa hwbcid
+              -- `τ ∈ Stab(cur_b.col)` transfers to the parent, and `τσ` is a parent-automorphism
+              have hτp : IsColAut adj χp τ := isColAut_parent_of_refines hrefb hτ
+              have hτσ : IsColAut adj χp (τ * σ) := hτp.comp hσ
+              -- the invariant across this level (`step_rerelate`)
+              have hτ' : IsColAut adj (transportColouring σ cur_a.col) τ := by rw [← hrel]; exact hτ
+              have hstep_rel : (step adj cur_b.col w_b).col
+                  = transportColouring (τ * σ) (step adj cur_a.col w_a).col := by
+                have hr := step_rerelate cur_a.col w_a hσ.relabel hτ'
+                rw [hτeq] at hr
+                rw [hrel]; exact hr
+              -- parent-refinement survives a step, both sides
+              have hrefa' : ∀ x y, (step adj cur_a.col w_a).col x = (step adj cur_a.col w_a).col y
+                  → χp x = χp y := fun x y hxy => hrefa x y (step_refines adj cur_a.col w_a hxy)
+              have hrefb' : ∀ x y, (step adj cur_b.col w_b).col x = (step adj cur_b.col w_b).col y
+                  → χp x = χp y := fun x y hxy => hrefb x y (step_refines adj cur_b.col w_b hxy)
+              -- the recursive Amenable premise
+              have hAmen' : AmenablePath adj χp fuel (step adj cur_a.col w_a) := hAmen_rec
+              -- ANCHOR TRACKING: `τ` fixes the protected singleton `σ a₀`, so `(τσ) a₀ = σ a₀`,
+              -- and it stays a singleton after the step
+              have hτfix : τ (σ a₀) = σ a₀ := isColAut_fixes_singleton hτ hb0
+              have hnew_a0 : (τ * σ) a₀ = σ a₀ := by rw [Equiv.Perm.mul_apply]; exact hτfix
+              have hb0' : ∀ u, (step adj cur_b.col w_b).col u
+                  = (step adj cur_b.col w_b).col ((τ * σ) a₀) → u = (τ * σ) a₀ := by
+                rw [hnew_a0]; exact step_preserves_singleton adj cur_b.col hb0 w_b
+              -- apply IH on the `b`-side head `w_b`
+              obtain ⟨σ', leaf_b, hσ', hrepl, hleaf, ha0⟩ :=
+                ih (step adj cur_a.col w_a) (step adj cur_b.col w_b) (τ * σ) a₀ hτσ
+                  hstep_rel hrefa' hrefb' hb0' hAmen' la inner hinner
+              -- reduce `replay (cid :: inner) cur_b` to the recursive replay on `w_b`
+              refine ⟨σ', leaf_b, hσ', ?_, hleaf, ha0.trans hnew_a0⟩
+              show replay adj (cid :: inner) cur_b = some leaf_b
+              unfold replay
+              dsimp only
+              rw [show (List.finRange n).filter (fun v => cur_b.col v == cid) = w_b :: rest_b from hmb,
+                  if_neg (by
+                    have hle : ¬ (w_b :: rest_b).length < 2 := by
+                      have hlift : (w_b :: rest_b).length = (cidCell cur_b.col cid).length := by rw [hmb]
+                      rw [hlift]; exact Nat.not_lt.mpr hlen_b
+                    exact hle)]
+              exact hrepl
 
 /-! ## 2d. Piece 3 — `twistOf` verifies from the σ-relation
 
@@ -558,53 +549,6 @@ theorem twistOf_id_off_K {adj : AdjMatrix n} {χ χ1 : Colouring n} {K : List (F
         rw [permOf_apply hp v]
         unfold imgFun; rw [if_neg (by rw [hv]; simp)]
       · rw [if_neg hia] at h; exact absurd h (by simp)
-
-/-- **Every reference generator is a colour-automorphism** — the ref analog of `deepenGens_isColAut`
-(same `twistOf_isColAut` emission gate, all paths). So a ref gen `ρ` gives `IsColAut adj χ ρ`, hence
-`ρ x` lies in `x`'s `IsColAut`-orbit — the input to `ORBIT_K`. -/
-theorem deepenRefGens_isColAut (adj : AdjMatrix n) (χ : Colouring n)
-    {ρ : Equiv.Perm (Fin n)} (h : ρ ∈ deepenRefGens adj χ) : IsColAut adj χ ρ := by
-  unfold deepenRefGens at h
-  rw [List.mem_flatMap] at h
-  obtain ⟨p1, _, h⟩ := h
-  rw [List.mem_flatMap] at h
-  obtain ⟨ds, _, h⟩ := h
-  dsimp only at h
-  by_cases hgate :
-      ((coupled χ ds.1.col).isEmpty || !allSingletonsK (coupled χ ds.1.col) ds.1.col) = true
-  · rw [if_pos hgate] at h; simp at h
-  · rw [if_neg hgate] at h
-    rw [List.mem_flatMap] at h
-    obtain ⟨pj, _, h⟩ := h
-    by_cases heq : (pj.1 == p1.1) = true
-    · rw [if_pos heq] at h; simp at h
-    · rw [if_neg heq] at h
-      rw [List.mem_filterMap] at h
-      obtain ⟨dj, _, h⟩ := h
-      exact twistOf_isColAut adj χ ds.1.col _ dj.col h
-
-/-- **Each reference generator is the identity off SOME `K`** (its anchor's coupled component). Extracts
-the `K` for the `hL1` reduction's off-`K` = `refl` branch. -/
-theorem refGen_id_off (adj : AdjMatrix n) (χ : Colouring n) {ρ : Equiv.Perm (Fin n)}
-    (h : ρ ∈ deepenRefGens adj χ) : ∃ K : List (Fin n), ∀ v, K.contains v = false → ρ v = v := by
-  unfold deepenRefGens at h
-  rw [List.mem_flatMap] at h
-  obtain ⟨p1, _, h⟩ := h
-  rw [List.mem_flatMap] at h
-  obtain ⟨ds, _, h⟩ := h
-  dsimp only at h
-  by_cases hgate :
-      ((coupled χ ds.1.col).isEmpty || !allSingletonsK (coupled χ ds.1.col) ds.1.col) = true
-  · rw [if_pos hgate] at h; simp at h
-  · rw [if_neg hgate] at h
-    rw [List.mem_flatMap] at h
-    obtain ⟨pj, _, h⟩ := h
-    by_cases heq : (pj.1 == p1.1) = true
-    · rw [if_pos heq] at h; simp at h
-    · rw [if_neg heq] at h
-      rw [List.mem_filterMap] at h
-      obtain ⟨dj, _, hd⟩ := h
-      exact ⟨coupled χ ds.1.col, fun v hv => twistOf_id_off_K hd hv⟩
 
 /-- **Forward membership in `deepenGens`** — reconstructs that the twist for anchor `r₁`, rep `rⱼ` is an
 emitted executable generator, from the pipeline facts (deepen succeeds, gate passes, replay succeeds,
@@ -723,30 +667,7 @@ theorem exec_recovers_cell_orbits (adj : AdjMatrix n) (χ : Colouring n) {r₁ r
   have hwr := (Consume.WordReach.refl r₁).step hver
   rwa [ha0.trans htrj] at hwr
 
-/-- **★ THE `hL1 ⟸ ORBIT_K` REDUCTION (§9.1.1).** `DeepenRefInExec` follows from the on-`K` coverage
-`hreach` (each ref gen reaches every `x` in its coupled component `K`) — the off-`K` case is `refl`
-because a ref gen fixes everything outside `K` (`refGen_id_off`). So the whole bridge reduces to proving
-`hreach`, which splits into the branch-cell half (clean) and the `K∖cell` crux (§9.1.1). -/
-theorem deepenRefInExec_of_reachOnK
-    (hreach : ∀ (adj : AdjMatrix n) (χ : Colouring n) (ρ : Equiv.Perm (Fin n)),
-        ρ ∈ deepenRefGens adj χ →
-        ∀ K : List (Fin n), (∀ v, K.contains v = false → ρ v = v) →
-        ∀ x, K.contains x = true → Consume.WordReach (Consume.verified deepenSupply adj χ) x (ρ x)) :
-    ∀ (adj : AdjMatrix n) (χ : Colouring n), DeepenRefInExec adj χ := by
-  intro adj χ ρ hρ x
-  obtain ⟨K, hoff⟩ := refGen_id_off adj χ hρ
-  by_cases hxK : K.contains x = true
-  · exact hreach adj χ ρ hρ K hoff x hxK
-  · rw [hoff x (by simpa using hxK)]; exact Consume.WordReach.refl x
-
-/-! ## 2b. Route ε — `hreach` split into cell-coverage (LANDED) + the `K∖cell` crux (isolated)
-
-`hreach` (what `hL1` reduces to) asks: every ref gen `ρ` reaches every `x` in its coupled component `K`.
-Since `K = cell ⊎ (K∖cell)` we split it. The **cell** half is now fully covered — the branch-cell half
-`exec_recovers_cell_orbits` holds for ANY anchor-rep pair related by an automorphism, and `ρ ∈ IsColAut`
-maps each cell vertex `x` to `ρ x` in `x`'s orbit, so applying it at anchor `x` reaches `ρ x` directly.
-The **`K∖cell`** half is the `ker φ` crux (§9.1.2), isolated below as `ExecRecoversKMinusCell` — the target
-of the Route-ε path-difference induction. -/
+/-! ## 2b. Branch-cell reachability atoms -/
 
 /-- A verified generator reaches `x ↦ g x` in one step (the base atom of every exec word). -/
 theorem wordReach_of_mem_verified {S : Consume.Supply n} {adj : AdjMatrix n} {χ : Colouring n}
@@ -766,114 +687,233 @@ theorem isColAut_mem_branches {adj : AdjMatrix n} {χ : Colouring n} {β : Equiv
   obtain ⟨c, hc, hxc⟩ := Consume.exists_targetColour_of_mem hx
   exact (Descend.mem_branches_iff hc (β x)).mpr (by rw [hβ.2 x]; exact hxc)
 
-/-- **The per-anchor firing bundle.** Anchor `a`'s canonical deepening succeeds, its gate passes (all
-singletons over a non-empty coupled component), and the leaf is discrete (`[DISC]`). These are exactly the
-domain facts `exec_recovers_cell_orbits` needs; measured to hold on every firing witness (all anchors). -/
-def AnchorFires (adj : AdjMatrix n) (χ : Colouring n) (a : Fin n) : Prop :=
-  ∃ (d1 : Refine.ColData n) (seq : List Nat),
-    deepen adj χ n (step adj χ a) [] = some (d1, seq) ∧
-    ((coupled χ d1.col).isEmpty || !allSingletonsK (coupled χ d1.col) d1.col) = false ∧
-    Discrete d1.col
+/-! ## 2b′. ★★★ [DISC] IS STRUCTURAL — the track-A win that eliminates `AnchorFires`
 
-/-- **The `K∖cell` crux, isolated (§9.1.2 `ker φ` recovery).** For a ref gen `ρ` and a coupled-but-non-cell
-vertex `x`, the executable reaches `ρ x`. No single exec gen does this (they all move the cell); it is the
-content of the Route-ε path-difference induction. Everything else in `hreach` is now discharged. -/
-def ExecRecoversKMinusCell (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
-  ∀ (ρ : Equiv.Perm (Fin n)), ρ ∈ deepenRefGens adj χ →
-    ∀ K : List (Fin n), (∀ v, K.contains v = false → ρ v = v) →
-    ∀ x, K.contains x = true → x ∉ Descend.branches χ →
-      Consume.WordReach (Consume.verified deepenSupply adj χ) x (ρ x)
+`deepen` now individualizes to WHOLE-graph discreteness, so a successful leaf is *automatically* discrete
+(`deepen_discrete`) and the gate passes for free on a non-trivial branch cell (`gate_of_discrete`). The old
+`AnchorFires` domain hypothesis — `deepen` succeeds + gate + `Discrete` leaf — is thus discharged
+structurally: `[DISC]` from the loop's stop condition, `deepen` succeeds by fuel-adequacy
+(`deepen_succeeds`), the gate from `[DISC]`. Only `Amenable` remains. -/
 
-/-- **★ CELL COVERAGE — a ref gen is exec-reachable on the whole branch cell.** For `x ∈ cell`, the
-branch-cell half applied at anchor `x` (rep `ρ x`, automorphism `ρ`) reaches `ρ x` directly; `ρ x = x` is
-`refl`. So the cell part of `hreach` needs no `K∖cell` content. -/
+/-- The `chooseIdK` min-fold from a `some` seed never returns `none`. -/
+theorem foldl_min_isSome (χc : Colouring n) :
+    ∀ (L : List (Fin n)) (m : Nat),
+      (L.foldl (fun acc v => match acc with
+        | none => some (χc v) | some m => some (min m (χc v))) (some m)).isSome := by
+  intro L
+  induction L with
+  | nil => intro m; simp
+  | cons v L ih => intro m; simp only [List.foldl_cons]; exact ih _
+
+/-- **★ `chooseIdK (finRange) = none` ⟹ `Discrete`.** No non-singleton cell means every class is a
+singleton = injective. This is what makes `[DISC]` STRUCTURAL for whole-graph `deepen`. -/
+theorem discrete_of_chooseIdK_none {χc : Colouring n}
+    (h : chooseIdK (List.finRange n) χc = none) : Discrete χc := by
+  intro u w huw
+  by_contra hne
+  have hu' : u ∈ classOf χc u := List.mem_filter.mpr ⟨List.mem_finRange u, by simp⟩
+  have hw' : w ∈ classOf χc u := List.mem_filter.mpr ⟨List.mem_finRange w, by simpa using huw.symm⟩
+  have hlen : 2 ≤ (classOf χc u).length := by
+    by_contra hlt
+    exact hne (eq_of_mem_of_length_le_one (Nat.lt_succ_iff.mp (Nat.lt_of_not_le hlt)) hu' hw')
+  have hmem : u ∈ (List.finRange n).filter (fun v => (classOf χc v).length ≥ 2) :=
+    List.mem_filter.mpr ⟨List.mem_finRange u, by simpa using hlen⟩
+  have hne_nil : (List.finRange n).filter (fun v => (classOf χc v).length ≥ 2) ≠ [] := by
+    intro hc; rw [hc] at hmem; simp at hmem
+  unfold chooseIdK at h
+  obtain ⟨a, L, hfl⟩ := List.exists_cons_of_ne_nil hne_nil
+  rw [hfl] at h
+  simp only [List.foldl_cons] at h
+  exact absurd h (Option.isSome_iff_ne_none.mp (foldl_min_isSome χc L (χc a)))
+
+/-- **★ [DISC] IS STRUCTURAL.** `deepen` individualizes to whole-graph discreteness, so any successful
+leaf is discrete. -/
+theorem deepen_discrete (adj : AdjMatrix n) (χp : Colouring n) (fuel : Nat) :
+    ∀ (cur : Refine.ColData n) (seq : List Nat) (d1 : Refine.ColData n) (s : List Nat),
+      deepen adj χp fuel cur seq = some (d1, s) → Discrete d1.col := by
+  induction fuel with
+  | zero => intro cur seq d1 s h; simp [deepen] at h
+  | succ fuel ih =>
+      intro cur seq d1 s h
+      unfold deepen at h
+      dsimp only at h
+      cases hco : chooseIdK (List.finRange n) cur.col with
+      | none =>
+          rw [hco] at h
+          simp only [Option.some.injEq, Prod.mk.injEq] at h
+          obtain ⟨rfl, _⟩ := h
+          exact discrete_of_chooseIdK_none hco
+      | some cid =>
+          rw [hco] at h
+          dsimp only at h
+          cases hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
+          | nil => rw [hfl] at h; simp at h
+          | cons w rest => rw [hfl] at h; dsimp only at h; exact ih _ _ _ _ h
+
+/-- **`deepen` fuel-adequacy.** With more fuel than the colour deficit `n - ncol`, `deepen` reaches a
+discrete leaf: each level individualizes a non-singleton cell (`chooseIdK = some`), and individualizing a
+vertex with a same-colour partner strictly raises `ncol` (`ncol_lt_indivOne_of_partner`), while the warm
+refine never lowers it (`ncol_le_refine`). -/
+theorem deepen_isSome (adj : AdjMatrix n) (χp : Colouring n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n),
+      n - Descend.ncol cur.col < fuel → (deepen adj χp fuel cur []).isSome := by
+  intro fuel
+  induction fuel with
+  | zero => intro cur h; omega
+  | succ fuel ih =>
+      intro cur h
+      unfold deepen
+      dsimp only
+      cases hco : chooseIdK (List.finRange n) cur.col with
+      | none => simp
+      | some cid =>
+          dsimp only
+          cases hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
+          | nil =>
+              exfalso
+              have h2 := chooseIdK_mem _ _ hco
+              unfold cidCell at h2; rw [hfl] at h2; simp at h2
+          | cons w rest =>
+              dsimp only
+              rw [deepen_acc adj χp fuel (step adj cur.col w) [cid], Option.isSome_map]
+              apply ih
+              -- `w` has a same-colour partner in its (≥ 2)-cell, so `ncol` strictly increases
+              have hcell : cidCell cur.col cid = w :: rest := hfl
+              have hlen : 2 ≤ (cidCell cur.col cid).length := chooseIdK_mem _ _ hco
+              have hwcid : cur.col w = cid := by
+                have hwm : w ∈ cidCell cur.col cid := by rw [hcell]; simp
+                exact (mem_cidCell_iff _ _ _).mp hwm
+              obtain ⟨u, rest', hrest⟩ : ∃ u rest', rest = u :: rest' := by
+                cases rest with
+                | nil => rw [hcell] at hlen; simp at hlen
+                | cons u rest' => exact ⟨u, rest', rfl⟩
+              have hucid : cur.col u = cid := by
+                have hum : u ∈ cidCell cur.col cid := by rw [hcell, hrest]; simp
+                exact (mem_cidCell_iff _ _ _).mp hum
+              have hnd : (cidCell cur.col cid).Nodup := cidCell_nodup cur.col cid
+              rw [hcell, hrest] at hnd
+              simp only [List.nodup_cons, List.mem_cons] at hnd
+              have huw : u ≠ w := fun heq => hnd.1 (Or.inl heq.symm)
+              have hpartner : ∃ z, z ≠ w ∧ cur.col z = cur.col w := ⟨u, huw, by rw [hucid, hwcid]⟩
+              have h1 : Descend.ncol cur.col < Descend.ncol (Descend.indivOne cur.col w) :=
+                Descend.ncol_lt_indivOne_of_partner hpartner
+              have h2 : Descend.ncol (Descend.indivOne cur.col w) ≤ Descend.ncol (step adj cur.col w).col := by
+                show _ ≤ Descend.ncol (Refine.warmRefineVec adj (Descend.indivOne cur.col w)).col
+                rw [Refine.warmRefineVec_col_eq, ← Refine.refineV_encodeFreeFast]
+                exact Descend.ncol_le_refine Refine.refineSplits_encodeFreeFast adj (Descend.indivOne cur.col w)
+              have h3 := Descend.ncol_le (step adj cur.col w).col
+              omega
+
+/-- **★ `deepen` TERMINATES to a discrete leaf** — `[DISC]`/termination is STRUCTURAL (track A). Fuel `n`
+always suffices: `ncol (step … x) ≥ 1`, so the colour deficit is `< n`. Discharges (with `deepen_discrete`,
+`gate_of_discrete`) the whole of the old `AnchorFires` bundle — only `Amenable` remains. -/
+theorem deepen_succeeds (adj : AdjMatrix n) (χ : Colouring n) (x : Fin n) :
+    ∃ (d1 : Refine.ColData n) (seq : List Nat),
+      deepen adj χ n (step adj χ x) [] = some (d1, seq) := by
+  have hpos : 0 < Descend.ncol (step adj χ x).col := by
+    unfold Descend.ncol; rw [Finset.card_pos]
+    exact ⟨(step adj χ x).col x, Finset.mem_image.mpr ⟨x, Finset.mem_univ _, rfl⟩⟩
+  have hle : Descend.ncol (step adj χ x).col ≤ n := Descend.ncol_le _
+  have hsome : (deepen adj χ n (step adj χ x) []).isSome := deepen_isSome adj χ n _ (by omega)
+  obtain ⟨⟨d1, seq⟩, hd⟩ := Option.isSome_iff_exists.mp hsome
+  exact ⟨d1, seq, hd⟩
+
+/-- Discrete ⟹ every class is a singleton ⟹ `allSingletonsK` on any `K`. -/
+theorem allSingletonsK_of_discrete {χc : Colouring n} (hdisc : Discrete χc) (K : List (Fin n)) :
+    allSingletonsK K χc = true := by
+  unfold allSingletonsK
+  rw [List.all_eq_true]
+  intro v _
+  simp only [beq_iff_eq]
+  have hv : v ∈ classOf χc v := List.mem_filter.mpr ⟨List.mem_finRange v, by simp⟩
+  have hnd : (classOf χc v).Nodup := (List.nodup_finRange n).filter _
+  have hge : 0 < (classOf χc v).length := List.length_pos_of_mem hv
+  have hle : (classOf χc v).length ≤ 1 := by
+    by_contra hlt
+    rw [Nat.not_le] at hlt
+    have hne_nil : classOf χc v ≠ [] := by intro hc; rw [hc] at hv; simp at hv
+    obtain ⟨a, L, hfl⟩ := List.exists_cons_of_ne_nil hne_nil
+    rcases L with _ | ⟨b, L'⟩
+    · rw [hfl] at hlt; simp at hlt
+    · have ha : a ∈ classOf χc v := by rw [hfl]; exact List.mem_cons_self ..
+      have hb : b ∈ classOf χc v := by rw [hfl]; exact List.mem_cons_of_mem _ (List.mem_cons_self ..)
+      rw [hfl] at hnd
+      simp only [List.nodup_cons, List.mem_cons] at hnd
+      have hab : a ≠ b := fun h => hnd.1 (Or.inl h)
+      have hav : a = v := hdisc a v (by simpa using (List.mem_filter.mp ha).2)
+      have hbv : b = v := hdisc b v (by simpa using (List.mem_filter.mp hb).2)
+      exact hab (hav.trans hbv.symm)
+  omega
+
+/-- **★ THE GATE PASSES FROM `[DISC]`.** A whole-graph-discrete leaf makes every cell a singleton
+(`allSingletonsK`), and a non-trivial branch pair `(x, w)` puts `x` in the coupled component (its `χ`-cell
+split), so the gate `(K.isEmpty || ¬allSingletonsK) = false`. -/
+theorem gate_of_discrete {χ χc : Colouring n} {x w : Fin n}
+    (hxw : χ x = χ w) (hne : x ≠ w) (hdisc : Discrete χc) :
+    ((coupled χ χc).isEmpty || !allSingletonsK (coupled χ χc) χc) = false := by
+  rw [Bool.or_eq_false_iff]
+  refine ⟨?_, ?_⟩
+  · -- `x ∈ coupled` ⟹ coupled non-empty
+    have hxmem : x ∈ coupled χ χc := by
+      rw [coupled, List.mem_filter]
+      refine ⟨List.mem_finRange x, ?_⟩
+      -- `x`'s `χ`-cell maps through `χc` to ≥ 2 distinct values (`χc x ≠ χc w`, both in the cell)
+      have hxc : x ∈ (List.finRange n).filter (fun z => χ z == χ x) :=
+        List.mem_filter.mpr ⟨List.mem_finRange x, by simp⟩
+      have hwc : w ∈ (List.finRange n).filter (fun z => χ z == χ x) :=
+        List.mem_filter.mpr ⟨List.mem_finRange w, by simpa using hxw.symm⟩
+      have hne' : χc x ≠ χc w := fun h => hne (hdisc x w h)
+      have hx2 : χc x ∈ (((List.finRange n).filter (fun z => χ z == χ x)).map χc) :=
+        List.mem_map.mpr ⟨x, hxc, rfl⟩
+      have hw2 : χc w ∈ (((List.finRange n).filter (fun z => χ z == χ x)).map χc) :=
+        List.mem_map.mpr ⟨w, hwc, rfl⟩
+      have : 2 ≤ (((List.finRange n).filter (fun z => χ z == χ x)).map χc).dedup.length := by
+        have hxd : χc x ∈ (((List.finRange n).filter (fun z => χ z == χ x)).map χc).dedup :=
+          List.mem_dedup.mpr hx2
+        have hwd : χc w ∈ (((List.finRange n).filter (fun z => χ z == χ x)).map χc).dedup :=
+          List.mem_dedup.mpr hw2
+        by_contra hlt
+        exact hne' (eq_of_mem_of_length_le_one (Nat.lt_succ_iff.mp (Nat.lt_of_not_le hlt)) hxd hwd)
+      simpa using this
+    cases hc : (coupled χ χc) with
+    | nil => rw [hc] at hxmem; exact absurd hxmem (by simp)
+    | cons a L => simp
+  · rw [allSingletonsK_of_discrete hdisc]; simp
+
+/-- **★ CELL COVERAGE — a colour-automorphism image is exec-reachable on the branch cell.** For `x ∈ cell`,
+the branch-cell half applied at anchor `x` (rep `ρ x`, automorphism `ρ`) reaches `ρ x` directly; `ρ x = x`
+is `refl`. `AnchorFires` is GONE: `deepen` succeeds (`deepen_succeeds`), the leaf is discrete
+(`deepen_discrete`), and the gate passes (`gate_of_discrete`) — all structural, only `Amenable` remains. -/
 theorem exec_recovers_refgen_on_cell (adj : AdjMatrix n) (χ : Colouring n)
     {ρ : Equiv.Perm (Fin n)} (hρaut : IsColAut adj χ ρ) (hAmen : Amenable adj χ)
-    (hfires : ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
     {x : Fin n} (hx : x ∈ Descend.branches χ) :
     Consume.WordReach (Consume.verified deepenSupply adj χ) x (ρ x) := by
   by_cases hfix : ρ x = x
   · rw [hfix]; exact Consume.WordReach.refl x
   · have hρx : ρ x ∈ Descend.branches χ := isColAut_mem_branches hρaut hx
-    obtain ⟨d1, seq, hd, hg, hDisc⟩ := hfires x hx
     have hne : (ρ x == x) = false := by rw [beq_eq_false_iff_ne]; exact hfix
+    -- both `x` and `ρ x` sit in the branch cell ⟹ same `χ`-colour
+    obtain ⟨c, hc, hxc⟩ := Consume.exists_targetColour_of_mem hx
+    have hρxc : χ (ρ x) = c := by
+      obtain ⟨c', hc', hρxc'⟩ := Consume.exists_targetColour_of_mem hρx
+      rw [hc'] at hc; cases hc; exact hρxc'
+    have hxeq : χ x = χ (ρ x) := by rw [hxc, hρxc]
+    -- structural firing facts (track A)
+    obtain ⟨d1, seq, hd⟩ := deepen_succeeds adj χ x
+    have hDisc : Discrete d1.col := deepen_discrete adj χ n (step adj χ x) [] d1 seq hd
+    have hg : ((coupled χ d1.col).isEmpty || !allSingletonsK (coupled χ d1.col) d1.col) = false :=
+      gate_of_discrete hxeq (fun h => hfix h.symm) hDisc
     exact exec_recovers_cell_orbits adj χ hx hρx hne hρaut rfl hd hg (hAmen x hx) hDisc
 
-/-- **★★ R1 REDUCED TO THE `K∖cell` CRUX.** `DeepenRefInExec` (= R1) follows from three clean domain
-inputs: `Amenable`, the all-anchors firing bundle `AnchorFires`, and the isolated `K∖cell` crux
-`ExecRecoversKMinusCell`. The cell half is discharged (`exec_recovers_refgen_on_cell`); off-`K` is `refl`
-(`deepenRefInExec_of_reachOnK`). So the ENTIRE remaining content of R1 is `ExecRecoversKMinusCell` — the
-Route-ε target. -/
-theorem deepenRefInExec_of_cell_and_crux
-    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
-    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
-    (hcrux : ∀ (adj : AdjMatrix n) (χ : Colouring n), ExecRecoversKMinusCell adj χ) :
-    ∀ (adj : AdjMatrix n) (χ : Colouring n), DeepenRefInExec adj χ := by
-  apply deepenRefInExec_of_reachOnK
-  intro adj χ ρ hρ K hoff x hxK
-  by_cases hxb : x ∈ Descend.branches χ
-  · exact exec_recovers_refgen_on_cell adj χ (deepenRefGens_isColAut adj χ hρ) (hAmen adj χ)
-      (hfires adj χ) hxb
-  · exact hcrux adj χ ρ hρ K hoff x hxK hxb
+/-! ## 2b″. ★★★ THE REFERENCE-FREE, ANCHORFIRES-FREE CLOSE — `①c` modulo `{Amenable}` ONLY
 
-/-! ## 2b′. ★★ THE `K∖cell`-FREE CLOSE — branch-only same-orbits suffices for `①c`
-
-The object narrows only through `rep` on `forcedSet ⊆ branches` (`OrbitPrune.SameOrbitsOnBranches`), and a
-branch source's orbit stays inside the branch cell (`orbit_subset_branches`). So `①c` needs the reference and
-executable to agree on orbits **only for branch sources** — which is EXACTLY the cell coverage already landed
-(`exec_recovers_refgen_on_cell`). The `K∖cell` crux (`ExecRecoversKMinusCell`) is invisible to the object and
-NOT on the critical path. This is the clean close; `ExecReachesAut` / `ExecRecoversKMinusCell` (§2c) remain the
-statements for the *stronger* full-`SameOrbits` route, kept only for reference. -/
-
-/-- **Ref ⊆ exec on branch sources.** A `WordReach` in the reference from a branch vertex is matched
-step-by-step by the executable: each ref gen maps the current branch vertex within the cell
-(`isColAut_mem_branches`) and the executable reaches that image (`exec_recovers_refgen_on_cell`). -/
-theorem wordReach_deepen_of_ref_on_branch (adj : AdjMatrix n) (χ : Colouring n)
-    (hAmen : Amenable adj χ) (hfires : ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
-    {u : Fin n} (hu : u ∈ Descend.branches χ) {w : Fin n}
-    (h : Consume.WordReach (Consume.verified deepenRefSupply adj χ) u w) :
-    Consume.WordReach (Consume.verified deepenSupply adj χ) u w := by
-  induction h with
-  | refl => exact Consume.WordReach.refl u
-  | @step m hsub ρ hg ih =>
-      have hm : m ∈ Descend.branches χ :=
-        Consume.orbit_subset_branches hu (Consume.mem_orbit_of_wordReach hsub)
-      exact ih.trans
-        (exec_recovers_refgen_on_cell adj χ (Consume.isColAut_of_mem_verified hg) hAmen hfires hm)
-
-/-- **★★ `SameOrbitsOnBranches` for `deepenRefSupply`/`deepenSupply` — from cell coverage alone.** The `⊇`
-half is `wordReach_ref_of_deepen`; the `⊆` half is `wordReach_deepen_of_ref_on_branch`. No `K∖cell`. -/
-theorem sameOrbitsOnBranches_of_cell
-    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
-    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a) :
-    OrbitPrune.SameOrbitsOnBranches (deepenRefSupply (n := n)) (deepenSupply (n := n)) :=
-  fun adj χ u hu w =>
-    ⟨wordReach_deepen_of_ref_on_branch adj χ (hAmen adj χ) (hfires adj χ) hu,
-     wordReach_ref_of_deepen adj χ u w⟩
-
-/-- **★★★ `①c` FOR `deepenSupply` — modulo `{R2, Amenable, AnchorFires}` ONLY.** The `K∖cell` group-recovery
-crux is off the critical path: branch-only same-orbits suffices, and it follows from the landed cell coverage.
-This is the intended close of R1. -/
-theorem deepenSupply_guarded_canonizer_of_cell
-    (hR2 : SupplyTransport.SupplyEquivariant (deepenRefSupply (n := n)))
-    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
-    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a) :
-    CanonSpec.IsCanonicalFormOpt
-      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
-        (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
-          (deepenSupply (n := n))))) :=
-  OrbitPrune.guarded_mixed_canonizer_of_sameOrbitsOnBranches Force.keyEquivariant_lookahead hR2
-    (sameOrbitsOnBranches_of_cell hAmen hfires)
-
-/-! ## 2b″. ★★★ THE REFERENCE-FREE CLOSE — `①c` with NO `deepenRefSupply`, NO R2
-
-The reference `deepenRefSupply` existed only to give an *equivariant* object to compare deepen against
-(`SameOrbits`). But `StallEquivariant` needs only that deepen's **branch-orbit relation transports**
+`StallEquivariant` needs only that deepen's **branch-orbit relation transports**
 (`SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport`) — and it does, because deepen's
 branch orbits EQUAL the `IsColAut`-orbits (⟸ = the branch-cell half; ⟹ = soundness), which transport under `σ`
-by `isColAut_conj_iff`. So `①c` closes with **no reference, no R1, no R2** — only `{Amenable, AnchorFires}`. This
-supersedes both the `SameOrbits`/`SameOrbitsOnBranches` route and the `twistOf`-transport (R2) obligation, and
-sidesteps the `twistOf` order-dependence entirely (`deepenRefSupply` is never mentioned). -/
+by `isColAut_conj_iff`. So `①c` closes with **no reference, no R1, no R2, no `AnchorFires`** — only `{Amenable}`,
+since track-A whole-graph `deepen` makes `[DISC]`/gate/termination structural (`deepen_discrete`,
+`gate_of_discrete`, `deepen_succeeds`). This supersedes the entire `SameOrbits`/`deepenRefSupply`/`twistOf`
+apparatus (discarded provenance). -/
 
 /-- A `WordReach` in deepen's verified generators is realized by a single colour-automorphism (soundness at the
 group level — the word composes to one `IsColAut`). -/
@@ -891,29 +931,28 @@ theorem wordReach_imp_isColAut {adj : AdjMatrix n} {χ : Colouring n} {u w : Fin
 and `w` lie in the same colour-automorphism orbit. `⟹` is `wordReach_imp_isColAut`; `⟸` is the branch-cell half
 `exec_recovers_refgen_on_cell`. -/
 theorem deepen_branch_orbit_iff_aut (adj : AdjMatrix n) (χ : Colouring n)
-    (hAmen : Amenable adj χ) (hfires : ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
+    (hAmen : Amenable adj χ)
     {u : Fin n} (hu : u ∈ Descend.branches χ) {w : Fin n} :
     Consume.WordReach (Consume.verified deepenSupply adj χ) u w
       ↔ ∃ β : Equiv.Perm (Fin n), IsColAut adj χ β ∧ β u = w := by
   constructor
   · exact wordReach_imp_isColAut
   · rintro ⟨β, hβ, rfl⟩
-    exact exec_recovers_refgen_on_cell adj χ hβ hAmen hfires hu
+    exact exec_recovers_refgen_on_cell adj χ hβ hAmen hu
 
 /-- **★★ deepen's branch-orbit relation TRANSPORTS.** Both sides equal the `IsColAut`-orbit relation, which
 conjugates under `σ` (`isColAut_conj_iff`). Needs `{Amenable, AnchorFires}` on every graph (they are ∀-quantified
 domain facts, so they hold on the relabelled graph too). -/
 theorem deepen_branchOrbit_transport
     (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
-    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a)
     (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (a b : Fin n)
     (ha : a ∈ Descend.branches χ) (hb : b ∈ Descend.branches χ) :
     Consume.WordReach (Consume.verified deepenSupply (relabelAdj σ adj) (transportColouring σ χ)) (σ a) (σ b)
       ↔ Consume.WordReach (Consume.verified deepenSupply adj χ) a b := by
   have hσa : σ a ∈ Descend.branches (transportColouring σ χ) :=
     (Descend.branches_transport_perm σ χ).mem_iff.mpr (List.mem_map_of_mem ha)
-  rw [deepen_branch_orbit_iff_aut _ _ (hAmen _ _) (hfires _ _) hσa,
-      deepen_branch_orbit_iff_aut _ _ (hAmen _ _) (hfires _ _) ha]
+  rw [deepen_branch_orbit_iff_aut _ _ (hAmen _ _) hσa,
+      deepen_branch_orbit_iff_aut _ _ (hAmen _ _) ha]
   constructor
   · rintro ⟨β, hβ, hβa⟩
     refine ⟨σ⁻¹ * β * σ, ?_, ?_⟩
@@ -929,15 +968,14 @@ theorem deepen_branchOrbit_transport
 no R1, no R2, no `twistOf`-transport. deepen's flag is equivariant because its branch orbits are the
 `IsColAut`-orbits, which transport. This is the intended, clean close of `①c`. -/
 theorem deepenSupply_guarded_canonizer_direct
-    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
-    (hfires : ∀ (adj : AdjMatrix n) (χ : Colouring n), ∀ a ∈ Descend.branches χ, AnchorFires adj χ a) :
+    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ) :
     CanonSpec.IsCanonicalFormOpt
       (Descend.canonForm? (Refine.encodeFreeFast (n := n))
         (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
           (deepenSupply (n := n))))) :=
   Residue.guarded_mixed_canonizer Force.keyEquivariant_lookahead
     (SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport
-      Force.keyEquivariant_lookahead (deepen_branchOrbit_transport hAmen hfires))
+      Force.keyEquivariant_lookahead (deepen_branchOrbit_transport hAmen))
 
 /-! ## 2b‴. The rigid handoff — deepen DEFERS SOUNDLY on a rigid obstruction
 
@@ -981,71 +1019,14 @@ theorem not_amenablePath_imp_rigidObstruction (adj : AdjMatrix n) (χp : Colouri
       dsimp only at h
       split at h
       · exact absurd trivial h
-      · split at h
-        · exact absurd trivial h
-        · rename_i cid _
-          rw [not_and_or] at h
-          rcases h with hcso | htail
-          · exact ⟨cur.col, cid, rigidObstruction_of_not_cellSingleOrbit adj cur.col cid hcso⟩
-          · split at htail
-            · exact absurd trivial htail
-            · rename_i w _ _
-              exact ih (step adj cur.col w) htail
-
-/-! ## 2c. Route ε — the whole-node target `ExecReachesAut` and its reduction
-
-`ExecRecoversKMinusCell` reframes to the honest whole-hog statement: `⟨verified deepenSupply⟩` recovers the
-full `IsColAut`-action on `K`. A ref gen is an `IsColAut` (`deepenRefGens_isColAut`) that fixes off-`K`, so
-`ExecRecoversKMinusCell ⟸ ExecReachesAut` directly. This is the target the Route-ε path-difference induction
-aims at; its `K∖cell` content is the `ker φ` group-recovery. -/
-
-/-- **The whole-node group-recovery statement.** Exec reaches every `IsColAut`-image of every `K`-point —
-i.e. `⟨exec⟩ ⊇ IsColAut` orbit-wise on `K`. The `⊆` is free (exec gens are `IsColAut`); this is the `⊇`
-content. IMPLIES `ExecRecoversKMinusCell`. -/
-def ExecReachesAut (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
-  ∀ (β : Equiv.Perm (Fin n)), IsColAut adj χ β →
-    ∀ (K : List (Fin n)), (∀ v, K.contains v = false → β v = v) →
-    ∀ x, K.contains x = true → Consume.WordReach (Consume.verified deepenSupply adj χ) x (β x)
-
-/-- `ExecRecoversKMinusCell` follows from the whole-node recovery `ExecReachesAut` (a ref gen is an
-`IsColAut`; drop the `x ∉ cell` side-condition). -/
-theorem execRecoversKMinusCell_of_execReachesAut {adj : AdjMatrix n} {χ : Colouring n}
-    (h : ExecReachesAut adj χ) : ExecRecoversKMinusCell adj χ :=
-  fun ρ hρ K hoff x hxK _ => h ρ (deepenRefGens_isColAut adj χ hρ) K hoff x hxK
-
-/-! ## 3. The capstone — `(R1 ∧ R2) → ①c`, and the `Amenable`-gated form
-
-Mirrors `KernelTransport.kernelSupply_guarded_canonizer`: ①c for the executable `deepenSupply` is
-`OrbitPrune.guarded_mixed_canonizer_of_sameOrbits` applied to `KeyEquivariant` (lookahead) + the
-reference's equivariance (**R2**) + `SameOrbits` (**R1**, via `sameOrbits_of_core`). The two open links
-enter as explicit hypotheses — exactly the project's gate-conditional pattern. **G1** (rigid ⟹ F_k, the
-shared wall) is NOT a hypothesis here: ①c needs only `Amenable`; G1 lives at the totality layer (it says
-the rigid cells `deepen` defers on are the rigid solver's, so the whole canonizer stays total). -/
-
-/-- **★★ `(R1 ∧ R2) → ①c` for `deepenSupply`.** `hcore` is R1 (`DeepenRefInExec`, discharged from
-`Amenable` by the Layer-1 induction); `hR2` is R2 (`deepenRefSupply` equivariant). No other assumption. -/
-theorem deepenSupply_guarded_canonizer_of
-    (hR2 : SupplyTransport.SupplyEquivariant (deepenRefSupply (n := n)))
-    (hcore : ∀ (adj : AdjMatrix n) (χ : Colouring n), DeepenRefInExec adj χ) :
-    CanonSpec.IsCanonicalFormOpt
-      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
-        (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
-          (deepenSupply (n := n))))) :=
-  OrbitPrune.guarded_mixed_canonizer_of_sameOrbits Force.keyEquivariant_lookahead
-    hR2 (sameOrbits_of_core hcore)
-
-/-- **★★ The `Amenable`-gated form — `(Amenable ∧ L1 ∧ R2) → ①c`.** Factors R1 through the domain
-hypothesis: `hL1` is the Layer-1 induction (`Amenable ⟹ R1`, on `step_aut`), `hAmen` the domain fact
-(discharged by the WL-obstruction classification: rigid cells are force/rigid-solver's, per G1). -/
-theorem deepenSupply_canonizer_of_amenable
-    (hR2 : SupplyTransport.SupplyEquivariant (deepenRefSupply (n := n)))
-    (hL1 : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ → DeepenRefInExec adj χ)
-    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ) :
-    CanonSpec.IsCanonicalFormOpt
-      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
-        (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
-          (deepenSupply (n := n))))) :=
-  deepenSupply_guarded_canonizer_of hR2 (fun adj χ => hL1 adj χ (hAmen adj χ))
+      · rename_i cid _
+        rw [not_and_or] at h
+        rcases h with hcso | htail
+        · exact ⟨cur.col, cid, rigidObstruction_of_not_cellSingleOrbit adj cur.col cid hcso⟩
+        · split at htail
+          · exact absurd trivial htail
+          · rename_i w _ _
+            exact ih (step adj cur.col w) htail
 
 end Deepen
 end ChainDescent
