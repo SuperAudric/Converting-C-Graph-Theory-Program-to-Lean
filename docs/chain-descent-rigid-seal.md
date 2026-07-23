@@ -20,13 +20,21 @@
 
 > **The C# rigid solver is COMPLETE; the Lean rigid seal is nearly empty; the consume side now feeds it a clean
 > per-node handoff object, AND discharging its own `Amenable` hypothesis is a rigid-side deliverable (§9.1).**
-> This is the next track to build. **The mixed-cell/fusion design question is now SETTLED (§8.1, 2026-07-23):**
+> This is the next track to build. **The mixed-cell/fusion design question is SETTLED (§8.1, 2026-07-23):**
 > the "Progress" completeness predicate IS the ALREADY-BUILT sel-rewrite (`Select.HandledS`/`NodeResolved`/`selNode`,
 > 2026-07-18) — a resolver-aware selector that picks a resolvable cell (single-path, `②` preserved) and flags ONLY
-> at the true mutual stall (`selNode_stall_iff`). No object change, no new predicate. First concrete steps
-> (all wall-free): **R0a stated against `NodeResolved`** (the discretizing cell's leaf-matrix `keyV` separates its
-> exposed pairs ⟹ `cellNarrow ≤ 1` ⟹ `HandledS` at that node, via `answersS_of_handledS`); the heavy P3 Smith
-> build and the strength-dependent R6(c) (force-separates-every-exposed-rigid-pair) follow.
+> at the true mutual stall (`selNode_stall_iff`). No object change, no new predicate.
+>
+> **✅ R0a LANDED 2026-07-23 (`ChainDescent/RigidSeal.lean`, in `build.sh`, axiom-clean).** Force separates
+> non-automorphic pairs on the DISCRETIZING regime. **★ FINDING: the plain `Force.lookaheadKey` is INSUFFICIENT**
+> — its leaf matrix is adjacency-only, so equal keys give only a *graph* automorphism (no `σ u = w`, no
+> χ-preservation). The fix, built: the augmented key **`leafColKey`** recording the complete coloured-pointed
+> invariant `(pin-rank, χ-in-rank-order, leaf-matrix)`; `colAut_of_leafColKey_eq` proves equal keys ⟹ a
+> **colour**-automorphism `u↦w` (σ = π_w⁻¹π_u), `rigidResolved_leafColKey` discharges `RigidResolved`, and
+> `nodeResolved_leafColKey_of_rigid_discretizing` gives `Select.NodeResolved` on a rigid discretizing cell (feeds
+> `HandledS` via `answersS_of_handledS`). `leafColKey` is the strictly-stronger, still-poly, still-equivariant
+> force key of record. **Next concrete steps:** R0b (bridge, carry `hSmallAutThin`) · P1 (extraction, standalone)
+> · the heavy P3 Smith build · the strength-dependent R6(c).
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -337,7 +345,7 @@ the two together, not as separate legs.
 |---|---|---|
 | **handoff** | `RigidObstructionAt` exposed per consume-stall; deepen defers soundly | **PROVED** (`not_amenablePath_imp_rigidObstruction`, `rigidObstruction_imp_not_cellIsOrbit`) |
 | **contract** | `Phase2.Solver`/`Sound`/`IsoInvariant` | **stated** (`Phase2Handoff.lean`); Algorithm R is the future witness |
-| **R0a** | discretizing → `keyV` separates non-aut pairs (`RigidResolved`) | **PROVABLE, no wall** — leaf-matrix complete-invariant lemma; not built |
+| **R0a** | discretizing → `keyV` separates non-aut pairs (`RigidResolved`) → `NodeResolved` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`, in `build.sh`) — via the augmented key `leafColKey` (plain `lookaheadKey` INSUFFICIENT); `colAut_of_leafColKey_eq` / `rigidResolved_leafColKey` / `nodeResolved_leafColKey_of_rigid_discretizing` |
 | **mixed-cell** | resolver-aware selector picks a resolvable cell (single-path) + `Reaches`-exposure; flag = true mutual stall | **✅ SETTLED 2026-07-23** (§8.1) — the "Progress" predicate IS the ALREADY-BUILT sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18). No object change, no new predicate, `②` single-path PRESERVED. |
 | **R0b** | `RigidResolved ⟸ hSmallAutThin` (bridge) | **not built** — reduction to the shared wall |
 | **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **Remaining = (c) force-separates-every-exposed-rigid-pair** (`RigidObstructionAt`'s pair gets distinct `keyV` ⟹ its cell `cellNarrow`s to ≤1 ⟹ `NodeResolved`) — the substance, tied to rigid-resolver STRENGTH, co-evolves with P3/P4. Deepest ③/totality claim. |
@@ -361,8 +369,10 @@ the exposed pairs, closing the true-mutual-stall residue).
 
 ## 11. Traps and pointers
 
-- ⚠ **"Force separates non-automorphic pairs" is NOT proved** — assumed `hsep` everywhere (`Force.lean:409`,
-  `Composite.lean:238`). R0a proves it only on the discretizing regime.
+- ⚠ **"Force separates non-automorphic pairs" is assumed (`hsep`) in the GENERAL case** (`Force.lean:409`,
+  `Composite.lean:238`) — but **R0a now PROVES it on the discretizing regime** (`RigidSeal.rigidResolved_leafColKey`,
+  axiom-clean, with the augmented key `leafColKey`; the plain `lookaheadKey` is insufficient). The non-discretizing
+  regime is R0b (carries `hSmallAutThin`).
 - ⚠ **`hSmallAutThin` / "Algorithm R" / "linear oracle" are hypotheses / C# / prose — not built Lean objects.**
 - ⚠ **`CellResolved` is single-step** — it does not model the interleaving; mixed/fusion cells need the
   `Reaches`-iteration (or a refined predicate). The load-bearing design question (§8.1).
