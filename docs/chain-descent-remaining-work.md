@@ -715,7 +715,9 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   hook discharged per sealed family (first: CFI odd-deg via `theorem_1_HOR_cfi_oddDeg`; depth already
   imports via P2b/P2c). Zero families populated today; this is ③'s content and each leg's totality brick.
 - **T2 — cost bounds per new mechanism** (`SupplyCost` pattern: closed-form `c₂`/`keyCost` at land time —
-  house rule, not a backlog).
+  house rule, not a backlog). ⚠ **Outstanding debt: `deepenSupply` has NO formalized cost bound** — its
+  `n⁶` bill is prose only (no `SupplyCost`/`descentCost` theorem references it). Not urgent (deepen is not
+  in the record object yet), but MUST be paid when T1 wires it in; the cost-model pilot is its natural home.
 - **T3 — citation discharge** per policy (everything but G3; register + M1–M5 playbook in the discharge doc;
   wiring cautions: G3 only at the Sun–Wilmes threshold, FTPG corrected predicate, Payne–Thas narrowed).
 - **T4 — D0** (`SchurianScheme` model faithfulness) — see W2.

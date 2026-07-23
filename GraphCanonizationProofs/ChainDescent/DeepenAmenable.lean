@@ -944,8 +944,9 @@ theorem deepen_branch_orbit_iff_aut (adj : AdjMatrix n) (χ : Colouring n)
     exact exec_recovers_refgen_on_cell adj χ hβ hAmen hu
 
 /-- **★★ deepen's branch-orbit relation TRANSPORTS.** Both sides equal the `IsColAut`-orbit relation, which
-conjugates under `σ` (`isColAut_conj_iff`). Needs `{Amenable, AnchorFires}` on every graph (they are ∀-quantified
-domain facts, so they hold on the relabelled graph too). -/
+conjugates under `σ` (`isColAut_conj_iff`). Needs `{Amenable}` on every graph (a ∀-quantified domain fact, so
+it holds on the relabelled graph too). `AnchorFires` is GONE — track-A whole-graph `deepen` made `[DISC]`/gate/
+termination structural. -/
 theorem deepen_branchOrbit_transport
     (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
     (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (a b : Fin n)
@@ -967,9 +968,11 @@ theorem deepen_branchOrbit_transport
     refine ⟨σ * β * σ⁻¹, (Consume.isColAut_conj_iff σ).mpr hβ, ?_⟩
     simp [Equiv.Perm.mul_apply, hβa]
 
-/-- **★★★ `①c` FOR `deepenSupply` — REFERENCE-FREE, modulo `{Amenable, AnchorFires}` ONLY.** No `deepenRefSupply`,
-no R1, no R2, no `twistOf`-transport. deepen's flag is equivariant because its branch orbits are the
-`IsColAut`-orbits, which transport. This is the intended, clean close of `①c`. -/
+/-- **★★★ `①c` FOR `deepenSupply` — REFERENCE-FREE, `AnchorFires`-FREE, modulo `{Amenable}` ONLY.** No
+`deepenRefSupply`, no R1, no R2, no `twistOf`-transport, no `AnchorFires`. deepen's flag is equivariant because
+its branch orbits are the `IsColAut`-orbits, which transport. This is the intended, clean close of `①c`.
+⚠ `hAmen` is GLOBAL (`∀ adj χ`) — a conditional scaffold, NOT applicable as-is (false on rigid graphs); the
+`Amenable` discharge is the per-family rigid coupling (rigid-seal §9.1), the substantive remaining work. -/
 theorem deepenSupply_guarded_canonizer_direct
     (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ) :
     CanonSpec.IsCanonicalFormOpt

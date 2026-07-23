@@ -26,6 +26,12 @@
 >   (the gate passes on a non-trivial branch cell). `allSingletonsK_of_discrete` supports the gate.
 > - **`deepenSupply_guarded_canonizer_direct` now takes ONLY `hAmen : ∀ adj χ, Amenable adj χ`.** `①c` closes
 >   modulo `{Amenable}` alone — no `AnchorFires`, no reference, no R1/R2.
+>   **⚠ Read "closed modulo `{Amenable}`" precisely: `hAmen` is GLOBAL (`∀ adj χ`) and false on rigid graphs,
+>   so this capstone is a CONDITIONAL SCAFFOLD, not an applicable theorem.** The `Amenable` discharge is the
+>   per-family rigid coupling (rigid-seal §9.1) — a substantive program, not a footnote. Deepen enters
+>   `Publication.canonForm?` only once `Amenable`/`CellsAreOrbits` is populated per family (T1), and on
+>   non-`Amenable` graphs it defers SOUNDLY (`rigidObstruction_imp_not_cellIsOrbit`) — the residual work is
+>   *relocated* to the rigid side, not finished.
 > - **The entire reference apparatus is REMOVED from the build** (not just superseded): `deepenRefGens`,
 >   `DeepenRefInExec`, `ExecRecoversKMinusCell`, `sameOrbitsOnBranches_of_cell`, `deepenRefSupply`, and the
 >   files `DeepenRef`/`DeepenRefTransport`/`DeepenR1` are parked out of `build.sh`. The `imgFun` /
@@ -414,7 +420,7 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
     [INV]`: `Discrete` leaf ⟹ off-coupled = `χ`-singleton) · **`exec_recovers_cell_orbits`** (★ `x,y ∈ cell` +
     automorphism ⟹ `WordReach exec x y`; now carries the single clean domain fact `Discrete d1.col`).
   - *Route ε foundations + crux isolation (2026-07-22, §9.1.2):* `wordReach_of_mem_verified` · `wordReach_symm`
-    · `isColAut_mem_branches` · `AnchorFires` (per-anchor firing bundle) · **`exec_recovers_refgen_on_cell`**
+    · `isColAut_mem_branches` · ~~`AnchorFires`~~ (per-anchor firing bundle — **ELIMINATED by track A**, def deleted) · **`exec_recovers_refgen_on_cell`**
     (★ whole-cell coverage for a ref gen) · `ExecRecoversKMinusCell` / `deepenRefInExec_of_cell_and_crux` /
     `ExecReachesAut` (the now-UNNEEDED full-`SameOrbits` route, kept for reference).
   - *★★★ the `K∖cell`-free close (2026-07-22):* in `OrbitPrune` — `rep_congr_at` · **`SameOrbitsOnBranches`** ·

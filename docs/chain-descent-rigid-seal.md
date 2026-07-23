@@ -20,8 +20,13 @@
 
 > **The C# rigid solver is COMPLETE; the Lean rigid seal is nearly empty; the consume side now feeds it a clean
 > per-node handoff object, AND discharging its own `Amenable` hypothesis is a rigid-side deliverable (§9.1).**
-> This is the next track to build. First concrete steps (all wall-free / design-level): resolve the mixed-cell
-> design question (§8.1), then R0a (§8.1); the heavy P3 Smith build waits until the design settles.
+> This is the next track to build. **The mixed-cell/fusion design question is now SETTLED (§8.1, 2026-07-23):**
+> the "Progress" completeness predicate IS the ALREADY-BUILT sel-rewrite (`Select.HandledS`/`NodeResolved`/`selNode`,
+> 2026-07-18) — a resolver-aware selector that picks a resolvable cell (single-path, `②` preserved) and flags ONLY
+> at the true mutual stall (`selNode_stall_iff`). No object change, no new predicate. First concrete steps
+> (all wall-free): **R0a stated against `NodeResolved`** (the discretizing cell's leaf-matrix `keyV` separates its
+> exposed pairs ⟹ `cellNarrow ≤ 1` ⟹ `HandledS` at that node, via `answersS_of_handledS`); the heavy P3 Smith
+> build and the strength-dependent R6(c) (force-separates-every-exposed-rigid-pair) follow.
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -210,14 +215,52 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
   separates *exactly* the non-automorphic pairs — `RigidResolved` holds. Content: the **leaf-matrix complete-invariant**
   lemma (discrete refinement distinguishes non-isomorphic pointed graphs), the force analog of
   `handled_of_root_discrete` (`Residue.lean:176`). Regime (1) of §3; the clean core.
-- **⚠ The mixed-cell / fusion design question (load-bearing — resolve before the capstone).** `CellResolved` is
-  *single-step*: whole-cell consume OR whole-cell force. A **mixed cell** (some same-orbit pairs, some rigid pairs)
-  satisfies *neither* in one step — consume can't connect the rigid pair; force merges the same-orbit pair (even in
-  the discretizing case). Resolution is the **interleaving**: force separates the rigid pairs (splitting the cell → a
-  new `Reaches` node), consume then fires on the same-orbit sub-cells. So mixed cells resolve over
-  `Handled`-`Reaches`, not at the mixed node. **Open: does `CellResolved` need a "force partially separates, then
-  recurse" refinement, or does the `Reaches`-iteration already carry it?** This is the Lean form of the fusion
-  resolution `endgame §1a` cites for retiring the sequential handoff.
+- **✅ The mixed-cell / fusion design question — SETTLED 2026-07-23 (traced against source).** The answer:
+  **the "Progress" completeness predicate the user endorsed IS THE ALREADY-BUILT SEL-REWRITE
+  (`Select.HandledS`/`NodeResolved`/`selNode`, landed 2026-07-18 — `SelectNode.lean`). It is not a new predicate,
+  and it is NOT an object change that surrenders the single-path `②` bound.** ⚠ **This CORRECTS an earlier
+  version of this bullet** that described the mechanism as "fan-out over the min-key orbit-reps + `Reaches`
+  recursion" against `forceThenConsume`/`Stall.guard`; that is *not* the object of record and is withdrawn. The
+  correct trace:
+  - **`Stall.stalled := 1 < (narrow …).length`** (`Stall.lean:79`) makes the blind `Stall.guard` object
+    DELIBERATELY single-path — it flags on *any* fan-out, which is exactly what buys the unconditional `②`
+    node-bound (`resolvedAll_guard`). The authors already diagnosed (`Stall.lean:225–242`) that the blind object's
+    flag is *spurious*: it reads only the **least-colour** cell, so it flags at a stalled cell `A` even when
+    another cell `B` is resolvable and individualizing in `B` would expose what `A` needs (the exposure/fusion
+    dependency). The scoped fix — a **resolver-aware selector** — is the sel-rewrite, and it is BUILT.
+  - **`selNode` (`SelectNode.lean:371`)** probes all cells, commits to the least **resolvable** one (the cell whose
+    `cellNarrow` reaches `≤ 1`), hands each kept child its refined colouring, and emits `[]` = flag **iff NO
+    non-singleton cell narrows to `≤ 1`** (`selNode_stall_iff`, :810) — the **true mutual stall**. Each resolved
+    cell still narrows to `≤ 1`, so **the object stays single-path and `②` is preserved** (`Publication.canonForm?`
+    IS this fused object).
+  - **`NodeResolved key S adj χ := ∃ non-singleton cell c, (cellNarrow … c).length ≤ 1`** (:838) = *"some cell can
+    progress."* **`HandledS := ∀ reached non-discrete χ, NodeResolved`** (:842). Its negation — a reached node
+    where **no** cell resolves — is exactly the user's *"a state that cannot progress"*, and it is
+    `selNode_stall_iff`'s true mutual stall.
+  - **The deflation + answers chain is all built and axiom-clean:** `nodeResolved_of_cellResolved` / `handledS_of_handled`
+    (:858 — `Residue.Handled ⟹ HandledS`, strictly weaker, the exposure witness in `Regression.lean` shows strict);
+    `answersS_of_handledS` (:933 — `HandledS ⟹` the fused canonizer ANSWERS, no flag); `residue_of_not_handledS`
+    (:863 — `¬HandledS ⟹ Residue`); `handledS_of_sameOrbits` (:868 — reads the supply only through its orbits, so
+    it transfers to deepen the same way `①c` does); `handledS_of_seal` (:879 — the seal populates it per family).
+    So the **residue is already the deflated `¬HandledS`** (the true mutual stall), not the blind `¬Handled`.
+  - **A single mixed CELL** (same-orbit `{a,b}` + rigid `{u,w}`, all in one cell, ≥2 non-automorphic branches
+    *tying* on the min key so `cellNarrow` of THAT cell stays `> 1`) resolves iff **some OTHER cell** is resolvable
+    (selector picks it, single-path, `Reaches`-exposure handles the rest). If NO cell is resolvable, `selNode`
+    flags — and that is the **genuine residue** (a same-key non-automorphic pair in every cell = the key's / force's
+    weakness), *not* spurious. This is correct poly-or-flag behaviour, and closing it is force STRENGTH (R6(c) / the
+    wall), not a predicate change.
+  **Consequences for the build (do these):**
+  1. **R0a targets `NodeResolved`, not whole-cell `RigidResolved`.** On the discretizing regime R0a's content is
+     "the discretizing cell's leaf-matrix `keyV` separates its exposed non-automorphic pairs ⟹ that cell's
+     `cellNarrow` reaches `≤ 1` ⟹ `NodeResolved` at the node ⟹ `HandledS` there." Feed `answersS_of_handledS`.
+  2. **`RigidResolved` (§4 seam predicate) should be stated per-cell as "the exposed rigid pairs get distinct
+     `keyV` so `cellNarrow` reaches `≤ 1`"** — i.e. it discharges `NodeResolved` for that cell, not a whole-node
+     claim. `HandledS` is the node-level target it feeds.
+  3. **This IS the Lean form of the fusion resolution `endgame §1a` cites** — the resolver-aware selector +
+     `Reaches`-exposure, single-path, flag = true mutual stall. It confirms retiring the sequential handoff.
+  4. **No new Lean predicate is needed for the "Progress" core** — the work is (i) realign R0a/`RigidResolved`
+     onto `NodeResolved`/`HandledS` (above), (ii) wire deepen's `HandledS` per family via `handledS_of_sameOrbits`
+     (T1), (iii) R6(c) force-strength for the true-mutual-stall residue.
 - **R0b — the bridge, carrying the wall.** `RigidResolved ⟸ hSmallAutThin` per node: on the non-discretizing regime,
   force-separation of the exposed pair = force-completeness on the rigid cell = `hSmallAutThin`. Land the reduction,
   carry `hSmallAutThin` — the honest `modulo {hSmallAutThin}` end-state.
@@ -244,9 +287,12 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 
 ### 8.4 Ordering + dependencies
 
-`R0a` (clean, immediate) → resolve the **mixed-cell design question** (gates the capstone shape) → `P1` (extraction,
-standalone, parallel to R0a) → `R0b` (bridge, carry `hSmallAutThin`) → `P2`/`P3` (solve + iso, the heavy build) →
-`P4` (capstone). `R2` (per-family) and `R5` (tighten) run in parallel as residue-shrinkers. The C# is the reference
+**Mixed-cell design question SETTLED (§8.1)** — the "Progress" predicate layer is the already-built sel-rewrite
+(`HandledS`/`NodeResolved`/`selNode`), so the ordering is now: `R0a` **stated against `NodeResolved`** (clean,
+immediate, feeds `answersS_of_handledS`) ∥ `P1` (extraction, standalone) → `R0b` (bridge, carry `hSmallAutThin`) →
+`P2`/`P3` (solve + iso, the heavy build) → `P4` (capstone) + **R6(c)** (force-separates-every-exposed-rigid-pair,
+the strength-dependent residue closure, co-evolves with P3/P4). `R2` (per-family, via `handledS_of_seal`/
+`handledS_of_sameOrbits`) and `R5` (tighten) run in parallel as residue-shrinkers. The C# is the reference
 throughout (validate Lean claims against `Option2Solver` behaviour before proving).
 
 ---
@@ -292,8 +338,9 @@ the two together, not as separate legs.
 | **handoff** | `RigidObstructionAt` exposed per consume-stall; deepen defers soundly | **PROVED** (`not_amenablePath_imp_rigidObstruction`, `rigidObstruction_imp_not_cellIsOrbit`) |
 | **contract** | `Phase2.Solver`/`Sound`/`IsoInvariant` | **stated** (`Phase2Handoff.lean`); Algorithm R is the future witness |
 | **R0a** | discretizing → `keyV` separates non-aut pairs (`RigidResolved`) | **PROVABLE, no wall** — leaf-matrix complete-invariant lemma; not built |
-| **mixed-cell** | fusion cell resolved by force-split + `Reaches`-iteration | **DESIGN QUESTION** — does `CellResolved` need refining? |
+| **mixed-cell** | resolver-aware selector picks a resolvable cell (single-path) + `Reaches`-exposure; flag = true mutual stall | **✅ SETTLED 2026-07-23** (§8.1) — the "Progress" predicate IS the ALREADY-BUILT sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18). No object change, no new predicate, `②` single-path PRESERVED. |
 | **R0b** | `RigidResolved ⟸ hSmallAutThin` (bridge) | **not built** — reduction to the shared wall |
+| **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **Remaining = (c) force-separates-every-exposed-rigid-pair** (`RigidObstructionAt`'s pair gets distinct `keyV` ⟹ its cell `cellNarrow`s to ≤1 ⟹ `NodeResolved`) — the substance, tied to rigid-resolver STRENGTH, co-evolves with P3/P4. Deepest ③/totality claim. |
 | **P1** | minimal forcing-circuits generate `rowspace(H)` | **not built** — F₂/matroid, standalone, do first |
 | **P2** | forcing-model bridge (1-WL forcing = ring propagation) | **carried** — model hypothesis |
 | **P3** | solve (Smith/ring) + canonical-form iso-invariance | **not built** — the heavy build |
@@ -303,8 +350,12 @@ the two together, not as separate legs.
 | **R5** | no rigid Cameron ⟹ "or non-linear" only | `cameron-entanglement` — conjecture, empirically solid |
 | **C#** | `Option2Solver` B1–B6 | **COMPLETE** (50 tests) — the reference spec |
 
-Everything conjectural lives in **`hSmallAutThin`** (shared). The seam's *own* new content is **R0a** + **R0b** + the
-**mixed-cell design question**; the solver's is **P1–P4**; the rest is per-family imports and the C# reference.
+Everything conjectural lives in **`hSmallAutThin`** (shared). The seam's *own* new content is **R0a** + **R0b**;
+the solver's is **P1–P4**; the rest is per-family imports and the C# reference. **R6's predicate layer is already
+built** (the sel-rewrite `HandledS`/`NodeResolved`/`selNode`, 2026-07-18); R6's remaining content is **(c)**
+force-separates-every-exposed-rigid-pair, which lands alongside P3/P4 once the solver's strength is fixed — it is
+NOT a corollary of P4 (P1–P4 build the solver in isolation; R6(c) is the claim the force key actually separates
+the exposed pairs, closing the true-mutual-stall residue).
 
 ---
 
