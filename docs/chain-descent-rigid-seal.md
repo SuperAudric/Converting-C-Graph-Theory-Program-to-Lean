@@ -60,8 +60,13 @@
 > reduced to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound`(+`hemit`) via `skOf` +
 > `keyEquivariant_skOf`/`solverSeparates_skOf`), both axiom-clean 2026-07-23. ⚠ **Mathlib Smith =
 > noncomputable/existence-only** ⟹ P3 is construction not a lift; F₂=field→RREF tractable, ring→finite-Smith heavy.
-> **Next:** P3-Sound (verify-by-reconstruction) + P3-F₂ (RREF solver, connects P1) → P3-ring → R6(c)/P4. The
-> residue is `¬HandledS` at non-linear rigid; `hSmallAutThin` stays home on the Route-C symmetry seals (W1).
+> **✅ P3-Sound LANDED 2026-07-23** (`RigidSolverSound.lean`): **soundness is FREE** (`emitLabel`/`ptSound_emitLabel`
+> — emit the pointed relabelling `ptForm`, `PtSound` for any `gen`), and `①` reduces to **`GenEquivariant gen`**
+> (the canonical-labelling law); capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` close
+> the whole rigid seam on `GenEquivariant + hemit`. **⟹ the entire rigid `①` = one poly total equivariant `gen` =
+> canonization of the linear code.** **Next:** P3-F₂ (concrete poly `gen` = RREF, blocked on `P2` extraction, = the
+> `②`/poly content) → P3-ring → R6(c)/P4. Residue = `¬HandledS` at non-linear rigid; `hSmallAutThin` = separate
+> (Route-C, W1).
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -360,11 +365,21 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
     `lookData`-faithfulness lemma needed at the seam**; the individualization/reflection content defers *into* the
     concrete solver, where it is provable from the construction. `PtSound`/`hemit` are the exact obligations
     P3-Sound/P3-F₂ + R2 must meet.
-  - **P3-Sound — verify-by-reconstruction** (lift C# B1c/B3): an emitted gauge φ reconstructs the graph ⟹ the form
-    is a valid relabelling ⟹ `Phase2.Sound` ⟹ `PtSound`. Family-agnostic.
-  - **P3-F₂ — the first concrete solver** (`sol_F2` via RREF of the extracted `rowspace(H)` from P1): computable,
-    `PtIsoInvariant` (RREF a complete subspace invariant, fired at the iso-invariant root) + `PtSound` (RREF basis
-    reconstructs). Discharges the F₂-linear residue; connects straight to `ForcingCircuits`.
+  - **✅ P3-Sound — soundness is FREE — LANDED 2026-07-23 (`ChainDescent/RigidSolverSound.lean`, axiom-clean).**
+    Verify-by-reconstruction (C# B1c/B3) lifted: `ptForm π adj χ v` = the pointed coloured graph *relabelled* by
+    π (injective in the triple `(relabelAdj π adj, transportColouring π χ, π v)`); `emitLabel gen` emits `gen`'s
+    chosen permutation's `ptForm`. **`ptSound_emitLabel`: `PtSound` holds for ANY `gen`** — soundness needs no
+    completeness (extract the actual relabelling, not an indicator). `colAut_of_ptForm_eq` is `r0a_core` off the
+    discretizing regime (equal forms ⟹ colour-aut `u↦w`, σ=πw⁻¹πu). `ptIsoInvariant_emitLabel`: `PtIsoInvariant ⟸
+    GenEquivariant gen` (the canonical-labelling law `gen (relabel σ ·) = (gen ·).map (·*σ⁻¹)`, via `ptForm_transport`).
+    **★ Capstones** `keyEquivariant_compKey_emitLabel` / `nodeResolved_compKey_emitLabel`: the **whole rigid seam
+    closes** on just two obligations on the concrete labelling — `GenEquivariant gen` (all the `①`) + `hemit` (no-flag,
+    the `②`/completeness; where it flags = the residue). **⟹ the entire `①` content of Algorithm R = a poly, total,
+    equivariant canonical labelling `gen`** = graph-canonization of the F₂/ring-linear residue.
+  - **P3-F₂ — the concrete poly `gen`** (`sol_F2` via RREF of the extracted `rowspace(H)` from P1): computable,
+    `GenEquivariant` (RREF a complete invariant, fired at the iso-invariant root) + total (`hemit`) on the F₂-linear
+    residue. ⚠ **Remaining hard brick** — it is graph-canonization of the linear code, blocked on `P2` (the
+    graph→system extraction bridge) which is carried. This is where the `②`/poly content now lives.
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**
@@ -448,8 +463,8 @@ the two together, not as separate legs.
 | **P1** | extraction-soundness: forced ⟹ backed by a `rowspace(H)` codeword (support ⊆ `insert j S`) | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingCircuits.lean`, Mathlib-only standalone) — `Forced`/`cl_up` + `forced_certificate` (unconditional; the codeword not the indicator ⟹ no minimality needed) + `certificate_of_forced_notMem`/`certificate_mem_rowspace` |
 | **P2** | forcing-model bridge (1-WL forcing = ring propagation; certificates *generate* `rowspace`) | **carried** — model hypothesis (needs rows = minimal circuits) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
-| **P3-Sound** | verify-by-reconstruction (emitted φ reconstructs ⟹ `Phase2.Sound` ⟹ `PtSound`) | **not built** — lift C# B1c/B3 |
-| **P3-F₂** | first concrete solver: RREF of `rowspace(H)` ⟹ `PtIsoInvariant` + `PtSound` (F₂-linear) | **not built** — connects P1; F₂ = field, tractable |
+| **P3-Sound** | soundness is FREE (relabelling-emit) + `①` reduces to `GenEquivariant gen` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverSound.lean`) — `ptForm`/`colAut_of_ptForm_eq`/`emitLabel`/`ptSound_emitLabel`/`ptIsoInvariant_emitLabel` + capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` |
+| **P3-F₂** | concrete poly `gen`: RREF of `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **not built** — the `②`/poly content; graph-canonization of the linear code, blocked on `P2` extraction |
 | **P3-ring** | `Z_{2^k}`/finite-abelian: ring-inference + finite-ring Smith + 2-adic tower | **not built** — heavy; ring-inference carried (`IR §11.13`). ⚠ Mathlib Smith = noncomputable/existence-only |
 | **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
 | **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |
