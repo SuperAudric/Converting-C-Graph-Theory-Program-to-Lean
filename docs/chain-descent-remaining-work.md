@@ -48,19 +48,32 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
-> **▶▶▶ UPDATE 2026-07-23 (latest) — THE ACTIVE TRACK IS THE RIGID SEAL; R0a + R0b LANDED.**
-> **Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (STATUS + §8 + §10 ledger).**
+> **▶▶▶ UPDATE 2026-07-23 (latest) — THE ACTIVE TRACK IS THE RIGID SEAL; the whole Algorithm-R Lean scaffold LANDED.**
+> **Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (STATUS + §8.1/§8.2 + §10 ledger).**
 > The consume side is closed modulo `{Amenable}` (track A, below), and `Amenable`-violation ⟺ `RigidObstructionAt`
-> = the rigid side's job — so the rigid seal is now the frontier. **✅ R0a + R0b LANDED** (`ChainDescent/RigidSeal.lean`,
-> in `build.sh`, all axiom-clean, full gate green 158 s): force separates non-automorphic pairs on the
-> **discretizing** regime via the augmented key `leafColKey` (`(pin-rank, χ-in-rank-order, leaf-matrix)`; the plain
-> `Force.lookaheadKey` is INSUFFICIENT — adjacency-only), and R0b reduces the whole cell to the wall
-> `SmallAutThinAt` (= `hSmallAutThin` at the seam), shrinking the blanket assumed `hsep` to just the
-> non-discretizing residue. **Mixed-cell/fusion design question SETTLED:** the "Progress" completeness predicate IS
-> the already-built sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18) — no object change, `②`
-> single-path preserved; `¬HandledS` = the true mutual stall = a state that cannot progress. **NEXT (rigid-seal
-> §8): P1** (extraction-soundness, standalone F₂/matroid) · **P3** (Smith/ring solve — discharges `SmallAutThinAt`)
-> · **R6(c)** (force-separates-every-exposed-rigid-pair). Everything reduces to the shared wall `hSmallAutThin`.
+> = the rigid side's job — so the rigid seal is the frontier. **The following all LANDED, axiom-clean, full gate green
+> (89 modules):**
+> - **R0a/R0b + `compKey`** (`RigidSeal.lean`): the force key `leafColKey` separates non-aut pairs on the DISCRETIZING
+>   regime; the composite `compKey sk` = `leafColKey` (disc) ∘ solver key `sk` (non-disc rigid) carries the sole
+>   obligation `SolverSeparates` — a SOLVER property, dischargeable by the rigid solver we build (NOT an SRG cite).
+> - **P1** (`ForcingCircuits.lean`): F₂ extraction-soundness (`forced_certificate`). **P3-I** (`RigidSolverInterface.lean`):
+>   reduce compKey's obligations to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound`. **P3-Sound**
+>   (`RigidSolverSound.lean`): **soundness is FREE** (`emitLabel`/`ptSound_emitLabel`), and the whole rigid `①`
+>   collapses to ONE object — a poly total equivariant canonical labelling `gen` (capstones
+>   `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel`). **P2** (`ForcingModel.lean`): graph↔F₂
+>   forcing-model bridge + the transport of P1 to graph level. **P3-F₂ core** (`RigidSolveF2.lean`): the F₂
+>   rigid-solve determinacy (`unique_solution_of_rigid` — rigid ⟹ unique solution).
+> - **⚠⚠ RETRACTED (do-not-re-derive):** the earlier "`SmallAutThinAt` = `hSmallAutThin` at the seam" identity is
+>   **wrong**. `hSmallAutThin` is a STATIC `SchurianScheme` predicate (Route-C/symmetry artifact, false on consumable
+>   cases); the canonizer's real residue is the DYNAMIC `¬HandledS`; they join only via the unbuilt W1 bridge
+>   (one-directional, NOT `↔`). See rigid-seal §8 correction.
+> - **Mixed-cell/fusion SETTLED:** the "Progress" predicate IS the already-built sel-rewrite
+>   `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18); `¬HandledS` = the true mutual stall.
+> **NEXT (rigid-seal §8.2):** wire `RigidSolveF2`'s unique solve, under an iso-invariant frame, into an equivariant
+> poly `gen` (`GenEquivariant`+`hemit`, the `②`/poly framing+emit = graph-canonization of the linear code) → P3-ring
+> → R6(c)/P4. **Carried:** `ForcingModel.bridge` (Layer B), `RecoversRowspace` (Layer-C generation), `gForce`'s
+> `encodeFreeFast` realization, and `hSmallAutThin` (on the Route-C symmetry seals, via W1). ⚠ **User-flagged open Q**
+> (deferred): the rigid solver likely covers MORE than linear residues.
 >
 > **▶▶▶ UPDATE 2026-07-23 (later) — TRACK A LANDED: `AnchorFires` ELIMINATED, ①c modulo `{Amenable}` ONLY.**
 > `deepen` now discretizes the WHOLE graph, making `[DISC]`/gate/termination STRUCTURAL

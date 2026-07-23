@@ -4352,7 +4352,80 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RigidSeal.RigidResolved` | 150-154 | The rigid-seam predicate (§4): force distinguishes every non-automorphic branch pair. | Definition |
 | `RigidSeal.rigidResolved_leafColKey` | 156-164 | **R0a:** `leafColKey` discharges `RigidResolved` on the discretizing regime (contrapositive of `colAut_of_leafColKey_eq`), no wall. | — |
 | `RigidSeal.nodeResolved_leafColKey_of_rigid_discretizing` | 168-182 | **R0a:** a rigid discretizing branch cell ⟹ `Select.NodeResolved` (feeds `HandledS` via `answersS_of_handledS`), no wall. | — |
-| `RigidSeal.SmallAutThinAt` | 193-202 | The rigid seam's form of the wall `hSmallAutThin`: `leafColKey` separates non-automorphic pairs on the non-discretizing regime. Vacuous on the discretizing regime. | Definition |
-| `RigidSeal.smallAutThinAt_of_all_discretize` | 204-211 | `SmallAutThinAt` holds vacuously when every branch vertex discretizes (R0a needs no wall there). | — |
-| `RigidSeal.rigidResolved_of_smallAutThin` | 213-225 | **R0b:** `RigidResolved (leafColKey)` for the whole cell modulo exactly the wall `SmallAutThinAt` (discretizing pairs discharged by R0a). | — |
-| `RigidSeal.nodeResolved_leafColKey_of_rigid` | 227-239 | **R0b:** `Select.NodeResolved` on any rigid cell modulo the wall `SmallAutThinAt`. | — |
+| `RigidSeal.SmallAutThinAt` | 204-213 | The rigid seam's form of the wall `hSmallAutThin`: `leafColKey` separates non-automorphic pairs on the non-discretizing regime. Vacuous on the discretizing regime. | Definition |
+| `RigidSeal.smallAutThinAt_of_all_discretize` | 215-222 | `SmallAutThinAt` holds vacuously when every branch vertex discretizes (R0a needs no wall there). | — |
+| `RigidSeal.rigidResolved_of_smallAutThin` | 224-236 | **R0b:** `RigidResolved (leafColKey)` for the whole cell modulo exactly the wall `SmallAutThinAt` (discretizing pairs discharged by R0a). | — |
+| `RigidSeal.nodeResolved_leafColKey_of_rigid` | 238-250 | **R0b:** `Select.NodeResolved` on any rigid cell modulo the wall `SmallAutThinAt`. | — |
+| `RigidSeal.compKey` | 268-274 | — | Definition |
+| `RigidSeal.keyV_compKey` | 276-282 | — | `@[simp]` |
+| `RigidSeal.keyV_compKey_disc` | 284-287 | — | — |
+| `RigidSeal.keyV_compKey_not_disc` | 289-292 | — | — |
+| `RigidSeal.keyV_leafColKey_disc_head` | 294-299 | — | — |
+| `RigidSeal.keyEquivariant_compKey` | 301-313 | — | — |
+| `RigidSeal.SolverSeparates` | 315-324 | — | Definition |
+| `RigidSeal.rigidResolved_compKey` | 326-352 | — | — |
+| `RigidSeal.nodeResolved_compKey_of_rigid` | 354-366 | — | — |
+## ChainDescent/ForcingCircuits.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ForcingCircuits.rowspace` | 47-50 | — | Definition |
+| `ForcingCircuits.Forced` | 52-62 | — | Inductive |
+| `ForcingCircuits.forced_certificate` | 68-144 | — | — |
+| `ForcingCircuits.certificate_of_forced_notMem` | 146-152 | — | — |
+| `ForcingCircuits.certificate_mem_rowspace` | 154-164 | — | — |
+
+## ChainDescent/ForcingModel.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ForcingModel.ForcingModel` | 46-54 | — | Structure |
+| `ForcingModel.Recoverable` | 58-62 | — | Definition |
+| `ForcingModel.recoverable_mem_rowspace` | 64-67 | — | — |
+| `ForcingModel.recoverable_of_model` | 69-78 | — | — |
+| `ForcingModel.forcing_certificate_of_model` | 80-85 | — | — |
+| `ForcingModel.RecoversRowspace` | 89-93 | — | Definition |
+| `ForcingModel.rowspace_eq_span_recoverable` | 95-104 | — | — |
+
+## ChainDescent/RigidSolveF2.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RigidSolveF2.dotP` | 33-34 | — | Definition |
+| `RigidSolveF2.dotP_zero_right` | 36-37 | — | `@[simp]` |
+| `RigidSolveF2.dotP_sub` | 39-40 | — | — |
+| `RigidSolveF2.dotP_add_left` | 42-43 | — | — |
+| `RigidSolveF2.dotP_smul_left` | 45-48 | — | — |
+| `RigidSolveF2.IsRigidF2` | 50-53 | — | Definition |
+| `RigidSolveF2.unique_solution_of_rigid` | 55-64 | — | — |
+| `RigidSolveF2.dotP_zero_rowspace` | 66-75 | — | — |
+| `RigidSolveF2.isRigidF2_rowspace` | 77-82 | — | — |
+
+## ChainDescent/RigidSolverInterface.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RigidSolver.PtSolver` | 45-46 | — | `abbrev` |
+| `RigidSolver.PtIsoInvariant` | 48-51 | — | Definition |
+| `RigidSolver.PtSound` | 53-59 | — | Definition |
+| `RigidSolver.encodeOpt` | 63-68 | — | Definition |
+| `RigidSolver.skCost` | 70-72 | — | Definition |
+| `RigidSolver.skOf` | 74-75 | — | Definition |
+| `RigidSolver.keyV_skOf` | 77-78 | — | `@[simp]` |
+| `RigidSolver.keyEquivariant_skOf` | 82-89 | — | — |
+| `RigidSolver.solverSeparates_skOf` | 93-117 | — | — |
+
+## ChainDescent/RigidSolverSound.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RigidSolver.ptForm` | 37-41 | — | Definition |
+| `RigidSolver.colAut_of_labelledAdj_eq` | 43-63 | — | — |
+| `RigidSolver.colAut_of_ptForm_eq` | 65-79 | — | — |
+| `RigidSolver.emitLabel` | 83-86 | — | Definition |
+| `RigidSolver.ptSound_emitLabel` | 88-103 | — | — |
+| `RigidSolver.GenEquivariant` | 107-112 | — | Definition |
+| `RigidSolver.ptForm_transport` | 114-123 | — | — |
+| `RigidSolver.ptIsoInvariant_emitLabel` | 125-141 | — | — |
+| `RigidSolver.keyEquivariant_compKey_emitLabel` | 156-162 | — | — |
+| `RigidSolver.nodeResolved_compKey_emitLabel` | 164-175 | — | — |

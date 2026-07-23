@@ -171,11 +171,17 @@ close it — is set out in
 > (`not_amenablePath_imp_rigidObstruction`). **`deepenSupply` stays out of `Publication.canonForm?` until
 > `Amenable`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
 > ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Amenable`
-> per family AND is the other seal. **✅ R0a + R0b LANDED 2026-07-23** (`ChainDescent/RigidSeal.lean`, axiom-clean):
-> force separates non-automorphic pairs on the discretizing regime via the augmented key `leafColKey` (the plain
-> `Force.lookaheadKey` is insufficient), and R0b reduces the rest to the wall `SmallAutThinAt` (= `hSmallAutThin`).
-> The mixed-cell/fusion question is SETTLED — the "Progress" predicate is the already-built sel-rewrite
-> `Select.HandledS`/`NodeResolved`. NEXT: P1 (extraction) · P3 (Smith, discharges the wall) · R6(c). Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
+> per family AND is the other seal. **✅ THE WHOLE ALGORITHM-R LEAN SCAFFOLD LANDED 2026-07-23** (axiom-clean, gate
+> green 89 modules — authoritative detail = rigid-seal STATUS/§8.2/§10): the force key `leafColKey` + composite
+> `compKey` (`RigidSeal.lean`); **P1** (`ForcingCircuits`, extraction-soundness), **P3-I** (`RigidSolverInterface`,
+> contract reduction), **P3-Sound** (`RigidSolverSound`, soundness FREE ⟹ `①` = one canonical labelling `gen`),
+> **P2** (`ForcingModel`, graph↔F₂ bridge), **P3-F₂ core** (`RigidSolveF2`, the rigid-solve determinacy). ⚠⚠ **The
+> earlier "`SmallAutThinAt` = `hSmallAutThin` at the seam" identity is RETRACTED** — `hSmallAutThin` is a STATIC
+> Route-C scheme predicate (false on consumable cases); the canonizer's residue is the DYNAMIC `¬HandledS`; they join
+> only via the unbuilt W1 (NOT `↔`). The mixed-cell/fusion question is SETTLED — the "Progress" predicate is the
+> already-built sel-rewrite `Select.HandledS`/`NodeResolved`. **NEXT:** wire `RigidSolveF2`'s unique solve, under an
+> iso-invariant frame, into an equivariant poly `gen` (`GenEquivariant`+`hemit`) → P3-ring → R6(c)/P4. ⚠ user-flagged
+> open Q (deferred): the rigid solver likely covers MORE than linear residues. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
 > `hL1`/`K∖cell`, WL-completeness framing) is **SUPERSEDED PROVENANCE**. Measured (`DeepenStrengthProbe.cs`, 39
 > rows): starvation = 0, every checkable row COMPLETE, Chang-A 384/384 (survivor = fusion), expander multipedes rigid.
 > ⛔ `KernelBase.lean` (base recovery + lift) **parked** — not in `build.sh`.

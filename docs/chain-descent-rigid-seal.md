@@ -18,12 +18,14 @@
 
 ## ▶ STATUS (2026-07-23)
 
-> **The C# rigid solver is COMPLETE; the Lean rigid seal is nearly empty; the consume side now feeds it a clean
-> per-node handoff object, AND discharging its own `Amenable` hypothesis is a rigid-side deliverable (§9.1).**
-> This is the next track to build. **The mixed-cell/fusion design question is SETTLED (§8.1, 2026-07-23):**
-> the "Progress" completeness predicate IS the ALREADY-BUILT sel-rewrite (`Select.HandledS`/`NodeResolved`/`selNode`,
-> 2026-07-18) — a resolver-aware selector that picks a resolvable cell (single-path, `②` preserved) and flags ONLY
-> at the true mutual stall (`selNode_stall_iff`). No object change, no new predicate.
+> **The C# rigid solver is COMPLETE, and the whole Algorithm-R Lean *scaffold* is now built (2026-07-23,
+> axiom-clean, gate green 89 modules): the seam (R0a/R0b/`compKey`) + the solver's reduction layers (P1, P3-I,
+> P3-Sound, P2, P3-F₂ core).** What remains is the **concrete poly canonical labelling `gen`** (the `②`/poly
+> framing+emit) plus the carried model obligations — see §8.2 and §10. The consume side also feeds a clean per-node
+> handoff object, and discharging its own `Amenable` hypothesis is a rigid-side deliverable (§9.1). **The
+> mixed-cell/fusion design question is SETTLED (§8.1):** the "Progress" completeness predicate IS the ALREADY-BUILT
+> sel-rewrite (`Select.HandledS`/`NodeResolved`/`selNode`, 2026-07-18) — a resolver-aware selector, single-path,
+> `②` preserved, flags ONLY at the true mutual stall (`selNode_stall_iff`). No object change, no new predicate.
 >
 > **✅ R0a LANDED 2026-07-23 (`ChainDescent/RigidSeal.lean`, in `build.sh`, axiom-clean).** Force separates
 > non-automorphic pairs on the DISCRETIZING regime. **★ FINDING: the plain `Force.lookaheadKey` is INSUFFICIENT**
@@ -77,13 +79,16 @@
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
 >   §11.12). It solves CFI / multipede / `Z_{2^k}` / general-arity / `s`-fold covers. This is the **reference spec**
 >   the Lean must certify — not a lift (there is no Smith-normal-form in Lean yet).
-> - **Lean — R0a/R0b LANDED; the SOLVER is still empty.** What exists: the typed contract
->   `Phase2.Solver`/`Sound`/`IsoInvariant` (`Phase2Handoff.lean:74,78,85`) + `handoffBase_relabel`; the force
->   resolvers `lookaheadKey` and now the augmented **`leafColKey`** (`RigidSeal.lean`); **the force-separation
->   theorem on the discretizing regime (R0a) + the wall reduction (R0b), all axiom-clean.** **Still no Lean
->   rigid-solver, no Smith/ring solve, no P1–P4, no `canonizesRigidResidue_or_flags`.** ⚠ The `RRU` namespace in
->   `Phase2Handoff.lean` (the *sequential* R(G) handoff) is **RETIRED** for the interleaved model (`endgame §1a`) —
->   do not build on it; the surviving seam is `Phase2.Solver`/`Sound`/`IsoInvariant`.
+> - **Lean — the whole Algorithm-R scaffold LANDED (2026-07-23), all axiom-clean, gate green (89 modules).** Built:
+>   the typed contract `Phase2.Solver`/`Sound`/`IsoInvariant` (`Phase2Handoff.lean`) + `handoffBase_relabel`; the
+>   force key **`leafColKey`** + the composite **`compKey`** (`RigidSeal.lean`, R0a/R0b/§9); **P1**
+>   (`ForcingCircuits.lean`, extraction-soundness), **P3-I** (`RigidSolverInterface.lean`, the contract reduction),
+>   **P3-Sound** (`RigidSolverSound.lean`, soundness-free + `①`⟹one `gen`), **P2** (`ForcingModel.lean`, graph↔F₂
+>   bridge), **P3-F₂ core** (`RigidSolveF2.lean`, the rigid-solve determinacy). **Still NOT built:** the concrete poly
+>   `gen` itself (the `②`/poly framing+emit), the ring-general Smith (`Z_{2^k}`), and the capstone
+>   `canonizesRigidResidue_or_flags` (P4). ⚠ The `RRU` namespace in `Phase2Handoff.lean` (the *sequential* R(G)
+>   handoff) is **RETIRED** for the interleaved model (`endgame §1a`) — do not build on it; the surviving seam is
+>   `Phase2.Solver`/`Sound`/`IsoInvariant`.
 > - **The handoff (NEW, from consume).** Consume (`deepenSupply`) now provably exposes, per node, a concrete
 >   `RigidObstructionAt` — a same-colour non-automorphic pair the rigid side must distinguish
 >   (`not_amenablePath_imp_rigidObstruction`, axiom-clean). This is the *interleaved* handoff object, replacing the
@@ -241,23 +246,31 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 
 ---
 
-## 7. The Lean gap — what is NOT built
+## 7. The Lean gap — what IS and is NOT built
 
-> **▶ UPDATED 2026-07-23 — R0a/R0b changed this list.** `RigidSeal.lean` now builds the **force-separation
-> theorem on the discretizing regime** + the reduction to the wall. What remains unbuilt is the *solver* (P1–P4)
-> and the *non*-discretizing separation (`SmallAutThinAt`, = the wall). Corrected below.
+> **▶ UPDATED 2026-07-23 — the whole Algorithm-R scaffold landed.** The seam (R0a/R0b/`compKey`) and the solver's
+> *reduction* layers (P1, P3-I, P3-Sound, P2, P3-F₂ core) are all built and axiom-clean. What remains is the
+> concrete poly `gen` and the carried model obligations. The full ledger is §10; the sub-brick plan is §8.2.
 
-- **No rigid-solver object.** "Algorithm R" / "linear oracle" are C#/prose only; the Phase-1 linear oracle is
-  `LinearOracle.configSwap_of_aut/twin` inside CFI, not a general solver.
-- **No Smith normal form / ring solve** anywhere in Lean.
-- **✅ Force-separation on the DISCRETIZING regime is now BUILT** (R0a, `RigidSeal.lean`, axiom-clean): the
-  augmented key `leafColKey` + `rigidResolved_leafColKey` + `nodeResolved_leafColKey_of_rigid_discretizing`.
-  **What is NOT built:** the *non*-discretizing separation — carried as the wall `SmallAutThinAt` (R0b's
-  `rigidResolved_of_smallAutThin`); it is discharged by the rigid solver (P3), not yet built.
-- **No `canonizesRigidResidue_or_flags`** — the capstone does not exist.
-- **`hSmallAutThin` is a hypothesis, not a lemma** (`CascadeAffine.lean:1320`).
-- The surviving Lean seam is only the **contract** (`Phase2.Solver`/`Sound`/`IsoInvariant` + `handoffBase_relabel`);
-  the `RRU` reachability apparatus is retired.
+**Built (axiom-clean, in `build.sh`):**
+- **The seam** — `leafColKey` + `compKey` (`RigidSeal.lean`): force separates non-aut pairs on the discretizing
+  regime, and the composite key carries the sole obligation `SolverSeparates`.
+- **P1** `ForcingCircuits.lean` — F₂ extraction-soundness (`forced_certificate`).
+- **P3-I** `RigidSolverInterface.lean` — reduce `compKey`'s obligations to the pointed solver contract.
+- **P3-Sound** `RigidSolverSound.lean` — soundness FREE; the whole `①` reduces to one canonical labelling `gen`.
+- **P2** `ForcingModel.lean` — graph↔F₂ forcing-model bridge + transport of P1 to the graph level.
+- **P3-F₂ core** `RigidSolveF2.lean` — the F₂ rigid-solve determinacy (`unique_solution_of_rigid`).
+
+**NOT built:**
+- **The concrete poly `gen`** — an iso-invariant (`GenEquivariant`), total (`hemit`), polynomial canonical labelling
+  of the F₂-linear residue. This is graph-canonization of the linear code; the `②`/poly framing+emit. **The one
+  substantive next brick.**
+- **No Smith / ring solve** (`Z_{2^k}` = P3-ring); Mathlib's Smith is noncomputable/existence-only (see §8.2 gate).
+- **No `canonizesRigidResidue_or_flags`** (P4 capstone).
+- **Carried model obligations:** `ForcingModel.bridge` (Layer B, empirical/cited), `RecoversRowspace` (Layer-C
+  generation), `gForce`'s `encodeFreeFast` realization; and `hSmallAutThin` (a hypothesis on the Route-C symmetry
+  seals, `CascadeAffine.lean:1320`, reached via W1 — NOT the descent residue).
+- The `RRU` reachability apparatus is retired; the surviving seam is `Phase2.Solver`/`Sound`/`IsoInvariant`.
 
 ---
 
@@ -421,15 +434,17 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 ### 8.4 Ordering + dependencies
 
 **Mixed-cell design question SETTLED (§8.1)** — the "Progress" predicate layer is the already-built sel-rewrite
-(`HandledS`/`NodeResolved`/`selNode`), so the ordering is: **✅ `R0a` DONE** (against `NodeResolved`, feeds
-`answersS_of_handledS`) → **✅ `R0b` DONE** (leafColKey precursor) → **✅ `compKey` DONE** (§9 — the dischargeable
-seam; carried object is now `SolverSeparates` over the composite key, a solver property) → **now: `P1`**
-(extraction, standalone) → `P2`/`P3` (solve + iso, the heavy build — **P3 builds `sk` and discharges
-`SolverSeparates` via `Phase2.Sound`**, NOT the static `hSmallAutThin`) → `P4` (capstone) + **R6(c)**
-(force-separates-every-exposed-rigid-pair, the strength-dependent residue closure, co-evolves with P3/P4).
-`R2` (per-family, via `handledS_of_seal`/`handledS_of_sameOrbits`) and `R5` (tighten) run
-in parallel as residue-shrinkers. The C# is the reference throughout (validate Lean claims against `Option2Solver`
-behaviour before proving).
+(`HandledS`/`NodeResolved`/`selNode`). Ordering, with current state:
+**✅ `R0a`** (feeds `answersS_of_handledS`) → **✅ `R0b`** (leafColKey precursor) → **✅ `compKey`** (§9 — the
+dischargeable seam; carried object `SolverSeparates` = a solver property) → **✅ `P1`** (`ForcingCircuits`) →
+**✅ `P3-I`** (`RigidSolverInterface`, contract reduction) → **✅ `P3-Sound`** (`RigidSolverSound`, soundness free ⟹
+`①` = one `gen`) → **✅ `P2`** (`ForcingModel`, graph↔F₂ bridge) → **✅ `P3-F₂` core** (`RigidSolveF2`, solve
+determinacy) → **▶ NOW: the concrete poly `gen`** (wire the unique solve under an iso-invariant frame into
+`GenEquivariant`+`hemit` — the `②`/poly framing+emit) → `P3-ring` (`Z_{2^k}`) → `P4` (capstone
+`canonizesRigidResidue_or_flags`) + **R6(c)** (force-separates-every-exposed-rigid-pair, co-evolves with the `gen`
+build). `R2` (per-family, via `handledS_of_seal`/`handledS_of_sameOrbits`) and `R5` (tighten) run in parallel as
+residue-shrinkers. The C# `Option2Solver` is the reference throughout (validate Lean claims against its behaviour
+before proving).
 
 ---
 

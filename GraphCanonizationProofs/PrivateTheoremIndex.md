@@ -411,3 +411,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `Kernel.filterMap_length_eq_iff` | 121-149 | A `filterMap` preserves length exactly when every element maps to `some` — the counting half of the all-or-nothing gate. | — |
+## ChainDescent/ForcingCircuits.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ForcingCircuits.addTwo_eq_zero` | 64-66 | — | — |

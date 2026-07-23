@@ -1,9 +1,19 @@
 # HANDOFF — 2026-07-14 (the canonizer object: ①, ②, ③ and what is actually left)
 
-> **Read this first if you are picking the project up.** It is the authoritative state of the **canonizer** track as
-> of 2026-07-14. It supersedes the STATUS blocks of `chain-descent-mixed-composition.md`,
-> `chain-descent-remaining-work.md` and `00-START-HERE.md` §2 wherever they disagree — and it records **two
-> retracted claims** that a reader could otherwise re-derive and act on.
+> **⚠⚠ STALE FOR THE RIGID TRACK (as of 2026-07-23) — READ THE CURRENT STATE FIRST.** This doc is the authoritative
+> record of the ①/②/③ **canonizer-object** foundations (still valid — read it for those), but it **predates track A
+> (deepen) and the entire rigid-seal build**. For the *current* frontier and what is left, the authoritative sources
+> are now [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (STATUS + §8.2 + §10) and
+> [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md) (▶ CURRENT FRONTIER). Where THIS doc and
+> those disagree on current state, **those win** (the "supersedes remaining-work" line below is reversed for the
+> rigid track). In particular this doc's "what is left" predates: the whole Algorithm-R Lean scaffold
+> (R0a/R0b/`compKey`/P1/P3-I/P3-Sound/P2/P3-F₂ core, all landed axiom-clean) and the retraction of the
+> "`SmallAutThinAt` = `hSmallAutThin`" identity.
+>
+> **The (still-valid) canonizer-object foundations, as of 2026-07-14.** It supersedes the STATUS blocks of
+> `chain-descent-mixed-composition.md`, `chain-descent-remaining-work.md` and `00-START-HERE.md` §2 wherever they
+> disagree **on the ①/②/③ object foundations** — and it records **two retracted claims** that a reader could
+> otherwise re-derive and act on.
 >
 > **Quality bar (unchanged, non-negotiable):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`;
 > full build green (`bash scripts/build.sh`, **3-6 min** as of 2026-07-19); no `sorry`; no fresh `axiom` (cited
