@@ -64,7 +64,10 @@
 > — emit the pointed relabelling `ptForm`, `PtSound` for any `gen`), and `①` reduces to **`GenEquivariant gen`**
 > (the canonical-labelling law); capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` close
 > the whole rigid seam on `GenEquivariant + hemit`. **⟹ the entire rigid `①` = one poly total equivariant `gen` =
-> canonization of the linear code.** **Next:** P3-F₂ (concrete poly `gen` = RREF, blocked on `P2` extraction, = the
+> canonization of the linear code.** **✅ P2 LANDED 2026-07-23** (`ForcingModel.lean`): the forcing-model bridge
+> graph↔F₂ (`ForcingModel.bridge` = Layer B WL=unit-prop, carried) + `recoverable_of_model` (transport: graph-forced
+> ⟹ `rowspace(H)` codeword, via P1) + `rowspace_eq_span_recoverable` (exact recovery mod carried generation). **Next:**
+> P3-F₂ (concrete poly `gen` = RREF over the P2-recovered `rowspace(H)` + `encodeFreeFast` wiring of `gForce`; = the
 > `②`/poly content) → P3-ring → R6(c)/P4. Residue = `¬HandledS` at non-linear rigid; `hSmallAutThin` = separate
 > (Route-C, W1).
 >
@@ -345,8 +348,17 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
   (`cl_up ⊆ cl_lin` at the witness level — what P3's Smith/rank solve consumes). ⚠ The **generation** direction
   (certificates *span* `rowspace(H)`) is the P2 model bridge, carried (needs rows = minimal circuits, a graph
   property). This matches P1's name: *extraction-**soundness***.
-- **P2 — forcing-model bridge (carried, discharge later).** "1-WL forcing over `A` = ring-unit propagation" as a
-  model hypothesis linking the graph to the recovered system.
+- **✅ P2 — forcing-model bridge — LANDED 2026-07-23 (`ChainDescent/ForcingModel.lean`, axiom-clean).** Links the
+  **graph** side (1-WL refinement forcing over `Fin n`) to the **pure-F₂** side (`ForcingCircuits.Forced`/`rowspace`
+  over abstract vars `ι`). Empirical content = **Layer B** (`IR §11.4a`): WL-forcing on the real multipede/CFI graph
+  = unit-propagation on the recovered matrix `H`, *exactly* (50/50 validated, mechanism-verified; asymptotics cited
+  Neuen–Schweitzer) — a **gadget-model** property, so **carried** as the hypothesis `ForcingModel.bridge : gForce S
+  j ↔ Forced H S j` (where it fails = non-linear rigid residue; `gForce`'s realization by `encodeFreeFast` is the
+  deferred wiring). **Proved:** `recoverable_of_model` / `forcing_certificate_of_model` = the **transport**
+  (graph-forced ⟹ genuine `rowspace(H)` codeword — P1's `forced_certificate` pulled across the bridge =
+  graph-extraction soundness P3-F₂ consumes); `rowspace_eq_span_recoverable` = exact recovery reduces to the carried
+  generation `RecoversRowspace` (soundness inclusion from P1; generation = the delicate minimal-circuit Layer-C
+  content, carried).
 - **P3 — solve + canonical-form iso-invariance (the heavy new build), SCOPED into sub-bricks 2026-07-23.**
   ⚠ **Feasibility gate (Mathlib reality):** Mathlib's Smith (`Submodule.smithNormalForm`) is **`noncomputable` and
   existence-only** (invariant factors over a PID — NO executable `U·M·V=D` transforms, NO canonical-form emit), so
@@ -461,7 +473,7 @@ the two together, not as separate legs.
 | **compKey** | dischargeable seam: force key = `leafColKey` (disc, tag `1::`) ∘ solver key `sk` (non-disc rigid, tag `0::`); carried obligation = `SolverSeparates` (a solver property, discharged by P3's `Phase2.Sound`) | **✅ LANDED 2026-07-23, axiom-clean** (§9, `RigidSeal.lean`) — `compKey` + `keyEquivariant_compKey` (given `KeyEquivariant sk`) + `SolverSeparates` + `rigidResolved_compKey` + `nodeResolved_compKey_of_rigid`. `sk`/`SolverSeparates` stubbed to P3. The force half of "consume-can't-fire ⟹ force-fires." |
 | **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **Remaining = (c) force-separates-every-exposed-rigid-pair** (`RigidObstructionAt`'s pair gets distinct `keyV` ⟹ its cell `cellNarrow`s to ≤1 ⟹ `NodeResolved`) — the substance, tied to rigid-resolver STRENGTH, co-evolves with P3/P4. Deepest ③/totality claim. |
 | **P1** | extraction-soundness: forced ⟹ backed by a `rowspace(H)` codeword (support ⊆ `insert j S`) | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingCircuits.lean`, Mathlib-only standalone) — `Forced`/`cl_up` + `forced_certificate` (unconditional; the codeword not the indicator ⟹ no minimality needed) + `certificate_of_forced_notMem`/`certificate_mem_rowspace` |
-| **P2** | forcing-model bridge (1-WL forcing = ring propagation; certificates *generate* `rowspace`) | **carried** — model hypothesis (needs rows = minimal circuits) |
+| **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
 | **P3-Sound** | soundness is FREE (relabelling-emit) + `①` reduces to `GenEquivariant gen` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverSound.lean`) — `ptForm`/`colAut_of_ptForm_eq`/`emitLabel`/`ptSound_emitLabel`/`ptIsoInvariant_emitLabel` + capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` |
 | **P3-F₂** | concrete poly `gen`: RREF of `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **not built** — the `②`/poly content; graph-canonization of the linear code, blocked on `P2` extraction |
