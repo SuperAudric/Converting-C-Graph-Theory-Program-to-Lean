@@ -33,8 +33,15 @@
 > **colour**-automorphism `u↦w` (σ = π_w⁻¹π_u), `rigidResolved_leafColKey` discharges `RigidResolved`, and
 > `nodeResolved_leafColKey_of_rigid_discretizing` gives `Select.NodeResolved` on a rigid discretizing cell (feeds
 > `HandledS` via `answersS_of_handledS`). `leafColKey` is the strictly-stronger, still-poly, still-equivariant
-> force key of record. **Next concrete steps:** R0b (bridge, carry `hSmallAutThin`) · P1 (extraction, standalone)
-> · the heavy P3 Smith build · the strength-dependent R6(c).
+> force key of record.
+>
+> **✅ R0b LANDED 2026-07-23 (`RigidSeal.lean`, axiom-clean).** The bridge to the wall: `SmallAutThinAt` is the
+> seam form of `hSmallAutThin` (non-discretizing pairs still separated by `leafColKey`), vacuous on the
+> discretizing regime (`smallAutThinAt_of_all_discretize`); `rigidResolved_of_smallAutThin` gives `RigidResolved`
+> for the WHOLE cell modulo exactly `SmallAutThinAt`, and `nodeResolved_leafColKey_of_rigid` gives `NodeResolved`
+> on any rigid cell modulo the wall. **Net: the blanket assumed `hsep` (all non-automorphic pairs) is shrunk to
+> just the non-discretizing ones.** **Next concrete steps:** P1 (extraction, standalone) · the heavy P3 Smith
+> build (separating the non-discretizing residue = discharging `SmallAutThinAt`) · the strength-dependent R6(c).
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -269,9 +276,15 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
   4. **No new Lean predicate is needed for the "Progress" core** — the work is (i) realign R0a/`RigidResolved`
      onto `NodeResolved`/`HandledS` (above), (ii) wire deepen's `HandledS` per family via `handledS_of_sameOrbits`
      (T1), (iii) R6(c) force-strength for the true-mutual-stall residue.
-- **R0b — the bridge, carrying the wall.** `RigidResolved ⟸ hSmallAutThin` per node: on the non-discretizing regime,
-  force-separation of the exposed pair = force-completeness on the rigid cell = `hSmallAutThin`. Land the reduction,
-  carry `hSmallAutThin` — the honest `modulo {hSmallAutThin}` end-state.
+- **✅ R0b — the bridge, carrying the wall — LANDED 2026-07-23 (`RigidSeal.lean`, axiom-clean).** `SmallAutThinAt`
+  is the seam form of `hSmallAutThin` — *on the non-discretizing regime, `leafColKey` still separates every
+  non-automorphic branch pair* — vacuous on the discretizing regime (`smallAutThinAt_of_all_discretize`).
+  `rigidResolved_of_smallAutThin` : `RigidResolved (leafColKey)` for the WHOLE cell **modulo exactly
+  `SmallAutThinAt`** (discretizing pairs via R0a, unconditionally; the rest carried).
+  `nodeResolved_leafColKey_of_rigid` lifts it to `Select.NodeResolved` on any rigid cell modulo the wall.
+  **Net: the blanket assumed `hsep` (all non-automorphic pairs) is shrunk to just the non-discretizing residue** —
+  the honest `modulo {hSmallAutThin}` end-state, with the connection to the concrete scheme-level `hSmallAutThin`
+  (`CascadeAffine.lean:1320`) left to the recovery bridge (W1). P3 (Smith solve) discharges `SmallAutThinAt`.
 
 ### 8.2 Algorithm R Lean (P1–P4 — `endgame §3`, `IR §11.12`; do-not-rescope)
 
@@ -296,12 +309,13 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 ### 8.4 Ordering + dependencies
 
 **Mixed-cell design question SETTLED (§8.1)** — the "Progress" predicate layer is the already-built sel-rewrite
-(`HandledS`/`NodeResolved`/`selNode`), so the ordering is now: `R0a` **stated against `NodeResolved`** (clean,
-immediate, feeds `answersS_of_handledS`) ∥ `P1` (extraction, standalone) → `R0b` (bridge, carry `hSmallAutThin`) →
-`P2`/`P3` (solve + iso, the heavy build) → `P4` (capstone) + **R6(c)** (force-separates-every-exposed-rigid-pair,
-the strength-dependent residue closure, co-evolves with P3/P4). `R2` (per-family, via `handledS_of_seal`/
-`handledS_of_sameOrbits`) and `R5` (tighten) run in parallel as residue-shrinkers. The C# is the reference
-throughout (validate Lean claims against `Option2Solver` behaviour before proving).
+(`HandledS`/`NodeResolved`/`selNode`), so the ordering is: **✅ `R0a` DONE** (against `NodeResolved`, feeds
+`answersS_of_handledS`) → **✅ `R0b` DONE** (bridge, carries `SmallAutThinAt` = the wall) → **now: `P1`**
+(extraction, standalone) → `P2`/`P3` (solve + iso, the heavy build — P3 discharges `SmallAutThinAt`) → `P4`
+(capstone) + **R6(c)** (force-separates-every-exposed-rigid-pair, the strength-dependent residue closure,
+co-evolves with P3/P4). `R2` (per-family, via `handledS_of_seal`/`handledS_of_sameOrbits`) and `R5` (tighten) run
+in parallel as residue-shrinkers. The C# is the reference throughout (validate Lean claims against `Option2Solver`
+behaviour before proving).
 
 ---
 
@@ -347,7 +361,7 @@ the two together, not as separate legs.
 | **contract** | `Phase2.Solver`/`Sound`/`IsoInvariant` | **stated** (`Phase2Handoff.lean`); Algorithm R is the future witness |
 | **R0a** | discretizing → `keyV` separates non-aut pairs (`RigidResolved`) → `NodeResolved` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`, in `build.sh`) — via the augmented key `leafColKey` (plain `lookaheadKey` INSUFFICIENT); `colAut_of_leafColKey_eq` / `rigidResolved_leafColKey` / `nodeResolved_leafColKey_of_rigid_discretizing` |
 | **mixed-cell** | resolver-aware selector picks a resolvable cell (single-path) + `Reaches`-exposure; flag = true mutual stall | **✅ SETTLED 2026-07-23** (§8.1) — the "Progress" predicate IS the ALREADY-BUILT sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18). No object change, no new predicate, `②` single-path PRESERVED. |
-| **R0b** | `RigidResolved ⟸ hSmallAutThin` (bridge) | **not built** — reduction to the shared wall |
+| **R0b** | `RigidResolved ⟸ hSmallAutThin` (bridge) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`) — `SmallAutThinAt` (seam form of the wall, vacuous on the discretizing regime) + `rigidResolved_of_smallAutThin` + `nodeResolved_leafColKey_of_rigid`; shrinks the blanket `hsep` to the non-discretizing pairs only |
 | **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **Remaining = (c) force-separates-every-exposed-rigid-pair** (`RigidObstructionAt`'s pair gets distinct `keyV` ⟹ its cell `cellNarrow`s to ≤1 ⟹ `NodeResolved`) — the substance, tied to rigid-resolver STRENGTH, co-evolves with P3/P4. Deepest ③/totality claim. |
 | **P1** | minimal forcing-circuits generate `rowspace(H)` | **not built** — F₂/matroid, standalone, do first |
 | **P2** | forcing-model bridge (1-WL forcing = ring propagation) | **carried** — model hypothesis |

@@ -181,5 +181,62 @@ theorem nodeResolved_leafColKey_of_rigid_discretizing (S : Consume.Supply n) (ad
   obtain ⟨σ, hσ, hσuw⟩ := colAut_of_leafColKey_eq adj χ u w (hdisc u hu) (hdisc w hw) hkey
   exact hrigid u hu w hw hne σ hσ hσuw
 
+/-! ## 8. R0b — the bridge to the wall (the non-discretizing regime)
+
+R0a handles every non-automorphic pair whose *both* individualizations discretize, with **no wall**. The residual
+is the **non-discretizing** regime: individualizing a branch vertex fails to refine to discrete (the IR-blind-spot
+/ multipede residue), so `leafColKey` falls back to the weak cell-size histogram and may not separate a
+non-automorphic pair. Separating those is the rigid **solver**'s job (P3); until it lands, the separation is
+carried as the wall. R0b isolates the carried part to *exactly* those pairs — shrinking the blanket `hsep`
+(`Force.lean:409`, assumed for **all** pairs) down to the non-discretizing ones. -/
+
+/-- **The rigid seam's form of the wall `hSmallAutThin`.** On the non-discretizing regime, `leafColKey` still
+separates every non-automorphic branch pair. This is `hSmallAutThin` at the descent-object granularity —
+force-completeness on the *hard* rigid cells; the concrete scheme-level `hSmallAutThin`
+(`CascadeAffine.lean:1320`) connects through the recovery bridge (W1). Vacuously true on the discretizing regime
+(`smallAutThinAt_of_all_discretize`); it can only fail where individualization does not discretize. -/
+def SmallAutThinAt (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ u ∈ branches χ, ∀ w ∈ branches χ,
+    (∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) →
+    (¬ Discrete (lookData adj χ u).col ∨ ¬ Discrete (lookData adj χ w).col) →
+    keyV (leafColKey (n := n)) adj χ u ≠ keyV (leafColKey (n := n)) adj χ w
+
+/-- The wall is **vacuous on the discretizing regime** — the discharged instance (R0a needs no wall there). -/
+theorem smallAutThinAt_of_all_discretize (adj : AdjMatrix n) (χ : Colouring n)
+    (hdisc : ∀ v ∈ branches χ, Discrete (lookData adj χ v).col) :
+    SmallAutThinAt adj χ := by
+  intro u hu w hw _ hnd
+  rcases hnd with h | h
+  · exact absurd (hdisc u hu) h
+  · exact absurd (hdisc w hw) h
+
+/-- **★★ R0b — `RigidResolved ⟸ hSmallAutThin` (the honest `modulo {wall}` end-state).** The force key `leafColKey`
+separates ALL non-automorphic branch pairs, modulo exactly the shared wall `SmallAutThinAt`: the discretizing
+pairs go through R0a unconditionally, the non-discretizing residual is the wall. -/
+theorem rigidResolved_of_smallAutThin (adj : AdjMatrix n) (χ : Colouring n)
+    (hwall : SmallAutThinAt adj χ) :
+    RigidResolved (leafColKey (n := n)) adj χ := by
+  intro u hu w hw hrig hkey
+  by_cases hdu : Discrete (lookData adj χ u).col
+  · by_cases hdw : Discrete (lookData adj χ w).col
+    · obtain ⟨σ, hσ, hσuw⟩ := colAut_of_leafColKey_eq adj χ u w hdu hdw hkey
+      exact hrig σ hσ hσuw
+    · exact hwall u hu w hw hrig (Or.inr hdw) hkey
+  · exact hwall u hu w hw hrig (Or.inl hdu) hkey
+
+/-- **★★★ R0b → `NodeResolved` on ANY rigid cell (modulo the wall).** Generalises
+`nodeResolved_leafColKey_of_rigid_discretizing` off the discretizing regime: a rigid branch cell resolves via
+`leafColKey` modulo exactly `SmallAutThinAt`. On discretizing rigid cells the wall is vacuous
+(`smallAutThinAt_of_all_discretize`), recovering R0a with no wall. -/
+theorem nodeResolved_leafColKey_of_rigid (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n)
+    (hnd : ¬ Discrete χ) (hwall : SmallAutThinAt adj χ)
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (leafColKey (n := n)) S adj χ := by
+  refine Select.nodeResolved_of_cellResolved hnd (Or.inr ?_)
+  intro u hu w hw hkey
+  by_contra hne
+  exact rigidResolved_of_smallAutThin adj χ hwall u hu w hw (hrigid u hu w hw hne) hkey
+
 end RigidSeal
 end ChainDescent
