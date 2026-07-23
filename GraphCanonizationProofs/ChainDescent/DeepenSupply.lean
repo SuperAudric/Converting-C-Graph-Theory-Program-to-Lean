@@ -97,15 +97,17 @@ measurement file. Three faults, all instances of the project's standing traps:
 · `coupled` is `O(n³)` and was computed twice per level and again per pair — it is now computed
   once per level and once per anchor and threaded.
 
-## Scope, honestly
+## Scope — ①c CLOSED modulo `{Amenable}` (track A, 2026-07-23)
 
-This file is **tranche 1**: the executable object and its measured firing. The ① proof stack (the
-`SameOrbits` reduction above) is **tranche 2 and is NOT built**, so this supply is deliberately
-**not** in `Publication.canonForm?`'s record object yet — exactly how `kernelSupply` was staged.
-Measured on `mp7` (`PerformanceTest` §16): branch cell 28, and the gadget cell (28) *and* the foot
-cell (14) each collapse to a **single orbit** — the standing `Z₇`/`PGL(3,2)` base symmetry that
-`kernelSupply` honestly left, now certified. (The single-anchor variant gave 27 generators there;
-the all-anchors design required by the `G8` falsifier gives correspondingly more.)
+⚠ The **"①c story"** and **"residual ①c obligation (tranche 2, OPEN)"** sections above are **pre-track-A
+provenance**. CURRENT: `deepen` individualizes to WHOLE-GRAPH discreteness (see the `deepen` def below),
+making `[DISC]` structural; `①c` is CLOSED modulo `{Amenable}` alone (`DeepenAmenable.deepenSupply_guarded_
+canonizer_direct`, axiom-clean) — `AnchorFires` and the entire `SameOrbits`/`deepenRefSupply`/R1/R2 apparatus
+are ELIMINATED (files `DeepenRef`/`DeepenRefTransport`/`DeepenR1` parked out of `build.sh`). `deepenSupply` is
+still deliberately **not** in `Publication.canonForm?`'s record object — it enters once `Amenable` =
+`CellsAreOrbits` totality is populated per family (T1 / the rigid seal). Measured on `mp7`
+(`PerformanceTest` §16): branch cell 28, gadget cell (28) *and* foot cell (14) each collapse to a **single
+orbit** — the `Z₇`/`PGL(3,2)` base symmetry `kernelSupply` left, now certified.
 -/
 
 namespace ChainDescent

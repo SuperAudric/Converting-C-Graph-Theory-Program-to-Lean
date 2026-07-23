@@ -4,26 +4,29 @@ import ChainDescent.Composite
 import ChainDescent.OrbitPrune
 
 /-!
-# `C3b` tranche 2, part VI — Layer 1 foundations for `Amenable ⟹ R1`
+# `C3b` — `deepenSupply`'s `①c`, CLOSED modulo `{Amenable}` ONLY (track A, 2026-07-23)
 
-R1's crux FACTORS (see `DeepenR1` header): `R1 ⟸ (Amenable ⟹ R1) + Amenable`, where `Amenable` says
-every deepening level's `chooseIdK` cell is a single orbit of the pointwise-stabilizer of the
-individualized-so-far. **Layer 1** (`Amenable ⟹ R1`) is the mechanical **re-relating induction**:
+**The capstone `deepenSupply_guarded_canonizer_direct` takes ONLY `hAmen : ∀ adj χ, Amenable adj χ`** —
+no reference, no R1/R2, no `AnchorFires`. This is the track-A close: `deepen` (in `DeepenSupply`) now
+individualizes to **whole-graph** discreteness, which makes `[DISC]` (the leaf being discrete)
+STRUCTURAL, so the old `AnchorFires` firing bundle (deepen-succeeds + gate + discrete-leaf) is now three
+theorems here — `deepen_succeeds` (termination, `ncol` colour-count measure), `deepen_discrete`,
+`gate_of_discrete`.
 
-> the deepen-from-`a` and replay-from-`b` descents (`a ~ b` via `σ ∈ Aut`) stay related by an
-> automorphism `σₖ ∈ Aut(adj)` with `ψ_b^(k) = transportColouring σₖ ψ_a^(k)`.
+The engine (unchanged by track A): the **re-relating induction `joint`** — the deepen-from-`a` and
+replay-from-`b` descents (`a ~ b` via `σ ∈ Aut`) stay related by an automorphism `σₖ` with
+`ψ_b^(k) = transportColouring σₖ ψ_a^(k)`; per level `chooseIdK` picks the same id (`chooseIdK_transport`),
+the cell being a single `Stab`-orbit (= `Amenable`) yields `τ ∈ Stab` fixing the lowest-index mismatch,
+and `σₖ₊₁ := τ σₖ` re-establishes the invariant. At (whole-graph) discreteness the leaves are `σ`-related,
+so `twistOf`'s colour-match IS `σ` on `K` (off-`K` is inert by discreteness, `offCoupled_singleton`), the
+exec twist verifies, and `exec_recovers_cell_orbits` reaches `b`. Then `deepen_branch_orbit_iff_aut` (deepen
+branch-orbits = `IsColAut`-orbits) ⟹ `deepen_branchOrbit_transport` ⟹ `①c` via `guarded_mixed_canonizer`.
 
-Maintained per level: `chooseIdK` picks the same id, so the selected cells are `σₖ`-images; the cell
-being single-orbit under `Stab` (= `Amenable`) yields `τ ∈ Stab(ψ_b)` fixing the lowest-index mismatch
-`τ (σₖ u_a) = u_b`, and `σₖ₊₁ := τ σₖ` re-establishes the invariant. At discreteness the leaves are
-`σ`-related, so `twistOf`'s colour-match IS `σ` on all of `K`, hence the exec twist verifies and
-directly reaches `b`.
-
-This file lands the **transport atoms** the induction runs on. The atom is `step_aut`: an automorphism
-of the graph transports one individualize+refine step between `σ`-related colourings — the level-to-level
-engine. `transportColouring_comp` composes the per-level `σₖ`. (The full induction and the residual
-K-coverage obligation — `SameOrbits` is over all vertices, the induction gives the branch cell — build
-on these.)
+**`Amenable` is the sole condition, and it IS `CellsAreOrbits`** (`CascadeOracle`): free at discreteness,
+its failure an *exposed* rigid decision (`rigidObstruction_of_not_cellSingleOrbit`,
+`not_amenablePath_imp_rigidObstruction`) — the handoff to the RIGID SEAL (`docs/chain-descent-rigid-seal.md`),
+which discharges it per family. **This file no longer imports/uses `DeepenRef`/`DeepenRefTransport`/`DeepenR1`**
+(the discarded reference route; parked out of `build.sh`).
 -/
 
 namespace ChainDescent

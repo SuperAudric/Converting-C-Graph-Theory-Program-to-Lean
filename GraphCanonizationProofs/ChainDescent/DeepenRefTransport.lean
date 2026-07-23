@@ -1,4 +1,11 @@
 import ChainDescent.DeepenRef
+/-! ⚠⚠ SUPERSEDED & PARKED (2026-07-23, TRACK A) — NOT in `build.sh`, DOES NOT COMPILE against the current
+`deepen`. This is the DISCARDED reference route (`deepenRefSupply`/`DeepenRefInExec`/R1/R2) for `deepenSupply`
+'s `①c`. It was made MOOT by the whole-graph-discretize redesign: `①c` now closes modulo `{Amenable}` alone
+(`DeepenAmenable.deepenSupply_guarded_canonizer_direct`), with `[DISC]`/gate/termination structural and
+`AnchorFires` eliminated. Retained for provenance only — see `docs/chain-descent-deepen-supply.md` STATUS +
+§8/§9 (provenance) and `docs/00-START-HERE.md` §2 C3b. Do NOT build on this. -/
+
 
 /-!
 # `C3b` tranche 2, part IV — the reference's transport (R2), algebraic core

@@ -127,9 +127,11 @@ of `PGL(3,2)`) survives, and no gauge-shaped or propagation-shaped constructor r
 Stop propagating; instead **replay a deepening and compare refinement footprints** (`DeepenSupply.lean`):
 
 1. **`deepen` (`DeepenAnchor`)** — individualize the anchor `r₁` of the branch cell and refine; then
-   repeatedly individualize the **lowest-id non-singleton sub-cell of the footprint** (the diff against the
-   node colouring, held fixed as parent) until all-singletons, recording the sequence of chosen cell ids.
-   One sub-cell, one vertex per level — a **single path**, never a branch over representatives.
+   repeatedly individualize the **lowest-id non-singleton cell of the WHOLE graph** (⚠ **track A, 2026-07-23**;
+   was the coupled *footprint* pre-track-A) until the **whole colouring is discrete**, recording the sequence
+   of chosen cell ids. One cell, one vertex per level — a **single path**, never a branch over
+   representatives. Whole-graph (not footprint) discreteness is what makes `[DISC]` STRUCTURAL and eliminates
+   `AnchorFires` (STATUS 2026-07-23); the twist below still matches only the coupled component `K`.
 2. **`replay` (`ReplayDeepening`)** — for each other representative `rⱼ`, individualize `rⱼ` and follow the
    SAME recorded id sequence. If `rⱼ` cannot follow it, it yields no candidate (sound — the reps stay
    separate).
@@ -333,13 +335,14 @@ Chang-A) is where `Amenable`/`①c` could break. Per the framing, consume's resi
 
 ## 7. The gap ledger (provability status)
 
-**▶ SUPERSEDED 2026-07-22 — the reference (R1/R2) is ELIMINATED (§2b″).** `①c` closes REFERENCE-FREE modulo
-`{Amenable, AnchorFires}` only. The table below is updated; the L0/R1/R2 rows are retired to provenance.
+**▶ UPDATED 2026-07-23 (TRACK A) — `AnchorFires` ELIMINATED; `①c` closes modulo `{Amenable}` ONLY.** The
+whole-graph-discretize redesign made `[DISC]`/gate/termination structural. The reference (R1/R2) was already
+eliminated (§2b″); now the last firing hypothesis is gone too.
 
 | Link | Statement | Status |
 |---|---|---|
-| **①c** | `{Amenable, AnchorFires} → ①c` (reference-free) | **PROVED** (`deepenSupply_guarded_canonizer_direct`) — via deepen-branch-orbit = `IsColAut`-orbit, transports; no `deepenRefSupply`, no R1, no R2 |
-| **AnchorFires** | per-anchor: `deepen` succeeds + gate + `Discrete` leaf | **domain fact** — a `deepen`-discretizes lemma (firing-completeness, NOT a wall); undischarged |
+| **①c** | `{Amenable} → ①c` (reference-free, AnchorFires-free) | **PROVED axiom-clean** (`deepenSupply_guarded_canonizer_direct`, takes ONLY `hAmen`) — via deepen-branch-orbit = `IsColAut`-orbit, transports; no `deepenRefSupply`, no R1/R2, no `AnchorFires` |
+| ~~AnchorFires~~ | ~~per-anchor: `deepen` succeeds + gate + `Discrete` leaf~~ | **ELIMINATED (track A)** — now three theorems: `deepen_discrete` (leaf discrete), `deepen_succeeds` (termination, `ncol` measure), `gate_of_discrete`. `[DISC]` is structural because `deepen` discretizes the WHOLE graph |
 | **L2 / G2** | `¬Amenable → RigidObstructionAt` (attribution) | **PROVED** (`rigidObstruction_of_not_cellSingleOrbit`) |
 | **rigid handoff** | `RigidObstructionAt → ¬CellIsOrbit` (deepen defers SOUNDLY) | **PROVED** (`rigidObstruction_imp_not_cellIsOrbit`) — deepen never mishandles a rigid pair; it is the SAME obstruction type the rigid solver / §11.14 own |
 | **G1 / force-sep** | `RigidObstructionAt → CellResolved`'s force branch (key injective on branches) | the **shared wall** (`hSmallAutThin`) — totality only, NOT `①c` |
@@ -349,13 +352,21 @@ Chang-A) is where `Amenable`/`①c` could break. Per the framing, consume's resi
 | ~~L0~~ ~~R1~~ ~~R2~~ | `(R1∧R2)→①c` / `Amenable→R1` / `SupplyEquivariant deepenRefSupply` | **RETIRED** (reference eliminated); `deepenRefSupply` route kept for provenance only |
 
 Everything conjectural lives in **G1** (the shared wall, covered whenever anyone covers it) + the **fusion
-scheduling** (a totality obligation). `①c` itself is prose-free modulo the two domain facts `{Amenable,
-AnchorFires}`; the rigid **handoff is sound** (deepen defers, never mishandles), so deepen introduces **no new
-obstruction** — only the shared wall + scheduling remain.
+scheduling** (a totality obligation). `①c` itself is prose-free modulo the **single** domain fact `{Amenable}`
+(= `CellsAreOrbits`); the rigid **handoff is sound** (deepen defers, never mishandles), so deepen introduces
+**no new obstruction** — only the shared wall + scheduling remain.
 
 ---
 
 ## 8. Lean file map + landed-theorem inventory (all axiom-clean, in `build.sh`)
+
+> **⚠ PARTIALLY SUPERSEDED BY TRACK A (2026-07-23).** The `DeepenRef`/`DeepenRefTransport`/`DeepenR1` files and
+> the `deepenRefGens`/`DeepenRefInExec`/`ExecRecoversKMinusCell`/`sameOrbitsOnBranches` theorems below are
+> **REMOVED from the build** (parked). The CURRENT landed set = STATUS (2026-07-23): `deepen` (whole-graph),
+> `deepen_discrete`, `deepen_succeeds`, `gate_of_discrete`, `allSingletonsK_of_discrete`, `joint`,
+> `exec_recovers_cell_orbits`, `exec_recovers_refgen_on_cell`, `deepen_branch_orbit_iff_aut`,
+> `deepen_branchOrbit_transport`, `deepenSupply_guarded_canonizer_direct` (all in `DeepenSupply`/`DeepenTransport`/
+> `DeepenCrux`/`DeepenAmenable`, still in build). The list below is pre-track-A provenance.
 
 - **`DeepenSupply.lean`** — the executable. `classOf` · `coupled` · `allSingletonsK` · `chooseIdK` · `step`
   · `deepen` · `replay` · `twistOf` · **`twistOf_isColAut`** (every emitted twist is verified) · `deepenGens`
@@ -426,6 +437,15 @@ obstruction** — only the shared wall + scheduling remain.
 ---
 
 ## 9. Remaining work
+
+> **⚠⚠ SUPERSEDED BY TRACK A (2026-07-23) — §9.1/§9.1.1/§9.1.2/§9.2/§9.3 below are ALL MOOT.** They plan the
+> reference/`hL1`/`DeepenRefInExec`/`K∖cell`/R2/backup-gate route to close `①c`. That route is **abandoned**:
+> `①c` is now CLOSED modulo `{Amenable}` alone (STATUS 2026-07-23). **The actual remaining work is NOT here —
+> it is (a) the RIGID SEAL** ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md): mixed-cell design
+> question → R0a → P1–P4), which also **discharges `Amenable` = `CellsAreOrbits` per family** (the coupling,
+> rigid-seal §9.1), and **(b)** wiring `deepenSupply` into `Publication.canonForm?`'s record object (append it
+> like `kernelSupply`, once `Amenable`/`CellsAreOrbits` totality is populated per family — T1). §9.1–§9.3 are
+> retained as provenance only.
 
 ### 9.1 Layer 1 — finish `hL1 : Amenable → DeepenRefInExec` (4 pieces)
 

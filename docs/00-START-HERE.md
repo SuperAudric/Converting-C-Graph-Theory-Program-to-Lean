@@ -159,23 +159,22 @@ close it — is set out in
 > totally, profile `[28]`, so an equivariance falsifier must be PARTIALLY-firing). The landed supply quantifies
 > over all anchors.
 >
-> **▶▶▶ C3b ①c — CURRENT STATE: read [`chain-descent-deepen-supply.md`](./chain-descent-deepen-supply.md)
-> (authoritative, self-contained).** 2026-07-22: `joint` (re-relating induction + anchor-tracking) + the bridge
-> reduction `hL1 ⟸ hreach` + the branch-cell half `exec_recovers_cell_orbits` LANDED axiom-clean; remaining =
-> `[INV]` discharge + the `K∖cell` crux (Route ε primary, ζ parallel). The 2026-07-21 snapshot below is prior
-> framing. ①c is discharged the `kernelSupply` way — `OrbitPrune.SameOrbits`
-> against an EQUIVARIANT proof-side all-picks reference `deepenRefSupply`, NOT vs `Aut`. Landed axiom-clean,
-> in `build.sh`: `DeepenTransport` (part I: every stage transports but the pick), `DeepenCrux` (part II:
-> soundness + predicates), `DeepenRef` (the reference + the EASY `SameOrbits` half), `DeepenRefTransport`
-> (R2 core `twistOf_transport`: the twist conjugates under σ), `DeepenR1` (**R1 reduced to the predicate
-> `DeepenRefInExec`**). ①c = R1 + R2; **R2 remainder is mechanical**; **R1 is the crux**, traced (measured
-> whole-graph discreteness of the deepening) to **"WL-refinement is complete on the class"** — the
-> harvest-completeness statement (C# linear-oracle §L.4 "FIRM but CONJECTURAL"; NOT the banned GI∈P form).
-> Route (b) (budgeted reference) is OFF THE TABLE (flags ⟹ incomplete). NEXT = the WL-completeness strategy,
-> a step back first. `deepenSupply` stays out of `Publication.canonForm?` until R1+R2 close. Also measured
-> (`DeepenStrengthProbe.cs`, 39 rows): starvation = 0 everywhere, every checkable row COMPLETE, the Chang-A
-> "leak" RETRACTED (384/384, survivor = fusion), expander multipedes rigid (can't discriminate).
-> ⛔ `KernelBase.lean` (base recovery + lift) is **superseded by this route and parked** — not in `build.sh`.
+> **▶▶▶ C3b ①c — CURRENT STATE (2026-07-23, TRACK A): read [`chain-descent-deepen-supply.md`](./chain-descent-deepen-supply.md)
+> STATUS (authoritative, self-contained).** **`deepenSupply`'s ①c is CLOSED modulo `{Amenable}` ONLY**
+> (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,
+> making `[DISC]`/gate/termination STRUCTURAL (`deepen_discrete` / `gate_of_discrete` / `deepen_succeeds` via the
+> `ncol` colour-count measure) — this **ELIMINATED `AnchorFires`** (the last firing hypothesis). The **entire
+> reference/R1/R2 apparatus is REMOVED from the build** (`DeepenRef`/`DeepenRefTransport`/`DeepenR1` parked;
+> `deepenRefSupply`/`DeepenRefInExec`/`ExecRecoversKMinusCell` deleted; `imgFun` moved to `DeepenSupply`). **The
+> SOLE remaining ①c condition, `Amenable`, IS `CellsAreOrbits`** (`CascadeOracle`) — free at discreteness
+> (`cellsAreOrbits_of_discrete`), so NOT a GI∈P assumption; its failure is an *exposed* rigid decision
+> (`not_amenablePath_imp_rigidObstruction`). **`deepenSupply` stays out of `Publication.canonForm?` until
+> `Amenable`/`CellsAreOrbits` totality is populated per family (T1); NEXT = the RIGID SEAL**
+> ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md)), which discharges `Amenable` per family AND
+> is the other seal. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
+> `hL1`/`K∖cell`, WL-completeness framing) is **SUPERSEDED PROVENANCE**. Measured (`DeepenStrengthProbe.cs`, 39
+> rows): starvation = 0, every checkable row COMPLETE, Chang-A 384/384 (survivor = fusion), expander multipedes rigid.
+> ⛔ `KernelBase.lean` (base recovery + lift) **parked** — not in `build.sh`.
 > **⚠⚠ STANDING TRAP: `Consume.gens` returns UNVERIFIED candidates** (junk is filtered by `Consume.verified`
 > downstream) — any probe reading it directly MUST filter by `IsColAut` first; reading it raw produced a wrong
 > "liftability = kernel of `Aut(base) → H¹`" diagnosis that is RETRACTED.
