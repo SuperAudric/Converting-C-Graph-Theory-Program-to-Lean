@@ -35,13 +35,29 @@
 > `HandledS` via `answersS_of_handledS`). `leafColKey` is the strictly-stronger, still-poly, still-equivariant
 > force key of record.
 >
-> **✅ R0b LANDED 2026-07-23 (`RigidSeal.lean`, axiom-clean).** The bridge to the wall: `SmallAutThinAt` is the
-> seam form of `hSmallAutThin` (non-discretizing pairs still separated by `leafColKey`), vacuous on the
-> discretizing regime (`smallAutThinAt_of_all_discretize`); `rigidResolved_of_smallAutThin` gives `RigidResolved`
-> for the WHOLE cell modulo exactly `SmallAutThinAt`, and `nodeResolved_leafColKey_of_rigid` gives `NodeResolved`
-> on any rigid cell modulo the wall. **Net: the blanket assumed `hsep` (all non-automorphic pairs) is shrunk to
-> just the non-discretizing ones.** **Next concrete steps:** P1 (extraction, standalone) · the heavy P3 Smith
-> build (separating the non-discretizing residue = discharging `SmallAutThinAt`) · the strength-dependent R6(c).
+> **✅ R0b LANDED 2026-07-23 (`RigidSeal.lean`, axiom-clean).** The leafColKey precursor:
+> `smallAutThinAt_of_all_discretize` (vacuous on the discretizing regime), `rigidResolved_of_smallAutThin`,
+> `nodeResolved_leafColKey_of_rigid` — `RigidResolved`/`NodeResolved` for the whole cell modulo the
+> non-discretizing separation, shrinking the blanket `hsep`.
+>
+> **⚠ SEAM CORRECTED + ✅ `compKey` LANDED 2026-07-23 (§9, `RigidSeal.lean`, axiom-clean).** The R0b carried object
+> was **wrongly** glossed "`SmallAutThinAt` = `hSmallAutThin` at the seam." **RETRACTED.** `hSmallAutThin`
+> (`CascadeAffine.lean:1320`) is a **static `SchurianScheme` predicate** (minMult-form of Babai's SRG theorem) — a
+> *symmetry-consumption / Route-C* artifact, **false on consumable cases** (multipede + small added symmetry,
+> already reduced by consume). The canonizer's actual residue is the **dynamic `¬Select.HandledS`** (interleaved
+> mutual stall); the two join only via the unbuilt W1 bridge (*one-directional* seal-transfer, not `↔`). And
+> `SmallAutThinAt`-over-`leafColKey` is **not dischargeable** (its non-discretizing pairs are exactly where the
+> histogram ties). **The fix — the composite force key `compKey sk`:** discretizing branch = `leafColKey` (tag
+> `1 ::`, R0a); non-discretizing rigid branch = the **solver key `sk`** (tag `0 ::`, P3). Disjoint tags ⟹ mixed
+> pairs separate free; the sole carried obligation is **`SolverSeparates`** = *the solver key separates the
+> both-non-discretizing rigid pairs* — a property of an **algorithm we build**, discharged by the solver's
+> soundness (P3), **NOT** an SRG citation. Landed axiom-clean: `keyEquivariant_compKey` (① obligation = P3's
+> `IsoInvariant`, structural given `KeyEquivariant sk`), `rigidResolved_compKey` (whole cell modulo
+> `SolverSeparates`), `nodeResolved_compKey_of_rigid` (the force half of "consume-can't-fire ⟹ force-fires"; the
+> consume half is the untouched `cellIsOrbit` disjunct of `NodeResolved`). `sk`/`SolverSeparates` are stubbed to
+> P3. **Next:** P1 (extraction, standalone F₂/matroid) → P3 (build `sk` = the ring solve, discharges
+> `SolverSeparates`) → R6(c)/P4. The residue is `¬HandledS` at non-linear rigid; `hSmallAutThin` stays home on the
+> Route-C symmetry seals (W1, a separate obligation).
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -287,15 +303,25 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
   4. **No new Lean predicate is needed for the "Progress" core** — the work is (i) realign R0a/`RigidResolved`
      onto `NodeResolved`/`HandledS` (above), (ii) wire deepen's `HandledS` per family via `handledS_of_sameOrbits`
      (T1), (iii) R6(c) force-strength for the true-mutual-stall residue.
-- **✅ R0b — the bridge, carrying the wall — LANDED 2026-07-23 (`RigidSeal.lean`, axiom-clean).** `SmallAutThinAt`
-  is the seam form of `hSmallAutThin` — *on the non-discretizing regime, `leafColKey` still separates every
-  non-automorphic branch pair* — vacuous on the discretizing regime (`smallAutThinAt_of_all_discretize`).
-  `rigidResolved_of_smallAutThin` : `RigidResolved (leafColKey)` for the WHOLE cell **modulo exactly
-  `SmallAutThinAt`** (discretizing pairs via R0a, unconditionally; the rest carried).
-  `nodeResolved_leafColKey_of_rigid` lifts it to `Select.NodeResolved` on any rigid cell modulo the wall.
-  **Net: the blanket assumed `hsep` (all non-automorphic pairs) is shrunk to just the non-discretizing residue** —
-  the honest `modulo {hSmallAutThin}` end-state, with the connection to the concrete scheme-level `hSmallAutThin`
-  (`CascadeAffine.lean:1320`) left to the recovery bridge (W1). P3 (Smith solve) discharges `SmallAutThinAt`.
+- **✅ R0b — the leafColKey precursor — LANDED 2026-07-23 (`RigidSeal.lean`, axiom-clean).**
+  `smallAutThinAt_of_all_discretize` (vacuous on the discretizing regime), `rigidResolved_of_smallAutThin`
+  (`RigidResolved (leafColKey)` for the whole cell modulo the non-discretizing separation),
+  `nodeResolved_leafColKey_of_rigid` (→ `Select.NodeResolved`). ⚠ **The carried object `SmallAutThinAt` is the
+  leafColKey-specialization, NOT the scheme wall `hSmallAutThin` — see the retraction in §9 below. It is not
+  dischargeable; superseded by `compKey`/`SolverSeparates` (§9).**
+- **✅ THE DISCHARGEABLE SEAM — `compKey` — LANDED 2026-07-23 (§9, `RigidSeal.lean`, axiom-clean).** The connecting
+  theorem is *"when consume can't fire, force must"*, stated in a **dischargeable** form. The composite force key
+  `compKey sk` = `leafColKey` on the discretizing branch (tag `1 ::`, R0a) ∘ the **solver key `sk`** on the
+  non-discretizing rigid branch (tag `0 ::`, P3). Disjoint tags ⟹ mixed pairs separate for free. Landed:
+  `keyEquivariant_compKey` (① obligation = P3's `Phase2.IsoInvariant`, structural given `KeyEquivariant sk`),
+  `SolverSeparates` (the sole carried obligation = *the solver key separates the both-non-discretizing rigid
+  pairs*), `rigidResolved_compKey` (whole cell modulo `SolverSeparates`), `nodeResolved_compKey_of_rigid`. **Why
+  this is dischargeable where `hSmallAutThin` isn't:** `SolverSeparates` is a property of the **rigid solver we
+  build** (discharged by P3's `Phase2.Sound` — distinct canonical forms for non-isomorphic pointed residues, a
+  flag = the honest non-linear residue), not a static SRG-scheme citation. `sk`/`SolverSeparates` are stubbed to
+  P3. **The honest residue is `¬Select.HandledS` at non-linear rigid** (the consume half = the untouched
+  `cellIsOrbit` disjunct; the force half = `compKey`); `hSmallAutThin` is a *separate* obligation that stays home
+  on the Route-C symmetry seals (W1).
 
 ### 8.2 Algorithm R Lean (P1–P4 — `endgame §3`, `IR §11.12`; do-not-rescope)
 
@@ -312,8 +338,11 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 
 - **R2.** CFI: `theorem_1_HOR_cfi_oddDeg` (`CFI.lean:3179`, axiom-free) gives orbit-recovery = warm-refined colouring
   at bounded depth for odd-degree CFI; `cfiFlipAut` (:3722) + `isAut_cfiFlipAut` (:3740) build the `Z₂^β` gauge autos.
-  These discharge `RigidResolved` for CFI by import. `Z_{2^k}` / multipede (`MultipedeWitness.lean`) are build targets
-  (no `Z_{2^k}` theorem yet). Each family landed shrinks what R0b/P4 carries.
+  These help discharge `SolverSeparates`/`RigidResolved` for CFI by import — but ⚠ **not a freebie:**
+  `theorem_1_HOR_cfi_oddDeg` gives discreteness over a **base set**, whereas `compKey`/`lookData` individualize a
+  **single** vertex, so odd-degree CFI sits in the *non*-discretizing branch (needs the solver key `sk`, not R0a's
+  vacuity). `Z_{2^k}` / multipede (`MultipedeWitness.lean`) are build targets (no `Z_{2^k}` theorem yet). Each
+  family landed shrinks what `SolverSeparates`/P4 carries.
 - **R5.** No-rigid-Cameron (`cameron-entanglement`): rigid medium admits no hidden Johnson/Cameron ⟹ the rigid flag
   floor is "or non-linear" with no Cameron carry.
 
@@ -321,10 +350,12 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 
 **Mixed-cell design question SETTLED (§8.1)** — the "Progress" predicate layer is the already-built sel-rewrite
 (`HandledS`/`NodeResolved`/`selNode`), so the ordering is: **✅ `R0a` DONE** (against `NodeResolved`, feeds
-`answersS_of_handledS`) → **✅ `R0b` DONE** (bridge, carries `SmallAutThinAt` = the wall) → **now: `P1`**
-(extraction, standalone) → `P2`/`P3` (solve + iso, the heavy build — P3 discharges `SmallAutThinAt`) → `P4`
-(capstone) + **R6(c)** (force-separates-every-exposed-rigid-pair, the strength-dependent residue closure,
-co-evolves with P3/P4). `R2` (per-family, via `handledS_of_seal`/`handledS_of_sameOrbits`) and `R5` (tighten) run
+`answersS_of_handledS`) → **✅ `R0b` DONE** (leafColKey precursor) → **✅ `compKey` DONE** (§9 — the dischargeable
+seam; carried object is now `SolverSeparates` over the composite key, a solver property) → **now: `P1`**
+(extraction, standalone) → `P2`/`P3` (solve + iso, the heavy build — **P3 builds `sk` and discharges
+`SolverSeparates` via `Phase2.Sound`**, NOT the static `hSmallAutThin`) → `P4` (capstone) + **R6(c)**
+(force-separates-every-exposed-rigid-pair, the strength-dependent residue closure, co-evolves with P3/P4).
+`R2` (per-family, via `handledS_of_seal`/`handledS_of_sameOrbits`) and `R5` (tighten) run
 in parallel as residue-shrinkers. The C# is the reference throughout (validate Lean claims against `Option2Solver`
 behaviour before proving).
 
@@ -372,19 +403,26 @@ the two together, not as separate legs.
 | **contract** | `Phase2.Solver`/`Sound`/`IsoInvariant` | **stated** (`Phase2Handoff.lean`); Algorithm R is the future witness |
 | **R0a** | discretizing → `keyV` separates non-aut pairs (`RigidResolved`) → `NodeResolved` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`, in `build.sh`) — via the augmented key `leafColKey` (plain `lookaheadKey` INSUFFICIENT); `colAut_of_leafColKey_eq` / `rigidResolved_leafColKey` / `nodeResolved_leafColKey_of_rigid_discretizing` |
 | **mixed-cell** | resolver-aware selector picks a resolvable cell (single-path) + `Reaches`-exposure; flag = true mutual stall | **✅ SETTLED 2026-07-23** (§8.1) — the "Progress" predicate IS the ALREADY-BUILT sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18). No object change, no new predicate, `②` single-path PRESERVED. |
-| **R0b** | `RigidResolved ⟸ hSmallAutThin` (bridge) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`) — `SmallAutThinAt` (seam form of the wall, vacuous on the discretizing regime) + `rigidResolved_of_smallAutThin` + `nodeResolved_leafColKey_of_rigid`; shrinks the blanket `hsep` to the non-discretizing pairs only |
+| **R0b** | leafColKey precursor (non-discretizing separation) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`) — `smallAutThinAt_of_all_discretize` + `rigidResolved_of_smallAutThin` + `nodeResolved_leafColKey_of_rigid`. ⚠ `SmallAutThinAt` is the leafColKey-specialization, **NOT the scheme wall `hSmallAutThin`** and **not dischargeable**; superseded by `compKey` |
+| **compKey** | dischargeable seam: force key = `leafColKey` (disc, tag `1::`) ∘ solver key `sk` (non-disc rigid, tag `0::`); carried obligation = `SolverSeparates` (a solver property, discharged by P3's `Phase2.Sound`) | **✅ LANDED 2026-07-23, axiom-clean** (§9, `RigidSeal.lean`) — `compKey` + `keyEquivariant_compKey` (given `KeyEquivariant sk`) + `SolverSeparates` + `rigidResolved_compKey` + `nodeResolved_compKey_of_rigid`. `sk`/`SolverSeparates` stubbed to P3. The force half of "consume-can't-fire ⟹ force-fires." |
 | **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **Remaining = (c) force-separates-every-exposed-rigid-pair** (`RigidObstructionAt`'s pair gets distinct `keyV` ⟹ its cell `cellNarrow`s to ≤1 ⟹ `NodeResolved`) — the substance, tied to rigid-resolver STRENGTH, co-evolves with P3/P4. Deepest ③/totality claim. |
 | **P1** | minimal forcing-circuits generate `rowspace(H)` | **not built** — F₂/matroid, standalone, do first |
 | **P2** | forcing-model bridge (1-WL forcing = ring propagation) | **carried** — model hypothesis |
-| **P3** | solve (Smith/ring) + canonical-form iso-invariance | **not built** — the heavy build |
-| **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates `LinearObstruction` = wall |
-| **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`); `Z_{2^k}`/multipede **build targets** |
-| **the wall** | `hSmallAutThin` (rigid-GI∈P) | the **shared wall** — carry-only |
+| **P3** | build `sk` (solve Smith/ring) + canonical-form iso-invariance ⟹ **discharges `SolverSeparates`** (`Phase2.Sound`) + `KeyEquivariant sk` (`Phase2.IsoInvariant`) | **not built** — the heavy build |
+| **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
+| **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |
+| **residue (rigid)** | `¬Select.HandledS` at non-linear rigid (dynamic, per-node) | the honest rigid residue — conjecturally empty (claim #2/#3, §5) |
+| **W1** | scheme `hSmallAutThin` seal ⟹ `HandledS`-for-family (Route-C symmetry side) | **separate obligation** — one-directional transfer, NOT `↔`; `hSmallAutThin` stays a carried SRG citation here |
 | **R5** | no rigid Cameron ⟹ "or non-linear" only | `cameron-entanglement` — conjecture, empirically solid |
 | **C#** | `Option2Solver` B1–B6 | **COMPLETE** (50 tests) — the reference spec |
 
-Everything conjectural lives in **`hSmallAutThin`** (shared). The seam's *own* new content is **R0a** + **R0b**;
-the solver's is **P1–P4**; the rest is per-family imports and the C# reference. **R6's predicate layer is already
+⚠ **The conjectural content is now TWO cleanly-separated objects, not one conflated "wall":** (A) the rigid
+residue `¬HandledS` at non-linear rigid — discharged (linear part) by `compKey`/`SolverSeparates` via P3, its
+non-linear part conjecturally empty (§5 claims #2/#3); and (B) `hSmallAutThin` — the static SRG-scheme citation
+that stays home on the Route-C symmetry seals, reached via W1. **They are related but NOT equal**; the old
+"`SmallAutThinAt` = `hSmallAutThin` at the seam" identity is retracted. The seam's *own* new content is **R0a** +
+**R0b** + **`compKey`**; the solver's is **P1–P4**; the rest is per-family imports and the C# reference. **R6's
+predicate layer is already
 built** (the sel-rewrite `HandledS`/`NodeResolved`/`selNode`, 2026-07-18); R6's remaining content is **(c)**
 force-separates-every-exposed-rigid-pair, which lands alongside P3/P4 once the solver's strength is fixed — it is
 NOT a corollary of P4 (P1–P4 build the solver in isolation; R6(c) is the claim the force key actually separates
