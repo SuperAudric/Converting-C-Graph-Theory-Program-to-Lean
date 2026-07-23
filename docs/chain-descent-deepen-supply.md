@@ -7,8 +7,10 @@
 > one place. Authoritative for deepen; when it disagrees with an older scattered note, this wins.
 >
 > **Related docs:** `chain-descent-remaining-work.md` §1C (the live tracker), the topic memory
-> `[[project-c3-kernel-supply-2026-07-19]]`, and the `kernelSupply` staging analog
-> (`KernelRef`/`KernelTransport`) which deepen mirrors exactly.
+> `[[project-c3-kernel-supply-2026-07-19]]`, the `kernelSupply` staging analog (`KernelRef`/`KernelTransport`)
+> which deepen mirrors exactly, and — the **mirror-facing companion** for the RIGID side that consume hands off to
+> — [`chain-descent-rigid-handoff.md`](./chain-descent-rigid-handoff.md) (Algorithm R discharging the exposed
+> `RigidObstructionAt`).
 
 ---
 
