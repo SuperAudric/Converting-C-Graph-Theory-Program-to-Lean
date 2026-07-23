@@ -9,8 +9,8 @@
 > **Related docs:** `chain-descent-remaining-work.md` §1C (the live tracker), the topic memory
 > `[[project-c3-kernel-supply-2026-07-19]]`, the `kernelSupply` staging analog (`KernelRef`/`KernelTransport`)
 > which deepen mirrors exactly, and — the **mirror-facing companion** for the RIGID side that consume hands off to
-> — [`chain-descent-rigid-handoff.md`](./chain-descent-rigid-handoff.md) (Algorithm R discharging the exposed
-> `RigidObstructionAt`).
+> — [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (Algorithm R: the complete rigid-seal working
+> doc — the handoff, the solver to certify, the P1–P4 Lean build, the wall).
 
 ---
 
