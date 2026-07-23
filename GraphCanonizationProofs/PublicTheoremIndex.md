@@ -4447,3 +4447,8 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RigidRREF.xorList_all_false` | 181-187 | `xorList` of an all-`false` list is `false`. | — |
 | `RigidRREF.xorList_map_single` | 189-203 | Single-support XOR parity: if `g` is `true` on exactly one member of a `Nodup` list, the XOR of `g` over it is `true`. | — |
 | `RigidRREF.combo_eq_zero_of_pivots_zero` | 205-236 | **★★ Kernel triviality (the transversal property)**: a row-space vector `false` at every pivot column is the zero row — the pivot rows are linearly independent. The workhorse of RREF-canonicity (brick B) pivot-row uniqueness. | — |
+| `RigidRREF.LeadInv` | 246-248 | **Leading position**: every pivot row is `false` strictly below its own pivot column (the structural fact `PivInv` lacks). | Definition |
+| `RigidRREF.len_echStep` | 250-271 | `echStep` preserves uniform row length. | — |
+| `RigidRREF.leadInv_echStep` | 273-315 | **★ The `echelon` fold step preserves `LeadInv`**: new pivot `false` below its column by `findIdx?`; a triggered back-reduction has `c ≥ cp.1`, so never alters below `cp.1`. | — |
+| `RigidRREF.lead_foldl` | 317-329 | The joint `length` + `LeadInv` invariant, folded over the input rows. | — |
+| `RigidRREF.leadInv_echelon` | 331-336 | **★★ Leading position for `echelon`**: every pivot row is `false` strictly below its pivot column. The basis for pivot-column determination (brick B-cols). | — |

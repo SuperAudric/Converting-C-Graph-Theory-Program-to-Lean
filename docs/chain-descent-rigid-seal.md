@@ -432,9 +432,15 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
         pivot *columns* — `span{[1,1]}` admits both column 0 and column 1 as valid `PivInv` pivots — so column
         determination needs the **leading-position** property (each pivot row `false` strictly below its pivot),
         which `echelon` satisfies but `PivInv` does not record. That is (B-cols) below, the harder remaining piece.
-      - **(B-cols) pivot columns are intrinsic — NEXT.** Prove `echelon`'s pivot rows satisfy leading position (a
-        fold invariant, parallel to `pivInv_echelon`), then pivot columns = the space's leading positions ⟹ two
-        RREFs of the same space have the same pivot columns.
+      - **(B-cols) pivot columns are intrinsic — IN PROGRESS.**
+        - **✅ leading-position invariant — LANDED 2026-07-23** (`RigidRREF.lean` §3, axiom-clean):
+          `leadInv_echelon` — every pivot row of `echelon rows` is `false` strictly below its pivot column (the
+          structural fact `PivInv` lacks). A fresh fold invariant (`LeadInv`/`leadInv_echStep`/`lead_foldl`,
+          parallel to `pivInv_echelon`): the new pivot is `false` below its column by `findIdx?` (leftmost true),
+          and a *triggered* back-reduction has `c ≥ cp.1` so it never touches below `cp.1`.
+        - **NEXT:** the reconstruction identity (`w ∈ span ⟹ w = combo of pivot rows selected by w`'s pivot bits,
+          from §2 kernel triviality) ⟹ pivot columns = the space's **leading positions** (both directions) ⟹ two
+          RREFs of the same space have the same pivot columns.
       - **(B-rows) pivot rows are intrinsic** — given equal columns, each pivot row is the unique space-vector that
         is `1` at its pivot and `0` at the others (direct from (B-kernel)). Then (B5) assembles `rrefCanon` equality.
     - **(C) the χ-frame.** RREF is canonical **only per column order**, so it is *not* equivariant on raw indices

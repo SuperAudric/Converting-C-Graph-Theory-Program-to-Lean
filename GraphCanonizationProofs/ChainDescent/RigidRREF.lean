@@ -235,5 +235,105 @@ theorem combo_eq_zero_of_pivots_zero {m : Nat} {P : List (Nat × List Bool)} {w 
   rw [hSnil] at hScombo
   simpa using hScombo.symm
 
+/-! ## 3. The leading-position invariant (brick (B-cols) linchpin)
+
+`PivInv` does not pin the pivot columns (§2 finding). The missing structural fact is that `echelon`'s pivot
+rows are **false strictly below their pivot column** — the pivot is the *leading* (leftmost) nonzero entry, a
+consequence of `findIdx?` picking the leftmost true and back-reduction only touching columns `≥` the new
+pivot. This is a fresh fold invariant, parallel to `pivInv_echelon`. With it, pivot columns = the row space's
+leading positions (intrinsic), which gives column determination for RREF uniqueness. -/
+
+/-- **Leading position**: every pivot row is `false` strictly below its own pivot column. -/
+def LeadInv (P : List (Nat × List Bool)) : Prop :=
+  ∀ cp ∈ P, ∀ j, j < cp.1 → cp.2.getD j false = false
+
+/-- `echStep` preserves uniform row length. -/
+theorem len_echStep {m : Nat} {P : List (Nat × List Bool)} {r : List Bool}
+    (hlen : ∀ cp ∈ P, cp.2.length = m) (hr : r.length = m) :
+    ∀ cp ∈ echStep P r, cp.2.length = m := by
+  cases hfind : (reduceRow P r).findIdx? id with
+  | none =>
+      have hEs : echStep P r = P := by unfold echStep; rw [hfind]
+      rw [hEs]; exact hlen
+  | some c =>
+      have hr'len : (reduceRow P r).length = m := reduceRow_length P r hlen hr
+      have hEs : echStep P r = (c, reduceRow P r) :: P.map (fun cp =>
+          (cp.1, if cp.2.getD c false then xorRow cp.2 (reduceRow P r) else cp.2)) := by
+        unfold echStep; rw [hfind]
+      rw [hEs]
+      intro cp hcp
+      rcases List.mem_cons.mp hcp with rfl | hcp
+      · exact hr'len
+      · obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hcp
+        dsimp only
+        split
+        · rw [length_xorRow, hlen q hq, hr'len]; omega
+        · exact hlen q hq
+
+/-- **★ The step preserves the leading-position invariant.** The new pivot row is `false` below its column by
+`findIdx?` (leftmost true); a *triggered* back-reduction has `c ≥ cp.1` (else the old pivot would be nonzero
+below its own column), so it only alters columns `≥ c ≥ cp.1`, never below `cp.1`. -/
+theorem leadInv_echStep {m : Nat} {P : List (Nat × List Bool)} {r : List Bool}
+    (hlen : ∀ cp ∈ P, cp.2.length = m) (hr : r.length = m) (hlead : LeadInv P) :
+    LeadInv (echStep P r) := by
+  cases hfind : (reduceRow P r).findIdx? id with
+  | none =>
+      have hEs : echStep P r = P := by unfold echStep; rw [hfind]
+      rw [hEs]; exact hlead
+  | some c =>
+      set r' := reduceRow P r with hr'def
+      have hr'len : r'.length = m := reduceRow_length P r hlen hr
+      obtain ⟨hclt, -, hbefore⟩ := List.findIdx?_eq_some_iff_getElem.mp hfind
+      have hcm : c < m := hr'len ▸ hclt
+      have hr'below : ∀ j, j < c → r'.getD j false = false := by
+        intro j hj
+        rw [getD_in (Nat.lt_trans hj hclt)]
+        simpa using hbefore j hj
+      have hEs : echStep P r = (c, r') :: P.map (fun cp =>
+          (cp.1, if cp.2.getD c false then xorRow cp.2 r' else cp.2)) := by
+        unfold echStep; rw [hfind]
+      rw [hEs]
+      intro cp hcp j hj
+      rcases List.mem_cons.mp hcp with rfl | hcp
+      · exact hr'below j hj
+      · obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hcp
+        have hqbelow : ∀ j', j' < q.1 → q.2.getD j' false = false := hlead q hq
+        dsimp only
+        split
+        · rename_i hb
+          have hq1c : q.1 ≤ c := by
+            by_contra hlt
+            push_neg at hlt
+            have := hqbelow c hlt
+            rw [hb] at this
+            exact absurd this (by decide)
+          have hjc : j < c := Nat.lt_of_lt_of_le hj hq1c
+          have hjm : j < m := Nat.lt_trans hjc hcm
+          rw [getD_xorRow (by rw [hlen q hq]; exact hjm) (by rw [hr'len]; exact hjm),
+            hqbelow j hj, hr'below j hjc]
+          rfl
+        · exact hqbelow j hj
+
+/-- The joint `length` + `LeadInv` invariant, folded over the rows. -/
+theorem lead_foldl {m : Nat} : ∀ (rows : List (List Bool)), (∀ r ∈ rows, r.length = m) →
+    ∀ (P : List (Nat × List Bool)), (∀ cp ∈ P, cp.2.length = m) → LeadInv P →
+      (∀ cp ∈ rows.foldl echStep P, cp.2.length = m) ∧ LeadInv (rows.foldl echStep P) := by
+  intro rows
+  induction rows with
+  | nil => intro _ P hlen hlead; exact ⟨hlen, hlead⟩
+  | cons r rs ih =>
+      intro hrows P hlen hlead
+      have hr : r.length = m := hrows r (List.mem_cons_self ..)
+      have hrows' : ∀ x ∈ rs, x.length = m := fun x hx => hrows x (List.mem_cons_of_mem _ hx)
+      simp only [List.foldl_cons]
+      exact ih hrows' (echStep P r) (len_echStep hlen hr) (leadInv_echStep hlen hr hlead)
+
+/-- **★★ Leading position for `echelon`.** Every pivot row of `echelon rows` is `false` strictly below its
+pivot column — the structural fact `PivInv` lacks, and the basis for pivot-column determination (brick B-cols). -/
+theorem leadInv_echelon {m : Nat} {rows : List (List Bool)} (h : ∀ r ∈ rows, r.length = m) :
+    LeadInv (echelon rows) := by
+  rw [echelon_eq_foldl]
+  exact (lead_foldl rows h [] (by simp) (by intro cp hcp; simp at hcp)).2
+
 end RigidRREF
 end ChainDescent
