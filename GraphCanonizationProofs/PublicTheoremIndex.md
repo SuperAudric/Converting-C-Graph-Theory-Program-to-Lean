@@ -4440,3 +4440,10 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RigidRREF.rrefCanon_nodup` | 77-84 | The canonical pivot list is duplicate-free (distinct columns scanned once). | — |
 | `RigidRREF.rrefCanon_cols_nodup` | 86-94 | Its pivot **columns** are distinct — the `PivInv.nodup` field, transported. | — |
 | `RigidRREF.pivInv_rrefCanon` | 96-115 | **★ Row-space preservation for the canonical form**: `rrefCanon m rows` inherits `PivInv` — a reduced echelon system with the **same row space as the input, both directions**. The foundation bricks B/C/D build on. | — |
+| `RigidRREF.xorRow_left_comm` | 126-130 | `xorRow` is left-commutative on equal-length rows. | — |
+| `RigidRREF.combo_perm` | 132-148 | `combo` (XOR-fold) is invariant under permutation of an equal-length row list. | — |
+| `RigidRREF.spans_nodup_combo` | 150-175 | **Dedup to a Nodup subset**: every span element is the XOR of a *duplicate-free* subset of the generators (over F₂ repeats cancel). | — |
+| `RigidRREF.xorList_perm` | 177-179 | `xorList` (parity of `true`s) is permutation-invariant. | — |
+| `RigidRREF.xorList_all_false` | 181-187 | `xorList` of an all-`false` list is `false`. | — |
+| `RigidRREF.xorList_map_single` | 189-203 | Single-support XOR parity: if `g` is `true` on exactly one member of a `Nodup` list, the XOR of `g` over it is `true`. | — |
+| `RigidRREF.combo_eq_zero_of_pivots_zero` | 205-236 | **★★ Kernel triviality (the transversal property)**: a row-space vector `false` at every pivot column is the zero row — the pivot rows are linearly independent. The workhorse of RREF-canonicity (brick B) pivot-row uniqueness. | — |

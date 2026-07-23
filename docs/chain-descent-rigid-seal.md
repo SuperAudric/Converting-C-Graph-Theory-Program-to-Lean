@@ -422,9 +422,21 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       reorders them to increasing **column order** `0…m-1` (`find?`-scan), a canonical *shape*. `mem_rrefCanon_iff`
       (same pivots — a reorder, no loss) + `pivInv_rrefCanon` (the canonical form **inherits `PivInv`** — reduced
       echelon, row space preserved both ways). `#eval`-tested. The foundation the labelling reads.
-    - **(B) canonicity as a subspace invariant — NEXT.** RREF is unique given the column order: `PivInv m r₁ P₁ →
-      PivInv m r₂ P₂ → sameRowspace r₁ r₂ → rrefCanon-normal P₁ = P₂`. The crux new theorem (uniqueness of reduced
-      echelon form).
+    - **(B) canonicity as a subspace invariant — IN PROGRESS.** RREF is unique given the column order:
+      `rowspace r₁ = rowspace r₂ → rrefCanon m r₁ = rrefCanon m r₂` (uniqueness of reduced echelon form). Sub-DAG:
+      - **✅ (B-kernel) kernel triviality — LANDED 2026-07-23** (`RigidRREF.lean` §2, axiom-clean):
+        `combo_eq_zero_of_pivots_zero` — a row-space vector `false` at every pivot column is the zero row (the
+        pivot rows are a **transversal / linearly independent**), the workhorse of pivot-row uniqueness. Proof =
+        dedup a span element to a **Nodup** XOR of pivot rows (`spans_nodup_combo`, via `combo_perm`) then evaluate
+        at a used pivot's column (`xorList_map_single`). ⚠ **KEY FINDING:** `PivInv` alone does **not** pin the
+        pivot *columns* — `span{[1,1]}` admits both column 0 and column 1 as valid `PivInv` pivots — so column
+        determination needs the **leading-position** property (each pivot row `false` strictly below its pivot),
+        which `echelon` satisfies but `PivInv` does not record. That is (B-cols) below, the harder remaining piece.
+      - **(B-cols) pivot columns are intrinsic — NEXT.** Prove `echelon`'s pivot rows satisfy leading position (a
+        fold invariant, parallel to `pivInv_echelon`), then pivot columns = the space's leading positions ⟹ two
+        RREFs of the same space have the same pivot columns.
+      - **(B-rows) pivot rows are intrinsic** — given equal columns, each pivot row is the unique space-vector that
+        is `1` at its pivot and `0` at the others (direct from (B-kernel)). Then (B5) assembles `rrefCanon` equality.
     - **(C) the χ-frame.** RREF is canonical **only per column order**, so it is *not* equivariant on raw indices
       (permuting columns changes the pivot set). The order must come from χ (iso-invariant — the existing
       `rankInv_transport`/`vertexRank_transport`). Compose (B) with the χ-order transport.

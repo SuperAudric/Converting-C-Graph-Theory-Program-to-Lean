@@ -114,5 +114,126 @@ theorem pivInv_rrefCanon {m : Nat} {rows : List (List Bool)} (h : ∀ r ∈ rows
     obtain ⟨cp, hcpE, rfl⟩ := List.mem_map.mp hb
     exact List.mem_map.mpr ⟨cp, (hmem cp).mpr hcpE, rfl⟩
 
+/-! ## 2. Kernel triviality — the transversal property (brick (B) foundation)
+
+RREF uniqueness rests on: **a row-space vector that is zero at every pivot column is zero** — the pivot rows
+form a transversal (are linearly independent). `PivInv`'s `unit` + `cross` + `nodup` give exactly this, once a
+span element is written as an XOR of a **Nodup subset** of the pivot rows (dedup mod 2, `spans_nodup_combo`).
+⚠ Note this is *stronger* than `PivInv` alone can be used for pivot-column determination — `PivInv` does not pin
+the pivot columns to leading positions (`span{[1,1]}` admits both column 0 and column 1 as valid `PivInv`
+pivots); that gap is brick (B)'s pivot-column step, separate from this kernel lemma. -/
+
+/-- `xorRow` is left-commutative on equal-length rows. -/
+theorem xorRow_left_comm {m : Nat} {a b c : List Bool}
+    (ha : a.length = m) (hb : b.length = m) (hc : c.length = m) :
+    xorRow a (xorRow b c) = xorRow b (xorRow a c) := by
+  rw [← xorRow_assoc ha hb hc, xorRow_comm a b, xorRow_assoc hb ha hc]
+
+/-- `combo` is invariant under permutation of an equal-length row list (XOR is comm/assoc). -/
+theorem combo_perm {m : Nat} : ∀ {ws ws' : List (List Bool)}, ws.Perm ws' →
+    (∀ x ∈ ws, x.length = m) → combo m ws = combo m ws' := by
+  intro ws ws' hp
+  induction hp with
+  | nil => intro _; rfl
+  | cons x _ ih =>
+      intro h
+      rw [combo_cons, combo_cons, ih (fun y hy => h y (List.mem_cons_of_mem _ hy))]
+  | swap x y l =>
+      intro h
+      rw [combo_cons, combo_cons, combo_cons, combo_cons]
+      exact xorRow_left_comm (h y (by simp)) (h x (by simp))
+        (combo_length (fun z hz => h z (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hz))))
+  | trans p1 _ ih1 ih2 =>
+      intro h
+      rw [ih1 h, ih2 (fun x hx => h x (p1.mem_iff.mpr hx))]
+
+/-- **Dedup to a Nodup subset.** Every span element is the XOR of a *duplicate-free* subset of the generators
+(over F₂, repeats cancel). -/
+theorem spans_nodup_combo {m : Nat} {B : List (List Bool)} (hB : ∀ b ∈ B, b.length = m)
+    {w : List Bool} (hw : Spans m B w) :
+    ∃ S : List (List Bool), (∀ x ∈ S, x ∈ B) ∧ S.Nodup ∧ combo m S = w := by
+  induction hw with
+  | zero => exact ⟨[], by simp, List.nodup_nil, rfl⟩
+  | @step b w' hb _ ih =>
+      obtain ⟨S, hSsub, hSnd, hScombo⟩ := ih
+      have hlenS : ∀ x ∈ S, x.length = m := fun x hx => hB x (hSsub x hx)
+      have hbl : b.length = m := hB b hb
+      by_cases hbS : b ∈ S
+      · refine ⟨S.erase b, fun x hx => hSsub x (List.mem_of_mem_erase hx), hSnd.erase b, ?_⟩
+        have hperm : S.Perm (b :: S.erase b) := List.perm_cons_erase hbS
+        have hcomboS : combo m S = xorRow b (combo m (S.erase b)) := by
+          rw [combo_perm hperm hlenS, combo_cons]
+        have hcl : (combo m (S.erase b)).length = m :=
+          combo_length (fun x hx => hlenS x (List.mem_of_mem_erase hx))
+        have hbw : xorRow b (combo m (S.erase b)) = w' := by rw [← hcomboS, hScombo]
+        rw [← hbw, xorRow_self_cancel hbl hcl]
+      · refine ⟨b :: S, ?_, List.nodup_cons.mpr ⟨hbS, hSnd⟩, ?_⟩
+        · intro x hx
+          rcases List.mem_cons.mp hx with rfl | hx
+          · exact hb
+          · exact hSsub x hx
+        · rw [combo_cons, hScombo]
+
+/-- `xorList` counts `true`s mod 2, so it is permutation-invariant. -/
+theorem xorList_perm {l l' : List Bool} (h : l.Perm l') : xorList l = xorList l' := by
+  rw [xorList_eq_count, xorList_eq_count, h.count_eq]
+
+/-- `xorList` of an all-`false` list is `false`. -/
+theorem xorList_all_false {l : List Bool} (h : ∀ a ∈ l, a = false) : xorList l = false := by
+  rw [xorList_eq_count]
+  have : l.count true = 0 := by
+    rw [List.count_eq_zero]
+    intro hc; exact Bool.noConfusion (h _ hc)
+  simp [this]
+
+/-- **Single-support XOR parity.** If `g` is `true` on exactly one member `x` of a `Nodup` list, the XOR of
+`g` over the list is `true`. -/
+theorem xorList_map_single {S : List (List Bool)} (hSnd : S.Nodup) {x : List Bool} (hx : x ∈ S)
+    {g : List Bool → Bool} (hgx : g x = true) (hsupp : ∀ y ∈ S, g y = true → y = x) :
+    xorList (S.map g) = true := by
+  have hperm : S.Perm (x :: S.erase x) := List.perm_cons_erase hx
+  rw [xorList_perm (hperm.map g), List.map_cons, xorList_cons, hgx]
+  have hrest : xorList ((S.erase x).map g) = false := by
+    refine xorList_all_false ?_
+    intro a ha
+    obtain ⟨y, hy, rfl⟩ := List.mem_map.mp ha
+    have hyne : y ≠ x := (hSnd.mem_erase_iff.mp hy).1
+    by_contra hg
+    exact hyne (hsupp y (List.mem_of_mem_erase hy) (by simpa using hg))
+  simp [hrest]
+
+/-- **★★ Kernel triviality (the transversal property).** A row-space vector `w` that is `false` at every pivot
+column is the zero row. The pivot rows are linearly independent: represent `w` as a Nodup XOR of pivot rows;
+any pivot row used would make `w` nonzero at its own column. This is the workhorse of pivot-row uniqueness. -/
+theorem combo_eq_zero_of_pivots_zero {m : Nat} {P : List (Nat × List Bool)} {w : List Bool}
+    (hcol_lt : ∀ cp ∈ P, cp.1 < m) (hlen : ∀ cp ∈ P, cp.2.length = m)
+    (hunit : ∀ cp ∈ P, cp.2.getD cp.1 false = true)
+    (hcross : ∀ cp ∈ P, ∀ cq ∈ P, cp.1 ≠ cq.1 → cp.2.getD cq.1 false = false)
+    (hnodup : (P.map (·.1)).Nodup) (hw : Spans m (P.map (·.2)) w)
+    (hz : ∀ cp ∈ P, w.getD cp.1 false = false) : w = zeroW m := by
+  have hB : ∀ b ∈ P.map (·.2), b.length = m := by
+    intro b hb; obtain ⟨cp, hcp, rfl⟩ := List.mem_map.mp hb; exact hlen cp hcp
+  obtain ⟨S, hSsub, hSnd, hScombo⟩ := spans_nodup_combo hB hw
+  have hlenS : ∀ x ∈ S, x.length = m := fun x hx => hB x (hSsub x hx)
+  have hSnil : S = [] := by
+    by_contra hne
+    obtain ⟨x, hxS⟩ := List.exists_mem_of_ne_nil S hne
+    obtain ⟨cq, hcq, hxeq⟩ := List.mem_map.mp (hSsub x hxS)
+    -- `x = cq.2`; evaluate `w` at pivot column `cq.1`, get `true`, contradicting `hz`.
+    have hval : w.getD cq.1 false = true := by
+      rw [← hScombo, getD_combo hlenS (hcol_lt cq hcq)]
+      refine xorList_map_single hSnd hxS (g := fun y => y.getD cq.1 false) ?_ ?_
+      · rw [← hxeq]; exact hunit cq hcq
+      · intro y hy hgy
+        obtain ⟨cd, hcd, rfl⟩ := List.mem_map.mp (hSsub y hy)
+        by_cases hcol : cd.1 = cq.1
+        · rw [← hxeq]
+          exact congrArg (·.2) (List.inj_on_of_nodup_map hnodup hcd hcq hcol)
+        · exact absurd (hgy.symm.trans (hcross cd hcd cq hcq hcol)) (by decide)
+    rw [hz cq hcq] at hval
+    exact Bool.noConfusion hval
+  rw [hSnil] at hScombo
+  simpa using hScombo.symm
+
 end RigidRREF
 end ChainDescent
