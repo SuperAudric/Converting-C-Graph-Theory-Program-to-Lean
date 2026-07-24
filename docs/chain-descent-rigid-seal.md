@@ -438,11 +438,14 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
           structural fact `PivInv` lacks). A fresh fold invariant (`LeadInv`/`leadInv_echStep`/`lead_foldl`,
           parallel to `pivInv_echelon`): the new pivot is `false` below its column by `findIdx?` (leftmost true),
           and a *triggered* back-reduction has `c ≥ cp.1` so it never touches below `cp.1`.
-        - **NEXT:** the reconstruction identity (`w ∈ span ⟹ w = combo of pivot rows selected by w`'s pivot bits,
-          from §2 kernel triviality) ⟹ pivot columns = the space's **leading positions** (both directions) ⟹ two
-          RREFs of the same space have the same pivot columns.
-      - **(B-rows) pivot rows are intrinsic** — given equal columns, each pivot row is the unique space-vector that
-        is `1` at its pivot and `0` at the others (direct from (B-kernel)). Then (B5) assembles `rrefCanon` equality.
+        - **✅ reconstruction + column determination — LANDED 2026-07-23** (`RigidRREF.lean` §4, axiom-clean):
+          `reconstruction` (`w ∈ span ⟹ w = combo of the pivot rows at the columns where `w` is set`, via kernel
+          triviality on `xorRow w (recon w)`) ⟹ `pivotCol_isLeading` / `leading_isPivotCol` (pivot columns = the
+          space's **leading positions**, both directions) ⟹ **`pivotCols_eq`**: two reduced-echelon systems with the
+          same row space have the **same pivot columns**. (B-cols) is complete.
+      - **(B-rows) pivot rows are intrinsic — NEXT.** Given equal columns, each pivot row is the unique space-vector
+        that is `1` at its pivot and `0` at the other (shared) pivots — direct from (B-kernel) via
+        `xorRow ρ₁ ρ₂ ∈ span` being zero at all pivots. Then (B5) assembles `rrefCanon` equality.
     - **(C) the χ-frame.** RREF is canonical **only per column order**, so it is *not* equivariant on raw indices
       (permuting columns changes the pivot set). The order must come from χ (iso-invariant — the existing
       `rankInv_transport`/`vertexRank_transport`). Compose (B) with the χ-order transport.

@@ -4433,22 +4433,29 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `RigidRREF.rrefCanon` | 34-42 | The **canonical column-ordered F₂ RREF** — `Kernel.echelon rows` reordered so its pivots appear in increasing column order `0…m-1` (a `find?`-scan). Canonical *shape* (`gen` sub-brick A); canonicity as a subspace invariant is brick B. | Definition |
-| `RigidRREF.mem_echelon_of_mem_rrefCanon` | 44-55 | Every pivot of the canonical form is a pivot of `echelon rows` (the reorder loses nothing). | — |
-| `RigidRREF.mem_rrefCanon_of_mem_echelon` | 57-70 | Conversely every `echelon` pivot appears in the canonical form (at its own column); needs uniform-length rows for `pivInv_echelon`'s `col_lt`/`nodup`. | — |
-| `RigidRREF.mem_rrefCanon_iff` | 72-75 | The canonical form and `echelon rows` have exactly the same pivots (a reordering). | — |
-| `RigidRREF.rrefCanon_nodup` | 77-84 | The canonical pivot list is duplicate-free (distinct columns scanned once). | — |
-| `RigidRREF.rrefCanon_cols_nodup` | 86-94 | Its pivot **columns** are distinct — the `PivInv.nodup` field, transported. | — |
-| `RigidRREF.pivInv_rrefCanon` | 96-115 | **★ Row-space preservation for the canonical form**: `rrefCanon m rows` inherits `PivInv` — a reduced echelon system with the **same row space as the input, both directions**. The foundation bricks B/C/D build on. | — |
-| `RigidRREF.xorRow_left_comm` | 126-130 | `xorRow` is left-commutative on equal-length rows. | — |
-| `RigidRREF.combo_perm` | 132-148 | `combo` (XOR-fold) is invariant under permutation of an equal-length row list. | — |
-| `RigidRREF.spans_nodup_combo` | 150-175 | **Dedup to a Nodup subset**: every span element is the XOR of a *duplicate-free* subset of the generators (over F₂ repeats cancel). | — |
-| `RigidRREF.xorList_perm` | 177-179 | `xorList` (parity of `true`s) is permutation-invariant. | — |
-| `RigidRREF.xorList_all_false` | 181-187 | `xorList` of an all-`false` list is `false`. | — |
-| `RigidRREF.xorList_map_single` | 189-203 | Single-support XOR parity: if `g` is `true` on exactly one member of a `Nodup` list, the XOR of `g` over it is `true`. | — |
-| `RigidRREF.combo_eq_zero_of_pivots_zero` | 205-236 | **★★ Kernel triviality (the transversal property)**: a row-space vector `false` at every pivot column is the zero row — the pivot rows are linearly independent. The workhorse of RREF-canonicity (brick B) pivot-row uniqueness. | — |
-| `RigidRREF.LeadInv` | 246-248 | **Leading position**: every pivot row is `false` strictly below its own pivot column (the structural fact `PivInv` lacks). | Definition |
-| `RigidRREF.len_echStep` | 250-271 | `echStep` preserves uniform row length. | — |
-| `RigidRREF.leadInv_echStep` | 273-315 | **★ The `echelon` fold step preserves `LeadInv`**: new pivot `false` below its column by `findIdx?`; a triggered back-reduction has `c ≥ cp.1`, so never alters below `cp.1`. | — |
-| `RigidRREF.lead_foldl` | 317-329 | The joint `length` + `LeadInv` invariant, folded over the input rows. | — |
-| `RigidRREF.leadInv_echelon` | 331-336 | **★★ Leading position for `echelon`**: every pivot row is `false` strictly below its pivot column. The basis for pivot-column determination (brick B-cols). | — |
+| `RigidRREF.rrefCanon` | 35-43 | The **canonical column-ordered F₂ RREF** — `Kernel.echelon rows` reordered so its pivots appear in increasing column order `0…m-1` (a `find?`-scan). Canonical *shape* (`gen` sub-brick A); canonicity as a subspace invariant is brick B. | Definition |
+| `RigidRREF.mem_echelon_of_mem_rrefCanon` | 45-56 | Every pivot of the canonical form is a pivot of `echelon rows` (the reorder loses nothing). | — |
+| `RigidRREF.mem_rrefCanon_of_mem_echelon` | 58-71 | Conversely every `echelon` pivot appears in the canonical form (at its own column); needs uniform-length rows for `pivInv_echelon`'s `col_lt`/`nodup`. | — |
+| `RigidRREF.mem_rrefCanon_iff` | 73-76 | The canonical form and `echelon rows` have exactly the same pivots (a reordering). | — |
+| `RigidRREF.rrefCanon_nodup` | 78-85 | The canonical pivot list is duplicate-free (distinct columns scanned once). | — |
+| `RigidRREF.rrefCanon_cols_nodup` | 87-95 | Its pivot **columns** are distinct — the `PivInv.nodup` field, transported. | — |
+| `RigidRREF.pivInv_rrefCanon` | 97-116 | **★ Row-space preservation for the canonical form**: `rrefCanon m rows` inherits `PivInv` — a reduced echelon system with the **same row space as the input, both directions**. The foundation bricks B/C/D build on. | — |
+| `RigidRREF.xorRow_left_comm` | 127-131 | `xorRow` is left-commutative on equal-length rows. | — |
+| `RigidRREF.combo_perm` | 133-149 | `combo` (XOR-fold) is invariant under permutation of an equal-length row list. | — |
+| `RigidRREF.spans_nodup_combo` | 151-176 | **Dedup to a Nodup subset**: every span element is the XOR of a *duplicate-free* subset of the generators (over F₂ repeats cancel). | — |
+| `RigidRREF.xorList_perm` | 178-180 | `xorList` (parity of `true`s) is permutation-invariant. | — |
+| `RigidRREF.xorList_all_false` | 182-188 | `xorList` of an all-`false` list is `false`. | — |
+| `RigidRREF.xorList_map_single` | 190-204 | Single-support XOR parity: if `g` is `true` on exactly one member of a `Nodup` list, the XOR of `g` over it is `true`. | — |
+| `RigidRREF.combo_eq_zero_of_pivots_zero` | 206-237 | **★★ Kernel triviality (the transversal property)**: a row-space vector `false` at every pivot column is the zero row — the pivot rows are linearly independent. The workhorse of RREF-canonicity (brick B) pivot-row uniqueness. | — |
+| `RigidRREF.LeadInv` | 247-249 | **Leading position**: every pivot row is `false` strictly below its own pivot column (the structural fact `PivInv` lacks). | Definition |
+| `RigidRREF.len_echStep` | 251-272 | `echStep` preserves uniform row length. | — |
+| `RigidRREF.leadInv_echStep` | 274-316 | **★ The `echelon` fold step preserves `LeadInv`**: new pivot `false` below its column by `findIdx?`; a triggered back-reduction has `c ≥ cp.1`, so never alters below `cp.1`. | — |
+| `RigidRREF.lead_foldl` | 318-330 | The joint `length` + `LeadInv` invariant, folded over the input rows. | — |
+| `RigidRREF.leadInv_echelon` | 332-337 | **★★ Leading position for `echelon`**: every pivot row is `false` strictly below its pivot column. The basis for pivot-column determination (brick B-cols). | — |
+| `RigidRREF.recon` | 346-348 | Reconstruct `w` from its pivot coordinates: XOR the pivot rows at columns where `w` is set. | Definition |
+| `RigidRREF.recon_getD_pivot` | 350-382 | **Pivot-coordinate evaluation**: `recon` agrees with `w` at every pivot column (the coordinate map is the identity on pivot coordinates). | — |
+| `RigidRREF.recon_mem_span` | 384-391 | `recon m P w` lies in the row space `span(P)`. | — |
+| `RigidRREF.reconstruction` | 393-411 | **★★ The reconstruction identity**: a row-space vector equals the XOR of the pivot rows at the columns where it is set (`xorRow w (recon w)` is zero at every pivot ⟹ kernel triviality). | — |
+| `RigidRREF.pivotCol_isLeading` | 413-421 | **(B-cols) forward**: every pivot column is a leading position of the row space, witnessed by its own pivot row. | — |
+| `RigidRREF.leading_isPivotCol` | 423-459 | **★★ (B-cols) backward**: every leading position of the row space is a pivot column (else reconstruction writes a leading-`c` codeword as an XOR of pivot rows all `>c`, forcing `w.getD c = false`). | — |
+| `RigidRREF.pivotCols_eq` | 461-477 | **★★★ (B-cols)**: two reduced-echelon systems with the same row space have the **same pivot columns** (each = the space's leading positions). The column half of RREF uniqueness. | — |

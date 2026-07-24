@@ -1,4 +1,5 @@
 import ChainDescent.KernelGauss
+import Mathlib.Data.List.GetD
 
 /-!
 # P3-F₂ / `gen` sub-brick (A) — the canonical column-ordered F₂ RREF
@@ -188,8 +189,8 @@ theorem xorList_all_false {l : List Bool} (h : ∀ a ∈ l, a = false) : xorList
 
 /-- **Single-support XOR parity.** If `g` is `true` on exactly one member `x` of a `Nodup` list, the XOR of
 `g` over the list is `true`. -/
-theorem xorList_map_single {S : List (List Bool)} (hSnd : S.Nodup) {x : List Bool} (hx : x ∈ S)
-    {g : List Bool → Bool} (hgx : g x = true) (hsupp : ∀ y ∈ S, g y = true → y = x) :
+theorem xorList_map_single {α : Type*} [DecidableEq α] {S : List α} (hSnd : S.Nodup) {x : α} (hx : x ∈ S)
+    {g : α → Bool} (hgx : g x = true) (hsupp : ∀ y ∈ S, g y = true → y = x) :
     xorList (S.map g) = true := by
   have hperm : S.Perm (x :: S.erase x) := List.perm_cons_erase hx
   rw [xorList_perm (hperm.map g), List.map_cons, xorList_cons, hgx]
@@ -334,6 +335,146 @@ theorem leadInv_echelon {m : Nat} {rows : List (List Bool)} (h : ∀ r ∈ rows,
     LeadInv (echelon rows) := by
   rw [echelon_eq_foldl]
   exact (lead_foldl rows h [] (by simp) (by intro cp hcp; simp at hcp)).2
+
+/-! ## 4. Reconstruction + pivot columns are intrinsic (brick (B-cols))
+
+With kernel triviality (§2) and leading position (§3): a row-space vector is the XOR of the pivot rows at the
+columns where it is set (`reconstruction`), from which the pivot **columns** are exactly the row space's
+**leading positions** (`pivotCol_isLeading` / `leading_isPivotCol`) — an intrinsic characterization, so two
+RREFs of the same space have the same pivot columns. -/
+
+/-- Reconstruct `w` from its pivot coordinates: XOR the pivot rows at columns where `w` is set. -/
+def recon (m : Nat) (P : List (Nat × List Bool)) (w : List Bool) : List Bool :=
+  combo m ((P.filter (fun cp => w.getD cp.1 false)).map (·.2))
+
+/-- **Pivot-coordinate evaluation.** `recon` agrees with `w` at every pivot column (the coordinate map is the
+identity on pivot coordinates). -/
+theorem recon_getD_pivot {m : Nat} {rows : List (List Bool)} {P : List (Nat × List Bool)}
+    (hpiv : PivInv m rows P) {w : List Bool} {cp : Nat × List Bool} (hcp : cp ∈ P) :
+    (recon m P w).getD cp.1 false = w.getD cp.1 false := by
+  have hPnd : P.Nodup := List.Nodup.of_map _ hpiv.nodup
+  have hfnd : (P.filter (fun q => w.getD q.1 false)).Nodup := hPnd.filter _
+  have hlenL : ∀ x ∈ (P.filter (fun q => w.getD q.1 false)).map (·.2), x.length = m := by
+    intro x hx; obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hx
+    exact hpiv.len q (List.mem_of_mem_filter hq)
+  have hkey : ∀ q ∈ P, q.2.getD cp.1 false = true → q = cp := by
+    intro q hqP hq
+    by_contra hne
+    have hcolne : q.1 ≠ cp.1 := fun hcol => hne (List.inj_on_of_nodup_map hpiv.nodup hqP hcp hcol)
+    rw [hpiv.cross q hqP cp hcp hcolne] at hq
+    exact absurd hq (by decide)
+  rw [recon, getD_combo hlenL (hpiv.col_lt cp hcp), List.map_map]
+  show xorList ((P.filter (fun q => w.getD q.1 false)).map (fun q => q.2.getD cp.1 false))
+      = w.getD cp.1 false
+  by_cases hwc : w.getD cp.1 false = true
+  · rw [hwc]
+    refine xorList_map_single hfnd (List.mem_filter.mpr ⟨hcp, hwc⟩) (hpiv.unit cp hcp) ?_
+    intro q hq hgq; exact hkey q (List.mem_of_mem_filter hq) hgq
+  · rw [Bool.not_eq_true] at hwc
+    rw [hwc]
+    refine xorList_all_false ?_
+    intro a ha
+    obtain ⟨q, hq, rfl⟩ := List.mem_map.mp ha
+    by_cases hg : q.2.getD cp.1 false = true
+    · have hpq : w.getD q.1 false = true := (List.mem_filter.mp hq).2
+      rw [hkey q (List.mem_of_mem_filter hq) hg] at hpq
+      exact absurd (hpq.symm.trans hwc) (by decide)
+    · simpa using hg
+
+/-- `recon m P w` lies in the row space `span(P)`. -/
+theorem recon_mem_span {m : Nat} {rows : List (List Bool)} {P : List (Nat × List Bool)}
+    (hpiv : PivInv m rows P) (w : List Bool) : Spans m (P.map (·.2)) (recon m P w) := by
+  rw [recon]
+  refine spans_combo ?_
+  intro x hx
+  obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hx
+  exact List.mem_map.mpr ⟨q, List.mem_of_mem_filter hq, rfl⟩
+
+/-- **★★ The reconstruction identity.** A row-space vector equals the XOR of the pivot rows at the columns where
+it is set. (`xorRow w (recon w)` lies in the space and is zero at every pivot column, so kernel triviality
+forces it to zero.) -/
+theorem reconstruction {m : Nat} {rows : List (List Bool)} {P : List (Nat × List Bool)}
+    (hpiv : PivInv m rows P) {w : List Bool} (hw : Spans m (P.map (·.2)) w) : w = recon m P w := by
+  have hBlen : ∀ b ∈ P.map (·.2), b.length = m := by
+    intro b hb; obtain ⟨cp, hcp, rfl⟩ := List.mem_map.mp hb; exact hpiv.len cp hcp
+  have hwlen : w.length = m := hw.length hBlen
+  have hrlen : (recon m P w).length = m := (recon_mem_span hpiv w).length hBlen
+  have hu : xorRow w (recon m P w) = zeroW m := by
+    refine combo_eq_zero_of_pivots_zero hpiv.col_lt hpiv.len hpiv.unit hpiv.cross hpiv.nodup
+      (Spans.xor_closed hBlen hw (recon_mem_span hpiv w)) ?_
+    intro cp hcp
+    rw [getD_xorRow (by rw [hwlen]; exact hpiv.col_lt cp hcp) (by rw [hrlen]; exact hpiv.col_lt cp hcp),
+      recon_getD_pivot hpiv hcp]
+    cases w.getD cp.1 false <;> rfl
+  calc w = xorRow w (zeroW m) := (xorRow_zeroW_right hwlen).symm
+    _ = xorRow w (xorRow w (recon m P w)) := by rw [hu]
+    _ = recon m P w := xorRow_self_cancel hwlen hrlen
+
+/-- **(B-cols) forward.** Every pivot column is a **leading position** of the row space — witnessed by its own
+pivot row (`unit` at the column, `false` strictly below by leading position). -/
+theorem pivotCol_isLeading {m : Nat} {rows : List (List Bool)} {P : List (Nat × List Bool)}
+    (hpiv : PivInv m rows P) (hlead : LeadInv P) {cp : Nat × List Bool} (hcp : cp ∈ P) :
+    ∃ w, Spans m (P.map (·.2)) w ∧ w.getD cp.1 false = true ∧ ∀ j, j < cp.1 → w.getD j false = false := by
+  have hBlen : ∀ b ∈ P.map (·.2), b.length = m := by
+    intro b hb; obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hb; exact hpiv.len q hq
+  exact ⟨cp.2, Spans.mem hBlen (List.mem_map.mpr ⟨cp, hcp, rfl⟩), hpiv.unit cp hcp,
+    fun j hj => hlead cp hcp j hj⟩
+
+/-- **★★ (B-cols) backward.** Every leading position of the row space is a pivot column. If `c` were not a
+pivot, reconstruction would write `w` (a codeword with leading position `c`) as an XOR of pivot rows whose
+columns are all `> c` (none below `c` since `w` is `false` there, none at `c` since `c` isn't a pivot); those
+are all `false` at `c` by leading position, so `w.getD c = false` — contradicting `w.getD c = true`. -/
+theorem leading_isPivotCol {m : Nat} {rows : List (List Bool)} {P : List (Nat × List Bool)}
+    (hpiv : PivInv m rows P) (hlead : LeadInv P) {w : List Bool} {c : Nat}
+    (hw : Spans m (P.map (·.2)) w) (hc : w.getD c false = true)
+    (hbelow : ∀ j, j < c → w.getD j false = false) : c ∈ P.map (·.1) := by
+  have hBlen : ∀ b ∈ P.map (·.2), b.length = m := by
+    intro b hb; obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hb; exact hpiv.len q hq
+  have hwlen : w.length = m := hw.length hBlen
+  have hcm : c < m := by
+    by_contra h
+    rw [List.getD_eq_default _ _ (by omega)] at hc
+    exact absurd hc (by decide)
+  by_contra hcnot
+  have hlenL : ∀ x ∈ (P.filter (fun q => w.getD q.1 false)).map (·.2), x.length = m := by
+    intro x hx; obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hx
+    exact hpiv.len q (List.mem_of_mem_filter hq)
+  have hzero : xorList (((P.filter (fun q => w.getD q.1 false)).map (·.2)).map
+      (fun x => x.getD c false)) = false := by
+    refine xorList_all_false ?_
+    intro a ha
+    obtain ⟨x, hx, rfl⟩ := List.mem_map.mp ha
+    obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hx
+    have hqP : q ∈ P := List.mem_of_mem_filter hq
+    have hqsel : w.getD q.1 false = true := (List.mem_filter.mp hq).2
+    have hcq : c < q.1 := by
+      rcases Nat.lt_trichotomy c q.1 with h | h | h
+      · exact h
+      · exact absurd (h ▸ List.mem_map.mpr ⟨q, hqP, rfl⟩) hcnot
+      · rw [hbelow q.1 h] at hqsel; exact absurd hqsel (by decide)
+    exact hlead q hqP c hcq
+  have := reconstruction hpiv hw
+  rw [this, recon, getD_combo hlenL hcm] at hc
+  rw [hzero] at hc
+  exact absurd hc (by decide)
+
+/-- **★★★ (B-cols) — pivot columns are determined by the row space.** Two reduced-echelon systems with the same
+row space have the same pivot columns: each side's pivot columns are exactly that space's leading positions
+(`pivotCol_isLeading` / `leading_isPivotCol`), transported across equal spans. The column half of RREF
+uniqueness. -/
+theorem pivotCols_eq {m : Nat} {rows₁ rows₂ : List (List Bool)} {P₁ P₂ : List (Nat × List Bool)}
+    (hpiv₁ : PivInv m rows₁ P₁) (hlead₁ : LeadInv P₁) (hpiv₂ : PivInv m rows₂ P₂) (hlead₂ : LeadInv P₂)
+    (hspan : ∀ w, Spans m (P₁.map (·.2)) w ↔ Spans m (P₂.map (·.2)) w) {c : Nat} :
+    c ∈ P₁.map (·.1) ↔ c ∈ P₂.map (·.1) := by
+  constructor
+  · intro hc
+    obtain ⟨cp, hcp, rfl⟩ := List.mem_map.mp hc
+    obtain ⟨w, hwspan, hwc, hwbelow⟩ := pivotCol_isLeading hpiv₁ hlead₁ hcp
+    exact leading_isPivotCol hpiv₂ hlead₂ ((hspan w).mp hwspan) hwc hwbelow
+  · intro hc
+    obtain ⟨cp, hcp, rfl⟩ := List.mem_map.mp hc
+    obtain ⟨w, hwspan, hwc, hwbelow⟩ := pivotCol_isLeading hpiv₂ hlead₂ hcp
+    exact leading_isPivotCol hpiv₁ hlead₁ ((hspan w).mpr hwspan) hwc hwbelow
 
 end RigidRREF
 end ChainDescent
