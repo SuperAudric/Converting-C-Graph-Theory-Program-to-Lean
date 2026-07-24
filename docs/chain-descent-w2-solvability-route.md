@@ -42,8 +42,27 @@
 > differ in some class `t = (colour, adj-value, POE)` (= `refineStep_iff` ∘ `Multiset.ext`) — plus the gloss
 > `count_signature_eq_card` (each class-count IS a literal neighbour cardinality `|{u≠v : (χ u, adj v u, P v u)=t}|`).
 > This is the non-circular skeleton: it says *what warm refinement does at each step*, touching nothing about the
-> gauge *group* (Tier B). Next in Tier A: the equitability ⟹ local-exchange (flatness) lemma, then different-orbits
-> ⟺ nontrivial holonomy.
+> gauge *group* (Tier B).
+>
+> **✅ Tier A piece 2 LANDED (2026-07-24, same module, axiom-clean).** Flatness / the local exchange:
+> `refineStep_eq_iff_forall_card_eq` (the positive twin of piece 1 — same refined colour ⟺ co-cellular ∧ every
+> class-count agrees), `localExchange_of_refineStep_eq` and the headline `localExchange_of_equitable` (equitability,
+> spelled as the fixpoint condition `∀ x y, χ x = χ y → refineStep x = refineStep y`, ⟹ for every co-cellular pair
+> and every class `t` a **bijection** `nbhdClass v t ≃ nbhdClass w t` exists). The bijection is non-canonical
+> (`Finset.equivOfCardEq`, choice) — that non-canonicity *is* the local gauge freedom. Flat = every local exchange
+> exists; whether a globally-consistent choice exists is the **holonomy** (piece 3, untouched here).
+>
+> **✅ Tier A piece 3 LANDED (2026-07-24, same module, axiom-clean, gate green).** The holonomy object as the
+> **flat-but-not-globally-trivial defect**: `IsColAut` (generic-`V` colour-automorphism), `SameOrbit`,
+> `LocallyFlat` (= `refineStep u = refineStep v`, ⟺ per-class exchanges exist via `locallyFlat_iff`), and
+> `HolonomyNontrivial u v := LocallyFlat u v ∧ ¬ SameOrbit u v`. **Load-bearing content = the equivariance
+> `sameOrbit_imp_locallyFlat`** (every orbit pair is flat — a global section preserves the refined colour, via
+> `signature_eq_of_colAut`), which makes the flat locus the correct domain; piece 3 proper is
+> `holonomyNontrivial_iff_diff_orbit` (on flat pairs, different-orbit ⟺ nontrivial holonomy). ⚠ **Non-vacuity is
+> external** — a Lean witness of an inhabited `HolonomyNontrivial` *is* a WL lower bound (flat ∧ ¬orbit = CFI /
+> multipede), carried per the standing evidence, not proved here. The finer structure (this holonomy is a *linear*
+> F₂/ring cocycle composing around cycles when the gauge is abelian) is **Tier B** and untouched. **Tier A spine
+> complete.** Next: Tier B — wire the holonomy to the recovered-system frame matroid / `forceSolvable`.
 >
 > **What is DEAD and must not be re-walked.** The **matroid framework on commit-set closures** is closed
 > (`matroid.md:463-481`, §6/§8): neither the partition-based `cl` nor the TC-based `cl_prov` satisfies the exchange
@@ -207,8 +226,12 @@ re-walk a grave.
 **Tier A — the localization spine (provable now; non-circular; standalone value).**
 1. ✅ **LANDED** — `matroid.md:146-151` base lemma = `GaugeComplex.refineStep_ne_iff_exists_count_ne` (+
    `count_signature_eq_card`), `ChainDescent/GaugeComplex.lean`, axiom-clean, in the gate.
-2. Gauge-complex formalization: mixed-cell = non-Schurian; equitability ⟹ local exchange exists (flatness);
-   different-orbits ⟺ nontrivial holonomy.
+2. ✅ **LANDED (flatness)** — equitability ⟹ local exchange exists = `GaugeComplex.localExchange_of_equitable`
+   (+ `refineStep_eq_iff_forall_card_eq`, `nbhdClass`), axiom-clean, in the gate.
+3. ✅ **LANDED (holonomy)** — `IsColAut`/`SameOrbit`/`LocallyFlat`/`HolonomyNontrivial` +
+   `sameOrbit_imp_locallyFlat` (equivariance, the real content) + `holonomyNontrivial_iff_diff_orbit`. Non-vacuity
+   external (WL lower bound). **Tier A spine complete.** Remaining: mixed-cell = non-Schurian (a labelling of the
+   locus, cheap) folds into Tier B.
 3. Core/decoration split as a theorem: decoration ⟹ zero independent holonomy ⟹ the core is `Recover`'s `M`.
    Re-derive `Recover` as a *statement about WL-stable graphs*, not just an algorithm.
 > ⚠ **Do NOT put "linear" in the base case.** The induction produces the *complex*; linearity/solvability is a
