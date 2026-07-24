@@ -93,7 +93,16 @@
 > per-level `hstep` = **Luks's reduction** (Luks 1982, JCSS 25:42–65; Babai–Luks 1983, STOC) — carried, not built.
 > **Honest poly scope:** settled for `Γ_d` (bounded composition-factor degree) and bounded-order gauge; for general
 > unbounded solvable it is **"plausibly poly"** (project hedge, `cameron-entanglement.md:124`), not a classical
-> theorem. The skeleton (proved) makes no poly claim itself. **Next: C3's `Recover`** discharging
+> theorem. The skeleton (proved) makes no poly claim itself.
+>
+> **✅ C3 `Recover` — piece R-a LANDED (2026-07-24, `ChainDescent/GaugeIsolation.lean`, axiom-clean, gate green 97
+> modules; scope in §5a).** Gauge **isolation** in the rigid regime: `sameOrbit_iff_eq_of_rigid`,
+> `holonomyNontrivial_iff_flat_ne_of_rigid` (rigid ⟹ nontrivial holonomy = a locally-flat pair of distinct vertices
+> ⟹ gauge cells = non-singleton flatness classes). ★ **Refined the scope:** the `mp7 → Z₂³` gauge/base split is the
+> two-seals **interleaving** (consume peels `PGL(3,2)`, force sees the rigid `Z₂³` residue), NOT a Recover-internal
+> classifier — so rigidity does the isolating, and the deferred C2 fibre-isolation is unnecessary for force.
+> `faithful` (R-d) ≈ the carried forcing bridge (`ForcingModel.bridge`, shared with the rigid-seal — C3 adds no new
+> carried obligation). **Next: C3's `Recover`** discharging
 > `faithful` + the `carrier ≅ kerF2` correspondence (the remaining carried isolation content), and/or consolidation.
 >
 > **What is DEAD and must not be re-walked.** The **matroid framework on commit-set closures** is closed
@@ -343,6 +352,36 @@ threshold. NOT by WL-counting** (§3(i): WL is blind to Γ's structure).
   genuine witness = a statement-change (claim #3 realized).
 - Reuse `NonAbelianCfiProbe.cs` (`GroupFromPerms` / `BuildGroupCfi`); do **not** re-walk the seven Schurian
   falsifiers (`steers-archive.md:211-227`, 0 witnesses) or the amorphic `ℤ₄²` bullseye (recovers at depth 2).
+
+---
+
+## 5a. C3 `Recover` — scope (2026-07-24)
+
+`Recover` is the structural, recognition-free extraction that produces the gauge group Γ (C3) from the WL-stable
+coloured graph. Discharging it turns the W2 Tier-B chain from *carried* to *theorem-clean*. It must discharge two
+carried obligations: **(1)** `faithful` — the recovered Γ's orbits are exactly the local-flatness classes; **(2)**
+`carrier ≅ kerF2 H` — the abelian-branch correspondence.
+
+| piece | content | status |
+|---|---|---|
+| **R-a — gauge isolation** | pick the gauge cells, exclude the base (the `mp7 → Z₂³` test) | ✅ **LANDED** (rigid-regime form, below) |
+| **R-b — the forcing bridge** | recovered `M` faithfully models WL-flatness (1-WL forcing = unit-prop/kernel on `M`) | **carried** — this *is* `ForcingModel.bridge`, already carried by the rigid-seal track; **C3 adds no new carried obligation, it inherits it** |
+| **R-c — gauge-group construction** | build `carrier` from `M`: abelian = `kerF2` (**built**, `GaugeAbelian`); non-abelian = the recovered relation's gain/aut group | abelian **built**; non-abelian **new** |
+| **R-d — `faithful`** | orbits(Γ) = flatness classes | **composition** of R-a+R-b+R-c; ≈ the forcing bridge |
+
+**Key finding.** `faithful` (R-d) ≈ the forcing bridge, so C3 is dischargeable **modulo the same bridge the
+rigid-seal linear ① is already modulo** — not an independent liability. The genuinely-new *provable* work is R-a
+(isolation) and R-c-nonabelian.
+
+**✅ R-a LANDED — and it REFINED the scope (`ChainDescent/GaugeIsolation.lean`, axiom-clean, gate green).** The
+"gauge vs. base classifier on the full graph" is **not** what force needs: force sees the residue *after* consume
+peels the base — a **rigid** residue — and in the rigid regime isolation is automatic. `IsRigid` (`Aut = 1`);
+`sameOrbit_iff_eq_of_rigid` (`SameOrbit` collapses to equality); `holonomyNontrivial_iff_flat_ne_of_rigid` (nontrivial
+holonomy = a locally-flat pair of **distinct** vertices ⟹ **gauge cells = non-singleton flatness classes**);
+`carriesGauge_iff_exists_holonomy_of_rigid`. **⟹ the `mp7 → Z₂³` split is the two-seals INTERLEAVING** (consume takes
+`PGL(3,2)`, force sees the rigid `Z₂³` residue), **not** a Recover-internal classifier — which also explains why the
+deferred **C2 fibre-isolation is unnecessary for force**: rigidity does the isolating. **Next in R-c/R-d:** wire
+`carrier ≅ kerF2` on the rigid residue (thin, once R-a picks the cells); R-c-nonabelian; R-b stays carried (shared).
 
 ---
 
