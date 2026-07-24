@@ -18,16 +18,18 @@
 >    **abelian**? — equivalently the c-of-k trigger algebra **composes** (`matroid.md:223-228`), equivalently the
 >    recovered gain-graph's **frame matroid is field-representable**. **TRUE over F₂ (XOR composes); OPEN and
 >    conjecturally-FALSE beyond** — the S₃/D₄ probe exhibits a *rigid non-abelian* core.
-> 2. **Solvable threshold** (the *actual* poly-completeness boundary): is `Γ` forced **solvable**? — equivalently
->    the Babai–Luks canonization of the recovered `Γ`-system is **poly**. **TRUE at every probed level** (abelian,
->    dihedral, Heisenberg all solvable/poly); the **only** open case is a **growing non-solvable** `Γ` (Aₙ/PSL…),
->    for which there is **no constructible witness** and the full CFI is search-infeasible (a theory question).
+> 2. **Solvable threshold** (the *actual* poly-completeness boundary): is `Γ` forced **solvable**? — canonization
+>    under a solvable gauge is poly for **bounded** composition-factor degree (`Γ_d`, Luks 1982) and **plausibly
+>    poly** in general (`cameron-entanglement.md:124`, not a settled classical theorem). **TRUE at every probed
+>    level** (abelian, dihedral, Heisenberg — all solvable, poly at the bounded orders tested); the **only** wall
+>    case is a **growing non-solvable** `Γ` (Aₙ/PSL…), no constructible witness, full CFI search-infeasible (theory).
 >
 > **The headline correction to the user's hypothesis.** "The obstruction must be linear (F_k) or a symmetry" is
 > **too coarse and, in the strict-linear reading, FALSE**: a rigid graph can carry genuinely non-abelian structure
 > (`NonAbelianCfiProbe`, Albert's theorem). The correct target is not *linear* but *solvable*: **k-WL fails exactly
 > on a non-Schurian rigid core whose difficulty is the Babai–Luks difficulty of its recovered gauge group `Γ` —
-> poly for every solvable `Γ`, open only for growing non-solvable `Γ`.**
+> poly for bounded-degree (`Γ_d`) solvable gauge (Luks) and plausibly poly for general solvable, open only for
+> growing non-solvable `Γ`.**
 >
 > **Legality guardrails (do not violate).** (a) The form *"X ⟹ GI∈P, therefore X is impossible"* is **BANNED**
 > (`remaining-work.md:818`); the "a perfect key cannot exist" argument was **retracted** for exactly this
@@ -82,8 +84,17 @@
 > solvable target); and the `RigidSolveF2` reuse: `kerF2 H` = the abelian gauge as `ker H` (abelian by construction),
 > `isRigidF2_iff_kerF2_eq_bot` (`IsRigidF2 ⟺ kerF2 = ⊥` = "rigid = no gauge freedom"), `rigid_unique_solve` (the
 > built determinacy as the branch's solve). Carried: the `carrier ≅ kerF2 H` correspondence (`Recover`/`ForcingModel`
-> bridge). **Next: the solvable-branch coset-enum solver** (the S₃/D₄ delta), and/or **C3's `Recover`** discharging
-> `faithful` + the `carrier ≅ kerF2` correspondence.
+> bridge).
+>
+> **✅ Tier B solvable branch — reduction skeleton LANDED (2026-07-24, `ChainDescent/GaugeSolvable.lean`, axiom-clean,
+> gate green 96 modules).** The Babai–Luks reduction: `of_solvable_tower` (capability `P` for `⊥` + preserved across
+> each derived step ⟹ `P ⊤`, downward induction on the terminating derived series) + `of_solvable_abelian_base` (the
+> solvable branch **reduces to the abelian branch** — abelian base + the step ⟹ whole solvable gauge). ⚠ the
+> per-level `hstep` = **Luks's reduction** (Luks 1982, JCSS 25:42–65; Babai–Luks 1983, STOC) — carried, not built.
+> **Honest poly scope:** settled for `Γ_d` (bounded composition-factor degree) and bounded-order gauge; for general
+> unbounded solvable it is **"plausibly poly"** (project hedge, `cameron-entanglement.md:124`), not a classical
+> theorem. The skeleton (proved) makes no poly claim itself. **Next: C3's `Recover`** discharging
+> `faithful` + the `carrier ≅ kerF2` correspondence (the remaining carried isolation content), and/or consolidation.
 >
 > **What is DEAD and must not be re-walked.** The **matroid framework on commit-set closures** is closed
 > (`matroid.md:463-481`, §6/§8): neither the partition-based `cl` nor the TC-based `cl_prov` satisfies the exchange
@@ -179,7 +190,7 @@ So the honest picture is a **ladder with two thresholds**, not a dichotomy:
 | gauge group `Γ` of the core | canonization | threshold | status |
 |---|---|---|---|
 | **abelian** (F₂, `Z_{2^k}`, rings) | Smith / rowspace-kernel | ← *abelian* (claim #2, linear seal) | **SEALED — Algorithm R ✓** |
-| **non-abelian solvable** (S₃, D₄, dihedral, Heisenberg) | coset-enumeration / fixed-group CSP | between | **poly, TAME — needs a solvable-group solver, not Smith** |
+| **non-abelian solvable** (S₃, D₄, dihedral, Heisenberg) | coset-enumeration / fixed-group CSP | between | **poly for bounded/`Γ_d`, plausibly poly general — needs a solvable-group solver, not Smith** |
 | **non-abelian non-solvable, growing** (Aₙ, PSL…) | Babai–Luks string canonization | ← *solvable* (true completeness) | **the ONLY wall candidate — no constructible witness** |
 
 The user's "must be linear" is the **abelian threshold**; the target that actually secures poly-completeness is the
@@ -235,7 +246,8 @@ non-binary for `A_k`-symmetric hidden constructions*") but lacked the group-theo
 to name. **Field-representable ⟺ abelian threshold; the coincidence with Face A is the c-of-k = XOR reading.**
 
 **Face C — Babai–Luks solvability (the true target).** Canonizing the recovered `Γ`-gain graph up to gauge is
-**string-canonization under `Γ`** — poly for every **solvable** `Γ`, open only for growing non-solvable `Γ`. This
+**string-canonization under `Γ`** — poly for bounded-degree solvable gauge (`Γ_d`, Luks 1982), **plausibly poly**
+for general solvable (`cameron-entanglement.md:124`, not classical), open at growing non-solvable `Γ`. This
 is the **solvable threshold**, strictly weaker (more permissive) than Faces A/B: abelian ⊊ solvable. Faces A/B
 secure the *linear* sub-seal; Face C secures *poly-completeness*, which is the actual deliverable.
 
@@ -312,8 +324,13 @@ threshold. NOT by WL-counting** (§3(i): WL is blind to Γ's structure).
   as `ker H` (abelian by construction), `isRigidF2_iff_kerF2_eq_bot` (`IsRigidF2 ⟺ trivial gauge` = "rigid = no
   gauge freedom"), `rigid_unique_solve` (the built determinacy as the branch's solve). Carried: `carrier ≅ kerF2 H`
   (the `Recover`/`ForcingModel` correspondence). Faces A/B; `matroid.md:463-481` §8.4's Tier-2 detector.
-- **Solvable branch** — Γ solvable → coset-enumeration / fixed-group CSP (Face C, the **new** solver; the delta
-  beyond abelian, e.g. S₃/D₄).
+- ✅ **Solvable branch — reduction skeleton (LANDED)** — `GaugeSolvable.lean`: `of_solvable_tower` (a gauge
+  capability `P` holding for `⊥` and preserved across each derived-series step `P ⁅H,H⁆ → P H` holds for the whole
+  solvable gauge, by downward induction on the terminating derived series `⊤=D₀⊇…⊇Dₙ=⊥`) + `of_solvable_abelian_base`
+  (P for every abelian subgroup + the step ⟹ P ⊤ = **the solvable branch reduces to the abelian branch**). ⚠ the
+  per-level step `hstep` = **Luks's reduction** (Luks 1982; Babai–Luks 1983), carried. **Poly scope (honest):**
+  settled for `Γ_d`/bounded-order; **plausibly poly** for general unbounded solvable (`cameron-entanglement.md:124`),
+  not a classical theorem. The skeleton is proved and makes no poly claim. Face C.
 - **else → the wall** (growing non-solvable Γ, no constructible witness). Completeness lever: route-(ii) "no
   non-abelian fusion survives into a rigid medium" (`remaining-work.md:734`), evidenced by S₃/D₄ tameness.
 
@@ -335,7 +352,7 @@ threshold. NOT by WL-counting** (§3(i): WL is blind to Γ's structure).
 |---|---|---|---|
 | **Lichter CFI-over-`Z_{2^k}`** | "F₂ is the only obstruction" — FALSE | still **linear** (varying ring) | `rigid-seal.md:232`, `ir-blindspot-solver.md:1067` |
 | **S₃/D₄ group-CFI** (rigidified) | "rigid ⟹ abelian" — FALSE (rigid non-abelian exists) | **solvable ⟹ poly** (coset CSP) | `project_nonabelian_cfi_witness` memory |
-| **Dihedral / Heisenberg** (growing) | non-abelian structure stays accessible & tame with growth | **solvable ⟹ Babai–Luks poly** | ibid. §group-varying probe |
+| **Dihedral / Heisenberg** (growing) | non-abelian structure stays accessible & tame with growth | **solvable ⟹ plausibly poly** (Luks reduction; settled `Γ_d`, general solvable a project hedge) | ibid. §group-varying probe |
 | **`mp7` (Fano multipede)** | **the isolation test**: recover yields `Γ = Z₂³` (F₂ gauge), **not** `\|Aut\| = 1344` | base `PGL(3,2)` (non-solvable!) is **symmetry**, not gauge — excluded by `Recover` | `deepen-supply.md:120-124`, `00-START-HERE.md:138` |
 | **multipedes** (circulant≤72, rand-reg≤288) | canonize (discretize ≤7 levels) | rigid but not a flag at scale | `exhaustive-obstruction.md:420-427` |
 | **rigid expanders** | parity propagates fast (easy) | small instances don't flag | `exhaustive-obstruction.md:424-427` |

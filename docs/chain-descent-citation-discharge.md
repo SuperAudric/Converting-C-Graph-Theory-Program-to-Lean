@@ -111,6 +111,7 @@ truth for what is still carried (a discharged citation is *removed*, not merely 
 | **`hcatch`** (CFI-1992 dimWL) | seal capstones | Cai–Fürer–Immerman 1992 Thm 5.2 | collapses to the `s(C)` core | **≈ MOOT** — not a real external citation; = the project's own open core in disguise (remaining-work §1). Free where 1-WL discretizes. |
 | **`PrimitiveCCClassification` (G3)** | all seal capstones (`hClassify`) | Babai ITCS'14 / J.Alg'15 / Kivva JCTB'24 / Sun–Wilmes — the Cameron classification | the "or Cameron" escape | **KEEP CITED** (policy). ⚠ **Threshold scope (2026-07-16):** citable only when `IsLargeScheme` is at least the Sun–Wilmes `exp(Õ(n^{1/3}))` (all ranks; Sun–Wilmes is CFSG-free) or rank ≤ 4 (Babai/Kivva, quasi-poly). The `Confinement.confinementLargeScheme` instantiation (quasi-poly threshold, all ranks) is **Babai's open conjecture, NOT a citation** — see the corrected docstring at `Confinement.lean` `confinementLargeScheme`; do not axiomatize `hClassify` at that instance. |
 | Skresanov / Liebeck / Ponomarenko-cyclotomic-2-sep | affine-slice / seam (remaining-work §3a) | rank-3 2-closure / primitive-group / cyclotomic 2-sep | seal (schurian affine residue) | **○ CITED** — real classical results; formalizable, off the near-term path. ⚠ **Bridge note (2026-07-16 audit):** the cyclotomic carrier `TwinsAreSemilinear` (`CascadeAffine.lean`) is the *operational* form — getting from the paper's 2-separability (Thm 1.1) to "depth-2 count twins at an arbitrary individualized base are realized by `T`-fixing automorphisms" is a pointed/base-transport step the paper does not state; name that bridge as an obligation before treating the row as a literal citation. Also: the F₁₆/F₂₅ non-exception claims rest on the paper's computed Table 1, not its theorems. |
+| **W2 solvable-branch `hstep` (Luks reduction)** | **NOT wired to any capstone** — `GaugeSolvable.of_solvable_tower` takes it as a **bound hypothesis** `∀ H, P ⁅H,H⁆ → P H`, discharged by the caller; the reduction *skeleton* is proved and `#print axioms` shows nothing from it | Luks's group-theoretic reduction: canonical form under `G` reduces (poly) to canonical form under a normal subgroup with **abelian** quotient — **Luks 1982** (JCSS 25(1):42–65) + **Babai–Luks 1983** (STOC, 171–183). ⚠ **Faithful scope:** covers `Γ_d` (bounded composition-factor degree, poly `n^{O(d)}`) + bounded-order gauge (trivial) + the abelian base; it does **NOT** state unbounded-solvable poly — that is *plausibly poly* (`cameron-entanglement.md:124`), NOT this citation | **W2 Tier B solvable branch — NOT yet critical-track** | **○ PENDING (not carried).** Activates as a carried citation only when a concrete solvable solver instantiates `hstep`. Luks 1982 / Babai–Luks 1983 are universally-accepted classical results (like CFSG-tier), reviewer-safe **in the `Γ_d` form**; the unbounded-solvable poly must NOT be wired to this citation. |
 
 *(`hSmallAutThin` and `hImprim` are **not** citations — the first is the open research core, the second is deferred
 Lean infra (block tower). See remaining-work §1. `SparseSeparable`/`Separable`/`DepthOneSeparable` are project
@@ -374,7 +375,14 @@ over `𝔽_q^d` (`d ≥ 4`, `q` odd); (b) **delete the carried premise** from `r
   routes bypass it). Discharge only if a uniform sub-exp floor is wanted in-Lean.
 - **`hcatch`** — not a genuine external citation; collapses onto the project's own `s(C)` core (remaining-work §1). Free
   wherever 1-WL discretizes; "discharging" it = proving the core, not importing a theorem.
-- **G3 (`PrimitiveCCClassification`)** — **stays cited** (CFSG). Do not attempt.
+- **G3 (`PrimitiveCCClassification`)** — **stays cited for now** (CFSG). Do not attempt yet.
+- **W2 solvable-branch `hstep` (Luks reduction)** — the per-level step of `GaugeSolvable.of_solvable_tower` = Luks's
+  group-theoretic reduction (**Luks 1982**, JCSS 25:42–65; **Babai–Luks 1983**, STOC). ⚠ **Not yet a carried
+  critical-track citation:** it is a *bound hypothesis* of the proved reduction skeleton, discharged by the caller —
+  no capstone carries it, `#print axioms` is clean. Reviewer-safe **only in the `Γ_d`/bounded-degree form**; the
+  general unbounded-solvable poly is *plausibly poly* (not this citation). See
+  [`chain-descent-w2-solvability-route.md`](./chain-descent-w2-solvability-route.md) §5 + the `GaugeSolvable.lean`
+  module note (register row in §2). Here to be kept track of.
 
 ---
 
