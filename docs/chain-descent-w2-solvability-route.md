@@ -75,8 +75,15 @@
 > local-flatness classes; `faithful` = the isolation-faithfulness `Recover` discharges, carried). `holonomy_iff_gauge`:
 > `HolonomyNontrivial u v ⟺ Γ-orbit u v ∧ ¬SameOrbit` — Tier A's holonomy connected to the group-carrying Γ.
 > `gaugeContractMax` proves the contract is **inhabited** (non-vacuity guard; ⚠ the max partition-stabilizer, NOT the
-> recovered gauge — solvability is asked of the recovered `carrier`). **Next: the abelian solve branch** (bridge Γ to
-> `RigidSolveF2`'s `ker H`) and/or the **solvable-branch coset-enum solver**; C3's `Recover` discharge of `faithful`.
+> recovered gauge — solvability is asked of the recovered `carrier`).
+>
+> **✅ Tier B abelian branch LANDED (2026-07-24, `ChainDescent/GaugeAbelian.lean`, axiom-clean, gate green 95
+> modules).** `isSolvable_of_carrier_comm` (commutative gauge ⟹ solvable — abelian is the trivial base of the
+> solvable target); and the `RigidSolveF2` reuse: `kerF2 H` = the abelian gauge as `ker H` (abelian by construction),
+> `isRigidF2_iff_kerF2_eq_bot` (`IsRigidF2 ⟺ kerF2 = ⊥` = "rigid = no gauge freedom"), `rigid_unique_solve` (the
+> built determinacy as the branch's solve). Carried: the `carrier ≅ kerF2 H` correspondence (`Recover`/`ForcingModel`
+> bridge). **Next: the solvable-branch coset-enum solver** (the S₃/D₄ delta), and/or **C3's `Recover`** discharging
+> `faithful` + the `carrier ≅ kerF2` correspondence.
 >
 > **What is DEAD and must not be re-walked.** The **matroid framework on commit-set closures** is closed
 > (`matroid.md:463-481`, §6/§8): neither the partition-based `cl` nor the TC-based `cl_prov` satisfies the exchange
@@ -300,8 +307,11 @@ threshold. NOT by WL-counting** (§3(i): WL is blind to Γ's structure).
   `gaugeContractMax` = non-vacuity witness. The Tier-A→Tier-B connector.
 - **Isolation** — the group-general structural `Recover` (§4a); classify Γ by extraction + Albert/isotopy
   (`Probe_ExtractionDiscriminator` is the template).
-- **Abelian branch** — Γ abelian → Smith/`ker H`: reuse the built `RigidSolveF2`/`RigidGen` machinery **unchanged**
-  (Faces A/B; `matroid.md:463-481` §8.4's Tier-2 detector = field-representability ⟺ abelian).
+- ✅ **Abelian branch (LANDED)** — `GaugeAbelian.lean`: `isSolvable_of_carrier_comm` (commutative gauge ⟹
+  solvable — abelian is the trivial base of the target); F₂ reuse of `RigidSolveF2` — `kerF2 H` = the abelian gauge
+  as `ker H` (abelian by construction), `isRigidF2_iff_kerF2_eq_bot` (`IsRigidF2 ⟺ trivial gauge` = "rigid = no
+  gauge freedom"), `rigid_unique_solve` (the built determinacy as the branch's solve). Carried: `carrier ≅ kerF2 H`
+  (the `Recover`/`ForcingModel` correspondence). Faces A/B; `matroid.md:463-481` §8.4's Tier-2 detector.
 - **Solvable branch** — Γ solvable → coset-enumeration / fixed-group CSP (Face C, the **new** solver; the delta
   beyond abelian, e.g. S₃/D₄).
 - **else → the wall** (growing non-solvable Γ, no constructible witness). Completeness lever: route-(ii) "no
