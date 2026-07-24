@@ -8,7 +8,7 @@
 > "linear" — §3). k-WL fails exactly on a non-Schurian rigid core; its difficulty is the Babai–Luks difficulty of
 > the recovered gauge group Γ (§4a). Legal framing = oracle-capability, never graph-classification (§1 guardrails).
 >
-> **BUILT (Lean, all axiom-clean `[propext, Classical.choice, Quot.sound]`, in `scripts/build.sh`, gate green — 98
+> **BUILT (Lean, all axiom-clean `[propext, Classical.choice, Quot.sound]`, in `scripts/build.sh`, gate green — 99
 > modules, ~190 s). Read in this dependency order:**
 > 1. **`ChainDescent/GaugeComplex.lean`** — Tier A spine. Piece 1 `refineStep_ne_iff_exists_count_ne` (+
 >    `count_signature_eq_card`, `nbhdClass`); piece 2 flatness `localExchange_of_equitable`
@@ -25,6 +25,9 @@
 > 6. **`ChainDescent/GaugeNonabelian.lean`** — C3 `Recover` R-c (non-abelian). The §3a/§3b skeleton: recovered gauge
 >    `Γ ≤ (ι → G₀)` ⟹ `isSolvable_pi` (degree-independent) → `recoveredGauge_reduces_to_abelian` (reduces to the
 >    abelian branch via `of_solvable_tower`) + `isSolvable_gaugeCarrier` (feeds `GaugeContract`); `S₃` non-vacuity.
+> 7. **`ChainDescent/GaugeLayer.lean`** — R-c extraction brick **L1** (§3b's corner-emptying gap). `derivedSeries_pi_const`:
+>    the gauge's derived tower decomposes coordinatewise `derivedSeries (ι→G₀) k = ∏ᵢ derivedSeries G₀ k` = *each layer
+>    is a free module of rank `|gadgets|`* ⟹ each tower step is a per-coordinate **linear** solve; `mem_derivedSeries_pi`.
 >
 > **PROVED end-to-end (the reduction).** Holonomy → Γ (bridge) → abelian solve (built, `ker H`) / solvable solve
 > (reduces to abelian + carried step); isolation automatic in the rigid regime; the **non-abelian** recovered gauge is
@@ -39,9 +42,11 @@
 > part is the extraction preserving each derived layer's *module structure* (so the tower step is a linear solve) =
 > the §3b load-bearing gap, shared with `ForcingModel.bridge`.
 >
-> **NEXT (in value order):** the *linearity-of-each-layer* extraction property (§3b's one open gap — that `Recover`
-> hands each derived quotient over as a module action; empties the §3a corner) · wire `carrier ≅ kerF2` on the rigid
-> residue (thin) · R-b (proving the forcing bridge) = a large **cross-track** effort, not W2-specific. **Deferred:** C2 = extraction-free intrinsic Γ (blocked on fibre-isolation; §5a shows rigidity
+> **NEXT (in value order):** the extraction bricks **L2** (local layer `A_k` abelian ⟹ product layer `= ι → A_k`, an
+> `A_k`-module) → **L3** (per-layer Smith/Gaussian solve, `kerF2` = `k=0`/`ZMod 2` instance) — §3b's corner-emptying
+> chain, whose **structural core L1 is now built** (`GaugeLayer`, coordinatewise tower decomposition); **L4** (`Recover`
+> produces the layers as explicit linear systems) stays CARRIED, shared with `ForcingModel.bridge`. Then wire
+> `carrier ≅ kerF2` on the rigid residue (thin) · R-b (proving the forcing bridge) = a large **cross-track** effort. **Deferred:** C2 = extraction-free intrinsic Γ (blocked on fibre-isolation; §5a shows rigidity
 > makes it unnecessary for force). **Map:** §4a Γ-scope · §5 attack plan · §5a Recover scope · §6 falsifier ledger ·
 > §7 fresh-reader pointers. **Chronological landing notes follow below.**
 >
@@ -345,8 +350,17 @@ frontier; it maps onto it. This is the strongest honest "empty": *no residue bey
 the step is a linear solve rather than an opaque permutation action? That is a property of the extraction — the **same
 object R-c-nonabelian builds** (`carrier` from `M`, non-abelian case) plus the carried `ForcingModel.bridge`. Resolving
 it discharges the carried `hstep` **and** empties the corner in one move — not new debt. **Verdict: the corner is
-plausibly empty-beyond-the-wall, reducible to already-carried objects, legal, and quasipoly-settled meanwhile.** The
-concrete next build is R-c-nonabelian (§5a) with the *linearity-of-each-layer* property as its target spec.
+plausibly empty-beyond-the-wall, reducible to already-carried objects, legal, and quasipoly-settled meanwhile.**
+
+**✅ The extraction's structural core (L1) LANDED (2026-07-24, `ChainDescent/GaugeLayer.lean`, axiom-clean, in the
+gate).** Scoped into four bricks: **L1** the gauge's derived tower **decomposes coordinatewise** —
+`derivedSeries (ι → G₀) k = ∏ᵢ derivedSeries G₀ k` (`derivedSeries_pi_const`, via Mathlib `commutator_pi_pi_of_finite`;
+`mem_derivedSeries_pi` the per-gadget membership form) = *each layer is a free module of rank `|gadgets|`*, so each
+`of_solvable_tower` step is a per-coordinate **linear** problem, not a `|G₀|^{|ι|}`-coset search (the structural reason
+`kerF2`'s one Gaussian pass generalizes up the whole tower). **Remaining:** **L2** the local layer
+`A_k = G₀⁽ᵏ⁾/G₀⁽ᵏ⁺¹⁾` abelian ⟹ product layer `= ι → A_k`, an `A_k`-module; **L3** per-layer Smith/Gaussian solve,
+`kerF2` the `k=0`/`ZMod 2` instance; **L4** (stays **CARRIED**, shared with `ForcingModel.bridge`) `Recover` produces
+the layers as explicit linear systems from the graph. L1 is the group-theoretic structure L2–L4 stand on.
 
 ---
 
