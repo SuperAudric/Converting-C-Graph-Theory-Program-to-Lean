@@ -76,9 +76,12 @@
 > the canonical column-ordered RREF `rrefCanon` — LANDED 2026-07-23** (`RigidRREF.lean`, axiom-clean, gate green:
 > `pivInv_rrefCanon`). **✅ sub-brick (B) — RREF-CANONICITY — COMPLETE 2026-07-24** (`rrefCanon_eq_of_span_eq`: same
 > row space ⟹ equal canonical RREF, via kernel triviality + leading-position + reconstruction ⟹ `pivotCols_eq` +
-> `pivotRow_eq`; all axiom-clean). **Next:** (C) the χ-frame (RREF is equivariant only per an iso-invariant column
-> order — supply it from χ via `rankInv_transport`) → (D) read the labelling ⟹ `GenEquivariant`+`hemit` → P3-ring →
-> R6(c)/P4. Residue = `¬HandledS` at non-linear rigid; `hSmallAutThin` = separate (Route-C, W1).
+> `pivotRow_eq`; all axiom-clean). **✅ (C) χ-FRAME — LANDED 2026-07-24** (`RigidFrame.lean`: RREF is NOT
+> column-equivariant, so order columns by iso-invariant χ-rank ⟹ the framed system is LITERALLY σ-invariant
+> [`leafMatrix` pattern, via `RigidSeal.rankInv_transport`]; `framedRREF_transport` ⟹ `gen`'s `GenEquivariant`
+> reduces to the extraction transporting as `H ↦ H.map (transportRow σ)`, carried). **Next:** (D) read the labelling
+> ⟹ `GenEquivariant`+`hemit` → P3-ring → R6(c)/P4. Residue = `¬HandledS` at non-linear rigid; `hSmallAutThin` =
+> separate (Route-C, W1).
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -450,9 +453,20 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
           same row space have the **same pivot columns**. (B-cols) is complete.
       - **✅ (B-rows) pivot rows are intrinsic** — `pivotRow_eq` (direct from (B-kernel)); **✅ (B5)** assembled into
         `rrefCanon_eq_of_span_eq`. **(B) is closed.**
-      **▶ NEXT = (C) the χ-frame** — RREF is equivariant *only* per an iso-invariant column order (permuting columns
-      changes the pivot set). Supply the order from χ (via the existing `rankInv_transport`), so `rrefCanon`-under-χ
-      transports under σ. Then (D) read the labelling ⟹ `GenEquivariant` + `hemit`.
+    - **✅ (C) the χ-frame — LANDED 2026-07-24** (`ChainDescent/RigidFrame.lean`, axiom-clean). **★ Design finding:**
+      RREF is **NOT column-equivariant** — permuting columns changes which is leftmost, hence the pivot set
+      (`span{[1,1]}` pivots at position 0 either way, but that's a *different actual column*). So the order must come
+      from the iso-invariant **χ-rank** (`Colouring.vertexRank`/`rankInv`) — the `leafMatrix` pattern: reading a
+      vertex-indexed object in rank order is *literally* σ-invariant because `rankInv` transports
+      (`RigidSeal.rankInv_transport`). `frameRow`/`frameSys` read a row / system in χ-rank order;
+      `frameRow_transport`/`frameSys_transport` prove they are literally σ-invariant when the row transports as
+      `r ↦ r ∘ σ⁻¹` (`transportRow`); **`framedRREF_transport`** ⟹ the χ-framed `rrefCanon` is σ-invariant. This
+      **reduces `gen`'s `GenEquivariant` to the extraction transporting as `H ↦ H.map (transportRow σ)`** (a
+      P2/extraction property, carried) — the RREF/frame layer owes no further equivariance. `framedRREF_span_invariant`
+      (from B) = also a canonical function of the framed code.
+      **▶ NEXT = (D) read the labelling** — turn the χ-framed canonical RREF into the permutation `gen`, discharge
+      `GenEquivariant` (via `framedRREF_transport` + the carried extraction-transport) and `hemit` (no-flag on the
+      linear residue). P3-Sound's capstones then close the rigid `①`.
     - **(C) the χ-frame.** RREF is canonical **only per column order**, so it is *not* equivariant on raw indices
       (permuting columns changes the pivot set). The order must come from χ (iso-invariant — the existing
       `rankInv_transport`/`vertexRank_transport`). Compose (B) with the χ-order transport.
@@ -544,7 +558,7 @@ the two together, not as separate legs.
 | **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
 | **P3-Sound** | soundness is FREE (relabelling-emit) + `①` reduces to `GenEquivariant gen` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverSound.lean`) — `ptForm`/`colAut_of_ptForm_eq`/`emitLabel`/`ptSound_emitLabel`/`ptIsoInvariant_emitLabel` + capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` |
-| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **Remaining:** (C) χ-frame, (D) read the labelling ⟹ `GenEquivariant`+`hemit` |
+| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME LANDED** (`RigidFrame.lean`: `framedRREF_transport` — χ-rank column order ⟹ framed RREF σ-invariant; reduces GenEquivariant to carried extraction-transport). **Remaining:** (D) read the labelling ⟹ `GenEquivariant`+`hemit` |
 | **P3-ring** | `Z_{2^k}`/finite-abelian: ring-inference + finite-ring Smith + 2-adic tower | **not built** — heavy; ring-inference carried (`IR §11.13`). ⚠ Mathlib Smith = noncomputable/existence-only |
 | **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
 | **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |

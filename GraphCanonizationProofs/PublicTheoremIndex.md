@@ -4461,3 +4461,15 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RigidRREF.pivotCols_eq` | 461-477 | **★★★ (B-cols)**: two reduced-echelon systems with the same row space have the **same pivot columns** (each = the space's leading positions). The column half of RREF uniqueness. | — |
 | `RigidRREF.pivotRow_eq` | 485-521 | **★★ (B-rows)**: pivot rows are determined by the row space — for a shared pivot column, `xorRow ρ₁ ρ₂` is in the span and zero at every pivot, so kernel triviality gives `ρ₁ = ρ₂`. | — |
 | `RigidRREF.rrefCanon_eq_of_span_eq` | 523-559 | **★★★ (B5) RREF canonicity**: two uniform-length row lists with the same row space have equal `rrefCanon` — the executable RREF is a canonical form of the *subspace*, independent of the generating list. The crux of brick (B). | — |
+## ChainDescent/RigidFrame.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RigidFrame.transportRow` | 35-38 | A row over the vertices of `adj` transports to `relabelAdj σ adj` by precomposition with `σ⁻¹` (the F₂/vertex-column analog of `transportColouring`). | Definition |
+| `RigidFrame.frameRow` | 40-43 | **The χ-framed row**: read `r`'s F₂ entries in χ-**rank** order (columns = vertices ordered by iso-invariant rank). `leafMatrix`'s idea for one F₂ vector. | Definition |
+| `RigidFrame.length_frameRow` | 45-46 | `(frameRow χ r).length = n`. | `@[simp]` |
+| `RigidFrame.frameSys` | 48-50 | The χ-framed system — every extracted row read in χ-rank order. | Definition |
+| `RigidFrame.frameRow_transport` | 52-61 | **★ The framed row is literally σ-invariant**: reading `r ∘ σ⁻¹` in the transported χ-rank order = reading `r` in the original, via `RigidSeal.rankInv_transport`. | — |
+| `RigidFrame.frameSys_transport` | 63-70 | The whole framed system is literally σ-invariant when each row transports as `transportRow σ`. | — |
+| `RigidFrame.framedRREF_transport` | 72-81 | **★★ (C) the χ-framed RREF transports**: χ-rank column order makes the framed system literally σ-invariant (NOT RREF column-equivariance, which is false), so its `rrefCanon` is σ-invariant — reduces `gen`'s `GenEquivariant` to the carried extraction-transport. | — |
+| `RigidFrame.framedRREF_span_invariant` | 83-92 | The framed RREF is also (from brick B) a canonical function of the framed code — robustness to how the extraction presents its generators. | — |
