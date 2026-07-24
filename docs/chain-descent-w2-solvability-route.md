@@ -62,7 +62,21 @@
 > external** — a Lean witness of an inhabited `HolonomyNontrivial` *is* a WL lower bound (flat ∧ ¬orbit = CFI /
 > multipede), carried per the standing evidence, not proved here. The finer structure (this holonomy is a *linear*
 > F₂/ring cocycle composing around cycles when the gauge is abelian) is **Tier B** and untouched. **Tier A spine
-> complete.** Next: Tier B — wire the holonomy to the recovered-system frame matroid / `forceSolvable`.
+> complete.**
+>
+> **✅ Γ SCOPED (2026-07-24, §4a).** Operative **Γ = C3 = the structurally-recovered gauge relation**, layered
+> **isolate (group-general) → solve (abelian=Smith built / solvable=coset-enum new)**. The `mp7` check refined this:
+> the gauge/base *isolation* (`Recover`) is group-general (`mp7` → `Z₂³`, not `Aut`=1344); only the *solve* is
+> abelian-in-Lean. Γ ≠ `Aut` (C1 dead); the extraction-free **C2 is deferred** (completeness ideal, blocked on
+> intrinsic fibre-isolation, not needed for the solvable threshold).
+>
+> **✅ Tier B step 1 (the bridge) LANDED (2026-07-24, `ChainDescent/GaugeBridge.lean`, axiom-clean, gate green 94
+> modules).** Abstract `GaugeContract` = the recovered gauge Γ (a group `carrier ≤ Sym V` whose orbits are the
+> local-flatness classes; `faithful` = the isolation-faithfulness `Recover` discharges, carried). `holonomy_iff_gauge`:
+> `HolonomyNontrivial u v ⟺ Γ-orbit u v ∧ ¬SameOrbit` — Tier A's holonomy connected to the group-carrying Γ.
+> `gaugeContractMax` proves the contract is **inhabited** (non-vacuity guard; ⚠ the max partition-stabilizer, NOT the
+> recovered gauge — solvability is asked of the recovered `carrier`). **Next: the abelian solve branch** (bridge Γ to
+> `RigidSolveF2`'s `ker H`) and/or the **solvable-branch coset-enum solver**; C3's `Recover` discharge of `faithful`.
 >
 > **What is DEAD and must not be re-walked.** The **matroid framework on commit-set closures** is closed
 > (`matroid.md:463-481`, §6/§8): neither the partition-based `cl` nor the TC-based `cl_prov` satisfies the exchange
@@ -182,6 +196,21 @@ fires are the residue* (`mixed-composition.md:399-402`, Lean `narrow_eq_branches
 All the open weight is one statement. It has three equivalent-looking faces; establishing their coincidence is
 itself part of the work, so treat them as *three attack angles on the same crux*, not as a proven equivalence.
 
+**Γ, and the two steps `mp7` forces apart.** The object all three faces range over is the **gauge group Γ** — the
+WL-invisible *local* symmetry, separated from the visible base symmetry `Aut/Γ` (definition scope: §4a; Γ **is not**
+`Aut(G)`). Getting Γ right is **two distinct steps**, which the Fano multipede `mp7` forces apart:
+- **Recover (isolation) — group-general.** Structurally extract the gauge *relation*, excluding the base. On `mp7`
+  this yields `Z₂³` (the [7,3,4] simplex code), **not** `|Aut| = 1344`; the non-solvable base `PGL(3,2)` never
+  enters the system. On S₃/D₄ it yields the genuine non-abelian relation. So isolation is **group-general**, and it
+  is what Faces A/B/C all attach to.
+- **Solve (canonize Γ) — the threshold split.** Abelian → Smith/`ker H` (built); solvable → coset-enumeration
+  (new); non-solvable → wall.
+
+⚠ **Correction to an earlier framing.** The recovered *F₂* system is the abelian shadow of the **solve** only — the
+**recover** / isolation is group-general (that is why C3 passes the `mp7` test where a naive `Aut`-based Γ returns
+1344). Faces A/B are the *abelian* solve; Face C is the *solvable* solve; all three sit on the same group-general
+recovered Γ.
+
 **Face A — c-of-k composition (`matroid.md:223-228`, §5.2 Algorithm 2).** The discrepancy chain composes triggers:
 if `p` depends on cells `D_i` with triggers `T_i`, is `p`'s ultimate trigger `c-of-k` over `⋃ T_i`? Recorded
 verbatim as **load-bearing and not obviously true — "may hold only in the binary case (threshold-of-thresholds =
@@ -221,6 +250,33 @@ re-walk a grave.
 
 ---
 
+## 4a. The gauge group Γ — definition scope (C3 operative, 2026-07-24)
+
+Γ is the WL-invisible local gauge whose **solvability** decides whether force fires — **not** `Aut(G)`. Three
+acceptance tests pin it: **(1)** abelian CFI → `Γ ≅ ker H`; **(2)** Schurian cell → `Γ = 1`; **(3)** `mp7` → `Z₂³`,
+**not** 1344. Test (3) is the *discriminating* one — it demands the non-solvable base `PGL(3,2)` be excluded;
+CFI/Schurian have trivial base and so cannot catch a bad isolation, `mp7` can (it is the reason isolation, not
+solve, is the crux of well-definedness).
+
+| candidate | against the tests | verdict |
+|---|---|---|
+| **C1: Γ = `Aut(G)`** | fails all (`mp7` → **1344**; Schurian `Aut` large) | **Γ ≠ Aut — dead** |
+| **C2: intrinsic fibre-fixing subgroup of `Aut`** (extraction-free) | pass *iff* the intrinsic **fibre structure** is defined — and that isolation is **open** | **deferred** — the completeness ideal (theorem-clean, no `Recover`), parked with its open fibre-isolation problem |
+| **C3: structurally-recovered gauge relation** (`Recover`'s `M`) | **passes all three now** — isolation is group-general (§4 recover step; `mp7` → `Z₂³`, S₃/D₄ → genuine non-abelian relation) | **OPERATIVE** |
+
+**Operative Γ = C3**, layered **isolate (group-general) → solve (abelian/solvable)** (§4). **Why not the naive
+intrinsic C2:** the gauge/base separation `mp7` stresses is done "for free" by the linear/structural algebra of
+`Recover` (kernel = gauge, base = symmetry *of* the code, not *in* it), whereas a purely-intrinsic Γ must define the
+fibre structure that realizes the same split — the genuinely open piece. **C2 is the completeness upgrade** — pursue
+only if intrinsic fibre isolation resolves; **not needed to reach the solvable threshold.**
+
+The one liability C3 carries: `Recover`'s faithfulness is *structural-but-not-yet-theorem* (recognition-free —
+stronger than the empirical F₂ `ForcingModel.bridge` — but still an extraction). That is exactly what the **bridge
+lemma** to Tier A's `HolonomyNontrivial` discharges (§5): the completeness-clean holonomy is the theorem-clean
+witness that the recovered isolation is faithful.
+
+---
+
 ## 5. The attack plan (three tiers)
 
 **Tier A — the localization spine (provable now; non-circular; standalone value).**
@@ -232,20 +288,24 @@ re-walk a grave.
    `sameOrbit_imp_locallyFlat` (equivariance, the real content) + `holonomyNontrivial_iff_diff_orbit`. Non-vacuity
    external (WL lower bound). **Tier A spine complete.** Remaining: mixed-cell = non-Schurian (a labelling of the
    locus, cheap) folds into Tier B.
-3. Core/decoration split as a theorem: decoration ⟹ zero independent holonomy ⟹ the core is `Recover`'s `M`.
+4. Core/decoration split as a theorem: decoration ⟹ zero independent holonomy ⟹ the core is `Recover`'s `M`.
    Re-derive `Recover` as a *statement about WL-stable graphs*, not just an algorithm.
 > ⚠ **Do NOT put "linear" in the base case.** The induction produces the *complex*; linearity/solvability is a
 > property of the *holonomy group*, proved separately (Tier B) or the whole thing is circular (assumes claim #2).
 
-**Tier B — the crux (`forceSolvable`), attacked by the three faces, NOT by WL-counting.**
-- (i) **Extraction + Albert/isotopy**: classify the *recovered relation* `M` (not counting-blind) — abelian? then
-  Smith seals it; solvable? then coset-enumeration seals it. The probe's `Probe_ExtractionDiscriminator` is the
-  template.
-- (ii) **Frame-matroid representability** (Face B): decide binary/field-representable ⟺ abelian; this is the
-  Tier-2 detector `matroid.md:463-481` §8.4 concluded "lives at the linear-oracle layer, not commit-closures."
-- (iii) **Route-(ii) visibility** (`remaining-work.md:734`): "no non-abelian fusion survives into a rigid medium" —
-  the negative-witness evidence is the S₃/D₄ tameness; a *proof* collapses the rigid residual.
-- **NOT** the cell-neighbour counting itself (§3(i): WL is blind to `Γ`'s structure).
+**Tier B — the crux (`forceSolvable`), on Γ = the recovered gauge relation (C3, §4a), split by the *solve*
+threshold. NOT by WL-counting** (§3(i): WL is blind to Γ's structure).
+- ✅ **Bridge (LANDED)** — `holonomy_iff_gauge` (`GaugeBridge.lean`): `HolonomyNontrivial u v ⟺ Γ-orbit u v ∧
+  ¬SameOrbit`, against the abstract `GaugeContract` (Γ's `faithful` carried, `Recover` discharges it);
+  `gaugeContractMax` = non-vacuity witness. The Tier-A→Tier-B connector.
+- **Isolation** — the group-general structural `Recover` (§4a); classify Γ by extraction + Albert/isotopy
+  (`Probe_ExtractionDiscriminator` is the template).
+- **Abelian branch** — Γ abelian → Smith/`ker H`: reuse the built `RigidSolveF2`/`RigidGen` machinery **unchanged**
+  (Faces A/B; `matroid.md:463-481` §8.4's Tier-2 detector = field-representability ⟺ abelian).
+- **Solvable branch** — Γ solvable → coset-enumeration / fixed-group CSP (Face C, the **new** solver; the delta
+  beyond abelian, e.g. S₃/D₄).
+- **else → the wall** (growing non-solvable Γ, no constructible witness). Completeness lever: route-(ii) "no
+  non-abelian fusion survives into a rigid medium" (`remaining-work.md:734`), evidenced by S₃/D₄ tameness.
 
 **Tier C — falsifier discipline (run in parallel; cheap first; per `feedback_validate_cheap_before_long_runs`).**
 - Test any "chain cannot collapse" claim against **Shrikhande** first — it killed *unconditional* block-visibility
@@ -266,6 +326,7 @@ re-walk a grave.
 | **Lichter CFI-over-`Z_{2^k}`** | "F₂ is the only obstruction" — FALSE | still **linear** (varying ring) | `rigid-seal.md:232`, `ir-blindspot-solver.md:1067` |
 | **S₃/D₄ group-CFI** (rigidified) | "rigid ⟹ abelian" — FALSE (rigid non-abelian exists) | **solvable ⟹ poly** (coset CSP) | `project_nonabelian_cfi_witness` memory |
 | **Dihedral / Heisenberg** (growing) | non-abelian structure stays accessible & tame with growth | **solvable ⟹ Babai–Luks poly** | ibid. §group-varying probe |
+| **`mp7` (Fano multipede)** | **the isolation test**: recover yields `Γ = Z₂³` (F₂ gauge), **not** `\|Aut\| = 1344` | base `PGL(3,2)` (non-solvable!) is **symmetry**, not gauge — excluded by `Recover` | `deepen-supply.md:120-124`, `00-START-HERE.md:138` |
 | **multipedes** (circulant≤72, rand-reg≤288) | canonize (discretize ≤7 levels) | rigid but not a flag at scale | `exhaustive-obstruction.md:420-427` |
 | **rigid expanders** | parity propagates fast (easy) | small instances don't flag | `exhaustive-obstruction.md:424-427` |
 | **Shrikhande** | kills *unconditional* block-visibility | a scheme fact, not a rigid core | `steers-archive.md:137-139` |
