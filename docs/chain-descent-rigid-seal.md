@@ -580,6 +580,18 @@ Both branches route through the same shared wall `hSmallAutThin`. **Framing cons
 seal handles (R2: CFI, `Z_{2^k}`, multipede) simultaneously discharges deepen's `Amenable` on that family — track
 the two together, not as separate legs.
 
+### 9.2 The `ForcingModel.bridge` coupling — this is ALSO the W2 completeness track's last obligation
+
+`ForcingModel.bridge` (P2, Layer B, carried — §10 ledger) is not only the rigid solver's graph↔F₂ recovery obligation;
+it is **the same object as the W2 completeness track's `L4`** (`chain-descent-w2-solvability-route.md` §3b + HANDOFF).
+The W2 track (the *completeness dual* — "is the rigid gauge forced solvable?") has now built, axiom-clean, the whole
+group-theoretic + linear-algebra reduction: a recovered **solvable** gauge reduces to a bounded tower of per-coordinate
+**linear** (Smith) solves (`GaugeLayer` L1–L3, `GaugeNonabelian`, `GaugeSolvable`), **modulo exactly one hypothesis —
+that `Recover` produces each derived layer as an explicit linear system from the graph.** That hypothesis is `L4`, and
+it is `ForcingModel.bridge`. **Consequence for this doc:** discharging `ForcingModel.bridge` (the P2/P3 build) does
+double duty — it also empties the W2 *solvable* corner, leaving only the shared non-linear/non-solvable wall (claim #3,
+§5). The two tracks meet at this one object; see the W2 doc's ▶▶ HANDOFF "LOGICAL STATE" note. **Track them together.**
+
 ---
 
 ## 10. Gap ledger

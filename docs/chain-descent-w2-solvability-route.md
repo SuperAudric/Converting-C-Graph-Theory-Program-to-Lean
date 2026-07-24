@@ -8,7 +8,7 @@
 > "linear" — §3). k-WL fails exactly on a non-Schurian rigid core; its difficulty is the Babai–Luks difficulty of
 > the recovered gauge group Γ (§4a). Legal framing = oracle-capability, never graph-classification (§1 guardrails).
 >
-> **BUILT (Lean, all axiom-clean `[propext, Classical.choice, Quot.sound]`, in `scripts/build.sh`, gate green — 99
+> **BUILT (Lean, all axiom-clean `[propext, Classical.choice, Quot.sound]`, in `scripts/build.sh`, gate green — 97
 > modules, ~190 s). Read in this dependency order:**
 > 1. **`ChainDescent/GaugeComplex.lean`** — Tier A spine. Piece 1 `refineStep_ne_iff_exists_count_ne` (+
 >    `count_signature_eq_card`, `nbhdClass`); piece 2 flatness `localExchange_of_equitable`
@@ -51,6 +51,19 @@
 > forcing bridge) = the same large cross-track effort L4 lives in. **Deferred:** C2 = extraction-free intrinsic Γ (blocked on fibre-isolation; §5a shows rigidity
 > makes it unnecessary for force). **Map:** §4a Γ-scope · §5 attack plan · §5a Recover scope · §6 falsifier ledger ·
 > §7 fresh-reader pointers. **Chronological landing notes follow below.**
+>
+> **▶▶ THE LOGICAL STATE — what this track has reduced the corner to (read this).** With **L1–L3 + `of_solvable_tower`**
+> built, the chain is complete as *structure*: a recovered **solvable** gauge `⟹` a bounded tower of per-coordinate
+> **linear** (Smith/Gaussian) solves — **modulo L4 alone** (the graph→linear-system extraction, `GaugeLayer` L4, shared
+> with `ForcingModel.bridge`). Consequently:
+> - **If L4 holds unconditionally, the entire *solvable* corner is poly ⟹ empty** (no residue beyond the wall). L1–L3
+>   already discharge everything between "solvable gauge" and "linear tower"; L4 is the *only* remaining hypothesis.
+> - The **only** residue that can then survive is the **non-solvable** rigid case = **claim #3 = the wall**
+>   (`rigid-seal.md` §5; 0 constructible witnesses) — a **separate** conjecture, **not** implied by L4.
+> - ⚠ **Precise form (don't overstate):** L4 ⟹ solvable-corner-empty is **one-directional** (a different poly route
+>   could also empty it); "non-solvable case empty" is the *wall*, tracked independently, not equivalent to L4. **Net:
+>   this track has reduced the §3a corner to exactly `{L4}` + the pre-existing wall — it opens no new residue.** That is
+>   the whole deliverable of the W2 completeness dual: the solvable side is now a single named extraction obligation.
 >
 > ---
 >
@@ -595,10 +608,16 @@ soundness dual.
 - `chain-descent-mixed-composition.md` (`:399-402`) — the complementary-firing-domain theorem (structure/symmetry
   fork); and `:54-59` the retracted "perfect key cannot exist" (the banned form).
 
-**The built W2 modules (this track):** `GaugeComplex` → `GaugeBridge` → `GaugeAbelian` → `GaugeSolvable` +
-`GaugeIsolation` — all axiom-clean, in the gate. **The read-order + one-line-each + what is proved vs carried is the
-HANDOFF block at the top of this doc's STATUS** — start there. What follows are the rigid-seal objects this track
-*connects to / carries*.
+**The built W2 modules (this track, 7):** `GaugeComplex` → `GaugeBridge` → `GaugeAbelian` → `GaugeSolvable` →
+`GaugeIsolation` (R-a) → `GaugeNonabelian` (R-c-nonabelian) → `GaugeLayer` (extraction L1–L3) — all axiom-clean, in the
+gate. **The read-order + one-line-each + what is proved vs carried + the ▶▶ LOGICAL STATE note is the HANDOFF block at
+the top of this doc's STATUS** — start there. What follows are the rigid-seal objects this track *connects to / carries*.
+
+**⚠ Theorem-index state (`PublicTheoremIndex.md`, refreshed 2026-07-24):** all 7 Gauge modules' declarations are now
+*indexed* (rows present, discoverable). `GaugeLayer` (the frontier, L1–L3) has full descriptions; the other 6 Gauge
+modules carry rows with **blank (`—`) descriptions** — a pending *description pass* (`scripts/GenerateTheoremIndexes.py`
++ `theorem-index-maintenance.md`), not a gap in the proofs. Full prose for those lives in the module docstrings + the
+HANDOFF read-order above.
 
 **Rigid-seal objects the crux reduces onto (downstream connection):**
 - `ChainDescent/RigidSolveF2.lean` — `IsRigidF2` (trivial kernel = rigid), `unique_solution_of_rigid`, rowspace-only

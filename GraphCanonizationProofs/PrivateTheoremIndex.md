@@ -416,3 +416,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `ForcingCircuits.addTwo_eq_zero` | 64-66 | — | — |
+## ChainDescent/GaugeLayer.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GaugeComplex.pi_univ_top` | 39-45 | — | — |

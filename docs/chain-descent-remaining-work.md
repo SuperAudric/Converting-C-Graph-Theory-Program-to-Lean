@@ -743,6 +743,18 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   cell-neighbour induction reframed onto the recovered gauge group; retargets the goal from *linear* (claim #2,
   abelian threshold — crossed by rigid non-abelian cores) to *solvable* (`forceSolvable`, the achievable
   poly-completeness threshold); crux = c-of-k composition / frame-matroid representability / Babai–Luks solvability.
+  **▶▶ SUBSTANTIALLY BUILT (2026-07-24, 7 `Gauge*` modules, axiom-clean, in `build.sh`; read that doc's ▶▶ HANDOFF
+  block):** Tier-A localization (`GaugeComplex`) + Tier-B reduction (`GaugeBridge`/`GaugeAbelian`/`GaugeSolvable`) +
+  C3-Recover R-a (`GaugeIsolation`) + R-c-nonabelian (`GaugeNonabelian`: recovered `Γ ≤ ι→G₀` solvable ⟹ reduces to
+  the abelian branch) + the **extraction bricks L1–L3** (`GaugeLayer`: the derived tower decomposes coordinatewise =
+  each layer a free module ⟹ per-coordinate LINEAR solve; `kerF2` is an F₂-subspace). **★ THE LUKS SHARPENING (doc
+  §3a):** recovered `Γ ≤ G₀^m ⟹ Γ ∈ Γ_{μ(G₀)}` ⟹ Luks GENUINE poly for bounded local `G₀` (all fixed constructions +
+  CFI/Lichter=`Γ₂`); the "plausibly poly" hedge is confined to a growing unbounded-cyclic-section solvable corner.
+  **★ THE FRONTIER (doc §3b + HANDOFF):** L1–L3 reduce the whole *solvable* corner to **one carried obligation `L4`**
+  (`Recover` produces each derived layer as an explicit linear system from the graph — **shared with
+  `ForcingModel.bridge`**, a cross-track object). **L4 unconditional ⟹ the solvable corner is empty**; the only
+  residue that can then survive is the **non-solvable** case = the wall (claim #3, W2/W3), tracked independently. So W2
+  completeness has collapsed to `{L4}` + the pre-existing wall — no new residue.
 - **W3 — where they meet:** `hSmallAutThin` / rigid-GI. Emptied iff W1 and W2 both close. The endgame-spec's
   "two seals, one wall" frame remains the correct *map*; under §0 the wall is a **target**, not a fixture.
 

@@ -121,8 +121,13 @@ That makes the problem concrete even though the general statement is GI-adjacent
     analog of Lichter's ring-varying CFI: across a growing family (dihedral D₃…D₈, orders 6→16, + Heisenberg `H(F₃)`,
     order 27) the extraction recovers the genuine relation at every size, it stays non-abelian, and `b_WL` stays
     non-abelian-blind and tame — **no wall in extraction or WL-depth even as the group grows.** Since dihedral and
-    Heisenberg are **solvable**, Babai–Luks string-canonization is poly, so the family is plausibly poly end-to-end. The
-    genuine non-poly-wall candidate therefore **narrows to growing NON-SOLVABLE groups** (Aₙ / simple), which the full
+    Heisenberg are **solvable**, Babai–Luks string-canonization is poly, so the family is plausibly poly end-to-end.
+    **⚠ SHARPENED 2026-07-24 (`chain-descent-w2-solvability-route.md` §3a, the Luks sharpening):** this "solvable ⟹
+    Babai–Luks poly" is loose — for each *fixed* group it is a **genuine `Γ_d` theorem** (the recovered gauge
+    `Γ ≤ G₀^m ⟹ Γ ∈ Γ_{μ(G₀)}`, `μ(G₀)` constant); the "plausibly poly" (non-classical) survives **only** in the
+    *growing* unbounded-cyclic-section limit (growing `D_p`/`H(𝔽_p)`), a strictly narrower corner. And W2 §3b's L1–L3
+    reduce even that corner to a single carried extraction obligation (`L4` = `ForcingModel.bridge`).
+    The genuine non-poly-wall candidate therefore **narrows to growing NON-SOLVABLE groups** (Aₙ / simple), which the full
     CFI cannot feasibly probe (gadget = `|Γ|^{d-1}` vertices) — so it is now a *theory* question (is CFI over growing
     simple groups super-poly?), with no constructible probe witness. Practical net: the rigid seal's "or non-linear"
     escape covers "linear/CSP over a fixed-or-growing **solvable** group"; only growing non-solvable groups remain a

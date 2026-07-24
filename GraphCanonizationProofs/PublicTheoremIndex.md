@@ -4484,3 +4484,96 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RigidGen.emit_isSome_genOfRef` | 82-88 | The emit is `some` iff the refinement is discrete — so `hemit` reduces to `ref` discretizing on the residue (carried per-family). | — |
 | `RigidGen.keyEquivariant_compKey_genOfRef` | 90-95 | **★★★ (D) capstone**: the whole `compKey` `①` obligation closes on `RefEquivariant ref` alone (composed with P3-Sound). | — |
 | `RigidGen.nodeResolved_compKey_genOfRef` | 97-107 | **★★★ (D) firing capstone**: `NodeResolved` on a rigid cell ⟸ `ref` discrete (⟹ `hemit`) + rigidity — soundness free. Closes the rigid force branch. | — |
+## ChainDescent/GaugeAbelian.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GaugeComplex.isSolvable_of_carrier_comm` | 36-42 | — | — |
+| `GaugeComplex.dotP_add_right` | 49-51 | — | — |
+| `GaugeComplex.kerF2` | 53-64 | — | Definition |
+| `GaugeComplex.mem_kerF2` | 66-67 | — | `@[simp]` |
+| `GaugeComplex.isRigidF2_iff_kerF2_eq_bot` | 69-74 | — | — |
+| `GaugeComplex.rigid_unique_solve` | 76-87 | — | — |
+
+## ChainDescent/GaugeBridge.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GaugeComplex.GaugeContract` | 35-42 | — | Structure |
+| `GaugeComplex.GaugeContract.Equiv` | 44-47 | — | Definition |
+| `GaugeComplex.holonomy_iff_gauge` | 49-57 | — | — |
+| `GaugeComplex.locallyFlat_of_gauge` | 59-63 | — | — |
+| `GaugeComplex.gaugeMax` | 67-80 | — | Definition |
+| `GaugeComplex.mem_gaugeMax` | 82-86 | — | `@[simp]` |
+| `GaugeComplex.gaugeContractMax` | 88-110 | — | Definition |
+
+## ChainDescent/GaugeComplex.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GaugeComplex.refineStep_ne_iff_exists_count_ne` | 40-58 | — | — |
+| `GaugeComplex.nbhdClass` | 60-66 | — | Definition |
+| `GaugeComplex.count_signature_eq_card` | 68-78 | — | — |
+| `GaugeComplex.refineStep_eq_iff_forall_card_eq` | 95-107 | — | — |
+| `GaugeComplex.localExchange_of_refineStep_eq` | 109-118 | — | — |
+| `GaugeComplex.localExchange_of_equitable` | 120-131 | — | — |
+| `GaugeComplex.IsColAut` | 157-161 | — | Definition |
+| `GaugeComplex.signature_eq_of_colAut` | 163-186 | — | — |
+| `GaugeComplex.refineStep_eq_of_colAut` | 188-192 | — | — |
+| `GaugeComplex.SameOrbit` | 194-196 | — | Definition |
+| `GaugeComplex.LocallyFlat` | 198-201 | — | Definition |
+| `GaugeComplex.locallyFlat_iff` | 203-218 | — | — |
+| `GaugeComplex.sameOrbit_imp_locallyFlat` | 220-229 | — | — |
+| `GaugeComplex.HolonomyNontrivial` | 231-236 | — | Definition |
+| `GaugeComplex.holonomyNontrivial_iff_diff_orbit` | 238-245 | — | — |
+| `GaugeComplex.not_sameOrbit_of_holonomyNontrivial` | 247-258 | — | — |
+
+## ChainDescent/GaugeIsolation.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GaugeComplex.isColAut_one` | 31-34 | — | — |
+| `GaugeComplex.IsRigid` | 36-42 | — | Definition |
+| `GaugeComplex.sameOrbit_iff_eq_of_rigid` | 44-52 | — | — |
+| `GaugeComplex.holonomyNontrivial_iff_flat_ne_of_rigid` | 54-61 | — | — |
+| `GaugeComplex.CarriesGauge` | 63-66 | — | Definition |
+| `GaugeComplex.carriesGauge_iff_exists_holonomy_of_rigid` | 68-83 | — | — |
+
+## ChainDescent/GaugeLayer.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GaugeComplex.derivedSeries_pi_const` | 47-57 | **W2 R-c extraction L1.** The gauge's derived tower decomposes coordinatewise: `derivedSeries (ι→G₀) k = ∏ᵢ derivedSeries G₀ k` (finite `ι`), via Mathlib `commutator_pi_pi_of_finite`. = each layer a free module of rank `\|gadgets\|` ⟹ each `of_solvable_tower` step is a per-coordinate LINEAR problem, not a coset search. §3b. | — |
+| `GaugeComplex.mem_derivedSeries_pi` | 59-64 | L1 membership form: `x ∈ derivedSeries (ι→G₀) k ↔ ∀ i, x i ∈ derivedSeries G₀ k` (the per-gadget characterization the layer solve consumes). | — |
+| `GaugeComplex.map_eval_layer` | 66-72 | The k-th product-gauge layer maps onto each gadget's local layer `derivedSeries G₀ k` (restates `map_eval_derivedSeries` for the layer narrative). | — |
+| `GaugeComplex.commutator_mem_derivedSeries_succ` | 76-84 | **L2 — the layer is abelian.** `a b ∈ derivedSeries G k ⟹ ⁅a,b⁆ ∈ derivedSeries G (k+1)`: `D_k` commutes modulo `D_{k+1}`, so `A_k = D_k/D_{k+1}` is abelian (what makes the per-layer solve linear). | — |
+| `GaugeComplex.layerCoeff` | 86-91 | The abelian layer coefficient group `A_k = D_k/D_{k+1}` = `Abelianization ↥(derivedSeries G k)` (a `CommGroup`); the product layer is the free module `ι → A_k`. | `abbrev` |
+| `GaugeComplex.derivedProj` | 93-99 | Coordinatewise projection `↥(derivedSeries (ι→G₀) k) →* ↥(derivedSeries G₀ k)`, `x ↦ x i` (lands by L1). | Definition |
+| `GaugeComplex.derivedProj_surjective` | 101-104 | `derivedProj k i` is surjective (constant tuple `fun _ => g` witnesses). | — |
+| `GaugeComplex.layerProj` | 106-112 | The `i`-th coordinate map on layer coefficients `A_k(ι→G₀) →* A_k(G₀)` (abelianizes `derivedProj`). | Definition |
+| `GaugeComplex.layerProj_surjective` | 114-120 | **L2 — the product layer surjects coordinatewise onto each local `A_k`** — the `ι → A_k` free-module coordinate structure L3's linear solve consumes. | — |
+| `GaugeComplex.dotP_smul_right` | 126-130 | The F₂ pairing is linear in the scalar on the assignment side: `dotP r (c • x) = c * dotP r x`. | — |
+| `GaugeComplex.kerF2_smul_mem` | 132-138 | **L3 — the abelian gauge is `ZMod 2`-scalar-closed:** `kerF2 H` is a subspace, so the layer solve is linear. | — |
+| `GaugeComplex.kerF2Submodule` | 140-151 | **L3 — `kerF2` as an F₂-subspace.** The abelian branch's gauge upgraded from `AddSubgroup` to a genuine `Submodule (ZMod 2) (ι→ZMod 2)` — the concrete `A_0 = ZMod 2` field instance of "each layer is an `A_k`-submodule of `ι → A_k`, solved by Smith/Gaussian." | Definition |
+| `GaugeComplex.mem_kerF2Submodule` | 153-166 | `kerF2Submodule H` has exactly the `kerF2 H` carrier — same gauge, now recorded as linear. | `@[simp]` |
+
+## ChainDescent/GaugeNonabelian.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GaugeComplex.isSolvable_pi` | 46-64 | — | Instance |
+| `GaugeComplex.isSolvable_recoveredGauge` | 66-70 | — | — |
+| `GaugeComplex.map_eval_derivedSeries` | 72-78 | — | — |
+| `GaugeComplex.isSolvable_extension` | 82-89 | — | — |
+| `GaugeComplex.recoveredGauge_reduces_to_abelian` | 93-102 | — | — |
+| `GaugeComplex.isSolvable_gaugeCarrier` | 104-110 | — | — |
+| `GaugeComplex.isSolvable_alt3` | 114-121 | — | Instance |
+| `GaugeComplex.isSolvable_perm3` | 123-128 | — | Instance |
+| `GaugeComplex.perm3_not_comm` | 130-145 | — | — |
+
+## ChainDescent/GaugeSolvable.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `GaugeComplex.of_solvable_tower` | 51-74 | — | — |
+| `GaugeComplex.of_solvable_abelian_base` | 76-88 | — | — |

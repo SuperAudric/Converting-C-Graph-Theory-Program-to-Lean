@@ -145,9 +145,13 @@ close it — is set out in
 > was the earlier C3b plan, now SUPERSEDED by the deepen supply; the C3b state is the CURRENT-STATE block just
 > below + the tracker's "▶ CURRENT FRONTIER"), then T1 per-family localisation, F3b Smith/CRT, the W1 recovery
 > poly program, and the W2 wall — in that order (remaining-work §2).
-> **▶ W2 now has a dedicated, partly-BUILT track: `docs/chain-descent-w2-solvability-route.md`** (retargets the wall
-> from "linear" to *solvable* `Γ`; Tier-A localization + Tier-B reduction + C3-Recover R-a landed, 5 `Gauge*.lean`
-> modules, axiom-clean, in `build.sh`). **Read that doc's ▶▶ HANDOFF block (top of STATUS) to pick it up.**
+> **▶ W2 now has a dedicated, substantially-BUILT track: `docs/chain-descent-w2-solvability-route.md`** (retargets the
+> wall from "linear" to *solvable* `Γ`; Tier-A localization + Tier-B reduction + C3-Recover R-a + R-c-nonabelian + the
+> extraction bricks L1–L3 landed, **7 `Gauge*.lean` modules**, axiom-clean, in `build.sh`). ★ The **Luks sharpening**
+> (§3a) makes Luks-poly a genuine theorem for bounded local `G₀`; L1–L3 (§3b) reduce the whole *solvable* corner to
+> **one carried obligation L4** (`Recover` → explicit per-layer linear systems, shared with `ForcingModel.bridge`) —
+> **L4 unconditional ⟹ solvable corner empty**, leaving only the non-solvable wall. **Read that doc's ▶▶ HANDOFF block
+> (top of STATUS) to pick it up.**
 > **✅ C3b LANDED (tranche 1) 2026-07-20 — `ChainDescent/DeepenSupply.lean` `deepenSupply`, in `build.sh`.**
 > The constructor for **base** symmetry — what survives after `kernelSupply` certifies the gauge, and what no
 > propagation-shaped supply reaches (girth 6 ⟹ a seed forces 1 vertex of 42, at any number of seeds). Ported
