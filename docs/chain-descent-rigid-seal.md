@@ -270,9 +270,11 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 
 ## 7. The Lean gap — what IS and is NOT built
 
-> **▶ UPDATED 2026-07-23 — the whole Algorithm-R scaffold landed.** The seam (R0a/R0b/`compKey`) and the solver's
-> *reduction* layers (P1, P3-I, P3-Sound, P2, P3-F₂ core) are all built and axiom-clean. What remains is the
-> concrete poly `gen` and the carried model obligations. The full ledger is §10; the sub-brick plan is §8.2.
+> **▶ UPDATED 2026-07-24 — the whole Algorithm-R scaffold AND the `gen`-labelling reduction chain (A)–(D) landed.**
+> The seam (R0a/R0b/`compKey`), the solver's *reduction* layers (P1, P3-I, P3-Sound, P2, P3-F₂ core), and the full
+> `gen` chain (A canonical RREF, B RREF-canonicity, C χ-frame, D read-labelling) are all built and axiom-clean. What
+> remains is the concrete `ref` (extraction wiring) + P3-ring + P4, and the carried model obligations. The full
+> ledger is §10; the sub-brick plan is §8.2.
 
 **Built (axiom-clean, in `build.sh`):**
 - **The seam** — `leafColKey` + `compKey` (`RigidSeal.lean`): force separates non-aut pairs on the discretizing
@@ -282,6 +284,13 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 - **P3-Sound** `RigidSolverSound.lean` — soundness FREE; the whole `①` reduces to one canonical labelling `gen`.
 - **P2** `ForcingModel.lean` — graph↔F₂ forcing-model bridge + transport of P1 to the graph level.
 - **P3-F₂ core** `RigidSolveF2.lean` — the F₂ rigid-solve determinacy (`unique_solution_of_rigid`).
+- **`gen` chain (A)–(D)** — `RigidRREF.lean` (A `rrefCanon`/`pivInv_rrefCanon` + B `rrefCanon_eq_of_span_eq`: the
+  executable F₂ RREF is a canonical function of the row *subspace*, via kernel triviality + leading-position +
+  reconstruction ⟹ `pivotCols_eq`/`pivotRow_eq`); `RigidFrame.lean` (C `framedRREF_transport`: χ-rank column order
+  makes the framed RREF σ-invariant — RREF is *not* column-equivariant); `RigidGen.lean` (D
+  `genEquivariant_genOfRef` + capstones `keyEquivariant_compKey_genOfRef`/`nodeResolved_compKey_genOfRef`: the
+  labelling `genOfRef ref` = `rankPerm` of the solve-refined colouring closes `compKey`'s `①`/firing on
+  `RefEquivariant ref` + `ref`-discrete). **⟹ rigid linear `①` fully reduced to the carried `ref`.**
 
 **NOT built:**
 - **The concrete `ref` (`refineByFrame`)** — wire P2's extraction (`gForce`/`encodeFreeFast`) into the χ-framed

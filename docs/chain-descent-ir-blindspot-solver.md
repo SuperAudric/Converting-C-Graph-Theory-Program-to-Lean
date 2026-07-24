@@ -1,5 +1,12 @@
 # The IR-blind-spot solver — canonizing the rigid residue in polynomial time
 
+> **⚠⚠ BUILD-STATE REDIRECT (2026-07-24): the "NOTHING is built yet" banner below is STALE for the Lean build.**
+> The whole Algorithm-R Lean scaffold (seam R0a/R0b/`compKey` + reduction layers P1/P3-I/P3-Sound/P2/P3-F₂ core) AND
+> the full `gen`-labelling reduction chain (A)–(D) are now built and axiom-clean — authoritative build state =
+> [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) STATUS + §7 + §8.2 + §10. This §11 doc remains the
+> authoritative **design/roadmap** (the engine, the ring design §11.13, the obstruction classification §11.11/§11.14);
+> read it for the math, not the build state.
+>
 > # ▶▶ ⚠ STATUS 2026-07-14 — §11.12's Lean witness is a **`Force.Key`**, and NOTHING is built yet
 >
 > The rigid solver no longer enters as a `phase2` function. It enters as a **`Force.Key`** — a vertex invariant the
