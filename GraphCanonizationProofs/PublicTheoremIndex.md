@@ -4473,3 +4473,14 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RigidFrame.frameSys_transport` | 63-70 | The whole framed system is literally σ-invariant when each row transports as `transportRow σ`. | — |
 | `RigidFrame.framedRREF_transport` | 72-81 | **★★ (C) the χ-framed RREF transports**: χ-rank column order makes the framed system literally σ-invariant (NOT RREF column-equivariance, which is false), so its `rrefCanon` is σ-invariant — reduces `gen`'s `GenEquivariant` to the carried extraction-transport. | — |
 | `RigidFrame.framedRREF_span_invariant` | 83-92 | The framed RREF is also (from brick B) a canonical function of the framed code — robustness to how the extraction presents its generators. | — |
+## ChainDescent/RigidGen.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RigidGen.RefEquivariant` | 44-47 | The refinement transports: refining the σ-relabelled graph = the σ-transport of the refinement. | Definition |
+| `RigidGen.genOfRef` | 49-53 | **`gen` from a refinement**: `rankPerm` of χ refined by the solve (`ref adj χ`) when discrete, else flag; ignores the pin `v`. | Definition, `noncomputable` |
+| `RigidGen.rankPerm_transport` | 55-65 | `rankPerm (transportColouring σ χ) = rankPerm χ * σ⁻¹` — the `GenEquivariant` shape, from `vertexRank_transport`. | — |
+| `RigidGen.genEquivariant_genOfRef` | 67-80 | **★★ (D) the labelling read is equivariant**: `GenEquivariant (genOfRef ref)` ⟸ `RefEquivariant ref` *alone* — the rigid `①`'s equivariance reduces to the refinement transporting. | — |
+| `RigidGen.emit_isSome_genOfRef` | 82-88 | The emit is `some` iff the refinement is discrete — so `hemit` reduces to `ref` discretizing on the residue (carried per-family). | — |
+| `RigidGen.keyEquivariant_compKey_genOfRef` | 90-95 | **★★★ (D) capstone**: the whole `compKey` `①` obligation closes on `RefEquivariant ref` alone (composed with P3-Sound). | — |
+| `RigidGen.nodeResolved_compKey_genOfRef` | 97-107 | **★★★ (D) firing capstone**: `NodeResolved` on a rigid cell ⟸ `ref` discrete (⟹ `hemit`) + rigidity — soundness free. Closes the rigid force branch. | — |

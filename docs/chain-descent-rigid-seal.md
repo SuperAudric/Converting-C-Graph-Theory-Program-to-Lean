@@ -79,9 +79,14 @@
 > `pivotRow_eq`; all axiom-clean). **✅ (C) χ-FRAME — LANDED 2026-07-24** (`RigidFrame.lean`: RREF is NOT
 > column-equivariant, so order columns by iso-invariant χ-rank ⟹ the framed system is LITERALLY σ-invariant
 > [`leafMatrix` pattern, via `RigidSeal.rankInv_transport`]; `framedRREF_transport` ⟹ `gen`'s `GenEquivariant`
-> reduces to the extraction transporting as `H ↦ H.map (transportRow σ)`, carried). **Next:** (D) read the labelling
-> ⟹ `GenEquivariant`+`hemit` → P3-ring → R6(c)/P4. Residue = `¬HandledS` at non-linear rigid; `hSmallAutThin` =
-> separate (Route-C, W1).
+> reduces to the extraction transporting as `H ↦ H.map (transportRow σ)`, carried). **✅ (D) READ-LABELLING — LANDED
+> 2026-07-24** (`RigidGen.lean`: `genOfRef ref` = `rankPerm` of the solve-refined colouring; `rankPerm_transport` ⟹
+> `genEquivariant_genOfRef` (`GenEquivariant ⟸ RefEquivariant ref`); capstones `keyEquivariant_compKey_genOfRef` /
+> `nodeResolved_compKey_genOfRef` close `compKey`'s `①`/firing). **▶▶ THE (A)–(D) `gen`-REDUCTION CHAIN IS COMPLETE**
+> — the rigid **linear** `①` reduces to just: `RefEquivariant ref` (⟸ C ⟸ carried extraction-transport) + `ref`
+> discrete on residue (⟸ solve discretizes, per-family). **Next:** wire P2's extraction into the concrete `ref`
+> (`refineByFrame`), then P3-ring → R6(c)/P4. Residue = `¬HandledS` at non-linear rigid; `hSmallAutThin` = separate
+> (Route-C, W1).
 >
 > - **C# — DONE.** Algorithm R is built, wired (`EnableRigidSolver` default-ON), and validated: `Option2Solver.cs`
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
@@ -270,9 +275,13 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 - **P3-F₂ core** `RigidSolveF2.lean` — the F₂ rigid-solve determinacy (`unique_solution_of_rigid`).
 
 **NOT built:**
-- **The concrete poly `gen`** — an iso-invariant (`GenEquivariant`), total (`hemit`), polynomial canonical labelling
-  of the F₂-linear residue. This is graph-canonization of the linear code; the `②`/poly framing+emit. **The one
-  substantive next brick.**
+- **The concrete `ref` (`refineByFrame`)** — wire P2's extraction (`gForce`/`encodeFreeFast`) into the χ-framed
+  RREF solve to produce the refined colouring `ref adj χ`. **★ The `gen` REDUCTION CHAIN (A)–(D) IS BUILT AND
+  axiom-clean** (`RigidRREF`/`RigidFrame`/`RigidGen`): `genOfRef ref` is `GenEquivariant` given `RefEquivariant ref`
+  (⟸ (C) `framedRREF_transport` ⟸ carried extraction-transport), and the `compKey` `①`/firing capstones close on
+  `RefEquivariant` + `ref` discrete-on-residue. So what is NOT built is exactly the concrete `ref` = the extraction
+  wiring + the solve, **not** the (now-reduced) canonicity/equivariance/labelling layers. This is the graph-canonization
+  of the linear code, `②`/poly, still substantive but no longer an equivariance obligation.
 - **No Smith / ring solve** (`Z_{2^k}` = P3-ring); Mathlib's Smith is noncomputable/existence-only (see §8.2 gate).
 - **No `canonizesRigidResidue_or_flags`** (P4 capstone).
 - **Carried model obligations:** `ForcingModel.bridge` (Layer B, empirical/cited), `RecoversRowspace` (Layer-C
@@ -464,9 +473,19 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       **reduces `gen`'s `GenEquivariant` to the extraction transporting as `H ↦ H.map (transportRow σ)`** (a
       P2/extraction property, carried) — the RREF/frame layer owes no further equivariance. `framedRREF_span_invariant`
       (from B) = also a canonical function of the framed code.
-      **▶ NEXT = (D) read the labelling** — turn the χ-framed canonical RREF into the permutation `gen`, discharge
-      `GenEquivariant` (via `framedRREF_transport` + the carried extraction-transport) and `hemit` (no-flag on the
-      linear residue). P3-Sound's capstones then close the rigid `①`.
+    - **✅ (D) read the labelling — LANDED 2026-07-24** (`ChainDescent/RigidGen.lean`, axiom-clean). `genOfRef ref` =
+      `rankPerm` of χ **refined by the solve** (`ref adj χ`), when discrete; else flag. **Ignores the pin `v`** — a
+      whole-graph canonical labelling suffices, since `ptForm`'s pin component `(π v).val` already separates the
+      pinned vertex by its rank. **`rankPerm_transport`** (from `vertexRank_transport`): `rankPerm (transportColouring
+      σ χ) = rankPerm χ * σ⁻¹` — *exactly* `GenEquivariant`'s shape ⟹ **`genEquivariant_genOfRef`**: `GenEquivariant
+      (genOfRef ref)` ⟸ **`RefEquivariant ref`** (the refinement transports) *alone*. `emit_isSome_genOfRef`: `hemit`
+      ⟸ `ref` discrete. **Capstones `keyEquivariant_compKey_genOfRef` / `nodeResolved_compKey_genOfRef`** compose with
+      P3-Sound to close the whole `compKey` `①`/firing on `RefEquivariant` + `RefDiscrete`.
+      **▶▶ THE (A)–(D) `gen`-REDUCTION CHAIN IS COMPLETE.** The entire rigid **linear** `①` now reduces to exactly
+      two carried, per-family facts: (i) **`RefEquivariant ref`** ⟸ (C) `framedRREF_transport` ⟸ the extraction
+      transporting as `H ↦ H.map (transportRow σ)` (P2); (ii) **`ref` discrete on the residue** ⟸ the RREF solve
+      discretizing the gauge (per-family). The pure-F₂ / RREF / frame / labelling layers owe **nothing** further —
+      what remains is the concrete `ref` (wire P2's extraction into `refineByFrame`) and P3-ring.
     - **(C) the χ-frame.** RREF is canonical **only per column order**, so it is *not* equivariant on raw indices
       (permuting columns changes the pivot set). The order must come from χ (iso-invariant — the existing
       `rankInv_transport`/`vertexRank_transport`). Compose (B) with the χ-order transport.
@@ -558,7 +577,7 @@ the two together, not as separate legs.
 | **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
 | **P3-Sound** | soundness is FREE (relabelling-emit) + `①` reduces to `GenEquivariant gen` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverSound.lean`) — `ptForm`/`colAut_of_ptForm_eq`/`emitLabel`/`ptSound_emitLabel`/`ptIsoInvariant_emitLabel` + capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` |
-| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME LANDED** (`RigidFrame.lean`: `framedRREF_transport` — χ-rank column order ⟹ framed RREF σ-invariant; reduces GenEquivariant to carried extraction-transport). **Remaining:** (D) read the labelling ⟹ `GenEquivariant`+`hemit` |
+| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME + ✅ (D) READ-LABELLING LANDED** (`RigidFrame.lean` `framedRREF_transport` + `RigidGen.lean` `genEquivariant_genOfRef`/capstones `keyEquivariant_compKey_genOfRef`/`nodeResolved_compKey_genOfRef`). **▶ (A)–(D) CHAIN COMPLETE: rigid linear `①` reduces to `RefEquivariant ref` + `ref` discrete-on-residue, both carried.** Remaining: wire P2 extraction into concrete `ref`; P3-ring |
 | **P3-ring** | `Z_{2^k}`/finite-abelian: ring-inference + finite-ring Smith + 2-adic tower | **not built** — heavy; ring-inference carried (`IR §11.13`). ⚠ Mathlib Smith = noncomputable/existence-only |
 | **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
 | **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |
