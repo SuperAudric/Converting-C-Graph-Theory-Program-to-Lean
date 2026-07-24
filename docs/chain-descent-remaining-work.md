@@ -48,32 +48,38 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
-> **▶▶▶ UPDATE 2026-07-23 (latest) — THE ACTIVE TRACK IS THE RIGID SEAL; the whole Algorithm-R Lean scaffold LANDED.**
+> **▶▶▶ UPDATE 2026-07-24 (latest) — RIGID SEAL IS THE ACTIVE TRACK; the Algorithm-R scaffold AND the full
+> `gen`-reduction chain (A)–(D) are LANDED (axiom-clean, gate green 92 modules).**
 > **Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (STATUS + §8.1/§8.2 + §10 ledger).**
 > The consume side is closed modulo `{Amenable}` (track A, below), and `Amenable`-violation ⟺ `RigidObstructionAt`
-> = the rigid side's job — so the rigid seal is the frontier. **The following all LANDED, axiom-clean, full gate green
-> (89 modules):**
-> - **R0a/R0b + `compKey`** (`RigidSeal.lean`): the force key `leafColKey` separates non-aut pairs on the DISCRETIZING
->   regime; the composite `compKey sk` = `leafColKey` (disc) ∘ solver key `sk` (non-disc rigid) carries the sole
->   obligation `SolverSeparates` — a SOLVER property, dischargeable by the rigid solver we build (NOT an SRG cite).
-> - **P1** (`ForcingCircuits.lean`): F₂ extraction-soundness (`forced_certificate`). **P3-I** (`RigidSolverInterface.lean`):
->   reduce compKey's obligations to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound`. **P3-Sound**
->   (`RigidSolverSound.lean`): **soundness is FREE** (`emitLabel`/`ptSound_emitLabel`), and the whole rigid `①`
->   collapses to ONE object — a poly total equivariant canonical labelling `gen` (capstones
->   `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel`). **P2** (`ForcingModel.lean`): graph↔F₂
->   forcing-model bridge + the transport of P1 to graph level. **P3-F₂ core** (`RigidSolveF2.lean`): the F₂
->   rigid-solve determinacy (`unique_solution_of_rigid` — rigid ⟹ unique solution).
+> = the rigid side's job — so the rigid seal is the frontier. **Landed:**
+> - **Scaffold:** **R0a/R0b + `compKey`** (`RigidSeal.lean`, force key `leafColKey` ∘ solver key `sk`, sole carried
+>   obligation `SolverSeparates` = a SOLVER property, NOT an SRG cite); **P1** (`ForcingCircuits.lean`,
+>   extraction-soundness `forced_certificate`); **P3-I** (`RigidSolverInterface.lean`, reduce compKey's obligations to
+>   the pointed solver contract); **P3-Sound** (`RigidSolverSound.lean`, soundness FREE ⟹ the whole rigid `①`
+>   collapses to ONE object = a poly total equivariant labelling `gen`); **P2** (`ForcingModel.lean`, graph↔F₂ bridge
+>   + P1-transport); **P3-F₂ core** (`RigidSolveF2.lean`, `unique_solution_of_rigid`).
+> - **★ The `gen` chain (A)–(D), NEW 2026-07-24 — the rigid LINEAR `①` is now FULLY REDUCED:** **(A)+(B)**
+>   `RigidRREF.lean` — the executable F₂ RREF is a canonical function of the row *space* (`rrefCanon_eq_of_span_eq`,
+>   via kernel triviality + leading-position + reconstruction). **(C)** `RigidFrame.lean` — RREF is NOT
+>   column-equivariant, so ordering columns by iso-invariant χ-rank makes the framed system LITERALLY σ-invariant
+>   (`framedRREF_transport`). **(D)** `RigidGen.lean` — `genOfRef ref` = `rankPerm` of the solve-refined colouring;
+>   `genEquivariant_genOfRef` + capstones close the whole `compKey` `①`/firing on **`RefEquivariant ref`** alone. ⟹
+>   the rigid linear `①` reduces to just **(i) `RefEquivariant ref`** (⟸ (C) ⟸ the carried extraction-transport) +
+>   **(ii) `ref` discrete on the residue** (the solve discretizes, per-family). The pure-F₂/RREF/frame/labelling
+>   layers owe NOTHING further.
 > - **⚠⚠ RETRACTED (do-not-re-derive):** the earlier "`SmallAutThinAt` = `hSmallAutThin` at the seam" identity is
 >   **wrong**. `hSmallAutThin` is a STATIC `SchurianScheme` predicate (Route-C/symmetry artifact, false on consumable
 >   cases); the canonizer's real residue is the DYNAMIC `¬HandledS`; they join only via the unbuilt W1 bridge
->   (one-directional, NOT `↔`). See rigid-seal §8 correction.
-> - **Mixed-cell/fusion SETTLED:** the "Progress" predicate IS the already-built sel-rewrite
->   `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18); `¬HandledS` = the true mutual stall.
-> **NEXT (rigid-seal §8.2):** wire `RigidSolveF2`'s unique solve, under an iso-invariant frame, into an equivariant
-> poly `gen` (`GenEquivariant`+`hemit`, the `②`/poly framing+emit = graph-canonization of the linear code) → P3-ring
-> → R6(c)/P4. **Carried:** `ForcingModel.bridge` (Layer B), `RecoversRowspace` (Layer-C generation), `gForce`'s
-> `encodeFreeFast` realization, and `hSmallAutThin` (on the Route-C symmetry seals, via W1). ⚠ **User-flagged open Q**
-> (deferred): the rigid solver likely covers MORE than linear residues.
+>   (one-directional, NOT `↔`). **Mixed-cell/fusion SETTLED:** the "Progress" predicate IS the already-built
+>   sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18); `¬HandledS` = the true mutual stall.
+> **NEXT (rigid-seal §8.2):** build the concrete **`ref` = `refineByFrame`** — wire P2's extraction
+> (`gForce`/`encodeFreeFast`) into the χ-framed RREF solve to produce the solve-refined colouring `ref adj χ` — then
+> **P3-ring** (`Z_{2^k}`) → **R6(c)/P4**. This is the `②`/poly content (graph-canonization of the linear code); it is
+> NO LONGER an equivariance/canonicity obligation (those are discharged by (A)–(D)). **Carried:** `ForcingModel.bridge`
+> (Layer B), `RecoversRowspace` (Layer-C generation), `gForce`'s `encodeFreeFast` realization, and `hSmallAutThin` (on
+> the Route-C symmetry seals, via W1). ⚠ **User-flagged open Q** (deferred): the rigid solver likely covers MORE than
+> linear residues.
 >
 > **▶▶▶ UPDATE 2026-07-23 (later) — TRACK A LANDED: `AnchorFires` ELIMINATED, ①c modulo `{Amenable}` ONLY.**
 > `deepen` now discretizes the WHOLE graph, making `[DISC]`/gate/termination STRUCTURAL

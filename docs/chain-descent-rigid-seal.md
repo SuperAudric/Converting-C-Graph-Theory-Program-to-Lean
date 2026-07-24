@@ -16,12 +16,18 @@
 
 ---
 
-## ▶ STATUS (2026-07-23)
+## ▶ STATUS (2026-07-24)
 
-> **The C# rigid solver is COMPLETE, and the whole Algorithm-R Lean *scaffold* is now built (2026-07-23,
-> axiom-clean, gate green 89 modules): the seam (R0a/R0b/`compKey`) + the solver's reduction layers (P1, P3-I,
-> P3-Sound, P2, P3-F₂ core).** What remains is the **concrete poly canonical labelling `gen`** (the `②`/poly
-> framing+emit) plus the carried model obligations — see §8.2 and §10. The consume side also feeds a clean per-node
+> **The C# rigid solver is COMPLETE, and on the Lean side BOTH the Algorithm-R *scaffold* (seam R0a/R0b/`compKey` +
+> reduction layers P1/P3-I/P3-Sound/P2/P3-F₂ core) AND the full `gen`-labelling reduction chain (A)–(D) are now
+> built (axiom-clean, gate green 92 modules).** ▶▶ **HEADLINE FOR A FRESH READER: the rigid *linear* `①` is fully
+> reduced** — building the canonical labelling `gen` no longer carries any equivariance/canonicity obligation; it
+> reduces to exactly two carried, per-family facts: **(i) `RefEquivariant ref`** (the solve-refined colouring
+> transports — ⟸ (C) `framedRREF_transport` ⟸ the extraction transporting as `H ↦ H.map (transportRow σ)`, a P2
+> property) and **(ii) `ref` discrete on the residue** (the RREF solve discretizes the gauge, per-family). **What
+> remains to build:** the concrete `ref` = **`refineByFrame`** (wire P2's extraction `gForce`/`encodeFreeFast` into
+> the χ-framed RREF solve), then **P3-ring** (`Z_{2^k}`), then **P4** (`canonizesRigidResidue_or_flags`). The
+> module chain to read is `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D); see §8.2 and §10. The consume side also feeds a clean per-node
 > handoff object, and discharging its own `Amenable` hypothesis is a rigid-side deliverable (§9.1). **The
 > mixed-cell/fusion design question is SETTLED (§8.1):** the "Progress" completeness predicate IS the ALREADY-BUILT
 > sel-rewrite (`Select.HandledS`/`NodeResolved`/`selNode`, 2026-07-18) — a resolver-aware selector, single-path,
@@ -92,14 +98,17 @@
 >   (recover → solve → emit → verify, ring-general, **B1–B6 all landed, 50 tests**; `ir-blindspot-solver` STATUS +
 >   §11.12). It solves CFI / multipede / `Z_{2^k}` / general-arity / `s`-fold covers. This is the **reference spec**
 >   the Lean must certify — not a lift (there is no Smith-normal-form in Lean yet).
-> - **Lean — the whole Algorithm-R scaffold LANDED (2026-07-23), all axiom-clean, gate green (89 modules).** Built:
->   the typed contract `Phase2.Solver`/`Sound`/`IsoInvariant` (`Phase2Handoff.lean`) + `handoffBase_relabel`; the
->   force key **`leafColKey`** + the composite **`compKey`** (`RigidSeal.lean`, R0a/R0b/§9); **P1**
->   (`ForcingCircuits.lean`, extraction-soundness), **P3-I** (`RigidSolverInterface.lean`, the contract reduction),
->   **P3-Sound** (`RigidSolverSound.lean`, soundness-free + `①`⟹one `gen`), **P2** (`ForcingModel.lean`, graph↔F₂
->   bridge), **P3-F₂ core** (`RigidSolveF2.lean`, the rigid-solve determinacy). **Still NOT built:** the concrete poly
->   `gen` itself (the `②`/poly framing+emit), the ring-general Smith (`Z_{2^k}`), and the capstone
->   `canonizesRigidResidue_or_flags` (P4). ⚠ The `RRU` namespace in `Phase2Handoff.lean` (the *sequential* R(G)
+> - **Lean — the Algorithm-R scaffold + the `gen`-reduction chain LANDED, all axiom-clean, gate green (92 modules).**
+>   Built: the typed contract `Phase2.Solver`/`Sound`/`IsoInvariant` (`Phase2Handoff.lean`) + `handoffBase_relabel`;
+>   the force key **`leafColKey`** + composite **`compKey`** (`RigidSeal.lean`, R0a/R0b/§9); **P1**
+>   (`ForcingCircuits.lean`), **P3-I** (`RigidSolverInterface.lean`), **P3-Sound** (`RigidSolverSound.lean`), **P2**
+>   (`ForcingModel.lean`), **P3-F₂ core** (`RigidSolveF2.lean`); and the **`gen` chain (A)–(D)**: **(A)+(B)**
+>   `RigidRREF.lean` (canonical RREF `rrefCanon` + `rrefCanon_eq_of_span_eq` = RREF is a canonical fn of the
+>   subspace), **(C)** `RigidFrame.lean` (`framedRREF_transport` = χ-rank frame ⟹ σ-invariant), **(D)**
+>   `RigidGen.lean` (`genOfRef`/`genEquivariant_genOfRef` + capstones = the whole `compKey` `①` closes on
+>   `RefEquivariant ref`). **Still NOT built:** the concrete `ref` (`refineByFrame` = P2-extraction wiring +
+>   solve — the `②`/poly content, no longer an equivariance obligation), the ring-general Smith (`Z_{2^k}`), and the
+>   capstone `canonizesRigidResidue_or_flags` (P4). ⚠ The `RRU` namespace in `Phase2Handoff.lean` (the *sequential* R(G)
 >   handoff) is **RETIRED** for the interleaved model (`endgame §1a`) — do not build on it; the surviving seam is
 >   `Phase2.Solver`/`Sound`/`IsoInvariant`.
 > - **The handoff (NEW, from consume).** Consume (`deepenSupply`) now provably exposes, per node, a concrete
@@ -486,11 +495,19 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       transporting as `H ↦ H.map (transportRow σ)` (P2); (ii) **`ref` discrete on the residue** ⟸ the RREF solve
       discretizing the gauge (per-family). The pure-F₂ / RREF / frame / labelling layers owe **nothing** further —
       what remains is the concrete `ref` (wire P2's extraction into `refineByFrame`) and P3-ring.
-    - **(C) the χ-frame.** RREF is canonical **only per column order**, so it is *not* equivariant on raw indices
-      (permuting columns changes the pivot set). The order must come from χ (iso-invariant — the existing
-      `rankInv_transport`/`vertexRank_transport`). Compose (B) with the χ-order transport.
-    - **(D) read the labelling.** Turn the framed canonical RREF into the permutation `gen`; prove `GenEquivariant`
-      from (C) and `hemit` (totality on the linear residue). This closes P3-F₂'s `①`/`②` via P3-Sound's capstones.
+    - **✅ (C) the χ-frame — LANDED** (`RigidFrame.lean`, full detail in the sub-DAG above): RREF is canonical only
+      per column order and NOT column-equivariant, so the order comes from χ-rank (`RigidSeal.rankInv_transport`),
+      making the framed system literally σ-invariant (`framedRREF_transport`).
+    - **✅ (D) read the labelling — LANDED** (`RigidGen.lean`): `genOfRef ref` = `rankPerm` of the solve-refined
+      colouring; `genEquivariant_genOfRef` + capstones close P3-F₂'s `①` via P3-Sound on `RefEquivariant ref` alone.
+    - **▶ NEXT — the concrete `ref` = `refineByFrame` (the `②`/poly content).** Spec for a fresh reader: `ref adj χ`
+      = χ refined so each vertex gets the canonical F₂ value the χ-framed RREF solve assigns it. Build it as: extract
+      the F₂ system `H` from `(adj, χ)` via P2's `gForce`/`encodeFreeFast` (columns = vertices/rails) → `RigidFrame.frameSys χ H`
+      → `RigidRREF.rrefCanon` → read each vertex's solved bit(s) → append to χ. Then: **`RefEquivariant refineByFrame`**
+      follows from `RigidFrame.framedRREF_transport` once the extraction is shown to transport as `H ↦ H.map (transportRow σ)`
+      (a P2/extraction property, carried); **`refineByFrame` discrete on the residue** is that the solve assigns
+      distinct values to gauge-tied vertices (per-family). Feed both into `RigidGen`'s capstones — the rigid linear
+      `①` is then closed. No equivariance/canonicity work remains; this step is the extraction wiring + solve.
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**
@@ -519,10 +536,13 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
 dischargeable seam; carried object `SolverSeparates` = a solver property) → **✅ `P1`** (`ForcingCircuits`) →
 **✅ `P3-I`** (`RigidSolverInterface`, contract reduction) → **✅ `P3-Sound`** (`RigidSolverSound`, soundness free ⟹
 `①` = one `gen`) → **✅ `P2`** (`ForcingModel`, graph↔F₂ bridge) → **✅ `P3-F₂` core** (`RigidSolveF2`, solve
-determinacy) → **▶ NOW: the concrete poly `gen`** (wire the unique solve under an iso-invariant frame into
-`GenEquivariant`+`hemit` — the `②`/poly framing+emit) → `P3-ring` (`Z_{2^k}`) → `P4` (capstone
-`canonizesRigidResidue_or_flags`) + **R6(c)** (force-separates-every-exposed-rigid-pair, co-evolves with the `gen`
-build). `R2` (per-family, via `handledS_of_seal`/`handledS_of_sameOrbits`) and `R5` (tighten) run in parallel as
+determinacy) → **✅ the `gen`-reduction chain (A)–(D)**: **✅ (A)+(B)** `RigidRREF` (canonical RREF, canonical fn of
+the subspace) → **✅ (C)** `RigidFrame` (χ-rank frame ⟹ σ-invariant) → **✅ (D)** `RigidGen` (`genOfRef` +
+`genEquivariant_genOfRef` + `compKey` capstones ⟹ rigid `①` closes on `RefEquivariant ref`) → **▶ NOW: the concrete
+`ref` = `refineByFrame`** (wire P2's extraction `gForce`/`encodeFreeFast` into the χ-framed RREF solve; this is the
+`②`/poly content — NOT an equivariance/canonicity obligation, those are discharged) → `P3-ring` (`Z_{2^k}`) → `P4`
+(capstone `canonizesRigidResidue_or_flags`). **R6(c)** is ✅ discharged for the linear residue by (D)'s
+`nodeResolved_compKey_genOfRef` (modulo `ref` discrete). `R2` (per-family) and `R5` (tighten) run in parallel as
 residue-shrinkers. The C# `Option2Solver` is the reference throughout (validate Lean claims against its behaviour
 before proving).
 
@@ -572,7 +592,7 @@ the two together, not as separate legs.
 | **mixed-cell** | resolver-aware selector picks a resolvable cell (single-path) + `Reaches`-exposure; flag = true mutual stall | **✅ SETTLED 2026-07-23** (§8.1) — the "Progress" predicate IS the ALREADY-BUILT sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18). No object change, no new predicate, `②` single-path PRESERVED. |
 | **R0b** | leafColKey precursor (non-discretizing separation) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`) — `smallAutThinAt_of_all_discretize` + `rigidResolved_of_smallAutThin` + `nodeResolved_leafColKey_of_rigid`. ⚠ `SmallAutThinAt` is the leafColKey-specialization, **NOT the scheme wall `hSmallAutThin`** and **not dischargeable**; superseded by `compKey` |
 | **compKey** | dischargeable seam: force key = `leafColKey` (disc, tag `1::`) ∘ solver key `sk` (non-disc rigid, tag `0::`); carried obligation = `SolverSeparates` (a solver property, discharged by P3's `Phase2.Sound`) | **✅ LANDED 2026-07-23, axiom-clean** (§9, `RigidSeal.lean`) — `compKey` + `keyEquivariant_compKey` (given `KeyEquivariant sk`) + `SolverSeparates` + `rigidResolved_compKey` + `nodeResolved_compKey_of_rigid`. `sk`/`SolverSeparates` stubbed to P3. The force half of "consume-can't-fire ⟹ force-fires." |
-| **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **Remaining = (c) force-separates-every-exposed-rigid-pair** (`RigidObstructionAt`'s pair gets distinct `keyV` ⟹ its cell `cellNarrow`s to ≤1 ⟹ `NodeResolved`) — the substance, tied to rigid-resolver STRENGTH, co-evolves with P3/P4. Deepest ③/totality claim. |
+| **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **(c) force-separates-every-exposed-rigid-pair** — **✅ DISCHARGED for the LINEAR residue 2026-07-24** by the (D) firing capstone `RigidGen.nodeResolved_compKey_genOfRef` (`NodeResolved` on a rigid cell ⟸ `ref` discrete + rigidity, soundness free). What remains of (c) is exactly `ref` discretizing on the residue (the solve, carried per-family) and the non-linear residue (the wall). Deepest ③/totality claim. |
 | **P1** | extraction-soundness: forced ⟹ backed by a `rowspace(H)` codeword (support ⊆ `insert j S`) | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingCircuits.lean`, Mathlib-only standalone) — `Forced`/`cl_up` + `forced_certificate` (unconditional; the codeword not the indicator ⟹ no minimality needed) + `certificate_of_forced_notMem`/`certificate_mem_rowspace` |
 | **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
