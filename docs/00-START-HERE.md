@@ -145,6 +145,9 @@ close it — is set out in
 > was the earlier C3b plan, now SUPERSEDED by the deepen supply; the C3b state is the CURRENT-STATE block just
 > below + the tracker's "▶ CURRENT FRONTIER"), then T1 per-family localisation, F3b Smith/CRT, the W1 recovery
 > poly program, and the W2 wall — in that order (remaining-work §2).
+> **▶ W2 now has a dedicated, partly-BUILT track: `docs/chain-descent-w2-solvability-route.md`** (retargets the wall
+> from "linear" to *solvable* `Γ`; Tier-A localization + Tier-B reduction + C3-Recover R-a landed, 5 `Gauge*.lean`
+> modules, axiom-clean, in `build.sh`). **Read that doc's ▶▶ HANDOFF block (top of STATUS) to pick it up.**
 > **✅ C3b LANDED (tranche 1) 2026-07-20 — `ChainDescent/DeepenSupply.lean` `deepenSupply`, in `build.sh`.**
 > The constructor for **base** symmetry — what survives after `kernelSupply` certifies the gauge, and what no
 > propagation-shaped supply reaches (girth 6 ⟹ a seed forces 1 vertex of 42, at any number of seeds). Ported

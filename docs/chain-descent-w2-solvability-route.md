@@ -2,6 +2,44 @@
 
 ## ▶ STATUS (2026-07-24)
 
+> ## ▶▶ HANDOFF — FRESH READER START HERE
+>
+> **The route.** Completeness dual of the rigid seal: *is the rigid gauge forced **solvable**?* (retargeted from
+> "linear" — §3). k-WL fails exactly on a non-Schurian rigid core; its difficulty is the Babai–Luks difficulty of
+> the recovered gauge group Γ (§4a). Legal framing = oracle-capability, never graph-classification (§1 guardrails).
+>
+> **BUILT (Lean, all axiom-clean `[propext, Classical.choice, Quot.sound]`, in `scripts/build.sh`, gate green — 97
+> modules, ~190 s). Read in this dependency order:**
+> 1. **`ChainDescent/GaugeComplex.lean`** — Tier A spine. Piece 1 `refineStep_ne_iff_exists_count_ne` (+
+>    `count_signature_eq_card`, `nbhdClass`); piece 2 flatness `localExchange_of_equitable`
+>    (+ `refineStep_eq_iff_forall_card_eq`); piece 3 holonomy `IsColAut`/`SameOrbit`/`LocallyFlat`/
+>    `HolonomyNontrivial` + `sameOrbit_imp_locallyFlat` (equivariance) + `holonomyNontrivial_iff_diff_orbit`.
+> 2. **`ChainDescent/GaugeBridge.lean`** — Tier B step 1. `GaugeContract` (abstract recovered Γ; `faithful` carried)
+>    + **`holonomy_iff_gauge`** (Tier A ↔ Γ) + `gaugeContractMax` (non-vacuity witness; ⚠ NOT the recovered gauge).
+> 3. **`ChainDescent/GaugeAbelian.lean`** — Tier B abelian branch. `isSolvable_of_carrier_comm` (abelian ⟹ solvable);
+>    `kerF2 H` + `isRigidF2_iff_kerF2_eq_bot` + `rigid_unique_solve` (reuse of `RigidSolveF2`).
+> 4. **`ChainDescent/GaugeSolvable.lean`** — Tier B solvable branch. `of_solvable_tower` / `of_solvable_abelian_base`
+>    (the proved reduction skeleton: solvable ⟹ tower of abelian steps; the per-level `hstep` = carried Luks).
+> 5. **`ChainDescent/GaugeIsolation.lean`** — C3 `Recover` R-a. `IsRigid`, `sameOrbit_iff_eq_of_rigid`,
+>    `holonomyNontrivial_iff_flat_ne_of_rigid` (rigid ⟹ gauge cells = non-singleton flatness classes).
+>
+> **PROVED end-to-end (the reduction).** Holonomy → Γ (bridge) → abelian solve (built, `ker H`) / solvable solve
+> (reduces to abelian + carried step); isolation automatic in the rigid regime.
+>
+> **CARRIED (the honest boundary — cited, never fresh `axiom`s):** (a) **R-b the forcing bridge** = `faithful` ≈
+> `ForcingModel.bridge`, **shared** with the rigid-seal track (C3 adds no *new* carried obligation, §5a); (b) the
+> **Babai–Luks per-level poly** (`hstep`) = Luks 1982 / Babai–Luks 1983 — settled for `Γ_d`/bounded order, **plausibly
+> poly** for general unbounded solvable (§3, project hedge `cameron-entanglement.md:124`); (c) **R-c-nonabelian** (the
+> gain/aut group of the recovered non-abelian relation) — not built.
+>
+> **NEXT (in value order):** R-c-nonabelian (last new *provable* gauge-construction piece, the S₃/D₄ object) · wire
+> `carrier ≅ kerF2` on the rigid residue (thin) · R-b (proving the forcing bridge) = a large **cross-track** effort,
+> not W2-specific. **Deferred:** C2 = extraction-free intrinsic Γ (blocked on fibre-isolation; §5a shows rigidity
+> makes it unnecessary for force). **Map:** §4a Γ-scope · §5 attack plan · §5a Recover scope · §6 falsifier ledger ·
+> §7 fresh-reader pointers. **Chronological landing notes follow below.**
+>
+> ---
+>
 > **What this doc is.** A dedicated planning doc for the **deliberately-avoided** "characterize what k-WL
 > *cannot* handle" route — the completeness dual of the rigid seal. It is **W2 attack-route (ii)**
 > (`chain-descent-remaining-work.md:734`, *"prove no non-abelian fusion survives into a rigid medium"*),
@@ -9,8 +47,8 @@
 > chain ⟹ a global *twist* that blocks collapse). It has its own doc precisely **because** it runs against the
 > project's sanctioned architecture — the seal is a *tautology* that avoids classifying obstructions
 > (`chain-descent-exhaustive-obstruction.md:221`), so reasoning about the residue's *structure* is deliberately
-> sparse. That gap is the reason to write it down, not a reason to skip it. Nothing here is built; this is a
-> research plan with a named crux.
+> sparse. That gap is the reason to write it down, not a reason to skip it. **(Originally a pure research plan; the
+> Tier-A spine + the Tier-B reduction + C3 R-a are now built — see the HANDOFF above.)**
 >
 > **The one-line frontier.** The entire open weight concentrates on **ONE lemma with three equivalent faces**, and
 > that lemma **splits into two thresholds** the "linear-or-symmetry" framing conflated:
@@ -424,9 +462,14 @@ soundness dual.
 - `chain-descent-mixed-composition.md` (`:399-402`) — the complementary-firing-domain theorem (structure/symmetry
   fork); and `:54-59` the retracted "perfect key cannot exist" (the banned form).
 
-**Lean objects the crux reduces onto:**
+**The built W2 modules (this track):** `GaugeComplex` → `GaugeBridge` → `GaugeAbelian` → `GaugeSolvable` +
+`GaugeIsolation` — all axiom-clean, in the gate. **The read-order + one-line-each + what is proved vs carried is the
+HANDOFF block at the top of this doc's STATUS** — start there. What follows are the rigid-seal objects this track
+*connects to / carries*.
+
+**Rigid-seal objects the crux reduces onto (downstream connection):**
 - `ChainDescent/RigidSolveF2.lean` — `IsRigidF2` (trivial kernel = rigid), `unique_solution_of_rigid`, rowspace-only
-  rigidity (`dotP_zero_rowspace`). The abelian-threshold seal.
+  rigidity (`dotP_zero_rowspace`). The abelian-threshold seal — reused by `GaugeAbelian`.
 - `ChainDescent/ForcingModel.lean` — `ForcingModel.bridge` (graph↔F₂, carried); `ChainDescent/ForcingCircuits.lean`
   — `forced_certificate` (forced ⟹ rowspace codeword). The extraction to classify at Tier B.
 - `ChainDescent/RigidSeal.lean` — `compKey` / `SolverSeparates` (the force key carrying the sole obligation);
