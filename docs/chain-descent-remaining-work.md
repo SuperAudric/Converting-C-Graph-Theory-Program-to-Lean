@@ -739,6 +739,10 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   constructible witness that survives all built + planned mechanisms; every dead route recorded in the
   steers archive. Only after this exhaustion does any residue framing become final — and then it is carried
   with its recorded route obituaries, not as a design assumption.
+  **▶ Route-(ii) has a dedicated planning doc: `chain-descent-w2-solvability-route.md`** — the user's
+  cell-neighbour induction reframed onto the recovered gauge group; retargets the goal from *linear* (claim #2,
+  abelian threshold — crossed by rigid non-abelian cores) to *solvable* (`forceSolvable`, the achievable
+  poly-completeness threshold); crux = c-of-k composition / frame-matroid representability / Babai–Luks solvability.
 - **W3 — where they meet:** `hSmallAutThin` / rigid-GI. Emptied iff W1 and W2 both close. The endgame-spec's
   "two seals, one wall" frame remains the correct *map*; under §0 the wall is a **target**, not a fixture.
 
