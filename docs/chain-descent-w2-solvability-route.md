@@ -25,9 +25,11 @@
 > 6. **`ChainDescent/GaugeNonabelian.lean`** — C3 `Recover` R-c (non-abelian). The §3a/§3b skeleton: recovered gauge
 >    `Γ ≤ (ι → G₀)` ⟹ `isSolvable_pi` (degree-independent) → `recoveredGauge_reduces_to_abelian` (reduces to the
 >    abelian branch via `of_solvable_tower`) + `isSolvable_gaugeCarrier` (feeds `GaugeContract`); `S₃` non-vacuity.
-> 7. **`ChainDescent/GaugeLayer.lean`** — R-c extraction brick **L1** (§3b's corner-emptying gap). `derivedSeries_pi_const`:
->    the gauge's derived tower decomposes coordinatewise `derivedSeries (ι→G₀) k = ∏ᵢ derivedSeries G₀ k` = *each layer
->    is a free module of rank `|gadgets|`* ⟹ each tower step is a per-coordinate **linear** solve; `mem_derivedSeries_pi`.
+> 7. **`ChainDescent/GaugeLayer.lean`** — R-c extraction bricks **L1+L2+L3** (§3b's corner-emptying gap). L1
+>    `derivedSeries_pi_const` (tower decomposes coordinatewise = each layer a free module of rank `|gadgets|` ⟹
+>    per-coordinate **linear** step); L2 `commutator_mem_derivedSeries_succ` (layer abelian) + `layerCoeff` (`A_k`) +
+>    `layerProj_surjective` (the `ι → A_k` coordinate structure); L3 `kerF2Submodule` (the abelian gauge is an
+>    F₂-**subspace** — the `A_0 = ZMod 2` field instance). **L4** (`Recover` → explicit linear systems) stays carried.
 >
 > **PROVED end-to-end (the reduction).** Holonomy → Γ (bridge) → abelian solve (built, `ker H`) / solvable solve
 > (reduces to abelian + carried step); isolation automatic in the rigid regime; the **non-abelian** recovered gauge is
@@ -42,11 +44,11 @@
 > part is the extraction preserving each derived layer's *module structure* (so the tower step is a linear solve) =
 > the §3b load-bearing gap, shared with `ForcingModel.bridge`.
 >
-> **NEXT (in value order):** the extraction bricks **L2** (local layer `A_k` abelian ⟹ product layer `= ι → A_k`, an
-> `A_k`-module) → **L3** (per-layer Smith/Gaussian solve, `kerF2` = `k=0`/`ZMod 2` instance) — §3b's corner-emptying
-> chain, whose **structural core L1 is now built** (`GaugeLayer`, coordinatewise tower decomposition); **L4** (`Recover`
-> produces the layers as explicit linear systems) stays CARRIED, shared with `ForcingModel.bridge`. Then wire
-> `carrier ≅ kerF2` on the rigid residue (thin) · R-b (proving the forcing bridge) = a large **cross-track** effort. **Deferred:** C2 = extraction-free intrinsic Γ (blocked on fibre-isolation; §5a shows rigidity
+> **NEXT (in value order):** **L4** — the one remaining extraction brick and the honest corner-emptying gap: prove
+> `Recover` produces each derived layer *as an explicit linear system from the graph* (so `hstep` is a built Smith
+> solve, not carried Luks). This is **shared with `ForcingModel.bridge`** (a cross-track object) — L1–L3 (`GaugeLayer`)
+> built the target structure it plugs into. Then wire `carrier ≅ kerF2` on the rigid residue (thin) · R-b (proving the
+> forcing bridge) = the same large cross-track effort L4 lives in. **Deferred:** C2 = extraction-free intrinsic Γ (blocked on fibre-isolation; §5a shows rigidity
 > makes it unnecessary for force). **Map:** §4a Γ-scope · §5 attack plan · §5a Recover scope · §6 falsifier ledger ·
 > §7 fresh-reader pointers. **Chronological landing notes follow below.**
 >
@@ -352,15 +354,21 @@ object R-c-nonabelian builds** (`carrier` from `M`, non-abelian case) plus the c
 it discharges the carried `hstep` **and** empties the corner in one move — not new debt. **Verdict: the corner is
 plausibly empty-beyond-the-wall, reducible to already-carried objects, legal, and quasipoly-settled meanwhile.**
 
-**✅ The extraction's structural core (L1) LANDED (2026-07-24, `ChainDescent/GaugeLayer.lean`, axiom-clean, in the
-gate).** Scoped into four bricks: **L1** the gauge's derived tower **decomposes coordinatewise** —
-`derivedSeries (ι → G₀) k = ∏ᵢ derivedSeries G₀ k` (`derivedSeries_pi_const`, via Mathlib `commutator_pi_pi_of_finite`;
-`mem_derivedSeries_pi` the per-gadget membership form) = *each layer is a free module of rank `|gadgets|`*, so each
-`of_solvable_tower` step is a per-coordinate **linear** problem, not a `|G₀|^{|ι|}`-coset search (the structural reason
-`kerF2`'s one Gaussian pass generalizes up the whole tower). **Remaining:** **L2** the local layer
-`A_k = G₀⁽ᵏ⁾/G₀⁽ᵏ⁺¹⁾` abelian ⟹ product layer `= ι → A_k`, an `A_k`-module; **L3** per-layer Smith/Gaussian solve,
-`kerF2` the `k=0`/`ZMod 2` instance; **L4** (stays **CARRIED**, shared with `ForcingModel.bridge`) `Recover` produces
-the layers as explicit linear systems from the graph. L1 is the group-theoretic structure L2–L4 stand on.
+**✅ The extraction's structural core (L1+L2+L3) LANDED (2026-07-24, `ChainDescent/GaugeLayer.lean`, axiom-clean, in
+the gate).** Scoped into four bricks; **L1–L3 built, L4 carried**:
+- **L1** the gauge's derived tower **decomposes coordinatewise** — `derivedSeries (ι → G₀) k = ∏ᵢ derivedSeries G₀ k`
+  (`derivedSeries_pi_const`, via Mathlib `commutator_pi_pi_of_finite`; `mem_derivedSeries_pi` the per-gadget form) =
+  *each layer is a free module of rank `|gadgets|`*, so each `of_solvable_tower` step is a per-coordinate **linear**
+  problem, not a `|G₀|^{|ι|}`-coset search (why `kerF2`'s one Gaussian pass generalizes up the tower).
+- **L2** the layer is **abelian** (`commutator_mem_derivedSeries_succ`: commutators drop a level ⟹ `A_k = D_k/D_{k+1}`
+  abelian) with coefficient group `layerCoeff G₀ k = Abelianization ↥(derivedSeries G₀ k)` (a `CommGroup`); the
+  product layer projects coordinatewise onto each local `A_k` (`layerProj`/`layerProj_surjective`) = the `ι → A_k`
+  free-module coordinate structure.
+- **L3** the per-layer solve is **linear**: `kerF2` upgraded from `AddSubgroup` to a genuine `Submodule (ZMod 2)`
+  (`kerF2Submodule`, via `kerF2_smul_mem`) — a subspace of the free `F₂`-module, the concrete `A_0 = ZMod 2` field
+  instance of "each layer is an `A_k`-submodule of `ι → A_k`, solved by Smith/Gaussian."
+- **L4** (stays **CARRIED**, shared with `ForcingModel.bridge`) `Recover` produces the layers as explicit linear
+  systems *from the graph*. L1–L3 build the target structure; L4 plugs the graph in — the honest remaining gap.
 
 ---
 
