@@ -28,9 +28,10 @@
 >
 > **CARRIED (the honest boundary — cited, never fresh `axiom`s):** (a) **R-b the forcing bridge** = `faithful` ≈
 > `ForcingModel.bridge`, **shared** with the rigid-seal track (C3 adds no *new* carried obligation, §5a); (b) the
-> **Babai–Luks per-level poly** (`hstep`) = Luks 1982 / Babai–Luks 1983 — settled for `Γ_d`/bounded order, **plausibly
-> poly** for general unbounded solvable (§3, project hedge `cameron-entanglement.md:124`); (c) **R-c-nonabelian** (the
-> gain/aut group of the recovered non-abelian relation) — not built.
+> **Babai–Luks per-level poly** (`hstep`) = Luks 1982 / Babai–Luks 1983 — **§3a sharpens the scope: a genuine `Γ_d`-poly
+> theorem for the whole fixed-`G₀` family** (recovered `Γ ≤ G₀^m ⟹ Γ ∈ Γ_{μ(G₀)}`, `μ = 2` for CFI/Lichter), with the
+> **plausibly-poly hedge confined to a *growing* unbounded-cyclic-section solvable corner** (`cameron-entanglement.md:124`);
+> (c) **R-c-nonabelian** (the gain/aut group of the recovered non-abelian relation) — not built.
 >
 > **NEXT (in value order):** R-c-nonabelian (last new *provable* gauge-construction piece, the S₃/D₄ object) · wire
 > `carrier ≅ kerF2` on the rigid residue (thin) · R-b (proving the forcing bridge) = a large **cross-track** effort,
@@ -57,10 +58,12 @@
 >    recovered gain-graph's **frame matroid is field-representable**. **TRUE over F₂ (XOR composes); OPEN and
 >    conjecturally-FALSE beyond** — the S₃/D₄ probe exhibits a *rigid non-abelian* core.
 > 2. **Solvable threshold** (the *actual* poly-completeness boundary): is `Γ` forced **solvable**? — canonization
->    under a solvable gauge is poly for **bounded** composition-factor degree (`Γ_d`, Luks 1982) and **plausibly
->    poly** in general (`cameron-entanglement.md:124`, not a settled classical theorem). **TRUE at every probed
->    level** (abelian, dihedral, Heisenberg — all solvable, poly at the bounded orders tested); the **only** wall
->    case is a **growing non-solvable** `Γ` (Aₙ/PSL…), no constructible witness, full CFI search-infeasible (theory).
+>    under a solvable gauge is poly for **bounded** composition-factor degree (`Γ_d`, Luks 1982). **§3a (the Luks
+>    sharpening) upgrades this to a genuine poly THEOREM for the whole family that arises** — the recovered
+>    `Γ ≤ G₀^m` (product of the fixed local gadget group) forces `Γ ∈ Γ_{μ(G₀)}`, `μ = 2` for CFI/Lichter — leaving
+>    **plausibly poly** (`cameron-entanglement.md:124`) confined to a *growing* unbounded-cyclic-section solvable
+>    corner. **TRUE at every probed level** (abelian, dihedral, Heisenberg — each a fixed `G₀`, hence genuine poly);
+>    the **only** wall case is a **growing non-solvable** `Γ` (Aₙ/PSL…), no constructible witness (theory).
 >
 > **The headline correction to the user's hypothesis.** "The obstruction must be linear (F_k) or a symmetry" is
 > **too coarse and, in the strict-linear reading, FALSE**: a rigid graph can carry genuinely non-abelian structure
@@ -237,7 +240,7 @@ So the honest picture is a **ladder with two thresholds**, not a dichotomy:
 | gauge group `Γ` of the core | canonization | threshold | status |
 |---|---|---|---|
 | **abelian** (F₂, `Z_{2^k}`, rings) | Smith / rowspace-kernel | ← *abelian* (claim #2, linear seal) | **SEALED — Algorithm R ✓** |
-| **non-abelian solvable** (S₃, D₄, dihedral, Heisenberg) | coset-enumeration / fixed-group CSP | between | **poly for bounded/`Γ_d`, plausibly poly general — needs a solvable-group solver, not Smith** |
+| **non-abelian solvable** (S₃, D₄, dihedral, Heisenberg) | coset-enumeration / fixed-group CSP | between | **genuine `Γ_d`-poly THEOREM for every *fixed* `G₀` (§3a); hedge only on *growing* unbounded-cyclic-section families** |
 | **non-abelian non-solvable, growing** (Aₙ, PSL…) | Babai–Luks string canonization | ← *solvable* (true completeness) | **the ONLY wall candidate — no constructible witness** |
 
 The user's "must be linear" is the **abelian threshold**; the target that actually secures poly-completeness is the
@@ -253,6 +256,91 @@ theorem**: *force provably cannot fire on a symmetric cell, and consume fires ex
 fires are the residue* (`mixed-composition.md:399-402`, Lean `narrow_eq_branches_of_orbit` /
 `forceBy_no_narrowing_on_orbit`). Non-abelian *symmetry* is caught by the other horn — "non-abelian ⟹ not hideable
 ⟹ visible ⟹ excluded by rigidity" (`rigid-seal.md:229`).
+
+---
+
+## 3a. The Luks sharpening — the hedge is confined, not "general solvable"
+
+Face C carries Luks as "poly for `Γ_d`, **plausibly poly** for general solvable." That is **looser than the recovered
+gauge groups warrant.** The sharpening rests on one structural fact about how `Recover` produces Γ.
+
+**Structure.** By construction (`project_nonabelian_cfi_witness`; CFI/multipede-over-Γ, `cameron-entanglement.md:49`),
+the gauge acts **per gadget** by a **fixed local group `G₀`** (`Z₂` for CFI, `Z_{2^k}` for Lichter, `S₃`/`D₄`/`H` for
+the group-CFI), and independent gadgets gauge independently, so the recovered `Γ` is a **subgroup of a product**
+`Γ ≤ G₀^m`, with `m ≤ n` the gadget count. For CFI this is exactly the cycle space `Z₂^β ≤ Z₂^{|E|}`.
+
+**Lemma (`Γ ∈ Γ_d` for `d = μ(G₀)` := the max composition-factor degree of `G₀`).** The class `Γ_d` is closed under
+**subgroups, quotients, and extensions** (standard — the closure Luks's own recursion rides; Luks 1982). Hence
+`G₀ ∈ Γ_{μ(G₀)}` (definition of `μ`) ⟹ `G₀^m ∈ Γ_{μ(G₀)}` (extension/product-closed) ⟹ `Γ ≤ G₀^m` forces
+`Γ ∈ Γ_{μ(G₀)}` (subgroup-closed). **So whenever `G₀` is bounded, `μ(G₀) = O(1)`, and Luks canonizes `Γ` in
+`n^{O(μ(G₀))}` — a genuine poly THEOREM, not a hedge.**
+
+**The hedge splits four ways, and survives in only one:**
+
+| local gauge `G₀` | `μ(G₀)` | route | status after the sharpening |
+|---|---|---|---|
+| **bounded** — CFI (`Z₂`), **Lichter `Z_{2^k}` for every `k`**, fixed `S₃`/`D₄`/`H` | `O(1)` (CFI/Lichter **= 2**; `S₃` = 3) | Luks `n^{O(μ)}` | **poly THEOREM — hedge retired** |
+| **growing abelian** (`Z_p`, `p → ∞`) | `p` (unbounded) | abelian branch (Smith / `kerF2`) | **poly THEOREM — degree irrelevant** |
+| **growing non-abelian solvable, unbounded cyclic sections** (growing `D_p`, `H(𝔽_p)`) | `p` (unbounded) | neither Luks-`Γ_d` nor Smith | **the ONLY surviving "plausibly poly" — narrow, named** |
+| **growing non-solvable** (`A_k`, `PSL`) | unbounded non-solvable factor | — | **the wall (unchanged)** |
+
+**Two consequences.**
+1. **The hedge never touched the witness bank.** Every *fixed* construction is a fixed `G₀` ⟹ `μ` constant ⟹ genuine
+   Luks-poly; so the probe evidence (`D₃…D₈`, `H(𝔽₃)` all tame, `project_nonabelian_cfi_witness`) is each a *genuine*
+   poly instance, and "plausibly poly" was only ever the **uniform/asymptotic** claim over a *growing* family.
+   ★ **`Z_{2^k}` (Lichter) is `Γ₂` for every `k`** (a cyclic 2-group has every composition factor `= Z₂`), so the whole
+   *varying-abelian* row is Luks-poly *verbatim* — it never even needed the abelian branch. This corrects the loose
+   reading at `cameron-entanglement.md:124` ("dihedral/Heisenberg solvable ⟹ Babai–Luks poly"): the *fixed* members are
+   genuine-poly (`Γ_d`), and only the `p → ∞` limit hedges.
+2. **The surviving corner is structurally strained (perhaps empty).** For `G₀` to grow, the gadget alphabet must grow
+   (`|G₀|^{d-1}` vertices per gadget), so a growing local group forces `n` to grow with it; and a *single* gadget
+   carrying a large `D_p`/cyclic symmetry is directly canonizable (a cycle's dihedral symmetry is trivial to fix). So
+   the residual regime — growing non-abelian solvable with unbounded cyclic sections — has **no constructible witness**
+   and is squeezed between the abelian branch and the wall. (Argument-sketch, not a proof that the corner is empty.)
+
+**Deliverable.** Face C's carried-vs-theorem boundary moves: **a genuine `Γ_d`-poly theorem on the entire fixed-`G₀`
+family (all CFI/Lichter/fixed-non-abelian), poly-by-Smith on growing-abelian, and the hedge confined to one
+unwitnessed growing-solvable corner adjacent to the wall.** The earlier "plausibly poly for general solvable"
+over-scoped the hedge; the honest carried residue is this single corner.
+
+⚠ **Legality.** This is still an *oracle-capability* statement (Luks's algorithm canonizes any `Γ_{O(1)}` gauge), not a
+graph classification — it stays on the legal side of the GI-adjacency wire (§1 guardrails). It does **not** assert the
+residue is empty; it narrows *where* the un-settled poly claim lives.
+
+---
+
+## 3b. Is the §3a corner empty? — the argument plan (2026-07-24)
+
+The §3a residual is a **growing non-abelian solvable** recovered gauge (`D_p`, `H(𝔽_p)`, iterated wreath). "Empty" has
+three senses; only the **oracle-capability** ones are legal to argue: **(E2)** it arises but is poly-canonizable by a
+route other than Luks-`Γ_d`; **(E3)** it arises but never reaches force as a rigid residue. (The third, *"if non-empty
+then GI∉P"*, is the **banned form** — do not use it.) **Non-emptiness is graceful:** poly-or-flag **flags** the corner
+(sound, poly-bounded), so this is a *completeness*, not a soundness, question. **Free reframe:** by **Babai 2016**
+(quasipoly string-canonization under any `Γ ≤ Sym Ω`, `|Ω| = n`), the corner is **quasipolynomial unconditionally** —
+the open question is strictly *poly-vs-quasipoly* on a witness-free corner, not "unknown."
+
+| argument | mechanism | gap | resolvable? |
+|---|---|---|---|
+| **A1 — visibility excludes non-abelian gauge** (E3) | "only hideable symmetry is abelian" ⟹ non-abelian gauge visible ⟹ consumed | **probe-refuted**: anchoring rigidifies a non-abelian gauge into a genuine force-residue (`project_nonabelian_cfi_witness`) | **No — dead** (measured falsifier) |
+| **A2 — a graph parameter bounds `μ(G₀)`** (salvage Luks) | bounded arity/degree ⟹ bounded local group | bounded arity ⟹ `G₀ = Γ` arbitrary; nothing bounds the local group | **No — dead** |
+| **A3 — derived-series tower of *linear* solves** (E2) — **THE LEAD** | solvable ⟹ tower of abelian steps (`of_solvable_tower`, **built**); each abelian layer canonized **degree-independently by linear algebra** (Smith/`kerF2`), not Luks-`Γ_d` | `hstep` is poly **iff each derived quotient acts *linearly* (as a module) on the recovered lower layer**; linearity collapses the `2^m`-coset branching that makes general-solvable open (the `kerF2` precedent: solve `2^β` gauge in one Gaussian pass, no enumeration) | **Yes in principle** — reduces to the *carried* `hstep`; `D_p` (`Z₂` = `×(−1)`) and `H(𝔽_p)` (central ⟹ trivial action) both have **linear** layers, so both close *if Recover preserves the layer module structure* |
+| **A4 — abelian-normal + linear quotient** (E2, A3 sub-case) | `D_p = Z_p ⋊ Z₂`: ring-solver does `Z_p` (P3-ring), `Z₂^m` quotient → `kerF2` | needs P3-ring built; two-unbounded-layer `H(𝔽_p)` folds up into A3 | **Yes for the `D_p`/metabelian sub-corner** (modulo P3-ring); rest → A3 |
+
+⚠ **Derived length is a red herring** — a tower of poly-time steps is poly regardless of length; the hard point is the
+**per-quotient coset/branching blow-up**, which **linearity** (module action ⟹ coset orbits, no enumeration) collapses.
+
+**The convergence (the payoff).** A3 reduces "corner empty" to *"each derived layer of the recovered gauge is linearly
+representable"* — which is **Face B (frame-matroid representability) applied per derived-series level.** A genuinely
+*non-linear* layer is exactly **claim #3** (the wall, 0 witnesses). So A3, if it goes through, shows the solvable corner
+contains **no *new* residue** — any true survivor **coincides with the existing wall**. The corner does not widen the
+frontier; it maps onto it. This is the strongest honest "empty": *no residue beyond the one already named.*
+
+**The one load-bearing gap (honest).** Does `Recover` deliver each derived layer *with its module structure intact*, so
+the step is a linear solve rather than an opaque permutation action? That is a property of the extraction — the **same
+object R-c-nonabelian builds** (`carrier` from `M`, non-abelian case) plus the carried `ForcingModel.bridge`. Resolving
+it discharges the carried `hstep` **and** empties the corner in one move — not new debt. **Verdict: the corner is
+plausibly empty-beyond-the-wall, reducible to already-carried objects, legal, and quasipoly-settled meanwhile.** The
+concrete next build is R-c-nonabelian (§5a) with the *linearity-of-each-layer* property as its target spec.
 
 ---
 
@@ -293,10 +381,13 @@ non-binary for `A_k`-symmetric hidden constructions*") but lacked the group-theo
 to name. **Field-representable ⟺ abelian threshold; the coincidence with Face A is the c-of-k = XOR reading.**
 
 **Face C — Babai–Luks solvability (the true target).** Canonizing the recovered `Γ`-gain graph up to gauge is
-**string-canonization under `Γ`** — poly for bounded-degree solvable gauge (`Γ_d`, Luks 1982), **plausibly poly**
-for general solvable (`cameron-entanglement.md:124`, not classical), open at growing non-solvable `Γ`. This
-is the **solvable threshold**, strictly weaker (more permissive) than Faces A/B: abelian ⊊ solvable. Faces A/B
-secure the *linear* sub-seal; Face C secures *poly-completeness*, which is the actual deliverable.
+**string-canonization under `Γ`** — poly for bounded-degree solvable gauge (`Γ_d`, Luks 1982). **§3a sharpens this
+from a hedge to a theorem on the family that arises:** the recovered `Γ ≤ G₀^m` (product of the fixed local group), so
+`Γ ∈ Γ_{μ(G₀)}` and Luks is `n^{O(μ(G₀))}` — genuine poly whenever `G₀` is bounded (all fixed constructions +
+CFI/Lichter, `μ = 2`). The residual **plausibly poly** (`cameron-entanglement.md:124`, not classical) is confined to a
+*growing* non-abelian solvable local group with unbounded cyclic sections (§3a). This is the **solvable threshold**,
+strictly weaker (more permissive) than Faces A/B: abelian ⊊ solvable. Faces A/B secure the *linear* sub-seal; Face C
+secures *poly-completeness*, which is the actual deliverable.
 
 **The crux lemma, stated legally (oracle-capability form):**
 
@@ -429,7 +520,7 @@ deferred **C2 fibre-isolation is unnecessary for force**: rigidity does the isol
 |---|---|---|---|
 | **Lichter CFI-over-`Z_{2^k}`** | "F₂ is the only obstruction" — FALSE | still **linear** (varying ring) | `rigid-seal.md:232`, `ir-blindspot-solver.md:1067` |
 | **S₃/D₄ group-CFI** (rigidified) | "rigid ⟹ abelian" — FALSE (rigid non-abelian exists) | **solvable ⟹ poly** (coset CSP) | `project_nonabelian_cfi_witness` memory |
-| **Dihedral / Heisenberg** (growing) | non-abelian structure stays accessible & tame with growth | **solvable ⟹ plausibly poly** (Luks reduction; settled `Γ_d`, general solvable a project hedge) | ibid. §group-varying probe |
+| **Dihedral / Heisenberg** (growing) | non-abelian structure stays accessible & tame with growth | **each *fixed* member is genuine `Γ_d`-poly (§3a); hedge only in the `p → ∞` limit** (unbounded cyclic section, not `Γ_d`, not Smith) | ibid. §group-varying probe; §3a |
 | **`mp7` (Fano multipede)** | **the isolation test**: recover yields `Γ = Z₂³` (F₂ gauge), **not** `\|Aut\| = 1344` | base `PGL(3,2)` (non-solvable!) is **symmetry**, not gauge — excluded by `Recover` | `deepen-supply.md:120-124`, `00-START-HERE.md:138` |
 | **multipedes** (circulant≤72, rand-reg≤288) | canonize (discretize ≤7 levels) | rigid but not a flag at scale | `exhaustive-obstruction.md:420-427` |
 | **rigid expanders** | parity propagates fast (easy) | small instances don't flag | `exhaustive-obstruction.md:424-427` |
