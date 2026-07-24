@@ -476,5 +476,87 @@ theorem pivotCols_eq {m : Nat} {rows₁ rows₂ : List (List Bool)} {P₁ P₂ :
     obtain ⟨w, hwspan, hwc, hwbelow⟩ := pivotCol_isLeading hpiv₂ hlead₂ hcp
     exact leading_isPivotCol hpiv₁ hlead₁ ((hspan w).mpr hwspan) hwc hwbelow
 
+/-! ## 5. Pivot rows are intrinsic, and RREF canonicity (bricks (B-rows), (B5))
+
+Given the columns match (`pivotCols_eq`), each pivot row is the unique space-vector that is `1` at its pivot and
+`0` at the other pivots (`pivotRow_eq`, direct from kernel triviality). Together with column determination this
+gives **RREF uniqueness**: `rrefCanon` is a function of the row space alone (`rrefCanon_eq_of_span_eq`). -/
+
+/-- **★★ (B-rows) — pivot rows are determined by the row space.** For a pivot column `c` shared by two
+reduced-echelon systems of the same space, the two pivot rows coincide: `xorRow ρ₁ ρ₂` lies in the space and is
+`false` at every pivot column (both rows are `1` at `c` and `0` at the other — shared — pivots), so kernel
+triviality forces it to zero. -/
+theorem pivotRow_eq {m : Nat} {rows₁ rows₂ : List (List Bool)} {P₁ P₂ : List (Nat × List Bool)}
+    (hpiv₁ : PivInv m rows₁ P₁) (hlead₁ : LeadInv P₁) (hpiv₂ : PivInv m rows₂ P₂) (hlead₂ : LeadInv P₂)
+    (hspan : ∀ w, Spans m (P₁.map (·.2)) w ↔ Spans m (P₂.map (·.2)) w)
+    {c : Nat} {ρ₁ ρ₂ : List Bool} (hm1 : (c, ρ₁) ∈ P₁) (hm2 : (c, ρ₂) ∈ P₂) : ρ₁ = ρ₂ := by
+  have hρ₁len : ρ₁.length = m := hpiv₁.len (c, ρ₁) hm1
+  have hρ₂len : ρ₂.length = m := hpiv₂.len (c, ρ₂) hm2
+  have hB₁len : ∀ b ∈ P₁.map (·.2), b.length = m := by
+    intro b hb; obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hb; exact hpiv₁.len q hq
+  have hρ₁span : Spans m (P₁.map (·.2)) ρ₁ := Spans.mem hB₁len (List.mem_map.mpr ⟨(c, ρ₁), hm1, rfl⟩)
+  have hρ₂span : Spans m (P₁.map (·.2)) ρ₂ := by
+    refine (hspan ρ₂).mpr (Spans.mem ?_ (List.mem_map.mpr ⟨(c, ρ₂), hm2, rfl⟩))
+    intro b hb; obtain ⟨q, hq, rfl⟩ := List.mem_map.mp hb; exact hpiv₂.len q hq
+  have hu : xorRow ρ₁ ρ₂ = zeroW m := by
+    refine combo_eq_zero_of_pivots_zero hpiv₁.col_lt hpiv₁.len hpiv₁.unit hpiv₁.cross hpiv₁.nodup
+      (Spans.xor_closed hB₁len hρ₁span hρ₂span) ?_
+    intro cp hcp
+    rw [getD_xorRow (by rw [hρ₁len]; exact hpiv₁.col_lt cp hcp)
+      (by rw [hρ₂len]; exact hpiv₁.col_lt cp hcp)]
+    have hrow : ρ₁.getD cp.1 false = ρ₂.getD cp.1 false := by
+      by_cases hdc : cp.1 = c
+      · rw [hdc]; rw [hpiv₁.unit (c, ρ₁) hm1, hpiv₂.unit (c, ρ₂) hm2]
+      · have h1 : ρ₁.getD cp.1 false = false := hpiv₁.cross (c, ρ₁) hm1 cp hcp (fun h => hdc h.symm)
+        have h2 : ρ₂.getD cp.1 false = false := by
+          have hcolP2 : cp.1 ∈ P₂.map (·.1) :=
+            (pivotCols_eq hpiv₁ hlead₁ hpiv₂ hlead₂ hspan).mp (List.mem_map.mpr ⟨cp, hcp, rfl⟩)
+          obtain ⟨q, hq, hqcol⟩ := List.mem_map.mp hcolP2
+          rw [← hqcol]
+          exact hpiv₂.cross (c, ρ₂) hm2 q hq (fun h => hdc (hqcol ▸ h.symm))
+        rw [h1, h2]
+    rw [hrow]; cases ρ₂.getD cp.1 false <;> rfl
+  calc ρ₁ = xorRow ρ₁ (zeroW m) := (xorRow_zeroW_right hρ₁len).symm
+    _ = xorRow ρ₁ (xorRow ρ₁ ρ₂) := by rw [← hu]
+    _ = ρ₂ := xorRow_self_cancel hρ₁len hρ₂len
+
+/-- **★★★ (B5) — RREF canonicity.** `rrefCanon` is a function of the **row space** alone: two uniform-length row
+lists with the same row space (mutual `Spans`) have equal canonical RREFs. Per column `c`, the two `echelon`s
+have a pivot at `c` for the same `c` (`pivotCols_eq`) and, when they do, the same pivot row (`pivotRow_eq`). This
+is the crux of brick (B): the executable RREF computes a canonical form of the subspace, independent of the
+generating list — the invariant an iso-invariant `gen` reads (once the χ-frame supplies the column order, C/D). -/
+theorem rrefCanon_eq_of_span_eq {m : Nat} {rows₁ rows₂ : List (List Bool)}
+    (h₁ : ∀ r ∈ rows₁, r.length = m) (h₂ : ∀ r ∈ rows₂, r.length = m)
+    (hsp : ∀ w, Spans m rows₁ w ↔ Spans m rows₂ w) :
+    rrefCanon m rows₁ = rrefCanon m rows₂ := by
+  have hpiv₁ := pivInv_echelon h₁
+  have hpiv₂ := pivInv_echelon h₂
+  have hlead₁ := leadInv_echelon h₁
+  have hlead₂ := leadInv_echelon h₂
+  -- span of the pivot rows = span of the input rows (`PivInv.spanned`/`covers`)
+  have hbridge : ∀ (rows : List (List Bool)) (P : List (Nat × List Bool)), PivInv m rows P →
+      (∀ r ∈ rows, r.length = m) → ∀ w, Spans m (P.map (·.2)) w ↔ Spans m rows w := by
+    intro rows P hpiv hrows w
+    refine ⟨fun h => Spans.trans_basis hrows (fun b hb => ?_) h,
+      fun h => Spans.trans_basis (fun b hb => ?_) (fun b hb => hpiv.covers b hb) h⟩
+    · obtain ⟨cp, hcp, rfl⟩ := List.mem_map.mp hb; exact hpiv.spanned cp hcp
+    · obtain ⟨cp, hcp, rfl⟩ := List.mem_map.mp hb; exact hpiv.len cp hcp
+  have hspanP : ∀ w, Spans m ((echelon rows₁).map (·.2)) w ↔ Spans m ((echelon rows₂).map (·.2)) w := by
+    intro w; rw [hbridge rows₁ _ hpiv₁ h₁ w, hsp w, ← hbridge rows₂ _ hpiv₂ h₂ w]
+  unfold rrefCanon
+  refine List.filterMap_congr (fun c _ => ?_)
+  by_cases hcol : c ∈ (echelon rows₁).map (·.1)
+  · obtain ⟨cp₁, hcp₁, hcol₁⟩ := List.mem_map.mp hcol
+    have hm1 : (c, cp₁.2) ∈ echelon rows₁ := by rw [← hcol₁]; exact hcp₁
+    obtain ⟨cp₂, hcp₂, hcol₂⟩ :=
+      List.mem_map.mp ((pivotCols_eq hpiv₁ hlead₁ hpiv₂ hlead₂ hspanP).mp hcol)
+    have hm2 : (c, cp₂.2) ∈ echelon rows₂ := by rw [← hcol₂]; exact hcp₂
+    have hrow : cp₁.2 = cp₂.2 := pivotRow_eq hpiv₁ hlead₁ hpiv₂ hlead₂ hspanP hm1 hm2
+    rw [find?_col_eq hpiv₁.nodup hm1, find?_col_eq hpiv₂.nodup hm2]
+    simp [hrow]
+  · have hcolP2 : c ∉ (echelon rows₂).map (·.1) := fun h =>
+      hcol ((pivotCols_eq hpiv₁ hlead₁ hpiv₂ hlead₂ hspanP).mpr h)
+    rw [find?_col_none hcol, find?_col_none hcolP2]
+
 end RigidRREF
 end ChainDescent
