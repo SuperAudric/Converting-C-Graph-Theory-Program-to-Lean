@@ -8,7 +8,7 @@
 > "linear" — §3). k-WL fails exactly on a non-Schurian rigid core; its difficulty is the Babai–Luks difficulty of
 > the recovered gauge group Γ (§4a). Legal framing = oracle-capability, never graph-classification (§1 guardrails).
 >
-> **BUILT (Lean, all axiom-clean `[propext, Classical.choice, Quot.sound]`, in `scripts/build.sh`, gate green — 97
+> **BUILT (Lean, all axiom-clean `[propext, Classical.choice, Quot.sound]`, in `scripts/build.sh`, gate green — 98
 > modules, ~190 s). Read in this dependency order:**
 > 1. **`ChainDescent/GaugeComplex.lean`** — Tier A spine. Piece 1 `refineStep_ne_iff_exists_count_ne` (+
 >    `count_signature_eq_card`, `nbhdClass`); piece 2 flatness `localExchange_of_equitable`
@@ -22,20 +22,26 @@
 >    (the proved reduction skeleton: solvable ⟹ tower of abelian steps; the per-level `hstep` = carried Luks).
 > 5. **`ChainDescent/GaugeIsolation.lean`** — C3 `Recover` R-a. `IsRigid`, `sameOrbit_iff_eq_of_rigid`,
 >    `holonomyNontrivial_iff_flat_ne_of_rigid` (rigid ⟹ gauge cells = non-singleton flatness classes).
+> 6. **`ChainDescent/GaugeNonabelian.lean`** — C3 `Recover` R-c (non-abelian). The §3a/§3b skeleton: recovered gauge
+>    `Γ ≤ (ι → G₀)` ⟹ `isSolvable_pi` (degree-independent) → `recoveredGauge_reduces_to_abelian` (reduces to the
+>    abelian branch via `of_solvable_tower`) + `isSolvable_gaugeCarrier` (feeds `GaugeContract`); `S₃` non-vacuity.
 >
 > **PROVED end-to-end (the reduction).** Holonomy → Γ (bridge) → abelian solve (built, `ker H`) / solvable solve
-> (reduces to abelian + carried step); isolation automatic in the rigid regime.
+> (reduces to abelian + carried step); isolation automatic in the rigid regime; the **non-abelian** recovered gauge is
+> solvable and reduces to the abelian branch (R-c, degree-independently — §3a).
 >
 > **CARRIED (the honest boundary — cited, never fresh `axiom`s):** (a) **R-b the forcing bridge** = `faithful` ≈
 > `ForcingModel.bridge`, **shared** with the rigid-seal track (C3 adds no *new* carried obligation, §5a); (b) the
 > **Babai–Luks per-level poly** (`hstep`) = Luks 1982 / Babai–Luks 1983 — **§3a sharpens the scope: a genuine `Γ_d`-poly
 > theorem for the whole fixed-`G₀` family** (recovered `Γ ≤ G₀^m ⟹ Γ ∈ Γ_{μ(G₀)}`, `μ = 2` for CFI/Lichter), with the
 > **plausibly-poly hedge confined to a *growing* unbounded-cyclic-section solvable corner** (`cameron-entanglement.md:124`);
-> (c) **R-c-nonabelian** (the gain/aut group of the recovered non-abelian relation) — not built.
+> (c) **R-c-nonabelian** — **✅ now BUILT** (`GaugeNonabelian.lean`, group-theoretic skeleton); the remaining carried
+> part is the extraction preserving each derived layer's *module structure* (so the tower step is a linear solve) =
+> the §3b load-bearing gap, shared with `ForcingModel.bridge`.
 >
-> **NEXT (in value order):** R-c-nonabelian (last new *provable* gauge-construction piece, the S₃/D₄ object) · wire
-> `carrier ≅ kerF2` on the rigid residue (thin) · R-b (proving the forcing bridge) = a large **cross-track** effort,
-> not W2-specific. **Deferred:** C2 = extraction-free intrinsic Γ (blocked on fibre-isolation; §5a shows rigidity
+> **NEXT (in value order):** the *linearity-of-each-layer* extraction property (§3b's one open gap — that `Recover`
+> hands each derived quotient over as a module action; empties the §3a corner) · wire `carrier ≅ kerF2` on the rigid
+> residue (thin) · R-b (proving the forcing bridge) = a large **cross-track** effort, not W2-specific. **Deferred:** C2 = extraction-free intrinsic Γ (blocked on fibre-isolation; §5a shows rigidity
 > makes it unnecessary for force). **Map:** §4a Γ-scope · §5 attack plan · §5a Recover scope · §6 falsifier ledger ·
 > §7 fresh-reader pointers. **Chronological landing notes follow below.**
 >
@@ -495,7 +501,7 @@ carried obligations: **(1)** `faithful` — the recovered Γ's orbits are exactl
 |---|---|---|
 | **R-a — gauge isolation** | pick the gauge cells, exclude the base (the `mp7 → Z₂³` test) | ✅ **LANDED** (rigid-regime form, below) |
 | **R-b — the forcing bridge** | recovered `M` faithfully models WL-flatness (1-WL forcing = unit-prop/kernel on `M`) | **carried** — this *is* `ForcingModel.bridge`, already carried by the rigid-seal track; **C3 adds no new carried obligation, it inherits it** |
-| **R-c — gauge-group construction** | build `carrier` from `M`: abelian = `kerF2` (**built**, `GaugeAbelian`); non-abelian = the recovered relation's gain/aut group | abelian **built**; non-abelian **new** |
+| **R-c — gauge-group construction** | build `carrier` from `M`: abelian = `kerF2` (**built**, `GaugeAbelian`); non-abelian = the recovered gauge `Γ ≤ (ι → G₀)`, its solvability + reduction to the abelian branch | abelian **built**; non-abelian **✅ BUILT** (`GaugeNonabelian`, below) |
 | **R-d — `faithful`** | orbits(Γ) = flatness classes | **composition** of R-a+R-b+R-c; ≈ the forcing bridge |
 
 **Key finding.** `faithful` (R-d) ≈ the forcing bridge, so C3 is dischargeable **modulo the same bridge the
@@ -510,7 +516,21 @@ holonomy = a locally-flat pair of **distinct** vertices ⟹ **gauge cells = non-
 `carriesGauge_iff_exists_holonomy_of_rigid`. **⟹ the `mp7 → Z₂³` split is the two-seals INTERLEAVING** (consume takes
 `PGL(3,2)`, force sees the rigid `Z₂³` residue), **not** a Recover-internal classifier — which also explains why the
 deferred **C2 fibre-isolation is unnecessary for force**: rigidity does the isolating. **Next in R-c/R-d:** wire
-`carrier ≅ kerF2` on the rigid residue (thin, once R-a picks the cells); R-c-nonabelian; R-b stays carried (shared).
+`carrier ≅ kerF2` on the rigid residue (thin, once R-a picks the cells); R-b stays carried (shared).
+
+**✅ R-c-nonabelian LANDED (2026-07-24, `ChainDescent/GaugeNonabelian.lean`, axiom-clean, in the gate).** The
+group-theoretic skeleton of §3b's A3, on the §3a structural fact *the recovered gauge is a subgroup of a product
+`Γ ≤ (ι → G₀)` of the fixed local gadget group* (CFI's `Z₂^β ≤ Z₂^{|E|}`): **`isSolvable_pi`** (product of a fixed
+solvable `G₀` is solvable — **degree-independent**, one uniform derived length via `map_derivedSeries_eq` at each
+projection, so it sidesteps the Luks-`Γ_d` hedge, §3a) ⟹ **`isSolvable_recoveredGauge`** (any recovered `Γ` solvable) +
+**`isSolvable_gaugeCarrier`** (its image in `Sym V`, a `GaugeContract.carrier`, solvable); **`isSolvable_extension`**
+(solvable-by-solvable = the A3 "two abelian layers" core); **`recoveredGauge_reduces_to_abelian`** (THE deliverable —
+wiring into the built `of_solvable_tower`: the non-abelian gauge reduces to the abelian branch); **`map_eval_derivedSeries`**
+(the §3b *linearity-of-each-layer* evidence — the `n`-th derived layer is coordinatewise `G₀`'s). Non-vacuity:
+`S₃ = Perm (Fin 3)`, genuinely non-abelian (`perm3_not_comm`) and solvable (`isSolvable_perm3`). ⚠ **The one carried
+gap is unchanged (§3b):** that `Recover` delivers each derived layer *with its module structure intact* (so the tower
+step is a linear solve) — the extraction property, shared with `ForcingModel.bridge`. This module is the skeleton the
+extraction plugs into; it does not close that gap.
 
 ---
 
