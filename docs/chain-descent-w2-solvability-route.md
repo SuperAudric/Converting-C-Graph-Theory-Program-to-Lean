@@ -36,6 +36,15 @@
 > obstruction is abelian"), which is logged **GI-adjacent** (`wl-visibility.md:152-154`, "the target of the whole
 > line, not a near-term build"). Same content, legal framing.
 >
+> **✅ Tier A piece 1 LANDED (2026-07-24, `ChainDescent/GaugeComplex.lean`, axiom-clean, gate green 93 modules).**
+> The split-vs-count base lemma (`chain-descent-matroid.md:146-151`, current API): `refineStep_ne_iff_exists_count_ne`
+> — two co-cellular vertices (`χ v = χ w`) are separated by one 1-WL round iff their neighbour class-count vectors
+> differ in some class `t = (colour, adj-value, POE)` (= `refineStep_iff` ∘ `Multiset.ext`) — plus the gloss
+> `count_signature_eq_card` (each class-count IS a literal neighbour cardinality `|{u≠v : (χ u, adj v u, P v u)=t}|`).
+> This is the non-circular skeleton: it says *what warm refinement does at each step*, touching nothing about the
+> gauge *group* (Tier B). Next in Tier A: the equitability ⟹ local-exchange (flatness) lemma, then different-orbits
+> ⟺ nontrivial holonomy.
+>
 > **What is DEAD and must not be re-walked.** The **matroid framework on commit-set closures** is closed
 > (`matroid.md:463-481`, §6/§8): neither the partition-based `cl` nor the TC-based `cl_prov` satisfies the exchange
 > axiom (M3 machine-checked refuted). The live matroid is **not** on the descent closure — it is on the
@@ -196,8 +205,8 @@ re-walk a grave.
 ## 5. The attack plan (three tiers)
 
 **Tier A — the localization spine (provable now; non-circular; standalone value).**
-1. `matroid.md:146-151` base lemma — vertex breaks from `C` iff neighbour-subcell count vector differs (multiset
-   `refineStep_iff`). Moderate Lean.
+1. ✅ **LANDED** — `matroid.md:146-151` base lemma = `GaugeComplex.refineStep_ne_iff_exists_count_ne` (+
+   `count_signature_eq_card`), `ChainDescent/GaugeComplex.lean`, axiom-clean, in the gate.
 2. Gauge-complex formalization: mixed-cell = non-Schurian; equitability ⟹ local exchange exists (flatness);
    different-orbits ⟺ nontrivial holonomy.
 3. Core/decoration split as a theorem: decoration ⟹ zero independent holonomy ⟹ the core is `Recover`'s `M`.
