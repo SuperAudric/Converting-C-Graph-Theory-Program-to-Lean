@@ -299,5 +299,75 @@ theorem keyEquivariant_compKey_refineByFrame_adj :
       (genOfRef (refineByFrame (extractOf (rowAdj (n := n)) witChi)))))) :=
   keyEquivariant_compKey_refineByFrame (extractOf rowAdj witChi) refExtractEquivariant_adj
 
+/-! ## Step 5 — the `②` reduction: `hemit` (discreteness) ⟸ `ForcedSeparates` (faithfulness)
+
+The `②`/firing side reduced to one clean, family-agnostic predicate — the mirror of Step A's `①` reduction.
+`refineByFrame` discretizes exactly when the extraction's forced values separate co-cellular vertices; that
+separation IS the per-family faithfulness (carried). On CFI it holds on the **rigid residue after consume peels
+the `Z₂^β` gauge** (raw-cell gauge coords are `none` = tie = consume's job), so it is entangled with the
+interleaving (R6), not a standalone CFI fact. -/
+
+theorem encOpt_lt_three (o : Option (ZMod 2)) : encOpt o < 3 := by
+  cases o with
+  | none => decide
+  | some x =>
+    have hx : x.val < 2 := ZMod.val_lt x
+    simp only [encOpt]; omega
+
+theorem encOpt_injective : Function.Injective encOpt := by
+  intro a b hab
+  cases a with
+  | none =>
+    cases b with
+    | none => rfl
+    | some y => simp only [encOpt] at hab; omega
+  | some x =>
+    cases b with
+    | none => simp only [encOpt] at hab; omega
+    | some y =>
+      simp only [encOpt] at hab
+      have hxy : x.val = y.val := by omega
+      exact congrArg some (ZMod.val_injective 2 hxy)
+
+/-- **The extraction's forced values SEPARATE co-cellular vertices** — distinct vertices of the same χ-colour get
+distinct forced values (`frameRead`). This is the per-family faithfulness the `②`/firing needs; carried. On CFI it
+holds on the rigid residue (after consume peels the gauge), i.e. entangled with the interleaving. -/
+def ForcedSeparates
+    (extract : AdjMatrix n → Colouring n → Finset (Fin n → ZMod 2) × (Fin n → ZMod 2))
+    (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ u v : Fin n, χ u = χ v → frameRead extract adj χ u = frameRead extract adj χ v → u = v
+
+/-- **★ Step 5 — the `②` reduction.** `hemit` for `refineByFrame` (= `Discrete (refineByFrame extract adj χ)`)
+reduces to `ForcedSeparates`: the refined colour `3 * χ v + encOpt (frameRead …)` is injective because
+`encOpt ∈ {0,1,2} < 3` splits it into the χ-digit and the forced-digit, and `ForcedSeparates` separates within a
+χ-cell. Family-agnostic; any faithful extraction discharges `hemit` through this. -/
+theorem hemit_of_forcedSeparates
+    (extract : AdjMatrix n → Colouring n → Finset (Fin n → ZMod 2) × (Fin n → ZMod 2))
+    (adj : AdjMatrix n) (χ : Colouring n) (h : ForcedSeparates extract adj χ) :
+    Discrete (refineByFrame extract adj χ) := by
+  intro u v huv
+  simp only [refineByFrame] at huv
+  have hu := encOpt_lt_three (frameRead extract adj χ u)
+  have hv := encOpt_lt_three (frameRead extract adj χ v)
+  have hχ : χ u = χ v := by omega
+  have hc : encOpt (frameRead extract adj χ u) = encOpt (frameRead extract adj χ v) := by omega
+  exact h u v hχ (encOpt_injective hc)
+
+/-- **★★★ The `②`/firing capstone, on the clean interface.** `NodeResolved` for `refineByFrame` reduces to
+`ForcedSeparates` (the per-family faithfulness — the extraction's forced values separate co-cellular vertices) +
+rigidity. Soundness is free (P3-Sound), `hext`-free (firing is equivariance-free). Combined with
+`keyEquivariant_compKey_refineByFrame` (`①` ⟸ `RefExtractEquivariant`), the whole rigid-**linear** seal for
+`refineByFrame` rests on exactly two per-family objects: `RefExtractEquivariant` (extraction transports — ✅
+discharged for the adjacency instance) and `ForcedSeparates` (extraction faithful — the carried bridge). -/
+theorem nodeResolved_compKey_refineByFrame_of_forcedSeparates
+    (extract : AdjMatrix n → Colouring n → Finset (Fin n → ZMod 2) × (Fin n → ZMod 2))
+    (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n) (hnd : ¬ Discrete χ)
+    (hsep : ForcedSeparates extract adj χ)
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (compKey (skOf (emitLabel (genOfRef (refineByFrame extract))))) S adj χ :=
+  nodeResolved_compKey_refineByFrame extract S adj χ hnd
+    (fun _ _ _ => hemit_of_forcedSeparates extract adj χ hsep) hrigid
+
 end RigidRefine
 end ChainDescent
