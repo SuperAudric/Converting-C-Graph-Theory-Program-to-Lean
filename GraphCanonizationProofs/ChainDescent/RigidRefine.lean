@@ -41,6 +41,8 @@ open ChainDescent.Force
 open ChainDescent.RigidSolver
 open ChainDescent.RigidSeal
 open ChainDescent.Consume (IsColAut)
+open ChainDescent.RigidRREF (rrefCanon)
+open ChainDescent.RigidFrame (transportRow)
 
 variable {n : Nat}
 
@@ -452,6 +454,127 @@ theorem readEquivariant_encOpt_frameRead
     ReadEquivariant (fun adj χ v => encOpt (frameRead extract adj χ v)) := by
   intro σ adj χ v
   simp only [frameRead_transport extract hext σ adj χ v]
+
+/-! ## Step 6b — the concrete structural reader (RREF-column over a recovered order)
+
+The `②`-delivering reader. Reads each vertex's **RREF-column signature** (`rrefCanon`, reused) over a **structural
+column order** `ord` — a `Perm` that transports as `ord' = σ · ord` (iso-invariant, from `Recover`). ★ The unlock:
+a structural order makes the framed RREF invariant **unconditionally** — no `Discrete χ` (the χ-rank frame's gap
+came exactly from `rankInv` needing injectivity; a recovered order sidesteps it). So `ReadEquivariant` (`①`) holds
+for the structural reader modulo two carried transport facts (`OrdEquivariant`, `HsEquivariant`); `ReadSeparates`
+(`②`, discretization) stays carried = "`Recover`'s ordered base pins every vertex." -/
+
+/-- Read a row in a **given** column order `ord` (position ↦ vertex) — the general-order frame, χ-rank-free. -/
+def frameRowBy (ord : Equiv.Perm (Fin n)) (r : Fin n → Bool) : List Bool :=
+  (List.finRange n).map (fun pos => r (ord pos))
+
+/-- The system read in the order `ord`. -/
+def frameSysBy (ord : Equiv.Perm (Fin n)) (Hs : List (Fin n → Bool)) : List (List Bool) :=
+  Hs.map (frameRowBy ord)
+
+/-- **★ The general-order framed row is σ-invariant** when the order transports as `ord' = σ · ord` — read `r ∘ σ⁻¹`
+in the `σ·ord` order = read `r` in the `ord` order. **No `Discrete χ`** (the unlock vs. the χ-rank frame). -/
+theorem frameRowBy_transport (σ ord : Equiv.Perm (Fin n)) (r : Fin n → Bool) :
+    frameRowBy (σ * ord) (transportRow σ r) = frameRowBy ord r := by
+  unfold frameRowBy
+  refine List.map_congr_left (fun pos _ => ?_)
+  show transportRow σ r ((σ * ord) pos) = r (ord pos)
+  unfold transportRow
+  rw [Equiv.Perm.mul_apply, Equiv.symm_apply_apply]
+
+theorem frameSysBy_transport (σ ord : Equiv.Perm (Fin n)) (Hs : List (Fin n → Bool)) :
+    frameSysBy (σ * ord) (Hs.map (transportRow σ)) = frameSysBy ord Hs := by
+  unfold frameSysBy
+  rw [List.map_map]
+  exact List.map_congr_left (fun r _ => frameRowBy_transport σ ord r)
+
+/-- **★★ The structurally-framed `rrefCanon` transports** (`ord' = σ · ord`) — unconditionally. The χ-rank-free
+analog of `RigidFrame.framedRREF_transport`. -/
+theorem framedRREFBy_transport (σ ord : Equiv.Perm (Fin n)) (Hs : List (Fin n → Bool)) :
+    rrefCanon n (frameSysBy (σ * ord) (Hs.map (transportRow σ))) = rrefCanon n (frameSysBy ord Hs) := by
+  rw [frameSysBy_transport]
+
+/-- The column of an RREF at position `pos` — the vertex's coordinate signature across the pivot rows. -/
+def colSig (rref : List (Nat × List Bool)) (pos : Fin n) : List Bool :=
+  rref.map (fun cr => cr.2.getD pos.val false)
+
+/-- Encode a bit-list injectively (leading `1` sentinel makes it injective across lengths). -/
+def bitsToNat : List Bool → Nat :=
+  List.foldl (fun a b => 2 * a + (if b then 1 else 0)) 1
+
+/-- **The structural reader.** Vertex `v`'s RREF-column signature over the recovered order `ord`, encoded to `ℕ`.
+Parameterized by the carried `Recover` objects: the order `ord` and the system `Hs`. -/
+def structRead (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : Nat :=
+  bitsToNat (colSig (rrefCanon n (frameSysBy (ord adj χ) (Hs adj χ))) ((ord adj χ).symm v))
+
+/-- The recovered order transports as `ord' = σ · ord` (iso-invariant structural order — carried on `Recover`). -/
+def OrdEquivariant (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n)) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n),
+    ord (relabelAdj σ adj) (transportColouring σ χ) = σ * ord adj χ
+
+/-- The recovered system transports as `Hs' = Hs.map (transportRow σ)` (carried on `Recover`). -/
+def HsEquivariant (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool)) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n),
+    Hs (relabelAdj σ adj) (transportColouring σ χ) = (Hs adj χ).map (transportRow σ)
+
+/-- **★★★ Step 6b `①` payoff — the structural reader is `ReadEquivariant`.** From the carried order/system
+transport (`OrdEquivariant` + `HsEquivariant`) and the χ-rank-free `framedRREFBy_transport`. **No `Discrete χ`.**
+Feeds `refEquivariant_refineBy` / `keyEquivariant_compKey_refineBy` — the rigid-linear `①` for the structural
+reader, modulo only the two carried `Recover` transport facts. -/
+theorem readEquivariant_structRead
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (ho : OrdEquivariant ord) (hH : HsEquivariant Hs) :
+    ReadEquivariant (structRead ord Hs) := by
+  intro σ adj χ v
+  simp only [structRead]
+  rw [ho σ adj χ, hH σ adj χ, framedRREFBy_transport σ (ord adj χ) (Hs adj χ)]
+  have hpos : (σ * ord adj χ).symm (σ v) = (ord adj χ).symm v := by
+    have h1 : (σ * ord adj χ) ((ord adj χ).symm v) = σ v := by
+      rw [Equiv.Perm.mul_apply, Equiv.apply_symm_apply]
+    rw [← h1, Equiv.symm_apply_apply]
+  rw [hpos]
+
+/-- **★★★ Step 6b `①` capstone.** `compKey`'s `KeyEquivariant` for the concrete structural reader — the rigid-linear
+`①` closes on the two carried `Recover` transport facts alone. -/
+theorem keyEquivariant_compKey_structRead
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (ho : OrdEquivariant ord) (hH : HsEquivariant Hs) :
+    KeyEquivariant (compKey (skOf (emitLabel (genOfRef (refineBy (structRead ord Hs)))))) :=
+  keyEquivariant_compKey_refineBy (structRead ord Hs) (readEquivariant_structRead ord Hs ho hH)
+
+/-- **The `②` obligation for the structural reader**, crisply: the reader is injective on the residue — every
+vertex gets a distinct column signature. This is exactly *"`Recover`'s ordered base pins every vertex"* = the RREF
+is full column rank on the rigid residue (⟸ rigidity `IsRigidF2` + faithful `Recover`). Carried; its non-vacuity
+is the rigid solver itself (a rigid multipede has trivial kernel ⟹ full-rank recovered system ⟹ distinct columns
+— the probe `scratchpad/probe_rigid.py` shows the RREF-column reader discretizes exactly where the single bit
+cannot). -/
+theorem readSeparates_of_injective
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (adj : AdjMatrix n) (χ : Colouring n)
+    (h : Function.Injective (structRead ord Hs adj χ)) :
+    ReadSeparates (structRead ord Hs) adj χ :=
+  fun _ _ _ huv => (h huv).symm
+
+/-- **★★★ Step 6b `②`/firing capstone.** `NodeResolved` for the concrete structural reader from its injectivity
+(the carried `Recover` discretization) + rigidity. Combined with `keyEquivariant_compKey_structRead` (`①`), the
+whole rigid-**linear** seal for the structural reader rests on exactly the three carried `Recover` facts:
+`OrdEquivariant` + `HsEquivariant` (the order/system transport, `①`) and `structRead` injective (discretization,
+`②`) — no `Discrete χ`, no coordinate-free coarseness. This is the discretizing reader the multipede needs. -/
+theorem nodeResolved_compKey_structRead
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n) (hnd : ¬ Discrete χ)
+    (hinj : Function.Injective (structRead ord Hs adj χ))
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (compKey (skOf (emitLabel (genOfRef (refineBy (structRead ord Hs)))))) S adj χ :=
+  nodeResolved_compKey_refineBy_of_readSeparates (structRead ord Hs) S adj χ hnd
+    (readSeparates_of_injective ord Hs adj χ hinj) hrigid
 
 end RigidRefine
 end ChainDescent

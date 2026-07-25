@@ -577,10 +577,23 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       recovered canonical ordered base (carried).** `ReadSeparates` is the honest restatement of `ForcedSeparates`
       ("the ordered base pins every vertex"). The single-bit reader is retained as a *coarse* `ReadEquivariant`
       instance (**`readEquivariant_encOpt_frameRead`** — steps 1–5 supply a transporting reader) that does NOT satisfy
-      `ReadSeparates` on rigid cells. **▶ NEXT (the larger arc): the concrete STRUCTURAL reader** = read the vertex's
-      RREF-column signature (`RigidRREF.rrefCanon`, reused) over the recovered iso-invariant column order — a
-      `ReadEquivariant + ReadSeparates` instance, carried on Lean `Recover` (C#-tested; Lean side is the P2/`ForcingModel`
-      extraction). That instance is where discretization of the rigid multipede is actually delivered.
+      `ReadSeparates` on rigid cells.
+    - **✅ (step 6b) THE CONCRETE STRUCTURAL READER — LANDED 2026-07-25** (`RigidRefine.lean`, axiom-clean). Reads each
+      vertex's RREF-column signature (`rrefCanon`, reused) over a **recovered iso-invariant column order** `ord` (a
+      `Perm` transporting as `ord' = σ·ord`). **★ THE UNLOCK — no `Discrete χ`:** `frameRowBy ord` / `framedRREFBy_transport`
+      generalize `RigidFrame` to an arbitrary order; a *structural* order makes the framed RREF invariant
+      **unconditionally** (the χ-rank frame's `Discrete χ` gap came from `rankInv` needing injectivity; a recovered order
+      sidesteps it). **`①` (proven):** `readEquivariant_structRead` (`ReadEquivariant (structRead ord Hs)` from the carried
+      `OrdEquivariant ord` + `HsEquivariant Hs` + `framedRREFBy_transport`) ⟹ `keyEquivariant_compKey_structRead`. **`②`
+      (reduced):** `readSeparates_of_injective` (`ReadSeparates ⟸ structRead injective`) ⟹ firing capstone
+      `nodeResolved_compKey_structRead`. ⟹ **the whole rigid-LINEAR seal for the discretizing reader rests on exactly
+      THREE carried `Recover` facts:** `OrdEquivariant` + `HsEquivariant` (order/system transport, `①`) and `structRead`
+      injective (discretization, `②` = "the recovered ordered base pins every vertex" = full-rank on the rigid residue via
+      `IsRigidF2`). **No `Discrete χ`, no coordinate-free coarseness** — this is the reader the rigid multipede actually
+      needs. `ord`/`Hs` are the carried Lean `Recover` objects (C#-tested; Lean side = P2/`ForcingModel`). **▶ NEXT:** the
+      concrete Lean `Recover` (discharge `OrdEquivariant`/`HsEquivariant`/injectivity per family) — the same object as
+      `ForcingModel.bridge`/L4; or `IsRigidF2 ⟹ structRead` injective (rigidity ⟹ full-rank ⟹ distinct columns, via
+      `RigidRREF`'s rank toolkit) to shrink the `②` carry.
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**
