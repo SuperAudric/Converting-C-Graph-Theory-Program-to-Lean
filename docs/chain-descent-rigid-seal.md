@@ -592,14 +592,20 @@ the two together, not as separate legs.
 ### 9.2 The `ForcingModel.bridge` coupling — this is ALSO the W2 completeness track's last obligation
 
 `ForcingModel.bridge` (P2, Layer B, carried — §10 ledger) is not only the rigid solver's graph↔F₂ recovery obligation;
-it is **the same object as the W2 completeness track's `L4`** (`chain-descent-w2-solvability-route.md` §3b + HANDOFF).
-The W2 track (the *completeness dual* — "is the rigid gauge forced solvable?") has now built, axiom-clean, the whole
-group-theoretic + linear-algebra reduction: a recovered **solvable** gauge reduces to a bounded tower of per-coordinate
-**linear** (Smith) solves (`GaugeLayer` L1–L3, `GaugeNonabelian`, `GaugeSolvable`), **modulo exactly one hypothesis —
-that `Recover` produces each derived layer as an explicit linear system from the graph.** That hypothesis is `L4`, and
-it is `ForcingModel.bridge`. **Consequence for this doc:** discharging `ForcingModel.bridge` (the P2/P3 build) does
-double duty — it also empties the W2 *solvable* corner, leaving only the shared non-linear/non-solvable wall (claim #3,
-§5). The two tracks meet at this one object; see the W2 doc's ▶▶ HANDOFF "LOGICAL STATE" note. **Track them together.**
+it is **the F₂/`A_0` instance of the W2 completeness track's `L4`** (`chain-descent-w2-solvability-route.md` §3b +
+HANDOFF). The W2 track (the *completeness dual* — "is the rigid gauge forced solvable?") has now built, axiom-clean, the
+whole group-theoretic + linear-algebra reduction: a recovered **solvable** gauge reduces to a bounded tower of
+per-coordinate **linear** (Smith) solves (`GaugeLayer` L1–L3, `GaugeNonabelian`, `GaugeSolvable`), **modulo exactly one
+hypothesis — that `Recover` produces each derived layer as an explicit linear system from the graph.** That hypothesis
+is `L4`. **⚠ SCOPE — do NOT flatly equate `L4` with `ForcingModel.bridge`.** The bridge is the **single-layer F₂**
+faithfulness (`gForce S j ↔ Forced H S j` over `ZMod 2`); `L4` is the **per-derived-layer** extraction over the tower's
+coefficient rings `A_k = Abelianization(derivedSeries G₀ k)`, of which the bridge is the `A_0 = ZMod 2` case (W2 doc
+§3b lines 30–32/381–382; and §5a's own caveat "stronger than the empirical F₂ `ForcingModel.bridge`", line 472).
+**Consequence for this doc:** discharging `ForcingModel.bridge` (the P2/P3 build) empties the **abelian/F₂** solvable
+corner and is genuinely shared with W2 at the **forcing-faithfulness (R-b)** level; the **general** solvable tower
+additionally needs the `A_k` (k ≥ 1) layer extraction, so the identity is exact only at F₂ — beyond it `L4` strictly
+generalizes the bridge. The two tracks meet at this object *at the F₂ layer*; see the W2 doc's ▶▶ HANDOFF "LOGICAL
+STATE" note. **Track them together — but count the `A_k`-layer extraction as W2-only work, not discharged by the F₂ bridge.**
 
 ---
 

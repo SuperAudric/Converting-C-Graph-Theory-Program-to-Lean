@@ -54,8 +54,8 @@
 >
 > **▶▶ THE LOGICAL STATE — what this track has reduced the corner to (read this).** With **L1–L3 + `of_solvable_tower`**
 > built, the chain is complete as *structure*: a recovered **solvable** gauge `⟹` a bounded tower of per-coordinate
-> **linear** (Smith/Gaussian) solves — **modulo L4 alone** (the graph→linear-system extraction, `GaugeLayer` L4, shared
-> with `ForcingModel.bridge`). Consequently:
+> **linear** (Smith/Gaussian) solves — **modulo L4 alone** (the graph→linear-system extraction, `GaugeLayer` L4, whose
+> **F₂/`A_0` instance** is `ForcingModel.bridge`). Consequently:
 > - **If L4 holds unconditionally, the entire *solvable* corner is poly ⟹ empty** (no residue beyond the wall). L1–L3
 >   already discharge everything between "solvable gauge" and "linear tower"; L4 is the *only* remaining hypothesis.
 > - The **only** residue that can then survive is the **non-solvable** rigid case = **claim #3 = the wall**
@@ -64,6 +64,13 @@
 >   could also empty it); "non-solvable case empty" is the *wall*, tracked independently, not equivalent to L4. **Net:
 >   this track has reduced the §3a corner to exactly `{L4}` + the pre-existing wall — it opens no new residue.** That is
 >   the whole deliverable of the W2 completeness dual: the solvable side is now a single named extraction obligation.
+> - ⚠ **L4 ≠ `ForcingModel.bridge` beyond F₂ — do not let the "shared object" framing hide `A_k`-layer work.** The
+>   bridge is the **single-layer F₂** faithfulness; L4 is the **per-derived-layer** extraction over `A_k =
+>   Abelianization(derivedSeries G₀ k)`, and the bridge is only its `A_0 = ZMod 2` case (§3b; §5a line 472 says as much:
+>   `Recover`'s faithfulness is "stronger than the empirical F₂ `ForcingModel.bridge`"). So discharging the rigid seal's
+>   `ForcingModel.bridge` empties the **abelian/F₂** solvable corner and shares the **R-b forcing-faithfulness** level
+>   with this track — but the `A_k` (k ≥ 1) layer extraction is **W2-only work**, not free from the F₂ bridge. "C3 adds
+>   no *new* carried obligation" holds at R-b; the ring-general L4 is that obligation *generalized*, not a fresh one.
 >
 > ---
 >
