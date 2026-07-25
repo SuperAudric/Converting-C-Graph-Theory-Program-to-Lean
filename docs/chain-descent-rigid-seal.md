@@ -37,9 +37,17 @@
 >   The reduction lemmas (`hemit_of_forcedSeparates` etc.) are correct and kept; the mis-scoping was **contained to the
 >   reader** (probe `scratchpad/probe_rigid.py`). The χ-frame route (C) has a `Discrete χ` gap; both are superseded for
 >   the discretizing job by `structRead` (§8.2 steps 5–6b).
-> - **▶ WHAT REMAINS:** discharge the three carried `Recover` facts — either **`IsRigidF2 ⟹ structRead` injective**
->   (self-contained Lean, via `RigidRREF`'s rank toolkit, shrinks `②`) or the **concrete Lean `Recover`** (per family;
->   the same object as `ForcingModel.bridge`/L4, §9.2) — then **P3-ring** (`Z_{2^k}`), then **P4**
+> - **▶ ACTIVE (step 7, §8.2) — PER-PAIR MIXED-NATIVE FIRING + DE-CLASSING.** Step 6b's `nodeResolved_compKey_structRead`
+>   fires only on the **purely-rigid** node (it routes through `genOfRef`'s all-or-nothing `Discrete` gate). The **mixed**
+>   residue (`CellsAreOrbits` false, ≥1 but not all decisions rigid) needs the per-pair seam `SolverSeparates`/
+>   `nodeResolved_compKey_of_rigid` (already built, mixed-native). Refactor: force key `skStruct = skRead (structRead …)`
+>   (NOT via `genOfRef`) + `ReadSeparatesRigid` (per-pair carried predicate = the **kernel characterization**
+>   `ker(recovered H) = automorphism-gauge`, stated ONCE, not per-family). ⟹ de-classes the `②` carry: the cell's "class"
+>   is `ker(recovered H)` as a subspace (Schurian / CFI / mixed = the extremes + interpolation of ONE predicate); the
+>   only ladder is the finite coefficient tower `F₂ ⊂ Z_{2^k} ⊂ solvable ⊂ (wall)` (= W2). `IsRigidF2 ⟹ structRead`
+>   injective demotes to the `ker=0` non-vacuity anchor.
+> - **▶ THEN:** the **concrete Lean `Recover`** (discharge `OrdEquivariant`/`HsEquivariant` + the kernel predicate per
+>   family; the same object as `ForcingModel.bridge`/L4, §9.2) → **P3-ring** (`Z_{2^k}`) → **P4**
 >   (`canonizesRigidResidue_or_flags`).
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
@@ -609,6 +617,38 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       concrete Lean `Recover` (discharge `OrdEquivariant`/`HsEquivariant`/injectivity per family) — the same object as
       `ForcingModel.bridge`/L4; or `IsRigidF2 ⟹ structRead` injective (rigidity ⟹ full-rank ⟹ distinct columns, via
       `RigidRREF`'s rank toolkit) to shrink the `②` carry.
+    - **▶ (step 7) PLANNED — PER-PAIR (MIXED-NATIVE) FIRING via `skStruct` / `SolverSeparates`; DE-CLASS the `②` carry.**
+      **Why:** `nodeResolved_compKey_structRead` (step 6b) routes firing through `genOfRef`'s **all-or-nothing `Discrete`
+      gate** (`skOf ∘ emitLabel ∘ genOfRef`) — so it fires ONLY when `structRead` *fully* discretizes the whole node =
+      the **purely-rigid** case (pure multipede). On a **mixed** cell (some forced coords + a gauge kernel) `genOfRef`
+      flags ⟹ `encodeOpt` emits the `[]` sentinel ⟹ **ties everything, separates nothing** — the solver's partial
+      progress is discarded, and the user's flagged endpoint (`CellsAreOrbits` false, ≥1 but not all decisions rigid) is
+      NOT handled. **The seam already built for this is `RigidSeal.SolverSeparates`/`nodeResolved_compKey_of_rigid`**
+      (:320/:358) — a **per-pair, family-agnostic** path (mixed-native: the equivariance ceiling `keyV_aut_invariant`
+      ties gauge pairs, consume merges them; only the *non-automorphic* pairs must separate), with **no** global-disc
+      requirement. Step 6b bypassed it. **The fix (a refactor, not new theory):**
+      - Define the force key **directly** from a per-vertex reader — `skRead read := fun adj χ v => ([read adj χ v], skCost n)`
+        (`keyV (skRead read) = [read …]`), NOT via `genOfRef`. `skStruct ord Hs := skRead (structRead ord Hs)`.
+      - `keyEquivariant_skRead` (`KeyEquivariant (skRead read) ⟸ ReadEquivariant read`) → `keyEquivariant_compKey`
+        gives the `①` with no global-disc.
+      - `solverSeparates_skRead` (`SolverSeparates (compKey (skRead read)) adj χ ⟸ ReadSeparatesRigid read adj χ`,
+        mirroring `solverSeparates_skOf` but with NO `hemit`/no-flag hypothesis) → `nodeResolved_compKey_of_rigid` gives
+        the per-cell firing capstone `nodeResolved_compKey_skStruct`.
+      - **`ReadSeparatesRigid read adj χ`** = the per-pair carried predicate: *non-automorphic, non-discretizing,
+        co-cellular `(u,w)` ⟹ `read u ≠ read w`.* **★ This IS the kernel characterization** `ker(recovered H) =
+        {automorphism-induced differences}` restricted to the exposed pairs: non-aut ⟺ `e_u−e_w ∉ ker(H)` ⟺ distinct
+        RREF-column signature. Stated ONCE over the generic extraction — **not per family.**
+      - `readSeparatesRigid_of_injective` (global injectivity ⟹ `ReadSeparatesRigid`, via `IsColAut.one`) keeps the
+        purely-rigid `IsRigidF2 ⟹ structRead` injective result as the **`ker = 0` special case** (Schurian-free
+        multipede = non-vacuity anchor), no longer the shape of the general discharge.
+      **★ De-classing consequence (the categorization).** The "class" of a cell is `ker(recovered H)` **as a subspace** —
+      a lattice parameter, not a discrete family label. **Schurian** = `ker H` everything (all gauge, consume all);
+      **CFI/multipede** = `ker H` the cycle-space gauge (force the rest); **mixed** = a proper intermediate subspace (the
+      interpolation) — the SAME `ReadSeparatesRigid`/kernel predicate covers all three. Per-family CFI/multipede demote
+      to **non-vacuity witnesses** (the de-classing pattern, cf. `theorem_2_HOR_of_pPolynomial`). The only place a ladder
+      could return is the coefficient ring, and there it is the **finite** algebraic tower `F₂ ⊂ Z_{2^k} ⊂ solvable ⊂
+      (wall)` = the W2 stratification (`GaugeLayer`/`of_solvable_tower`), NOT an infinite family list. **This is the
+      object shared with W2/L4 (§9.2)** — building the kernel predicate advances both seals.
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**

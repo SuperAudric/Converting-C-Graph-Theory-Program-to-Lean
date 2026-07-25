@@ -597,5 +597,143 @@ theorem nodeResolved_compKey_structRead
   nodeResolved_compKey_refineBy_of_readSeparates (structRead ord Hs) S adj χ hnd
     (readSeparates_of_injective ord Hs adj χ hinj) hrigid
 
+/-! ## Step 7 — per-pair (mixed-native) firing via `skRead` / `SolverSeparates` (de-class the `②` carry)
+
+Steps 6/6b close firing through `genOfRef`'s **all-or-nothing `Discrete` gate** (`skOf ∘ emitLabel ∘ genOfRef`), so
+`nodeResolved_compKey_structRead` fires only when the reader *fully* discretizes the node = the **purely-rigid** case
+(pure multipede). On a **mixed** cell (some forced coords + a gauge kernel) `genOfRef` flags ⟹ `encodeOpt` emits the
+`[]` sentinel ⟹ everything ties, nothing separates — the solver's partial progress is discarded and the mixed residue
+is not handled.
+
+This step routes firing through the **per-pair, family-agnostic** seam `RigidSeal.SolverSeparates` /
+`nodeResolved_compKey_of_rigid` instead. It is **mixed-native**: the equivariance ceiling ties gauge/automorphic pairs
+(consume merges them) and only the *non-automorphic* pairs must separate — there is **no** global-discreteness
+requirement. The carried predicate `ReadSeparatesRigid` is the **kernel characterization** `ker(recovered H) =
+{automorphism-induced differences}` restricted to the exposed pairs (non-aut ⟺ `e_u−e_w ∉ ker(H)` ⟺ distinct
+signature), stated ONCE over the generic extraction — not per family. Schurian (`ker H` = everything) and CFI/multipede
+(`ker H` = cycle-space gauge) are the extremes of this one predicate; mixed is the interpolation. Global injectivity
+(the purely-rigid `IsRigidF2 ⟹ structRead` injective) is the `ker = 0` special case
+(`readSeparatesRigid_of_injective`). -/
+
+/-- **The force key read directly off a per-vertex reader** — the reader's value wrapped as a `Force.Key`, NOT routed
+through `genOfRef`/`emitLabel` (whose `Discrete` gate is all-or-nothing). This is what lets the rigid solver fire
+per-pair on a mixed cell. `skCost` is the placeholder `②` cost (no `①` obligation). -/
+def skRead (read : AdjMatrix n → Colouring n → Fin n → Nat) : Force.Key n :=
+  fun adj χ v => ([read adj χ v], RigidSolver.skCost n)
+
+@[simp] theorem keyV_skRead (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    Force.keyV (skRead read) adj χ v = [read adj χ v] := rfl
+
+/-- **★ `①` — the reader key is equivariant** from `ReadEquivariant read` alone (the value is `[read …]`, a
+vertex-invariant). Feeds `keyEquivariant_compKey`. -/
+theorem keyEquivariant_skRead (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (h : ReadEquivariant read) : KeyEquivariant (skRead read) := by
+  intro σ adj χ v
+  simp only [keyV_skRead]
+  rw [h σ adj χ v]
+
+/-- **The per-pair carried predicate = the kernel characterization on the exposed pairs.** A non-automorphic,
+non-discretizing, co-cellular pair `(u,w)` gets **distinct** reads — i.e. `e_u − e_w ∉ ker(recovered H)`. This is the
+mixed-native `②`: it says nothing about gauge/automorphic pairs (they tie, correctly), only that the *rigid decisions*
+separate. Stated once over the generic reader — Schurian/CFI/mixed are all instances by the value of `ker(recovered
+H)`. -/
+def ReadSeparatesRigid (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ u ∈ branches χ, ∀ w ∈ branches χ,
+    (∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) →
+    ¬ Discrete (lookData adj χ u).col → ¬ Discrete (lookData adj χ w).col →
+    read adj χ u ≠ read adj χ w
+
+/-- **★★ Firing reduction — `SolverSeparates` from `ReadSeparatesRigid`, with NO `hemit`/no-flag hypothesis.** The
+mirror of `RigidSolver.solverSeparates_skOf`, but the direct reader key never flags, so the discretization
+completeness that `skOf` needed (`hemit`) drops out entirely — the reader separates the exposed rigid pairs *per pair*.
+This is the whole point of step 7: mixed cells fire without full discreteness. -/
+theorem solverSeparates_skRead (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) (hsep : ReadSeparatesRigid read adj χ) :
+    SolverSeparates (compKey (skRead read)) adj χ := by
+  intro u hu w hw hrig hdu hdw hkey
+  rw [keyV_compKey_not_disc (skRead read) adj χ u hdu,
+      keyV_compKey_not_disc (skRead read) adj χ w hdw, keyV_skRead, keyV_skRead] at hkey
+  obtain ⟨_, h2⟩ := List.cons.inj hkey
+  obtain ⟨hval, _⟩ := List.cons.inj h2
+  exact hsep u hu w hw hrig hdu hdw hval
+
+/-- **★ `①` capstone (per-pair).** `compKey (skRead read)`'s `KeyEquivariant` from `ReadEquivariant read`. -/
+theorem keyEquivariant_compKey_skRead (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (h : ReadEquivariant read) : KeyEquivariant (compKey (skRead read)) :=
+  keyEquivariant_compKey (skRead read) (keyEquivariant_skRead read h)
+
+/-- **★★★ `②`/firing capstone (per-pair, MIXED-NATIVE).** `NodeResolved` for `compKey (skRead read)` from
+`ReadSeparatesRigid` (the exposed rigid pairs separate) + rigidity — **no global discreteness**. The gauge pairs stay
+tied and are consume's job (the untouched `cellIsOrbit` disjunct); only the rigid decisions must separate. This is the
+firing the mixed residue actually needs. -/
+theorem nodeResolved_compKey_skRead (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n) (hnd : ¬ Discrete χ)
+    (hsep : ReadSeparatesRigid read adj χ)
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (compKey (skRead read)) S adj χ :=
+  nodeResolved_compKey_of_rigid (skRead read) S adj χ hnd
+    (solverSeparates_skRead read adj χ hsep) hrigid
+
+/-- **Global injectivity ⟹ `ReadSeparatesRigid`** — the `ker = 0` (purely-rigid) special case: if the reader is
+injective on the whole vertex set (`IsRigidF2 ⟹ structRead` injective, the pure multipede) then in particular it
+separates every non-automorphic pair, since a non-automorphic pair is distinct (the identity `IsColAut.one` would
+otherwise map `u` to `w`). So the purely-rigid result feeds the mixed-native firing as its extreme. -/
+theorem readSeparatesRigid_of_injective (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) (h : Function.Injective (read adj χ)) :
+    ReadSeparatesRigid read adj χ := by
+  intro u _ w _ hrig _ _ hval
+  exact hrig 1 (Consume.IsColAut.one adj χ) (by simpa using h hval)
+
+/-! ### Step 7 — the `structRead` instantiation (`skStruct`) -/
+
+/-- **`skStruct ord Hs`** — the concrete mixed-native force key: the structural RREF-column reader wrapped directly as
+a `Force.Key`, bypassing `genOfRef`. Its `①` rides the carried order/system transport; its firing rides the per-pair
+kernel characterization `ReadSeparatesRigid (structRead ord Hs)`. -/
+def skStruct (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool)) : Force.Key n :=
+  skRead (structRead ord Hs)
+
+/-- **★★★ Step 7 `①` capstone (structural).** `compKey (skStruct ord Hs)`'s `KeyEquivariant` from the two carried
+transport facts (`OrdEquivariant` + `HsEquivariant`) — no global discreteness, no `genOfRef`. -/
+theorem keyEquivariant_compKey_skStruct
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (ho : OrdEquivariant ord) (hH : HsEquivariant Hs) :
+    KeyEquivariant (compKey (skStruct ord Hs)) :=
+  keyEquivariant_compKey_skRead (structRead ord Hs) (readEquivariant_structRead ord Hs ho hH)
+
+/-- **★★★ Step 7 `②`/firing capstone (structural, MIXED-NATIVE).** `NodeResolved` for `compKey (skStruct ord Hs)` from
+the per-pair kernel characterization `ReadSeparatesRigid (structRead ord Hs)` + rigidity — **no global discreteness**.
+This is the discretizing reader firing on a MIXED cell (forced pairs separate, gauge pairs tie for consume), which
+step 6b's `nodeResolved_compKey_structRead` could not do. The whole rigid seal for the mixed residue now rests on:
+`OrdEquivariant` + `HsEquivariant` (`①`) + `ReadSeparatesRigid (structRead ord Hs)` (`②` = the kernel characterization,
+one generic predicate). -/
+theorem nodeResolved_compKey_skStruct
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n) (hnd : ¬ Discrete χ)
+    (hsep : ReadSeparatesRigid (structRead ord Hs) adj χ)
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (compKey (skStruct ord Hs)) S adj χ :=
+  nodeResolved_compKey_skRead (structRead ord Hs) S adj χ hnd hsep hrigid
+
+/-- **The purely-rigid (`ker = 0`) firing, recovered as a corollary.** Global `structRead` injectivity (the pure
+multipede, `IsRigidF2 ⟹ structRead` injective) ⟹ the mixed-native firing capstone — so step 6b's fully-rigid case is
+subsumed by step 7's per-pair route (via `readSeparatesRigid_of_injective`), and the two are one theorem. -/
+theorem nodeResolved_compKey_skStruct_of_injective
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n))
+    (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n) (hnd : ¬ Discrete χ)
+    (hinj : Function.Injective (structRead ord Hs adj χ))
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (compKey (skStruct ord Hs)) S adj χ :=
+  nodeResolved_compKey_skStruct ord Hs S adj χ hnd
+    (readSeparatesRigid_of_injective (structRead ord Hs) adj χ hinj) hrigid
+
 end RigidRefine
 end ChainDescent
