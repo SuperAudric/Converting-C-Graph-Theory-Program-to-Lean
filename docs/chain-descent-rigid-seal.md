@@ -46,9 +46,13 @@
 >   is `ker(recovered H)` as a subspace (Schurian / CFI / mixed = the extremes + interpolation of ONE predicate); the
 >   only ladder is the finite coefficient tower `F₂ ⊂ Z_{2^k} ⊂ solvable ⊂ (wall)` (= W2). `IsRigidF2 ⟹ structRead`
 >   injective demotes to the `ker=0` non-vacuity anchor.
-> - **▶ THEN:** the **concrete Lean `Recover`** (discharge `OrdEquivariant`/`HsEquivariant` + the kernel predicate per
->   family; the same object as `ForcingModel.bridge`/L4, §9.2) → **P3-ring** (`Z_{2^k}`) → **P4**
->   (`canonizesRigidResidue_or_flags`).
+> - **▶ ACTIVE (step 8, §8.2) — CONCRETE `Recover`.** Split into 3 pieces: (1) the extracted system `Hs` — **✅ DONE**
+>   (`hsAdj` + `hsAdj_transport_perm` + `rrefCanon_congr_perm` ⟹ `readEquivariant_structRead_hsAdj`: `HsEquivariant`
+>   DISCHARGED, `ReadEquivariant` from `OrdEquivariant` alone); (2) the iso-invariant **order `ord`** — the crux (**★
+>   finding: `OrdEquivariant` = an equivariant Perm is satisfiable ONLY on rigid inputs**; mixed needs
+>   `ReadEquivariant`-direct/orbit-invariance, = the WL/canonical-order wall, = C# `Recover`'s tested "canonical ordered
+>   base"); (3) the **kernel predicate** `ReadSeparatesRigid` (faithfulness/bridge = `ForcingModel.bridge`/L4, §9.2). **▶
+>   NEXT = piece 2** (rigid-regime order first) → **P3-ring** (`Z_{2^k}`) → **P4** (`canonizesRigidResidue_or_flags`).
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
 > reader 1–5, general interface 6, structural reader 6b); see §8.2 and §10. The consume side feeds a clean per-node handoff
@@ -617,7 +621,7 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       concrete Lean `Recover` (discharge `OrdEquivariant`/`HsEquivariant`/injectivity per family) — the same object as
       `ForcingModel.bridge`/L4; or `IsRigidF2 ⟹ structRead` injective (rigidity ⟹ full-rank ⟹ distinct columns, via
       `RigidRREF`'s rank toolkit) to shrink the `②` carry.
-    - **▶ (step 7) PLANNED — PER-PAIR (MIXED-NATIVE) FIRING via `skStruct` / `SolverSeparates`; DE-CLASS the `②` carry.**
+    - **✅ (step 7) LANDED 2026-07-25 — PER-PAIR (MIXED-NATIVE) FIRING via `skStruct` / `SolverSeparates`; DE-CLASSED the `②` carry** (`RigidRefine.lean`, axiom-clean).
       **Why:** `nodeResolved_compKey_structRead` (step 6b) routes firing through `genOfRef`'s **all-or-nothing `Discrete`
       gate** (`skOf ∘ emitLabel ∘ genOfRef`) — so it fires ONLY when `structRead` *fully* discretizes the whole node =
       the **purely-rigid** case (pure multipede). On a **mixed** cell (some forced coords + a gauge kernel) `genOfRef`
@@ -649,6 +653,26 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       could return is the coefficient ring, and there it is the **finite** algebraic tower `F₂ ⊂ Z_{2^k} ⊂ solvable ⊂
       (wall)` = the W2 stratification (`GaugeLayer`/`of_solvable_tower`), NOT an infinite family list. **This is the
       object shared with W2/L4 (§9.2)** — building the kernel predicate advances both seals.
+      **Landed (`RigidRefine` step 7):** `skRead`/`keyV_skRead`, `keyEquivariant_skRead`, `ReadSeparatesRigid`,
+      `solverSeparates_skRead` (no `hemit`), `keyEquivariant_compKey_skRead`, `nodeResolved_compKey_skRead`,
+      `readSeparatesRigid_of_injective`, and the `structRead` instantiation `skStruct`/`keyEquivariant_compKey_skStruct`/
+      `nodeResolved_compKey_skStruct`(`_of_injective`) — all `[propext, Classical.choice, Quot.sound]`.
+    - **✅ (step 8) LANDED 2026-07-25 — CONCRETE `Recover`, PART 1: the extracted system `Hs`; `HsEquivariant`
+      DISCHARGED** (`RigidRefine.lean`, axiom-clean). **★ Scoping finding that reshapes the crux:** `OrdEquivariant`
+      (an equivariant order **permutation**) is **only satisfiable on RIGID inputs** — a nontrivial colour-automorphism
+      `σ` (`relabel σ adj = adj`, `transport σ χ = χ`) forces `ord adj χ = σ · ord adj χ` ⟹ `σ = 1`. So the concrete
+      `ord` (piece 2) is the WL-flavored crux (equivariant Perm exists only on the pure-rigid regime; the mixed regime
+      needs `ReadEquivariant`-direct/orbit-invariance, not a Perm), while `Hs` (piece 1) and the kernel predicate
+      (piece 3) are separable. **Piece 1 built:** the concrete adjacency extraction `hsAdj` (Bool adjacency rows) +
+      **`hsAdj_transport_perm`** (σ-relabel = a `List.Perm` of the column-transported system — the honest row-order-agnostic
+      form of `HsEquivariant`; a real index-based extraction meets `HsEquivariant` only up to row permutation) +
+      **`rrefCanon_congr_perm`** (`rrefCanon` is `List.Perm`-invariant on its rows, via `rrefCanon_eq_of_span_eq` +
+      `Spans.mono`) ⟹ **`framedRREF_hsAdj_transport`** (the framed RREF of `hsAdj` transports, row-permutation absorbed)
+      ⟹ **`readEquivariant_structRead_hsAdj`** (`ReadEquivariant (structRead ord hsAdj)` from **`OrdEquivariant` ALONE** —
+      `HsEquivariant` gone) + capstone **`keyEquivariant_compKey_skStruct_hsAdj`**. **▶ So the concrete `Recover` now
+      carries only piece 2 (`ord`/`OrdEquivariant`, the crux) + piece 3 (the kernel predicate).** NEXT = piece 2: the
+      concrete iso-invariant order (rigid regime first, via the RREF-signature-sorted order; = C# `Recover`'s canonical
+      ordered base, tested — the Lean gap is its equivariance).
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**

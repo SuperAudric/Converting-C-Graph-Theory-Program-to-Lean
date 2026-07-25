@@ -735,5 +735,110 @@ theorem nodeResolved_compKey_skStruct_of_injective
   nodeResolved_compKey_skStruct ord Hs S adj χ hnd
     (readSeparatesRigid_of_injective (structRead ord Hs) adj χ hinj) hrigid
 
+/-! ## Step 8 — the concrete `Recover`, part 1: the extracted system `Hs` (discharge `HsEquivariant`)
+
+`structRead` carries two `Recover` objects: the column order `ord` and the extracted F₂ system `Hs`. This step
+discharges the `Hs` half **concretely** — the adjacency Bool-row system `hsAdj` — so `HsEquivariant` drops off the
+carried list, leaving only the order `ord` (the crux, piece 2) and the kernel predicate (piece 3).
+
+**★ Interface correction (surfaced by building):** a real index-based extraction satisfies `HsEquivariant` only **up
+to row permutation** — under `σ` the rows are both column-transported (`transportRow σ`) *and* re-indexed. That is
+harmless: `rrefCanon` is a canonical function of the row **space** (`rrefCanon_eq_of_span_eq`), so a `List.Perm` of the
+rows leaves the framed RREF — hence `structRead` — unchanged. This step proves that span-level transport for `hsAdj`,
+which is strictly the honest form of `HsEquivariant` (`readEquivariant_structRead` used the literal list equality,
+which no concrete index-based extraction meets on the nose). -/
+
+open ChainDescent.Kernel (Spans)
+
+/-- **`rrefCanon` is `List.Perm`-invariant on its rows** — a permutation of the generating list preserves the row
+space (`Spans` both ways via `Spans.mono`), so the canonical RREF is unchanged. The "row order doesn't matter" fact
+any concrete (index-based) extraction needs. -/
+theorem rrefCanon_congr_perm {m : Nat} {L₁ L₂ : List (List Bool)}
+    (h₁ : ∀ r ∈ L₁, r.length = m) (h₂ : ∀ r ∈ L₂, r.length = m) (hp : L₁.Perm L₂) :
+    rrefCanon m L₁ = rrefCanon m L₂ :=
+  RigidRREF.rrefCanon_eq_of_span_eq h₁ h₂ (fun _ =>
+    ⟨Spans.mono (fun _ hb => hp.mem_iff.mp hb), Spans.mono (fun _ hb => hp.mem_iff.mpr hb)⟩)
+
+/-- Mapping an `Equiv.Perm` over `List.finRange n` permutes it (same nodup elements). -/
+theorem finRange_map_perm (e : Equiv.Perm (Fin n)) :
+    ((List.finRange n).map (⇑e)).Perm (List.finRange n) := by
+  refine (List.perm_ext_iff_of_nodup ((List.nodup_finRange n).map e.injective)
+    (List.nodup_finRange n)).mpr (fun x => ?_)
+  simp only [List.mem_map, List.mem_finRange, true_and, iff_true]
+  exact ⟨e.symm x, by simp⟩
+
+/-- The concrete adjacency Bool-row of vertex `i`: `v ↦ [adj i v ≠ 0]`. -/
+def boolRow (adj : AdjMatrix n) (i : Fin n) : Fin n → Bool := fun v => decide (adj.adj i v ≠ 0)
+
+/-- **The concrete extracted system** — the graph's adjacency rows as an F₂ system (χ-independent; the simplest
+non-vacuous faithful-of-the-adjacency extraction, the Bool/`List` analog of step 4's `rowAdj`). This is the `Hs`
+the structural reader consumes; the per-family faithful extraction (CFI rails) slots in the same way. -/
+def hsAdj (adj : AdjMatrix n) (_χ : Colouring n) : List (Fin n → Bool) :=
+  (List.finRange n).map (boolRow adj)
+
+/-- The relabelled adjacency row is the transported row at the pre-image index: a pure reindex + column transport. -/
+theorem boolRow_relabel (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (i : Fin n) :
+    boolRow (relabelAdj σ adj) i = transportRow σ (boolRow adj (σ.symm i)) := by
+  funext v
+  show decide ((relabelAdj σ adj).adj i v ≠ 0) = decide (adj.adj (σ.symm i) (σ.symm v) ≠ 0)
+  rw [relabelAdj_adj]
+
+/-- **★ `hsAdj` transports up to `List.Perm`.** The σ-relabelled system is a row-permutation of the
+column-transported system — the honest (row-order-agnostic) form of `HsEquivariant`. -/
+theorem hsAdj_transport_perm (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) :
+    (hsAdj (relabelAdj σ adj) (transportColouring σ χ)).Perm ((hsAdj adj χ).map (transportRow σ)) := by
+  have key : hsAdj (relabelAdj σ adj) (transportColouring σ χ)
+      = ((List.finRange n).map (⇑σ.symm)).map (transportRow σ ∘ boolRow adj) := by
+    simp only [hsAdj, List.map_map]
+    exact List.map_congr_left (fun i _ => boolRow_relabel σ adj i)
+  have key2 : (hsAdj adj χ).map (transportRow σ)
+      = (List.finRange n).map (transportRow σ ∘ boolRow adj) := by
+    simp only [hsAdj, List.map_map]
+  rw [key, key2]
+  exact (finRange_map_perm σ.symm).map (transportRow σ ∘ boolRow adj)
+
+/-- Every row of a `frameSysBy` output has length `n` (it maps over `finRange n`). -/
+theorem length_mem_frameSysBy (o : Equiv.Perm (Fin n)) (L : List (Fin n → Bool)) :
+    ∀ r ∈ frameSysBy o L, r.length = n := by
+  intro r hr
+  obtain ⟨s, _, rfl⟩ := List.mem_map.mp hr
+  simp [frameRowBy]
+
+/-- **★★ The structurally-framed RREF of the concrete system transports** (order `o ↦ σ · o`) — the `hsAdj`
+instance of `framedRREFBy_transport`, with the row-permutation absorbed by `rrefCanon_congr_perm`. This is exactly
+what `readEquivariant_structRead` consumes at the `Hs` step, now discharged for the concrete extraction. -/
+theorem framedRREF_hsAdj_transport (σ o : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) :
+    rrefCanon n (frameSysBy (σ * o) (hsAdj (relabelAdj σ adj) (transportColouring σ χ)))
+      = rrefCanon n (frameSysBy o (hsAdj adj χ)) := by
+  have hp : (frameSysBy (σ * o) (hsAdj (relabelAdj σ adj) (transportColouring σ χ))).Perm
+      (frameSysBy (σ * o) ((hsAdj adj χ).map (transportRow σ))) :=
+    (hsAdj_transport_perm σ adj χ).map (frameRowBy (σ * o))
+  rw [rrefCanon_congr_perm (length_mem_frameSysBy _ _) (length_mem_frameSysBy _ _) hp]
+  exact framedRREFBy_transport σ o (hsAdj adj χ)
+
+/-- **★★★ Step 8 payoff — `ReadEquivariant (structRead ord hsAdj)` from `OrdEquivariant ord` ALONE.** The
+`HsEquivariant` carried fact is discharged for the concrete adjacency extraction (via the span-level
+`framedRREF_hsAdj_transport`). So a concrete `Recover` for the structural reader now carries only the order `ord`
+(`OrdEquivariant`) and the kernel predicate — the `Hs` extraction is no longer a hypothesis. -/
+theorem readEquivariant_structRead_hsAdj
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n)) (ho : OrdEquivariant ord) :
+    ReadEquivariant (structRead ord hsAdj) := by
+  intro σ adj χ v
+  simp only [structRead]
+  rw [ho σ adj χ, framedRREF_hsAdj_transport σ (ord adj χ) adj χ]
+  have hpos : (σ * ord adj χ).symm (σ v) = (ord adj χ).symm v := by
+    have h1 : (σ * ord adj χ) ((ord adj χ).symm v) = σ v := by
+      rw [Equiv.Perm.mul_apply, Equiv.apply_symm_apply]
+    rw [← h1, Equiv.symm_apply_apply]
+  rw [hpos]
+
+/-- **★★★ Step 8 `①` capstone — the mixed-native force key's equivariance, on the concrete extraction, modulo ONLY
+`OrdEquivariant`.** `HsEquivariant` is gone (discharged); the rigid-linear `①` for `compKey (skStruct ord hsAdj)`
+now rests on the single carried order fact. -/
+theorem keyEquivariant_compKey_skStruct_hsAdj
+    (ord : AdjMatrix n → Colouring n → Equiv.Perm (Fin n)) (ho : OrdEquivariant ord) :
+    KeyEquivariant (compKey (skStruct ord hsAdj)) :=
+  keyEquivariant_compKey_skRead (structRead ord hsAdj) (readEquivariant_structRead_hsAdj ord ho)
+
 end RigidRefine
 end ChainDescent
