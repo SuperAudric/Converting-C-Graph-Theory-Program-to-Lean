@@ -189,11 +189,16 @@ close it — is set out in
 > the seam" identity is RETRACTED** — `hSmallAutThin` is a STATIC Route-C scheme predicate (false on consumable
 > cases); the canonizer's residue is the DYNAMIC `¬HandledS`; they join only via the unbuilt W1 (NOT `↔`). The
 > mixed-cell/fusion question is SETTLED — the "Progress" predicate is the already-built sel-rewrite
-> `Select.HandledS`/`NodeResolved`. **▶▶ THE RIGID LINEAR `①` IS NOW FULLY REDUCED** — it needs only (i)
-> `RefEquivariant ref` (⟸ C ⟸ the carried extraction-transport) + (ii) `ref` discrete on the residue (the solve
-> discretizes, per-family). **NEXT: build the concrete `ref` = `refineByFrame`** (wire P2's extraction
-> `gForce`/`encodeFreeFast` into the χ-framed RREF solve) → P3-ring (`Z_{2^k}`) → R6(c)/P4. ⚠ user-flagged open Q
-> (deferred): the rigid solver likely covers MORE than linear residues. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
+> `Select.HandledS`/`NodeResolved`. The (A)–(D) chain reduced the rigid linear `①` to *"supply a discrete equivariant
+> `ref`."* **▶▶ THE CONCRETE `ref` IS NOW LANDED (2026-07-25, `RigidRefine.lean`, steps 1–6b) — see
+> `chain-descent-rigid-seal.md` STATUS + §8.2.** Object of record = the **discretizing structural reader `structRead`**
+> (vertex's RREF-column signature over a recovered iso-invariant order); its rigid-linear seal rests on exactly **three
+> carried `Recover` facts** (`OrdEquivariant` + `HsEquivariant` ⟹ `①` via the χ-rank-free `framedRREFBy_transport`, no
+> `Discrete χ`; `structRead` injective ⟹ `②`). ⚠⚠ **DO-NOT-RE-DERIVE:** the single-bit coordinate-free reader
+> `refineByFrame` (Route B′) does `①` but **cannot discretize** (one F₂ bit ⟹ ≤2 classes/cell ⟹ fails the rigid
+> multipede — the primary target); the χ-frame route (C) has a `Discrete χ` gap; both superseded by `structRead`.
+> **NEXT: `IsRigidF2 ⟹ structRead` injective** (self-contained Lean) and/or the **concrete Lean `Recover`** (= `ForcingModel.bridge`/L4)
+> → P3-ring (`Z_{2^k}`) → P4. ⚠ user-flagged open Q (deferred): the rigid solver likely covers MORE than linear residues. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
 > `hL1`/`K∖cell`, WL-completeness framing) is **SUPERSEDED PROVENANCE**. Measured (`DeepenStrengthProbe.cs`, 39
 > rows): starvation = 0, every checkable row COMPLETE, Chang-A 384/384 (survivor = fusion), expander multipedes rigid.
 > ⛔ `KernelBase.lean` (base recovery + lift) **parked** — not in `build.sh`.

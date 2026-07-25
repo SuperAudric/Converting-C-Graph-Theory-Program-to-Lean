@@ -16,23 +16,38 @@
 
 ---
 
-## ▶ STATUS (2026-07-24)
+## ▶ STATUS (2026-07-25)
 
-> **The C# rigid solver is COMPLETE, and on the Lean side BOTH the Algorithm-R *scaffold* (seam R0a/R0b/`compKey` +
-> reduction layers P1/P3-I/P3-Sound/P2/P3-F₂ core) AND the full `gen`-labelling reduction chain (A)–(D) are now
-> built (axiom-clean, gate green 92 modules).** ▶▶ **HEADLINE FOR A FRESH READER: the rigid *linear* `①` is fully
-> reduced** — building the canonical labelling `gen` no longer carries any equivariance/canonicity obligation; it
-> reduces to exactly two carried, per-family facts: **(i) `RefEquivariant ref`** (the solve-refined colouring
-> transports — ⟸ (C) `framedRREF_transport` ⟸ the extraction transporting as `H ↦ H.map (transportRow σ)`, a P2
-> property) and **(ii) `ref` discrete on the residue** (the RREF solve discretizes the gauge, per-family). **What
-> remains to build:** the concrete `ref` = **`refineByFrame`** — ⚠ **ROUTE B′ (coordinate-free forcing over P2's
-> `rowspace`/`Forced`), reframed 2026-07-25: the χ-frame route has a `Discrete χ` gap and is superseded for `①`; see
-> §8.2** — then **P3-ring** (`Z_{2^k}`), then **P4** (`canonizesRigidResidue_or_flags`). The
-> module chain to read is `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D); see §8.2 and §10. The consume side also feeds a clean per-node
-> handoff object, and discharging its own `Amenable` hypothesis is a rigid-side deliverable (§9.1). **The
-> mixed-cell/fusion design question is SETTLED (§8.1):** the "Progress" completeness predicate IS the ALREADY-BUILT
-> sel-rewrite (`Select.HandledS`/`NodeResolved`/`selNode`, 2026-07-18) — a resolver-aware selector, single-path,
-> `②` preserved, flags ONLY at the true mutual stall (`selNode_stall_iff`). No object change, no new predicate.
+> **The C# rigid solver is COMPLETE, and on the Lean side the Algorithm-R *scaffold* (seam R0a/R0b/`compKey` +
+> reduction layers P1/P3-I/P3-Sound/P2/P3-F₂ core), the full `gen`-labelling reduction chain (A)–(D), AND the concrete
+> rigid refinement `ref` (steps 1–6b, `RigidRefine.lean`) are all built (axiom-clean, gate green ~99 modules).**
+>
+> ▶▶ **HEADLINE FOR A FRESH READER.** The `gen`-chain (A)–(D) reduced the rigid **linear** `①` to *"supply a discrete,
+> equivariant `ref`"* (`RigidGen.genOfRef` reads `rankPerm` of a discrete `ref`; `①` needs only `RefEquivariant ref`).
+> The concrete `ref` is now built, and its state is the current frontier:
+> - **✅ The DISCRETIZING reader `structRead` (step 6b) is the object of record** — reads each vertex's RREF-column
+>   signature over a **recovered iso-invariant column order** `ord`. Its whole rigid-linear seal rests on **exactly
+>   three carried `Recover` facts**: `OrdEquivariant ord` + `HsEquivariant Hs` (order/system transport ⟹ `①`, via the
+>   χ-rank-free `framedRREFBy_transport` — **no `Discrete χ`**) and `structRead` injective (discretization ⟹ `②`, =
+>   "the recovered ordered base pins every vertex" = full-rank on the rigid residue). Capstones
+>   `keyEquivariant_compKey_structRead` (`①`) / `nodeResolved_compKey_structRead` (`②`/firing).
+> - **⚠⚠ DO-NOT-RE-DERIVE — the single-bit reader `refineByFrame` (Route B′, steps 1–5) CANNOT discretize.** It reads
+>   one F₂ bit per vertex (coordinate-free forcing over P2's `rowspace`), so `①` is unconditional (`refEquivariant_refineByFrame`)
+>   **but** on a rigid cell (no gauge, all forced) it gives ≤2 classes ⟹ **fails the rigid multipede (the primary target).**
+>   The reduction lemmas (`hemit_of_forcedSeparates` etc.) are correct and kept; the mis-scoping was **contained to the
+>   reader** (probe `scratchpad/probe_rigid.py`). The χ-frame route (C) has a `Discrete χ` gap; both are superseded for
+>   the discretizing job by `structRead` (§8.2 steps 5–6b).
+> - **▶ WHAT REMAINS:** discharge the three carried `Recover` facts — either **`IsRigidF2 ⟹ structRead` injective**
+>   (self-contained Lean, via `RigidRREF`'s rank toolkit, shrinks `②`) or the **concrete Lean `Recover`** (per family;
+>   the same object as `ForcingModel.bridge`/L4, §9.2) — then **P3-ring** (`Z_{2^k}`), then **P4**
+>   (`canonizesRigidResidue_or_flags`).
+>
+> **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
+> reader 1–5, general interface 6, structural reader 6b); see §8.2 and §10. The consume side feeds a clean per-node handoff
+> object, and discharging its `Amenable` hypothesis is a rigid-side deliverable (§9.1). **The mixed-cell/fusion design
+> question is SETTLED (§8.1):** the "Progress" predicate IS the already-built sel-rewrite
+> (`Select.HandledS`/`NodeResolved`/`selNode`, 2026-07-18) — resolver-aware, single-path, `②` preserved, flags ONLY at
+> the true mutual stall (`selNode_stall_iff`).
 >
 > **✅ R0a LANDED 2026-07-23 (`ChainDescent/RigidSeal.lean`, in `build.sh`, axiom-clean).** Force separates
 > non-automorphic pairs on the DISCRETIZING regime. **★ FINDING: the plain `Force.lookaheadKey` is INSUFFICIENT**
@@ -701,7 +716,7 @@ STATE" note. **Track them together — but count the `A_k`-layer extraction as W
 | **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
 | **P3-Sound** | soundness is FREE (relabelling-emit) + `①` reduces to `GenEquivariant gen` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverSound.lean`) — `ptForm`/`colAut_of_ptForm_eq`/`emitLabel`/`ptSound_emitLabel`/`ptIsoInvariant_emitLabel` + capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` |
-| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME + ✅ (D) READ-LABELLING LANDED** (`RigidFrame.lean` `framedRREF_transport` + `RigidGen.lean` `genEquivariant_genOfRef`/capstones `keyEquivariant_compKey_genOfRef`/`nodeResolved_compKey_genOfRef`). **▶ (A)–(D) CHAIN COMPLETE.** **✅ concrete `ref` = `refineByFrame` LANDED 2026-07-25, ROUTE B′** (`RigidRefine.lean`, axiom-clean): coordinate-free forcing over P2's `rowspace` (`rowspace_transport`/`forcedVal`/`forcedVal_transport`) ⟹ **`refEquivariant_refineByFrame`** (`RefEquivariant` **UNCONDITIONAL**, no `Discrete χ`, no frame — the χ-frame route had a discreteness gap) + capstones `keyEquivariant_compKey_refineByFrame`/`nodeResolved_compKey_refineByFrame`. The rigid linear `①`/firing now closes on the SINGLE carried `RefExtractEquivariant` (the extraction transports), handles MIXED cells (forced coords pinned, gauge coords tied), needs NO uniqueness. **✅ `RefExtractEquivariant` DISCHARGED (step 4, `RigidRefine.lean`): `refExtractEquivariant_extractOf` (any equivariant local extraction transports — the faithful CFI extraction plugs in here) + concrete `refExtractEquivariant_adj` ⟹ `keyEquivariant_compKey_refineByFrame_adj` = `compKey`'s `KeyEquivariant` with ZERO hypotheses. The `①`/EQUIVARIANCE side owes NOTHING.** **✅ `②` REDUCTION lemma (step 5): `hemit_of_forcedSeparates` + firing capstone (correct, retained).** ⚠⚠ **BUT single-bit `refineByFrame` CANNOT DISCRETIZE (2026-07-25 correction): one F₂ bit ⟹ ≤2 classes/cell ⟹ `ForcedSeparates` UNSATISFIABLE on rigid multipedes (>2-vertex cells, the PRIMARY target). Mis-scoping CONTAINED to the concrete reader; scaffold sound. FIX (step 6) = richer reader (RREF-column) over the recovered canonical ordered base (structural = match Recover, IR §11 B1a).** Remaining `②`: the structural discretizing `ref`; P3-ring |
+| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME + ✅ (D) READ-LABELLING LANDED** (`RigidFrame.lean` `framedRREF_transport` + `RigidGen.lean` `genEquivariant_genOfRef`/capstones `keyEquivariant_compKey_genOfRef`/`nodeResolved_compKey_genOfRef`). **▶ (A)–(D) CHAIN COMPLETE.** **✅ concrete `ref` = `refineByFrame` LANDED 2026-07-25, ROUTE B′** (`RigidRefine.lean`, axiom-clean): coordinate-free forcing over P2's `rowspace` (`rowspace_transport`/`forcedVal`/`forcedVal_transport`) ⟹ **`refEquivariant_refineByFrame`** (`RefEquivariant` **UNCONDITIONAL**, no `Discrete χ`, no frame — the χ-frame route had a discreteness gap) + capstones `keyEquivariant_compKey_refineByFrame`/`nodeResolved_compKey_refineByFrame`. The rigid linear `①`/firing now closes on the SINGLE carried `RefExtractEquivariant` (the extraction transports), handles MIXED cells (forced coords pinned, gauge coords tied), needs NO uniqueness. **✅ `RefExtractEquivariant` DISCHARGED (step 4, `RigidRefine.lean`): `refExtractEquivariant_extractOf` (any equivariant local extraction transports — the faithful CFI extraction plugs in here) + concrete `refExtractEquivariant_adj` ⟹ `keyEquivariant_compKey_refineByFrame_adj` = `compKey`'s `KeyEquivariant` with ZERO hypotheses. The `①`/EQUIVARIANCE side owes NOTHING.** **✅ `②` REDUCTION lemma (step 5): `hemit_of_forcedSeparates` + firing capstone (correct, retained).** ⚠⚠ **BUT single-bit `refineByFrame` CANNOT DISCRETIZE (2026-07-25 correction): one F₂ bit ⟹ ≤2 classes/cell ⟹ `ForcedSeparates` UNSATISFIABLE on rigid multipedes (>2-vertex cells, the PRIMARY target). Mis-scoping CONTAINED to the concrete reader; scaffold sound.** **✅ FIX LANDED (steps 6+6b): the discretizing structural reader `structRead` (RREF-column over a recovered iso-invariant order) — `readEquivariant_structRead`/`keyEquivariant_compKey_structRead` (`①`, no `Discrete χ`, via `framedRREFBy_transport`) + `readSeparates_of_injective`/`nodeResolved_compKey_structRead` (`②`). Rigid-linear seal for the discretizing reader now rests on exactly 3 carried `Recover` facts: `{OrdEquivariant, HsEquivariant, structRead-injective}`.** Remaining: discharge those 3 (`IsRigidF2 ⟹ structRead` inj / Lean `Recover`); P3-ring |
 | **P3-ring** | `Z_{2^k}`/finite-abelian: ring-inference + finite-ring Smith + 2-adic tower | **not built** — heavy; ring-inference carried (`IR §11.13`). ⚠ Mathlib Smith = noncomputable/existence-only |
 | **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
 | **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |

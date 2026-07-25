@@ -48,7 +48,24 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
-> **▶▶▶ UPDATE 2026-07-24 (latest) — RIGID SEAL IS THE ACTIVE TRACK; the Algorithm-R scaffold AND the full
+> **▶▶▶ UPDATE 2026-07-25 (latest) — THE CONCRETE RIGID `ref` IS LANDED (`RigidRefine.lean`, steps 1–6b, axiom-clean,
+> gate green ~99 modules). Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) STATUS + §8.2
+> steps 5–6b + §10.** The (A)–(D) chain reduced the rigid **linear** `①` to *"supply a discrete equivariant `ref`"*;
+> the concrete `ref` is now built and is the frontier:
+> - **✅ The DISCRETIZING reader `structRead` (step 6b) is the object of record.** Reads each vertex's RREF-column
+>   signature over a **recovered iso-invariant column order** `ord`. Its whole rigid-linear seal rests on **exactly
+>   three carried `Recover` facts**: `OrdEquivariant` + `HsEquivariant` (order/system transport ⟹ `①`, via the
+>   χ-rank-free `framedRREFBy_transport` — **no `Discrete χ`**) + `structRead` injective (discretization ⟹ `②` =
+>   full-rank on the rigid residue). `ord`/`Hs` are the carried Lean `Recover` objects (= `ForcingModel.bridge`/L4).
+> - **⚠⚠ DO-NOT-RE-DERIVE:** the earlier plan "wire P2 extraction into refineByFrame" (below, 2026-07-24) produced the
+>   single-bit coordinate-free reader `refineByFrame` — `①` unconditional, **but it CANNOT discretize** (one F₂ bit ⟹
+>   ≤2 classes/cell ⟹ fails the rigid **multipede**, the primary target; probe `scratchpad/probe_rigid.py`). The
+>   mis-scoping was **contained to the reader**; the scaffold ((A)–(D)/`genOfRef`/P3-Sound/`compKey`) is sound. Fixed by
+>   `structRead` (step 6b). Also the χ-frame route (C) has a `Discrete χ` gap.
+> - **▶ NEXT:** **`IsRigidF2 ⟹ structRead` injective** (self-contained Lean, `RigidRREF` rank toolkit — shrinks `②`)
+>   and/or the **concrete Lean `Recover`** (per family, = `ForcingModel.bridge`/L4, §9.2) → **P3-ring** → **P4**.
+>
+> **▶▶▶ UPDATE 2026-07-24 — RIGID SEAL IS THE ACTIVE TRACK; the Algorithm-R scaffold AND the full
 > `gen`-reduction chain (A)–(D) are LANDED (axiom-clean, gate green 92 modules).**
 > **Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (STATUS + §8.1/§8.2 + §10 ledger).**
 > The consume side is closed modulo `{Amenable}` (track A, below), and `Amenable`-violation ⟺ `RigidObstructionAt`

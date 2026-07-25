@@ -3,32 +3,53 @@ import ChainDescent.ForcingModel
 import ChainDescent.RigidSolveF2
 
 /-!
-# The concrete `ref` = `refineByFrame` — ROUTE B′ (coordinate-free forcing)
+# The concrete rigid refinement `ref` that `RigidGen.genOfRef` consumes
 
-The concrete rigid refinement `ref adj χ` that `RigidGen.genOfRef` consumes, built **Route B′**: over P2's
-already-built `rowspace` / `Forced`, coordinate-free — **not** the χ-frame.
+`RigidGen.genOfRef` reduced the rigid **linear** `①` to *"supply a **discrete**, **equivariant** `ref adj χ`"*
+(it reads `rankPerm` of `ref`). This module builds that `ref`. It contains **two** readers and a general interface;
+**the object of record is the structural reader `structRead` (§ step 6b)** — the coordinate-free reader
+(`refineByFrame`, steps 1–5) is retained but provably **cannot discretize** the primary target.
 
-**Why not the frame (the de-risk finding, 2026-07-25).** `RigidFrame.framedRREF_transport` carries a
-`(h : Discrete χ)` hypothesis (via `frameRow_transport` → `rankInv_transport`, which needs injectivity of the
-rank map). But `ref` is applied to **non-discrete cell colourings**, and on a non-discrete cell there is provably
-no equivariant column tiebreak (the "no iso-invariant within-cell vertex pick" wall). So the χ-frame cannot prove
-the *unconditional* `RefEquivariant` that `RigidGen.genEquivariant_genOfRef` consumes. The frame conflated the
-solving *algorithm* (`②`) with the *equivariance argument* (`①`).
+## The two readers (read this before editing)
 
-**The fix.** The per-vertex datum is coordinate-free forcing: *"is `e_v` forced (`e_v ∈ rowspace H`), and if so to
-what value"* = P2's `certificate_of_forced_notMem` read per vertex. This transports **unconditionally** because
-`rowspace` transports under the linear equiv `transportVec σ` (`span` commutes with a linear iso — no `Discrete χ`,
-no frame). It also handles the **mixed** residue (`CellsAreOrbits` false with only *some* rigid decisions): the
-reader pins exactly the forced (rigid) coordinates and leaves the gauge/kernel coordinates unforced (tie preserved
-= consume's job). It needs **no uniqueness** — `unique_solution_of_rigid` assumes the *whole* system rigid, which
-the mixed residue violates.
+**(A) `refineByFrame` — coordinate-free forcing (steps 1–5). `①` yes, `②` NO.** Per vertex reads one F₂ bit:
+*"is `e_v` forced (`e_v ∈ rowspace H`), and if so its value"* = P2's `certificate_of_forced_notMem`. `①`
+(`refEquivariant_refineByFrame`) is **unconditional** — `rowspace` transports under the linear equiv `transportVec σ`
+(`span` commutes with a linear iso — no `Discrete χ`, no frame), which is why this was built (the χ-frame route (C)
+has a `Discrete χ` gap: `framedRREF_transport` needs `rankInv` injective, false on a non-discrete cell, and there
+is no equivariant within-cell tiebreak — the "no iso-invariant vertex pick" wall). ⚠⚠ **But one F₂ bit gives ≤2
+classes per cell**, so on a **rigid** cell (zero symmetry ⟹ every coord forced, no gauge) a colour class with >2
+vertices is NOT separated. The rigid **multipede** — the rigid solver's primary target — has exactly such cells, so
+`refineByFrame` is NOT discrete there and `genOfRef` flags. Probe: `scratchpad/probe_rigid.py`. The reduction lemmas
+(`hemit_of_forcedSeparates`, the firing capstone) are correct and kept; the mis-scoping was contained to *this
+reader*. It still correctly identifies forced-vs-gauge (the mixed-cell split), just not discretization.
 
-## Build order
-1. **`transportVec σ`** — the `ZMod 2` analog of `RigidFrame.transportRow` (precomposition by `σ⁻¹`), as a linear
-   map — and **`rowspace_transport`** (`(rowspace H).map (transportVec σ) = rowspace (H.image (transportVec σ))`).
-   *(this file, below)*
-2. `forcedVal` (per-vertex forced value over `rowspace`/target) + its transport. *(next)*
-3. `refineByFrame` + `RefEquivariant` (unconditional) ⟹ feed `RigidGen.genEquivariant_genOfRef`. *(next)*
+**(B) `structRead` — the DISCRETIZING structural reader (step 6b). The object of record.** Per vertex reads its
+**RREF-column signature** (`RigidRREF.rrefCanon`, reused) over a **recovered iso-invariant column order** `ord` (a
+`Perm` transporting as `ord' = σ · ord`). ★ The unlock: a *structural* order makes the framed RREF σ-invariant
+**unconditionally** (`framedRREFBy_transport` — the general-order, χ-rank-free frame; χ-rank's gap was exactly
+`rankInv` injectivity). So the whole rigid-linear seal rests on **three carried `Recover` facts**:
+`OrdEquivariant ord` + `HsEquivariant Hs` (`①`, `readEquivariant_structRead`/`keyEquivariant_compKey_structRead`)
+and `structRead` injective (`②` = "the ordered base pins every vertex" = full-rank on the rigid residue,
+`readSeparates_of_injective`/`nodeResolved_compKey_structRead`). No `Discrete χ`, no coarseness. This is the reader
+the multipede needs; `ord`/`Hs` are the carried Lean `Recover` objects (C#-tested; Lean side = P2/`ForcingModel`).
+
+## Build order (sections in this file)
+1. `transportVec σ` (ZMod 2 analog of `transportRow`) + **`rowspace_transport`**.
+2. `forcedVal` (per-vertex forced bit over `rowspace`) + `forcedVal_transport`.
+3. `refineByFrame` + **`refEquivariant_refineByFrame`** (`①`, unconditional) ⟹ `RigidGen` capstones.
+4. concrete extraction (`extractOf`/`refExtractEquivariant_extractOf` generic + adjacency instance) — discharges the
+   carried `RefExtractEquivariant` (`①`) concretely.
+5. `②` reduction `hemit_of_forcedSeparates` (`Discrete refineByFrame ⟸ ForcedSeparates`) — ⚠ correct lemma, but
+   `ForcedSeparates` is unsatisfiable for the single-bit reader on rigid cells (see (A)).
+6. the **general reader interface** `refineBy read` + `ReadEquivariant`/`ReadSeparates` (both readers plug in).
+6b. **`structRead`** = reader (B): `frameRowBy`/`framedRREFBy_transport` (the unlock) + `readEquivariant_structRead`
+   + `readSeparates_of_injective` + capstones. **The discretizing reader.**
+
+## What remains (for a fresh reader)
+Discharge the three carried `Recover` facts: **`IsRigidF2 ⟹ structRead` injective** (self-contained Lean, via
+`RigidRREF`'s rank toolkit — shrinks `②`) and/or the **concrete Lean `Recover`** (per family; = `ForcingModel.bridge`/L4).
+Then P3-ring, P4. Authoritative detail: `docs/chain-descent-rigid-seal.md` STATUS + §8.2 + §10.
 -/
 
 namespace ChainDescent
