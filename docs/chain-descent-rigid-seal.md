@@ -25,8 +25,9 @@
 > reduces to exactly two carried, per-family facts: **(i) `RefEquivariant ref`** (the solve-refined colouring
 > transports — ⟸ (C) `framedRREF_transport` ⟸ the extraction transporting as `H ↦ H.map (transportRow σ)`, a P2
 > property) and **(ii) `ref` discrete on the residue** (the RREF solve discretizes the gauge, per-family). **What
-> remains to build:** the concrete `ref` = **`refineByFrame`** (wire P2's extraction `gForce`/`encodeFreeFast` into
-> the χ-framed RREF solve), then **P3-ring** (`Z_{2^k}`), then **P4** (`canonizesRigidResidue_or_flags`). The
+> remains to build:** the concrete `ref` = **`refineByFrame`** — ⚠ **ROUTE B′ (coordinate-free forcing over P2's
+> `rowspace`/`Forced`), reframed 2026-07-25: the χ-frame route has a `Discrete χ` gap and is superseded for `①`; see
+> §8.2** — then **P3-ring** (`Z_{2^k}`), then **P4** (`canonizesRigidResidue_or_flags`). The
 > module chain to read is `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D); see §8.2 and §10. The consume side also feeds a clean per-node
 > handoff object, and discharging its own `Amenable` hypothesis is a rigid-side deliverable (§9.1). **The
 > mixed-cell/fusion design question is SETTLED (§8.1):** the "Progress" completeness predicate IS the ALREADY-BUILT
@@ -509,14 +510,31 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       making the framed system literally σ-invariant (`framedRREF_transport`).
     - **✅ (D) read the labelling — LANDED** (`RigidGen.lean`): `genOfRef ref` = `rankPerm` of the solve-refined
       colouring; `genEquivariant_genOfRef` + capstones close P3-F₂'s `①` via P3-Sound on `RefEquivariant ref` alone.
-    - **▶ NEXT — the concrete `ref` = `refineByFrame` (the `②`/poly content).** Spec for a fresh reader: `ref adj χ`
-      = χ refined so each vertex gets the canonical F₂ value the χ-framed RREF solve assigns it. Build it as: extract
-      the F₂ system `H` from `(adj, χ)` via P2's `gForce`/`encodeFreeFast` (columns = vertices/rails) → `RigidFrame.frameSys χ H`
-      → `RigidRREF.rrefCanon` → read each vertex's solved bit(s) → append to χ. Then: **`RefEquivariant refineByFrame`**
-      follows from `RigidFrame.framedRREF_transport` once the extraction is shown to transport as `H ↦ H.map (transportRow σ)`
-      (a P2/extraction property, carried); **`refineByFrame` discrete on the residue** is that the solve assigns
-      distinct values to gauge-tied vertices (per-family). Feed both into `RigidGen`'s capstones — the rigid linear
-      `①` is then closed. No equivariance/canonicity work remains; this step is the extraction wiring + solve.
+    - **▶ NEXT — the concrete `ref` = `refineByFrame`, ROUTE B′ (coordinate-free forcing). ⚠ REFRAMED 2026-07-25
+      (de-risk finding — supersedes the frame-based spec).** The frame route below has a **discreteness gap**:
+      `RigidFrame.framedRREF_transport` carries `(h : Discrete χ)` (via `frameRow_transport` → `rankInv_transport`),
+      but `ref` is applied to **non-discrete cell colourings** — and on a non-discrete cell there is provably no
+      equivariant column tiebreak (the "no iso-invariant within-cell vertex pick" wall). So the χ-frame **cannot**
+      prove the *unconditional* `RefEquivariant` that `RigidGen.genEquivariant_genOfRef` consumes. The doc conflated
+      the *solving algorithm* (frame/RREF, `②`) with the *equivariance argument* (`①`).
+      **The fix (validated — pure-F₂ probe, mixed system + 4 relabellings + controls, `scratchpad/probe_forced.py`):
+      build `ref` over P2's already-built `rowspace`/`Forced`, coordinate-free.** The per-vertex datum is *"is `e_v`
+      forced (`e_v ∈ rowspace(H)`), and if so to what value (from the target `b`)"* = P2's
+      `certificate_of_forced_notMem` read per vertex. It (i) **transports UNCONDITIONALLY** — `rowspace`/`b`
+      transport under the `transportVec σ` linear equiv (span commutes with a linear iso), **no `Discrete χ`, no
+      frame**; (ii) **handles your MIXED residue correctly** — when `CellsAreOrbits` is false with only *some* rigid
+      decisions, the reader **pins exactly the forced (rigid) coords and leaves the gauge/kernel coords `None` = tie
+      preserved = consume's job** (the de-fusion handoff; where forcing misses an actually-rigid coord = bridge
+      fails = the non-linear residue) — needs **no uniqueness** (`unique_solution_of_rigid` was too strong: it
+      assumes the *whole* system rigid, which the mixed residue violates). **Build order:** (1) `transportVec σ`
+      (the `ZMod 2` analog of `transportRow`) + **`rowspace_transport`** (`(rowspace H).map (transportVec σ) =
+      rowspace (H.image (transportVec σ))`, via `Submodule.map_span`) — the one new lemma; (2) `forcedVal :
+      rowspace → b → Fin n → Option (ZMod 2)` + its transport (from (1) + `certificate_of_forced_notMem`); (3)
+      `refineByFrame adj χ v := 2 * (χ v) + encode (forcedVal …)`, wired to P2's `gForce`/extraction; prove
+      `RefEquivariant` **unconditionally**; feed `RigidGen.genEquivariant_genOfRef` — **(D) needs no edits**.
+      **`refineByFrame` discrete on the residue** (`hemit`) stays carried per-family = "the extracted `H` forces
+      every rigid coordinate" = the bridge, as before. **The frame (C)/`rrefCanon` is retained as the executable
+      COMPUTATION of `e_v ∈ rowspace(H)` (the `②`/poly content), NOT the `①` handle.**
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**
@@ -548,8 +566,8 @@ dischargeable seam; carried object `SolverSeparates` = a solver property) → **
 determinacy) → **✅ the `gen`-reduction chain (A)–(D)**: **✅ (A)+(B)** `RigidRREF` (canonical RREF, canonical fn of
 the subspace) → **✅ (C)** `RigidFrame` (χ-rank frame ⟹ σ-invariant) → **✅ (D)** `RigidGen` (`genOfRef` +
 `genEquivariant_genOfRef` + `compKey` capstones ⟹ rigid `①` closes on `RefEquivariant ref`) → **▶ NOW: the concrete
-`ref` = `refineByFrame`** (wire P2's extraction `gForce`/`encodeFreeFast` into the χ-framed RREF solve; this is the
-`②`/poly content — NOT an equivariance/canonicity obligation, those are discharged) → `P3-ring` (`Z_{2^k}`) → `P4`
+`ref` = `refineByFrame`, ROUTE B′** (coordinate-free forcing over P2's `rowspace`/`Forced` — `RefEquivariant`
+unconditional, mixed-cell-correct, no frame; §8.2) → `P3-ring` (`Z_{2^k}`) → `P4`
 (capstone `canonizesRigidResidue_or_flags`). **R6(c)** is ✅ discharged for the linear residue by (D)'s
 `nodeResolved_compKey_genOfRef` (modulo `ref` discrete). `R2` (per-family) and `R5` (tighten) run in parallel as
 residue-shrinkers. The C# `Option2Solver` is the reference throughout (validate Lean claims against its behaviour

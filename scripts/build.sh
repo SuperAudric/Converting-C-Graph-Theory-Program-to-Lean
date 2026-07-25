@@ -136,6 +136,7 @@ MODULES=(
   ChainDescent.RigidRREF              # gen (A,B): canonical F₂ RREF = a function of the subspace
   ChainDescent.RigidFrame             # gen (C): χ-rank frame ⟹ σ-invariant (framedRREF_transport)
   ChainDescent.RigidGen               # gen (D): rankPerm labelling; rigid linear ① on RefEquivariant
+  ChainDescent.RigidRefine            # concrete ref (Route B′): coordinate-free forcing; rowspace_transport
 
   # ── Deepen supply (base symmetry) ──
   ChainDescent.DeepenSupply           # C3b: anchor-deepening supply (all-anchors; base symmetry)
