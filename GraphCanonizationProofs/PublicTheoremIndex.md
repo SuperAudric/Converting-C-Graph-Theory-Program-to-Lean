@@ -4543,7 +4543,7 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `GaugeComplex.derivedSeries_pi_const` | 47-57 | **W2 R-c extraction L1.** The gauge's derived tower decomposes coordinatewise: `derivedSeries (ι→G₀) k = ∏ᵢ derivedSeries G₀ k` (finite `ι`), via Mathlib `commutator_pi_pi_of_finite`. = each layer a free module of rank `\|gadgets\|` ⟹ each `of_solvable_tower` step is a per-coordinate LINEAR problem, not a coset search. §3b. | — |
+| `GaugeComplex.derivedSeries_pi_const` | 47-57 | **W2 R-c extraction L1.** The gauge's derived tower decomposes coordinatewise: `derivedSeries (ι→G₀) k = ∏ᵢ derivedSeries G₀ k` (finite `ι`), via Mathlib `commutator_pi_pi_of_finite`. = each layer a free module of rank `|gadgets|` ⟹ each `of_solvable_tower` step is a per-coordinate LINEAR problem, not a coset search. §3b. | — |
 | `GaugeComplex.mem_derivedSeries_pi` | 59-64 | L1 membership form: `x ∈ derivedSeries (ι→G₀) k ↔ ∀ i, x i ∈ derivedSeries G₀ k` (the per-gadget characterization the layer solve consumes). | — |
 | `GaugeComplex.map_eval_layer` | 66-72 | The k-th product-gauge layer maps onto each gadget's local layer `derivedSeries G₀ k` (restates `map_eval_derivedSeries` for the layer narrative). | — |
 | `GaugeComplex.commutator_mem_derivedSeries_succ` | 76-84 | **L2 — the layer is abelian.** `a b ∈ derivedSeries G k ⟹ ⁅a,b⁆ ∈ derivedSeries G (k+1)`: `D_k` commutes modulo `D_{k+1}`, so `A_k = D_k/D_{k+1}` is abelian (what makes the per-layer solve linear). | — |
@@ -4577,3 +4577,24 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 |------|------|-------------|-------|
 | `GaugeComplex.of_solvable_tower` | 51-74 | — | — |
 | `GaugeComplex.of_solvable_abelian_base` | 76-88 | — | — |
+## ChainDescent/RigidRefine.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RigidRefine.transportVec` | 49-56 | The `ZMod 2` vertex-column transport `x ↦ x ∘ σ.symm`, as a `LinearMap` — the analog of `RigidFrame.transportRow` for F₂ codewords/assignments. | Definition |
+| `RigidRefine.transportVec_apply` | 58-59 | `transportVec σ x u = x (σ.symm u)`. | `@[simp]` |
+| `RigidRefine.rowspace_transport` | 61-67 | **The one new lemma of Route B′.** `(rowspace H).map (transportVec σ) = rowspace (H.image (transportVec σ))` — `span` commutes with the linear map `transportVec σ` (`Submodule.map_span`). Makes the coordinate-free forced-reader equivariant with no `Discrete χ`, no frame. | — |
+| `RigidRefine.transportVec_injective` | 69-75 | `transportVec σ` is injective (precomposition by the bijection `σ.symm`). | — |
+| `RigidRefine.transportVec_e` | 77-87 | `transportVec σ (e_v) = e_(σv)` (`Pi.single`) — the bridge turning `rowspace_transport` into a per-vertex fact. | — |
+| `RigidRefine.e_mem_rowspace_transport` | 89-101 | **Per-vertex forcedness is σ-invariant:** `e_(σv) ∈ rowspace (H.image (transportVec σ)) ↔ e_v ∈ rowspace H` (via `rowspace_transport` + `transportVec_e` + injectivity). "Is `v` a rigid/pinned coordinate" transports, no `Discrete χ`, no frame. | — |
+| `RigidRefine.forcedVal` | 105-117 | **The coordinate-free forced-value reader:** `some (x₀ v)` if `e_v ∈ rowspace H` (forced/rigid coord, canonical value), else `none` (gauge/free coord, left unrefined = consume's job). P2's forcedness read per vertex. | Definition, `noncomputable` |
+| `RigidRefine.forcedVal_transport` | 119-131 | **★★ The reader is a vertex-invariant** (unconditional): `forcedVal (H.image (transportVec σ)) (transportVec σ x₀) (σ v) = forcedVal H x₀ v`. The heart of Route B′'s `①`. | — |
+| `RigidRefine.RefExtractEquivariant` | 135-143 | The carried extraction-transport hypothesis: the extracted system + witness transport under σ (row set imaged by `transportVec σ`, witness by `transportVec σ`). The P2/`gForce`/`encodeFreeFast` realization = `ForcingModel.bridge`; the SOLE obligation `refineByFrame`'s `①` needs. | Definition |
+| `RigidRefine.frameRead` | 145-149 | The per-vertex forced reader assembled from an extraction: `forcedVal (extract adj χ).1 (extract adj χ).2 v`. | Definition, `noncomputable` |
+| `RigidRefine.frameRead_transport` | 151-160 | `frameRead` is a vertex-invariant given `RefExtractEquivariant` — `forcedVal_transport` pulled through the carried extraction transport. | — |
+| `RigidRefine.encOpt` | 162-166 | Encode a forced value into the refined colour's low digit: `none ↦ 0`, `some 0 ↦ 1`, `some 1 ↦ 2` (injective ⟹ genuine refinement). | Definition |
+| `RigidRefine.refineByFrame` | 168-175 | **The concrete rigid refinement `ref` (Route B′):** `3 * χ v + encOpt (frameRead …)`. Forced (rigid) coords split off by value; gauge/free coords keep χ's tie. Parameterized by the extraction. | Definition, `noncomputable` |
+| `RigidRefine.refEquivariant_refineByFrame` | 177-188 | **★★★ Route B′ payoff:** `RefEquivariant (refineByFrame extract)`, **UNCONDITIONAL** (no `Discrete χ`, no frame) on the single carried obligation `RefExtractEquivariant`. Closes the concrete rigid `ref`'s whole `①`/equivariance. | — |
+| `RigidRefine.keyEquivariant_compKey_refineByFrame` | 190-198 | **★★★ (D) `①` capstone, concretely:** `compKey`'s `KeyEquivariant` closes for `refineByFrame` on `RefExtractEquivariant` alone (composes `refEquivariant_refineByFrame` with `RigidGen.keyEquivariant_compKey_genOfRef`). (D) untouched. | — |
+| `RigidRefine.nodeResolved_compKey_refineByFrame` | 200-211 | **★★★ (D) firing capstone, concretely:** `NodeResolved` on a rigid cell where `refineByFrame` is discrete — soundness free, `hext`-free (only `refineByFrame` discrete + rigidity). Instantiates `RigidGen.nodeResolved_compKey_genOfRef`. | — |
+| `RigidRefine.refExtractEquivariant_trivial` | 213-220 | **Non-vacuity of `RefExtractEquivariant`:** the trivial extraction `(∅, 0)` satisfies it (`∅` images to `∅`, `transportVec σ 0 = 0`). The predicate is genuinely satisfiable. | — |

@@ -510,8 +510,9 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       making the framed system literally σ-invariant (`framedRREF_transport`).
     - **✅ (D) read the labelling — LANDED** (`RigidGen.lean`): `genOfRef ref` = `rankPerm` of the solve-refined
       colouring; `genEquivariant_genOfRef` + capstones close P3-F₂'s `①` via P3-Sound on `RefEquivariant ref` alone.
-    - **▶ NEXT — the concrete `ref` = `refineByFrame`, ROUTE B′ (coordinate-free forcing). ⚠ REFRAMED 2026-07-25
-      (de-risk finding — supersedes the frame-based spec).** The frame route below has a **discreteness gap**:
+    - **✅ (steps 1–3) LANDED 2026-07-25 — the concrete `ref` = `refineByFrame`, ROUTE B′ (coordinate-free forcing),
+      `ChainDescent/RigidRefine.lean`, axiom-clean, in `build.sh`. ⚠ REFRAMED (de-risk finding — supersedes the
+      frame-based spec).** The frame route below has a **discreteness gap**:
       `RigidFrame.framedRREF_transport` carries `(h : Discrete χ)` (via `frameRow_transport` → `rankInv_transport`),
       but `ref` is applied to **non-discrete cell colourings** — and on a non-discrete cell there is provably no
       equivariant column tiebreak (the "no iso-invariant within-cell vertex pick" wall). So the χ-frame **cannot**
@@ -526,15 +527,19 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       decisions, the reader **pins exactly the forced (rigid) coords and leaves the gauge/kernel coords `None` = tie
       preserved = consume's job** (the de-fusion handoff; where forcing misses an actually-rigid coord = bridge
       fails = the non-linear residue) — needs **no uniqueness** (`unique_solution_of_rigid` was too strong: it
-      assumes the *whole* system rigid, which the mixed residue violates). **Build order:** (1) `transportVec σ`
-      (the `ZMod 2` analog of `transportRow`) + **`rowspace_transport`** (`(rowspace H).map (transportVec σ) =
-      rowspace (H.image (transportVec σ))`, via `Submodule.map_span`) — the one new lemma; (2) `forcedVal :
-      rowspace → b → Fin n → Option (ZMod 2)` + its transport (from (1) + `certificate_of_forced_notMem`); (3)
-      `refineByFrame adj χ v := 2 * (χ v) + encode (forcedVal …)`, wired to P2's `gForce`/extraction; prove
-      `RefEquivariant` **unconditionally**; feed `RigidGen.genEquivariant_genOfRef` — **(D) needs no edits**.
-      **`refineByFrame` discrete on the residue** (`hemit`) stays carried per-family = "the extracted `H` forces
-      every rigid coordinate" = the bridge, as before. **The frame (C)/`rrefCanon` is retained as the executable
-      COMPUTATION of `e_v ∈ rowspace(H)` (the `②`/poly content), NOT the `①` handle.**
+      assumes the *whole* system rigid, which the mixed residue violates). **What LANDED (`RigidRefine.lean`):**
+      (1) `transportVec σ` (`ZMod 2` analog of `transportRow`, a `LinearMap`) + **`rowspace_transport`**
+      (`(rowspace H).map (transportVec σ) = rowspace (H.image (transportVec σ))`, via `Submodule.map_span`) +
+      `transportVec_e`/`transportVec_injective`/**`e_mem_rowspace_transport`** (per-vertex forcedness is σ-invariant);
+      (2) **`forcedVal H x₀ v`** (`some (x₀ v)` if `e_v ∈ rowspace H`, else `none`) + **`forcedVal_transport`** (a
+      vertex-invariant); (3) **`refineByFrame extract adj χ v := 3 * χ v + encOpt (frameRead …)`** + the payoff
+      **`refEquivariant_refineByFrame`** (`RefEquivariant`, **UNCONDITIONAL**, on the sole carried obligation
+      `RefExtractEquivariant` = the extraction transports) + capstones **`keyEquivariant_compKey_refineByFrame`** (①)
+      / **`nodeResolved_compKey_refineByFrame`** (firing, `hext`-free) + `refExtractEquivariant_trivial` (non-vacuity).
+      **(D) needed NO edits.** **Still carried:** `RefExtractEquivariant` for the concrete P2 extraction (= `gForce`/
+      `encodeFreeFast` realizing `H`, the same object as `ForcingModel.bridge`), and `refineByFrame` discrete on the
+      residue (`hemit` = "the extracted `H` forces every rigid coordinate", per-family). **The frame (C)/`rrefCanon`
+      is retained as the executable COMPUTATION of `e_v ∈ rowspace(H)` (the `②`/poly content), NOT the `①` handle.**
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**
@@ -642,7 +647,7 @@ STATE" note. **Track them together — but count the `A_k`-layer extraction as W
 | **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
 | **P3-Sound** | soundness is FREE (relabelling-emit) + `①` reduces to `GenEquivariant gen` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverSound.lean`) — `ptForm`/`colAut_of_ptForm_eq`/`emitLabel`/`ptSound_emitLabel`/`ptIsoInvariant_emitLabel` + capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` |
-| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME + ✅ (D) READ-LABELLING LANDED** (`RigidFrame.lean` `framedRREF_transport` + `RigidGen.lean` `genEquivariant_genOfRef`/capstones `keyEquivariant_compKey_genOfRef`/`nodeResolved_compKey_genOfRef`). **▶ (A)–(D) CHAIN COMPLETE: rigid linear `①` reduces to `RefEquivariant ref` + `ref` discrete-on-residue, both carried.** Remaining: wire P2 extraction into concrete `ref`; P3-ring |
+| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME + ✅ (D) READ-LABELLING LANDED** (`RigidFrame.lean` `framedRREF_transport` + `RigidGen.lean` `genEquivariant_genOfRef`/capstones `keyEquivariant_compKey_genOfRef`/`nodeResolved_compKey_genOfRef`). **▶ (A)–(D) CHAIN COMPLETE.** **✅ concrete `ref` = `refineByFrame` LANDED 2026-07-25, ROUTE B′** (`RigidRefine.lean`, axiom-clean): coordinate-free forcing over P2's `rowspace` (`rowspace_transport`/`forcedVal`/`forcedVal_transport`) ⟹ **`refEquivariant_refineByFrame`** (`RefEquivariant` **UNCONDITIONAL**, no `Discrete χ`, no frame — the χ-frame route had a discreteness gap) + capstones `keyEquivariant_compKey_refineByFrame`/`nodeResolved_compKey_refineByFrame`. The rigid linear `①`/firing now closes on the SINGLE carried `RefExtractEquivariant` (the extraction transports = the P2 `gForce`/`encodeFreeFast` realization = `ForcingModel.bridge`), handles MIXED cells (forced coords pinned, gauge coords tied), needs NO uniqueness. Remaining: the concrete P2 extraction; `ref` discrete-on-residue (`hemit`); P3-ring |
 | **P3-ring** | `Z_{2^k}`/finite-abelian: ring-inference + finite-ring Smith + 2-adic tower | **not built** — heavy; ring-inference carried (`IR §11.13`). ⚠ Mathlib Smith = noncomputable/existence-only |
 | **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
 | **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |
