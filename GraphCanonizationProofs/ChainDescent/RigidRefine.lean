@@ -369,5 +369,89 @@ theorem nodeResolved_compKey_refineByFrame_of_forcedSeparates
   nodeResolved_compKey_refineByFrame extract S adj χ hnd
     (fun _ _ _ => hemit_of_forcedSeparates extract adj χ hsep) hrigid
 
+/-! ## Step 6 — the discretizing reader over a structural frame (match Recover)
+
+The `②` FIX. The single-bit `forcedVal`/`frameRead` reader **cannot discretize** a rigid cell — one F₂ bit ⟹ ≤2
+classes per cell, and a rigid multipede (the rigid solver's primary target, zero symmetry) has colour classes with
+>2 vertices (probe `scratchpad/probe_rigid.py`). Discretization needs a **richer** per-vertex value over an
+**iso-invariant column order**; since χ-rank needs `Discrete χ` and coordinate-free F₂ gives ≤2 classes, the order
+must come from the **recovered canonical ordered base** (structural — the C# `Recover` path, IR §11 B1a, tested).
+
+This section re-parameterizes the refinement around an arbitrary per-vertex canonical reader `read : … → Fin n → ℕ`
+with two clean, mirrored obligations: `ReadEquivariant` (transports ⟹ `①`) and `ReadSeparates` (separates ⟹ `②`).
+**The structural (Recover-ordered) reader is the carried instance satisfying both** — its `ReadSeparates` is the
+honest restatement of the old `ForcedSeparates` ("the ordered base pins every vertex"). The single-bit reader is
+retained as a coarse `ReadEquivariant` instance (`readEquivariant_encOpt_frameRead`) that does *not* separate. -/
+
+/-- A per-vertex canonical reader is **equivariant** = a vertex-invariant (transports along σ). The structural
+(Recover-ordered) reader has this from structural-order transport (carried); `encOpt ∘ frameRead` has it too, but
+is too coarse to separate. -/
+def ReadEquivariant (read : AdjMatrix n → Colouring n → Fin n → Nat) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n),
+    read (relabelAdj σ adj) (transportColouring σ χ) (σ v) = read adj χ v
+
+/-- **Refine χ by a per-vertex canonical reader** — `Nat.pair` with χ (injective ⟹ a genuine refinement). The
+general form the structural frame plugs into (replaces the single-bit `refineByFrame`). -/
+def refineBy (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) : Colouring n :=
+  fun v => Nat.pair (χ v) (read adj χ v)
+
+/-- **★ `①` (general).** `refineBy read` is `RefEquivariant` from `ReadEquivariant read` alone (χ transports
+pointwise, `read` is a vertex-invariant). Reader-agnostic — the structural reader inherits it. -/
+theorem refEquivariant_refineBy (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (h : ReadEquivariant read) : RefEquivariant (refineBy read) := by
+  intro σ adj χ
+  funext u
+  have hr := h σ adj χ (σ.symm u)
+  rw [Equiv.apply_symm_apply] at hr
+  simp only [refineBy, transportColouring, hr]
+
+/-- The reader **separates** co-cellular vertices — the `②`/discretization obligation. Carried on the structural
+(Recover-ordered) reader = "the ordered base pins every vertex"; NOT met by `encOpt ∘ frameRead` on rigid cells
+(pigeonhole on the single F₂ bit). The honest restatement of `ForcedSeparates`. -/
+def ReadSeparates (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ u v : Fin n, χ u = χ v → read adj χ v = read adj χ u → u = v
+
+/-- **★ `②` (general).** `refineBy read` is discrete from `ReadSeparates` (via `Nat.pair` injectivity). -/
+theorem discrete_refineBy (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) (h : ReadSeparates read adj χ) :
+    Discrete (refineBy read adj χ) := by
+  intro u v huv
+  simp only [refineBy] at huv
+  have hp : ((χ u, read adj χ u) : Nat × Nat) = (χ v, read adj χ v) := by
+    have := congrArg Nat.unpair huv
+    rwa [Nat.unpair_pair, Nat.unpair_pair] at this
+  exact h u v (congrArg Prod.fst hp) (congrArg Prod.snd hp).symm
+
+/-- **★★★ `①` capstone (general).** `compKey`'s `KeyEquivariant` for `refineBy read` from `ReadEquivariant`. -/
+theorem keyEquivariant_compKey_refineBy (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (h : ReadEquivariant read) :
+    KeyEquivariant (compKey (skOf (emitLabel (genOfRef (refineBy read))))) :=
+  keyEquivariant_compKey_genOfRef (refineBy read) (refEquivariant_refineBy read h)
+
+/-- **★★★ `②`/firing capstone (general).** `NodeResolved` for `refineBy read` from `ReadSeparates` + rigidity
+(soundness free). With `keyEquivariant_compKey_refineBy`, the rigid-linear seal for the structural reader rests on
+exactly `{ReadEquivariant, ReadSeparates}` — both discharged by the recovered canonical ordered base (carried). -/
+theorem nodeResolved_compKey_refineBy_of_readSeparates
+    (read : AdjMatrix n → Colouring n → Fin n → Nat)
+    (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n) (hnd : ¬ Discrete χ)
+    (hsep : ReadSeparates read adj χ)
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (compKey (skOf (emitLabel (genOfRef (refineBy read))))) S adj χ :=
+  nodeResolved_compKey_genOfRef (refineBy read) S adj χ hnd
+    (fun _ _ _ => discrete_refineBy read adj χ hsep) hrigid
+
+/-- **The single-bit reader is a coarse `ReadEquivariant` instance** (from `frameRead_transport`) — so steps 1–5
+supply a *transporting* reader — but it does NOT satisfy `ReadSeparates` on rigid cells (≤2 F₂ classes), which is
+why the structural (Recover) reader is needed for `②`. -/
+theorem readEquivariant_encOpt_frameRead
+    (extract : AdjMatrix n → Colouring n → Finset (Fin n → ZMod 2) × (Fin n → ZMod 2))
+    (hext : RefExtractEquivariant extract) :
+    ReadEquivariant (fun adj χ v => encOpt (frameRead extract adj χ v)) := by
+  intro σ adj χ v
+  simp only [frameRead_transport extract hext σ adj χ v]
+
 end RigidRefine
 end ChainDescent
