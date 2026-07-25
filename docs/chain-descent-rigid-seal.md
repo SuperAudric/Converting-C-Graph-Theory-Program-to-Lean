@@ -46,13 +46,13 @@
 >   is `ker(recovered H)` as a subspace (Schurian / CFI / mixed = the extremes + interpolation of ONE predicate); the
 >   only ladder is the finite coefficient tower `F₂ ⊂ Z_{2^k} ⊂ solvable ⊂ (wall)` (= W2). `IsRigidF2 ⟹ structRead`
 >   injective demotes to the `ker=0` non-vacuity anchor.
-> - **▶ ACTIVE (step 8, §8.2) — CONCRETE `Recover`.** Split into 3 pieces: (1) the extracted system `Hs` — **✅ DONE**
->   (`hsAdj` + `hsAdj_transport_perm` + `rrefCanon_congr_perm` ⟹ `readEquivariant_structRead_hsAdj`: `HsEquivariant`
->   DISCHARGED, `ReadEquivariant` from `OrdEquivariant` alone); (2) the iso-invariant **order `ord`** — the crux (**★
->   finding: `OrdEquivariant` = an equivariant Perm is satisfiable ONLY on rigid inputs**; mixed needs
->   `ReadEquivariant`-direct/orbit-invariance, = the WL/canonical-order wall, = C# `Recover`'s tested "canonical ordered
->   base"); (3) the **kernel predicate** `ReadSeparatesRigid` (faithfulness/bridge = `ForcingModel.bridge`/L4, §9.2). **▶
->   NEXT = piece 2** (rigid-regime order first) → **P3-ring** (`Z_{2^k}`) → **P4** (`canonizesRigidResidue_or_flags`).
+> - **▶ ACTIVE (steps 8–9, §8.2) — CONCRETE `Recover`.** 3 pieces: (1) extracted system `Hs` — **✅ DONE** (step 8:
+>   `hsAdj`/`hsAdj_transport_perm`/`rrefCanon_congr_perm` ⟹ `readEquivariant_structRead_hsAdj`: `HsEquivariant` DISCHARGED);
+>   (2) the iso-invariant **order** — **★ finding: an equivariant order Perm exists ONLY on rigid inputs**, so the order is a
+>   **canonical MIN over an equivariant frame set** (C# B2), **✅ engine DONE** (step 9A: `FramesEquivariant`+`KeyTransport`
+>   ⟹ `isMinFrame_transport` ⟹ `ordEquivariant_minOrd` on a unique min; `KeyTransport` free for `hsAdj`) — **▶ NEXT = §9B**
+>   concrete poly frame set + **§9C** rigid ⟹ unique min ⟹ separating; (3) the **kernel predicate** `ReadSeparatesRigid`
+>   (faithfulness/bridge = `ForcingModel.bridge`/L4, §9.2), discharged with §9C. → **P3-ring** (`Z_{2^k}`) → **P4**.
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
 > reader 1–5, general interface 6, structural reader 6b); see §8.2 and §10. The consume side feeds a clean per-node handoff
@@ -670,9 +670,36 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       `Spans.mono`) ⟹ **`framedRREF_hsAdj_transport`** (the framed RREF of `hsAdj` transports, row-permutation absorbed)
       ⟹ **`readEquivariant_structRead_hsAdj`** (`ReadEquivariant (structRead ord hsAdj)` from **`OrdEquivariant` ALONE** —
       `HsEquivariant` gone) + capstone **`keyEquivariant_compKey_skStruct_hsAdj`**. **▶ So the concrete `Recover` now
-      carries only piece 2 (`ord`/`OrdEquivariant`, the crux) + piece 3 (the kernel predicate).** NEXT = piece 2: the
-      concrete iso-invariant order (rigid regime first, via the RREF-signature-sorted order; = C# `Recover`'s canonical
-      ordered base, tested — the Lean gap is its equivariance).
+      carries only piece 2 (`ord`/`OrdEquivariant`, the crux) + piece 3 (the kernel predicate).**
+    - **✅ (step 9A) LANDED 2026-07-25 — CONCRETE `Recover`, PART 2 (the ORDER) — the MIN-over-frames equivariance
+      engine** (`RigidRefine.lean`, axiom-clean). **★ The crux's `①` side, RESOLVED.** Since an equivariant order Perm
+      can't exist on symmetric inputs (step-8 finding), the order comes — exactly as C# `Recover`/B2 — from a **canonical
+      MIN over an equivariant candidate-frame set** (fire at the iso-invariant root partition, lex-min the labelling;
+      ties = residual symmetry). Built abstractly: **`FramesEquivariant`** (the candidate set `frames adj χ : Finset
+      (Perm)` transports as `o ↦ σ·o` — the object that exists on ALL inputs, unlike an equivariant Perm) + **`KeyTransport`**
+      (iso-invariant frame key) ⟹ **`isMinFrame_transport`** (a minimizer maps to a minimizer — the heart) ⟹ on a
+      **unique** min, **`ordEquivariant_minOrd`** = `OrdEquivariant` for the choice function `minOrd`, feeding step 8's
+      `readEquivariant_structRead_hsAdj`. **`KeyTransport` is FREE for `hsAdj`** (`keyTransport_hsAdj`, any encoding `f`,
+      from `framedRREF_hsAdj_transport`). Capstone **`keyEquivariant_compKey_skStruct_minFrame`**: the whole `compKey`'s
+      `①` on the concrete extraction, modulo {`FramesEquivariant`, existence, uniqueness} ONLY. **Uniqueness ⟺ trivial
+      residual symmetry ⟺ the rigid regime** — so the engine cleanly localizes what's left. **▶ NEXT (piece 2 cont.):**
+      **§9B** the concrete poly frame set (`FramesEquivariant` + existence; poly by bounded ring rank per B1d, NOT `n!`) ·
+      **§9C** rigid ⟹ unique min ⟹ separating (discharges uniqueness + the `ker=0` kernel predicate, closing the pure
+      multipede; the mixed/tie case reads at any min-achiever, deferred with the interleaving). Then P3-ring → P4.
+      **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
+      is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
+      are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback
+      (`cap→n` gives `n!` — never the scaling lever; "poly, any s" was retracted 2026-07-16/17). Arbitrary "k" is
+      un-capped where it matters: **Z₂ᵏ tower depth** = recursive s=2 doubling peel (poly, any k); **fully-symmetric
+      multiplicity** = copy-swap ⟹ consume (Lean BEYOND C#: `wcyc27`/Z₉ odd-part 9 has NO C# path, fold-tower-plan §5);
+      **ring alphabet** `Z_{2^k}` = P3-ring (the finite ladder). The ONLY shared-open pocket is **distinguishable
+      odd-part(s) ≥ 7** (F3b module Smith/CRT coset ordering, open both sides). **Impact on step 9 = NONE:** (i) 9A
+      equivariance is multiplicity-independent (`isMinFrame_transport` for any `frames`); (ii) no silent corruption —
+      on an unorderable cover the min is non-unique ⟹ `ordEquivariant_minOrd` doesn't fire ⟹ sound FLAG, never a broken
+      form; (iii) symmetric folds = the tie case = consume's job (correct routing). **Two design constraints this
+      imposes:** 9B builds `frames` **structurally/greedily** (the doc's "no base enumeration" single greedy path), NOT
+      by naive enumeration (which would re-import the `s!` blowup); and the fold/tower stays on consume/interleaving —
+      step 9 canonizes the single rigid CORE only.
   - **P3-ring (`Z_{2^k}`/finite-abelian)** — ring-inference (the genuinely open piece, `IR §11.13`) + finite-ring
     Smith + the 2-adic tower solve. The heavy stage; ring-inference carried as an obligation initially.
   - **The iso-invariance mechanism (C# B2, hard-won):** fire the emit at the **iso-invariant root partition**

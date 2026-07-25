@@ -840,5 +840,119 @@ theorem keyEquivariant_compKey_skStruct_hsAdj
     KeyEquivariant (compKey (skStruct ord hsAdj)) :=
   keyEquivariant_compKey_skRead (structRead ord hsAdj) (readEquivariant_structRead_hsAdj ord ho)
 
+/-! ## Step 9 — piece 2 of the concrete `Recover`: the iso-invariant column order via MIN over an equivariant frame set
+
+The step-8 crux: an equivariant order **permutation** (`OrdEquivariant`) is satisfiable ONLY on rigid inputs — a
+colour-automorphism `σ` forces `ord adj χ = σ · ord adj χ ⟹ σ = 1`. The resolution is the C# `Recover`/B2 mechanism:
+**not** a directly-constructed equivariant Perm, but a **canonical MIN over an equivariant candidate-frame set** (fire
+at the iso-invariant root partition, lex-min the labelling; ties = residual symmetry). This section builds that engine
+abstractly:
+
+* `frames adj χ : Finset (Perm)` — the candidate column orders (concretely the poly base/pivot frames of the code,
+  §9B), with **`FramesEquivariant`** (σ maps frames to frames).
+* `key adj χ o : ℕ` — an iso-invariant frame key (concretely any function of `rrefCanon (frameSysBy o (hsAdj …))`),
+  with **`KeyTransport`** — DISCHARGED for `hsAdj` from `framedRREF_hsAdj_transport` (`keyTransport_hsAdj`, any `f`).
+* the order = the min-key frame. **`isMinFrame_transport`**: the min frame transports as `o ↦ σ·o`. When the min is
+  **unique** (the rigid regime — ties are exactly residual symmetry), this yields **`OrdEquivariant`** for the choice
+  function (`ordEquivariant_minOrd`), feeding step 8's `readEquivariant_structRead_hsAdj` / `keyEquivariant_compKey_*`
+  end-to-end. So the ① crux is resolved modulo {`FramesEquivariant`, existence, uniqueness}; concrete `frames` is §9B,
+  and uniqueness = the rigid regime (§9C). The general (tie) case — reading at any min-achiever, tied frames agreeing —
+  is §9C, deferred with the interleaving. -/
+
+/-- The candidate frame set transports: σ maps each candidate column order `o` to `σ · o`. Iso-invariance of the
+CANDIDATE SET (not of any single frame) — this is the object that exists on all inputs, unlike an equivariant Perm. -/
+def FramesEquivariant (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n))) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n),
+    frames (relabelAdj σ adj) (transportColouring σ χ) = (frames adj χ).image (fun o => σ * o)
+
+/-- The frame key is an iso-invariant: the key of `σ · o` on the σ-relabelled node equals the key of `o` on the
+original. For `hsAdj` this is FREE from `framedRREF_hsAdj_transport` (`keyTransport_hsAdj`). -/
+def KeyTransport (key : AdjMatrix n → Colouring n → Equiv.Perm (Fin n) → Nat) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (o : Equiv.Perm (Fin n)),
+    key (relabelAdj σ adj) (transportColouring σ χ) (σ * o) = key adj χ o
+
+/-- `o` is a (key-)minimal frame at `(adj, χ)`: a candidate whose key is `≤` every candidate's. -/
+def IsMinFrame (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (key : AdjMatrix n → Colouring n → Equiv.Perm (Fin n) → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) (o : Equiv.Perm (Fin n)) : Prop :=
+  o ∈ frames adj χ ∧ ∀ o' ∈ frames adj χ, key adj χ o ≤ key adj χ o'
+
+/-- **★ The min frame transports** as `o ↦ σ · o`: the candidate set transports (`FramesEquivariant`) and the key
+transports (`KeyTransport`), so a minimizer maps to a minimizer. The heart of the engine — this is why the min-over-set
+is iso-invariant where a single equivariant Perm cannot exist. -/
+theorem isMinFrame_transport
+    {frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n))}
+    {key : AdjMatrix n → Colouring n → Equiv.Perm (Fin n) → Nat}
+    (hf : FramesEquivariant frames) (hk : KeyTransport key)
+    (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (o : Equiv.Perm (Fin n))
+    (h : IsMinFrame frames key adj χ o) :
+    IsMinFrame frames key (relabelAdj σ adj) (transportColouring σ χ) (σ * o) := by
+  obtain ⟨hmem, hmin⟩ := h
+  refine ⟨?_, ?_⟩
+  · rw [hf σ adj χ]; exact Finset.mem_image.mpr ⟨o, hmem, rfl⟩
+  · intro o'' ho''
+    rw [hf σ adj χ] at ho''
+    obtain ⟨o', ho', rfl⟩ := Finset.mem_image.mp ho''
+    rw [hk σ adj χ o, hk σ adj χ o']
+    exact hmin o' ho'
+
+/-- **The selected canonical order** — a chosen min frame (needs existence; uniqueness makes it equivariant). -/
+noncomputable def minOrd (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (key : AdjMatrix n → Colouring n → Equiv.Perm (Fin n) → Nat)
+    (hex : ∀ adj χ, ∃ o, IsMinFrame frames key adj χ o) :
+    AdjMatrix n → Colouring n → Equiv.Perm (Fin n) :=
+  fun adj χ => Classical.choose (hex adj χ)
+
+theorem isMinFrame_minOrd {frames key} (hex : ∀ adj χ, ∃ o, IsMinFrame frames key adj χ o)
+    (adj : AdjMatrix n) (χ : Colouring n) :
+    IsMinFrame frames key adj χ (minOrd frames key hex adj χ) :=
+  Classical.choose_spec (hex adj χ)
+
+/-- **★★ `OrdEquivariant` for the min-frame order, on a UNIQUE min.** Both `minOrd (relabel σ)(transport χ)` and
+`σ · minOrd adj χ` are min frames at the relabelled node (`isMinFrame_transport`); uniqueness forces them equal. This
+discharges the step-8 order obligation `OrdEquivariant` from {`FramesEquivariant`, existence, uniqueness} — the
+resolution of the crux (uniqueness ⟺ trivial residual symmetry ⟺ the rigid regime). -/
+theorem ordEquivariant_minOrd
+    {frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n))}
+    {key : AdjMatrix n → Colouring n → Equiv.Perm (Fin n) → Nat}
+    (hf : FramesEquivariant frames) (hk : KeyTransport key)
+    (hex : ∀ adj χ, ∃ o, IsMinFrame frames key adj χ o)
+    (huniq : ∀ adj χ o o', IsMinFrame frames key adj χ o → IsMinFrame frames key adj χ o' → o = o') :
+    OrdEquivariant (minOrd frames key hex) := by
+  intro σ adj χ
+  exact huniq (relabelAdj σ adj) (transportColouring σ χ) _ _
+    (isMinFrame_minOrd hex (relabelAdj σ adj) (transportColouring σ χ))
+    (isMinFrame_transport hf hk σ adj χ (minOrd frames key hex adj χ) (isMinFrame_minOrd hex adj χ))
+
+/-- The concrete `hsAdj` frame key: any encoding `f` of the framed canonical RREF. -/
+noncomputable def frameKeyHsAdj (f : List (Nat × List Bool) → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) (o : Equiv.Perm (Fin n)) : Nat :=
+  f (rrefCanon n (frameSysBy o (hsAdj adj χ)))
+
+/-- **`KeyTransport` is FREE for the concrete `hsAdj` frame key** — for ANY encoding `f`, the key transports because
+the framed RREF itself transports (`framedRREF_hsAdj_transport`). So the engine's key obligation costs nothing on the
+concrete extraction. -/
+theorem keyTransport_hsAdj (f : List (Nat × List Bool) → Nat) :
+    KeyTransport (frameKeyHsAdj (n := n) f) := by
+  intro σ adj χ o
+  simp only [frameKeyHsAdj, framedRREF_hsAdj_transport σ o adj χ]
+
+/-- **★★★ Step 9A capstone — the mixed-native force key's `①` on the concrete extraction, via the MIN-frame order,
+modulo {`FramesEquivariant`, existence, uniqueness} ONLY.** The step-8 order obligation `OrdEquivariant` is discharged
+by the min-over-frames engine (`ordEquivariant_minOrd` + free `keyTransport_hsAdj`), so `KeyEquivariant` of the whole
+`compKey (skStruct (minOrd …) hsAdj)` holds. What remains for piece 2 is the concrete frame set (§9B — `FramesEquivariant`
++ existence) and uniqueness (§9C — the rigid regime). -/
+theorem keyEquivariant_compKey_skStruct_minFrame
+    (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (f : List (Nat × List Bool) → Nat)
+    (hf : FramesEquivariant frames)
+    (hex : ∀ adj χ, ∃ o, IsMinFrame frames (frameKeyHsAdj f) adj χ o)
+    (huniq : ∀ adj χ o o',
+      IsMinFrame frames (frameKeyHsAdj f) adj χ o →
+      IsMinFrame frames (frameKeyHsAdj f) adj χ o' → o = o') :
+    KeyEquivariant (compKey (skStruct (minOrd frames (frameKeyHsAdj f) hex) hsAdj)) :=
+  keyEquivariant_compKey_skStruct_hsAdj _
+    (ordEquivariant_minOrd hf (keyTransport_hsAdj f) hex huniq)
+
 end RigidRefine
 end ChainDescent
