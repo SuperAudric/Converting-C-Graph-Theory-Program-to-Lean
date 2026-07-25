@@ -219,5 +219,85 @@ theorem refExtractEquivariant_trivial :
   intro σ adj χ
   simp [Finset.image_empty, map_zero]
 
+/-! ## Step 4 — a concrete extraction: generic local-row transport + the adjacency instance
+
+`RefExtractEquivariant` needs only that the extraction **transports** (structural); the extraction's
+**faithfulness** (that its system forces the actual rigid coordinates) is the carried `ForcingModel.bridge`,
+separate. Step A packages *any* per-vertex local extraction; Step B is a concrete non-vacuous instance (the
+faithful per-family CFI extraction plugs into Step A the same way). -/
+
+/-- A local row-builder is equivariant when the row at `σi` on the σ-relabelled node is the `transportVec σ`
+of the row at `i` — the pointwise transport that lifts to the whole extracted system. -/
+def RowAtEquivariant (rowAt : AdjMatrix n → Colouring n → Fin n → (Fin n → ZMod 2)) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (i : Fin n),
+    rowAt (relabelAdj σ adj) (transportColouring σ χ) (σ i) = transportVec σ (rowAt adj χ i)
+
+/-- The witness assignment is equivariant (transports as `transportVec σ`). -/
+def WitEquivariant (wit : AdjMatrix n → Colouring n → (Fin n → ZMod 2)) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n),
+    wit (relabelAdj σ adj) (transportColouring σ χ) = transportVec σ (wit adj χ)
+
+/-- **The extraction from a local row-builder + witness:** rows = `{rowAt adj χ i : i}`, witness = `wit adj χ`. -/
+def extractOf (rowAt : AdjMatrix n → Colouring n → Fin n → (Fin n → ZMod 2))
+    (wit : AdjMatrix n → Colouring n → (Fin n → ZMod 2)) :
+    AdjMatrix n → Colouring n → Finset (Fin n → ZMod 2) × (Fin n → ZMod 2) :=
+  fun adj χ => (Finset.univ.image (rowAt adj χ), wit adj χ)
+
+/-- **★ Step A — any equivariant local extraction transports.** `RefExtractEquivariant (extractOf rowAt wit)`
+from `RowAtEquivariant rowAt` + `WitEquivariant wit`: the row set transports by reindexing the `Finset.image`
+along the bijection `σ` (`univ.image σ = univ`, then `Finset.image_image` + the pointwise `RowAtEquivariant`);
+the witness by `WitEquivariant`. The faithful per-family extraction discharges its `①` obligation **here**. -/
+theorem refExtractEquivariant_extractOf
+    (rowAt : AdjMatrix n → Colouring n → Fin n → (Fin n → ZMod 2))
+    (wit : AdjMatrix n → Colouring n → (Fin n → ZMod 2))
+    (hrow : RowAtEquivariant rowAt) (hwit : WitEquivariant wit) :
+    RefExtractEquivariant (extractOf rowAt wit) := by
+  intro σ adj χ
+  simp only [extractOf, Prod.mk.injEq]
+  refine ⟨?_, hwit σ adj χ⟩
+  have hσ : (Finset.univ : Finset (Fin n)).image (⇑σ) = Finset.univ := by
+    apply Finset.eq_univ_of_forall
+    intro x
+    exact Finset.mem_image.mpr ⟨σ.symm x, Finset.mem_univ _, by simp⟩
+  calc Finset.univ.image (rowAt (relabelAdj σ adj) (transportColouring σ χ))
+      = (Finset.univ.image (⇑σ)).image (rowAt (relabelAdj σ adj) (transportColouring σ χ)) := by rw [hσ]
+    _ = Finset.univ.image (fun i => rowAt (relabelAdj σ adj) (transportColouring σ χ) (σ i)) := by
+          rw [Finset.image_image]; rfl
+    _ = Finset.univ.image (fun i => transportVec σ (rowAt adj χ i)) :=
+          Finset.image_congr (fun i _ => hrow σ adj χ i)
+    _ = (Finset.univ.image (rowAt adj χ)).image (transportVec σ) := by rw [Finset.image_image]; rfl
+
+/-- Concrete row-builder: the F₂ adjacency row of `i` (`v ↦ adj i v mod 2`). A genuine graph invariant. -/
+def rowAdj (adj : AdjMatrix n) (_χ : Colouring n) (i : Fin n) : Fin n → ZMod 2 :=
+  fun v => (adj.adj i v : ZMod 2)
+
+/-- Concrete witness: `χ` reduced mod 2. -/
+def witChi (_adj : AdjMatrix n) (χ : Colouring n) : Fin n → ZMod 2 :=
+  fun v => (χ v : ZMod 2)
+
+theorem rowAtEquivariant_rowAdj : RowAtEquivariant (rowAdj (n := n)) := by
+  intro σ adj χ i
+  funext v
+  simp only [rowAdj, transportVec_apply, relabelAdj_adj, Equiv.symm_apply_apply]
+
+theorem witEquivariant_witChi : WitEquivariant (witChi (n := n)) := by
+  intro σ adj χ
+  funext v
+  simp only [witChi, transportVec_apply, transportColouring]
+
+/-- **★ Step B — the adjacency extraction transports.** A concrete, non-vacuous `RefExtractEquivariant` witness. -/
+theorem refExtractEquivariant_adj : RefExtractEquivariant (extractOf (rowAdj (n := n)) witChi) :=
+  refExtractEquivariant_extractOf rowAdj witChi rowAtEquivariant_rowAdj witEquivariant_witChi
+
+/-- **★★★ Step C — the rigid linear `①`, CONCRETELY and UNCONDITIONALLY closed.** For the concrete extraction
+`extractOf rowAdj witChi`, `refineByFrame`'s `RefEquivariant` holds with **no hypotheses**, so `compKey`'s
+`KeyEquivariant` holds outright. The whole rigid-linear `①` machinery is thereby instantiated end-to-end; the only
+remaining rigid-linear content is `hemit` (the extraction faithfully forces the rigid coordinates = the carried
+`ForcingModel.bridge`), per family — where the faithful extraction replaces `rowAdj` via `refExtractEquivariant_extractOf`. -/
+theorem keyEquivariant_compKey_refineByFrame_adj :
+    KeyEquivariant (compKey (skOf (emitLabel
+      (genOfRef (refineByFrame (extractOf (rowAdj (n := n)) witChi)))))) :=
+  keyEquivariant_compKey_refineByFrame (extractOf rowAdj witChi) refExtractEquivariant_adj
+
 end RigidRefine
 end ChainDescent
