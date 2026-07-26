@@ -381,7 +381,42 @@ algorithm the partition comes from the same `cert` computation (fibres), so this
 means the poly *fast path* (deepen's harvest instead of certs) is only available where the harvest is
 exact, i.e. certified-below (§7.1, measured 18/18 there).
 
-## 10. Build sketch (if this is taken up)
+## 10. ✅ LANDED — `ChainDescent/DeepenCertified.lean` (block 1 of the forcibility proof)
+
+Gate green (`bash /workspace/scripts/build.sh`, 197 s); all 9 theorems
+`[propext, Classical.choice, Quot.sound]`. In `build.sh` after `DeepenAmenable`.
+
+**The target chain** for *"consume failing hands force a forcible node"*:
+
+| | statement | status |
+|---|---|---|
+| **T1** | `CertifiedOrbit ⟹ CellSingleOrbit` — a *checked* transitivity of harvested twists **is** single-orbit-ness | ✅ `cellSingleOrbit_of_certifiedOrbit` |
+| **T2** | `CertifiedPath ⟹ AmenablePath`, `Certified ⟹ Amenable` | ✅ `amenablePath_of_certifiedPath`, `amenable_of_certified` |
+| **T3** | selector identity `chooseIdK (finRange n) = Descend.targetColour` — deepen's per-level cell **is** the canonizer's branch cell | ✅ `chooseIdK_eq_targetColour` |
+| **T4** | per-level bridge: `Consume.CellIsOrbit` discharges the level's certificate | ✅ `certifiedOrbit_of_cellIsOrbit_chooseIdK` |
+| **T5** | **exactness ⊇**: at a certified-below node, automorphic ⟹ the twist verifies, so harvest-partition = orbit-partition | ⏳ next — from `joint` + `twistOf_of_transport_fixing` |
+| **T6** | **the key**: certified-below ⟹ `KeyEquivariant certKey`; `forceBy certKey` fires | ⏳ — `joint` generalized from an automorphism of one graph to an **isomorphism between two** |
+| **T7** | guarded supply: replace the global hypothesis by a per-level run-time check | ⏳ |
+
+**What T1–T4 buy.** `Amenable` was unobservable — `CellSingleOrbit` quantifies over the true `IsColAut`
+group. T1 shows it does not need to be *assumed*: deepen's harvest emits only *verified* automorphisms
+(`twistOf_isColAut`) and `IsColAut` is composition-closed, so a checked transitivity **is** a proof of
+single-orbit-ness. T3 is what makes that check *achievable* — it identifies the cell `AmenablePath`
+names with the cell `deepenGens` actually harvests, so the consume side's own `CellIsOrbit` discharges
+each level (T4).
+
+⚠ **Honest scope.** This is the soundness core, not yet the headline. The restated capstone
+`deepenSupply_guarded_canonizer_of_certified` still carries a *global* hypothesis, and `Certified` is
+strictly *stronger* than `Amenable` — so as a global assumption it is worse, not better. The payoff
+needs T7 (branch on the check instead of assuming it). T5/T6 are the "forcible, not merely exposed"
+content and are the next work.
+
+**T6 is unblocked**: `step_transport` is already stated **across graphs**
+(`step (relabelAdj σ adj) (transportColouring σ χ) (σ v) = transport σ (step adj χ v)`), and
+`chooseIdK_transport` / `cellSingleOrbit_transport` likewise — so generalizing `joint` from an
+automorphism to an isomorphism is a re-run of the same induction, not new machinery.
+
+## 11. Build sketch (if this is taken up)
 
 **Smallest first step (§6.2 — does not need the min-over-cell descent at all):**
 
