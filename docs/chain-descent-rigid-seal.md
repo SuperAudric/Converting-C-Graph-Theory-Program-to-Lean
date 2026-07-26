@@ -37,14 +37,20 @@
 >   non-automorphic pairs separate. Firing capstone `nodeResolved_compKey_readAgg_faithful`. **⟹ the whole rigid-linear
 >   seal for the mixed reader rests on exactly `{FramesEquivariant, AggFaithful}`** — frame-set transport (structural) +
 >   aggregate faithfulness (the shared wall, per-family).
-> - **▶▶ THE FRONTIER (what a fresh reader picks up) — the POLY frame set (§8.2 P1/P2/P3) + P3-ring + P4.** `readAgg`
->   currently runs over `framesUniv` (all `n!` orders — correct-but-EXPONENTIAL). The `②`-cost fix is a poly equivariant
->   frame set. **✅ P1 (`seedFrames`/`framesEquivariant_seedFrames`/`card_seedFrames_le`)** is the structural interface:
->   `FramesEquivariant ⟸ SeedsEquivariant + OrderOfEquivariant`, and `|frames| ≤ |seeds|`. **▶ P2 = the concrete poly
->   seed** (bounded base assignments, `|seeds| ≤ n^k`) **+ the discretizing solve-completion `orderOf`** (⚠ needs a
->   STRUCTURAL discretizing order = the **linear solve**; WL-refinement provably won't discretize the multipede — so
->   `OrderOfEquivariant` is carried per-family = the recover core). **▶ P3 = `AggFaithful (seedFrames …)`** per-family (=
->   `ForcingModel.bridge`/L4). Then **P3-ring** (`Z_{2^k}`, ring-inference `IR §11.13`) → **P4** (`canonizesRigidResidue_or_flags`).
+> - **▶▶ THE FRONTIER (what a fresh reader picks up) — the DE-CLASSED base-quotient reader `readAggB` (§8.2 step 9F) +
+>   the `mp7` probe + P3-ring + P4.** **⚠⚠ FULL-ORDER POLY FRAME SET IS IMPOSSIBLE (the finding that retired `seedFrames`):**
+>   `readAgg` ranges over `Finset (Perm (Fin n))`, and `FramesEquivariant` at a **gauge** colour-aut forces the set
+>   invariant under LEFT-MULT by the gauge group `G` — a **free** action — so any nonempty such set has `|frames| ≥ |G| =
+>   2^β`. The exponential is forced by the TYPE, not the choice; the old `seedFrames`/`OrderOfEquivariant` interface is
+>   target-vacuous (`OrderOfEquivariant` at a gauge `σ` fixing a seed forces `σ=1` ⟹ purely-rigid only). **✅ THE ESCAPE
+>   (step 9F, landed): re-type the aggregate over an ABSTRACT base-frame type `B` on which gauge acts NON-freely** (the
+>   recovered base is gauge-fixed). `readAggB`/`readEquivariant_readAggB`/`AggFaithfulB`/capstones over generic
+>   `(B, act, baseRead)` with `{FramesEquivariantB, ReadAtEquivariant, AggFaithfulB}`; **① unconditional** and now **POLY**
+>   — the concrete `forcedVal`-based **pinning** instance (`baseReadPin`, gauge-fixed, ORDER-FREE, reuses step 2) is
+>   `FramesEquivariantB` at a **singleton** frame family (`keyEquivariant_compKey_readAggB_pin`, ZERO carried beyond the
+>   extraction). **▶ NEXT = the `mp7` probe** (a RICH pinning family whose aggregate discretizes the rigid part while
+>   tying gauge ⟹ `AggFaithfulB` non-vacuous) **= P2**; then **P3-ring** (`Z_{2^k}`, `IR §11.13`) → **P4**
+>   (`canonizesRigidResidue_or_flags`).
 > - **★ DE-CLASSING (the `②` shape — why this is not an infinite family ladder).** `ReadSeparatesRigid`/`AggFaithful` IS
 >   the **kernel characterization** `ker(recovered H) = automorphism-gauge`, stated ONCE. The cell's "class" is
 >   `ker(recovered H)` as a subspace: Schurian (`ker` = all) / CFI (`ker` = cycle-space) / mixed (intermediate) = the
@@ -62,8 +68,11 @@
 >      9C-2 assembly `RigidFrameUnique = framedCodeSym_of_rrefCanon_eq (PROVABLE lin-alg) + CodeFaithful (wall) +
 >      GRAPH-rigidity` is the anchor's faithfulness; ⚠ uniqueness needs GRAPH rigidity, NOT `IsRigidF2` (trivial kernel =
 >      the `②`/separation condition, a distinct fact).
->   3. **A poly (`< n!`) equivariant frame set needs a STRUCTURAL discretizing order = the linear solve** (WL won't). So
->      P2's `OrderOfEquivariant` is carried per-family, not general.
+>   3. **A poly full-order (`Finset (Perm)`) equivariant frame set is IMPOSSIBLE on a gauged input** — `FramesEquivariant`
+>      at a gauge aut ⟹ set invariant under free left-mult by `G` ⟹ `|frames| ≥ 2^β`. The exponential is TYPE-forced, not
+>      a bad choice; `seedFrames`/`OrderOfEquivariant` (which committed to `Perm` orders) are RETIRED. The escape is the
+>      base-quotient re-typing (`readAggB`, step 9F): frames are gauge-FIXED base objects (pinnings), so `act` is non-free
+>      and a poly (singleton) `FramesEquivariantB` set exists; the read is order-free `forcedVal`, no full order at all.
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** — steps 1–5 coord-free
 > reader (Route B′, anchor-history) · 6 general `refineBy read` interface · 6b–9C single-`ord` `structRead` (the `ker=0`
@@ -760,20 +769,42 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       finer (weakens `AggFaithful`) — a drop-in `②` upgrade if the set is too coarse per-family. **▶ NEXT:** the poly
       structural frame set (`②`-cost, replaces exponential `framesUniv`) + per-family `AggFaithful` (= `ForcingModel.bridge`/L4)
       → P3-ring → P4.
-    - **✅ (step 9E / P1) LANDED 2026-07-26 — the POLY frame set: the seed→frame interface.** The `②`-cost fix (replace
-      exponential `framesUniv`) staged. **★ Load-bearing constraint:** an equivariant frame set `< n!` needs an
-      iso-invariant frame-SELECTION rule, and each frame is a genuine `Perm` (total column order) — any index-order fill
-      breaks equivariance, so a fully-structural order needs discreteness, which for the rigid LINEAR targets is the
-      **linear solve** (WL-refinement provably won't discretize the multipede). **P1 (structural, generic):** a frame
-      set `seedFrames seeds orderOf = (seeds adj χ).image (orderOf adj χ)` from an iso-invariant seed family `seeds`
-      (bounded base assignments = C# affine frames) + an equivariant order completion `orderOf`. Built:
-      **`framesEquivariant_seedFrames`** (`FramesEquivariant ⟸ SeedsEquivariant + OrderOfEquivariant`, pure
-      `Finset.image` algebra) + **`card_seedFrames_le`** (`|frames| ≤ |seeds|` — with a poly seed bound ⟹ poly frame
-      set ⟹ poly `readAgg` cost) + capstone `keyEquivariant_compKey_readAgg_seedFrames`. Decouples ① (equivariance,
-      done) / cost (`|seeds| ≤ poly`, P2) / ② (richness = `AggFaithful`, P3). **▶ NEXT — P2:** the concrete poly seed
-      (bounded base, `|seeds| ≤ n^k`) + the discretizing solve-completion `orderOf` (equivariant, carried per-family =
-      the recover core / wall family; ⚠ `OrderOfEquivariant` needs discreteness = linear solve, NOT WL) · **P3:**
-      `AggFaithful (seedFrames …)` per-family. Then P3-ring → P4.
+    - **⛔ (step 9E / P1) RETIRED 2026-07-26 — the full-order `seedFrames`/`OrderOfEquivariant` interface is IMPOSSIBLE
+      at poly cardinality.** The `②`-cost fix was staged as a poly `Finset (Perm)` frame set (`seedFrames seeds orderOf`
+      + `framesEquivariant_seedFrames ⟸ SeedsEquivariant + OrderOfEquivariant` + `card_seedFrames_le`). **★ A branched
+      agent + machine-check found this cannot work:** `FramesEquivariant frames` at a **gauge** colour-aut `σ` (`relabelAdj
+      σ adj = adj`, `transportColouring σ χ = χ`) forces `frames adj χ = (frames adj χ).image (σ · )` — the set is
+      invariant under LEFT-MULTIPLICATION by the whole gauge group `G`. Left-mult on a group is a **free** action
+      (`σ·o = o ⟹ σ=1`), so any nonempty invariant set is a union of full `G`-orbits ⟹ **`|frames| ≥ |G| = 2^β`.** There
+      is NO poly `FramesEquivariant` set of full orders on a gauged (mixed) input — **the exponential is forced by the
+      TYPE, not the choice of set** (`framesUniv` was not merely the easy exponential; every choice is `≥ 2^β`). And
+      `OrderOfEquivariant` at a gauge `σ` fixing a seed forces `σ=1`, so it holds only on purely-rigid inputs — the
+      interface was target-vacuous, re-importing the whole-node rigidity 9D routed around, relocated into the order.
+    - **✅✅ (step 9F) LANDED 2026-07-26 — the DE-CLASSED base-quotient reader `readAggB` (the TYPE ESCAPE).** Range the
+      aggregate over an **abstract base-frame type `B` on which the gauge acts NON-freely** — the recovered base is
+      gauge-FIXED (gauge induces the identity on the base), so `act σ` is trivial for gauge `σ` ⟹ a gauge-closed frame
+      set of poly (even singleton) cardinality EXISTS and the free-action bound does not apply. Built (`RigidRefine.lean`,
+      axiom-clean, gate green 191s): the whole aggregate re-typed over generic `(B, act, baseRead)` — **`FramesEquivariantB`**
+      (frame set transports via `act`) + **`ReadAtEquivariant`** (each per-frame read a vertex-invariant) ⟹
+      **`readEquivariant_readAggB`** (`①` UNCONDITIONAL — the base-quotient analog of 9D, no rigidity) + capstone
+      `keyEquivariant_compKey_readAggB`; and the `②` side **`AggFaithfulB`** (aggregate-indistinguishable ⟹ AUTOMORPHIC)
+      + `readAggB_eq_of_aut` (gauge ties) + `readSeparatesRigid_readAggB` + `nodeResolved_compKey_readAggB_faithful`.
+      The full-order `readAgg` is exactly the `B = Perm`, `act = (σ·)` instance (the exponential anchor). **★ CONCRETE
+      PINNING INSTANCE (the escape realized, non-vacuous):** `B = Finset (Fin n → ZMod 2)` = a base **pinning**;
+      **`pinAct σ p = p.image (transportVec σ)`** (gauge-FIXED — non-free); **`baseReadPin extract p adj χ v = encOpt
+      (forcedVal ((extract adj χ).1 ∪ p) (extract adj χ).2 v)`** — the vertex's forced value under (system ∪ pinning),
+      **reusing step 2's `forcedVal`, ORDER-FREE, no `rrefCanon` in the `①` handle**; **`readAtEquivariant_baseReadPin`**
+      (`ReadAtEquivariant ⟸ RefExtractEquivariant`, via `forcedVal_transport` + `image_union`) + **`framesEquivariantB_singleton`**
+      + capstone **`keyEquivariant_compKey_readAggB_pin`**: the concrete de-classed `①`, **POLY** (a singleton pinning
+      family, `|frames|=1`, not `n!`), ZERO carried beyond the extraction. **⟹ the whole rigid-linear seal for the
+      de-classed reader rests on exactly `{FramesEquivariantB, ReadAtEquivariant, AggFaithfulB}`** — all satisfiable at
+      poly cost. **De-classing preserved:** ONE read (`forcedVal`, generic over the carried extraction) + ONE faithfulness
+      predicate (`AggFaithfulB`); CFI/multipede/`Z_{2^k}` are non-vacuity WITNESSES, not per-family theorems; only ladder
+      = the finite ring tower (P3-ring). The base-frame aggregate is also the RICHNESS fix for step 5's ≤2-classes
+      coarseness (one forced-bit per pinning ⟹ enough bits to discretize the rigid part). **▶ NEXT — P2 = the `mp7`
+      probe:** a RICH (poly) pinning family whose aggregate discretizes the rigid part while tying gauge ⟹ `AggFaithfulB`
+      non-vacuous on the primary mixed witness (needs the concrete poly pinning family to be computable — `framesUniv`
+      couldn't be measured). Then set-vs-multiset decision, P3-ring → P4.
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
       are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback
@@ -897,7 +928,7 @@ STATE" note. **Track them together — but count the `A_k`-layer extraction as W
 | **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |
 | **P3-Sound** | soundness is FREE (relabelling-emit) + `①` reduces to `GenEquivariant gen` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverSound.lean`) — `ptForm`/`colAut_of_ptForm_eq`/`emitLabel`/`ptSound_emitLabel`/`ptIsoInvariant_emitLabel` + capstones `keyEquivariant_compKey_emitLabel`/`nodeResolved_compKey_emitLabel` |
-| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME + ✅ (D) READ-LABELLING LANDED** (`RigidFrame.lean` `framedRREF_transport` + `RigidGen.lean` `genEquivariant_genOfRef`/capstones `keyEquivariant_compKey_genOfRef`/`nodeResolved_compKey_genOfRef`). **▶ (A)–(D) CHAIN COMPLETE.** **✅ concrete `ref` = `refineByFrame` LANDED 2026-07-25, ROUTE B′** (`RigidRefine.lean`, axiom-clean): coordinate-free forcing over P2's `rowspace` (`rowspace_transport`/`forcedVal`/`forcedVal_transport`) ⟹ **`refEquivariant_refineByFrame`** (`RefEquivariant` **UNCONDITIONAL**, no `Discrete χ`, no frame — the χ-frame route had a discreteness gap) + capstones `keyEquivariant_compKey_refineByFrame`/`nodeResolved_compKey_refineByFrame`. The rigid linear `①`/firing now closes on the SINGLE carried `RefExtractEquivariant` (the extraction transports), handles MIXED cells (forced coords pinned, gauge coords tied), needs NO uniqueness. **✅ `RefExtractEquivariant` DISCHARGED (step 4, `RigidRefine.lean`): `refExtractEquivariant_extractOf` (any equivariant local extraction transports — the faithful CFI extraction plugs in here) + concrete `refExtractEquivariant_adj` ⟹ `keyEquivariant_compKey_refineByFrame_adj` = `compKey`'s `KeyEquivariant` with ZERO hypotheses. The `①`/EQUIVARIANCE side owes NOTHING.** **✅ `②` REDUCTION lemma (step 5): `hemit_of_forcedSeparates` + firing capstone (correct, retained).** ⚠⚠ **BUT single-bit `refineByFrame` CANNOT DISCRETIZE (2026-07-25 correction): one F₂ bit ⟹ ≤2 classes/cell ⟹ `ForcedSeparates` UNSATISFIABLE on rigid multipedes (>2-vertex cells, the PRIMARY target). Mis-scoping CONTAINED to the concrete reader; scaffold sound.** **✅ FIX LANDED (steps 6+6b): the discretizing structural reader `structRead` (RREF-column over a recovered iso-invariant order) — `readEquivariant_structRead`/`keyEquivariant_compKey_structRead` (`①`, no `Discrete χ`, via `framedRREFBy_transport`) + `readSeparates_of_injective`/`nodeResolved_compKey_structRead` (`②`). Rigid-linear seal for the discretizing reader now rests on exactly 3 carried `Recover` facts: `{OrdEquivariant, HsEquivariant, structRead-injective}`.** **⚠⚠ SUPERSEDED as object-of-record (2026-07-26): the single-`ord` `structRead` path (steps 6b–9C) is WHOLE-NODE-RIGID** (`OrdEquivariant` = equivariant Perm exists only on rigid inputs) — KEPT as the `ker=0` ANCHOR (`keyEquivariant_compKey_skStruct_faithful` from `RigidFrameUnique` = `framedCodeSym_of_rrefCanon_eq` [provable lin-alg] + `CodeFaithful` [wall] + graph-rigidity). **✅ OBJECT OF RECORD = the MIXED-NATIVE aggregate reader `readAgg` (steps 7+9D):** ① `readEquivariant_readAgg` UNCONDITIONAL (from `FramesEquivariant` alone, NO rigidity), ② `readSeparatesRigid_readAgg` from `AggFaithful` (aggregate-indistinguishable ⟹ AUTOMORPHIC; gauge ties provably `readAgg_eq_of_aut`, non-aut separates); firing `nodeResolved_compKey_readAgg_faithful`; seal = `{FramesEquivariant, AggFaithful}`. **✅ POLY FRAME SET P1 (9E):** `seedFrames`/`framesEquivariant_seedFrames`/`card_seedFrames_le` (`|frames|≤|seeds|`). Remaining: **P2** concrete poly seed + discretizing solve-completion `orderOf` (carried per-family; needs LINEAR solve, WL won't) · **P3** `AggFaithful (seedFrames …)` per-family; then P3-ring |
+| **P3-F₂** | concrete poly `gen` over `rowspace(H)` ⟹ `GenEquivariant` + total (`hemit`) | **core ✅ LANDED 2026-07-23** (`RigidSolveF2.lean`) — the rigid-solve determinacy `unique_solution_of_rigid` (+ `IsRigidF2`/`dotP`/`dotP_zero_rowspace`). **`gen` scoped into (A)–(D), §8.2.** **✅ (A) canonical RREF + ✅ (B) RREF-CANONICITY LANDED** (`RigidRREF.lean`, axiom-clean): `rrefCanon`/`pivInv_rrefCanon` (A) + **`rrefCanon_eq_of_span_eq`** (B — same row space ⟹ equal canonical RREF: kernel triviality + leading-position + `reconstruction` ⟹ `pivotCols_eq`/`pivotRow_eq`). **✅ (C) χ-FRAME + ✅ (D) READ-LABELLING LANDED** (`RigidFrame.lean` `framedRREF_transport` + `RigidGen.lean` `genEquivariant_genOfRef`/capstones `keyEquivariant_compKey_genOfRef`/`nodeResolved_compKey_genOfRef`). **▶ (A)–(D) CHAIN COMPLETE.** **✅ concrete `ref` = `refineByFrame` LANDED 2026-07-25, ROUTE B′** (`RigidRefine.lean`, axiom-clean): coordinate-free forcing over P2's `rowspace` (`rowspace_transport`/`forcedVal`/`forcedVal_transport`) ⟹ **`refEquivariant_refineByFrame`** (`RefEquivariant` **UNCONDITIONAL**, no `Discrete χ`, no frame — the χ-frame route had a discreteness gap) + capstones `keyEquivariant_compKey_refineByFrame`/`nodeResolved_compKey_refineByFrame`. The rigid linear `①`/firing now closes on the SINGLE carried `RefExtractEquivariant` (the extraction transports), handles MIXED cells (forced coords pinned, gauge coords tied), needs NO uniqueness. **✅ `RefExtractEquivariant` DISCHARGED (step 4, `RigidRefine.lean`): `refExtractEquivariant_extractOf` (any equivariant local extraction transports — the faithful CFI extraction plugs in here) + concrete `refExtractEquivariant_adj` ⟹ `keyEquivariant_compKey_refineByFrame_adj` = `compKey`'s `KeyEquivariant` with ZERO hypotheses. The `①`/EQUIVARIANCE side owes NOTHING.** **✅ `②` REDUCTION lemma (step 5): `hemit_of_forcedSeparates` + firing capstone (correct, retained).** ⚠⚠ **BUT single-bit `refineByFrame` CANNOT DISCRETIZE (2026-07-25 correction): one F₂ bit ⟹ ≤2 classes/cell ⟹ `ForcedSeparates` UNSATISFIABLE on rigid multipedes (>2-vertex cells, the PRIMARY target). Mis-scoping CONTAINED to the concrete reader; scaffold sound.** **✅ FIX LANDED (steps 6+6b): the discretizing structural reader `structRead` (RREF-column over a recovered iso-invariant order) — `readEquivariant_structRead`/`keyEquivariant_compKey_structRead` (`①`, no `Discrete χ`, via `framedRREFBy_transport`) + `readSeparates_of_injective`/`nodeResolved_compKey_structRead` (`②`). Rigid-linear seal for the discretizing reader now rests on exactly 3 carried `Recover` facts: `{OrdEquivariant, HsEquivariant, structRead-injective}`.** **⚠⚠ SUPERSEDED as object-of-record (2026-07-26): the single-`ord` `structRead` path (steps 6b–9C) is WHOLE-NODE-RIGID** (`OrdEquivariant` = equivariant Perm exists only on rigid inputs) — KEPT as the `ker=0` ANCHOR (`keyEquivariant_compKey_skStruct_faithful` from `RigidFrameUnique` = `framedCodeSym_of_rrefCanon_eq` [provable lin-alg] + `CodeFaithful` [wall] + graph-rigidity). **✅ OBJECT OF RECORD = the MIXED-NATIVE aggregate reader `readAgg` (steps 7+9D):** ① `readEquivariant_readAgg` UNCONDITIONAL (from `FramesEquivariant` alone, NO rigidity), ② `readSeparatesRigid_readAgg` from `AggFaithful` (aggregate-indistinguishable ⟹ AUTOMORPHIC; gauge ties provably `readAgg_eq_of_aut`, non-aut separates); firing `nodeResolved_compKey_readAgg_faithful`; seal = `{FramesEquivariant, AggFaithful}`. **⛔ FULL-ORDER POLY FRAME SET IMPOSSIBLE (9E RETIRED):** `FramesEquivariant` at a gauge aut ⟹ free left-mult invariance ⟹ `|frames|≥2^β`; `seedFrames`/`OrderOfEquivariant` retired (target-vacuous). **✅ DE-CLASSED ESCAPE = `readAggB` (9F):** re-typed over an abstract base-frame `B` gauge acts NON-freely on; `{FramesEquivariantB, ReadAtEquivariant}` ⟹ `readEquivariant_readAggB` (① unconditional) + `keyEquivariant_compKey_readAggB`; `②` via `AggFaithfulB`; concrete `forcedVal`-based **pinning** instance (`pinAct`/`baseReadPin`/`readAtEquivariant_baseReadPin`) POLY at a singleton frame family (`keyEquivariant_compKey_readAggB_pin`, zero carried). Remaining: **P2** = `mp7` probe (rich pinning family ⟹ `AggFaithfulB` non-vacuous) · then P3-ring |
 | **P3-ring** | `Z_{2^k}`/finite-abelian: ring-inference + finite-ring Smith + 2-adic tower | **not built** — heavy; ring-inference carried (`IR §11.13`). ⚠ Mathlib Smith = noncomputable/existence-only |
 | **P4** | `canonizesRigidResidue_or_flags` | **not built** — the capstone; isolates the non-linear-rigid residue (`¬HandledS`) |
 | **R2** | per-family: CFI, `Z_{2^k}`, multipede | CFI **axiom-free** (`theorem_1_HOR_cfi_oddDeg`, but non-disc ⟹ needs `sk`); `Z_{2^k}`/multipede **build targets** |
