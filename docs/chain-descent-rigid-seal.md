@@ -815,23 +815,36 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       base-quotient escape is real.** **⚠ BUT the READ matters — decisive finding:** the single-value `baseReadPin`
       (`encOpt (forcedVal …)` ∈ `{none,some0,some1}`) has an aggregate SET of `≤3` values ⟹ `≤7` classes EVER ⟹ **cannot
       split large rigid cells** (probe v3, faithful to the landed `baseReadPin` over BOTH `hsAdj`-adjacency AND the CFI
-      recovered code: 2–4 classes vs 30 orbits — FAILS, the same ceiling as step 5). The read that WORKS (probe v2 —
-      recovers orbits exactly) is a **colour-keyed forced-neighbourhood profile**: a multiset over neighbours keyed by
-      `(χ-colour, forced-orientation-relative bit)` — **RICH** (not one bit), **order-free** (keyed by the already-canonical
-      χ-colours, NOT a full vertex order ⟹ no `2^β`), **transporting** (χ + `forcedVal` both transport). It is WL-refinement
-      **plus the linear-solve forcing** (strictly > WL — the forced orientations break WL-symmetry; consistent with "the
-      linear solve discretizes, WL alone won't"). **⟹ REFINED P2 (immediate next Lean step): the concrete read is
-      `baseReadWL` (colour-keyed forced profile), NOT `baseReadPin`.** The abstract §9F interface
-      (`readAggB`/`FramesEquivariantB`/`ReadAtEquivariant`/`AggFaithfulB`) is UNCHANGED — it already takes an arbitrary
-      `baseRead : … → Nat`, so ONLY the concrete instance swaps; `baseReadPin` is kept as the ①/POLY non-vacuity witness
-      (discharges equivariance + poly cardinality; just doesn't discretize).
-      **▶ TO CLOSE THE SEAM from here (ordered):** **(1) P2** — land `baseReadWL` + `readAtEquivariant_baseReadWL` (reuses
-      `forcedVal`/χ-keying) ⟹ `keyEquivariant_compKey_readAggB` gives ① POLY & discretizing; **(2) P3** — discharge
-      `AggFaithfulB (…) baseReadWL` on the linear residue = the kernel-characterization faithfulness (`ForcingModel.bridge`/
-      L4, carried; probe-confirmed), per-family witnesses; **(3) P3-ring** — `Z_{2^k}` (ring inference + finite Smith);
-      **(4) P4** — the capstone `canonizesRigidResidue_or_flags`; **(5) SEAM INTEGRATION** — `nodeResolved_compKey_readAggB_faithful`
-      feeds `Select.HandledS`; couple to consume's `Amenable` (§9.1: `Amenable`-violation ⟹ `RigidObstructionAt` ⟹ the
-      reader separates it); residue `¬HandledS` at non-linear rigid = the wall (§9.2 / claim #2/#3).
+      recovered code: 2–4 classes vs 30 orbits — FAILS, the same ceiling as step 5).
+    - **⚠⚠ (step 9F PROBE, ROUND 2 — CORRECTION 2026-07-26) — `baseReadWL` REFUTED; the discretizing read is the
+      RREF-column recover-core, NOT a WL profile.** A faithful measurement on the rigid multipede
+      (`scratchpad/lin_discretize.py`, `probe_basereadWL.py`) killed the round-1 hope that a colour-keyed forced-neighbourhood
+      profile (`baseReadWL`) discretizes: **(i)** single-bit `forcedVal` gives **0/30 coords forced** (the homogeneous CFI
+      code has NO individually-forced coord — `baseReadPin` is not just coarse, it's empty here); **(ii)** the WL-neighbourhood
+      read (`baseReadWL`, even ITERATED to a fixpoint + the forcing bit) **stabilizes at 10–16 classes** — it does NOT
+      discretize, which is exactly the multipede's designed WL-hardness (a colour-keyed neighbourhood read is WL-with-an-extra-
+      colour, and WL is provably blind to the multipede). Probe v2's apparent success was a **fixture artifact** — it keyed by
+      the pre-distinct fine-colouring segment identities, not a general mechanism. **(iii)** what DOES discretize is the
+      **RREF-COLUMN signature** (`structReadAt`, the linear-solve read): **30/30 distinct, feet distinct, middles distinct**
+      — the rich column signature is the only thing that cracks the multipede. **⟹ THE REAL TENSION, now localized:** the
+      discretizing read (RREF-column) needs a **canonical column order** to be iso-invariant (RREF is NOT column-equivariant,
+      the (C) finding), and a poly equivariant FULL order is exactly the `2^β`-impossible thing on gauge inputs
+      (whole-node-rigid `9A–9C` gives it only on PURELY-rigid). Base pinnings do NOT resolve this: a base pinning is
+      gauge-FIXED, so a gauge `σ` still fixes it ⟹ its induced order `o_b` hits the same whole-node-rigidity wall; and
+      pinning the gauge itself = `2^β` cosets. **So the `②`/discretization is NOT a cheap read — it IS the recover-core**
+      (a canonical order on the RIGID part with the gauge tied), = `ForcingModel.bridge`/L4, the carried per-family wall,
+      exactly where the project always placed it. **No regression:** §9F's ① escape (poly, gauge-tied, `baseReadPin` witness)
+      stands; the probe SHARPENED `②` — it refuted the WL shortcut and confirmed the discretizing content = RREF-column +
+      canonical rigid-part order = the recover core. The exponential `readAgg`-over-`framesUniv` of `structReadAt` remains
+      the correct-but-exponential object (① unconditional 9D, ② via `AggFaithful`); the poly reduction is the OPEN frontier,
+      now precisely characterized as "a canonical column order on the rigid residue (gauge tied)."
+      **▶ TO CLOSE THE SEAM from here (ordered, corrected):** **(1) P2 = the recover-core read** — a canonical column order
+      on the RIGID part (tie the gauge, order the forced/rigid residue), feeding `structReadAt`; this is the carried
+      per-family content (`ForcingModel`/L4), NOT a WL shortcut; the probe confirms the RREF-column read discretizes once
+      the order exists. **(2) P3** — `AggFaithful` = the kernel-characterization faithfulness (carried, probe-confirmed
+      non-vacuous at the decision level). **(3) P3-ring** — `Z_{2^k}`. **(4) P4** — `canonizesRigidResidue_or_flags`.
+      **(5) SEAM** — `nodeResolved_compKey_readAggB_faithful` feeds `Select.HandledS`; couple to consume's `Amenable` (§9.1);
+      residue `¬HandledS` at non-linear rigid = the wall (§9.2, claim #2/#3).
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
       are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback
