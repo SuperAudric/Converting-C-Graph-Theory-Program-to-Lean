@@ -65,8 +65,12 @@
 >   `readEquivariant_readAgg` holds **UNCONDITIONALLY** (from `FramesEquivariant` alone — set transports ⟹ aggregate
 >   invariant; NO uniqueness/rigidity); `keyEquivariant_compKey_readAgg_univ` = the mixed-native `①` with **ZERO carried
 >   hypotheses**. Gauge pairs tie automatically (ReadEquivariant at a colour-aut), rigid pairs separate via the per-pair
->   `ReadSeparatesRigid` (step 7). The single-`ord` 9A–9C results are KEPT as the **`ker=0`/purely-rigid anchor**. **▶ NEXT:
->   §9D `②`** = `ReadSeparatesRigid (readAgg)` (per-pair faithfulness; the poly frame set for cost) → **P3-ring** → **P4**.
+>   `ReadSeparatesRigid` (step 7). The single-`ord` 9A–9C results are KEPT as the **`ker=0`/purely-rigid anchor**. **✅ §9D-②
+>   SEPARATION** = **`AggFaithful`** (aggregate-indistinguishable ⟹ **AUTOMORPHIC**, the mixed modification vs 9C's "⟹
+>   identity"): gauge ties provably (`readAgg_eq_of_aut`), non-aut separates (`readSeparatesRigid_readAgg`), capstone
+>   `nodeResolved_compKey_readAgg_faithful`. **Mixed-reader seal = `{FramesEquivariant` ✅`, AggFaithful` (wall)`}`.** **▶
+>   NEXT:** poly structural frame set (`②`-cost, replaces `framesUniv`) + per-family `AggFaithful` (= `ForcingModel.bridge`/L4)
+>   → **P3-ring** → **P4**.
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
 > reader 1–5, general interface 6, structural reader 6b); see §8.2 and §10. The consume side feeds a clean per-node handoff
@@ -748,8 +752,19 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       pairs tie automatically (`ReadEquivariant` at a colour-aut); rigid pairs separate per-pair. **⚠ COST — NO NEW
       exponential:** the aggregate ranges over `frames`; `framesUniv` (all `n!`) is exponential = the SAME 9B `②`-cost
       deferral (the `①` is frame-set-agnostic ⟹ a poly/greedy structural frame set, bounded ring rank, drops into the
-      same `FramesEquivariant` slot unchanged). **▶ NEXT:** `ReadSeparatesRigid (readAgg)` (per-pair faithfulness, `②`) +
-      the poly frame set (cost) → P3-ring → P4.
+      same `FramesEquivariant` slot unchanged).
+    - **✅✅ (step 9D-②) LANDED 2026-07-26 — SEPARATION via the MIXED-NATIVE faithfulness `AggFaithful`.** `readAgg u =
+      readAgg w` ⟺ (encode∘sort injective, `aggSet_eq_of_readAgg_eq`) equal signature SETS `aggSet u = aggSet w`. So `②`
+      reduces to faithfulness, with the **modification for non-trivial aut**: **`AggFaithful` — aggregate-indistinguishable
+      ⟹ AUTOMORPHIC** (`∃ colour-aut σ, σu=w`), NOT identity (the 9C-2 form). This admits gauge, and splits mixed-natively:
+      **gauge pairs tie provably** (`readAgg_eq_of_aut`, from `ReadEquivariant` at the colour-aut — no over-separation) +
+      **non-aut pairs separate** (`readSeparatesRigid_readAgg` from `AggFaithful` + the non-aut hypothesis, NO node/cell
+      rigidity). Capstone `nodeResolved_compKey_readAgg_faithful`: the mixed-native firing from `AggFaithful` alone. **⟹
+      the whole rigid-linear seal for the mixed-native reader rests on exactly `{FramesEquivariant` (structural, ✅ for
+      `framesUniv`)`, AggFaithful` (the shared wall)`}`.** ⚠ `aggSet` = SET (dedup); the MULTISET aggregate is strictly
+      finer (weakens `AggFaithful`) — a drop-in `②` upgrade if the set is too coarse per-family. **▶ NEXT:** the poly
+      structural frame set (`②`-cost, replaces exponential `framesUniv`) + per-family `AggFaithful` (= `ForcingModel.bridge`/L4)
+      → P3-ring → P4.
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
       are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback

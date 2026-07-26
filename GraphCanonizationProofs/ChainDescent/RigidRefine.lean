@@ -1232,5 +1232,86 @@ theorem keyEquivariant_compKey_readAgg_univ :
     KeyEquivariant (compKey (skRead (readAgg (framesUniv (n := n))))) :=
   keyEquivariant_compKey_readAgg framesUniv framesEquivariant_univ
 
+/-! ## Step 9D-② — separation: `ReadSeparatesRigid (readAgg)` via the MIXED-NATIVE faithfulness `AggFaithful`
+
+The `②`/firing side of the aggregate reader. `readAgg u = readAgg w` ⟺ (encode∘sort injective) the **sets of per-frame
+signatures** coincide (`aggSet u = aggSet w`). So separation reduces to a faithfulness predicate — but with the crucial
+**modification for non-trivial automorphisms** (vs the purely-rigid 9C):
+
+* 9C (purely rigid): code-symmetric ⟹ **identity** (trivial aut).
+* 9D (mixed): **`AggFaithful` — aggregate-indistinguishable ⟹ AUTOMORPHIC** (`∃ colour-aut σ, σu=w`), NOT identity.
+  This admits gauge, and the two directions come out mixed-natively:
+  - **gauge pairs tie provably** (`readAgg_eq_of_aut`, from `ReadEquivariant` at the colour-aut) — no over-separation;
+  - **non-automorphic pairs separate** (`readSeparatesRigid_readAgg`, from `AggFaithful` + the non-aut hypothesis).
+
+Carried gap = `AggFaithful` (aggregate faithfulness, the wall, per-family). ⚠ `aggSet` is a SET (dedup); the MULTISET
+aggregate is strictly finer and weakens `AggFaithful` if the set proves too coarse on a family — a drop-in `②` upgrade. -/
+
+/-- The set of per-frame signatures of vertex `v` — the semantic content of `readAgg` (before sort/encode). -/
+noncomputable def aggSet (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : Finset Nat :=
+  (frames adj χ).image (fun o => structReadAt o hsAdj adj χ v)
+
+/-- `readAgg` is `encode` of the sorted `aggSet` (definitional). -/
+theorem readAgg_eq_encode_sort (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    readAgg frames adj χ v = Encodable.encode ((aggSet frames adj χ v).sort (· ≤ ·)) := rfl
+
+/-- **`readAgg` distinguishes vertices exactly when their signature SETS differ** — `encode ∘ sort` is injective on
+`Finset ℕ` (`encode` injective; `sort` determines the Finset via `toFinset`). -/
+theorem aggSet_eq_of_readAgg_eq (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (adj : AdjMatrix n) (χ : Colouring n) (u w : Fin n)
+    (h : readAgg frames adj χ u = readAgg frames adj χ w) :
+    aggSet frames adj χ u = aggSet frames adj χ w := by
+  rw [readAgg_eq_encode_sort, readAgg_eq_encode_sort] at h
+  have hs := Encodable.encode_injective h
+  have := congrArg List.toFinset hs
+  rwa [Finset.sort_toFinset, Finset.sort_toFinset] at this
+
+/-- **★ Gauge pairs TIE (correctness — no over-separation).** An automorphic pair (`σ` a colour-aut, `σ u = w`) gets
+EQUAL `readAgg`, straight from `ReadEquivariant` at `σ` (`relabelAdj σ adj = adj`, `transportColouring σ χ = χ`). So the
+aggregate reader correctly leaves gauge/orbit pairs unrefined (consume's job) — it separates ONLY genuine decisions. -/
+theorem readAgg_eq_of_aut (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (hf : FramesEquivariant frames) (adj : AdjMatrix n) (χ : Colouring n) (u w : Fin n)
+    (σ : Equiv.Perm (Fin n)) (hσ : IsColAut adj χ σ) (hσuw : σ u = w) :
+    readAgg frames adj χ u = readAgg frames adj χ w := by
+  have h := readEquivariant_readAgg frames hf σ adj χ u
+  rw [hσ.relabel, hσ.transport, hσuw] at h
+  exact h.symm
+
+/-- **CARRIED — aggregate faithfulness (the wall, MIXED-NATIVE form):** if two co-cellular vertices have the same set
+of per-frame signatures, they are **automorphic** (`∃ colour-aut σ, σ u = w`) — NOT merely equal. This is the mixed
+analog of 9C-2's `CodeFaithful` (which landed on the identity); admitting non-trivial `σ` is exactly what lets the
+mixed residue's gauge coexist with rigid decisions. Per-family resolvable; its failure = the non-linear residue. -/
+def AggFaithful (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ u ∈ branches χ, ∀ w ∈ branches χ,
+    aggSet frames adj χ u = aggSet frames adj χ w → ∃ σ : Equiv.Perm (Fin n), IsColAut adj χ σ ∧ σ u = w
+
+/-- **★★ `ReadSeparatesRigid (readAgg frames)` from `AggFaithful`.** A non-automorphic, non-discretizing, co-cellular
+pair gets distinct `readAgg`: equal `readAgg` ⟹ equal signature sets ⟹ (`AggFaithful`) automorphic — contradicting
+non-automorphy. No rigidity of the node/cell; purely the per-pair non-aut hypothesis. -/
+theorem readSeparatesRigid_readAgg (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (adj : AdjMatrix n) (χ : Colouring n) (haf : AggFaithful frames adj χ) :
+    ReadSeparatesRigid (readAgg frames) adj χ := by
+  intro u hu w hw hnaut _ _ heq
+  obtain ⟨σ, hσ, hσuw⟩ := haf u hu w hw (aggSet_eq_of_readAgg_eq frames adj χ u w heq)
+  exact hnaut σ hσ hσuw
+
+/-- **★★★ Step 9D-② capstone — MIXED-NATIVE firing from `AggFaithful` alone.** `NodeResolved` for the aggregate force
+key from the aggregate faithfulness (`②`) + the exposed-pairs-non-automorphic condition — no whole-node/whole-cell
+rigidity, no global discreteness. Combined with `keyEquivariant_compKey_readAgg` (`①`, zero carried), the whole
+rigid-linear seal for the mixed-native reader rests on exactly `{FramesEquivariant, AggFaithful}` — the frame-set
+transport (structural) and the aggregate faithfulness (the shared wall). -/
+theorem nodeResolved_compKey_readAgg_faithful
+    (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n) (hnd : ¬ Discrete χ)
+    (haf : AggFaithful frames adj χ)
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (compKey (skRead (readAgg frames))) S adj χ :=
+  nodeResolved_compKey_readAgg frames S adj χ hnd
+    (readSeparatesRigid_readAgg frames adj χ haf) hrigid
+
 end RigidRefine
 end ChainDescent
