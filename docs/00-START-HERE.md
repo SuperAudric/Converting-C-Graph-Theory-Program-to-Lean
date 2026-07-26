@@ -179,7 +179,7 @@ close it — is set out in
 > `Amenable`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
 > ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Amenable`
 > per family AND is the other seal. **✅ THE ALGORITHM-R SCAFFOLD + THE FULL `gen`-REDUCTION CHAIN (A)–(D) LANDED
-> (2026-07-24, axiom-clean, gate green 92 modules — authoritative detail = rigid-seal STATUS/§8.2/§10):** the force
+> (2026-07-24, axiom-clean, gate green ~97 modules — authoritative detail = rigid-seal STATUS/§8.2/§10):** the force
 > key `leafColKey` + composite `compKey` (`RigidSeal.lean`); **P1** (`ForcingCircuits`), **P3-I**
 > (`RigidSolverInterface`), **P3-Sound** (`RigidSolverSound`, soundness FREE ⟹ `①` = one canonical labelling `gen`),
 > **P2** (`ForcingModel`), **P3-F₂ core** (`RigidSolveF2`); and the **`gen` chain**: **(A)+(B)** `RigidRREF.lean`
@@ -190,15 +190,19 @@ close it — is set out in
 > cases); the canonizer's residue is the DYNAMIC `¬HandledS`; they join only via the unbuilt W1 (NOT `↔`). The
 > mixed-cell/fusion question is SETTLED — the "Progress" predicate is the already-built sel-rewrite
 > `Select.HandledS`/`NodeResolved`. The (A)–(D) chain reduced the rigid linear `①` to *"supply a discrete equivariant
-> `ref`."* **▶▶ THE CONCRETE `ref` IS NOW LANDED (2026-07-25, `RigidRefine.lean`, steps 1–6b) — see
-> `chain-descent-rigid-seal.md` STATUS + §8.2.** Object of record = the **discretizing structural reader `structRead`**
-> (vertex's RREF-column signature over a recovered iso-invariant order); its rigid-linear seal rests on exactly **three
-> carried `Recover` facts** (`OrdEquivariant` + `HsEquivariant` ⟹ `①` via the χ-rank-free `framedRREFBy_transport`, no
-> `Discrete χ`; `structRead` injective ⟹ `②`). ⚠⚠ **DO-NOT-RE-DERIVE:** the single-bit coordinate-free reader
-> `refineByFrame` (Route B′) does `①` but **cannot discretize** (one F₂ bit ⟹ ≤2 classes/cell ⟹ fails the rigid
-> multipede — the primary target); the χ-frame route (C) has a `Discrete χ` gap; both superseded by `structRead`.
-> **NEXT: `IsRigidF2 ⟹ structRead` injective** (self-contained Lean) and/or the **concrete Lean `Recover`** (= `ForcingModel.bridge`/L4)
-> → P3-ring (`Z_{2^k}`) → P4. ⚠ user-flagged open Q (deferred): the rigid solver likely covers MORE than linear residues. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
+> `ref`."* **▶▶ THE CONCRETE `ref` + `Recover` ARE LANDED (2026-07-26, `RigidRefine.lean`, steps 1–9E, axiom-clean,
+> gate green ~97 modules) — authoritative = `chain-descent-rigid-seal.md` STATUS + §8.2.** **Object of record = the
+> MIXED-NATIVE aggregate reader `readAgg`** (sorted encoded SET of per-frame RREF-column signatures over an equivariant
+> frame set): **① `readEquivariant_readAgg` UNCONDITIONAL** (from `FramesEquivariant` alone — NO uniqueness/rigidity) +
+> **② `readSeparatesRigid_readAgg` from `AggFaithful`** (aggregate-indistinguishable ⟹ AUTOMORPHIC; gauge ties provably,
+> non-aut separates). **Seal for the mixed reader = `{FramesEquivariant, AggFaithful}`.** ⚠⚠ **DO-NOT-RE-DERIVE:** (1)
+> the single-bit `refineByFrame` (Route B′, steps 1–5) does `①` but **cannot discretize** (≤2 classes/cell ⟹ fails the
+> multipede); (2) an equivariant order PERM exists ONLY on rigid inputs, so the single-`ord` `structRead` path (steps
+> 6b–9C) is **whole-node-rigid = the `ker=0` anchor**, superseded by `readAgg` for the mixed residue; (3) a poly (`<n!`)
+> equivariant frame set needs a structural discretizing order = the LINEAR solve (WL won't). **FRONTIER: the POLY frame
+> set** — ✅ P1 interface (`seedFrames`/`framesEquivariant_seedFrames`/`card_seedFrames_le`) → ▶ P2 concrete poly seed +
+> discretizing solve-completion `orderOf` (carried per-family) · P3 `AggFaithful (seedFrames …)` per-family → P3-ring
+> (`Z_{2^k}`) → P4. ⚠ user-flagged open Q (deferred): the rigid solver likely covers MORE than linear residues. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
 > `hL1`/`K∖cell`, WL-completeness framing) is **SUPERSEDED PROVENANCE**. Measured (`DeepenStrengthProbe.cs`, 39
 > rows): starvation = 0, every checkable row COMPLETE, Chang-A 384/384 (survivor = fusion), expander multipedes rigid.
 > ⛔ `KernelBase.lean` (base recovery + lift) **parked** — not in `build.sh`.

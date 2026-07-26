@@ -48,25 +48,26 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
-> **▶▶▶ UPDATE 2026-07-25 (latest) — THE CONCRETE RIGID `ref` IS LANDED (`RigidRefine.lean`, steps 1–6b, axiom-clean,
-> gate green ~99 modules). Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) STATUS + §8.2
-> steps 5–6b + §10.** The (A)–(D) chain reduced the rigid **linear** `①` to *"supply a discrete equivariant `ref`"*;
-> the concrete `ref` is now built and is the frontier:
-> - **✅ The DISCRETIZING reader `structRead` (step 6b) is the object of record.** Reads each vertex's RREF-column
->   signature over a **recovered iso-invariant column order** `ord`. Its whole rigid-linear seal rests on **exactly
->   three carried `Recover` facts**: `OrdEquivariant` + `HsEquivariant` (order/system transport ⟹ `①`, via the
->   χ-rank-free `framedRREFBy_transport` — **no `Discrete χ`**) + `structRead` injective (discretization ⟹ `②` =
->   full-rank on the rigid residue). `ord`/`Hs` are the carried Lean `Recover` objects (= `ForcingModel.bridge`/L4).
-> - **⚠⚠ DO-NOT-RE-DERIVE:** the earlier plan "wire P2 extraction into refineByFrame" (below, 2026-07-24) produced the
->   single-bit coordinate-free reader `refineByFrame` — `①` unconditional, **but it CANNOT discretize** (one F₂ bit ⟹
->   ≤2 classes/cell ⟹ fails the rigid **multipede**, the primary target; probe `scratchpad/probe_rigid.py`). The
->   mis-scoping was **contained to the reader**; the scaffold ((A)–(D)/`genOfRef`/P3-Sound/`compKey`) is sound. Fixed by
->   `structRead` (step 6b). Also the χ-frame route (C) has a `Discrete χ` gap.
-> - **▶ NEXT:** **`IsRigidF2 ⟹ structRead` injective** (self-contained Lean, `RigidRREF` rank toolkit — shrinks `②`)
->   and/or the **concrete Lean `Recover`** (per family, = `ForcingModel.bridge`/L4, §9.2) → **P3-ring** → **P4**.
+> **▶▶▶ UPDATE 2026-07-26 (latest) — THE CONCRETE `ref` + `Recover` ARE LANDED (`RigidRefine.lean`, steps 1–9E,
+> axiom-clean, gate green ~97 modules). Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md)
+> STATUS + §8.2 + §10.** The (A)–(D) chain reduced the rigid **linear** `①` to *"supply a discrete equivariant `ref`"*;
+> `RigidRefine` builds it and its `Recover`. Current state + the one live task:
+> - **✅ OBJECT OF RECORD = the MIXED-NATIVE aggregate reader `readAgg` (step 9D).** Reads the sorted, encoded SET of a
+>   vertex's per-frame RREF-column signatures over an equivariant frame set. **① `readEquivariant_readAgg`
+>   UNCONDITIONAL** (from `FramesEquivariant` alone — NO uniqueness/rigidity); **② `readSeparatesRigid_readAgg` from
+>   `AggFaithful`** (aggregate-indistinguishable ⟹ AUTOMORPHIC — gauge ties provably, non-aut separates). **Mixed-reader
+>   seal = `{FramesEquivariant, AggFaithful}`** (frame-set transport + the shared wall faithfulness).
+> - **⚠⚠ DO-NOT-RE-DERIVE:** (1) the single-bit `refineByFrame` (steps 1–5) **cannot discretize** (≤2 classes/cell);
+>   (2) an equivariant order PERM exists ONLY on rigid inputs, so the single-`ord` `structRead` path (steps 6b–9C) is
+>   **whole-node-rigid = the `ker=0` anchor**, superseded by `readAgg`; (3) a poly (`<n!`) equivariant frame set needs a
+>   structural discretizing order = the LINEAR solve (WL won't discretize the multipede).
+> - **▶ NEXT (the frontier) — the POLY frame set** (`②`-cost, replaces the exponential `framesUniv`): **✅ P1** interface
+>   (`seedFrames`/`framesEquivariant_seedFrames`/`card_seedFrames_le`) → **▶ P2** concrete poly seed (bounded base,
+>   `|seeds| ≤ n^k`) + discretizing solve-completion `orderOf` (carried per-family = the recover core) · **P3**
+>   `AggFaithful (seedFrames …)` per-family (= `ForcingModel.bridge`/L4) → **P3-ring** (`Z_{2^k}`) → **P4**.
 >
 > **▶▶▶ UPDATE 2026-07-24 — RIGID SEAL IS THE ACTIVE TRACK; the Algorithm-R scaffold AND the full
-> `gen`-reduction chain (A)–(D) are LANDED (axiom-clean, gate green 92 modules).**
+> `gen`-reduction chain (A)–(D) are LANDED (axiom-clean, gate green ~97 modules).**
 > **Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (STATUS + §8.1/§8.2 + §10 ledger).**
 > The consume side is closed modulo `{Amenable}` (track A, below), and `Amenable`-violation ⟺ `RigidObstructionAt`
 > = the rigid side's job — so the rigid seal is the frontier. **Landed:**
