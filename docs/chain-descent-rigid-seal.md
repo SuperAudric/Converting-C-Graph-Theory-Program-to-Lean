@@ -70,7 +70,10 @@
 >   identity"): gauge ties provably (`readAgg_eq_of_aut`), non-aut separates (`readSeparatesRigid_readAgg`), capstone
 >   `nodeResolved_compKey_readAgg_faithful`. **Mixed-reader seal = `{FramesEquivariant` ✅`, AggFaithful` (wall)`}`.** **▶
 >   NEXT:** poly structural frame set (`②`-cost, replaces `framesUniv`) + per-family `AggFaithful` (= `ForcingModel.bridge`/L4)
->   → **P3-ring** → **P4**.
+>   → **P3-ring** → **P4**. **✅ 9E/P1** = the seed→frame interface: `seedFrames seeds orderOf` +
+>   `framesEquivariant_seedFrames` (`FramesEquivariant ⟸ SeedsEquivariant + OrderOfEquivariant`) + `card_seedFrames_le`
+>   (`|frames| ≤ |seeds|`). **⚠ constraint:** equivariant frame `< n!` needs a structural (discretizing) order = the
+>   LINEAR solve (WL won't). NEXT = P2 concrete poly seed + solve-completion (carried per-family) · P3 `AggFaithful`.
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
 > reader 1–5, general interface 6, structural reader 6b); see §8.2 and §10. The consume side feeds a clean per-node handoff
@@ -765,6 +768,20 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       finer (weakens `AggFaithful`) — a drop-in `②` upgrade if the set is too coarse per-family. **▶ NEXT:** the poly
       structural frame set (`②`-cost, replaces exponential `framesUniv`) + per-family `AggFaithful` (= `ForcingModel.bridge`/L4)
       → P3-ring → P4.
+    - **✅ (step 9E / P1) LANDED 2026-07-26 — the POLY frame set: the seed→frame interface.** The `②`-cost fix (replace
+      exponential `framesUniv`) staged. **★ Load-bearing constraint:** an equivariant frame set `< n!` needs an
+      iso-invariant frame-SELECTION rule, and each frame is a genuine `Perm` (total column order) — any index-order fill
+      breaks equivariance, so a fully-structural order needs discreteness, which for the rigid LINEAR targets is the
+      **linear solve** (WL-refinement provably won't discretize the multipede). **P1 (structural, generic):** a frame
+      set `seedFrames seeds orderOf = (seeds adj χ).image (orderOf adj χ)` from an iso-invariant seed family `seeds`
+      (bounded base assignments = C# affine frames) + an equivariant order completion `orderOf`. Built:
+      **`framesEquivariant_seedFrames`** (`FramesEquivariant ⟸ SeedsEquivariant + OrderOfEquivariant`, pure
+      `Finset.image` algebra) + **`card_seedFrames_le`** (`|frames| ≤ |seeds|` — with a poly seed bound ⟹ poly frame
+      set ⟹ poly `readAgg` cost) + capstone `keyEquivariant_compKey_readAgg_seedFrames`. Decouples ① (equivariance,
+      done) / cost (`|seeds| ≤ poly`, P2) / ② (richness = `AggFaithful`, P3). **▶ NEXT — P2:** the concrete poly seed
+      (bounded base, `|seeds| ≤ n^k`) + the discretizing solve-completion `orderOf` (equivariant, carried per-family =
+      the recover core / wall family; ⚠ `OrderOfEquivariant` needs discreteness = linear solve, NOT WL) · **P3:**
+      `AggFaithful (seedFrames …)` per-family. Then P3-ring → P4.
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
       are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback
