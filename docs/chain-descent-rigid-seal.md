@@ -53,8 +53,11 @@
 >   ⟹ `isMinFrame_transport` ⟹ `ordEquivariant_minOrd` on a unique min; `KeyTransport` free for `hsAdj`). **✅ §9B** a
 >   concrete frame set: exhaustive `framesUniv` (`framesEquivariant_univ` + `exists_isMinFrame_univ` ⟹
 >   `keyEquivariant_compKey_skStruct_univ`, `①` **modulo UNIQUENESS ALONE**; `univ`=correct-but-exponential, poly/greedy
->   set = deferred ② refinement). **▶ NEXT = §9C** `IsRigidF2`⟹unique min (ties=code-aut=graph-aut=trivial) ⟹ discharges
->   `huniq` + the `ker=0` kernel predicate (3), closing the pure multipede. → **P3-ring** (`Z_{2^k}`) → **P4**.
+>   set = deferred ② refinement). **✅ §9C-1** rigid ⟹ unique min: `huniq` REDUCED to ONE faithfulness predicate
+>   `RigidFrameUnique` (concrete `Encodable.encode`, no f-inj carried) — **★ piece-2 uniqueness = piece-3 kernel predicate
+>   = the SAME faithfulness fact** (equal framed RREF ⟺ code-auto ⟺ graph-auto ⟺ id). **▶ NEXT = §9C-2** (carried linear
+>   algebra): `IsRigidF2`+faithfulness bridge ⟹ `RigidFrameUnique` + `structRead` inj (② via step-7 `readSeparatesRigid_of_injective`),
+>   closing the pure multipede. → **P3-ring** (`Z_{2^k}`) → **P4**.
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
 > reader 1–5, general interface 6, structural reader 6b); see §8.2 and §10. The consume side feeds a clean per-node handoff
@@ -698,9 +701,19 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       exhaustive canonizer the project refines to poly) — it settles `①`/correctness; the **poly** frame set (built
       **structurally/greedily** = the C# "no base enumeration" single greedy path, poly by bounded ring rank per B1d,
       NOT naive enumeration — which would re-import the `s!` blow-up the fold-robustness note guards against) drops into
-      the SAME 9A engine and is a `②`-cost refinement, deferred. **▶ NEXT = §9C:** `IsRigidF2` (+ faithfulness) ⟹ the
-      min frame is unique (ties = code-automorphisms = graph-automorphisms = trivial) ⟹ discharges `keyEquivariant_compKey_skStruct_univ`'s
-      `huniq` AND the `ker=0` kernel predicate — closing the pure multipede `①`+`②` end-to-end. Then P3-ring → P4.
+      the SAME 9A engine and is a `②`-cost refinement, deferred.
+    - **✅ (step 9C-1) LANDED 2026-07-26 — rigid ⟹ unique min: `huniq` REDUCED to the single faithfulness predicate
+      `RigidFrameUnique`** (`RigidRefine.lean`, axiom-clean). **★ The consolidation:** two `IsMinFrame`s force equal keys
+      ⟹ (injective encoding) **equal framed RREFs**; since `rrefCanon` is a function of the row *space*, equal framed
+      RREF ⟺ `o'·o⁻¹` is a coordinate-permutation automorphism of the recovered code ⟺ (faithfulness) a graph
+      colour-automorphism ⟺ (rigidity) the identity. **So piece-2 uniqueness and piece-3's kernel predicate are the SAME
+      faithfulness fact.** Built: **`RigidFrameUnique`** (distinct orders ⟹ distinct framed RREF) + **`eq_of_isMinFrame_hsAdj`**
+      (two key-minimal frames tie on the RREF ⟹ `RigidFrameUnique` ⟹ equal) + capstone **`keyEquivariant_compKey_skStruct_rigid`**:
+      with the **concrete injective `Encodable.encode`** (no `f`-injectivity carried), the whole rigid-linear `①` for the
+      mixed-native force key over `hsAdj` rests on exactly ONE carried predicate `RigidFrameUnique`. **▶ NEXT = §9C-2**
+      (the hard, carried-per-family linear-algebra core): `IsRigidF2` + the faithfulness bridge ⟹ `RigidFrameUnique`
+      (equal-RREF ⟹ code-auto ⟹ graph-auto ⟹ id), and the same faithfulness ⟹ `structRead` injective (the `②` kernel
+      predicate, via step 7's `readSeparatesRigid_of_injective`) — closing the pure multipede `①`+`②`. Then P3-ring → P4.
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
       are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback

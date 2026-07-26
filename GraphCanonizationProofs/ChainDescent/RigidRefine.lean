@@ -1001,5 +1001,55 @@ theorem keyEquivariant_compKey_skStruct_univ (f : List (Nat × List Bool) → Na
   keyEquivariant_compKey_skStruct_minFrame (framesUniv (n := n)) f
     framesEquivariant_univ (exists_isMinFrame_univ (frameKeyHsAdj f)) huniq
 
+/-! ## Step 9C — rigid ⟹ unique min: reduce `huniq` to the single faithfulness predicate `RigidFrameUnique`
+
+9B left piece 2's `①` modulo `huniq` (the min frame is unique). Two `IsMinFrame`s force **equal keys** ⟹ (injective
+encoding) **equal framed RREFs**. Since `rrefCanon` is a function of the row *space*, equal framed RREF ⟺ `o'·o⁻¹` is a
+coordinate-permutation automorphism of the recovered code. So uniqueness ⟺ *the code has no nontrivial coordinate
+automorphism* = **faithfulness** (code-auto = graph-auto, the kernel characterization / `ForcingModel.bridge`, piece 3)
++ **graph-rigidity**. Piece 2's uniqueness and piece 3's kernel predicate are thus the **same** faithfulness fact.
+
+This step (9C-1) makes that reduction concrete: `huniq` ⟸ **`RigidFrameUnique`** (distinct orders ⟹ distinct framed
+RREF), with a **concrete injective encoding** (`Encodable.encode`) so no `f`-injectivity is carried. The remaining core
+9C-2 — `IsRigidF2` + the faithfulness bridge ⟹ `RigidFrameUnique` (the equal-RREF ⟹ code-auto ⟹ graph-auto ⟹ id
+chain), and the same faithfulness ⟹ `structRead` injective (the ② kernel predicate, via step 7's
+`readSeparatesRigid_of_injective`) — is the hard, carried-per-family linear-algebra content. -/
+
+/-- **The rigid-regime frame-uniqueness predicate.** Distinct column orders give distinct canonical framed RREFs. On a
+rigid input this holds because two orders with the same framed RREF differ by a coordinate-permutation automorphism of
+the recovered code = (faithfulness) a graph colour-automorphism = (rigidity) the identity. Carried = piece 3 / the
+kernel characterization; 9C-2 proves it from `IsRigidF2` + the faithfulness bridge. -/
+def RigidFrameUnique (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ o o' : Equiv.Perm (Fin n),
+    rrefCanon n (frameSysBy o (Hs adj χ)) = rrefCanon n (frameSysBy o' (Hs adj χ)) → o = o'
+
+/-- **★ `huniq` from `RigidFrameUnique`** (pointwise): two key-minimal frames tie on the key ⟹ (injective `f`) tie on
+the framed RREF ⟹ (`RigidFrameUnique`) are equal. The rigid-regime uniqueness the min-frame engine needs, reduced to
+the single faithfulness predicate. -/
+theorem eq_of_isMinFrame_hsAdj {f : List (Nat × List Bool) → Nat} (hf : Function.Injective f)
+    (adj : AdjMatrix n) (χ : Colouring n) (hru : RigidFrameUnique hsAdj adj χ)
+    (o o' : Equiv.Perm (Fin n))
+    (ho : IsMinFrame framesUniv (frameKeyHsAdj f) adj χ o)
+    (ho' : IsMinFrame framesUniv (frameKeyHsAdj f) adj χ o') : o = o' := by
+  have hkey : frameKeyHsAdj f adj χ o = frameKeyHsAdj f adj χ o' :=
+    le_antisymm (ho.2 o' (Finset.mem_univ o')) (ho'.2 o (Finset.mem_univ o))
+  simp only [frameKeyHsAdj] at hkey
+  exact hru o o' (hf hkey)
+
+/-- **★★★ Step 9C-1 capstone — the pure-rigid `①`, closed on `RigidFrameUnique` ALONE.** With the concrete injective
+encoding `Encodable.encode`, `keyEquivariant_compKey_skStruct_univ`'s `huniq` is discharged from the per-node
+`RigidFrameUnique` (= the rigid-regime faithfulness). So the whole rigid-linear `①` for the mixed-native force key over
+the concrete `hsAdj` extraction now rests on exactly ONE carried predicate — the same faithfulness that (9C-2) also
+gives the ② kernel predicate. -/
+theorem keyEquivariant_compKey_skStruct_rigid
+    (hru : ∀ (adj : AdjMatrix n) (χ : Colouring n), RigidFrameUnique hsAdj adj χ) :
+    KeyEquivariant (compKey (skStruct
+      (minOrd (framesUniv (n := n)) (frameKeyHsAdj (Encodable.encode : List (Nat × List Bool) → Nat))
+        (exists_isMinFrame_univ (frameKeyHsAdj Encodable.encode))) hsAdj)) :=
+  keyEquivariant_compKey_skStruct_univ Encodable.encode
+    (fun adj χ o o' ho ho' =>
+      eq_of_isMinFrame_hsAdj Encodable.encode_injective adj χ (hru adj χ) o o' ho ho')
+
 end RigidRefine
 end ChainDescent
