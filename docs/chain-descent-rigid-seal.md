@@ -805,6 +805,33 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       probe:** a RICH (poly) pinning family whose aggregate discretizes the rigid part while tying gauge ⟹ `AggFaithfulB`
       non-vacuous on the primary mixed witness (needs the concrete poly pinning family to be computable — `framesUniv`
       couldn't be measured). Then set-vs-multiset decision, P3-ring → P4.
+    - **✅ (step 9F PROBE) DONE 2026-07-26 — `AggFaithfulB` NON-VACUOUS + architecture validated; concrete `baseReadPin`
+      is TOO COARSE (a placeholder).** Three faithful Neuen–Schweitzer multipede witnesses
+      (`scratchpad/probe_aggfaithful{,_middles,_real}.py`): MIXED base (partial F₂ kernel — segs 0,1 gauge-coupled, 2–4
+      rigid), RIGID `m=5` (odd base, trivial gauge), PURE-GAUGE `m=7` (Fano/simplex). **★ Result:** the de-classed
+      aggregate over a poly, gauge-CLOSED pinning family recovers the tie/separate (Aut-orbit) relation **EXACTLY** on all
+      three — **including the sharp `>2`-vertex test** (rigid gadget middles: a 4-element cell → 4 distinct labels = the
+      exact step-5 failure FIXED; gauge middles tie; mixed splits per-cell). ⟹ **`AggFaithfulB` holds (non-vacuous); the
+      base-quotient escape is real.** **⚠ BUT the READ matters — decisive finding:** the single-value `baseReadPin`
+      (`encOpt (forcedVal …)` ∈ `{none,some0,some1}`) has an aggregate SET of `≤3` values ⟹ `≤7` classes EVER ⟹ **cannot
+      split large rigid cells** (probe v3, faithful to the landed `baseReadPin` over BOTH `hsAdj`-adjacency AND the CFI
+      recovered code: 2–4 classes vs 30 orbits — FAILS, the same ceiling as step 5). The read that WORKS (probe v2 —
+      recovers orbits exactly) is a **colour-keyed forced-neighbourhood profile**: a multiset over neighbours keyed by
+      `(χ-colour, forced-orientation-relative bit)` — **RICH** (not one bit), **order-free** (keyed by the already-canonical
+      χ-colours, NOT a full vertex order ⟹ no `2^β`), **transporting** (χ + `forcedVal` both transport). It is WL-refinement
+      **plus the linear-solve forcing** (strictly > WL — the forced orientations break WL-symmetry; consistent with "the
+      linear solve discretizes, WL alone won't"). **⟹ REFINED P2 (immediate next Lean step): the concrete read is
+      `baseReadWL` (colour-keyed forced profile), NOT `baseReadPin`.** The abstract §9F interface
+      (`readAggB`/`FramesEquivariantB`/`ReadAtEquivariant`/`AggFaithfulB`) is UNCHANGED — it already takes an arbitrary
+      `baseRead : … → Nat`, so ONLY the concrete instance swaps; `baseReadPin` is kept as the ①/POLY non-vacuity witness
+      (discharges equivariance + poly cardinality; just doesn't discretize).
+      **▶ TO CLOSE THE SEAM from here (ordered):** **(1) P2** — land `baseReadWL` + `readAtEquivariant_baseReadWL` (reuses
+      `forcedVal`/χ-keying) ⟹ `keyEquivariant_compKey_readAggB` gives ① POLY & discretizing; **(2) P3** — discharge
+      `AggFaithfulB (…) baseReadWL` on the linear residue = the kernel-characterization faithfulness (`ForcingModel.bridge`/
+      L4, carried; probe-confirmed), per-family witnesses; **(3) P3-ring** — `Z_{2^k}` (ring inference + finite Smith);
+      **(4) P4** — the capstone `canonizesRigidResidue_or_flags`; **(5) SEAM INTEGRATION** — `nodeResolved_compKey_readAggB_faithful`
+      feeds `Select.HandledS`; couple to consume's `Amenable` (§9.1: `Amenable`-violation ⟹ `RigidObstructionAt` ⟹ the
+      reader separates it); residue `¬HandledS` at non-linear rigid = the wall (§9.2 / claim #2/#3).
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
       are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback
