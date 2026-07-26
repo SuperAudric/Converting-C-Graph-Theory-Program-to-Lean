@@ -259,7 +259,72 @@ core) and CORE_scoping's "main blocking feature = the poly iso-invariant order o
 does not move that wall — but it *does* deliver R/K with a poly, exact, certified constructor, which is
 what the R/K plan was missing.
 
-## 8. Build sketch (if this is taken up)
+## 8. ★★ §7.3 WAS WRONG — ranking is NOT the wall. Strategy assessment.
+
+§7.3 claimed "ranking the blocks == separating them by a poly invariant == the wall". That is false,
+and the refutation is deepen's own object. Probes: `probe_certkey.py`, `probe_strategies.py`.
+
+### S1 — the certified-below cert key ✅ CONFIRMED, and it is the route
+
+> **Claim.** If `AmenablePath` holds along `a`'s greedy descent (certified-below), then deepen's
+> **single-path leaf cert** `cert(a) = adj^{π_a}` is **iso-invariant**.
+>
+> *Proof.* Run the descent from `a` in `adj` and from `τa` in `τ·adj`. Cell ids match
+> (`chooseIdK_transport`). The min-index picks differ, `w` vs `w'`. `AmenablePath` says the chosen cell
+> is a single orbit of `IsColAut adj χ_cur`, so ∃`ρ` with `ρ w = τ⁻¹ w'`; then `τ∘ρ` is again an
+> isomorphism `adj → τ·adj` carrying pick to pick. Induct. At the discrete leaf the two are related by
+> an isomorphism, so the relabelled adjacency is **equal**. ∎
+>
+> This is `joint` with an **isomorphism between two graphs** in place of an automorphism of one — the
+> project's standard transport generalization, and its atoms (`step_transport`, `chooseIdK_transport`,
+> `cellSingleOrbit_transport`) are all landed.
+
+Combined with §7.1 exactness (`cert(a) = cert(b) ⟺ same orbit`), `cert` is a **poly** (one greedy path
+per rep), **equivariant**, **exactly orbit-separating** `Force.Key` — so it **ORDERS the blocks** and
+`force_canonizer` fires. No min-over-cell, no branching, no wall. It is also **gauge-tolerant**
+(automorphic pairs tie by construction), so it does not need whole-node rigidity.
+
+**Measured (`probe_certkey.py`, 9 witnesses):** certified-below reps with a non-invariant cert =
+**0**. Every non-invariant cert came from an **uncertified** rep (perfect correlation). `exact = Y` on
+8/9. On the **rigid multipedes** — the case I said was walled — all reps certify, and `cert` separates
+all 4 orbit blocks invariantly. The rigid decision is resolved by a poly key.
+
+### S2 — deferred schedule ✅ effective, ⚠ but it does NOT reach "purely rigid"
+
+Single-orbit-ness is invariant, so *"lowest-id **single-orbit** non-singleton cell, else lowest-id"* is
+an equally legal `targetColour`. Individualizing inside a single-orbit cell costs branch factor 1 and
+is free. Measured: forced decisions drop to **0–2 per witness**; **MIXED and mp7 need ZERO**.
+
+⚠ **But the node is not purely rigid when the first decision arrives.** At CFI cubic m=8/10/12 the
+first forced decision has `|Aut| = 512 / 128 / 256`. Every cell carries ≥2 orbits while the graph is
+still highly symmetric — you run out of *consumable cells* long before you run out of *symmetry*. So
+"defer until truly rigid, which is already handled" does not materialize, and the whole-node-rigid
+anchor (9A–9C, `OrdEquivariant`) does **not** become applicable this way. S1 covers it instead,
+because S1 is gauge-tolerant where 9A–9C is not.
+
+### S3 — order-agnostic block splitting ❌ refuted on the cheap keys
+
+Blocks are invariant sets, so any invariant set-function is a legal colour — no order needed. Tested
+`|B|`, the refinement histogram after set-individualizing `B`, and that plus `B`'s neighbourhood
+colours: **0 of 8 forced decisions separated** (only circ(5), and only the third variant). The
+block-level analogue of the already-recorded `baseReadWL` blindness. Not a route on its own — though
+it remains a free *pre-filter* wherever it does fire.
+
+### S4 — k-fold branch, non-recursively
+
+Where S1 is unavailable, branch over one rep per block and take the min. Cost `k` at that node,
+**not exponential unless nested**. Measured nesting: 8/9 witnesses have a single non-nested decision.
+
+### The actual residue (and it is not ordering)
+
+Nodes with an **uncertified** rep — i.e. `AmenablePath` breaks somewhere below (fusion). Measured:
+rand multipede V=12 W=8 (0/4 reps certified) and CFI cubic m=10 (4/40). There `cert` is genuinely
+non-invariant and S1 does not apply; the response is to resolve the deeper multi-orbit cell first
+(where S1 *does* apply, by induction) and re-run. So the open question is the **nesting depth of
+uncertified levels**, not the ordering of blocks. That is a cost/termination question, and it is a
+different question from the one the rigid-seal frontier is currently phrased around.
+
+## 9. Build sketch (if this is taken up)
 
 **Smallest first step (§6.2 — does not need the min-over-cell descent at all):**
 
