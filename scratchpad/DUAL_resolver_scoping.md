@@ -432,7 +432,131 @@ sound, but its own invariance is **not** established — `deepenGens` is index-d
 same index-pick issue one level up, and it is where the min-over-cell / split-loop redesign (§9)
 would apply.
 
-## 11. Build sketch (if this is taken up)
+## 11. ★★★ LITERATURE PLACEMENT (4 subagent searches, 2026-07-26)
+
+### 11.1 The recalled result is real, and sharper than expected
+
+**Booth & Colbourn, "Problems Polynomially Equivalent to Graph Isomorphism", TR CS-77-04, Univ. of
+Waterloo, June 1979**, §2.3 (attributed to **Karp**, following Read & Corneil 1977):
+
+> "**THEOREM: Computing the automorphism partition of a graph is isomorphism complete.** … Two vertices
+> *x* and *y* are similar … if and only if *G\*x* and *G\*y* are isomorphic."
+
+Turing-equivalent (their §1 collapses Cook/Karp reducibility by fiat). `|Aut|` and Aut-generators are
+**Mathon, IPL 8(3):131–132, 1979**. The `G*x` vs `G*y` apex-clique gadget is inherently **pairwise**. So
+**an unconditional poly `SameOrbit` puts GI in P — known since 1979.**
+
+**★ The availability caveat is not a caveat.** B&C §2.4 builds `|Aut|` from automorphism-partition calls
+on `G_{v₁,…,v_k}` — *individualization-derived graphs, recursively*:
+
+> "the order of the group of *G*_{v₁,…,v_{k−1}} is exactly *d* times the order of the group of
+> *G*_{v₁,…,v_k}, where *d* is the size of the similarity class of *v_k* … **This leads to a recursive
+> algorithm … whose running time is polynomial in the time required to compute the automorphism
+> partition of a graph.**"
+
+The project's oracle profile **is the classical proof's own profile**. Only the base call on `G ⊎ H` sits
+outside it. (Decision-only caveat: the bare yes/no gives `|Aut|` and GI; extracting *generators* needs
+B&C §2.2's search-to-decision layer.)
+
+### 11.2 ★ Neuen–Schweitzer's exponential lower bound does NOT bind this algorithm
+
+**Neuen & Schweitzer, STOC 2018 (arXiv:1705.03283), §3**, after Prop. 3.1, verbatim:
+
+> "**Likewise would a refinement operator that refines every coloring into the orbit partition under the
+> automorphism group** [yield a polynomial-size search tree]. However, we do not know how to compute
+> these two examples efficiently. In fact computing either of these is at least as hard as the
+> isomorphism problem itself. … it is nonsensical to allow that an individualization-refinement
+> algorithm uses a subroutine that already solves the graph isomorphism problem."
+
+**The literature names §9's algorithm, grants it a polynomial-size search tree, and excludes it from the
+model** — solely because orbits are GI-hard. Theorem 3.2 requires *k-realizability* (`WL_k ⪯ ref`, i.e.
+**coarser** than k-WL); orbit-refinement on a rigid multipede is *discrete*, strictly finer, so the
+hypothesis fails for every k. Their "all automorphisms free" clause is **vacuous** on their family
+(`|Aut| = 1`), so it is not a strengthening that covers an orbit oracle.
+
+⚠ Not a free lunch: there `|P| = 1` never occurs, every cell splits into `|C|` singletons, and they prove
+a **linear** number of individualizations is forced. All cost lands on the block-ordering recursion.
+
+### 11.3 Naming — one collision, two matches
+
+| project term | literature |
+|---|---|
+| `Amenable` / `CellsAreOrbits` | **= Tinhofer graph.** AKRV (*comput. complexity* 26(3):627–685, 2017; arXiv:1502.01255) App. A.2: *"G is Tinhofer if and only if, for every F, the orbit partition of A_F coincides with P_F."* Graded: Bhattacharjee–Panse–Sarma arXiv:2605.19702 Thm 1.1. |
+| ⚠ **name clash** | AKRV's **"amenable"** means something DIFFERENT (1-WL identifies `G` against all `H`). `Amenable ⊊ Compact ⊊ Godsil ⊊ Tinhofer ⊊ Refinable`, all strict (Thm 21). **Rename the project predicate.** |
+| the free consume step | **"symmetric choice"** (Gire–Hoang 1998; Dawar–Richerby CSL 2003); with automorphisms supplied as certificates, **"witnessed symmetric choice"** — Lichter & Schweitzer, LICS 2022 (Distinguished Paper) / **J. ACM 71(2), 2024**. Their Thm 1: definable isomorphism ⟹ definable canonization. Their stated motivation is verbatim §10's T1: *"it has to be verified that the choice set is actually an orbit and it is not known that orbits can be computed in polynomial time."* |
+| the whole split loop | **Gurevich's canonization algorithm**, *From invariants to canonization*, Bull. EATCS 63:115–119, 1997: repeatedly compute a **canonical orbit**, individualize one vertex, repeat. Poly complete invariant ⟺ poly canonization (classes closed under colouring). |
+
+### 11.4 ⚠⚠ THE RIGID COLLAPSE — and a vacuity in §8's rigid measurement
+
+**AKRV, immediately after Theorem 21:**
+
+> "It is worth noting that **the hierarchy collapses to Discrete if we restrict ourselves to only rigid
+> graphs**, i.e., graphs with trivial automorphism group."
+
+For rigid `G`, `Aut_S = 1` for all `S` ⟹ `Orb(Aut_S)` discrete ⟹ **Tinhofer ⟺ 1-WL already discretizes.**
+At a non-singleton cell of a rigid graph, "the cell is a single orbit of the stabilizer" is *impossible*.
+
+**Re-checked §8's rigid measurement against this — it was vacuous.** `descend_cert` level counts:
+
+```
+rand multipede V=6 W=5  (n=34)  levels per rep = [0,0,0,0,0,0,0,0]
+rand multipede V=8 W=6  (n=44)  levels per rep = [0,0,0,0]
+rand multipede V=10 W=7 (n=54)  levels per rep = [0,0,0,0]
+rand multipede V=12 W=8 (n=64)  levels per rep = [1,1,1,1]
+CFI cubic m=8 (n=56) levels = 5 ;  m=10 (n=70) levels = 4–6      <- these ARE substantive
+```
+
+Three of four rigid multipedes **discretize after ONE individualization**, so certified-below held with
+*zero levels to certify*. §8's "all reps certify on the rigid multipedes" is TRUE but EMPTY. The CFI
+results (4–6 levels) stand. This is the already-flagged "not the I-R-lower-bound families" caveat, now
+with a theorem saying why it *must* be so.
+
+**★ Where novelty can live — and it is exactly §10's open item.** The project's condition is
+**path-local** (only the cells actually selected on one descent need be orbits); Tinhofer quantifies over
+*all* `S`. The searches found **no named notion for the path-local weakening**, and none for a
+*poly-decidable* side condition implying orbit-correctness — recognizing Tinhofer/refinable is P-hard and
+at least as hard as GI on vertex-transitive graphs (AKRV Thm 22; arXiv:2605.19702). AKRV's whole
+hierarchy is over **1-WL**; a condition over k-WL or coherent-configuration-stable colourings is
+uncovered. §10's ⚠ ("which poly, relabelling-invariant check to use for the guard") is therefore not a
+loose end — it is the one genuinely unclaimed spot.
+
+### 11.5 The frontier, stated in 1983
+
+**Babai & Luks, "Canonical labeling of graphs", STOC 1983, §1**, verbatim:
+
+> "**Does knowledge of Aut(X) lead to a canonical form?** In the canonical form problem the objective is
+> to **select, wisely, from the various representations.** If, as is almost always the case, Aut(X) is
+> trivial, the number of such representations is n!. **How do we select?**"
+
+That is §9's remaining question verbatim. Supporting, all verified:
+
+* **Canonization ≤ₚ GI is OPEN**, both forms (`CAN ∈ FP^GI`? `GI ∈ P ⟹ CAN ∈ P`?) — Schweitzer–Wiebking
+  arXiv:1806.07466 §1; Grohe–Schweitzer–Wiebking SODA 2021 arXiv:2003.10935 abstract; Lichter–Schweitzer
+  arXiv:2205.14003 §1. No separation proved either (Blass–Gurevich 1984 = relativized only;
+  Fortnow–Grochow: `CF = Ker` would give NP = UP and probabilistic factoring).
+* **Lex-least canonical form is NP-hard** — Babai–Luks Prop. 3.1, *"even if G is restricted to be an
+  elementary abelian 2-group"*. The naive block ordering is dead by theorem.
+* **★ The concrete lead: Babai–Luks Prop. 3.7** (credited to Galil) — a **canonical reordering of the
+  domain** from a canonical structure tree `TREE(G,A)`, making lex-placement solvable in `|A|^{O(d)+c}`
+  where `d = cw(G)` = **composition width** (`cw = 1` for solvable). A group-supplied canonical ordering
+  of blocks, poly for bounded composition width — i.e. Luks's `Γ_d`, which is precisely the project's own
+  W2/solvable-tower route (`GaugeSolvable`, `isSolvable_pi`). Independent arrival at the same boundary.
+* Babai's own canonization answer (**STOC 2019**, a separate paper three years after the isomorphism
+  test) was to canonify the local-certificate structure, not to add an invariant.
+* Named culprit for isomorphism-without-canonization results: **coset intersection has no known
+  canonization analogue** (Schweitzer–Wiebking §1, citing Codenotti 2011).
+
+**Not Babai's Split-or-Johnson.** That is a "progress-or-Johnson-obstruction" dichotomy with
+quasipolynomial multiplicative cost in *both* branches, canonical only relative to arbitrary choices. The
+structural match is Babai's **fullness / affected–unaffected** dichotomy in Local Certificates: *full* ⟹
+global automorphisms `K(T)` produced (= consume); *non-full* ⟹ explicit obstruction `M(T)`, aggregated
+into a canonical relational structure (= force).
+
+**Closest prior theorem to §9's architecture:** Arvind–Das–Mukhopadhyay, JCSS 76(7):509–523, 2010 —
+tournament canonization is poly-time reducible to **tournament isomorphism + canonization of *rigid*
+tournaments**. An orbit oracle buys exactly the symmetric part and no more.
+
+## 12. Build sketch (if this is taken up)
 
 **Smallest first step (§6.2 — does not need the min-over-cell descent at all):**
 
