@@ -394,9 +394,9 @@ Gate green (`bash /workspace/scripts/build.sh`, 197 s); all 9 theorems
 | **T2** | `CertifiedPath ⟹ AmenablePath`, `Certified ⟹ Amenable` | ✅ `amenablePath_of_certifiedPath`, `amenable_of_certified` |
 | **T3** | selector identity `chooseIdK (finRange n) = Descend.targetColour` — deepen's per-level cell **is** the canonizer's branch cell | ✅ `chooseIdK_eq_targetColour` |
 | **T4** | per-level bridge: `Consume.CellIsOrbit` discharges the level's certificate | ✅ `certifiedOrbit_of_cellIsOrbit_chooseIdK` |
-| **T5** | **exactness ⊇**: at a certified-below node, automorphic ⟹ the twist verifies, so harvest-partition = orbit-partition | ⏳ next — from `joint` + `twistOf_of_transport_fixing` |
-| **T6** | **the key**: certified-below ⟹ `KeyEquivariant certKey`; `forceBy certKey` fires | ⏳ — `joint` generalized from an automorphism of one graph to an **isomorphism between two** |
-| **T7** | guarded supply: replace the global hypothesis by a per-level run-time check | ⏳ |
+| **T5** | **located failure**: at a certified node, consume failing names a non-automorphic pair **in this branch cell** | ✅ `consume_fail_gives_real_decision`, `rigidObstructionAt_branch_of_certified` |
+| **T6** | **`Amenable` transports** — the index-pick obstruction absorbed as in `joint` | ✅ `amenablePath_transport`, `amenable_transport`, `amenable_transport_iff` |
+| **T7** | guarded supply ⟹ **`①c` with no hypothesis at all** | ✅ `deepenSupplyGuarded_canonizer` |
 
 **What T1–T4 buy.** `Amenable` was unobservable — `CellSingleOrbit` quantifies over the true `IsColAut`
 group. T1 shows it does not need to be *assumed*: deepen's harvest emits only *verified* automorphisms
@@ -405,16 +405,32 @@ single-orbit-ness. T3 is what makes that check *achievable* — it identifies th
 names with the cell `deepenGens` actually harvests, so the consume side's own `CellIsOrbit` discharges
 each level (T4).
 
-⚠ **Honest scope.** This is the soundness core, not yet the headline. The restated capstone
-`deepenSupply_guarded_canonizer_of_certified` still carries a *global* hypothesis, and `Certified` is
-strictly *stronger* than `Amenable` — so as a global assumption it is worse, not better. The payoff
-needs T7 (branch on the check instead of assuming it). T5/T6 are the "forcible, not merely exposed"
-content and are the next work.
+**What T5 buys — "forcible", not merely "exposed".** `not_amenablePath_imp_rigidObstruction` gives
+`∃ χc cid, RigidObstructionAt adj χc cid`: an obstruction *somewhere*, possibly far below, with no
+control over which colouring or cell. At a certified node the failure is **located** — two named
+branch vertices linked by no colour-automorphism, at *this* colouring and *this* branch cell. That is
+the strengthening asked for.
 
-**T6 is unblocked**: `step_transport` is already stated **across graphs**
-(`step (relabelAdj σ adj) (transportColouring σ χ) (σ v) = transport σ (step adj χ v)`), and
-`chooseIdK_transport` / `cellSingleOrbit_transport` likewise — so generalizing `joint` from an
-automorphism to an isomorphism is a re-run of the same induction, not new machinery.
+**What T6/T7 buy — the hypothesis is gone.** `AmenablePath`'s per-level pick is by vertex index and so
+does not commute with a relabelling; that is the obstruction this track keeps meeting, and it is what
+forced `deepen_branchOrbit_transport` to carry a *global* `∀ adj χ, Amenable adj χ`. It is absorbable
+exactly as in `joint`: the level's cell **is** a single orbit (that is what `AmenablePath` says), so a
+stabilizer element carries `σ wₐ` to `w_b` and the relating isomorphism accumulates. With `Amenable`
+transport-stable, a supply that simply *defers* where `Amenable` fails is equivariant unconditionally
+(good side: §5 transports; bad side: both emit nothing). So **`deepenSupplyGuarded_canonizer` carries
+no hypothesis at all**, where `deepenSupply_guarded_canonizer_direct` carried a globally-false one.
+Soundness no longer rests on anything; only *firing* is reduced, and the guard is precisely where the
+rigid side takes over.
+
+Note that T3 (the selector identity) turned out load-bearing for T6 too: with
+`Descend.targetColour_transport` it gives `chooseIdK_finRange_transport` in one line, so the
+`List.map σ` mismatch in `chooseIdK_transport` never has to be dealt with.
+
+⚠ **Still open.** The guard is a `Prop` test, so `deepenSupplyGuarded` is `noncomputable`. Which
+*poly, relabelling-invariant* check to use in the executable is open: `Certified` (§2) is poly and
+sound, but its own invariance is **not** established — `deepenGens` is index-dependent. This is the
+same index-pick issue one level up, and it is where the min-over-cell / split-loop redesign (§9)
+would apply.
 
 ## 11. Build sketch (if this is taken up)
 
