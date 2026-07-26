@@ -55,9 +55,18 @@
 >   `keyEquivariant_compKey_skStruct_univ`, `①` **modulo UNIQUENESS ALONE**; `univ`=correct-but-exponential, poly/greedy
 >   set = deferred ② refinement). **✅ §9C-1** rigid ⟹ unique min: `huniq` REDUCED to ONE faithfulness predicate
 >   `RigidFrameUnique` (concrete `Encodable.encode`, no f-inj carried) — **★ piece-2 uniqueness = piece-3 kernel predicate
->   = the SAME faithfulness fact** (equal framed RREF ⟺ code-auto ⟺ graph-auto ⟺ id). **▶ NEXT = §9C-2** (carried linear
->   algebra): `IsRigidF2`+faithfulness bridge ⟹ `RigidFrameUnique` + `structRead` inj (② via step-7 `readSeparatesRigid_of_injective`),
->   closing the pure multipede. → **P3-ring** (`Z_{2^k}`) → **P4**.
+>   = the SAME faithfulness fact** (equal framed RREF ⟺ code-auto ⟺ graph-auto ⟺ id). §9C-2 assembles it: PROVABLE
+>   linear-algebra (`frameSysBy_eq_transport`/`spans_eq_of_rrefCanon_eq` ⟹ `framedCodeSym_of_rrefCanon_eq`) + CARRIED
+>   `CodeFaithful` (the wall) + graph-rigidity ⟹ `RigidFrameUnique`.
+> - **⚠⚠ CRUX RESOLVED — WHOLE-NODE RIGIDITY ROUTED AROUND (§9D).** All of `structRead ord`/9A–9C reads via a SINGLE
+>   `ord` Perm, whose `①` needs a UNIQUE equivariant order = **whole-node graph rigidity** ⟹ closes only PURELY-rigid
+>   nodes (the mixed residue = *some* but not all decisions rigid was left unhandled). **FIX (`readAgg`, step 9D): don't
+>   PICK a frame — AGGREGATE the per-frame read over the whole equivariant frame set** (sorted set, encoded).
+>   `readEquivariant_readAgg` holds **UNCONDITIONALLY** (from `FramesEquivariant` alone — set transports ⟹ aggregate
+>   invariant; NO uniqueness/rigidity); `keyEquivariant_compKey_readAgg_univ` = the mixed-native `①` with **ZERO carried
+>   hypotheses**. Gauge pairs tie automatically (ReadEquivariant at a colour-aut), rigid pairs separate via the per-pair
+>   `ReadSeparatesRigid` (step 7). The single-`ord` 9A–9C results are KEPT as the **`ker=0`/purely-rigid anchor**. **▶ NEXT:
+>   §9D `②`** = `ReadSeparatesRigid (readAgg)` (per-pair faithfulness; the poly frame set for cost) → **P3-ring** → **P4**.
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
 > reader 1–5, general interface 6, structural reader 6b); see §8.2 and §10. The consume side feeds a clean per-node handoff
@@ -713,7 +722,34 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       mixed-native force key over `hsAdj` rests on exactly ONE carried predicate `RigidFrameUnique`. **▶ NEXT = §9C-2**
       (the hard, carried-per-family linear-algebra core): `IsRigidF2` + the faithfulness bridge ⟹ `RigidFrameUnique`
       (equal-RREF ⟹ code-auto ⟹ graph-auto ⟹ id), and the same faithfulness ⟹ `structRead` injective (the `②` kernel
-      predicate, via step 7's `readSeparatesRigid_of_injective`) — closing the pure multipede `①`+`②`. Then P3-ring → P4.
+      predicate, via step 7's `readSeparatesRigid_of_injective`) — closing the pure multipede `①`+`②`.
+    - **✅ (step 9C-2) LANDED 2026-07-26 — `RigidFrameUnique` assembly (the ANCHOR path, purely-rigid).** PROVABLE
+      linear algebra: `frameSysBy_eq_transport` (framing `H` by `o` = framing the `(o'·o⁻¹)`-transported `H` by `o'`,
+      from `frameRowBy_transport`) + `spans_eq_of_rrefCanon_eq` (converse of `rrefCanon_eq_of_span_eq`, via
+      `PivInv.spanned`/`covers`) ⟹ **`framedCodeSym_of_rrefCanon_eq`** (equal framed RREF ⟹ `π=o'·o⁻¹` is a framed-code
+      symmetry). CARRIED: **`CodeFaithful`** (a framed-code symmetry IS a graph colour-aut = `ForcingModel.bridge`/L4,
+      the wall, per-family resolvable) + graph-rigidity ⟹ **`rigidFrameUnique_of_codeFaithful`** ⟹ capstone
+      `keyEquivariant_compKey_skStruct_faithful`. **⚠⚠ SCOPE CORRECTION (user):** uniqueness needs **GRAPH rigidity**
+      (trivial `IsColAut`), NOT `IsRigidF2` (trivial kernel — that is the `②`/separation condition). **This whole
+      single-`ord` path (9A–9C) is WHOLE-NODE-RIGID** ⟹ closes only PURELY-rigid nodes; kept as the `ker=0` ANCHOR,
+      superseded by §9D for the mixed residue.
+    - **✅✅ (step 9D) LANDED 2026-07-26 — WHOLE-NODE RIGIDITY ROUTED AROUND: the MIXED-NATIVE aggregate reader.**
+      **★ Diagnosis (user catch):** `structRead ord` reads via a SINGLE `ord` Perm; its `①` (`ReadEquivariant ⟸
+      OrdEquivariant`) needs a UNIQUE equivariant order = whole-node graph rigidity (the step-8 crux, made unavoidable
+      by 9A's `Classical.choose` of a unique minimizer). `①` is a GLOBAL obligation, so this left the mixed residue
+      (`CellsAreOrbits` false ⟹ *some* but not all rigid) unhandled — the actual target. Root = step 6b's single-`ord`
+      design, NOT shallow in 9C. **FIX — don't PICK a frame; AGGREGATE over the whole equivariant frame set:**
+      `structReadAt o` (per-frame read) + **`readAgg frames adj χ v`** = `Encodable.encode` of the sorted `Finset.image`
+      of `structReadAt o` over `o ∈ frames adj χ`. **`readEquivariant_readAgg` holds UNCONDITIONALLY** (from
+      `FramesEquivariant` alone: the frame set transports as `o ↦ σ·o`, each per-frame read transports
+      [`structReadAt_hsAdj_transport`], so the image Finset — hence its encoding — is invariant; **NO uniqueness, NO
+      rigidity**). Capstones `keyEquivariant_compKey_readAgg`(`_univ`) = the mixed-native `①` with **ZERO carried
+      hypotheses**, and `nodeResolved_compKey_readAgg` (firing from the per-pair `ReadSeparatesRigid` + step 7). Gauge
+      pairs tie automatically (`ReadEquivariant` at a colour-aut); rigid pairs separate per-pair. **⚠ COST — NO NEW
+      exponential:** the aggregate ranges over `frames`; `framesUniv` (all `n!`) is exponential = the SAME 9B `②`-cost
+      deferral (the `①` is frame-set-agnostic ⟹ a poly/greedy structural frame set, bounded ring rank, drops into the
+      same `FramesEquivariant` slot unchanged). **▶ NEXT:** `ReadSeparatesRigid (readAgg)` (per-pair faithfulness, `②`) +
+      the poly frame set (cost) → P3-ring → P4.
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
       are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback

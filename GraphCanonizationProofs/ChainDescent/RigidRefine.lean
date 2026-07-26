@@ -1051,5 +1051,186 @@ theorem keyEquivariant_compKey_skStruct_rigid
     (fun adj χ o o' ho ho' =>
       eq_of_isMinFrame_hsAdj Encodable.encode_injective adj χ (hru adj χ) o o' ho ho')
 
+/-! ## Step 9C-2 — `RigidFrameUnique` from faithfulness + rigidity (the provable/carried boundary)
+
+9C-1 reduced piece-2's `①` to `RigidFrameUnique`. This step proves it, exposing the honest gap boundary:
+
+* **PROVABLE (linear algebra):** equal framed RREF ⟹ the connecting permutation `π = o'·o⁻¹` is a **symmetry of the
+  framed recovered code** (`framedCodeSym_of_rrefCanon_eq`). Two ingredients: `frameSysBy_eq_transport` (framing `H` by
+  `o` = framing the `π`-transported `H` by `o'`, from `frameRowBy_transport`) + `spans_eq_of_rrefCanon_eq` (equal
+  `rrefCanon` ⟹ equal row space — the converse of `rrefCanon_eq_of_span_eq`, via `PivInv`'s `spanned`/`covers`).
+* **CARRIED — the one irreducible gap:** `CodeFaithful` (a framed-code symmetry IS a graph colour-automorphism) =
+  FAITHFULNESS = `ForcingModel.bridge`/L4. **Per-family resolvable** (CFI/multipede: the C#-tested recovery has
+  code-auto = graph-auto by construction); general-**un**resolvable (its failure = the non-linear residue = the wall).
+  The same wall carried throughout — the honest stopping point.
+* **CARRIED — input hypothesis:** graph-rigidity (trivial `IsColAut`), from the interleaving handoff (the residue is
+  rigid). ⚠ This is GRAPH rigidity, NOT `IsRigidF2` (trivial kernel) — the latter is the separation (`②`) condition;
+  uniqueness needs the former. -/
+
+/-- **Framing `H` by `o` = framing the `(o'·o⁻¹)`-transported `H` by `o'`.** The geometric identity relating two column
+orders of the same system, straight from `frameRowBy_transport`. -/
+theorem frameSysBy_eq_transport (o o' : Equiv.Perm (Fin n)) (H : List (Fin n → Bool)) :
+    frameSysBy o H = frameSysBy o' (H.map (transportRow (o' * o⁻¹))) := by
+  unfold frameSysBy
+  rw [List.map_map]
+  refine List.map_congr_left (fun r _ => ?_)
+  show frameRowBy o r = (frameRowBy o' ∘ transportRow (o' * o⁻¹)) r
+  have h := frameRowBy_transport (o' * o⁻¹) o r
+  rw [inv_mul_cancel_right] at h
+  exact h.symm
+
+/-- The reduced-echelon rows span the same space as the input rows (both ways), via `PivInv.spanned`/`covers`. -/
+theorem spans_pivInv_iff {rows : List (List Bool)} {P : List (Nat × List Bool)}
+    (hpiv : Kernel.PivInv n rows P) (hrows : ∀ r ∈ rows, r.length = n) (w : List Bool) :
+    Spans n (P.map (·.2)) w ↔ Spans n rows w := by
+  refine ⟨fun h => Spans.trans_basis hrows (fun b hb => ?_) h,
+    fun h => Spans.trans_basis (fun b hb => ?_) (fun b hb => hpiv.covers b hb) h⟩
+  · obtain ⟨cp, hcp, rfl⟩ := List.mem_map.mp hb; exact hpiv.spanned cp hcp
+  · obtain ⟨cp, hcp, rfl⟩ := List.mem_map.mp hb; exact hpiv.len cp hcp
+
+/-- **★ The converse of `rrefCanon_eq_of_span_eq`** — equal canonical RREF ⟹ equal row space. `rrefCanon` is a
+canonical function OF the subspace, so it also DETERMINES it (the rref rows span the original, both ways). -/
+theorem spans_eq_of_rrefCanon_eq {L1 L2 : List (List Bool)}
+    (h1 : ∀ r ∈ L1, r.length = n) (h2 : ∀ r ∈ L2, r.length = n)
+    (heq : rrefCanon n L1 = rrefCanon n L2) (w : List Bool) :
+    Spans n L1 w ↔ Spans n L2 w := by
+  rw [← spans_pivInv_iff (RigidRREF.pivInv_rrefCanon h1) h1 w,
+      ← spans_pivInv_iff (RigidRREF.pivInv_rrefCanon h2) h2 w, heq]
+
+/-- π is a symmetry of the `o`-framed recovered code: transporting the system by π leaves the framed row space fixed. -/
+def FramedCodeSym (H : List (Fin n → Bool)) (o π : Equiv.Perm (Fin n)) : Prop :=
+  ∀ w, Spans n (frameSysBy o (H.map (transportRow π))) w ↔ Spans n (frameSysBy o H) w
+
+/-- **★★ PROVABLE half — equal framed RREF ⟹ the connecting perm `o'·o⁻¹` is a framed-code symmetry.** Combines
+`frameSysBy_eq_transport` (rewrite the `o`-framing as the `π`-transported `o'`-framing) with `spans_eq_of_rrefCanon_eq`
+(equal RREF ⟹ equal span). No faithfulness used — pure linear algebra. -/
+theorem framedCodeSym_of_rrefCanon_eq (H : List (Fin n → Bool)) (o o' : Equiv.Perm (Fin n))
+    (heq : rrefCanon n (frameSysBy o H) = rrefCanon n (frameSysBy o' H)) :
+    FramedCodeSym H o' (o' * o⁻¹) := by
+  rw [frameSysBy_eq_transport o o' H] at heq
+  intro w
+  exact spans_eq_of_rrefCanon_eq (length_mem_frameSysBy _ _) (length_mem_frameSysBy _ _) heq w
+
+/-- **CARRIED — faithfulness (the wall gap):** a framed-code symmetry of the recovered system IS a graph
+colour-automorphism. = `ForcingModel.bridge`/L4, per-family (CFI/multipede: C#-tested recovery, code-auto = graph-auto
+by construction); its failure = the non-linear residue = the wall. -/
+def CodeFaithful (H : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ (o π : Equiv.Perm (Fin n)), FramedCodeSym (H adj χ) o π → IsColAut adj χ π
+
+/-- **★★ Assembly — `RigidFrameUnique` from faithfulness + graph rigidity.** Equal framed RREF ⟹ (provable) `o'·o⁻¹`
+is a framed-code symmetry ⟹ (faithful) a graph colour-automorphism ⟹ (rigid) the identity ⟹ `o = o'`. -/
+theorem rigidFrameUnique_of_codeFaithful (H : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (adj : AdjMatrix n) (χ : Colouring n)
+    (hcf : CodeFaithful H adj χ) (hrigid : ∀ π : Equiv.Perm (Fin n), IsColAut adj χ π → π = 1) :
+    RigidFrameUnique H adj χ := by
+  intro o o' heq
+  have hsym := framedCodeSym_of_rrefCanon_eq (H adj χ) o o' heq
+  have hone : o' * o⁻¹ = 1 := hrigid _ (hcf o' (o' * o⁻¹) hsym)
+  exact (mul_inv_eq_one.mp hone).symm
+
+/-- **★★★ Step 9C-2 capstone — the pure-rigid `①`, closed modulo {faithfulness, graph-rigidity}.** With the concrete
+adjacency extraction `hsAdj`, 9C-1's `keyEquivariant_compKey_skStruct_rigid` obligation `RigidFrameUnique` is
+discharged from exactly two honest carried facts: `CodeFaithful` (= the wall, per-family resolvable) and graph rigidity
+(the input is rigid). So the whole rigid-linear `①` for the pure multipede rests on the shared faithfulness bridge. -/
+theorem keyEquivariant_compKey_skStruct_faithful
+    (hcf : ∀ (adj : AdjMatrix n) (χ : Colouring n), CodeFaithful hsAdj adj χ)
+    (hrigid : ∀ (adj : AdjMatrix n) (χ : Colouring n) (π : Equiv.Perm (Fin n)),
+      IsColAut adj χ π → π = 1) :
+    KeyEquivariant (compKey (skStruct
+      (minOrd (framesUniv (n := n)) (frameKeyHsAdj (Encodable.encode : List (Nat × List Bool) → Nat))
+        (exists_isMinFrame_univ (frameKeyHsAdj Encodable.encode))) hsAdj)) :=
+  keyEquivariant_compKey_skStruct_rigid
+    (fun adj χ => rigidFrameUnique_of_codeFaithful hsAdj adj χ (hcf adj χ) (hrigid adj χ))
+
+/-! ## Step 9D — the MIXED-NATIVE reader: aggregate over the equivariant frame set (route around whole-node rigidity)
+
+Steps 6b–9C read via a SINGLE `ord : Perm` (`structRead ord`), whose `①` (`ReadEquivariant ⟸ OrdEquivariant`) needs a
+UNIQUE equivariant order = **whole-node graph rigidity** (the step-8 crux, made unavoidable by 9A's `Classical.choose`
+of a unique minimizer, then explicit in 9C's `RigidFrameUnique`/rigidity). That closes only PURELY-rigid nodes —
+insufficient for the mixed residue (`CellsAreOrbits` false ⟹ *some* but not all decisions rigid), the real target.
+Those single-`ord` results are kept as the `ker=0` / purely-rigid ANCHOR; this step is the general reader.
+
+**The fix — don't PICK a frame; aggregate the per-frame read over the whole equivariant frame set.** No frame is
+chosen ⟹ no uniqueness/rigidity. `ReadEquivariant` holds UNCONDITIONALLY (the frame set transports, so the aggregate
+is invariant); gauge/orbit pairs tie automatically (`ReadEquivariant` at a colour-aut); rigid pairs separate via the
+per-pair carried faithfulness (`ReadSeparatesRigid`, step 7) — never whole-node rigidity.
+
+⚠ **COST — no NEW exponential.** The aggregate ranges over `frames adj χ`; with `frames = framesUniv` (all `n!`
+orders) it is exponential — but that is the SAME `②`-cost deferral as 9B (`framesUniv` = correct-but-exponential; the
+poly/greedy structural frame set, bounded ring rank, drops into the SAME `FramesEquivariant` slot unchanged). The `①`
+here is **frame-set-agnostic** (any `FramesEquivariant frames` works), so it is poly-frame-ready. -/
+
+/-- The per-frame structural read of vertex `v` under a fixed column order `o`. -/
+def structReadAt (o : Equiv.Perm (Fin n)) (Hs : AdjMatrix n → Colouring n → List (Fin n → Bool))
+    (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : Nat :=
+  bitsToNat (colSig (rrefCanon n (frameSysBy o (Hs adj χ))) (o.symm v))
+
+/-- The per-frame read transports (for `hsAdj`): reading `σv` under frame `σ·o` on the relabelled node = reading `v`
+under frame `o` on the original — `framedRREF_hsAdj_transport` + `(σ·o).symm (σv) = o.symm v`. -/
+theorem structReadAt_hsAdj_transport (σ o : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (v : Fin n) :
+    structReadAt (σ * o) hsAdj (relabelAdj σ adj) (transportColouring σ χ) (σ v)
+      = structReadAt o hsAdj adj χ v := by
+  simp only [structReadAt, framedRREF_hsAdj_transport σ o adj χ]
+  have hpos : (σ * o).symm (σ v) = o.symm v := by
+    have h1 : (σ * o) (o.symm v) = σ v := by rw [Equiv.Perm.mul_apply, Equiv.apply_symm_apply]
+    rw [← h1, Equiv.symm_apply_apply]
+  rw [hpos]
+
+/-- **The mixed-native reader** — the sorted set of per-frame reads of `v` over the equivariant frame set, encoded to
+`ℕ`. No frame is chosen ⟹ no uniqueness/rigidity. Parameterized by the frame set (poly-ready). -/
+noncomputable def readAgg (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) : Nat :=
+  Encodable.encode
+    (((frames adj χ).image (fun o => structReadAt o hsAdj adj χ v)).sort (· ≤ ·))
+
+/-- **★★★ Step 9D — `ReadEquivariant (readAgg frames)` UNCONDITIONALLY**, from `FramesEquivariant` ALONE — NO
+uniqueness, NO rigidity. The frame set transports as `o ↦ σ·o` and each per-frame read transports
+(`structReadAt_hsAdj_transport`), so the image `Finset` — hence its sorted encoding — is invariant. **This is the route
+around whole-node rigidity: `①` now holds on EVERY input, mixed included.** -/
+theorem readEquivariant_readAgg (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (hf : FramesEquivariant frames) :
+    ReadEquivariant (readAgg frames) := by
+  intro σ adj χ v
+  have himg : (frames (relabelAdj σ adj) (transportColouring σ χ)).image
+        (fun o => structReadAt o hsAdj (relabelAdj σ adj) (transportColouring σ χ) (σ v))
+      = (frames adj χ).image (fun o => structReadAt o hsAdj adj χ v) := by
+    rw [hf σ adj χ, Finset.image_image]
+    refine Finset.image_congr (fun o _ => ?_)
+    show structReadAt (σ * o) hsAdj (relabelAdj σ adj) (transportColouring σ χ) (σ v)
+      = structReadAt o hsAdj adj χ v
+    exact structReadAt_hsAdj_transport σ o adj χ v
+  simp only [readAgg, himg]
+
+/-- **★★★ Step 9D `①` capstone (general, MIXED-NATIVE).** `compKey (skRead (readAgg frames))`'s `KeyEquivariant` from
+`FramesEquivariant` alone — no rigidity. The whole rigid-linear `①` for the mixed residue, on any equivariant frame
+set. -/
+theorem keyEquivariant_compKey_readAgg
+    (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (hf : FramesEquivariant frames) :
+    KeyEquivariant (compKey (skRead (readAgg frames))) :=
+  keyEquivariant_compKey_skRead (readAgg frames) (readEquivariant_readAgg frames hf)
+
+/-- **★★★ Step 9D `②`/firing capstone (general, MIXED-NATIVE).** `NodeResolved` from the per-pair kernel predicate
+`ReadSeparatesRigid (readAgg frames)` + rigidity of the exposed pair — no global discreteness, no whole-node rigidity.
+Gauge pairs tie (consume's `cellIsOrbit` disjunct); only the exposed rigid decisions separate. -/
+theorem nodeResolved_compKey_readAgg
+    (frames : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)))
+    (S : Consume.Supply n) (adj : AdjMatrix n) (χ : Colouring n) (hnd : ¬ Discrete χ)
+    (hsep : ReadSeparatesRigid (readAgg frames) adj χ)
+    (hrigid : ∀ u ∈ branches χ, ∀ w ∈ branches χ, u ≠ w →
+      ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
+    Select.NodeResolved (compKey (skRead (readAgg frames))) S adj χ :=
+  nodeResolved_compKey_skRead (readAgg frames) S adj χ hnd hsep hrigid
+
+/-- **★★★ Step 9D concrete — the mixed-native `①`, closed with NO carried hypothesis** (over the exhaustive
+`framesUniv`; exponential-but-correct, the poly frame set drops in unchanged). Contrast the purely-rigid
+`keyEquivariant_compKey_skStruct_rigid`, which carried `RigidFrameUnique`: the aggregate reader owes NOTHING on `①`
+for ANY input, rigid or mixed. -/
+theorem keyEquivariant_compKey_readAgg_univ :
+    KeyEquivariant (compKey (skRead (readAgg (framesUniv (n := n))))) :=
+  keyEquivariant_compKey_readAgg framesUniv framesEquivariant_univ
+
 end RigidRefine
 end ChainDescent
