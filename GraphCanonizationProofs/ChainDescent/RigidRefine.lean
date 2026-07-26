@@ -954,5 +954,52 @@ theorem keyEquivariant_compKey_skStruct_minFrame
   keyEquivariant_compKey_skStruct_hsAdj _
     (ordEquivariant_minOrd hf (keyTransport_hsAdj f) hex huniq)
 
+/-! ## Step 9B — a concrete frame set: the exhaustive `univ` instance (correct; poly refinement deferred)
+
+9A left the order's `①` modulo {`FramesEquivariant`, existence, uniqueness}. This step discharges the first two with
+the simplest concrete frame set — **all** column orders, `frames adj χ = univ`. It is manifestly equivariant (left
+multiplication by `σ` is a bijection of `Perm`, so `univ.image (σ·) = univ`) and non-empty (so a key-minimizer exists),
+closing the order's `①` end-to-end **modulo uniqueness alone** (§9C = the rigid regime).
+
+**⚠ This is the CORRECT-BUT-EXPONENTIAL instance** (the analog of the exhaustive canonizer the whole project refines to
+poly): `univ` is `n!`. The **poly** frame set — built **structurally/greedily** (the C# "no base enumeration" single
+greedy canonical-base path, poly by bounded ring rank per B1d), NOT by naive enumeration (which would re-import the `s!`
+blow-up the fold-robustness note guards against) — is a `②`-cost refinement that drops into the SAME 9A engine
+(`FramesEquivariant` + existence for the poly set), leaving `①`/uniqueness untouched. Deferred. -/
+
+/-- The exhaustive frame set — every column order. -/
+def framesUniv : AdjMatrix n → Colouring n → Finset (Equiv.Perm (Fin n)) :=
+  fun _ _ => Finset.univ
+
+/-- **★ The exhaustive frame set is equivariant.** `univ.image (σ·) = univ` since left-multiplication by `σ` is a
+bijection of `Perm`. The simplest concrete `FramesEquivariant` witness. -/
+theorem framesEquivariant_univ : FramesEquivariant (framesUniv (n := n)) := by
+  intro σ adj χ
+  show (Finset.univ : Finset (Equiv.Perm (Fin n))) = Finset.univ.image (fun o => σ * o)
+  refine (Finset.eq_univ_of_forall (fun p => ?_)).symm
+  exact Finset.mem_image.mpr ⟨σ⁻¹ * p, Finset.mem_univ _, mul_inv_cancel_left σ p⟩
+
+/-- **A key-minimal frame exists over `univ`** — `univ` is non-empty (`1 ∈ univ`) and the key lands in `ℕ`
+(well-ordered), so `Finset.exists_min_image` gives a minimizer. Discharges the engine's `existence` obligation. -/
+theorem exists_isMinFrame_univ (key : AdjMatrix n → Colouring n → Equiv.Perm (Fin n) → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) :
+    ∃ o, IsMinFrame framesUniv key adj χ o := by
+  obtain ⟨o, _, ho⟩ := Finset.exists_min_image Finset.univ (key adj χ) ⟨1, Finset.mem_univ 1⟩
+  exact ⟨o, Finset.mem_univ o, fun o' _ => ho o' (Finset.mem_univ o')⟩
+
+/-- **★★★ Step 9B capstone — the mixed-native force key's `①` on the concrete `hsAdj` extraction with the CONCRETE
+(exhaustive) frame set, modulo UNIQUENESS ALONE.** `FramesEquivariant` and existence are discharged (`univ`); the only
+remaining order obligation is that the min frame is unique — which holds exactly on the rigid regime (§9C), where ties
+(orders giving the same framed RREF) are code-automorphisms = graph-automorphisms = trivial. So the entire order piece
+(piece 2) of the concrete `Recover` reduces to **one** rigid-regime uniqueness fact. -/
+theorem keyEquivariant_compKey_skStruct_univ (f : List (Nat × List Bool) → Nat)
+    (huniq : ∀ (adj : AdjMatrix n) (χ : Colouring n) (o o' : Equiv.Perm (Fin n)),
+      IsMinFrame framesUniv (frameKeyHsAdj f) adj χ o →
+      IsMinFrame framesUniv (frameKeyHsAdj f) adj χ o' → o = o') :
+    KeyEquivariant (compKey (skStruct
+      (minOrd (framesUniv (n := n)) (frameKeyHsAdj f) (exists_isMinFrame_univ (frameKeyHsAdj f))) hsAdj)) :=
+  keyEquivariant_compKey_skStruct_minFrame (framesUniv (n := n)) f
+    framesEquivariant_univ (exists_isMinFrame_univ (frameKeyHsAdj f)) huniq
+
 end RigidRefine
 end ChainDescent

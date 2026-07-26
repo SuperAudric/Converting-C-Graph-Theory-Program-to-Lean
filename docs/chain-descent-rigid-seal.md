@@ -50,9 +50,11 @@
 >   `hsAdj`/`hsAdj_transport_perm`/`rrefCanon_congr_perm` ⟹ `readEquivariant_structRead_hsAdj`: `HsEquivariant` DISCHARGED);
 >   (2) the iso-invariant **order** — **★ finding: an equivariant order Perm exists ONLY on rigid inputs**, so the order is a
 >   **canonical MIN over an equivariant frame set** (C# B2), **✅ engine DONE** (step 9A: `FramesEquivariant`+`KeyTransport`
->   ⟹ `isMinFrame_transport` ⟹ `ordEquivariant_minOrd` on a unique min; `KeyTransport` free for `hsAdj`) — **▶ NEXT = §9B**
->   concrete poly frame set + **§9C** rigid ⟹ unique min ⟹ separating; (3) the **kernel predicate** `ReadSeparatesRigid`
->   (faithfulness/bridge = `ForcingModel.bridge`/L4, §9.2), discharged with §9C. → **P3-ring** (`Z_{2^k}`) → **P4**.
+>   ⟹ `isMinFrame_transport` ⟹ `ordEquivariant_minOrd` on a unique min; `KeyTransport` free for `hsAdj`). **✅ §9B** a
+>   concrete frame set: exhaustive `framesUniv` (`framesEquivariant_univ` + `exists_isMinFrame_univ` ⟹
+>   `keyEquivariant_compKey_skStruct_univ`, `①` **modulo UNIQUENESS ALONE**; `univ`=correct-but-exponential, poly/greedy
+>   set = deferred ② refinement). **▶ NEXT = §9C** `IsRigidF2`⟹unique min (ties=code-aut=graph-aut=trivial) ⟹ discharges
+>   `huniq` + the `ker=0` kernel predicate (3), closing the pure multipede. → **P3-ring** (`Z_{2^k}`) → **P4**.
 >
 > **Module chain to read:** `RigidRREF`(A,B) → `RigidFrame`(C) → `RigidGen`(D) → **`RigidRefine`** (steps 1–6b: coord-free
 > reader 1–5, general interface 6, structural reader 6b); see §8.2 and §10. The consume side feeds a clean per-node handoff
@@ -686,6 +688,19 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       **§9B** the concrete poly frame set (`FramesEquivariant` + existence; poly by bounded ring rank per B1d, NOT `n!`) ·
       **§9C** rigid ⟹ unique min ⟹ separating (discharges uniqueness + the `ker=0` kernel predicate, closing the pure
       multipede; the mixed/tie case reads at any min-achiever, deferred with the interleaving). Then P3-ring → P4.
+    - **✅ (step 9B) LANDED 2026-07-26 — a CONCRETE frame set: the exhaustive `univ` instance** (`RigidRefine.lean`,
+      axiom-clean). Discharges the engine's first two obligations with the simplest concrete `frames`: **all** column
+      orders, `framesUniv adj χ = univ`. **`framesEquivariant_univ`** (`univ.image (σ·) = univ`, left-mult a bijection)
+      + **`exists_isMinFrame_univ`** (`univ` non-empty + ℕ-valued key ⟹ a minimizer, `Finset.exists_min_image`) ⟹
+      capstone **`keyEquivariant_compKey_skStruct_univ`**: the whole `compKey`'s `①` on the concrete `hsAdj` extraction
+      with a concrete frame set, **modulo UNIQUENESS ALONE**. ⟹ the entire order piece (piece 2) now reduces to **one
+      rigid-regime uniqueness fact** (§9C). **⚠ `univ` is the CORRECT-BUT-EXPONENTIAL instance** (`n!`, the analog of the
+      exhaustive canonizer the project refines to poly) — it settles `①`/correctness; the **poly** frame set (built
+      **structurally/greedily** = the C# "no base enumeration" single greedy path, poly by bounded ring rank per B1d,
+      NOT naive enumeration — which would re-import the `s!` blow-up the fold-robustness note guards against) drops into
+      the SAME 9A engine and is a `②`-cost refinement, deferred. **▶ NEXT = §9C:** `IsRigidF2` (+ faithfulness) ⟹ the
+      min frame is unique (ties = code-automorphisms = graph-automorphisms = trivial) ⟹ discharges `keyEquivariant_compKey_skStruct_univ`'s
+      `huniq` AND the `ker=0` kernel predicate — closing the pure multipede `①`+`②` end-to-end. Then P3-ring → P4.
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
       are `Supply n`), NOT the rigid-force core (step 9). It guards only the *bounded-distinguishable* `s!` fallback
