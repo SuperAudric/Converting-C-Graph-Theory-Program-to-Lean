@@ -324,7 +324,64 @@ non-invariant and S1 does not apply; the response is to resolve the deeper multi
 uncertified levels**, not the ordering of blocks. That is a cost/termination question, and it is a
 different question from the one the rigid-seal frontier is currently phrased around.
 
-## 9. Build sketch (if this is taken up)
+## 9. ★★★ THE SPLIT LOOP — the mechanism has no third case (validated)
+
+Probe: `probe_splitloop.py`. The algorithm, exactly as stated:
+
+```
+loop:  refine
+       if discrete: done
+       C := target cell;  P := orbit partition of C
+       if |P| = 1:  individualize any member          -- CONSUME, branch factor 1, FREE
+       else:        order the blocks, refine by rank  -- FORCE, a SPLIT, no branch
+```
+
+**Two blocks cannot tie**: `cert(a) = cert(b) ⟺ (adj, χ+a) ≅ (adj, χ+b) ⟺ a, b are in the same
+orbit` — so a tie contradicts them being distinct blocks. The split therefore *always* succeeds.
+**There is no third outcome.** The `¬HandledS` "true mutual stall" does not exist as a mechanism;
+it exists only as cost.
+
+**One computation gives both verdicts.** Compute `cert(a)` for `a ∈ C`: its **fibres are the orbits**
+(consume) and its **values order them** (force). No separate harvest is needed — deepen's harvest
+becomes an *optimization*: where it certifies the cell is a single orbit, skip the certs entirely and
+take the free step.
+
+**Measured, 13 witnesses:** `blocks-tied = 0` everywhere; `① = OK` everywhere.
+
+| witness | calls | splits | free | max-nesting | blocks/split |
+|---|---|---|---|---|---|
+| mp7 Fano | **1** | 0 | 3 | 0 | — (pure consume) |
+| MIXED multipede | 3 | 1 | 7 | 1 | [2] |
+| circ(5) | 4 | 1 | 4 | 1 | [3] |
+| rigid multipedes n=34..84 | 5–15 | 1–6 | 0–1 | 1–2 | [4] … [4,2,2,2,2,2] |
+| CFI cubic m=8 / 10 / 12 / 14 | 3 / 9 / 8 / **17** | 1 / 2 / 1 / 2 | 14 / 39 / 43 / **96** | 1 / 2 / 1 / 1 | [2] / [6,2] / [7] / [14,2] |
+
+CFI cubic m=14 (n=98, WL-hard): **96 free consume steps, 2 splits, 17 recursive calls.**
+
+### What this settles, and what it leaves
+
+* **Settled — the mechanism.** Every cell is consumed or split; the split cannot fail; the result is
+  iso-invariant. `①` is unconditional for the whole algorithm (a canonical form is equivariant, and
+  `force_canonizer` needs only `KeyEquivariant`). The mixed-cell route (`CoveringOfAt`) collapses into
+  "split by the orbit partition, order by the key" — not a separate resolver.
+* **Left — the cost, and only the cost.** `calls = ∏` over a root-to-leaf chain of mixed cells of
+  (#blocks) = the **fully `Aut`-pruned I-R tree**. Measured 1–17 with nesting ≤ 2. In general this is
+  the object with known exponential lower bounds (Neuen–Schweitzer multipedes over expanders,
+  Miyazaki) — those families are *not* in this witness set, so the small numbers are suggestive only.
+* **Where force's key removes the cost entirely.** The recursion exists *only* to order the blocks. A
+  poly equivariant block-ordering key collapses it to depth 0 (`calls = 1 + #splits`, poly). So
+  "force handles ordering rigid cells" is exactly the hypothesis that makes the whole loop poly — the
+  model is right, and the wall is now located precisely at **"a poly key that orders the blocks of one
+  mixed cell"**, nothing else.
+* **And S1 is such a key at nesting 1.** Certified-below ⟹ deepen's single-path cert orders the blocks
+  in poly time. So **nesting ≤ 1 ⟹ poly, unconditionally** (measured: 9/13 witnesses).
+
+⚠ **Probe idealisation.** `orbit_map` uses a true canonical form as the partition oracle. In the real
+algorithm the partition comes from the same `cert` computation (fibres), so this is faithful — but it
+means the poly *fast path* (deepen's harvest instead of certs) is only available where the harvest is
+exact, i.e. certified-below (§7.1, measured 18/18 there).
+
+## 10. Build sketch (if this is taken up)
 
 **Smallest first step (§6.2 — does not need the min-over-cell descent at all):**
 
