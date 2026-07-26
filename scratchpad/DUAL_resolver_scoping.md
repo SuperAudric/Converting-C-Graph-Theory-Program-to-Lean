@@ -122,15 +122,163 @@ Aut-fixed), as do the rigid random multipedes (`|Aut| = 1`, `R = n`).
 This also names the poly constructor the R/K split was missing: **`K` = the orbits the dual's ties
 produce, `R` = what its certified separations leave.** The split stops being an oracle.
 
-## 6. Build sketch (if this is taken up)
+## 6. Where the exponential enters — and how much of it is avoidable
 
-1. `DualDescent.lean` — `certOf` (min-over-cell, fuel = colour count), `deepKey`, pruning by a
+Probe: `scratchpad/probe_polyloop.py` (faithful ports of `deepen`/`replay`/`twistOf`/`lookaheadKey`).
+
+### 6.1 Deepen's polynomiality and its `Amenable` hypothesis are the SAME FACT
+
+Cost of any descent = `∏ₖ bₖ`. Today's `deepen` sets `bₖ = 1` **by fiat** (lowest-index pick). That is
+free computationally but not free logically: the leaf it computes is a function of the *labelling*, and
+is only ever usable through an equality test between two runs — which is labelling-independent exactly
+when the picked cell is a single orbit, i.e. **`Amenable`**. So deepen is not "poly and correct"; it is
+**poly, and correct-when-`Amenable`**. The dual does not *introduce* an exponential — it *prices* the
+assumption deepen was making for free. Where `Amenable` holds, the dual has `bₖ = 1` too and is exactly
+as poly as deepen.
+
+`bₖ = 1` is legitimate — no branching at all — under either justification:
+
+* **CONSUME** — the cell is certified a single orbit (harvest transitive on it): pick any member.
+* **FORCE** — a poly equivariant key *splits* the cell: then we **refine, not branch** — the cell
+  shrinks and there is no cost multiplier whatsoever.
+
+**Exponential survives only at STALL nodes (both fail).** `cost = ∏(branch factors at stalls)`.
+
+### 6.2 `Amenable` never needs to be ASSUMED — deepen witnesses it from below
+
+`CellSingleOrbit adj χc cid := ∀ u w in the cell, ∃ σ, IsColAut adj χc σ ∧ σ u = w`
+(`DeepenAmenable.lean:198`). Every harvested twist **is** an `IsColAut` (`twistOf_isColAut`, landed), and
+`IsColAut` is closed under composition — so **transitivity of the harvested twists on the cell is a
+verified witness for `CellSingleOrbit`**. It is decidable and poly (deepen's own harvest computes it).
+
+⟹ The globally-false `hAmen : ∀ adj χ, Amenable adj χ` in `deepenSupply_guarded_canonizer_direct` can be
+replaced by a **per-level run-time certificate**, making the capstone unconditional. `joint` /
+`step_rerelate` are already exactly the lemmas that consume it — they need `CellSingleOrbit` per level,
+which is what the certificate supplies. The certificate is **one-sided** (failure ⇏ rigid), which is
+correct: failure means "not certified", and the response is branch / force / flag, never a wrong answer.
+
+### 6.3 Measured — the poly loop on 18 witnesses
+
+| witness | levels | FORCE | CONSUME | STALL | stall (\|C\|, harvest-orbits, TRUE-orbits) |
+|---|---|---|---|---|---|
+| mp7 Fano | 3 | 0 | **3** | **0** | — |
+| circ(5) | 2 | 1 | 1 | **0** | — |
+| CFI cubic m=10, m=12 (pl+tw) | 6 | 1 | 5 | **0** | — |
+| CFI cubic m=8 pl | 7 | 1 | 4 | 2 | (16, 2, **1**) · (4, 2, 2) |
+| CFI cubic m=14 (pl+tw) | 7 | 0 | 6 | 1 | (56, 36→**14**, 14) |
+| MIXED multipede | 3 | 0 | 2 | 1 | (4, 2, 2) |
+| rigid multipedes n=34..84 | 1–2 | 0 | 0 | 1–2 | (4,4,4) · (2,2,2) … |
+
+**Stall triage** — comparing the harvest's orbit count on the cell against the TRUE `Aut`-orbit count
+(computed independently by the min-over-cell canonical form) separates *forced* branching from *fixable*:
+
+1. **Genuine rigid decisions** (harvest == TRUE > 1): rigid multipedes (4,4 / 2,2), MIXED (2,2),
+   and CFI m=14's residual 14. Branching here is **forced** — no harvest improvement helps. This is
+   exactly force's job, and the rigid reader belongs here as a **stall-branch-factor reducer**, not as
+   a separate resolver.
+2. **Anchor-count gaps** (harvest > TRUE, closes with more anchors): CFI m=14 gives
+   **36 (3 anchors) → 24 (6) → 16 (12) → 14 (ALL) = TRUE**. A quantitative confirmation of §1.1
+   ("all anchors are required"); the all-anchor supply is *exactly* complete there.
+3. **★ A measured FUSION witness** (harvest > TRUE, does NOT close with all anchors): CFI cubic m=8,
+   the `|C| = 16` cell has **TRUE orbits = 1** — it *is* a single orbit — yet the harvest stalls even
+   over every anchor. Traced level by level: `AmenablePath` breaks **4 levels deeper**, at a cell with
+   **2 orbits**. This is precisely `not_amenablePath_imp_rigidObstruction`'s claim (a stall exposes a
+   force-actionable rigid pair *deeper* than the compared pair, which is itself automorphic = fusion).
+   The deepen doc §4 records this witness as *still missing*; it is here, on a CFI cubic base.
+
+### 6.4 Answer: avoidable at two of three scopes
+
+* **`Amenable` nodes — avoidable entirely and unconditionally.** `bₖ=1` with a *verified* witness; no
+  hypothesis; same cost as today's deepen. The dual is a conservative extension of deepen, not a
+  replacement with worse cost.
+* **Force-separable nodes — better than avoidable.** The key shrinks the cell; no multiplier at all.
+* **Genuine stalls — not avoidable in general.** `∏` over stall nodes is the honest cost and it is the
+  wall, unmoved. But it is now a **cost multiplier at nodes you can point at**, with a *correct*
+  fallback (branch), instead of a soundness hypothesis that is false on the graphs of interest.
+
+## 7. ★ CORRECTION — the exponential is in neither resolver; it is in ORDERING, not separating
+
+§6's framing put the exponential in "stall branching". That mislocates it. Neither resolver is
+exponential, and the dual does not make one so. Redone properly:
+
+### 7.1 The strong link is real, and it is provable from landed pieces
+
+`Descend.targetColour = (nonSingletonColours χ).min` and `Deepen.chooseIdK (finRange n)` are the **same
+object** — lowest-id non-singleton cell. So the canonizer's descent path *is* deepen's descent path.
+That makes "deepest failure along the path" well-defined, and gives:
+
+> **CERTIFIED-BELOW EXACTNESS.** Let `C` be a branch cell whose descent certifies `CellSingleOrbit` at
+> **every level strictly below** (§6.2's poly witness). Then the all-anchor harvest's partition of `C`
+> is **exactly the true `Aut`-orbit partition of `C`**.
+>
+> *Proof from landed pieces.* ⊆: every twist is verified (`twistOf_isColAut`), so each harvest block sits
+> inside a true orbit. ⊇: certified-below **is** `AmenablePath`, so `joint` + `twistOf_of_transport_fixing`
+> say an automorphic pair *does* produce a verifying twist. Hence equality. ∎
+
+This is strictly stronger than the link in use today. `not_amenablePath_imp_rigidObstruction` says a
+consume failure *exposes an obstruction somewhere*. The above says: **at a certified-below failure, the
+cell's exact orbit partition has been computed, in polynomial time, and its non-blocks are certified
+non-automorphic.** That is the user's "a cell with the properties needed to force" — and it is a
+proof-form gap, not new mathematics.
+
+Measured (`probe_verdict_invariance.py`, all-anchor harvest at the **branch cell**, 18 witnesses):
+
+* **exact = 18/18** — harvest partition == true `Aut`-orbit partition, on every witness
+  (mp7 28→1 block, CFI cubic m=14 56→14 blocks, rigid multipedes 4→4, MIXED 4→2).
+* **partition transports under relabelling = 18/18.**
+
+### 7.2 Why the earlier m=8 counterexample does not contradict this
+
+The `(16, 2, 1)` stall of §6.3 was at a node **not** certified-below (`AmenablePath` breaks 4 levels
+deeper, at a 2-orbit cell). Exactness is not claimed there, and its verdict is provably unusable — not
+merely measured so: `Force.forceBy_no_narrowing_on_orbit` says an **equivariant** key cannot split a
+single-orbit branch cell. That cell is a single orbit and the harvest splits it 2 ways, so that verdict
+**is not an equivariant key**, full stop. The scheduling consequence is the existing interleaving:
+force acts at the deeper exposed cell first, the colouring refines, consume retries. Rounds are ≤ n
+(each force step strictly refines), so the *loop* is poly.
+
+### 7.3 Where the exponential actually lives
+
+A branch cell with `k > 1` true orbits leaves the descent exactly two moves:
+
+* **rank the orbits** by an invariant and `keepMin` — this is `forceBy`; or
+* **branch over them** and take the min canonical form — cost multiplier `k`.
+
+And **ranking two orbits *is* separating them by a poly invariant** — the two are the same thing
+(`forceBy`'s power is exactly its key, and `forceBy_no_narrowing_on_orbit` says a key can act only
+between orbits). So:
+
+> Knowing the orbit partition **exactly** — which §7.1 now gets in poly time — still does not give
+> force a key. Force needs a **poly invariant ORDER on the certified-rigid blocks**. Absent it, the
+> only sound move is branching, and *that* is the exponential. It is the fallback for a missing order,
+> not a property of either resolver.
+
+So the split is: **PARTITION = poly and (per §7.1) provable; ORDER = the wall.** That is independently
+exactly the rigid-seal frontier wording ("canonical column order on the rigid residue", the recover
+core) and CORE_scoping's "main blocking feature = the poly iso-invariant order on R". The dual work
+does not move that wall — but it *does* deliver R/K with a poly, exact, certified constructor, which is
+what the R/K plan was missing.
+
+## 8. Build sketch (if this is taken up)
+
+**Smallest first step (§6.2 — does not need the min-over-cell descent at all):**
+
+1. `CertifiedOrbit adj χc cid : Bool` := harvested twists act transitively on the `cid`-cell.
+2. `certifiedOrbit_imp_cellSingleOrbit` — from `twistOf_isColAut` + `IsColAut` composition-closure.
+   A few lines; both ingredients landed.
+3. Guard `deepen` on the certificate per level ⟹ `AmenablePath` holds **by construction** along the
+   taken path ⟹ `joint` applies ⟹ drop `hAmen` from `deepenSupply_guarded_canonizer_direct`.
+   This alone converts the conditional scaffold into an unconditional (flagging) capstone.
+
+**Then the dual proper:**
+
+4. `DualDescent.lean` — `certOf` (min-over-cell, fuel = colour count), `deepKey`, pruning by the
    verified-generator accumulator. Data-typed throughout (`Refine.ColData`, trap #1).
-2. `keyEquivariant_deepKey` — the induction of §3. Mechanical; no new predicate.
-3. Feed `Force.forceBy deepKey` ⟹ `force_canonizer` gives `①` unconditionally.
-4. Ties ⟹ `deepenGens'`; reuse `twistOf_isColAut` verbatim as the verification gate.
-5. Cost: `keyCost` = leaves explored. `②` becomes a bound on `∏ surviving reps`, which is where the
-   rigid reader (`structReadAt` / RREF-column) plugs in — as a **cell splitter that removes
+5. `keyEquivariant_deepKey` — the induction of §3. Mechanical; no new predicate.
+6. Feed `Force.forceBy deepKey` ⟹ `force_canonizer` gives `①` unconditionally.
+   Ties ⟹ `deepenGens'`; reuse `twistOf_isColAut` verbatim as the verification gate.
+7. Cost: `keyCost` = leaves explored. `②` becomes a bound on `∏(stall branch factors)`, which is where
+   the rigid reader (`structReadAt` / RREF-column) plugs in — as a **cell splitter that removes
    branching**, not as a separate resolver.
-6. Retire on success: `deepenRefSupply`, `DeepenRefInExec`, R1/R2, and `Amenable`-as-soundness
+8. Retire on success: `deepenRefSupply`, `DeepenRefInExec`, R1/R2, and `Amenable`-as-soundness
    (`DeepenAmenable`'s `joint` survives as the *cost* lemma: `Amenable` ⟹ branch factor 1).
