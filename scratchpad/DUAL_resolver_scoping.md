@@ -942,3 +942,69 @@ single orbit block) hold; workstream B is now a *proof* task with the design val
    halving recovers `IsColAut adj χ ρ`. No `Amenable` needed for this direction — it is the *firing*
    direction, exactly as §14.3 predicted.
 3. **B3/D1** is then one line from `Force.forceBy_narrows_of_key_ne`.
+
+## 17. ✅✅ LANDED — workstream B / the hook CLOSED (`ChainDescent/DeepenExact.lean`), 2026-07-27
+
+Gate green (`bash /workspace/scripts/build.sh`, **223 s**, 103 modules); after `DeepenKey`. All 17
+theorems `[propext, Classical.choice, Quot.sound]`; no `sorry`, no new `axiom`.
+
+### 17.1 The chain, end to end
+
+| | statement | name |
+|---|---|---|
+| B0 | leaf colours are ranks (`< n`); the greedy leaf at fuel `n` is **discrete** (`Descend.ncol` measure) | `warmRefineR_lt`, `leafOf_lt`, `leafOf_discrete{,_n}` |
+| B0a | a discrete class is a **singleton**, so the read is one adjacency entry / one parent colour | `filter_eq_singleton_of_discrete`, `readAt_discrete`, `readColAt_discrete` |
+| B0b | key equality ⟹ componentwise equality (`readKey` = two `map`s ⟹ `List.append_inj` + `List.map_inj_left`) | `readKey_components` |
+| **B1 ★★** | **equal keys ⟹ SAME ORBIT — no hypothesis** | **`isColAut_of_readKey_eq`** |
+| B1a | a discrete colouring with colours `< n` is a permutation; two of them match colour-for-colour | `colEquiv`, `matchPerm`, `matchPerm_col` |
+| B3 | `orbKey` **separates** any pair no colour-automorphism links | `orbKey_ne_of_no_aut` |
+| B3a | at an `Amenable` node with a `RigidObstructionAt`, `forceBy orbKey` **strictly narrows** | `forceBy_orbKey_narrows` |
+| **B2 ★★** | at an `Amenable` node **`orbKey`'s fibres ARE the orbits** (both directions) | **`orbKey_eq_iff_orbit`** |
+| **D2 ★★** | force narrows the branch cell to a **single orbit** | **`forcedSet_single_orbit`** |
+| **D1 ★★★** | **a consume failure makes force fire at a reachable node** | **`consume_fail_force_fires`** |
+
+```
+consume_fail_force_fires :
+  ¬ Discrete χ → ¬ Consume.CellIsOrbit deepenSupply adj χ →
+    ∃ ψ, DescentReach adj χ ψ ∧
+         (narrow (forceBy orbKey) adj ψ).length < (branches ψ).length
+```
+
+**The pivot predicted in §14.3 held exactly**: the *firing* direction (equal keys ⟹ same orbit) needs
+**no** `Amenable`. It is completeness of the encoding — discrete leaf ⟹ singleton classes ⟹ the read
+determines the relabelled adjacency and the relabelled `indivOne χ v`; the **odd** values of
+`indivOne χ u` sit exactly at `u`, so `transportColouring ρ (indivOne χ u) = indivOne χ w` forces
+`ρ u = w`, and halving gives `χ ∘ ρ = χ`. `Amenable` is needed only for `①` (`DeepenKey`) and for the
+converse half of B2.
+
+### 17.2 The vacuity guard, and why it is not a contradiction
+
+`orbKey_eq_iff_orbit` is also the consistency check against `Force.forceBy_no_narrowing_on_orbit`: `⟸`
+is the **ceiling** (`Force.keyV_aut_invariant`, free from `keyEquivariant_orbKey`), so the key is
+constant on each orbit and force can never cut *inside* one. It separates orbits and nothing finer —
+which is exactly what D2 then says. The two landed theorems agree, and the measured 147/147 (§16.1)
+is the same statement empirically.
+
+### 17.3 What this settles
+
+* `not_amenablePath_imp_rigidObstruction`'s `∃ χc cid` — an obstruction *somewhere* — is replaced by a
+  **named reachable node at which a specific equivariant key provably fires**, i.e. the L0 → L4/L5 jump
+  of the §14.1 ladder in one arc (C → A → B).
+* The strongest available form. §14.0's measured witness (CFI cubic `m = 8`) shows "force fires at `χ`
+  itself" is FALSE — there the branch cell is one orbit and the ceiling forbids firing. The reachable-
+  node form is the target, not a weakening of it.
+* `①` never depended on any of this: `keyEquivariant_orbKey` carries no hypothesis, so
+  `Force.force_canonizer` / `Composite.composite_canonizer` were already applicable.
+
+### 17.4 What is left (all `②`, none `①`)
+
+1. **The guard's cost.** `orbKey` is `noncomputable`; `Amenable` is decidable but by an `n!` search.
+   Plan §14.5 E1/E2: either bill the honest exponential guard, or swap in the poly `CertifiedPath`
+   (`amenablePath_of_certifiedPath`, landed) once **the certificate boolean's invariance** is proved —
+   still the one open item, and still narrower than §10 asked for (a Boolean, not a partition).
+2. **Nesting depth.** D1 relocates work to a deeper node; bounding how often that recurses is the
+   cost question §8's "actual residue" names. `DescentReach` + the `ncol` measure bound it by `n`
+   *steps*, not by branch factor.
+3. **Composite assembly.** `forcedSet_single_orbit` is the exact input
+   `Composite.forceThenConsume_singleton_of_cellIsOrbit` wants; wiring it needs
+   `Consume.CellIsOrbit` on the *forced sub-cell*, which `Amenable` should supply.

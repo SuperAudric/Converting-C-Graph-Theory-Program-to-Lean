@@ -301,23 +301,31 @@ theorem readColAt_transport (σ : Equiv.Perm (Fin n)) (φ χ : Colouring n) (c :
   show φ (σ.symm (σ u)) = φ u
   simp
 
+/-- The adjacency read at a **flattened** index `k = c * n + d`. Flattening (rather than a nested
+`flatMap`) is deliberate: it makes `readKey` a concatenation of two plain `List.map`s, so
+`List.append_inj` + `List.map_inj_left` recover the components from an equality of keys — which is
+exactly what the completeness direction (workstream B) needs. -/
+def readAtIdx (adj : AdjMatrix n) (χ : Colouring n) (k : Nat) : Nat :=
+  readAt adj χ (k / n) (k % n)
+
 /-- **The read.** Adjacency between every ordered pair of colour classes, then the parent colour of
 every class. When `χ` is discrete each class is a singleton, so this is the full relabelled adjacency
 together with the relabelled parent colouring — the object the probe calls `cert`. -/
 def readKey (adj : AdjMatrix n) (φ χ : Colouring n) : List Nat :=
-  (List.range n).flatMap (fun c => (List.range n).map (fun d => readAt adj χ c d))
-    ++ (List.range n).map (fun c => readColAt φ χ c)
+  (List.range (n * n)).map (readAtIdx adj χ) ++ (List.range n).map (readColAt φ χ)
+
+theorem readAtIdx_transport (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (k : Nat) :
+    readAtIdx (relabelAdj σ adj) (transportColouring σ χ) k = readAtIdx adj χ k :=
+  readAt_transport σ adj χ _ _
 
 theorem readKey_transport (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (φ χ : Colouring n) :
     readKey (relabelAdj σ adj) (transportColouring σ φ) (transportColouring σ χ)
       = readKey adj φ χ := by
   unfold readKey
   congr 1
-  · refine List.flatMap_congr (fun c _ => ?_)
-    refine List.map_congr_left (fun d _ => ?_)
-    exact readAt_transport σ adj χ c d
-  · refine List.map_congr_left (fun c _ => ?_)
-    exact readColAt_transport σ φ χ c
+  · exact List.map_congr_left (fun k _ => readAtIdx_transport σ adj χ k)
+  · exact List.map_congr_left (fun c _ => readColAt_transport σ φ χ c)
 
 /-! ## 5. The guard transports -/
 
