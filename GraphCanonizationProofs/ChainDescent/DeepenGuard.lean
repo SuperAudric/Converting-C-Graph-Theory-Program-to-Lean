@@ -497,5 +497,150 @@ theorem force_canonizer_orbKeyG_deck2 :
           (Force.forceBy (orbKeyG (Deck2.deck2Supply (n := n)))) adj ≠ none :=
   Force.force_canonizer keyEquivariant_orbKeyG_deck2
 
+/-! ## 8. ★★ GUARD STRENGTH — the union, which is the MEASURED lever
+
+The scoping doc's §7.3 item 4 proposed raising the firing rate by *taking `S` deeper*. `Regression` §17
+measures that this is the wrong lever: **`deck2Supply` is not a superset of `deckSupply` at this
+guard** — `C5` certifies under `deckSupply` at every branch and fails under `deck2Supply` at branch 0.
+The supplies are incomparable, not ordered by strength, so the gain is in taking them **together**.
+
+Everything needed is monotonicity: more verified generators can only make `WordReach` easier, hence
+`CellIsOrbit` easier, hence `CertPath` easier. And `Deck.appendSupply` already carries the equivariance
+closure (`Deck.gensEquivariant_appendSupply`), so the union costs `①` nothing.
+
+⚠ **This raises firing, never soundness or `①`.** `CertPath S ⟹ AmenablePath` for *every* `S` (§3), so
+a bigger guard admits more nodes without weakening what admission means. And the cost stays honest: the
+union's `supplyCost` is the **sum** of its members', which is exactly what `keyCost_orbKeyG_le` charges
+through its `c₂`. -/
+
+/-- Monotonicity of word-reachability. (`DeepenRef` has this lemma but is parked out of `build.sh`.) -/
+theorem wordReach_mono {G G' : List (Equiv.Perm (Fin n))} (hsub : ∀ g ∈ G, g ∈ G')
+    {u w : Fin n} (h : WordReach G u w) : WordReach G' u w := by
+  induction h with
+  | refl => exact Consume.WordReach.refl _
+  | step _ hg ih => exact ih.step (hsub _ hg)
+
+theorem mem_verified_appendSupply_left {S₁ S₂ : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    {g : Equiv.Perm (Fin n)} (h : g ∈ verified S₁ adj χ) :
+    g ∈ verified (Deck.appendSupply S₁ S₂) adj χ := by
+  simp only [Consume.verified, List.mem_filter] at h ⊢
+  exact ⟨Deck.mem_gens_appendSupply_iff.mpr (Or.inl h.1), h.2⟩
+
+theorem mem_verified_appendSupply_right {S₁ S₂ : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    {g : Equiv.Perm (Fin n)} (h : g ∈ verified S₂ adj χ) :
+    g ∈ verified (Deck.appendSupply S₁ S₂) adj χ := by
+  simp only [Consume.verified, List.mem_filter] at h ⊢
+  exact ⟨Deck.mem_gens_appendSupply_iff.mpr (Or.inr h.1), h.2⟩
+
+theorem cellIsOrbit_append_left {S₁ S₂ : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CellIsOrbit S₁ adj χ) : CellIsOrbit (Deck.appendSupply S₁ S₂) adj χ :=
+  fun u hu w hw => wordReach_mono (fun _ hg => mem_verified_appendSupply_left hg) (h u hu w hw)
+
+theorem cellIsOrbit_append_right {S₁ S₂ : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CellIsOrbit S₂ adj χ) : CellIsOrbit (Deck.appendSupply S₁ S₂) adj χ :=
+  fun u hu w hw => wordReach_mono (fun _ hg => mem_verified_appendSupply_right hg) (h u hu w hw)
+
+/-- **★ THE GUARD ONLY GROWS.** Anything one member certifies, the union certifies. Proved through the
+§5 equation lemmas — never by unfolding `CertPath` in place. -/
+theorem certPath_append_left (S₁ S₂ : Supply n) (adj : AdjMatrix n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n),
+      CertPath S₁ adj fuel cur → CertPath (Deck.appendSupply S₁ S₂) adj fuel cur := by
+  intro fuel
+  induction fuel with
+  | zero => intro _ _; trivial
+  | succ fuel ih =>
+      intro cur h
+      cases hco : chooseIdK (List.finRange n) cur.col with
+      | none => exact (certPath_none hco).mpr trivial
+      | some cid =>
+          cases hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
+          | nil =>
+              obtain ⟨hcell, _⟩ := (certPath_nil hco hfl).mp h
+              exact (certPath_nil hco hfl).mpr ⟨cellIsOrbit_append_left hcell, trivial⟩
+          | cons w rest =>
+              obtain ⟨hcell, htail⟩ := (certPath_cons hco hfl).mp h
+              exact (certPath_cons hco hfl).mpr ⟨cellIsOrbit_append_left hcell, ih _ htail⟩
+
+theorem certPath_append_right (S₁ S₂ : Supply n) (adj : AdjMatrix n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n),
+      CertPath S₂ adj fuel cur → CertPath (Deck.appendSupply S₁ S₂) adj fuel cur := by
+  intro fuel
+  induction fuel with
+  | zero => intro _ _; trivial
+  | succ fuel ih =>
+      intro cur h
+      cases hco : chooseIdK (List.finRange n) cur.col with
+      | none => exact (certPath_none hco).mpr trivial
+      | some cid =>
+          cases hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
+          | nil =>
+              obtain ⟨hcell, _⟩ := (certPath_nil hco hfl).mp h
+              exact (certPath_nil hco hfl).mpr ⟨cellIsOrbit_append_right hcell, trivial⟩
+          | cons w rest =>
+              obtain ⟨hcell, htail⟩ := (certPath_cons hco hfl).mp h
+              exact (certPath_cons hco hfl).mpr ⟨cellIsOrbit_append_right hcell, ih _ htail⟩
+
+theorem certifiedG_append_left {S₁ S₂ : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CertifiedG S₁ adj χ) : CertifiedG (Deck.appendSupply S₁ S₂) adj χ :=
+  fun r hr => certPath_append_left S₁ S₂ adj n _ (h r hr)
+
+theorem certifiedG_append_right {S₁ S₂ : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CertifiedG S₂ adj χ) : CertifiedG (Deck.appendSupply S₁ S₂) adj χ :=
+  fun r hr => certPath_append_right S₁ S₂ adj n _ (h r hr)
+
+/-! ### 8a. `guardSupply` — all four equivariant supplies at once
+
+`kernelSupply` is deliberately absent: it is provably **not** `GensEquivariant` (its Gaussian basis is
+pivot-order dependent, trap #7), so it cannot serve in a guard whose whole job is to keep the `if`
+relabelling-stable. It remains available to *fire*, which needs no invariance. -/
+
+def guardSupply : Supply n :=
+  Deck.appendSupply (Fold.foldSupplyFast (n := n))
+    (Deck.appendSupply (Deck.deckSupply (n := n))
+      (Deck.appendSupply (Deck2.deck2Supply (n := n)) (Consume.matchSupply (n := n))))
+
+theorem gensEquivariant_guardSupply :
+    ChainDescent.SupplyTransport.GensEquivariant (guardSupply (n := n)) :=
+  Deck.gensEquivariant_appendSupply Fold.gensEquivariant_foldSupplyFast
+    (Deck.gensEquivariant_appendSupply Deck.gensEquivariant_deckSupply
+      (Deck.gensEquivariant_appendSupply Deck2.gensEquivariant_deck2Supply
+        ChainDescent.SupplyTransport.gensEquivariant_matchSupply))
+
+theorem supplyEquivariant_guardSupply : SupplyEquivariant (guardSupply (n := n)) :=
+  ChainDescent.SupplyTransport.supplyEquivariant_of_gensEquivariant gensEquivariant_guardSupply
+
+/-- **★★★ `①` FOR THE UNION-GUARDED KEY** — no hypothesis, exactly as for the single-supply guards. -/
+theorem keyEquivariant_orbKeyG_guard :
+    Force.KeyEquivariant (orbKeyG (guardSupply (n := n))) :=
+  keyEquivariant_orbKeyG supplyEquivariant_guardSupply
+
+/-- **★★★ THE UNION-GUARDED FORCE CANONIZER** — `①a`/`①b`/`①c` + totality, no hypothesis. -/
+theorem force_canonizer_orbKeyG_guard :
+    CanonSpec.IsCanonicalFormOpt
+        (Descend.canonForm? (Refine.encodeFree (n := n))
+          (Force.forceBy (orbKeyG (guardSupply (n := n)))))
+    ∧ ∀ adj : AdjMatrix n,
+        Descend.canonForm? (Refine.encodeFree (n := n))
+          (Force.forceBy (orbKeyG (guardSupply (n := n)))) adj ≠ none :=
+  Force.force_canonizer keyEquivariant_orbKeyG_guard
+
+/-! ### 8b. The union dominates every member — firing, not just soundness -/
+
+theorem certifiedG_guard_of_foldFast {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CertifiedG (Fold.foldSupplyFast (n := n)) adj χ) : CertifiedG (guardSupply (n := n)) adj χ :=
+  certifiedG_append_left h
+
+theorem certifiedG_guard_of_deck {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CertifiedG (Deck.deckSupply (n := n)) adj χ) : CertifiedG (guardSupply (n := n)) adj χ :=
+  certifiedG_append_right (certifiedG_append_left h)
+
+theorem certifiedG_guard_of_deck2 {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CertifiedG (Deck2.deck2Supply (n := n)) adj χ) : CertifiedG (guardSupply (n := n)) adj χ :=
+  certifiedG_append_right (certifiedG_append_right (certifiedG_append_left h))
+
+theorem certifiedG_guard_of_match {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CertifiedG (Consume.matchSupply (n := n)) adj χ) : CertifiedG (guardSupply (n := n)) adj χ :=
+  certifiedG_append_right (certifiedG_append_right (certifiedG_append_right h))
+
 end Deepen
 end ChainDescent

@@ -589,27 +589,29 @@ proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a dif
    `WordReach` on the forced set, and `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23) already
    supplies it at an `Amenable` node. `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` is
    the generalized brick; `nodeResolved_of_amenable` is the payoff.
-3. **Entry into `Publication.canonForm?`** waits on a *decision procedure* for `CellIsOrbit S` —
-   `DeepenGuard` registers a `Classical.dec` instance so the parametric development elaborates.
-   ⚠ **Smaller than billed:** `Consume.orbit` is a computable BFS and `Consume.mem_orbit_iff_wordReach`
+3. ~~**Entry into `Publication.canonForm?`** waits on a decision procedure for `CellIsOrbit S`.~~
+   **✅ DONE (§10.5)** — and it was **smaller than billed:** `Consume.orbit` is a computable BFS and `Consume.mem_orbit_iff_wordReach`
    is proved, so `Decidable (WordReach G u w)` is one `decidable_of_iff`, `CellIsOrbit` follows by
    `List.decidableBAll`, and `CertPath` by structural recursion. `leafOf`/`readKey`/`readAt` are already
-   computable defs — **only the guard was placeholdered**, so `orbKeyG S` becomes computable outright.
-   (`orbKey` cannot and should stay the theory-side object: its `AmenablePath` guard is an `n!` search.)
-4. **Guard strength.** Raise the measured firing rate by taking `S` deeper, or as the union of the five
-   equivariant supplies (a union of equivariant supplies is equivariant). ⚠ **The lever is probably not
-   depth.** The strongest available certifier is `deepenSupply` itself — *exactly* complete at
+   computable defs — **only the guard was placeholdered**, so `orbKeyG S` is now computable outright
+   (`Consume.decidableWordReach` → `decidableCellIsOrbit` → `Deepen.instDecidableCertPath`).
+   (`orbKey` cannot and stays the theory-side object: its `AmenablePath` guard is an `n!` search.)
+   ▶ What still gates `Publication` is the **record-object integration**, item 7.
+4. ~~**Guard strength.**~~ **✅ DONE (§10.6)** — the union, `Deepen.guardSupply`. ⚠ **The lever was not
+   depth**, as this item originally guessed. The strongest available certifier is `deepenSupply` itself — *exactly* complete at
    `Amenable` nodes by `deepen_branch_orbit_iff_aut` — and it is excluded only because it is not
    `GensEquivariant`. That is the problem `kernelSupply` solved via `OrbitPrune.SameOrbits` against an
    equivariant reference, and the congruence machinery exists (`SelectNode.cellNarrow_congr`,
    `handledS_of_sameOrbits`). Guarding by `S` with `SameOrbits S Ref` for equivariant `Ref` looks
    strictly better than depth. **Untried.**
-5. **`②` is declarative at both keys.** `keyCost (orbKeyG S) = n⁴` holds *by definition*, and the guard
+5. ~~**`②` is declarative at both keys.**~~ **✅ DONE (§10.5)** — `certPathCost` + `keyCost_orbKeyG_le`.
+   The original diagnosis, kept because it is the reason the fix was needed: `keyCost (orbKeyG S) = n⁴`
+   held *by definition*, and the guard
    is currently not computable at all, so the bill prices nothing — the same shape as the 2026-07-14
    "costs are now honest" finding. `SupplyCost` already has the pattern (`keyCost_lookaheadKey_le`).
    remaining-work §1T's recorded debt ("`deepenSupply` has NO formalized cost bound") now extends to
    both keys, and it is the **same work as item 3** — pay them together.
-6. **`DescentReach ⟹ Descend.Reaches` is missing.** `HandledS` quantifies over `Descend.Reaches`; D1
+6. ~~**`DescentReach ⟹ Descend.Reaches` is missing.**~~ **✅ DONE (§10.5)** — `reaches_of_descentReach`. `HandledS` quantifies over `Descend.Reaches`; D1
    delivers `DescentReach`. `Descend.Reaches.step` carries *exactly* `DescentReach.cons`'s side
    condition and `step` is `refineV encodeFreeFast ∘ indivOne`, so this is near-definitional — but
    without it D1's `ψ` is not formally a node the canonizer visits.
@@ -617,7 +619,7 @@ proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a dif
    `orbKey*` and no rigid-seal key appears. `force_canonizer_orbKeyG_deck2` is `①` for a **force-only**
    canonizer — a different object. Integration needs a key composition (`RigidSeal.compKey`'s
    disjoint-tag pattern is the template) plus a re-proof of `canonForm?_record`.
-8. **No Lean `#guard` for either key.** All firing evidence is Python probes; the project's own vacuity
+8. ~~**No Lean `#guard` for either key.**~~ **✅ DONE** — `Regression` §17/§17a. All firing evidence is Python probes; the project's own vacuity
    discipline asks for a `#guard`ed witness in the same pass. Once item 3 lands, `orbKeyG` is
    `#eval`-able and §2.5's 147/147 can be ported into `Regression`.
 
@@ -959,3 +961,47 @@ The key is now `#guard`-able, so the firing evidence is no longer Python-only. T
   at every branch (cost 13125 each) and **fails** under `deck2Supply` at branch 0. ⟹ §7.3 item 4's
   "take `S` deeper" is the wrong lever; the **union** of the equivariant supplies is the right one, and
   this is measured rather than argued. (`SameOrbits`-licensing remains the other candidate.)
+
+---
+
+### 10.6 ✅ LANDED — guard strength: the union, and why it is more than a maximum (`DeepenGuard` §8)
+
+**Monotonicity, proved.** More verified generators only make `WordReach` easier, hence `CellIsOrbit`,
+hence `CertPath`: `wordReach_mono` → `cellIsOrbit_append_{left,right}` →
+**`certPath_append_{left,right}`** → `certifiedG_append_{left,right}`. So a bigger guard admits more
+nodes **without weakening what admission means** — `CertPath S ⟹ AmenablePath` holds for every `S`, so
+`①` and soundness are untouched.
+
+**`guardSupply`** = `foldSupplyFast ++ deckSupply ++ deck2Supply ++ matchSupply`, with
+`gensEquivariant_guardSupply` / `supplyEquivariant_guardSupply` from the existing `appendSupply`
+closure, hence **`keyEquivariant_orbKeyG_guard`** and **`force_canonizer_orbKeyG_guard`** (`①a`/`①b`/
+`①c` + totality, no hypothesis). `certifiedG_guard_of_{foldFast,deck,deck2,match}` give firing
+dominance over each member. ⚠ `kernelSupply` is deliberately excluded: it is provably **not**
+`GensEquivariant` (pivot-order-dependent basis, trap #7), so it cannot sit in a guard whose whole job
+is to keep the `if` relabelling-stable. It remains available to *fire*, which needs no invariance.
+
+#### ★★ MEASURED — the union is STRICTLY stronger, and the gain is EMERGENT (`Regression` §17a)
+
+> `CertPath` is a **conjunction over the levels of one greedy path**, and different supplies certify
+> different levels. So the union can certify a path **no single member certifies.**
+
+| witness | foldFast | deck | deck2 | match | **union** |
+|---|---|---|---|---|---|
+| `C5` (5 branches) | — | OPEN 5/5 | **shut 0/5** | — | **OPEN 5/5** |
+| **`t3` (3 branches)** | **shut** | **shut** | **shut** | **shut** | **✅ OPEN 3/3** |
+
+`t3` is the headline: **all four equivariant supplies are shut on every branch and the union is open on
+every branch** — 0/3 → 3/3 on a witness where every individual supply fails. This is not a maximum over
+the members, and no theorem states it (`certPath_append_*` gives monotonicity, not strictness), which is
+exactly why it is a `#guard`.
+
+⚠ **The price is real and now visible** — which is what the billed `certPathCost` was for. On `t3` the
+union bills `1385216550` against `deckSupply`'s `6176250`, a ~**224×** multiple, because the union's
+`supplyCost` is the **sum** of its members'. Under the old flat `n⁴` this trade would have been
+invisible. Firing bought at an honest price.
+
+**▶ Remaining on guard strength:** `SameOrbits`-licensing (guard by a non-equivariant `S` with
+`SameOrbits S Ref` for an equivariant `Ref` — the `kernelSupply` pattern) is the other candidate and is
+still untried; it is the only route that could admit `deepenSupply` itself, which
+`deepen_branch_orbit_iff_aut` shows is *exactly* complete at `Amenable` nodes. ⚠ But note §10.2's
+correction: the guard buys **equivariance**, so coverage work should target that side.

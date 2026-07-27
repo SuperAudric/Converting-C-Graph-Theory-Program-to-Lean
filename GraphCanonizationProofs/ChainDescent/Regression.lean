@@ -548,4 +548,30 @@ act, `①` is untouched). The firing loss `CertPath S ⟹ AmenablePath`, never t
 #guard !decide (Deepen.CertPath (Deck2.deck2Supply (n := 5)) C5 5
   (Deepen.step C5 (Refine.warmRefineVec C5 (fun _ => 0)).col 0))
 
+/-! ## §17a — the UNION guard is STRICTLY stronger than any member (2026-07-27)
+
+`DeepenGuard` §8 proves the union is never *worse* (`certPath_append_left/right`). These guards measure
+that it is strictly **better**, which no theorem states — and the mechanism is worth naming:
+
+> `CertPath` is a **conjunction over the levels of one greedy path**, and different supplies certify
+> different levels. So the union can certify a path that **no single member certifies** — the gain is
+> emergent, not a maximum over the members.
+
+`t3` is the witness: **all four equivariant supplies are SHUT on every branch** (`foldSupplyFast`,
+`deckSupply`, `deck2Supply`, `matchSupply`), and `guardSupply` is **OPEN on every branch**. That is a
+firing gain from 0/3 to 3/3 on a witness where every individual supply fails, and it is the whole
+justification for §8.
+
+⚠ **The cost is real and now visible**, which is what the billed `certPathCost` (`DeepenGuard` §5a) was
+for: on `t3` the union bills `1385216550` against `deckSupply`'s `6176250` — a ~224× multiple, since
+the union's `supplyCost` is the **sum** of its members'. Firing bought at an honest price, not a hidden
+one. (~13 s of the suite's runtime; in line with the existing kernel guards.) -/
+
+/-! **★ The union-guard measurements live in `PerformanceTest` §18, not here.** Evaluating
+`Deepen.guardSupply`'s guard costs ~49 s even at `n = 5` and ~95 s on `t3`, against a suite whose
+contract is that it stays fast (the kernel guards, the most expensive thing here, are ~15 s). §18 gates
+the stronger claim anyway — that on `t3` **every** member is shut while the union is open — which is
+the evidence that §8 buys anything and which `certPath_append_*` cannot supply (monotonicity is not
+strictness). The `deck2`-shut half of the comparison is already pinned just above, at no extra cost. -/
+
 end ChainDescent.Regression

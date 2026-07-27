@@ -540,4 +540,51 @@ def mpDeepenGens : List (Equiv.Perm (Fin 42)) :=
 #guard (orbitOf (mpKernelGens ++ mpDeepenGens) (mk42 14)).length = 28
 #guard (orbitOf (mpKernelGens ++ mpDeepenGens) (mk42 0)).length = 14
 
+/-! ## §18 — the UNION guard is STRICTLY stronger than any member (2026-07-27)
+
+`DeepenGuard` §8 proves the union is never *worse* (`certPath_append_left/right`). This measures that
+it is strictly **better**, which no theorem states — and names the mechanism:
+
+> `CertPath` is a **conjunction over the levels of one greedy path**, and different supplies certify
+> different levels. So the union can certify a path that **no single member certifies** — the gain is
+> emergent, not a maximum over the members.
+
+`t3` is the witness: all four equivariant supplies are SHUT on every branch, `guardSupply` is OPEN on
+every branch — firing 0/3 → 3/3 where every individual supply fails. This is the entire justification
+for §8, and `certPath_append_*` cannot supply it (monotonicity is not strictness).
+
+⚠ **The price is real and visible**, which is what the billed `certPathCost` (`DeepenGuard` §5a) is
+for: the union bills `1385216550` here against `deckSupply`'s `6176250`, a ~224× multiple, because the
+union's `supplyCost` is the **sum** of its members'. Under the old flat `n⁴` the trade was invisible.
+
+⚠ Cost note: this lives here rather than in `Regression` precisely because of that — the regression
+suite's contract is that it stays fast, and evaluating the union's guard is not cheap even at `n = 5`
+(~49 s there, ~95 s here). `Regression` §17a keeps only the free half of the comparison: that
+`deck2Supply` alone is shut on `C5`. -/
+
+#guard (Descend.branches Regression.t3Root.col).all (fun v =>
+  !decide (Deepen.CertPath (Fold.foldSupplyFast (n := 15)) Regression.t3 15
+      (Deepen.step Regression.t3 Regression.t3Root.col v))
+  && !decide (Deepen.CertPath (Deck.deckSupply (n := 15)) Regression.t3 15
+      (Deepen.step Regression.t3 Regression.t3Root.col v))
+  && !decide (Deepen.CertPath (Deck2.deck2Supply (n := 15)) Regression.t3 15
+      (Deepen.step Regression.t3 Regression.t3Root.col v))
+  && !decide (Deepen.CertPath (Consume.matchSupply (n := 15)) Regression.t3 15
+      (Deepen.step Regression.t3 Regression.t3Root.col v)))
+
+#guard (Descend.branches Regression.t3Root.col).all (fun v =>
+  decide (Deepen.CertPath (Deepen.guardSupply (n := 15)) Regression.t3 15
+      (Deepen.step Regression.t3 Regression.t3Root.col v)))
+
+/-! The smaller `C5` instance of the same phenomenon: `deck2Supply` shut on every branch, the union
+open and **substantive** (`certPathCost > 0`, so not the AKRV-vacuous case) on every branch. -/
+#guard (Descend.branches (Refine.warmRefineVec Regression.C5 (fun _ => 0)).col).all (fun v =>
+  !decide (Deepen.CertPath (Deck2.deck2Supply (n := 5)) Regression.C5 5
+      (Deepen.step Regression.C5 (Refine.warmRefineVec Regression.C5 (fun _ => 0)).col v)))
+#guard (Descend.branches (Refine.warmRefineVec Regression.C5 (fun _ => 0)).col).all (fun v =>
+  decide (Deepen.CertPath (Deepen.guardSupply (n := 5)) Regression.C5 5
+      (Deepen.step Regression.C5 (Refine.warmRefineVec Regression.C5 (fun _ => 0)).col v))
+  && (0 < Deepen.certPathCost (Deepen.guardSupply (n := 5)) Regression.C5 5
+      (Deepen.step Regression.C5 (Refine.warmRefineVec Regression.C5 (fun _ => 0)).col v)))
+
 end ChainDescent.Perf

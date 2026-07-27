@@ -4328,7 +4328,7 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.deepen_mem_deepenAll` | 105-134 | — | — |
 | `Deepen.replay_mem_replayAll` | 136-156 | — | — |
 | `Deepen.deepenGens_subset_ref` | 160-200 | — | — |
-| `Deepen.wordReach_mono` | 204-209 | — | — |
+| `Deepen.wordReach_mono` | 204-209 | More generators only make word-reachability easier. (`DeepenRef` has this lemma but is parked out of `build.sh`, so it is re-proved here.) | — |
 | `Deepen.verified_deepen_subset_ref` | 211-217 | — | — |
 | `Deepen.wordReach_ref_of_deepen` | 219-226 | — | — |
 
@@ -4809,6 +4809,23 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.keyEquivariant_orbKeyG_deck` | 484-486 | Non-vacuity: instantiated at `deckSupply`. | — |
 | `Deepen.force_canonizer_orbKeyG_deck2` | 488-498 | ★★★ THE POLY-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` plus totality for the `deck2`-guarded key, with NO hypothesis at all. | — |
 
+| `Deepen.mem_verified_appendSupply_left` | 523-527 | A verified generator of `S₁` is a verified generator of `S₁ ++ S₂`. | — |
+| `Deepen.mem_verified_appendSupply_right` | 529-533 | A verified generator of `S₂` is a verified generator of `S₁ ++ S₂`. | — |
+| `Deepen.cellIsOrbit_append_left` | 535-537 | `CellIsOrbit` grows under `appendSupply` (left). | — |
+| `Deepen.cellIsOrbit_append_right` | 539-541 | `CellIsOrbit` grows under `appendSupply` (right). | — |
+| `Deepen.certPath_append_left` | 543-562 | ★ THE GUARD ONLY GROWS: anything `S₁` certifies, `S₁ ++ S₂` certifies. Proved through the §5 equation lemmas, never by unfolding `CertPath` in place. ⚠ Monotonicity, NOT strictness — that the union is *strictly* stronger is measured (`PerformanceTest` §18), not proved. | — |
+| `Deepen.certPath_append_right` | 564-581 | The same, from the right summand. | — |
+| `Deepen.certifiedG_append_left` | 583-585 | `CertifiedG` grows under `appendSupply` (left) — the node-level form. | — |
+| `Deepen.certifiedG_append_right` | 587-589 | `CertifiedG` grows under `appendSupply` (right). | — |
+| `Deepen.guardSupply` | 597-600 | ★★ THE UNION GUARD: `foldSupplyFast ++ deckSupply ++ deck2Supply ++ matchSupply`. ⚠ `kernelSupply` is deliberately EXCLUDED — it is provably not `GensEquivariant` (pivot-order-dependent basis, trap #7), so it cannot sit in a guard whose job is keeping the `if` relabelling-stable; it remains available to FIRE, which needs no invariance. | Definition |
+| `Deepen.gensEquivariant_guardSupply` | 602-607 | The union is `GensEquivariant`, from the existing `Deck.gensEquivariant_appendSupply` closure. | — |
+| `Deepen.supplyEquivariant_guardSupply` | 609-610 | Hence `SupplyEquivariant` — the only thing `keyEquivariant_orbKeyG` asks for. | — |
+| `Deepen.keyEquivariant_orbKeyG_guard` | 612-615 | ★★★ `①` FOR THE UNION-GUARDED KEY — no hypothesis, exactly as for the single-supply guards. | — |
+| `Deepen.force_canonizer_orbKeyG_guard` | 617-625 | ★★★ THE UNION-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` + totality, no hypothesis. The strongest executable force key in the record: poly guard, poly read, billed cost. | — |
+| `Deepen.certifiedG_guard_of_foldFast` | 629-631 | Firing dominance: whatever `foldSupplyFast` certifies, the union certifies. | — |
+| `Deepen.certifiedG_guard_of_deck` | 633-635 | Firing dominance over `deckSupply`. | — |
+| `Deepen.certifiedG_guard_of_deck2` | 637-639 | Firing dominance over `deck2Supply`. | — |
+| `Deepen.certifiedG_guard_of_match` | 641-643 | Firing dominance over `Consume.matchSupply`. | — |
 ## ChainDescent/DeepenKey.lean
 
 | Name | Line | Description | Notes |
