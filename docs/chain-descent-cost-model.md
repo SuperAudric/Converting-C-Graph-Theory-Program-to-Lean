@@ -362,7 +362,7 @@ The cost model is thus the instrument that decides, per family, "handled at poly
 > a force resolver acts on, so the predicate is FALSE there and the licence never fires. The separate
 > 2026-07-10 vacuity failure (`ConfinementCitations.hflag` uninhabited) does **not** transfer; that was a
 > universally-quantified citation bundle. **⚠ But read §10.2/§10.4 before scoping it as a weakening — it
-> is a UNIFICATION** (consume's `Amenable` absorbed into force's separation obligation, two carried
+> is a UNIFICATION** (consume's `Tinhofer` absorbed into force's separation obligation, two carried
 > predicates → one), and the 2026-07-10 audit's FORK still applies: the antecedent is informative only
 > when non-separation means *"none exists"* rather than *"the key deferred"*.
 

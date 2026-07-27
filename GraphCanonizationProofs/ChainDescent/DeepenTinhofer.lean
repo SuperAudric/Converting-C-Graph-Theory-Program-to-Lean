@@ -4,9 +4,9 @@ import ChainDescent.Composite
 import ChainDescent.OrbitPrune
 
 /-!
-# `C3b` — `deepenSupply`'s `①c`, CLOSED modulo `{Amenable}` ONLY (track A, 2026-07-23)
+# `C3b` — `deepenSupply`'s `①c`, CLOSED modulo `{Tinhofer}` ONLY (track A, 2026-07-23)
 
-**The capstone `deepenSupply_guarded_canonizer_direct` takes ONLY `hAmen : ∀ adj χ, Amenable adj χ`** —
+**The capstone `deepenSupply_guarded_canonizer_direct` takes ONLY `hAmen : ∀ adj χ, Tinhofer adj χ`** —
 no reference, no R1/R2, no `AnchorFires`. This is the track-A close: `deepen` (in `DeepenSupply`) now
 individualizes to **whole-graph** discreteness, which makes `[DISC]` (the leaf being discrete)
 STRUCTURAL, so the old `AnchorFires` firing bundle (deepen-succeeds + gate + discrete-leaf) is now three
@@ -16,15 +16,15 @@ theorems here — `deepen_succeeds` (termination, `ncol` colour-count measure), 
 The engine (unchanged by track A): the **re-relating induction `joint`** — the deepen-from-`a` and
 replay-from-`b` descents (`a ~ b` via `σ ∈ Aut`) stay related by an automorphism `σₖ` with
 `ψ_b^(k) = transportColouring σₖ ψ_a^(k)`; per level `chooseIdK` picks the same id (`chooseIdK_transport`),
-the cell being a single `Stab`-orbit (= `Amenable`) yields `τ ∈ Stab` fixing the lowest-index mismatch,
+the cell being a single `Stab`-orbit (= `Tinhofer`) yields `τ ∈ Stab` fixing the lowest-index mismatch,
 and `σₖ₊₁ := τ σₖ` re-establishes the invariant. At (whole-graph) discreteness the leaves are `σ`-related,
 so `twistOf`'s colour-match IS `σ` on `K` (off-`K` is inert by discreteness, `offCoupled_singleton`), the
 exec twist verifies, and `exec_recovers_cell_orbits` reaches `b`. Then `deepen_branch_orbit_iff_aut` (deepen
 branch-orbits = `IsColAut`-orbits) ⟹ `deepen_branchOrbit_transport` ⟹ `①c` via `guarded_mixed_canonizer`.
 
-**`Amenable` is the sole condition, and it IS `CellsAreOrbits`** (`CascadeOracle`): free at discreteness,
+**`Tinhofer` is the sole condition, and it IS `CellsAreOrbits`** (`CascadeOracle`): free at discreteness,
 its failure an *exposed* rigid decision (`rigidObstruction_of_not_cellSingleOrbit`,
-`not_amenablePath_imp_rigidObstruction`) — the handoff to the RIGID SEAL (`docs/chain-descent-rigid-seal.md`),
+`not_tinhoferPath_imp_rigidObstruction`) — the handoff to the RIGID SEAL (`docs/chain-descent-rigid-seal.md`),
 which discharges it per family. **This file no longer imports/uses `DeepenRef`/`DeepenRefTransport`/`DeepenR1`**
 (the discarded reference route; parked out of `build.sh`).
 -/
@@ -70,7 +70,7 @@ theorem step_isColAut {adj : AdjMatrix n} {χ : Colouring n} {σ : Equiv.Perm (F
 
 /-- **★ THE RE-RELATING STEP — the induction invariant is maintained across one level.** The two
 descents are `σ`-related (`ψ_b = transportColouring σ ψ_a`, `relabelAdj σ adj = adj`); at this level the
-`b`-descent individualizes `u_b = τ(σ u_a)` where `τ ∈ Stab(ψ_b)` is the automorphism `Amenable` supplies
+`b`-descent individualizes `u_b = τ(σ u_a)` where `τ ∈ Stab(ψ_b)` is the automorphism `Tinhofer` supplies
 to absorb the lowest-index mismatch (`τ` maps `σ`'s image of `a`'s pick onto `b`'s pick, both in the same
 single-orbit cell). Then the next colourings are `(τσ)`-related. This is the whole engine of Layer 1;
 what remains is threading it through `deepen`/`replay`'s fuel recursion and the `deepenRefGens` plumbing. -/
@@ -126,7 +126,7 @@ theorem cidCell_length_transport (σ : Equiv.Perm (Fin n)) (χc : Colouring n) (
 
 /-! ## 1c. Refinement monotonicity — piece 1 of the fuel induction
 
-The `τ` that `Amenable` supplies stabilizes the CURRENT colouring `ψ` (a refinement of the parent `χ`).
+The `τ` that `Tinhofer` supplies stabilizes the CURRENT colouring `ψ` (a refinement of the parent `χ`).
 For the joint induction's invariant `σ' ∈ IsColAut adj χ` to survive `σ' ↦ τσ'`, that `τ` must also
 stabilize the PARENT. It does, because a step only ever refines: `ψ x = ψ y ⟹ χ x = χ y`, and `IsColAut`'s
 colour clause is `∀ v, χ (α v) = χ v`, so refinement transfers stabilization down to any coarsening. -/
@@ -184,9 +184,9 @@ theorem step_indiv_singleton (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) 
   by_contra hne
   exact absurd hi (Descend.indivOne_singleton χ v u hne)
 
-/-! ## 2. `Amenable`, the rigid obstruction, and the G2 attribution
+/-! ## 2. `Tinhofer`, the rigid obstruction, and the G2 attribution
 
-`Amenable` is the domain hypothesis of Layer 1: every level of the canonical deepening individualizes a
+`Tinhofer` is the domain hypothesis of Layer 1: every level of the canonical deepening individualizes a
 cell that is a single orbit of the pointwise-stabilizer of the vertices fixed so far. Its NEGATION at a
 cell is precisely a **rigid (non-symmetric) obstruction** — two same-colour vertices that no stabilizer
 automorphism links. That is the **G2 attribution** the user asked for: we do not prove the path avoids
@@ -194,7 +194,7 @@ rigid cells (a final objective), we prove that a `CellSingleOrbit` FAILURE *is* 
 any ①c failure is attributable to the rigid side (force/rigid-solver's domain) at this stage. -/
 
 /-- A colour class (`χc`-colour `cid`) is a **single orbit** of the stabilizer `IsColAut adj χc` — the
-per-level requirement of `Amenable`. -/
+per-level requirement of `Tinhofer`. -/
 def CellSingleOrbit (adj : AdjMatrix n) (χc : Colouring n) (cid : Nat) : Prop :=
   ∀ u w : Fin n, χc u = cid → χc w = cid → ∃ σ, IsColAut adj χc σ ∧ σ u = w
 
@@ -205,7 +205,7 @@ def RigidObstructionAt (adj : AdjMatrix n) (χc : Colouring n) (cid : Nat) : Pro
   ∃ u w : Fin n, χc u = cid ∧ χc w = cid ∧ ∀ σ, IsColAut adj χc σ → σ u ≠ w
 
 /-- **★ THE G2 ATTRIBUTION (cell level).** A `CellSingleOrbit` failure *is* a rigid obstruction — the
-negation is definitional (de Morgan). So an `Amenable` violation is never a mystery: it localises to a
+negation is definitional (de Morgan). So an `Tinhofer` violation is never a mystery: it localises to a
 same-colour non-automorphic pair = the rigid side's responsibility. -/
 theorem rigidObstruction_of_not_cellSingleOrbit (adj : AdjMatrix n) (χc : Colouring n) (cid : Nat)
     (h : ¬ CellSingleOrbit adj χc cid) : RigidObstructionAt adj χc cid := by
@@ -214,9 +214,9 @@ theorem rigidObstruction_of_not_cellSingleOrbit (adj : AdjMatrix n) (χc : Colou
   obtain ⟨u, w, hu, hw, hσ⟩ := h
   exact ⟨u, w, hu, hw, hσ⟩
 
-/-- **`Amenable` along one anchor's deepening path.** Every level that individualizes a cell (`chooseIdK
+/-- **`Tinhofer` along one anchor's deepening path.** Every level that individualizes a cell (`chooseIdK
 = some cid`) requires that cell to be a single stabilizer-orbit. Mirrors `deepen`'s recursion exactly. -/
-def AmenablePath (adj : AdjMatrix n) (χp : Colouring n) :
+def TinhoferPath (adj : AdjMatrix n) (χp : Colouring n) :
     Nat → Refine.ColData n → Prop
   | 0, _ => True
   | fuel + 1, cur =>
@@ -227,17 +227,17 @@ def AmenablePath (adj : AdjMatrix n) (χp : Colouring n) :
             CellSingleOrbit adj χc cid ∧
             (match (List.finRange n).filter (fun v => χc v == cid) with
              | [] => True
-             | w :: _ => AmenablePath adj χp fuel (step adj χc w))
+             | w :: _ => TinhoferPath adj χp fuel (step adj χc w))
 
-/-- **`Amenable`** — the Layer-1 domain hypothesis: every anchor's canonical deepening individualizes
-only single-orbit cells. `Amenable ⟹ R1` is the re-relating induction (Layer 1, on `step_aut`); its
+/-- **`Tinhofer`** — the Layer-1 domain hypothesis: every anchor's canonical deepening individualizes
+only single-orbit cells. `Tinhofer ⟹ R1` is the re-relating induction (Layer 1, on `step_aut`); its
 complement is a rigid obstruction (`rigidObstruction_of_not_cellSingleOrbit`). -/
-def Amenable (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
-  ∀ r ∈ Descend.branches χ, AmenablePath adj χ n (step adj χ r)
+def Tinhofer (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ r ∈ Descend.branches χ, TinhoferPath adj χ n (step adj χ r)
 
 /-- **★ `CellSingleOrbit` TRANSPORTS under an automorphism (piece 2a).** `b`'s id-cell is the σ-image
 of `a`'s and its stabilizer is the σ-conjugate, so a single orbit stays a single orbit. This is why
-`Amenable` (stated about the `a`-descent) delivers the `τ ∈ Stab(cur_b.col)` the re-relating step needs
+`Tinhofer` (stated about the `a`-descent) delivers the `τ ∈ Stab(cur_b.col)` the re-relating step needs
 on the `b`-descent. Uses `Consume.isColAut_conj_iff` (the verification check conjugates). -/
 theorem cellSingleOrbit_transport {adj : AdjMatrix n} {χc : Colouring n} {σ : Equiv.Perm (Fin n)}
     (hσ : relabelAdj σ adj = adj) {cid : Nat} (h : CellSingleOrbit adj χc cid) :
@@ -317,12 +317,12 @@ theorem chooseIdK_mem (K : List (Fin n)) (χc : Colouring n) {cid : Nat}
       unfold cidCell classOf; congr 1; funext u; rw [hvc]
     rw [hcell]; exact hlen
 
-/-- **★★ b2 — THE JOINT RE-RELATING INDUCTION (canonical paths).** Under `Amenable`, the canonical
+/-- **★★ b2 — THE JOINT RE-RELATING INDUCTION (canonical paths).** Under `Tinhofer`, the canonical
 `deepen`-from-`a` and canonical `replay`-from-`b` (with `b`-state the `σ`-transport of `a`-state, `σ` a
 parent-automorphism) reach leaves related by an automorphism `σ'` via the WHOLE-COLOURING transport
 equation. So the emitted twist is a genuine graph-automorphism on all of `K` (K-coverage is subsumed —
 the relation is over every vertex, validated 2026-07-22). Each level: `chooseIdK_mem`+
-`cidCell_length_transport` pass replay's `≥2` guard; `cellSingleOrbit_transport`+`Amenable` supply
+`cidCell_length_transport` pass replay's `≥2` guard; `cellSingleOrbit_transport`+`Tinhofer` supply
 `τ ∈ Stab(cur_b.col)` absorbing the pick mismatch; `step_rerelate` carries the invariant; `step_refines`+
 `isColAut_parent_of_refines` keep `τσ` in the parent-stabilizer. -/
 theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
@@ -332,7 +332,7 @@ theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
       (∀ x y, cur_a.col x = cur_a.col y → χp x = χp y) →
       (∀ x y, cur_b.col x = cur_b.col y → χp x = χp y) →
       (∀ u, cur_b.col u = cur_b.col (σ a₀) → u = σ a₀) →
-      AmenablePath adj χp fuel cur_a →
+      TinhoferPath adj χp fuel cur_a →
       ∀ (leaf_a : Refine.ColData n) (seq : List Nat),
         deepen adj χp fuel cur_a [] = some (leaf_a, seq) →
         ∃ (σ' : Equiv.Perm (Fin n)) (leaf_b : Refine.ColData n),
@@ -358,7 +358,7 @@ theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
       | some cid =>
           rw [hco] at h
           dsimp only at h
-          -- `a`'s id-cell (= the deepen/AmenablePath filter, defeq `cidCell`)
+          -- `a`'s id-cell (= the deepen/TinhoferPath filter, defeq `cidCell`)
           cases hfl : (List.finRange n).filter (fun v => cur_a.col v == cid) with
           | nil => rw [hfl] at h; simp at h
           | cons w_a rest_a =>
@@ -387,8 +387,8 @@ theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
                 | nil => rw [hmb] at hlen_b; simp at hlen_b
                 | cons w_b rest_b => exact ⟨w_b, rest_b, rfl⟩
               have hwb_mem : w_b ∈ cidCell cur_b.col cid := by rw [hmb]; exact List.mem_cons_self ..
-              -- unpack `Amenable` at this level
-              unfold AmenablePath at hAmen
+              -- unpack `Tinhofer` at this level
+              unfold TinhoferPath at hAmen
               dsimp only at hAmen
               rw [hco] at hAmen
               dsimp only at hAmen
@@ -419,8 +419,8 @@ theorem joint (adj : AdjMatrix n) (χp : Colouring n) :
                   → χp x = χp y := fun x y hxy => hrefa x y (step_refines adj cur_a.col w_a hxy)
               have hrefb' : ∀ x y, (step adj cur_b.col w_b).col x = (step adj cur_b.col w_b).col y
                   → χp x = χp y := fun x y hxy => hrefb x y (step_refines adj cur_b.col w_b hxy)
-              -- the recursive Amenable premise
-              have hAmen' : AmenablePath adj χp fuel (step adj cur_a.col w_a) := hAmen_rec
+              -- the recursive Tinhofer premise
+              have hAmen' : TinhoferPath adj χp fuel (step adj cur_a.col w_a) := hAmen_rec
               -- ANCHOR TRACKING: `τ` fixes the protected singleton `σ a₀`, so `(τσ) a₀ = σ a₀`,
               -- and it stays a singleton after the step
               have hτfix : τ (σ a₀) = σ a₀ := isColAut_fixes_singleton hτ hb0
@@ -629,7 +629,7 @@ theorem offCoupled_singleton {χ χc : Colouring n} (hdisc : Discrete χc) {w : 
 cell related by a colour-automorphism `t` (`t r₁ = rⱼ`), the executable emits a verified generator mapping
 `r₁ ↦ rⱼ`, so `WordReach exec r₁ rⱼ`. Assembles `joint` (anchor-tracking gives `σf r₁ = rⱼ`) + piece 3
 (`twistOf = some σf`, `hfix` from `[INV]`) + `mem_deepenGens_of`. Carries the firing/domain facts: `deepen`
-succeeds, the gate passes, `Amenable`, and **`[INV]`** (off the coupled component every vertex is a
+succeeds, the gate passes, `Tinhofer`, and **`[INV]`** (off the coupled component every vertex is a
 `χ`-singleton — the discharge `[DISC] ⟹ [INV]` is the deferred `offCoupled_singleton`). -/
 theorem exec_recovers_cell_orbits (adj : AdjMatrix n) (χ : Colouring n) {r₁ rⱼ : Fin n}
     {d1 : Refine.ColData n} {seq : List Nat} {t : Equiv.Perm (Fin n)}
@@ -637,7 +637,7 @@ theorem exec_recovers_cell_orbits (adj : AdjMatrix n) (χ : Colouring n) {r₁ r
     (ht : IsColAut adj χ t) (htrj : t r₁ = rⱼ)
     (hdeepen : deepen adj χ n (step adj χ r₁) [] = some (d1, seq))
     (hgate : ((coupled χ d1.col).isEmpty || !allSingletonsK (coupled χ d1.col) d1.col) = false)
-    (hAmen : AmenablePath adj χ n (step adj χ r₁))
+    (hAmen : TinhoferPath adj χ n (step adj χ r₁))
     (hdisc : Discrete d1.col) :
     Consume.WordReach (Consume.verified deepenSupply adj χ) r₁ rⱼ := by
   -- `b`-state is the `t`-transport of `a`-state
@@ -696,7 +696,7 @@ theorem isColAut_mem_branches {adj : AdjMatrix n} {χ : Colouring n} {β : Equiv
 (`deepen_discrete`) and the gate passes for free on a non-trivial branch cell (`gate_of_discrete`). The old
 `AnchorFires` domain hypothesis — `deepen` succeeds + gate + `Discrete` leaf — is thus discharged
 structurally: `[DISC]` from the loop's stop condition, `deepen` succeeds by fuel-adequacy
-(`deepen_succeeds`), the gate from `[DISC]`. Only `Amenable` remains. -/
+(`deepen_succeeds`), the gate from `[DISC]`. Only `Tinhofer` remains. -/
 
 /-- The `chooseIdK` min-fold from a `some` seed never returns `none`. -/
 theorem foldl_min_isSome (χc : Colouring n) :
@@ -809,7 +809,7 @@ theorem deepen_isSome (adj : AdjMatrix n) (χp : Colouring n) :
 
 /-- **★ `deepen` TERMINATES to a discrete leaf** — `[DISC]`/termination is STRUCTURAL (track A). Fuel `n`
 always suffices: `ncol (step … x) ≥ 1`, so the colour deficit is `< n`. Discharges (with `deepen_discrete`,
-`gate_of_discrete`) the whole of the old `AnchorFires` bundle — only `Amenable` remains. -/
+`gate_of_discrete`) the whole of the old `AnchorFires` bundle — only `Tinhofer` remains. -/
 theorem deepen_succeeds (adj : AdjMatrix n) (χ : Colouring n) (x : Fin n) :
     ∃ (d1 : Refine.ColData n) (seq : List Nat),
       deepen adj χ n (step adj χ x) [] = some (d1, seq) := by
@@ -886,9 +886,9 @@ theorem gate_of_discrete {χ χc : Colouring n} {x w : Fin n}
 /-- **★ CELL COVERAGE — a colour-automorphism image is exec-reachable on the branch cell.** For `x ∈ cell`,
 the branch-cell half applied at anchor `x` (rep `ρ x`, automorphism `ρ`) reaches `ρ x` directly; `ρ x = x`
 is `refl`. `AnchorFires` is GONE: `deepen` succeeds (`deepen_succeeds`), the leaf is discrete
-(`deepen_discrete`), and the gate passes (`gate_of_discrete`) — all structural, only `Amenable` remains. -/
+(`deepen_discrete`), and the gate passes (`gate_of_discrete`) — all structural, only `Tinhofer` remains. -/
 theorem exec_recovers_refgen_on_cell (adj : AdjMatrix n) (χ : Colouring n)
-    {ρ : Equiv.Perm (Fin n)} (hρaut : IsColAut adj χ ρ) (hAmen : Amenable adj χ)
+    {ρ : Equiv.Perm (Fin n)} (hρaut : IsColAut adj χ ρ) (hAmen : Tinhofer adj χ)
     {x : Fin n} (hx : x ∈ Descend.branches χ) :
     Consume.WordReach (Consume.verified deepenSupply adj χ) x (ρ x) := by
   by_cases hfix : ρ x = x
@@ -908,12 +908,12 @@ theorem exec_recovers_refgen_on_cell (adj : AdjMatrix n) (χ : Colouring n)
       gate_of_discrete hxeq (fun h => hfix h.symm) hDisc
     exact exec_recovers_cell_orbits adj χ hx hρx hne hρaut rfl hd hg (hAmen x hx) hDisc
 
-/-! ## 2b″. ★★★ THE REFERENCE-FREE, ANCHORFIRES-FREE CLOSE — `①c` modulo `{Amenable}` ONLY
+/-! ## 2b″. ★★★ THE REFERENCE-FREE, ANCHORFIRES-FREE CLOSE — `①c` modulo `{Tinhofer}` ONLY
 
 `StallEquivariant` needs only that deepen's **branch-orbit relation transports**
 (`SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport`) — and it does, because deepen's
 branch orbits EQUAL the `IsColAut`-orbits (⟸ = the branch-cell half; ⟹ = soundness), which transport under `σ`
-by `isColAut_conj_iff`. So `①c` closes with **no reference, no R1, no R2, no `AnchorFires`** — only `{Amenable}`,
+by `isColAut_conj_iff`. So `①c` closes with **no reference, no R1, no R2, no `AnchorFires`** — only `{Tinhofer}`,
 since track-A whole-graph `deepen` makes `[DISC]`/gate/termination structural (`deepen_discrete`,
 `gate_of_discrete`, `deepen_succeeds`). This supersedes the entire `SameOrbits`/`deepenRefSupply`/`twistOf`
 apparatus (discarded provenance). -/
@@ -934,7 +934,7 @@ theorem wordReach_imp_isColAut {adj : AdjMatrix n} {χ : Colouring n} {u w : Fin
 and `w` lie in the same colour-automorphism orbit. `⟹` is `wordReach_imp_isColAut`; `⟸` is the branch-cell half
 `exec_recovers_refgen_on_cell`. -/
 theorem deepen_branch_orbit_iff_aut (adj : AdjMatrix n) (χ : Colouring n)
-    (hAmen : Amenable adj χ)
+    (hAmen : Tinhofer adj χ)
     {u : Fin n} (hu : u ∈ Descend.branches χ) {w : Fin n} :
     Consume.WordReach (Consume.verified deepenSupply adj χ) u w
       ↔ ∃ β : Equiv.Perm (Fin n), IsColAut adj χ β ∧ β u = w := by
@@ -944,11 +944,11 @@ theorem deepen_branch_orbit_iff_aut (adj : AdjMatrix n) (χ : Colouring n)
     exact exec_recovers_refgen_on_cell adj χ hβ hAmen hu
 
 /-- **★★ deepen's branch-orbit relation TRANSPORTS.** Both sides equal the `IsColAut`-orbit relation, which
-conjugates under `σ` (`isColAut_conj_iff`). Needs `{Amenable}` on every graph (a ∀-quantified domain fact, so
+conjugates under `σ` (`isColAut_conj_iff`). Needs `{Tinhofer}` on every graph (a ∀-quantified domain fact, so
 it holds on the relabelled graph too). `AnchorFires` is GONE — track-A whole-graph `deepen` made `[DISC]`/gate/
 termination structural. -/
 theorem deepen_branchOrbit_transport
-    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ)
+    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Tinhofer adj χ)
     (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (a b : Fin n)
     (ha : a ∈ Descend.branches χ) (hb : b ∈ Descend.branches χ) :
     Consume.WordReach (Consume.verified deepenSupply (relabelAdj σ adj) (transportColouring σ χ)) (σ a) (σ b)
@@ -968,13 +968,13 @@ theorem deepen_branchOrbit_transport
     refine ⟨σ * β * σ⁻¹, (Consume.isColAut_conj_iff σ).mpr hβ, ?_⟩
     simp [Equiv.Perm.mul_apply, hβa]
 
-/-- **★★★ `①c` FOR `deepenSupply` — REFERENCE-FREE, `AnchorFires`-FREE, modulo `{Amenable}` ONLY.** No
+/-- **★★★ `①c` FOR `deepenSupply` — REFERENCE-FREE, `AnchorFires`-FREE, modulo `{Tinhofer}` ONLY.** No
 `deepenRefSupply`, no R1, no R2, no `twistOf`-transport, no `AnchorFires`. deepen's flag is equivariant because
 its branch orbits are the `IsColAut`-orbits, which transport. This is the intended, clean close of `①c`.
 ⚠ `hAmen` is GLOBAL (`∀ adj χ`) — a conditional scaffold, NOT applicable as-is (false on rigid graphs); the
-`Amenable` discharge is the per-family rigid coupling (rigid-seal §9.1), the substantive remaining work. -/
+`Tinhofer` discharge is the per-family rigid coupling (rigid-seal §9.1), the substantive remaining work. -/
 theorem deepenSupply_guarded_canonizer_direct
-    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Amenable adj χ) :
+    (hAmen : ∀ (adj : AdjMatrix n) (χ : Colouring n), Tinhofer adj χ) :
     CanonSpec.IsCanonicalFormOpt
       (Descend.canonForm? (Refine.encodeFreeFast (n := n))
         (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
@@ -985,17 +985,17 @@ theorem deepenSupply_guarded_canonizer_direct
 
 /-! ## 2b‴. The rigid handoff — deepen DEFERS SOUNDLY on a rigid obstruction
 
-`①c` is conditional on `Amenable`; an `Amenable`-violation is a `RigidObstructionAt`
+`①c` is conditional on `Tinhofer`; an `Tinhofer`-violation is a `RigidObstructionAt`
 (`rigidObstruction_of_not_cellSingleOrbit`). This subsection nails the SOUND half of the rigid handoff at the
 branch cell: deepen can never *mishandle* a rigid pair, so it hands it, untouched, to the force / rigid side.
 What remains is the WALL (force actually separating the rigid cell = `CellResolved`'s force branch =
-`hSmallAutThin`) + the fusion/scheduling gap (the `Amenable` obstruction lives at a deep level; the
+`hSmallAutThin`) + the fusion/scheduling gap (the `Tinhofer` obstruction lives at a deep level; the
 interleaving must peel it before consume) — both totality obligations, neither a new conjecture. -/
 
 /-- **★ DEEPEN DEFERS SOUNDLY ON A RIGID OBSTRUCTION.** A same-colour NON-automorphic branch pair `(u, w)` can
 never be connected by deepen's verified generators — they are all `IsColAut`, so a `WordReach u w` would furnish
 the very automorphism ruled out. Hence `CellIsOrbit` FAILS on a rigid cell: deepen emit-nothings and the pair
-passes, untouched, to force. This is the exact `RigidObstructionAt` that G2 attributes an `Amenable`-violation
+passes, untouched, to force. This is the exact `RigidObstructionAt` that G2 attributes an `Tinhofer`-violation
 to — the SAME 1-WL-merged non-automorphic pair the rigid solver / §11.14 classification already own, not a new
 obstruction type. -/
 theorem rigidObstruction_imp_not_cellIsOrbit {adj : AdjMatrix n} {χ : Colouring n}
@@ -1007,21 +1007,21 @@ theorem rigidObstruction_imp_not_cellIsOrbit {adj : AdjMatrix n} {χ : Colouring
   exact hrig β hβ hβu
 
 /-- **★★ A CONSUME-PATH FAILURE EXPOSES A RIGID DECISION.** If the deepening path from a state is NOT
-`AmenablePath` — exactly when consume can fail to recover a genuinely same-orbit pair (fusion: symmetry over a
+`TinhoferPath` — exactly when consume can fail to recover a genuinely same-orbit pair (fusion: symmetry over a
 deeper rigid obstruction) — then some cell *along that path* carries a `RigidObstructionAt`: a concrete
 same-colour non-automorphic pair, force-actionable. So a consume-stall never dead-ends — it always surfaces one
 exposed rigid node (possibly deeper than the compared pair, which itself may be automorphic). This is the honest
 handoff target: NOT "the compared pair is rigid" (false under fusion), but "a rigid decision is exposed for
 force," which is what makes the force⇄consume interleaving terminate. -/
-theorem not_amenablePath_imp_rigidObstruction (adj : AdjMatrix n) (χp : Colouring n) :
-    ∀ (fuel : Nat) (cur : Refine.ColData n), ¬ AmenablePath adj χp fuel cur →
+theorem not_tinhoferPath_imp_rigidObstruction (adj : AdjMatrix n) (χp : Colouring n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n), ¬ TinhoferPath adj χp fuel cur →
       ∃ (χc : Colouring n) (cid : Nat), RigidObstructionAt adj χc cid := by
   intro fuel
   induction fuel with
   | zero => intro cur h; exact absurd trivial h
   | succ fuel ih =>
       intro cur h
-      unfold AmenablePath at h
+      unfold TinhoferPath at h
       dsimp only at h
       split at h
       · exact absurd trivial h

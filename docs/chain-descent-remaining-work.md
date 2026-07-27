@@ -68,13 +68,13 @@ transfer). "Complete" = the flag provably never fires.
 > THE FIRST `HandledS` POPULATION. Authoritative: DUAL doc §10.**
 > `consume_fail_force_fires` ends in *strict* narrowing, which **nothing downstream consumes** — the
 > predicate `②`/`③` read is `Select.NodeResolved` (`cellNarrow … ≤ 1`). That gap is now closed at every
-> `Amenable` node: **`nodeResolved_of_amenable`** + **`handledS_of_reached_amenable`** (the all-`Amenable` reached CLASS
-> — ⚠ not yet a named family; the per-family `Amenable` discharge is rigid-seal §9.1's work), assembled
+> `Tinhofer` node: **`nodeResolved_of_tinhofer`** + **`handledS_of_reached_tinhofer`** (the all-`Tinhofer` reached CLASS
+> — ⚠ not yet a named family; the per-family `Tinhofer` discharge is rigid-seal §9.1's work), assembled
 > from `forcedSet_single_orbit` (D2) and the **already-landed** `deepen_branch_orbit_iff_aut` (2026-07-23).
 > ⚠ §1T's "zero families populated" is the bottleneck this starts on. ⚠ Note it is **NOT** reachable via
 > `Cost.CellResolved` — at a mixed node (≥2 orbits, key ties inside each) NEITHER disjunct holds while
 > the composite still resolves; route to `NodeResolved` directly.
-> Also landed: **`KeySeparatesAt`** — the reduction absorbing consume's `Amenable` into force's
+> Also landed: **`KeySeparatesAt`** — the reduction absorbing consume's `Tinhofer` into force's
 > separation obligation (two carried predicates → one). **⚠ A UNIFICATION, NOT A WEAKENING**, and it is
 > the *repaired* form of the retired `assume-VT` prune — read DUAL §10.3 (**two** obituaries: fusion/
 > Chang-A REPAIRED, 2026-07-10 vacuity DOES NOT TRANSFER) and §10.4 (the surviving FORK objection + the
@@ -123,7 +123,7 @@ transfer). "Complete" = the flag provably never fires.
 > **▶▶▶ UPDATE 2026-07-24 — RIGID SEAL IS THE ACTIVE TRACK; the Algorithm-R scaffold AND the full
 > `gen`-reduction chain (A)–(D) are LANDED (axiom-clean, gate green ~97 modules).**
 > **Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) (STATUS + §8.1/§8.2 + §10 ledger).**
-> The consume side is closed modulo `{Amenable}` (track A, below), and `Amenable`-violation ⟺ `RigidObstructionAt`
+> The consume side is closed modulo `{Tinhofer}` (track A, below), and `Tinhofer`-violation ⟺ `RigidObstructionAt`
 > = the rigid side's job — so the rigid seal is the frontier. **Landed:**
 > - **Scaffold:** **R0a/R0b + `compKey`** (`RigidSeal.lean`, force key `leafColKey` ∘ solver key `sk`, sole carried
 >   obligation `SolverSeparates` = a SOLVER property, NOT an SRG cite); **P1** (`ForcingCircuits.lean`,
@@ -153,31 +153,31 @@ transfer). "Complete" = the flag provably never fires.
 > the Route-C symmetry seals, via W1). ⚠ **User-flagged open Q** (deferred): the rigid solver likely covers MORE than
 > linear residues.
 >
-> **▶▶▶ UPDATE 2026-07-23 (later) — TRACK A LANDED: `AnchorFires` ELIMINATED, ①c modulo `{Amenable}` ONLY.**
+> **▶▶▶ UPDATE 2026-07-23 (later) — TRACK A LANDED: `AnchorFires` ELIMINATED, ①c modulo `{Tinhofer}` ONLY.**
 > `deepen` now discretizes the WHOLE graph, making `[DISC]`/gate/termination STRUCTURAL
 > (`deepen_discrete`/`gate_of_discrete`/`deepen_succeeds`, all axiom-clean, full build green). The capstone
 > `deepenSupply_guarded_canonizer_direct` takes ONLY `hAmen`; the reference apparatus + `DeepenRef*`/`DeepenR1`
-> are removed from the build. **`Amenable` is now the sole ①c condition = `CellsAreOrbits`** (free at
+> are removed from the build. **`Tinhofer` is now the sole ①c condition = `CellsAreOrbits`** (free at
 > discreteness; its failure is an exposed rigid decision). Authoritative: `docs/chain-descent-deepen-supply.md`
-> STATUS (2026-07-23). The `{Amenable, AnchorFires}` framing just below is superseded.
+> STATUS (2026-07-23). The `{Tinhofer, AnchorFires}` framing just below is superseded.
 >
-> **▶▶▶ UPDATE 2026-07-23 (earlier) — THE REFERENCE IS ELIMINATED; ①c IS CLOSED modulo `{Amenable, AnchorFires}`.
+> **▶▶▶ UPDATE 2026-07-23 (earlier) — THE REFERENCE IS ELIMINATED; ①c IS CLOSED modulo `{Tinhofer, AnchorFires}`.
 > READ `docs/chain-descent-deepen-supply.md` FIRST (authoritative + self-contained).**
 > The whole reference apparatus — `deepenRefSupply`, R1 (`SameOrbits`), R2 (`twistOf`-transport), and with them
 > the `hL1 ⟸ hreach` reduction, the `K∖cell = ker φ` crux, and Routes ε/ζ — is **DISCARDED**. ①c now rides
 > `rep` on `forcedSet ⊆ branches` directly: the object's flag reads the supply only through the branch-orbit
 > relation, which transports because **deepen's branch orbits EQUAL the `IsColAut`-orbits**
 > (`deepen_branch_orbit_iff_aut`), which conjugate under σ. Capstone **`deepenSupply_guarded_canonizer_direct`
-> (`DeepenAmenable.lean:931`, axiom-clean)** discharges ①c modulo exactly two **domain facts**:
-> · **`Amenable`** — every deepening level's `chooseIdK` cell is a single orbit of the pointwise-stabilizer.
->   An `Amenable`-violation ⟺ `RigidObstructionAt` (a same-colour non-automorphic pair) ⟹ it is the **rigid
+> (`DeepenTinhofer.lean:931`, axiom-clean)** discharges ①c modulo exactly two **domain facts**:
+> · **`Tinhofer`** — every deepening level's `chooseIdK` cell is a single orbit of the pointwise-stabilizer.
+>   An `Tinhofer`-violation ⟺ `RigidObstructionAt` (a same-colour non-automorphic pair) ⟹ it is the **rigid
 >   side's** job, gated on the SAME shared wall `hSmallAutThin` (§1W). This is the **coupling to the rigid seal**
->   — discharging `Amenable` on a family = the interleaving delivering Schurian cells to consume. See
+>   — discharging `Tinhofer` on a family = the interleaving delivering Schurian cells to consume. See
 >   [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md).
 > · **`AnchorFires`** — per-anchor: `deepen` succeeds + gate passes + `Discrete` leaf. A **firing lemma**, not a
 >   wall; the next concrete deepen task.
 > The rigid HANDOFF is landed axiom-clean: `rigidObstruction_imp_not_cellIsOrbit` (deepen defers soundly, :957)
-> + `not_amenablePath_imp_rigidObstruction` (a consume-stall always exposes a concrete rigid node, :972).
+> + `not_tinhoferPath_imp_rigidObstruction` (a consume-stall always exposes a concrete rigid node, :972).
 > **⚠ EVERYTHING BELOW IN THIS AND THE FOLLOWING FRONTIER BLOCK (through §1C C3 ii-c) IS PROVENANCE ONLY** —
 > the reference/R1/R2/`K∖cell`/Route-ε-ζ mechanics it describes are superseded by the reference-free close
 > above. It is retained for the arc, not as live plan. `deepenRefSupply`/`SameOrbitsOnBranches` survive in the
@@ -221,31 +221,31 @@ below; this is the pickup summary.
   BOTH sides (ref does NOT falsely merge — gate sound). ★ **TIGHT:** G8 exec = **16 = Σ k(k−1) over {4,2,2}**
   = one DIRECT verifying twist per same-orbit ordered pair (no words). Plus the C# 39-family sweep
   (harvested==|Aut| ⟹ exec==Aut==ref ⟹ R1) is direct R1 evidence on symmetric families. ⚠ Validation checked
-  the BRANCH CELL only (see K-coverage risk below); the ONE untested regime = a `¬Amenable` FIRING witness
+  the BRANCH CELL only (see K-coverage risk below); the ONE untested regime = a `¬Tinhofer` FIRING witness
   (= the still-missing part-III "fires-but-incomplete" graph).
 - **▶▶ SCOPED (2026-07-21, user: give the design its best chance before the backup) — R1's crux FACTORS,
-  it is NOT a monolithic conjecture.** `R1 ⟸ (Amenable ⟹ R1) + Amenable`, where **`Amenable adj χ` := at
+  it is NOT a monolithic conjecture.** `R1 ⟸ (Tinhofer ⟹ R1) + Tinhofer`, where **`Tinhofer adj χ` := at
   every deepening level the `chooseIdK`-selected cell is a single orbit of the pointwise-stabilizer of the
-  vertices individualized so far.** ⚠ **Firing does NOT imply `Amenable`** (a WL-merged multi-orbit cell can
-  still discretize — a nested force-decision the greedy pick resolves arbitrarily), so `Amenable` is a genuine
+  vertices individualized so far.** ⚠ **Firing does NOT imply `Tinhofer`** (a WL-merged multi-orbit cell can
+  still discretize — a nested force-decision the greedy pick resolves arbitrarily), so `Tinhofer` is a genuine
   domain hypothesis.
-    - **LAYER 1 `Amenable ⟹ R1` — MECHANICAL, provable now.** Engine = a **re-relating induction**, invariant:
+    - **LAYER 1 `Tinhofer ⟹ R1` — MECHANICAL, provable now.** Engine = a **re-relating induction**, invariant:
       *the deepen-from-`a` and replay-from-`b` descents (a~b via ρ∈Aut) stay related by an automorphism ρ′
       mapping a's individualized sequence to b's pointwise.* Per level: same id (`chooseIdK_transport`);
-      `C_b=ρ′(C_a)` single-orbit under `Stab(indiv_b)` (= `Amenable`) ⟹ ∃τ∈Stab(indiv_b) fixing the
+      `C_b=ρ′(C_a)` single-orbit under `Stab(indiv_b)` (= `Tinhofer`) ⟹ ∃τ∈Stab(indiv_b) fixing the
       lowest-index mismatch `ρ′(u_a)↦u_b` ⟹ `τρ′` re-establishes the invariant. At discreteness leaves are
       automorphism-related ⟹ colour-matchable ⟹ exec twist for (a,b) VERIFIES ⟹ direct WordReach. Uses existing
       `refineEquivariant`/`step_transport`/`chooseIdK_transport`/`twistOf_isColAut`. ⚠ **SUB-RISK (settle FIRST):**
       `SameOrbits` is over ALL vertices but the induction gives completeness on the BRANCH CELL (anchors); the
       twists also move `K∖cell`, so K-coverage needs the induction extended to `K` or a "cell controls `K`" arg.
-      **▶ STATUS (2026-07-21): all bricks LANDED axiom-clean in `DeepenAmenable.lean`** — `step_rerelate`,
+      **▶ STATUS (2026-07-21): all bricks LANDED axiom-clean in `DeepenTinhofer.lean`** — `step_rerelate`,
       piece 1 (`step_refines`/`isColAut_parent_of_refines`), `cidCell_*`, piece 2a (`cellSingleOrbit_transport`),
       piece 2b-b0 (`deepen_acc`) + capstones. **Remaining = the joint fuel induction body** (b1 `chooseIdK_mem`
       + b2 assembly), pieces 3+4. **Authoritative detail + the `deepen` match-reduction recipe: the DEEPEN DOC
       `docs/chain-descent-deepen-supply.md` §9.1 + §11.**
-    - **LAYER 2 `Amenable` — discharge via the WL-OBSTRUCTION CLASSIFICATION (user reframe, 2026-07-21; MERGES
+    - **LAYER 2 `Tinhofer` — discharge via the WL-OBSTRUCTION CLASSIFICATION (user reframe, 2026-07-21; MERGES
       with existing work).** Not "is WL-dim bounded" (unbounded WL-dim exists — CFI — and is irrelevant) but
-      "**every `Amenable`-obstruction is a KNOWN WL-obstruction type with a handler.**" ★ **`Amenable`-violation
+      "**every `Tinhofer`-obstruction is a KNOWN WL-obstruction type with a handler.**" ★ **`Tinhofer`-violation
       ⟺ a RIGID (non-symmetric) WL-obstruction in a cell deepen visits** — because a WL-stable cell fails
       single-orbit exactly when it WL-merges NON-automorphic vertices (symmetric merges give a single orbit =
       no obstruction; that is what deepen consumes). The project ALREADY classifies rigid obstructions (EOL
@@ -257,10 +257,10 @@ below; this is the pickup summary.
       (`ir-blindspot-solver.md:1068`, CONJECTURE, 0 falsifiers, broader than F₂ per Lichter) + the interleaving
       schedule delivering Schurian (pure-symmetry) cells to consume. So **deepen's completeness = exactly the
       project's rigid-obstruction-coverage frontier** — no independent WL-dim bound needed. Deepen is complete
-      on the Schurian residue (1-WL = orbits ⟹ `Amenable` provable); on rigid cells it soundly emit-nothing
+      on the Schurian residue (1-WL = orbits ⟹ `Tinhofer` provable); on rigid cells it soundly emit-nothing
       (verification gate) and hands off. ⚠ **Deepen-specific NEW sub-question (a totality/T-gap piece, not a new
       wall):** the interleaving must deliver Schurian cells to consume (rigid decisions resolved first) — a
-      MIXED/FUSION cell (symmetry + a rigid obstruction at a deeper level, cf. Chang-A) is where `Amenable`/①c
+      MIXED/FUSION cell (symmetry + a rigid obstruction at a deeper level, cf. Chang-A) is where `Tinhofer`/①c
       could break. Per the Explore sweep, consume's residue completeness rests on the §11.11 consume-schedule +
       verify-by-reconstruction iso-invariance, and does NOT rest on no-rigid-Cameron (that only touches the flag
       floor). Landed CFI infra to connect to: `theorem_1_HOR_cfi_oddDeg` (`CFI.lean:3179`, axiom-free
@@ -268,14 +268,14 @@ below; this is the pickup summary.
       this obstruction-classification is the refined version that merges with the existing wall/EOL program.)
 - **BACKUP (held, poly, ①c-by-construction) — the all-or-nothing gate.** Per deepening level, check whether
   individualizing EACH member of the chosen id-cell gives the same footprint-partition; emit all-or-nothing
-  (defer on failure). Poly (≤n members × ≤n levels × a refine), CHECKS `Amenable` locally instead of proving it
+  (defer on failure). Poly (≤n members × ≤n levels × a refine), CHECKS `Tinhofer` locally instead of proving it
   (①c by construction — canonical gate + pick-independent ⟹ canonical group), gate-failure = honest deferral.
   Strictly better than route (b). **Only if Layer 1 K-coverage or Layer 2 discharge truly stalls.**
 - **▶ THE DEDICATED DEEPEN DOC (authoritative, self-contained): `docs/chain-descent-deepen-supply.md`** —
-  STATUS block, the mechanism, the ①c reduction, the reframe, the `Amenable` factoring, Layer 2 = the
+  STATUS block, the mechanism, the ①c reduction, the reframe, the `Tinhofer` factoring, Layer 2 = the
   WL-obstruction classification, the gap ledger, the Lean file map + theorem inventory, the remaining 4-piece
   Layer-1 plan, the evidence record, and the traps. **Read it first for anything deepen.**
-- **Read for detail:** the deepen doc above; `DeepenR1.lean` / `DeepenAmenable.lean` headers;
+- **Read for detail:** the deepen doc above; `DeepenR1.lean` / `DeepenTinhofer.lean` headers;
   `DeepenRefTransport.lean` header (R2 subtlety); §1C C3 (ii-c) below; [[project-c3-kernel-supply-2026-07-19]].
 
 ---
@@ -666,16 +666,16 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
       verification gate supplies the single-orbit restriction. §L.4 is a FORCE-side analogy, not a proof;
       "Miyazaki defeats it" was RETRACTED (deepen takes a single path, not the tree).
     · **Firing does NOT imply the single-orbit-cell property** (a WL-merged multi-orbit cell discretizes
-      too), so it is a genuine domain hypothesis `Amenable`, not a consequence of discreteness.
-    · R1's crux **FACTORS**: `R1 ⟸ (Amenable ⟹ R1) + Amenable`. **LAYER 1** (`Amenable ⟹ R1`) is
+      too), so it is a genuine domain hypothesis `Tinhofer`, not a consequence of discreteness.
+    · R1's crux **FACTORS**: `R1 ⟸ (Tinhofer ⟹ R1) + Tinhofer`. **LAYER 1** (`Tinhofer ⟹ R1`) is
       MECHANICAL — the re-relating induction (invariant: the two descents stay automorphism-related; the
       single-orbit cell absorbs the lowest-index mismatch via a `τ∈Stab`); ⚠ settle the K-coverage sub-risk
-      first (`SameOrbits` is over all vertices, induction gives the branch cell). **LAYER 2** (`Amenable`) =
+      first (`SameOrbits` is over all vertices, induction gives the branch cell). **LAYER 2** (`Tinhofer`) =
       IR-amenability along the canonical path, discharged PER-FAMILY aiming general (bounded categorisations
       → generalisable amenability), via existing WL-completeness seals; resisters route to force/kernel.
-      Backup = the poly all-or-nothing gate (CHECK `Amenable` per level, defer on failure; ①c by
+      Backup = the poly all-or-nothing gate (CHECK `Tinhofer` per level, defer on failure; ①c by
       construction). VALIDATION: no R1 falsifier (G8×7/cG8/F12/t3/wcyc9 + C# 39-family); 16 = exact
-      same-orbit pair count on G8. **NOT the banned GI∈P reasoning** — `Amenable` is a concrete,
+      same-orbit pair count on G8. **NOT the banned GI∈P reasoning** — `Tinhofer` is a concrete,
       measured-true, per-family-dischargeable hypothesis.
 
     ### ▶▶ 2026-07-21 — R2 ALGEBRAIC CORE LANDED (`DeepenRefTransport.lean`, in build, axiom-clean)
@@ -839,9 +839,9 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
 - **T1 — per-family localisation** (`Handled` population): `∀ T, CellsAreOrbits` or the lighter `_selected`
   hook discharged per sealed family (first: CFI odd-deg via `theorem_1_HOR_cfi_oddDeg`; depth already
   imports via P2b/P2c). This is ③'s content and each leg's totality brick.
-  **⚠ "Zero families populated" is no longer accurate (2026-07-27):** `KeyComplete.nodeResolved_of_amenable`
-  + **`handledS_of_reached_amenable`** populate `Select.HandledS` on the **all-`Amenable` reached class**
-  — a *class*, not yet a named family. What T1 still needs is the per-family discharge of `Amenable`
+  **⚠ "Zero families populated" is no longer accurate (2026-07-27):** `KeyComplete.nodeResolved_of_tinhofer`
+  + **`handledS_of_reached_tinhofer`** populate `Select.HandledS` on the **all-`Tinhofer` reached class**
+  — a *class*, not yet a named family. What T1 still needs is the per-family discharge of `Tinhofer`
   itself, which rigid-seal §9.1 says is the SAME work as the rigid seal on that family. So the first real
   family still costs a rigid-side discharge; the wiring above it is now built.
 - **T2 — cost bounds per new mechanism** (`SupplyCost` pattern: closed-form `c₂`/`keyCost` at land time —

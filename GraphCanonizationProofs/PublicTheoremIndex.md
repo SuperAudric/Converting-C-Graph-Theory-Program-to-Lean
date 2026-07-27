@@ -4250,7 +4250,7 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Kernel.baseGens` | 200-207 | — | Definition |
 | `Kernel.baseSupply` | 209-213 | — | Definition |
 
-## ChainDescent/DeepenAmenable.lean
+## ChainDescent/DeepenTinhofer.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -4274,8 +4274,8 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.CellSingleOrbit` | 196-199 | — | Definition |
 | `Deepen.RigidObstructionAt` | 201-205 | — | Definition |
 | `Deepen.rigidObstruction_of_not_cellSingleOrbit` | 207-215 | — | — |
-| `Deepen.AmenablePath` | 217-230 | — | Definition |
-| `Deepen.Amenable` | 232-236 | — | Definition |
+| `Deepen.TinhoferPath` | 217-230 | — | Definition |
+| `Deepen.Tinhofer` | 232-236 | — | Definition |
 | `Deepen.cellSingleOrbit_transport` | 238-253 | — | — |
 | `Deepen.deepen_acc` | 257-282 | — | — |
 | `Deepen.foldl_min_mem` | 284-305 | — | — |
@@ -4306,7 +4306,7 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.deepen_branchOrbit_transport` | 946-969 | — | — |
 | `Deepen.deepenSupply_guarded_canonizer_direct` | 971-984 | — | — |
 | `Deepen.rigidObstruction_imp_not_cellIsOrbit` | 995-1007 | — | — |
-| `Deepen.not_amenablePath_imp_rigidObstruction` | 1009-1035 | — | — |
+| `Deepen.not_tinhoferPath_imp_rigidObstruction` | 1009-1035 | — | — |
 
 ## ChainDescent/DeepenR1.lean
 
@@ -4723,9 +4723,9 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.cellSingleOrbit_of_certifiedOrbit` | 74-80 | — | — |
 | `Deepen.certifiedOrbit_of_cellIsOrbit` | 82-89 | — | — |
 | `Deepen.CertifiedPath` | 93-107 | — | Definition |
-| `Deepen.amenablePath_of_certifiedPath` | 109-135 | — | — |
+| `Deepen.tinhoferPath_of_certifiedPath` | 109-135 | — | — |
 | `Deepen.Certified` | 137-139 | — | Definition |
-| `Deepen.amenable_of_certified` | 141-145 | — | — |
+| `Deepen.tinhofer_of_certified` | 141-145 | — | — |
 | `Deepen.deepenSupply_guarded_canonizer_of_certified` | 147-157 | — | — |
 | `Deepen.classOf_eq_cidCell` | 171-172 | — | — |
 | `Deepen.cidCell_length_eq_cellOf_card` | 174-180 | — | — |
@@ -4738,14 +4738,14 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.relabelAdj_mul` | 363-365 | — | — |
 | `Deepen.cellSingleOrbit_transport_iso` | 367-379 | — | — |
 | `Deepen.chooseIdK_finRange_transport` | 381-386 | — | — |
-| `Deepen.amenablePath_transport` | 388-462 | — | — |
-| `Deepen.amenable_transport` | 464-477 | — | — |
+| `Deepen.tinhoferPath_transport` | 388-462 | — | — |
+| `Deepen.tinhofer_transport` | 464-477 | — | — |
 | `Deepen.relabelAdj_one` | 486 | — | — |
 | `Deepen.transportColouring_one` | 488-489 | — | — |
-| `Deepen.amenable_transport_iff` | 491-497 | — | — |
+| `Deepen.tinhofer_transport_iff` | 491-497 | — | — |
 | `Deepen.wordReach_nil_iff` | 499-505 | — | — |
 | `Deepen.deepenSupplyGuarded` | 506-512 | — | Definition, `noncomputable` |
-| `Deepen.verified_guarded_of_amenable` | 514-517 | — | — |
+| `Deepen.verified_guarded_of_tinhofer` | 514-517 | — | — |
 | `Deepen.verified_guarded_of_not` | 519-522 | — | — |
 | `Deepen.deepen_branchOrbit_transport_guarded` | 524-553 | — | — |
 | `Deepen.deepenSupplyGuarded_canonizer` | 555-567 | — | — |
@@ -4767,11 +4767,11 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.colEquiv_val` | 171-172 | B1a Its value is the colour. | — |
 | `Deepen.matchPerm` | 174-177 | B1a The permutation matching two discrete colourings colour-for-colour. | Definition, `noncomputable` |
 | `Deepen.matchPerm_col` | 179-186 | B1a `matchPerm` matches the colours. | — |
-| `Deepen.isColAut_of_readKey_eq` | 188-251 | ★★ B1 THE COMPLETENESS DIRECTION, UNCONDITIONAL. Two discrete leaves with equal reads are related by a colour-automorphism carrying `u` to `w`. No `Amenable`: this is completeness of the ENCODING. The odd values of `indivOne χ u` sit exactly at `u`, which is what forces `ρ u = w`; halving gives `χ ∘ ρ = χ`. This is the FIRING direction, and it needs no guard. | — |
-| `Deepen.amenablePath_of_amenable` | 259-261 | The guard is open at every branch rep of an `Amenable` node. | — |
+| `Deepen.isColAut_of_readKey_eq` | 188-251 | ★★ B1 THE COMPLETENESS DIRECTION, UNCONDITIONAL. Two discrete leaves with equal reads are related by a colour-automorphism carrying `u` to `w`. No `Tinhofer`: this is completeness of the ENCODING. The odd values of `indivOne χ u` sit exactly at `u`, which is what forces `ρ u = w`; halving gives `χ ∘ ρ = χ`. This is the FIRING direction, and it needs no guard. | — |
+| `Deepen.tinhoferPath_of_tinhofer` | 259-261 | The guard is open at every branch rep of an `Tinhofer` node. | — |
 | `Deepen.orbKey_ne_of_no_aut` | 263-278 | B3 `orbKey` SEPARATES any pair no colour-automorphism links. | — |
-| `Deepen.forceBy_orbKey_narrows` | 280-294 | ★★★ B3a At an `Amenable` node with a `RigidObstructionAt`, `forceBy orbKey` STRICTLY NARROWS. No contradiction with `forceBy_no_narrowing_on_orbit`: the obstruction is precisely the statement that the cell is NOT a single orbit. | — |
-| `Deepen.orbKey_eq_iff_orbit` | 296-313 | ★★★ B2 At an `Amenable` node `orbKey`'s FIBRES ARE THE ORBITS, both directions. `⟸` is the ceiling (`Force.keyV_aut_invariant`, free from `keyEquivariant_orbKey`), so the key is constant on each orbit and force can never cut INSIDE one — this is also the consistency check against `forceBy_no_narrowing_on_orbit`. | — |
+| `Deepen.forceBy_orbKey_narrows` | 280-294 | ★★★ B3a At an `Tinhofer` node with a `RigidObstructionAt`, `forceBy orbKey` STRICTLY NARROWS. No contradiction with `forceBy_no_narrowing_on_orbit`: the obstruction is precisely the statement that the cell is NOT a single orbit. | — |
+| `Deepen.orbKey_eq_iff_orbit` | 296-313 | ★★★ B2 At an `Tinhofer` node `orbKey`'s FIBRES ARE THE ORBITS, both directions. `⟸` is the ceiling (`Force.keyV_aut_invariant`, free from `keyEquivariant_orbKey`), so the key is constant on each orbit and force can never cut INSIDE one — this is also the consistency check against `forceBy_no_narrowing_on_orbit`. | — |
 | `Deepen.forcedSet_single_orbit` | 315-327 | ★★★ D2 Force narrows the branch cell to a SINGLE ORBIT — the exact input `Composite.forceThenConsume_singleton_of_cellIsOrbit` wants. | — |
 | `Deepen.exists_targetColour` | 329-335 | Every non-discrete colouring has a branch colour. | — |
 | `Deepen.consume_fail_force_fires` | 337-356 | ★★★ D1 THE HOOK, CLOSED. A CONSUME FAILURE MAKES FORCE FIRE at a descent-reachable node. Strongest available form: a measured witness (CFI over a random cubic base, m=8) has consume failing at a node whose branch cell is a SINGLE ORBIT, where `forceBy_no_narrowing_on_orbit` forbids force from firing — so relocating to a reachable node is the target, not a weakening. | — |
@@ -4780,29 +4780,29 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Deepen.wordReach_isColAut` | 69-78 | `WordReach` over any list of verified automorphisms yields an automorphism — `DeepenAmenable`'s version is `deepenSupply`-specific; this is the general one. | — |
+| `Deepen.wordReach_isColAut` | 69-78 | `WordReach` over any list of verified automorphisms yields an automorphism — `DeepenTinhofer`'s version is `deepenSupply`-specific; this is the general one. | — |
 | `Deepen.wordReach_isColAut_verified` | 80-83 | The same for a supply's `verified` list. | — |
 | `Deepen.cellSingleOrbit_of_cellIsOrbit` | 85-92 | SOUND `CellIsOrbit S` for ANY supply gives the branch cell's `CellSingleOrbit` — `DeepenCertified`'s T1 with `deepenSupply` generalised away. | — |
 | `Deepen.wordReach_transport` | 99-111 | `WordReach` transports under `SupplyEquivariant S`. | — |
 | `Deepen.cellIsOrbit_transport` | 113-120 | ★ The lemma the poly-guard design was missing: `CellIsOrbit S` transports when `S` does. | — |
-| `Deepen.CertPath` | 129-138 | The POLY guard: at every level, `S`'s verified generators act transitively on the cell the level individualizes. `AmenablePath`'s recursion with the OBSERVABLE `CellIsOrbit S` in place of the unobservable `CellSingleOrbit`. | Definition |
-| `Deepen.CertifiedG` | 140-142 | Every anchor's path is certified — the poly analogue of `Amenable`. | Definition |
-| `Deepen.amenablePath_of_certPath` | 144-169 | ★★ SOUND: the poly guard implies the real one. | — |
-| `Deepen.amenable_of_certifiedG` | 171-173 | ★★ `CertifiedG S ⟹ Amenable`. | — |
-| `Deepen.certPath_transport` | 181-254 | ★★ INVARIANT: the poly guard transports, given `SupplyEquivariant S`. Same pick-absorption induction as `amenablePath_transport`, with soundness supplying the stabiliser element. | — |
+| `Deepen.CertPath` | 129-138 | The POLY guard: at every level, `S`'s verified generators act transitively on the cell the level individualizes. `TinhoferPath`'s recursion with the OBSERVABLE `CellIsOrbit S` in place of the unobservable `CellSingleOrbit`. | Definition |
+| `Deepen.CertifiedG` | 140-142 | Every anchor's path is certified — the poly analogue of `Tinhofer`. | Definition |
+| `Deepen.tinhoferPath_of_certPath` | 144-169 | ★★ SOUND: the poly guard implies the real one. | — |
+| `Deepen.tinhofer_of_certifiedG` | 171-173 | ★★ `CertifiedG S ⟹ Tinhofer`. | — |
+| `Deepen.certPath_transport` | 181-254 | ★★ INVARIANT: the poly guard transports, given `SupplyEquivariant S`. Same pick-absorption induction as `tinhoferPath_transport`, with soundness supplying the stabiliser element. | — |
 | `Deepen.certPath_step_transport_iff` | 256-271 | The poly guard at a vertex, both directions. | — |
 | `Deepen.certPath_none` | 279-282 | `CertPath` equation lemma (no cell chosen). Reduce `CertPath` ONLY through these — unfolding in place then `cases`-ing on `chooseIdK` descends into its internal `foldl` (the recorded `deepen` match-reduction trap). | — |
 | `Deepen.certPath_nil` | 284-288 | `CertPath` equation lemma (chosen cell empty). | — |
 | `Deepen.certPath_cons` | 290-296 | `CertPath` equation lemma (chosen cell non-empty) — the recursive case that feeds the decidability instance. | — |
-| `Deepen.instDecidableCertPath` | 298-319 | ⚠ `Classical.dec` so the PARAMETRIC development elaborates. For a concrete poly `S` this is replaced by a real decision procedure — `CellIsOrbit S` is a finite `WordReach` reachability test on the branch cell. This is the last `noncomputable` in the chain. | Instance |
+| `Deepen.instDecidableCertPath` | 298-319 | ★★ `CertPath` IS DECIDABLE — structural recursion on the fuel, each level one `Consume.decidableCellIsOrbit` test (the orbit BFS), no search over `Equiv.Perm (Fin n)`. This REPLACED the `Classical.dec` placeholder and is what makes `orbKeyG` computable. ⚠ `orbKey` is not repairable this way: its `TinhoferPath` guard is the automorphism-partition problem (GI-complete). | Instance |
 | `Deepen.certPathCost` | 329-338 | The guard's OWN cost, billed along its own recursion: per level one `CellIsOrbit` reachability test plus **one call to `S`**, at the colouring that level actually visits. The key previously declared a flat `n⁴` that priced the read and nothing of the guard. | Definition |
 | `Deepen.certPathCost_le` | 340-370 | The guard costs `fuel` levels of (reachability + one supply call), parametric in the supply's own bound `c₂` — the `SupplyCost` pattern, so a real bound rather than a restatement of a declared constant. | — |
 | `Deepen.orbKeyG` | 374-381 | ★★★ THE POLY-GUARDED KEY. Identical to `orbKey` except the `if` tests the OBSERVABLE `CertPath S`. | Definition |
 | `Deepen.keyV_orbKeyG` | 383-387 | The guarded key's value projection, unfolded. | `@[simp]` |
 | `Deepen.keyCost_orbKeyG_le` | 389-396 | ★★ THE KEY'S BILL: `keyCost (orbKeyG S) ≤ n⁴ + n·(n⁴ + c₂)`. Parametric in the supply's cost bound, so an exponential `supplyCost` now yields an exponential `keyCost` — `②` at this key is falsifiable, which the flat constant could not express. | — |
-| `Deepen.keyEquivariant_orbKeyG` | 398-413 | ★★★ `①` FOR THE POLY-GUARDED KEY, from `SupplyEquivariant S` alone. ⚠ Note `CertPath S ⟹ AmenablePath` and never the converse, so `orbKeyG S` DEFERS more often than `orbKey` — a firing loss, not a soundness loss. | — |
+| `Deepen.keyEquivariant_orbKeyG` | 398-413 | ★★★ `①` FOR THE POLY-GUARDED KEY, from `SupplyEquivariant S` alone. ⚠ Note `CertPath S ⟹ TinhoferPath` and never the converse, so `orbKeyG S` DEFERS more often than `orbKey` — a firing loss, not a soundness loss. | — |
 | `Deepen.orbKeyG_ne_of_no_aut` | 420-433 | The guarded key separates a non-automorphic pair (`isColAut_of_readKey_eq` is guard-agnostic, so this transferred verbatim). | — |
-| `Deepen.forceBy_orbKeyG_narrows` | 435-446 | ★★★ FORCE FIRES UNDER THE POLY GUARD. Same as `forceBy_orbKey_narrows` with `CertifiedG S` (poly, observable) in place of `Amenable` (an `n!` search). | — |
+| `Deepen.forceBy_orbKeyG_narrows` | 435-446 | ★★★ FORCE FIRES UNDER THE POLY GUARD. Same as `forceBy_orbKey_narrows` with `CertifiedG S` (poly, observable) in place of `Tinhofer` (an `n!` search). | — |
 | `Deepen.consume_fail_force_fires_guarded` | 448-465 | ★★ The poly-guarded hook. The LOCALIZATION half is unchanged (it never depended on a guard); what the poly guard costs is that FIRING needs the guard open, hence `CertifiedG S ψ` as a hypothesis. The unconditional statement stays `consume_fail_force_fires`, over `orbKey`. | — |
 | `Deepen.orbKeyG_eq_orbKey_of_certPath` | 467-472 | Wherever the poly guard is open the two keys are EQUAL — `orbKeyG S` is a restriction of `orbKey`, not a different function. | — |
 | `Deepen.keyEquivariant_orbKeyG_deck2` | 480-482 | Non-vacuity: the parametric design instantiated at `deck2Supply`. | — |
@@ -4836,13 +4836,13 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.refines_step` | 77-82 | The warm-refined individualization refines what it was applied to (from `refineSplits_encodeFreeFast`). | — |
 | `Deepen.refines_indivOne` | 84-93 | Individualization refines the colouring it splits. | — |
 | `Deepen.refines_transport` | 95-99 | `Refines` transports. | — |
-| `Deepen.transport_eq_of_isColAut_refines` | 101-110 | ★ A colour-automorphism of a FINE colouring fixes every COARSER one. This is what carries the parent colouring through the accumulated isomorphism in `leafOf_transport_of_amenablePath` — without it the key can only compare UNCOLOURED individualized graphs, which is not enough for 'same orbit'. | — |
-| `Deepen.leafOf` | 118-127 | The state deepen's greedy path reaches from `cur` in ≤ `fuel` levels. Mirrors `AmenablePath`'s recursion exactly so the two line up level for level. | Definition |
+| `Deepen.transport_eq_of_isColAut_refines` | 101-110 | ★ A colour-automorphism of a FINE colouring fixes every COARSER one. This is what carries the parent colouring through the accumulated isomorphism in `leafOf_transport_of_tinhoferPath` — without it the key can only compare UNCOLOURED individualized graphs, which is not enough for 'same orbit'. | — |
+| `Deepen.leafOf` | 118-127 | The state deepen's greedy path reaches from `cur` in ≤ `fuel` levels. Mirrors `TinhoferPath`'s recursion exactly so the two line up level for level. | Definition |
 | `Deepen.leafOf_zero` | 135 | ⚠ Reduce `leafOf` ONLY through these three equation lemmas — unfolding then `cases`-ing on `chooseIdK` descends into its internal `foldl` (the recorded `deepen` match-reduction trap). | — |
 | `Deepen.leafOf_succ_none` | 137-139 | Equation lemma: the descent stops when `chooseIdK` returns `none`. | — |
 | `Deepen.leafOf_succ_nil` | 141-145 | Equation lemma: the (impossible) empty-cell case. | — |
 | `Deepen.leafOf_succ_cons` | 147-152 | Equation lemma: one level, picking the lowest-index member. | — |
-| `Deepen.leafOf_transport_of_amenablePath` | 160-255 | ★★ A2, the technical core. Under `AmenablePath` the two LEAVES are related by an accumulated isomorphism `ρ`, and `ρ` acts on any colouring the state refines exactly as `σ` does. This is `amenablePath_transport` with its accumulator `τ * σ` KEPT rather than discarded. | — |
+| `Deepen.leafOf_transport_of_tinhoferPath` | 160-255 | ★★ A2, the technical core. Under `TinhoferPath` the two LEAVES are related by an accumulated isomorphism `ρ`, and `ρ` acts on any colouring the state refines exactly as `σ` does. This is `tinhoferPath_transport` with its accumulator `τ * σ` KEPT rather than discarded. | — |
 | `Deepen.filter_col_transport` | 263-275 | A1 Colour classes transport by `σ`. | — |
 | `Deepen.readAt` | 277-280 | Total adjacency between the `c`-class and the `d`-class. | Definition |
 | `Deepen.readColAt` | 282-284 | Total parent colour over the `c`-class. | Definition |
@@ -4852,11 +4852,11 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.readKey` | 311-315 | The invariant read: adjacency between every ordered pair of colour classes, then the parent colour of every class. At a DISCRETE colouring each class is a singleton, so this is the full relabelled adjacency plus the relabelled parent colouring — the object the probes call `cert`. | Definition |
 | `Deepen.readAtIdx_transport` | 317-320 | A1 The flattened adjacency read transports. | — |
 | `Deepen.readKey_transport` | 322-328 | A1 The whole read transports. | — |
-| `Deepen.amenablePath_step_transport_iff` | 332-348 | A3 The guard is relabelling-invariant, both directions (forward `amenablePath_transport` at σ, backward at σ⁻¹). | — |
-| `Deepen.instDecidableAmenablePath` | 352-359 | `Amenable` IS decidable (`IsColAut` has an instance, `Equiv.Perm (Fin n)` is a `Fintype`) — but by an `n!` search, so this registers `Classical.dec` rather than pretend that is a cost model. One instance so `orbKey` and `keyV_orbKey` share the term and the projection is `rfl`. | Instance, `noncomputable` |
-| `Deepen.orbKey` | 361-370 | ★★★ THE KEY. deepen's greedy descent from `v` run to its leaf and read invariantly, GUARDED by `AmenablePath` — which is exactly the condition making that index-picked descent labelling-independent. Off the guard the key is constant, so force simply does not act. | Definition, `noncomputable` |
+| `Deepen.tinhoferPath_step_transport_iff` | 332-348 | A3 The guard is relabelling-invariant, both directions (forward `tinhoferPath_transport` at σ, backward at σ⁻¹). | — |
+| `Deepen.instDecidableTinhoferPath` | 352-359 | `Tinhofer` IS decidable (`IsColAut` has an instance, `Equiv.Perm (Fin n)` is a `Fintype`) — but by an `n!` search, so this registers `Classical.dec` rather than pretend that is a cost model. One instance so `orbKey` and `keyV_orbKey` share the term and the projection is `rfl`. | Instance, `noncomputable` |
+| `Deepen.orbKey` | 361-370 | ★★★ THE KEY. deepen's greedy descent from `v` run to its leaf and read invariantly, GUARDED by `TinhoferPath` — which is exactly the condition making that index-picked descent labelling-independent. Off the guard the key is constant, so force simply does not act. | Definition, `noncomputable` |
 | `Deepen.keyV_orbKey` | 372-376 | The key's value projection, unfolded. | `@[simp]` |
-| `Deepen.keyEquivariant_orbKey` | 378-396 | ★★★ A4 `①` FOR THE FORCE ROUTE, NO HYPOTHESIS. The guard transports (`amenablePath_step_transport_iff`) and the value transports along the isomorphism `leafOf_transport_of_amenablePath` supplies. `KeyEquivariant` is force's SOLE `①` obligation, so `Force.force_canonizer` / `Composite.composite_canonizer` apply with nothing left to discharge. | — |
+| `Deepen.keyEquivariant_orbKey` | 378-396 | ★★★ A4 `①` FOR THE FORCE ROUTE, NO HYPOTHESIS. The guard transports (`tinhoferPath_step_transport_iff`) and the value transports along the isomorphism `leafOf_transport_of_tinhoferPath` supplies. `KeyEquivariant` is force's SOLE `①` obligation, so `Force.force_canonizer` / `Composite.composite_canonizer` apply with nothing left to discharge. | — |
 
 ## ChainDescent/DeepenLocated.lean
 
@@ -4867,12 +4867,12 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.ncol_lt_step_of_partner` | 74-86 | C1a One proper descent step strictly raises the colour count — the termination measure `deepen_succeeds` uses, isolated for reuse. | — |
 | `Deepen.ncol_le_of_descentReach` | 88-93 | C1a Reachability never lowers the colour count. | — |
 | `Deepen.partner_of_chooseIdK` | 95-117 | C1b A `chooseIdK` level's pick has a same-colour partner (its cell has ≥ 2 members). | — |
-| `Deepen.not_amenablePath_located` | 125-163 | ★★ C2/L2 A non-`AmenablePath` state exposes a rigid obstruction at the BRANCH CELL of a REACHABLE colouring. Strengthens `not_amenablePath_imp_rigidObstruction`, whose `∃ χc cid` names no reachable node and no branch cell — force fires at a node, so it cannot act on the weaker form. | — |
-| `Deepen.not_amenable_deepest_aux` | 173-209 | C3 Fuelled form of `not_amenable_deepest`; `k` bounds the remaining colour deficit `n - ncol χ`. | — |
-| `Deepen.not_amenable_deepest` | 211-227 | ★★★ C3/L3 THE HOOK POINT. `¬Amenable adj χ` ⟹ the descent reaches `ψ` that is SIMULTANEOUSLY `Amenable` (consume exact below, which an orbit-separating equivariant key needs) and carries a `RigidObstructionAt` at its own branch cell (so force's ceiling does not block firing). Non-vacuity measured: 100 inhabitants over 7 families. | — |
-| `Deepen.consume_fail_real_decision_of_amenable` | 229-240 | The `Amenable` form of `consume_fail_gives_real_decision`; `DeepenCertified` states it over the strictly stronger `Certified`, but `deepen_branch_orbit_iff_aut` already takes `Amenable`. | — |
-| `Deepen.rigidObstructionAt_branch_of_amenable` | 242-248 | The `Amenable` form of `rigidObstructionAt_branch_of_certified`. | — |
-| `Deepen.consume_fail_locates` | 250-263 | ★★★ Every consume failure is LOCATED: either a rigid decision in THIS branch cell (node `Amenable`), or one at a reachable node carrying both hypotheses. Neither disjunct is an unanchored existential. | — |
+| `Deepen.not_tinhoferPath_located` | 125-163 | ★★ C2/L2 A non-`TinhoferPath` state exposes a rigid obstruction at the BRANCH CELL of a REACHABLE colouring. Strengthens `not_tinhoferPath_imp_rigidObstruction`, whose `∃ χc cid` names no reachable node and no branch cell — force fires at a node, so it cannot act on the weaker form. | — |
+| `Deepen.not_tinhofer_deepest_aux` | 173-209 | C3 Fuelled form of `not_tinhofer_deepest`; `k` bounds the remaining colour deficit `n - ncol χ`. | — |
+| `Deepen.not_tinhofer_deepest` | 211-227 | ★★★ C3/L3 THE HOOK POINT. `¬Tinhofer adj χ` ⟹ the descent reaches `ψ` that is SIMULTANEOUSLY `Tinhofer` (consume exact below, which an orbit-separating equivariant key needs) and carries a `RigidObstructionAt` at its own branch cell (so force's ceiling does not block firing). Non-vacuity measured: 100 inhabitants over 7 families. | — |
+| `Deepen.consume_fail_real_decision_of_tinhofer` | 229-240 | The `Tinhofer` form of `consume_fail_gives_real_decision`; `DeepenCertified` states it over the strictly stronger `Certified`, but `deepen_branch_orbit_iff_aut` already takes `Tinhofer`. | — |
+| `Deepen.rigidObstructionAt_branch_of_tinhofer` | 242-248 | The `Tinhofer` form of `rigidObstructionAt_branch_of_certified`. | — |
+| `Deepen.consume_fail_locates` | 250-263 | ★★★ Every consume failure is LOCATED: either a rigid decision in THIS branch cell (node `Tinhofer`), or one at a reachable node carrying both hypotheses. Neither disjunct is an unanchored existential. | — |
 ## ChainDescent/KeyComplete.lean
 
 | Name | Line | Description | Notes |
@@ -4881,10 +4881,10 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `KeyComplete.KeySeparates` | 97-100 | The global form — the carried obligation. Force's `SolverSeparates` stated against the descent's branch cell; by the corollary below it is ALSO everything the consume side needs. ⚠ A unification, not a weakening (DUAL doc §10.2). | Definition |
 | `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` | 108-122 | ★★★ THE EXHAUSTIVENESS COROLLARY — under `KeySeparatesAt` the key's argmin over the branch cell is a single `IsColAut`-orbit, so discarding all but one survivor is sound WITHOUT a certificate. Uses no property of the key beyond the hypothesis: no equivariance, no guard, no supply. | — |
 | `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` | 124-135 | The composite's firing lemma generalized from `CellIsOrbit` (about the WHOLE cell — false at a mixed node) to pairwise `WordReach` on the FORCED SET. The brick `Composite.forceThenConsume_singleton_of_cellIsOrbit` was missing. | — |
-| `KeyComplete.keySeparatesAt_orbKey_of_amenable` | 143-146 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Amenable` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
+| `KeyComplete.keySeparatesAt_orbKey_of_tinhofer` | 143-146 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Tinhofer` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
 | `KeyComplete.keySeparatesAt_orbKeyG_of_certifiedG` | 148-151 | Non-vacuity for the poly-guarded key, on its own guard (`CertifiedG S`). | — |
-| `KeyComplete.forceThenConsume_singleton_of_amenable` | 160-168 | ★★★ THE MIXED FIRING THEOREM — at an `Amenable` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
-| `KeyComplete.nodeResolved_of_amenable` | 170-180 | ★★ `Select.NodeResolved` at every `Amenable` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
+| `KeyComplete.forceThenConsume_singleton_of_tinhofer` | 160-168 | ★★★ THE MIXED FIRING THEOREM — at an `Tinhofer` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
+| `KeyComplete.nodeResolved_of_tinhofer` | 170-180 | ★★ `Select.NodeResolved` at every `Tinhofer` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
 | `KeyComplete.rawKey` | 203-208 | The UNGUARDED read (`orbKey` with the `if` removed). NOT `KeyEquivariant` — `leafOf` breaks ties by vertex index — so unusable as a force key; it exists to make the `KeySeparates` / `KeyEquivariant` decomposition a theorem. | Definition |
 | `KeyComplete.keyV_rawKey` | 210-213 | Value projection of `rawKey` (`rfl`). | `@[simp]` |
 | `KeyComplete.keySeparates_rawKey` | 215-227 | ★★ `KeySeparates` HOLDS GLOBALLY for the raw read at `n⁴`, no hypothesis — from the unconditional `isColAut_of_readKey_eq`. ⟹ `KeySeparates` alone is CHEAP and is NOT the wall; the GI-hard object is `KeySeparates ∧ KeyEquivariant`, and the guard on `orbKey`/`orbKeyG` purchases EQUIVARIANCE, not separation. | — |
@@ -4892,4 +4892,4 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `KeyComplete.step_col_eq_refineV` | 245-248 | `Deepen.step` IS `refineV encodeFreeFast ∘ indivOne` — the identification the `Reaches` bridge needs. | — |
 | `KeyComplete.reaches_of_descentReach` | 250-264 | ★ THE BRIDGE: everything `DescentReach` walks to, the descent `Reaches`. `Descend.Reaches.step` and `DescentReach.cons` carry exactly the same side condition, so this is near-definitional — but without it the node `DeepenLocated`'s relocation produces is not formally one the canonizer visits, and `HandledS` quantifies over `Reaches`. | — |
 | `KeyComplete.consume_fail_locates_resolved` | 266-285 | ★★ A consume failure locates a REACHED node that the fused resolver RESOLVES, carrying a genuine rigid decision. `DeepenExact.consume_fail_force_fires` with both weaknesses removed: the node is one the canonizer visits (the bridge above) and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing — which nothing downstream consumed. | — |
-| `KeyComplete.handledS_of_reached_amenable` | 287-295 | `Select.HandledS` on the all-`Amenable` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |
+| `KeyComplete.handledS_of_reached_tinhofer` | 287-295 | `Select.HandledS` on the all-`Tinhofer` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |

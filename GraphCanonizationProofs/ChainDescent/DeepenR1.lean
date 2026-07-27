@@ -1,8 +1,8 @@
 import ChainDescent.DeepenRef
 /-! ⚠⚠ SUPERSEDED & PARKED (2026-07-23, TRACK A) — NOT in `build.sh`, DOES NOT COMPILE against the current
 `deepen`. This is the DISCARDED reference route (`deepenRefSupply`/`DeepenRefInExec`/R1/R2) for `deepenSupply`
-'s `①c`. It was made MOOT by the whole-graph-discretize redesign: `①c` now closes modulo `{Amenable}` alone
-(`DeepenAmenable.deepenSupply_guarded_canonizer_direct`), with `[DISC]`/gate/termination structural and
+'s `①c`. It was made MOOT by the whole-graph-discretize redesign: `①c` now closes modulo `{Tinhofer}` alone
+(`DeepenTinhofer.deepenSupply_guarded_canonizer_direct`), with `[DISC]`/gate/termination structural and
 `AnchorFires` eliminated. Retained for provenance only — see `docs/chain-descent-deepen-supply.md` STATUS +
 §8/§9 (provenance) and `docs/00-START-HERE.md` §2 C3b. Do NOT build on this. -/
 
@@ -40,22 +40,22 @@ gate (`twistOf_isColAut`) supplies it.** (`§L.4` of the C# linear-oracle is a F
 ANALOGY here; the earlier "Miyazaki defeats it" was RETRACTED — `deepen` takes a SINGLE path per anchor,
 not the search tree.)
 
-**The factoring.** `R1 ⟸ (Amenable ⟹ R1) + Amenable`, where
+**The factoring.** `R1 ⟸ (Tinhofer ⟹ R1) + Tinhofer`, where
 
-  `Amenable adj χ` := at every level of the canonical deepening, the cell `chooseIdK` selects is a single
+  `Tinhofer adj χ` := at every level of the canonical deepening, the cell `chooseIdK` selects is a single
   orbit of the pointwise-stabilizer of the vertices individualized so far.
 
-⚠ **Firing does NOT imply `Amenable`** — a WL-merged multi-orbit cell can still discretize (a nested
-force-decision the greedy pick resolves arbitrarily). So `Amenable` is a genuine domain hypothesis, and a
-`¬Amenable` FIRING graph (the still-missing part-III "fires-but-incomplete" witness) is the one untested
+⚠ **Firing does NOT imply `Tinhofer`** — a WL-merged multi-orbit cell can still discretize (a nested
+force-decision the greedy pick resolves arbitrarily). So `Tinhofer` is a genuine domain hypothesis, and a
+`¬Tinhofer` FIRING graph (the still-missing part-III "fires-but-incomplete" witness) is the one untested
 regime. VALIDATION (`ScratchR1Probe`, deleted): no R1 falsifier — exec-orbits == ref-orbits on `G8` ×7
 relabellings (rich [4,2,2]), `cG8`, `t3`, `wcyc9`; rigid `F12` all-singletons both sides; and G8 exec =
 **16 = Σ k(k−1) over {4,2,2}** = one DIRECT verifying twist per same-orbit ordered pair.
 
-**LAYER 1 — `Amenable ⟹ R1`, MECHANICAL (provable now).** A **re-relating induction** with invariant:
+**LAYER 1 — `Tinhofer ⟹ R1`, MECHANICAL (provable now).** A **re-relating induction** with invariant:
 *the deepen-from-`a` and replay-from-`b` descents (a~b via ρ∈Aut) stay related by an automorphism ρ′
 mapping a's individualized sequence to b's, pointwise.* Per level: same id (`chooseIdK_transport`);
-`C_b = ρ′(C_a)` is single-orbit under `Stab(indiv_b)` (= `Amenable`) so ∃ `τ∈Stab(indiv_b)` with
+`C_b = ρ′(C_a)` is single-orbit under `Stab(indiv_b)` (= `Tinhofer`) so ∃ `τ∈Stab(indiv_b)` with
 `τ(ρ′ u_a) = u_b`, and `τρ′` re-establishes the invariant (τ absorbs the lowest-index mismatch). At
 discreteness the leaves are automorphism-related ⟹ colour-matchable ⟹ the exec twist for (a,b) VERIFIES
 ⟹ direct WordReach. Tools: `refineEquivariant`, `step_transport`, `chooseIdK_transport`, `twistOf_isColAut`.
@@ -63,7 +63,7 @@ discreteness the leaves are automorphism-related ⟹ colour-matchable ⟹ the ex
 BRANCH CELL (the anchors), but the twists also move `K∖cell` — needs the induction extended to `K` or a
 "the cell controls `K`" argument.
 
-**LAYER 2 — `Amenable`, per-family aiming GENERAL.** = IR-amenability along the canonical path (1-WL
+**LAYER 2 — `Tinhofer`, per-family aiming GENERAL.** = IR-amenability along the canonical path (1-WL
 identifies the graph at each individualized stage). FALSE universally (CFI) but known for deepen's target
 families (coherent configs / bounded-WL-dim rank-2 graphs, Cayley graphs of `PGL(3,2)` = mp7's base,
 affine/projective groups); discharge by connecting to existing WL-completeness seals (Route-C
@@ -72,8 +72,8 @@ property; a resisting family routes to force/kernel.
 
 **BACKUP (held) — the poly all-or-nothing gate.** Per level, check whether individualizing each member of
 the chosen id-cell gives the same footprint-partition; emit all-or-nothing, defer on failure. CHECKS
-`Amenable` locally instead of proving it (①c by construction). Only if Layer 1's K-coverage or Layer 2's
-discharge truly stalls. **NOT the banned GI∈P reasoning** — `Amenable` is concrete, measured-true, and
+`Tinhofer` locally instead of proving it (①c by construction). Only if Layer 1's K-coverage or Layer 2's
+discharge truly stalls. **NOT the banned GI∈P reasoning** — `Tinhofer` is concrete, measured-true, and
 per-family dischargeable.
 -/
 

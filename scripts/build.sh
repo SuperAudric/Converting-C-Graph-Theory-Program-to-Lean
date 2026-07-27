@@ -142,9 +142,9 @@ MODULES=(
   ChainDescent.DeepenSupply           # C3b: anchor-deepening supply (all-anchors; base symmetry)
   ChainDescent.DeepenTransport        # C3b: pipeline transports except the vertex pick (chooseIdK_transport)
   ChainDescent.DeepenCrux             # C3b: crux decomposed + soundness half (deepenGens_sound)
-  ChainDescent.DeepenAmenable         # C3b track A: ①c modulo {Amenable}; rigid handoff lemmas
-  ChainDescent.DeepenCertified        # C3b: Amenable as a RUN-TIME CERTIFICATE (Certified ⟹ Amenable)
-  ChainDescent.DeepenLocated          # C3b: consume failure LOCATED at a reachable Amenable+obstructed node
+  ChainDescent.DeepenTinhofer         # C3b track A: ①c modulo {Tinhofer}; rigid handoff lemmas
+  ChainDescent.DeepenCertified        # C3b: Tinhofer as a RUN-TIME CERTIFICATE (Certified ⟹ Tinhofer)
+  ChainDescent.DeepenLocated          # C3b: consume failure LOCATED at a reachable Tinhofer+obstructed node
   ChainDescent.DeepenKey              # C3b: orbKey — the equivariant force key (KeyEquivariant, no hypothesis)
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)

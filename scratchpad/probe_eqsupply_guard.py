@@ -47,10 +47,10 @@ def deck_certifies(n, adj, col, cell):
 
 def hook_paths(name, n, adj, maxdepth=2):
     """At every hook node, walk the greedy path from each rep and ask whether the
-    equivariant-supply proxy certifies each cell that AmenablePath requires."""
+    equivariant-supply proxy certifies each cell that TinhoferPath requires."""
     seen=set(); hooks=0; lv_tot=0; lv_ok=0; full_ok=0
     def amen_vertex_levels(col, v):
-        """the cells AmenablePath inspects on v's path (all are single orbits at a hook node)"""
+        """the cells TinhoferPath inspects on v's path (all are single orbits at a hook node)"""
         out=[]; cur=step(n,adj,col,v)
         for _ in range(n+1):
             c2,C2=P.target_cell(n,cur)
@@ -67,7 +67,7 @@ def hook_paths(name, n, adj, maxdepth=2):
         if cid is None: return
         tb=P.orbit_partition(n,adj,col,C)
         if tb is None: return
-        # hook node = Amenable AND >=2 orbits in the branch cell
+        # hook node = Tinhofer AND >=2 orbits in the branch cell
         amen=True
         for r in C:
             cur=step(n,adj,col,r)
@@ -92,7 +92,7 @@ def hook_paths(name, n, adj, maxdepth=2):
     print(f'{name:22s} hooks={hooks:4d}  path-cells={lv_tot:5d}  certified by the '
           f'equivariant proxy={lv_ok:5d} ({pc:5.1f}%)   hook nodes FULLY certified={full_ok}/{hooks}')
 
-print("Would an equivariant (deck-family) supply certify the cells `AmenablePath` inspects?\n")
+print("Would an equivariant (deck-family) supply certify the cells `TinhoferPath` inspects?\n")
 for nm,g in [('C3+C4', P.disjoint([P.cycle(3),P.cycle(4)])),
              ('C4+C5', P.disjoint([P.cycle(4),P.cycle(5)])),
              ('C3+C4+C5', P.disjoint([P.cycle(3),P.cycle(4),P.cycle(5)])),

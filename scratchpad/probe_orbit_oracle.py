@@ -16,7 +16,7 @@ oracle, for BOTH variants:
     SINGLE-anchor  = the C# `HarvestTwists(p, part, cell, cell[0])`
     ALL-anchor     = the Lean `Deepen.deepenGens` (loops every rep)
 
-and correlates every false negative with `AmenablePath` ("certified-below"): at every
+and correlates every false negative with `TinhoferPath` ("certified-below"): at every
 deepening level, is the chosen cell a single orbit of the CURRENT stabiliser?
 
 Exact orbit oracle: a ~ b  iff  canon(adj, indiv(chi,a)) == canon(adj, indiv(chi,b))
@@ -112,8 +112,8 @@ def harvest_from(n, adj, chi, anchor, firsts):
         out[rj] = None if dj is None else twist_of(n, adj, chi, chi1, K, dj)
     return out
 
-# ───────────────────────────────────────────── AmenablePath ("certified below")
-def amenable_path(n, adj, col, oracle_cap=200000):
+# ───────────────────────────────────────────── TinhoferPath ("certified below")
+def tinhofer_path(n, adj, col, oracle_cap=200000):
     """Walk deepen's path from `col`; at each level test whether the CHOSEN CELL is a
     single orbit of Aut(adj, cur).  Returns (levels, all_certified, first_bad_level)."""
     cur = list(col); levels = 0; bad = None
@@ -175,10 +175,10 @@ def measure(name, n, adj, leafcap=200000, verbose=True):
     fp_all = sum(1 for i, a in enumerate(C) for b in C[i+1:]
                  if true_blk[a] != true_blk[b] and find(a) == find(b))
 
-    # ---- certification (AmenablePath) per anchor ------------------------------
+    # ---- certification (TinhoferPath) per anchor ------------------------------
     lv, cert = [], []
     for a in C[:min(len(C), 8)]:
-        L, ok, bad = amenable_path(n, adj, firsts[a])
+        L, ok, bad = tinhofer_path(n, adj, firsts[a])
         lv.append(L); cert.append(ok)
     ncert = sum(1 for x in cert if x is True)
 

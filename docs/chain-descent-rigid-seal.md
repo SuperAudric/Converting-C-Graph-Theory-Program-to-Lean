@@ -48,9 +48,17 @@
 >   `(B, act, baseRead)` with `{FramesEquivariantB, ReadAtEquivariant, AggFaithfulB}`; **① unconditional** and now **POLY**
 >   — the concrete `forcedVal`-based **pinning** instance (`baseReadPin`, gauge-fixed, ORDER-FREE, reuses step 2) is
 >   `FramesEquivariantB` at a **singleton** frame family (`keyEquivariant_compKey_readAggB_pin`, ZERO carried beyond the
->   extraction). **▶ NEXT = the `mp7` probe** (a RICH pinning family whose aggregate discretizes the rigid part while
->   tying gauge ⟹ `AggFaithfulB` non-vacuous) **= P2**; then **P3-ring** (`Z_{2^k}`, `IR §11.13`) → **P4**
->   (`canonizesRigidResidue_or_flags`).
+>   extraction).
+>   **⚠⚠ THIS STATUS BLOCK WAS BEHIND ITS OWN §8.2 — corrected 2026-07-27.** It used to read "▶ NEXT = the `mp7`
+>   probe (a RICH pinning family whose aggregate discretizes the rigid part) = P2". **The probe is DONE and its
+>   round-2 result REFUTED that hope** (`scratchpad/lin_discretize.py`, `probe_basereadWL.py`; full record =
+>   §8.2's "step 9F PROBE, ROUND 2" block, ~lines 819–847): single-bit `forcedVal` = **0/30 forced** (empty on
+>   the homogeneous CFI code) and the WL-neighbourhood read `baseReadWL`, even iterated to a fixpoint with the
+>   forcing bit, **stabilizes at 10–16 classes — it does NOT discretize** (probe v2's apparent success was a
+>   fine-colouring fixture artifact). Only the **RREF-column signature** (`structReadAt`) discretizes: 30/30.
+>   **▶ NEXT (per §8.2, authoritative) = P2 the RECOVER-CORE READ** — a canonical column order on the RIGID part
+>   (gauge tied) feeding `structReadAt`; carried per-family (`ForcingModel.bridge`/L4), **NOT a WL shortcut**.
+>   Then **P3** `AggFaithful` → **P3-ring** (`Z_{2^k}`, `IR §11.13`) → **P4** (`canonizesRigidResidue_or_flags`).
 > - **★ DE-CLASSING (the `②` shape — why this is not an infinite family ladder).** `ReadSeparatesRigid`/`AggFaithful` IS
 >   the **kernel characterization** `ker(recovered H) = automorphism-gauge`, stated ONCE. The cell's "class" is
 >   `ker(recovered H)` as a subspace: Schurian (`ker` = all) / CFI (`ker` = cycle-space) / mixed (intermediate) = the
@@ -78,7 +86,7 @@
 > reader (Route B′, anchor-history) · 6 general `refineBy read` interface · 6b–9C single-`ord` `structRead` (the `ker=0`
 > ANCHOR) · **7 + 9D `readAgg` = the mixed-native object of record** · 9E/P1 poly-frame interface; see §8.2 (per-step
 > detail) and §10 (gap ledger). The consume side feeds a clean per-node handoff
-> object, and discharging its `Amenable` hypothesis is a rigid-side deliverable (§9.1). **The mixed-cell/fusion design
+> object, and discharging its `Tinhofer` hypothesis is a rigid-side deliverable (§9.1). **The mixed-cell/fusion design
 > question is SETTLED (§8.1):** the "Progress" predicate IS the already-built sel-rewrite
 > (`Select.HandledS`/`NodeResolved`/`selNode`, 2026-07-18) — resolver-aware, single-path, `②` preserved, flags ONLY at
 > the true mutual stall (`selNode_stall_iff`).
@@ -163,7 +171,7 @@
 >   `Phase2.Solver`/`Sound`/`IsoInvariant`.
 > - **The handoff (NEW, from consume).** Consume (`deepenSupply`) now provably exposes, per node, a concrete
 >   `RigidObstructionAt` — a same-colour non-automorphic pair the rigid side must distinguish
->   (`not_amenablePath_imp_rigidObstruction`, axiom-clean). This is the *interleaved* handoff object, replacing the
+>   (`not_tinhoferPath_imp_rigidObstruction`, axiom-clean). This is the *interleaved* handoff object, replacing the
 >   retired whole-residue R(G).
 > - **The build ahead (this doc §9):** the seam bridge (R0a discretizing / R0b wall) + the Algorithm-R Lean roadmap
 >   (P1 extraction → P2 forcing-bridge → P3 solve+iso → P4 capstone `canonizesRigidResidue_or_flags`) + per-family
@@ -215,13 +223,13 @@ the live model interleaves per relation, and the flag fires exactly at mutual st
 
 ## 3. What the rigid side receives — the handoff (the interleaved object)
 
-**The per-node handoff object (NEW, from the consume work — all axiom-clean, `DeepenAmenable.lean`):**
+**The per-node handoff object (NEW, from the consume work — all axiom-clean, `DeepenTinhofer.lean`):**
 - **`RigidObstructionAt adj χc cid`** (:200) := `∃ u w, χc u = cid ∧ χc w = cid ∧ ∀ σ, IsColAut adj χc σ → σ u ≠ w`
   — a concrete same-colour non-automorphic pair.
-- `rigidObstruction_of_not_cellSingleOrbit` (:206) — an `Amenable`-violation *is* one (de Morgan).
+- `rigidObstruction_of_not_cellSingleOrbit` (:206) — an `Tinhofer`-violation *is* one (de Morgan).
 - `rigidObstruction_imp_not_cellIsOrbit` (:957) — consume can NEVER connect a rigid pair (deepen gens are
   `IsColAut`). **Deepen defers soundly; it hands off, never mishandles.**
-- `not_amenablePath_imp_rigidObstruction` (:972) — a consume-stall ALWAYS surfaces one (possibly *deeper* than the
+- `not_tinhoferPath_imp_rigidObstruction` (:972) — a consume-stall ALWAYS surfaces one (possibly *deeper* than the
   compared pair, which under fusion is itself automorphic).
 
 The interleaving loop:
@@ -250,7 +258,7 @@ non-automorphic pair**. ⚠ **UPDATED 2026-07-23 — this is now PARTLY PROVED (
 augmented key `leafColKey` provably separates every non-automorphic branch pair on the **discretizing regime**
 (`RigidSeal.rigidResolved_leafColKey`, axiom-clean), and R0b (`rigidResolved_of_smallAutThin`) reduces the whole
 cell to the wall `SmallAutThinAt` (non-discretizing pairs only). The blanket assumed `hsep`
-(`Force.lean:409` `forceBy_singleton_of_separating`; `Composite.lean:238`, `DeepenAmenable.lean:947`) is thus
+(`Force.lean:409` `forceBy_singleton_of_separating`; `Composite.lean:238`, `DeepenTinhofer.lean:947`) is thus
 shrunk from *all* non-automorphic pairs to just the non-discretizing residue. `Handled` (`Residue.lean:162`) /
 `HandledS` (`SelectNode.lean:842`) quantify `CellResolved`/`NodeResolved` over the reachable non-discrete
 colourings; R0a is the **first** force-branch discharge (every prior discharge went through *consume*).
@@ -843,7 +851,7 @@ the deferred B1d solve-speed perf. The rigid-solver track is **complete for hand
       per-family content (`ForcingModel`/L4), NOT a WL shortcut; the probe confirms the RREF-column read discretizes once
       the order exists. **(2) P3** — `AggFaithful` = the kernel-characterization faithfulness (carried, probe-confirmed
       non-vacuous at the decision level). **(3) P3-ring** — `Z_{2^k}`. **(4) P4** — `canonizesRigidResidue_or_flags`.
-      **(5) SEAM** — `nodeResolved_compKey_readAggB_faithful` feeds `Select.HandledS`; couple to consume's `Amenable` (§9.1);
+      **(5) SEAM** — `nodeResolved_compKey_readAggB_faithful` feeds `Select.HandledS`; couple to consume's `Tinhofer` (§9.1);
       residue `¬HandledS` at non-linear rigid = the wall (§9.2, claim #2/#3).
       **⚠ FOLD/MULTIPLICITY ROBUSTNESS (checked 2026-07-25 vs C# `Option2Solver.MaxFoldMultiplicity=6`).** The C# `s`-cap
       is on the **fold/cover layer = the CONSUME side** (`FoldSupply.lean` "B4 port, consume side"; `foldSupply`/`deckSupply`
@@ -917,20 +925,20 @@ robust to a non-empty residual (`endgame §3` design note).
 rigid residue's final shape — the atoms should not be pinned before the rigid seal fixes what the rigid-obstruction
 atom actually is. When R0a/R0b/P4 land, the swap becomes mechanical and non-vacuity follows.
 
-### 9.1 The `Amenable` coupling — this is ALSO how consume's ①c closes
+### 9.1 The `Tinhofer` coupling — this is ALSO how consume's ①c closes
 
 The rigid seal is not merely a parallel second seal; it is **what discharges the consume side's last domain
-hypothesis.** `deepenSupply`'s ①c is closed modulo **`{Amenable}` alone** (`deepenSupply_guarded_canonizer_direct`,
-`DeepenAmenable.lean`; the track-A whole-graph-discretize redesign made `[DISC]`/gate/termination structural and
-**eliminated `AnchorFires`** — 2026-07-23, axiom-clean), and an **`Amenable`-violation is exactly a `RigidObstructionAt`**
+hypothesis.** `deepenSupply`'s ①c is closed modulo **`{Tinhofer}` alone** (`deepenSupply_guarded_canonizer_direct`,
+`DeepenTinhofer.lean`; the track-A whole-graph-discretize redesign made `[DISC]`/gate/termination structural and
+**eliminated `AnchorFires`** — 2026-07-23, axiom-clean), and an **`Tinhofer`-violation is exactly a `RigidObstructionAt`**
 (`rigidObstruction_of_not_cellSingleOrbit`) — a same-colour non-automorphic pair, i.e. the rigid side's job. So
-"discharge `Amenable` on family `F`" is not a separate obligation from the rigid work; it **is** the statement that
+"discharge `Tinhofer` on family `F`" is not a separate obligation from the rigid work; it **is** the statement that
 the interleaving delivers Schurian (pure-symmetry) cells to consume, with the rigid pairs peeled by force first.
 Concretely, per family this is a **totality/scheduling** obligation (not a new conjecture): show that every cell
-deepen visits on `F` is either a single Stab-orbit (Schurian → consume fires, `Amenable` holds) or carries a
-`RigidObstructionAt` that force separates first (→ refine → re-expose → the now-Schurian sub-cell is `Amenable`).
+deepen visits on `F` is either a single Stab-orbit (Schurian → consume fires, `Tinhofer` holds) or carries a
+`RigidObstructionAt` that force separates first (→ refine → re-expose → the now-Schurian sub-cell is `Tinhofer`).
 Both branches route through the same shared wall `hSmallAutThin`. **Framing consequence:** every family the rigid
-seal handles (R2: CFI, `Z_{2^k}`, multipede) simultaneously discharges deepen's `Amenable` on that family — track
+seal handles (R2: CFI, `Z_{2^k}`, multipede) simultaneously discharges deepen's `Tinhofer` on that family — track
 the two together, not as separate legs.
 
 ### 9.2 The `ForcingModel.bridge` coupling — this is ALSO the W2 completeness track's last obligation
@@ -957,13 +965,13 @@ STATE" note. **Track them together — but count the `A_k`-layer extraction as W
 
 | Item | Statement | Status |
 |---|---|---|
-| **handoff** | `RigidObstructionAt` exposed per consume-stall; deepen defers soundly | **PROVED** (`not_amenablePath_imp_rigidObstruction`, `rigidObstruction_imp_not_cellIsOrbit`) |
+| **handoff** | `RigidObstructionAt` exposed per consume-stall; deepen defers soundly | **PROVED** (`not_tinhoferPath_imp_rigidObstruction`, `rigidObstruction_imp_not_cellIsOrbit`) |
 | **contract** | `Phase2.Solver`/`Sound`/`IsoInvariant` | **stated** (`Phase2Handoff.lean`); Algorithm R is the future witness |
 | **R0a** | discretizing → `keyV` separates non-aut pairs (`RigidResolved`) → `NodeResolved` | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`, in `build.sh`) — via the augmented key `leafColKey` (plain `lookaheadKey` INSUFFICIENT); `colAut_of_leafColKey_eq` / `rigidResolved_leafColKey` / `nodeResolved_leafColKey_of_rigid_discretizing` |
 | **mixed-cell** | resolver-aware selector picks a resolvable cell (single-path) + `Reaches`-exposure; flag = true mutual stall | **✅ SETTLED 2026-07-23** (§8.1) — the "Progress" predicate IS the ALREADY-BUILT sel-rewrite `Select.HandledS`/`NodeResolved`/`selNode` (2026-07-18). No object change, no new predicate, `②` single-path PRESERVED. |
 | **R0b** | leafColKey precursor (non-discretizing separation) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSeal.lean`) — `smallAutThinAt_of_all_discretize` + `rigidResolved_of_smallAutThin` + `nodeResolved_leafColKey_of_rigid`. ⚠ `SmallAutThinAt` is the leafColKey-specialization, **NOT the scheme wall `hSmallAutThin`** and **not dischargeable**; superseded by `compKey` |
 | **compKey** | dischargeable seam: force key = `leafColKey` (disc, tag `1::`) ∘ solver key `sk` (non-disc rigid, tag `0::`); carried obligation = `SolverSeparates` (a solver property, discharged by P3's `Phase2.Sound`) | **✅ LANDED 2026-07-23, axiom-clean** (§9, `RigidSeal.lean`) — `compKey` + `keyEquivariant_compKey` (given `KeyEquivariant sk`) + `SolverSeparates` + `rigidResolved_compKey` + `nodeResolved_compKey_of_rigid`. `sk`/`SolverSeparates` stubbed to P3. The force half of "consume-can't-fire ⟹ force-fires." |
-| **R6** | interleaving-convergence: `¬Amenable ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **(c) force-separates-every-exposed-rigid-pair** — **✅ DISCHARGED for the LINEAR residue 2026-07-24** by the (D) firing capstone `RigidGen.nodeResolved_compKey_genOfRef` (`NodeResolved` on a rigid cell ⟸ `ref` discrete + rigidity, soundness free). What remains of (c) is exactly `ref` discretizing on the residue (the solve, carried per-family) and the non-linear residue (the wall). Deepest ③/totality claim. |
+| **R6** | interleaving-convergence: `¬Tinhofer ⟹ exposed `RigidObstructionAt` ⟹ force separates it ⟹ `NodeResolved` ⟹ no reached node is a genuine mutual stall (`selNode_stall_iff`) except at the wall` | **predicate layer BUILT** (`HandledS`/`NodeResolved`/`selNode_stall_iff`/`answersS_of_handledS`/`handledS_of_handled`, all axiom-clean). **(c) force-separates-every-exposed-rigid-pair** — **✅ DISCHARGED for the LINEAR residue 2026-07-24** by the (D) firing capstone `RigidGen.nodeResolved_compKey_genOfRef` (`NodeResolved` on a rigid cell ⟸ `ref` discrete + rigidity, soundness free). What remains of (c) is exactly `ref` discretizing on the residue (the solve, carried per-family) and the non-linear residue (the wall). Deepest ③/totality claim. |
 | **P1** | extraction-soundness: forced ⟹ backed by a `rowspace(H)` codeword (support ⊆ `insert j S`) | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingCircuits.lean`, Mathlib-only standalone) — `Forced`/`cl_up` + `forced_certificate` (unconditional; the codeword not the indicator ⟹ no minimality needed) + `certificate_of_forced_notMem`/`certificate_mem_rowspace` |
 | **P2** | forcing-model bridge (graph 1-WL forcing ↔ F₂ `Forced H`); transport P1→graph; exact recovery | **✅ LANDED 2026-07-23, axiom-clean** (`ForcingModel.lean`) — `ForcingModel.bridge` (Layer B, carried) + `recoverable_of_model` (transport) + `rowspace_eq_span_recoverable` (recovery mod carried `RecoversRowspace`) |
 | **P3-I** | interface: reduce `compKey`'s `KeyEquivariant`/`SolverSeparates` to the pointed solver contract `PtSolver`/`PtIsoInvariant`/`PtSound` (+ `hemit` no-flag) | **✅ LANDED 2026-07-23, axiom-clean** (`RigidSolverInterface.lean`) — `skOf` + `keyEquivariant_skOf` + `solverSeparates_skOf` |

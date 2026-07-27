@@ -13,7 +13,7 @@ closes the consume→force hook.
 
 > `readKey` equal ⟹ the two branch vertices are in the same orbit.   (`isColAut_of_readKey_eq`)
 
-and that is *unconditional* — no `Amenable`, no rigidity. It is pure completeness of the encoding:
+and that is *unconditional* — no `Tinhofer`, no rigidity. It is pure completeness of the encoding:
 
 * the greedy leaf at fuel `n` is **discrete** (§1, the `Descend.ncol` measure — the same one
   `deepen_succeeds` uses, with `ncol_lt_step_of_partner` already isolated in `DeepenLocated`), and its
@@ -24,7 +24,7 @@ and that is *unconditional* — no `Amenable`, no rigidity. It is pure completen
 * and `indivOne χ u` takes an **odd** value exactly at `u` — so that last equation forces `ρ u = w`,
   while halving it gives `χ ∘ ρ = χ`. Together: `IsColAut adj χ ρ ∧ ρ u = w` (§4).
 
-**The payoff (§5).** At a node that is `Amenable` (so both guards are open) with a `RigidObstructionAt`
+**The payoff (§5).** At a node that is `Tinhofer` (so both guards are open) with a `RigidObstructionAt`
 in its branch cell, `orbKey` separates the obstructed pair, so `Force.forceBy_narrows_of_key_ne` fires.
 Chaining with `DeepenLocated.consume_fail_locates`:
 
@@ -186,7 +186,7 @@ theorem matchPerm_col {χa χb : Colouring n} (hda : Discrete χa) (hla : ∀ x,
   rwa [colEquiv_val, colEquiv_val] at this
 
 /-- **★★ THE COMPLETENESS DIRECTION — UNCONDITIONAL.** Two discrete leaves with equal reads are
-related by a colour-automorphism carrying `u` to `w`. No `Amenable`: this is completeness of the
+related by a colour-automorphism carrying `u` to `w`. No `Tinhofer`: this is completeness of the
 encoding, not a property of the descent. -/
 theorem isColAut_of_readKey_eq {adj : AdjMatrix n} {χ : Colouring n} {u w : Fin n}
     {χa χb : Colouring n} (hda : Discrete χa) (hla : ∀ x, χa x < n)
@@ -256,14 +256,14 @@ Assembling: at a node where both guards are open, `orbKey` separates any pair th
 colour-automorphism links. Combined with `DeepenLocated`'s localization, a consume failure makes force
 fire at a reachable node. -/
 
-/-- The guard is open at every branch rep of an `Amenable` node — that is what `Amenable` says. -/
-theorem amenablePath_of_amenable {adj : AdjMatrix n} {χ : Colouring n} (hA : Amenable adj χ)
-    {v : Fin n} (hv : v ∈ Descend.branches χ) : AmenablePath adj χ n (step adj χ v) := hA v hv
+/-- The guard is open at every branch rep of an `Tinhofer` node — that is what `Tinhofer` says. -/
+theorem tinhoferPath_of_tinhofer {adj : AdjMatrix n} {χ : Colouring n} (hA : Tinhofer adj χ)
+    {v : Fin n} (hv : v ∈ Descend.branches χ) : TinhoferPath adj χ n (step adj χ v) := hA v hv
 
 /-- **★★ `orbKey` SEPARATES a non-automorphic pair.** The contrapositive of `isColAut_of_readKey_eq`,
 with both guards open. -/
 theorem orbKey_ne_of_no_aut {adj : AdjMatrix n} {χ : Colouring n} {u w : Fin n}
-    (hAu : AmenablePath adj χ n (step adj χ u)) (hAw : AmenablePath adj χ n (step adj χ w))
+    (hAu : TinhoferPath adj χ n (step adj χ u)) (hAw : TinhoferPath adj χ n (step adj χ w))
     (hno : ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w) :
     Force.keyV orbKey adj χ u ≠ Force.keyV orbKey adj χ w := by
   rw [keyV_orbKey, keyV_orbKey, if_pos hAu, if_pos hAw]
@@ -277,29 +277,29 @@ theorem orbKey_ne_of_no_aut {adj : AdjMatrix n} {χ : Colouring n} {u w : Fin n}
       hkey
   exact hno ρ hρ hρu
 
-/-- **★★★ B3 — AT AN `Amenable` NODE WITH A RIGID OBSTRUCTION, FORCE STRICTLY NARROWS.**
+/-- **★★★ B3 — AT AN `Tinhofer` NODE WITH A RIGID OBSTRUCTION, FORCE STRICTLY NARROWS.**
 The obstruction names a branch pair no colour-automorphism links; `orbKey` separates it
 (`orbKey_ne_of_no_aut`); `Force.forceBy_narrows_of_key_ne` converts that into strictly fewer
 branches. Note this does **not** contradict `Force.forceBy_no_narrowing_on_orbit`: the obstruction is
 exactly the statement that the cell is *not* a single orbit. -/
 theorem forceBy_orbKey_narrows {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
-    (hc : Descend.targetColour χ = some c) (hA : Amenable adj χ)
+    (hc : Descend.targetColour χ = some c) (hA : Tinhofer adj χ)
     (hobs : RigidObstructionAt adj χ c) :
     (Descend.narrow (Force.forceBy orbKey) adj χ).length < (Descend.branches χ).length := by
   obtain ⟨u, w, hu, hw, hno⟩ := hobs
   have hub : u ∈ Descend.branches χ := (Descend.mem_branches_iff hc u).mpr hu
   have hwb : w ∈ Descend.branches χ := (Descend.mem_branches_iff hc w).mpr hw
   exact Force.forceBy_narrows_of_key_ne hub hwb
-    (orbKey_ne_of_no_aut (amenablePath_of_amenable hA hub)
-      (amenablePath_of_amenable hA hwb) hno)
+    (orbKey_ne_of_no_aut (tinhoferPath_of_tinhofer hA hub)
+      (tinhoferPath_of_tinhofer hA hwb) hno)
 
-/-- **★★★ B2 — AT AN `Amenable` NODE, `orbKey`'s FIBRES **ARE** THE ORBITS.** `⟸` is the ceiling
+/-- **★★★ B2 — AT AN `Tinhofer` NODE, `orbKey`'s FIBRES **ARE** THE ORBITS.** `⟸` is the ceiling
 (`Force.keyV_aut_invariant`, free from `keyEquivariant_orbKey`); `⟹` is `isColAut_of_readKey_eq`.
 
 This is also the **consistency check** against `Force.forceBy_no_narrowing_on_orbit`: the key is
 constant on each orbit, so force can never cut *inside* one — it separates orbits and nothing finer.
 Measured agreement: 147/147 hook nodes (scoping doc §2.5). -/
-theorem orbKey_eq_iff_orbit {adj : AdjMatrix n} {χ : Colouring n} (hA : Amenable adj χ)
+theorem orbKey_eq_iff_orbit {adj : AdjMatrix n} {χ : Colouring n} (hA : Tinhofer adj χ)
     {u w : Fin n} (hu : u ∈ Descend.branches χ) (hw : w ∈ Descend.branches χ) :
     Force.keyV orbKey adj χ u = Force.keyV orbKey adj χ w
       ↔ ∃ σ : Equiv.Perm (Fin n), IsColAut adj χ σ ∧ σ u = w := by
@@ -307,16 +307,16 @@ theorem orbKey_eq_iff_orbit {adj : AdjMatrix n} {χ : Colouring n} (hA : Amenabl
   · intro hkey
     by_contra hno
     push Not at hno
-    exact orbKey_ne_of_no_aut (amenablePath_of_amenable hA hu)
-      (amenablePath_of_amenable hA hw) (fun σ hσ => hno σ hσ) hkey
+    exact orbKey_ne_of_no_aut (tinhoferPath_of_tinhofer hA hu)
+      (tinhoferPath_of_tinhofer hA hw) (fun σ hσ => hno σ hσ) hkey
   · rintro ⟨σ, hσ, rfl⟩
     exact (Force.keyV_aut_invariant keyEquivariant_orbKey hσ.relabel hσ.transport u).symm
 
 /-- **★★★ D2 — FORCE NARROWS THE CELL TO A SINGLE ORBIT.** Any two survivors of `forceBy orbKey`
-attain the same (minimal) key, hence by `orbKey_eq_iff_orbit` are automorphic. So at an `Amenable`
+attain the same (minimal) key, hence by `orbKey_eq_iff_orbit` are automorphic. So at an `Tinhofer`
 node force does not merely *shrink* the fan-out — it reduces it to one orbit, which is precisely the
 input `Composite.forceThenConsume_singleton_of_cellIsOrbit` wants. -/
-theorem forcedSet_single_orbit {adj : AdjMatrix n} {χ : Colouring n} (hA : Amenable adj χ)
+theorem forcedSet_single_orbit {adj : AdjMatrix n} {χ : Colouring n} (hA : Tinhofer adj χ)
     {u w : Fin n}
     (hu : u ∈ Force.keepMin orbKey adj χ (Descend.branches χ))
     (hw : w ∈ Force.keepMin orbKey adj χ (Descend.branches χ)) :
@@ -337,7 +337,7 @@ theorem exists_targetColour {χ : Colouring n} (hd : ¬ Discrete χ) :
 /-- **★★★ D1 — THE HOOK, CLOSED. A CONSUME FAILURE MAKES FORCE FIRE.**
 
 If `deepenSupply` cannot make the branch cell a single orbit, then the descent reaches a colouring
-`ψ` — the node itself when it is `Amenable`, otherwise the deeper one `not_amenable_deepest`
+`ψ` — the node itself when it is `Tinhofer`, otherwise the deeper one `not_tinhofer_deepest`
 produces — at which `forceBy orbKey` **strictly narrows the branch cell**.
 
 This is the strongest form available: §1.2 of the scoping doc records a measured witness (CFI over a
@@ -349,10 +349,10 @@ theorem consume_fail_force_fires (adj : AdjMatrix n) {χ : Colouring n}
     ∃ ψ : Colouring n, DescentReach adj χ ψ ∧
       (Descend.narrow (Force.forceBy orbKey) adj ψ).length < (Descend.branches ψ).length := by
   obtain ⟨c, hc⟩ := exists_targetColour hd
-  by_cases hA : Amenable adj χ
+  by_cases hA : Tinhofer adj χ
   · exact ⟨χ, DescentReach.refl _,
-      forceBy_orbKey_narrows hc hA (rigidObstructionAt_branch_of_amenable hc hA hfail)⟩
-  · obtain ⟨ψ, hreach, hAψ, cid, hct, hobs⟩ := not_amenable_deepest adj hA
+      forceBy_orbKey_narrows hc hA (rigidObstructionAt_branch_of_tinhofer hc hA hfail)⟩
+  · obtain ⟨ψ, hreach, hAψ, cid, hct, hobs⟩ := not_tinhofer_deepest adj hA
     exact ⟨ψ, hreach, forceBy_orbKey_narrows hct hAψ hobs⟩
 
 end Deepen

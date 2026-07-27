@@ -10,7 +10,7 @@ The counter-claim (user's option 3, made precise):
   Proof sketch.  Run the greedy descent from `a` in `adj` and from `tau a` in `tau.adj`.
   Cell ids match (chooseIdK invariant).  The min-INDEX picks differ: w vs w'.  If the
   chosen cell is a single orbit of IsColAut(adj, chi_cur) -- which is exactly what
-  AmenablePath asserts -- then there is rho in Aut fixing chi_cur with rho(w) = tau^-1(w'),
+  TinhoferPath asserts -- then there is rho in Aut fixing chi_cur with rho(w) = tau^-1(w'),
   and (tau . rho) is again an isomorphism adj -> tau.adj carrying the picks onto each other.
   Induct.  At the discrete leaf the two are related by an isomorphism, so the relabelled
   adjacency -- the cert -- is EQUAL.                                                  QED?

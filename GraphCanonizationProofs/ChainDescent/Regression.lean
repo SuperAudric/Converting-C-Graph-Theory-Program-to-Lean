@@ -540,7 +540,7 @@ each, so ≥ 1 level genuinely certified). -/
       (Deepen.step G8 (Refine.warmRefineVec G8 (fun _ => 0)).col v))).length = 4
 
 /-! Guard SHUT on `t3` under `deckSupply` — a real deferral (the key returns `[]`, force does not
-act, `①` is untouched). The firing loss `CertPath S ⟹ AmenablePath`, never the converse, is observable. -/
+act, `①` is untouched). The firing loss `CertPath S ⟹ TinhoferPath`, never the converse, is observable. -/
 #guard (Descend.branches t3Root.col).all (fun v =>
   !decide (Deepen.CertPath (Deck.deckSupply (n := 15)) t3 15 (Deepen.step t3 t3Root.col v)))
 

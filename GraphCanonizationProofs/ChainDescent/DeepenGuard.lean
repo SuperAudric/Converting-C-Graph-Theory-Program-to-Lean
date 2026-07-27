@@ -3,7 +3,7 @@ import ChainDescent.DeepenExact
 /-!
 # A POLY, RELABELLING-INVARIANT GUARD for `orbKey`
 
-`orbKey`'s guard is `AmenablePath`, which is *decidable* but only by an `n!` search — so `orbKey` is
+`orbKey`'s guard is `TinhoferPath`, which is *decidable* but only by an `n!` search — so `orbKey` is
 `noncomputable` and cannot enter `Publication.canonForm?`. This file replaces the guard by one that is
 **poly, sound and invariant**, parameterised by any supply that already transports.
 
@@ -19,11 +19,11 @@ descent, so it inherits exactly that descent's labelling dependence. A guard bui
 **`SupplyEquivariant`** — i.e. whose *verified* generator list transports as `σ`-conjugates. Then:
 
 * **SOUND** (§3) — `S`'s generators are verified `IsColAut` and `WordReach` composes, so
-  `CellIsOrbit S` at a level gives that level's `CellSingleOrbit`, hence `CertPath S ⟹ AmenablePath`.
+  `CellIsOrbit S` at a level gives that level's `CellSingleOrbit`, hence `CertPath S ⟹ TinhoferPath`.
   This is `DeepenCertified`'s T1 with `deepenSupply` generalised away.
 * **INVARIANT** (§2, §4) — `CellIsOrbit S` transports (`cellIsOrbit_transport`, from
   `SupplyEquivariant` + `branches_transport_perm`), and the per-level index-pick mismatch is absorbed
-  exactly as in `amenablePath_transport`, with SOUND supplying the stabiliser element.
+  exactly as in `tinhoferPath_transport`, with SOUND supplying the stabiliser element.
 * **POLY, and now genuinely EXECUTABLE** (§5, §5a) — `Consume.decidableWordReach` decides `WordReach`
   by the orbit BFS that `mem_orbit_iff_wordReach` already characterises, so `CellIsOrbit` and then
   `CertPath` are decidable by structural recursion and `orbKeyG` is a plain `def`. The `Classical.dec`
@@ -37,12 +37,12 @@ Five supplies already carry `GensEquivariant` (hence `SupplyEquivariant` via
 
 ## ⚠ What this costs — read before using it in place of `orbKey`
 
-`CertPath S ⟹ AmenablePath`, never the converse. So `orbKeyG S` is a **restriction** of `orbKey`: it
+`CertPath S ⟹ TinhoferPath`, never the converse. So `orbKeyG S` is a **restriction** of `orbKey`: it
 agrees wherever it is defined and defers more often. Consequently
 
 > the unconditional theorem **`consume_fail_force_fires` (`DeepenExact`) is stated for `orbKey` and
 > stays there.** For `orbKeyG S` the localization half is unchanged — a consume failure still reaches a
-> node that is `Amenable` and carries a `RigidObstructionAt` — but the *firing* half becomes
+> node that is `Tinhofer` and carries a `RigidObstructionAt` — but the *firing* half becomes
 > conditional on the poly guard being open at that node (`forceBy_orbKeyG_narrows`).
 
 That is a firing loss, not a soundness loss: where the guard is shut the key is constant, force simply
@@ -63,7 +63,7 @@ variable {n : Nat}
 
 /-! ## 1. `WordReach` over a verified list is an automorphism — for ANY supply
 
-`DeepenAmenable.wordReach_imp_isColAut` is stated for `deepenSupply`; its proof uses only that every
+`DeepenTinhofer.wordReach_imp_isColAut` is stated for `deepenSupply`; its proof uses only that every
 member of the list is a verified `IsColAut`. Restated at that generality. -/
 
 theorem wordReach_isColAut {adj : AdjMatrix n} {χ : Colouring n}
@@ -121,7 +121,7 @@ theorem cellIsOrbit_transport {S : Supply n} (hS : SupplyEquivariant S)
 
 /-! ## 3. `CertPath` — the guard, and its soundness
 
-The recursion is `AmenablePath`'s verbatim, with the *observable* `CellIsOrbit S` in place of the
+The recursion is `TinhoferPath`'s verbatim, with the *observable* `CellIsOrbit S` in place of the
 unobservable `CellSingleOrbit`. Note it is stated at the level's own colouring: by the landed selector
 identity `chooseIdK_eq_targetColour`, the cell `chooseIdK` picks **is** `Descend.branches`' cell, so
 `CellIsOrbit S` speaks about exactly the cell the level individualizes. -/
@@ -137,22 +137,22 @@ def CertPath (S : Supply n) (adj : AdjMatrix n) : Nat → Refine.ColData n → P
              | [] => True
              | w :: _ => CertPath S adj fuel (step adj cur.col w))
 
-/-- Every anchor's path is certified. The poly analogue of `Amenable`. -/
+/-- Every anchor's path is certified. The poly analogue of `Tinhofer`. -/
 def CertifiedG (S : Supply n) (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
   ∀ r ∈ Descend.branches χ, CertPath S adj n (step adj χ r)
 
 /-- **★★ SOUND — the poly guard implies the real one.** Each level's `CellIsOrbit S` is a *checked*
 transitivity of verified automorphisms, which is what `CellSingleOrbit` asks for. -/
-theorem amenablePath_of_certPath (S : Supply n) (adj : AdjMatrix n) (χp : Colouring n) :
+theorem tinhoferPath_of_certPath (S : Supply n) (adj : AdjMatrix n) (χp : Colouring n) :
     ∀ (fuel : Nat) (cur : Refine.ColData n),
-      CertPath S adj fuel cur → AmenablePath adj χp fuel cur := by
+      CertPath S adj fuel cur → TinhoferPath adj χp fuel cur := by
   intro fuel
   induction fuel with
   | zero => intro _ _; trivial
   | succ fuel ih =>
       intro cur h
       unfold CertPath at h
-      unfold AmenablePath
+      unfold TinhoferPath
       dsimp only            -- zeta-reduce the goal's `let χc := cur.col`
       cases hco : chooseIdK (List.finRange n) cur.col with
       | none => exact trivial
@@ -168,13 +168,13 @@ theorem amenablePath_of_certPath (S : Supply n) (adj : AdjMatrix n) (χp : Colou
                 dsimp only at htail
                 exact ih _ htail
 
-theorem amenable_of_certifiedG {S : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
-    (h : CertifiedG S adj χ) : Amenable adj χ :=
-  fun r hr => amenablePath_of_certPath S adj χ n _ (h r hr)
+theorem tinhofer_of_certifiedG {S : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
+    (h : CertifiedG S adj χ) : Tinhofer adj χ :=
+  fun r hr => tinhoferPath_of_certPath S adj χ n _ (h r hr)
 
 /-! ## 4. ★★ THE GUARD TRANSPORTS
 
-Same shape as `amenablePath_transport`: the level's cell is a single orbit (which §3 extracts from the
+Same shape as `tinhoferPath_transport`: the level's cell is a single orbit (which §3 extracts from the
 *observable* hypothesis), so a stabiliser element carries `σ w_a` to `w_b` and the relating isomorphism
 accumulates. The only new ingredient is `cellIsOrbit_transport`. -/
 
@@ -300,7 +300,7 @@ theorem certPath_cons {S : Supply n} {adj : AdjMatrix n} {fuel : Nat} {cur : Ref
 the `Classical.dec` placeholder the file shipped with, and is what makes `orbKeyG` **computable** — the
 last `noncomputable` between this track and `Publication.canonForm?`.
 
-⚠ `orbKey` is *not* repairable this way and should stay the theory-side object: its `AmenablePath`
+⚠ `orbKey` is *not* repairable this way and should stay the theory-side object: its `TinhoferPath`
 guard asks whether a cell is a single orbit of the *whole* colour-automorphism group, which is the
 automorphism-partition problem (GI-complete, Booth–Colbourn §2.3). `CertPath` asks the same question of
 a *supply's verified generators*, which is a finite reachability test. -/
@@ -372,7 +372,7 @@ theorem certPathCost_le {S : Supply n} {adj : AdjMatrix n} {c₂ : Nat}
 /-! ## 6. `orbKeyG` — the same read, the poly guard, the billed cost -/
 
 /-- **★★★ THE GUARDED KEY.** Identical to `orbKey` except that the `if` tests the *observable*
-`CertPath S` instead of `AmenablePath` — and, since §5, it is **computable**: the guard is the orbit
+`CertPath S` instead of `TinhoferPath` — and, since §5, it is **computable**: the guard is the orbit
 BFS, not a classical choice. The cost bills the read (`n⁴`) *and* the guard (`certPathCost`). -/
 def orbKeyG (S : Supply n) : Force.Key n := fun adj χ v =>
   (if CertPath S adj n (step adj χ v)
@@ -396,7 +396,7 @@ theorem keyCost_orbKeyG_le {S : Supply n} {adj : AdjMatrix n} {c₂ : Nat}
   Nat.add_le_add_left (certPathCost_le hS n (step adj χ v)) _
 
 /-- **★★★ `①` FOR THE POLY-GUARDED KEY.** The guard transports (§4) and the value transports along the
-`AmenablePath` the guard implies (§3 + `leafOf_transport_of_amenablePath`). No hypothesis beyond `S`
+`TinhoferPath` the guard implies (§3 + `leafOf_transport_of_tinhoferPath`). No hypothesis beyond `S`
 being equivariant — which five landed supplies already are. -/
 theorem keyEquivariant_orbKeyG {S : Supply n} (hS : SupplyEquivariant S) :
     Force.KeyEquivariant (orbKeyG S) := by
@@ -405,10 +405,10 @@ theorem keyEquivariant_orbKeyG {S : Supply n} (hS : SupplyEquivariant S) :
   by_cases hC : CertPath S adj n (step adj χ v)
   · rw [if_pos ((certPath_step_transport_iff hS σ adj χ v).mpr hC), if_pos hC]
     obtain ⟨ρ, hρadj, hρφ, hρleaf⟩ :=
-      leafOf_transport_of_amenablePath adj χ n (step adj χ v)
+      leafOf_transport_of_tinhoferPath adj χ n (step adj χ v)
         (step (relabelAdj σ adj) (transportColouring σ χ) (σ v)) σ (Descend.indivOne χ v)
         (step_transport σ adj χ v) (refines_step adj χ v)
-        (amenablePath_of_certPath S adj χ n _ hC)
+        (tinhoferPath_of_certPath S adj χ n _ hC)
     rw [hρleaf, ← hρadj, Descend.indivOne_transport, ← hρφ, readKey_transport]
   · rw [if_neg (fun h => hC ((certPath_step_transport_iff hS σ adj χ v).mp h)), if_neg hC]
 
@@ -434,7 +434,7 @@ theorem orbKeyG_ne_of_no_aut {S : Supply n} {adj : AdjMatrix n} {χ : Colouring 
 
 /-- **★★★ FORCE FIRES UNDER THE POLY GUARD.** At a node the guard certifies, a rigid obstruction in the
 branch cell makes `forceBy (orbKeyG S)` strictly narrow. Compare `forceBy_orbKey_narrows`: the only
-change is `CertifiedG S` (poly, observable) in place of `Amenable` (an `n!` search). -/
+change is `CertifiedG S` (poly, observable) in place of `Tinhofer` (an `n!` search). -/
 theorem forceBy_orbKeyG_narrows {S : Supply n} {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
     (hc : Descend.targetColour χ = some c) (hG : CertifiedG S adj χ)
     (hobs : RigidObstructionAt adj χ c) :
@@ -446,30 +446,30 @@ theorem forceBy_orbKeyG_narrows {S : Supply n} {adj : AdjMatrix n} {χ : Colouri
     (orbKeyG_ne_of_no_aut (hG u hub) (hG w hwb) hno)
 
 /-- **★★ THE POLY-GUARDED HOOK.** A consume failure still *locates* a force-actionable node — that half
-(`DeepenLocated.not_amenable_deepest`) does not depend on the guard at all. What the poly guard costs is
+(`DeepenLocated.not_tinhofer_deepest`) does not depend on the guard at all. What the poly guard costs is
 that firing there needs the guard to be open, which is why this is stated with `CertifiedG S ψ` as a
 hypothesis rather than derived. The unconditional statement remains
 `DeepenExact.consume_fail_force_fires`, over `orbKey`. -/
 theorem consume_fail_force_fires_guarded (S : Supply n) (adj : AdjMatrix n) {χ : Colouring n}
     (hd : ¬ Discrete χ) (hfail : ¬ Consume.CellIsOrbit deepenSupply adj χ) :
-    ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Amenable adj ψ ∧
+    ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Tinhofer adj ψ ∧
       (∃ cid, Descend.targetColour ψ = some cid ∧ RigidObstructionAt adj ψ cid) ∧
       (CertifiedG S adj ψ →
         (Descend.narrow (Force.forceBy (orbKeyG S)) adj ψ).length < (Descend.branches ψ).length) := by
   obtain ⟨c, hc⟩ := exists_targetColour hd
-  by_cases hA : Amenable adj χ
+  by_cases hA : Tinhofer adj χ
   · refine ⟨χ, DescentReach.refl _, hA,
-      ⟨c, hc, rigidObstructionAt_branch_of_amenable hc hA hfail⟩, fun hG => ?_⟩
-    exact forceBy_orbKeyG_narrows hc hG (rigidObstructionAt_branch_of_amenable hc hA hfail)
-  · obtain ⟨ψ, hreach, hAψ, cid, hct, hobs⟩ := not_amenable_deepest adj hA
+      ⟨c, hc, rigidObstructionAt_branch_of_tinhofer hc hA hfail⟩, fun hG => ?_⟩
+    exact forceBy_orbKeyG_narrows hc hG (rigidObstructionAt_branch_of_tinhofer hc hA hfail)
+  · obtain ⟨ψ, hreach, hAψ, cid, hct, hobs⟩ := not_tinhofer_deepest adj hA
     exact ⟨ψ, hreach, hAψ, ⟨cid, hct, hobs⟩, fun hG => forceBy_orbKeyG_narrows hct hG hobs⟩
 
-/-- Wherever the poly guard is open, it certifies the `Amenable`-guarded key's guard too, so the two
+/-- Wherever the poly guard is open, it certifies the `Tinhofer`-guarded key's guard too, so the two
 keys **agree**: `orbKeyG S` is a restriction of `orbKey`, never a different function. -/
 theorem orbKeyG_eq_orbKey_of_certPath {S : Supply n} {adj : AdjMatrix n} {χ : Colouring n}
     {v : Fin n} (h : CertPath S adj n (step adj χ v)) :
     Force.keyV (orbKeyG S) adj χ v = Force.keyV orbKey adj χ v := by
-  rw [keyV_orbKeyG, keyV_orbKey, if_pos h, if_pos (amenablePath_of_certPath S adj χ n _ h)]
+  rw [keyV_orbKeyG, keyV_orbKey, if_pos h, if_pos (tinhoferPath_of_certPath S adj χ n _ h)]
 
 /-! ## 7. Concrete instantiations — the design is not vacuous
 
@@ -508,7 +508,7 @@ Everything needed is monotonicity: more verified generators can only make `WordR
 `CellIsOrbit` easier, hence `CertPath` easier. And `Deck.appendSupply` already carries the equivariance
 closure (`Deck.gensEquivariant_appendSupply`), so the union costs `①` nothing.
 
-⚠ **This raises firing, never soundness or `①`.** `CertPath S ⟹ AmenablePath` for *every* `S` (§3), so
+⚠ **This raises firing, never soundness or `①`.** `CertPath S ⟹ TinhoferPath` for *every* `S` (§3), so
 a bigger guard admits more nodes without weakening what admission means. And the cost stays honest: the
 union's `supplyCost` is the **sum** of its members', which is exactly what `keyCost_orbKeyG_le` charges
 through its `c₂`. -/

@@ -1,11 +1,11 @@
-import ChainDescent.DeepenAmenable
+import ChainDescent.DeepenTinhofer
 
 /-!
-# `Amenable` as a RUN-TIME CERTIFICATE, not an assumption
+# `Tinhofer` as a RUN-TIME CERTIFICATE, not an assumption
 
-**What this file is for.** `DeepenAmenable`'s capstone `deepenSupply_guarded_canonizer_direct` carries
-`hAmen : ∀ adj χ, Amenable adj χ` — a hypothesis that is **false on rigid graphs**, which is why that
-capstone is a conditional scaffold rather than an applicable theorem. `Amenable` is a statement about
+**What this file is for.** `DeepenTinhofer`'s capstone `deepenSupply_guarded_canonizer_direct` carries
+`hAmen : ∀ adj χ, Tinhofer adj χ` — a hypothesis that is **false on rigid graphs**, which is why that
+capstone is a conditional scaffold rather than an applicable theorem. `Tinhofer` is a statement about
 the *true* automorphism group (`CellSingleOrbit` quantifies over all of `IsColAut`), so it cannot be
 observed by the algorithm.
 
@@ -17,24 +17,24 @@ observed by the algorithm.
 > **the harvested twists acting transitively on a cell IS a proof that the cell is a single orbit.**
 
 That is `cellSingleOrbit_of_certifiedOrbit` below, and it is one line given `wordReach_imp_isColAut`.
-Lifting it along `AmenablePath`'s recursion gives `amenable_of_certified`: the whole `Amenable`
+Lifting it along `TinhoferPath`'s recursion gives `tinhofer_of_certified`: the whole `Tinhofer`
 hypothesis is discharged by a predicate the algorithm can *check*, level by level, in polynomial time
 (one deepen harvest per level).
 
 **The three further results.**
 
-* **§4 — a consume failure is a decision AT THIS CELL.** `not_amenablePath_imp_rigidObstruction` only
+* **§4 — a consume failure is a decision AT THIS CELL.** `not_tinhoferPath_imp_rigidObstruction` only
   gives `∃ χc cid, RigidObstructionAt adj χc cid` — an obstruction *somewhere*, possibly far below.
   At a certified node the failure is *located*: `consume_fail_gives_real_decision` names two branch
   vertices linked by **no** colour-automorphism, and `rigidObstructionAt_branch_of_certified` states
   it as a `RigidObstructionAt` at **this** colouring and **this** branch cell. Force is handed a node
   it can act on, not an existence statement.
-* **§5 — `Amenable` TRANSPORTS.** `AmenablePath`'s per-level pick is by vertex index and so does not
+* **§5 — `Tinhofer` TRANSPORTS.** `TinhoferPath`'s per-level pick is by vertex index and so does not
   commute with a relabelling — the obstruction this whole track keeps meeting. It is absorbable
-  exactly as in `joint`: the level's cell *is* a single orbit (that is what `AmenablePath` says), so a
+  exactly as in `joint`: the level's cell *is* a single orbit (that is what `TinhoferPath` says), so a
   stabilizer element carries `σ wₐ` to `w_b` and the relating isomorphism accumulates
-  (`amenablePath_transport`, `amenable_transport`).
-* **§6 — `①c` WITH NO HYPOTHESIS.** Given §5, a supply that simply *defers* where `Amenable` fails is
+  (`tinhoferPath_transport`, `tinhofer_transport`).
+* **§6 — `①c` WITH NO HYPOTHESIS.** Given §5, a supply that simply *defers* where `Tinhofer` fails is
   equivariant unconditionally (good side: §5 transports; bad side: both emit nothing). So
   `deepenSupplyGuarded_canonizer` carries **no** hypothesis at all, where
   `deepenSupply_guarded_canonizer_direct` carried a globally-false one. Soundness no longer rests on
@@ -47,7 +47,7 @@ and sound, but its own invariance is not established, because `deepenGens` is in
 **Non-vacuity (§3, proved here).** `chooseIdK (List.finRange n) χ = Descend.targetColour χ` — deepen's
 per-level cell selector and the canonizer's branch cell are the *same object*. So the harvest
 `deepenGens adj χ`, which runs on `Descend.branches χ`, is in fact a harvest on the very cell
-`AmenablePath` asks about, and the consume-side `Consume.CellIsOrbit` discharges each level's
+`TinhoferPath` asks about, and the consume-side `Consume.CellIsOrbit` discharges each level's
 certificate (`certifiedOrbit_of_cellIsOrbit_chooseIdK`). Without this the certificate would be sound
 but not obviously *achievable*.
 -/
@@ -81,7 +81,7 @@ theorem cellSingleOrbit_of_certifiedOrbit {adj : AdjMatrix n} {χ : Colouring n}
 
 /-- The certificate at the **branch cell** is exactly `Consume.CellIsOrbit` for `deepenSupply` — the
 predicate the consume side already speaks in. (Stated for the branch cell's own colour; the bridge to
-`AmenablePath`'s `chooseIdK`-supplied `cid` is the selector-identity noted at the file end.) -/
+`TinhoferPath`'s `chooseIdK`-supplied `cid` is the selector-identity noted at the file end.) -/
 theorem certifiedOrbit_of_cellIsOrbit {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
     (hc : Descend.targetColour χ = some c) (h : Consume.CellIsOrbit deepenSupply adj χ) :
     CertifiedOrbit adj χ c := by
@@ -90,9 +90,9 @@ theorem certifiedOrbit_of_cellIsOrbit {adj : AdjMatrix n} {χ : Colouring n} {c 
 
 /-! ## 2. Lifting the certificate along the deepening path -/
 
-/-- **`CertifiedPath`** — the observable mirror of `AmenablePath`: at every level that individualizes a
+/-- **`CertifiedPath`** — the observable mirror of `TinhoferPath`: at every level that individualizes a
 cell, that cell's single-orbit-ness is *witnessed* by the harvest rather than assumed. The recursion is
-`AmenablePath`'s, verbatim, with `CertifiedOrbit` in place of `CellSingleOrbit`. -/
+`TinhoferPath`'s, verbatim, with `CertifiedOrbit` in place of `CellSingleOrbit`. -/
 def CertifiedPath (adj : AdjMatrix n) (χp : Colouring n) :
     Nat → Refine.ColData n → Prop
   | 0, _ => True
@@ -106,19 +106,19 @@ def CertifiedPath (adj : AdjMatrix n) (χp : Colouring n) :
              | [] => True
              | w :: _ => CertifiedPath adj χp fuel (step adj χc w))
 
-/-- **★★ THE LIFT — a certified path IS an amenable path.** Level-by-level induction: each level's
+/-- **★★ THE LIFT — a certified path IS an tinhofer path.** Level-by-level induction: each level's
 certificate discharges that level's `CellSingleOrbit` via `cellSingleOrbit_of_certifiedOrbit`, and the
 tails match because the two recursions are the same recursion. -/
-theorem amenablePath_of_certifiedPath (adj : AdjMatrix n) (χp : Colouring n) :
+theorem tinhoferPath_of_certifiedPath (adj : AdjMatrix n) (χp : Colouring n) :
     ∀ (fuel : Nat) (cur : Refine.ColData n),
-      CertifiedPath adj χp fuel cur → AmenablePath adj χp fuel cur := by
+      CertifiedPath adj χp fuel cur → TinhoferPath adj χp fuel cur := by
   intro fuel
   induction fuel with
   | zero => intro cur _; trivial
   | succ fuel ih =>
       intro cur h
       unfold CertifiedPath at h
-      unfold AmenablePath
+      unfold TinhoferPath
       dsimp only at h ⊢
       -- `cases hco :` already substitutes in the GOAL; only `h` still mentions `chooseIdK`.
       cases hco : chooseIdK (List.finRange n) cur.col with
@@ -134,18 +134,18 @@ theorem amenablePath_of_certifiedPath (adj : AdjMatrix n) (χp : Colouring n) :
               rw [hfl] at htail
               exact ih _ htail
 
-/-- **`Certified`** — the observable mirror of `Amenable`: every anchor's deepening path is certified. -/
+/-- **`Certified`** — the observable mirror of `Tinhofer`: every anchor's deepening path is certified. -/
 def Certified (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
   ∀ r ∈ Descend.branches χ, CertifiedPath adj χ n (step adj χ r)
 
-/-- **★★★ `Certified ⟹ Amenable`.** The domain hypothesis the whole `C3b` track carries is discharged
+/-- **★★★ `Certified ⟹ Tinhofer`.** The domain hypothesis the whole `C3b` track carries is discharged
 by a predicate the algorithm computes. -/
-theorem amenable_of_certified {adj : AdjMatrix n} {χ : Colouring n}
-    (h : Certified adj χ) : Amenable adj χ :=
-  fun r hr => amenablePath_of_certifiedPath adj χ n (step adj χ r) (h r hr)
+theorem tinhofer_of_certified {adj : AdjMatrix n} {χ : Colouring n}
+    (h : Certified adj χ) : Tinhofer adj χ :=
+  fun r hr => tinhoferPath_of_certifiedPath adj χ n (step adj χ r) (h r hr)
 
 /-- The `①c` capstone restated over the observable hypothesis. ⚠ **This is not yet the unconditional
-theorem** — `Certified` is *stronger* than `Amenable`, so as a GLOBAL hypothesis this is strictly worse.
+theorem** — `Certified` is *stronger* than `Tinhofer`, so as a GLOBAL hypothesis this is strictly worse.
 Its value is that `Certified` is *checkable*: the next block replaces the global quantifier by a
 per-node run-time guard, which is what actually removes the hypothesis. -/
 theorem deepenSupply_guarded_canonizer_of_certified
@@ -154,13 +154,13 @@ theorem deepenSupply_guarded_canonizer_of_certified
       (Descend.canonForm? (Refine.encodeFreeFast (n := n))
         (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
           (deepenSupply (n := n))))) :=
-  deepenSupply_guarded_canonizer_direct (fun adj χ => amenable_of_certified (hCert adj χ))
+  deepenSupply_guarded_canonizer_direct (fun adj χ => tinhofer_of_certified (hCert adj χ))
 
 /-! ## 3. Non-vacuity — deepen's cell selector IS the canonizer's branch cell
 
 `CertifiedOrbit adj χ cid` is sound for any `cid` (§1), but for it to be *achievable* the harvest has
-to run on the very cell `AmenablePath` asks about. `deepenGens adj χ` harvests on `Descend.branches χ`
-(selected by `Descend.targetColour`), while `AmenablePath` names its cell by `chooseIdK (List.finRange
+to run on the very cell `TinhoferPath` asks about. `deepenGens adj χ` harvests on `Descend.branches χ`
+(selected by `Descend.targetColour`), while `TinhoferPath` names its cell by `chooseIdK (List.finRange
 n)`. This section proves those two selectors are **the same object**, which is what lets
 `certifiedOrbit_of_cellIsOrbit` fire at every level rather than only at the branch cell.
 
@@ -243,7 +243,7 @@ theorem mem_nonSingletonColours_iff (χ : Colouring n) (c : Nat) :
 
 /-- **★★ THE SELECTOR IDENTITY.** deepen's per-level cell selector and the canonizer's branch-cell
 selector are the *same object*. Hence `deepenGens adj χ` — which harvests on `Descend.branches χ` — is
-a harvest on exactly the cell `AmenablePath` names, so `Consume.CellIsOrbit deepenSupply adj χ`
+a harvest on exactly the cell `TinhoferPath` names, so `Consume.CellIsOrbit deepenSupply adj χ`
 discharges that level's `CertifiedOrbit` (`certifiedOrbit_of_cellIsOrbit`). This is what makes the
 certificate of §1–§2 *achievable* rather than merely sound. -/
 theorem chooseIdK_eq_targetColour (χ : Colouring n) :
@@ -299,9 +299,9 @@ theorem chooseIdK_eq_targetColour (χ : Colouring n) :
 
 /-- **★★★ THE PER-LEVEL BRIDGE, ASSEMBLED.** At *any* level of a deepening path, the consume-side
 predicate `Consume.CellIsOrbit deepenSupply adj χ` discharges that level's `CertifiedOrbit` for the
-very `cid` that `AmenablePath` names — because the two selectors are the same object (§3). Composed
+very `cid` that `TinhoferPath` names — because the two selectors are the same object (§3). Composed
 with §1–§2 this is the whole soundness route: a consume-side orbit check, level by level, discharges
-`Amenable`. -/
+`Tinhofer`. -/
 theorem certifiedOrbit_of_cellIsOrbit_chooseIdK {adj : AdjMatrix n} {χ : Colouring n} {cid : Nat}
     (hcid : chooseIdK (List.finRange n) χ = some cid)
     (h : Consume.CellIsOrbit deepenSupply adj χ) : CertifiedOrbit adj χ cid :=
@@ -309,19 +309,19 @@ theorem certifiedOrbit_of_cellIsOrbit_chooseIdK {adj : AdjMatrix n} {χ : Colour
 
 /-! ## 4. The forcible node — a consume failure is a decision AT THIS CELL
 
-`not_amenablePath_imp_rigidObstruction` says a path failure exposes a `RigidObstructionAt` *somewhere*:
+`not_tinhoferPath_imp_rigidObstruction` says a path failure exposes a `RigidObstructionAt` *somewhere*:
 `∃ χc cid, RigidObstructionAt adj χc cid`, with no control over which colouring or cell. That is the
 "exposed rigid obstruction". This section upgrades it: at a **certified** node, a consume failure
 names a non-automorphic pair **in the branch cell of the node you are standing on**. -/
 
 /-- **Exactness at a certified node.** deepen's emitted branch-orbit relation *is* the `IsColAut`-orbit
 relation. `⊆` is soundness (`wordReach_imp_isColAut`); `⊇` is `exec_recovers_refgen_on_cell` through
-`Amenable`, which the certificate supplies. -/
+`Tinhofer`, which the certificate supplies. -/
 theorem branchOrbit_iff_aut_of_certified (adj : AdjMatrix n) (χ : Colouring n)
     (hCert : Certified adj χ) {u : Fin n} (hu : u ∈ Descend.branches χ) {w : Fin n} :
     Consume.WordReach (Consume.verified deepenSupply adj χ) u w
       ↔ ∃ β : Equiv.Perm (Fin n), IsColAut adj χ β ∧ β u = w :=
-  deepen_branch_orbit_iff_aut adj χ (amenable_of_certified hCert) hu
+  deepen_branch_orbit_iff_aut adj χ (tinhofer_of_certified hCert) hu
 
 /-- **★★★ A CONSUME FAILURE AT A CERTIFIED NODE IS A REAL DECISION IN THIS CELL.** If the certificate
 held at every level and consume still could not make the branch cell one orbit, then two *named*
@@ -338,7 +338,7 @@ theorem consume_fail_gives_real_decision {adj : AdjMatrix n} {χ : Colouring n}
   exact (branchOrbit_iff_aut_of_certified adj χ hCert hu).mpr ⟨σ, hσ, hσu⟩
 
 /-- **★★★ THE SAME FACT IN THE PROJECT'S VOCABULARY — a LOCATED `RigidObstructionAt`.** Compare
-`not_amenablePath_imp_rigidObstruction`, which yields `∃ χc cid, RigidObstructionAt adj χc cid` with no
+`not_tinhoferPath_imp_rigidObstruction`, which yields `∃ χc cid, RigidObstructionAt adj χc cid` with no
 control over `χc` or `cid`. Here the obstruction is at **this** colouring and **this** branch cell, so
 the force side is handed a node it can act on rather than an existence statement. -/
 theorem rigidObstructionAt_branch_of_certified {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
@@ -348,16 +348,16 @@ theorem rigidObstructionAt_branch_of_certified {adj : AdjMatrix n} {χ : Colouri
   obtain ⟨u, hu, w, hw, hrig⟩ := consume_fail_gives_real_decision hCert hfail
   exact ⟨u, w, (Descend.mem_branches_iff hc u).mp hu, (Descend.mem_branches_iff hc w).mp hw, hrig⟩
 
-/-! ## 5. `Amenable` TRANSPORTS — removing the GLOBAL quantifier
+/-! ## 5. `Tinhofer` TRANSPORTS — removing the GLOBAL quantifier
 
-`deepen_branchOrbit_transport` carries `hAmen : ∀ adj χ, Amenable adj χ` — globally quantified purely
-because the transport argument needs `Amenable` on the *relabelled* graph too, and `AmenablePath`'s
+`deepen_branchOrbit_transport` carries `hAmen : ∀ adj χ, Tinhofer adj χ` — globally quantified purely
+because the transport argument needs `Tinhofer` on the *relabelled* graph too, and `TinhoferPath`'s
 per-level pick is by vertex index, which does not commute with a relabelling. That index pick is the
 same obstruction the whole track keeps meeting.
 
 It is removable. The pick mismatch is absorbed exactly as in `joint`: the chosen cell is a single
-orbit (that is what `AmenablePath` *says*), so a stabilizer element carries `σ w_a` to `w_b`, and the
-relating isomorphism accumulates. The result is that `Amenable` is transport-stable, so the global
+orbit (that is what `TinhoferPath` *says*), so a stabilizer element carries `σ w_a` to `w_b`, and the
+relating isomorphism accumulates. The result is that `Tinhofer` is transport-stable, so the global
 `∀ adj χ` collapses to the single graph in hand. -/
 
 /-- Relabelling composes. -/
@@ -385,21 +385,21 @@ theorem chooseIdK_finRange_transport (σ : Equiv.Perm (Fin n)) (χ : Colouring n
     chooseIdK (List.finRange n) (transportColouring σ χ) = chooseIdK (List.finRange n) χ := by
   rw [chooseIdK_eq_targetColour, chooseIdK_eq_targetColour, Descend.targetColour_transport]
 
-/-- **★★ `AmenablePath` TRANSPORTS.** The relating isomorphism accumulates a stabilizer element per
-level, exactly as in `joint`: `AmenablePath` asserts the level's cell is a single orbit, which is
+/-- **★★ `TinhoferPath` TRANSPORTS.** The relating isomorphism accumulates a stabilizer element per
+level, exactly as in `joint`: `TinhoferPath` asserts the level's cell is a single orbit, which is
 precisely what supplies the `τ` absorbing the index-pick mismatch `σ w_a ↦ w_b`. -/
-theorem amenablePath_transport (adj : AdjMatrix n) (χp χq : Colouring n) :
+theorem tinhoferPath_transport (adj : AdjMatrix n) (χp χq : Colouring n) :
     ∀ (fuel : Nat) (cur_a cur_b : Refine.ColData n) (σ : Equiv.Perm (Fin n)),
       cur_b.col = transportColouring σ cur_a.col →
-      AmenablePath adj χp fuel cur_a →
-      AmenablePath (relabelAdj σ adj) χq fuel cur_b := by
+      TinhoferPath adj χp fuel cur_a →
+      TinhoferPath (relabelAdj σ adj) χq fuel cur_b := by
   intro fuel
   induction fuel with
   | zero => intro _ _ _ _ _; trivial
   | succ fuel ih =>
       intro cur_a cur_b σ hrel hA
-      unfold AmenablePath at hA
-      unfold AmenablePath
+      unfold TinhoferPath at hA
+      unfold TinhoferPath
       dsimp only at hA ⊢
       cases hco : chooseIdK (List.finRange n) cur_a.col with
       | none =>
@@ -461,11 +461,11 @@ theorem amenablePath_transport (adj : AdjMatrix n) (χp χq : Colouring n) :
                     (τ * σ) hrel' hArec
                   rwa [hadj'] at this
 
-/-- **★★★ `Amenable` TRANSPORTS.** Hence the global `∀ adj χ, Amenable adj χ` that
+/-- **★★★ `Tinhofer` TRANSPORTS.** Hence the global `∀ adj χ, Tinhofer adj χ` that
 `deepen_branchOrbit_transport` carries is equivalent to the *local* fact on the graph in hand: it was
 globally quantified only to cover the relabelled graph, which this now supplies. -/
-theorem amenable_transport {adj : AdjMatrix n} {χ : Colouring n} (σ : Equiv.Perm (Fin n))
-    (h : Amenable adj χ) : Amenable (relabelAdj σ adj) (transportColouring σ χ) := by
+theorem tinhofer_transport {adj : AdjMatrix n} {χ : Colouring n} (σ : Equiv.Perm (Fin n))
+    (h : Tinhofer adj χ) : Tinhofer (relabelAdj σ adj) (transportColouring σ χ) := by
   intro r hr
   have hbr : ∃ y ∈ Descend.branches χ, σ y = r := by
     rw [(Descend.branches_transport_perm σ χ).mem_iff, List.mem_map] at hr
@@ -473,26 +473,26 @@ theorem amenable_transport {adj : AdjMatrix n} {χ : Colouring n} (σ : Equiv.Pe
   obtain ⟨y, hy, rfl⟩ := hbr
   have hstep : (step (relabelAdj σ adj) (transportColouring σ χ) (σ y)).col
       = transportColouring σ ((step adj χ y).col) := step_transport σ adj χ y
-  exact amenablePath_transport adj χ (transportColouring σ χ) n
+  exact tinhoferPath_transport adj χ (transportColouring σ χ) n
     (step adj χ y) (step (relabelAdj σ adj) (transportColouring σ χ) (σ y)) σ hstep (h y hy)
 
 /-! ## 6. The GUARDED supply — `①c` with NO hypothesis at all
 
-With `Amenable` known relabelling-invariant (§5), a supply that simply *defers* where `Amenable` fails
+With `Tinhofer` known relabelling-invariant (§5), a supply that simply *defers* where `Tinhofer` fails
 is equivariant unconditionally: on the good side both graphs take the deepen branch and §5 transports
 the orbit relation; on the bad side both emit nothing and the relation is trivial. So the flag is never
-a soundness artefact — the `∀ adj χ, Amenable adj χ` scaffold disappears. -/
+a soundness artefact — the `∀ adj χ, Tinhofer adj χ` scaffold disappears. -/
 
 theorem relabelAdj_one (adj : AdjMatrix n) : relabelAdj 1 adj = adj := rfl
 
 theorem transportColouring_one (χ : Colouring n) :
     transportColouring (1 : Equiv.Perm (Fin n)) χ = χ := rfl
 
-/-- `Amenable` is relabelling-INVARIANT, both directions. -/
-theorem amenable_transport_iff {adj : AdjMatrix n} {χ : Colouring n} (σ : Equiv.Perm (Fin n)) :
-    Amenable (relabelAdj σ adj) (transportColouring σ χ) ↔ Amenable adj χ := by
-  refine ⟨fun h => ?_, amenable_transport σ⟩
-  have h' := amenable_transport σ⁻¹ h
+/-- `Tinhofer` is relabelling-INVARIANT, both directions. -/
+theorem tinhofer_transport_iff {adj : AdjMatrix n} {χ : Colouring n} (σ : Equiv.Perm (Fin n)) :
+    Tinhofer (relabelAdj σ adj) (transportColouring σ χ) ↔ Tinhofer adj χ := by
+  refine ⟨fun h => ?_, tinhofer_transport σ⟩
+  have h' := tinhofer_transport σ⁻¹ h
   rwa [← relabelAdj_mul, transportColouring_comp, inv_mul_cancel, relabelAdj_one,
        transportColouring_one] at h'
 
@@ -503,36 +503,36 @@ theorem wordReach_nil_iff {u w : Fin n} : Consume.WordReach [] u w ↔ u = w := 
   exact Residue.not_wordReach_nil hne h
 
 open Classical in
-/-- **★ THE GUARDED DEEPEN SUPPLY.** Emit deepen's generators only where `Amenable` actually holds;
+/-- **★ THE GUARDED DEEPEN SUPPLY.** Emit deepen's generators only where `Tinhofer` actually holds;
 defer (emit nothing) otherwise. ⚠ **Proof-side object** — the guard is a `Prop` test, so this is
 `noncomputable`. What poly, relabelling-invariant check to use in the *executable* is a separate,
 open question (`Certified` of §2 is poly and sound but its own invariance is not established, since
 `deepenGens` is index-dependent). Nothing below depends on the guard being computable. -/
 noncomputable def deepenSupplyGuarded : Consume.Supply n := fun adj χ =>
-  if Amenable adj χ then deepenSupply adj χ else ([], n * n * n * n * n * n)
+  if Tinhofer adj χ then deepenSupply adj χ else ([], n * n * n * n * n * n)
 
-theorem verified_guarded_of_amenable {adj : AdjMatrix n} {χ : Colouring n} (h : Amenable adj χ) :
+theorem verified_guarded_of_tinhofer {adj : AdjMatrix n} {χ : Colouring n} (h : Tinhofer adj χ) :
     Consume.verified deepenSupplyGuarded adj χ = Consume.verified deepenSupply adj χ := by
   unfold Consume.verified Consume.gens deepenSupplyGuarded
   rw [if_pos h]
 
-theorem verified_guarded_of_not {adj : AdjMatrix n} {χ : Colouring n} (h : ¬ Amenable adj χ) :
+theorem verified_guarded_of_not {adj : AdjMatrix n} {χ : Colouring n} (h : ¬ Tinhofer adj χ) :
     Consume.verified deepenSupplyGuarded adj χ = [] := by
   unfold Consume.verified Consume.gens deepenSupplyGuarded
   rw [if_neg h]; rfl
 
 /-- **★★ THE GUARDED BRANCH-ORBIT RELATION TRANSPORTS — UNCONDITIONALLY.** Compare
-`deepen_branchOrbit_transport`, which carries `∀ adj χ, Amenable adj χ`. Here the good case is handled
-by §5's `amenable_transport` and the bad case by the guard itself. -/
+`deepen_branchOrbit_transport`, which carries `∀ adj χ, Tinhofer adj χ`. Here the good case is handled
+by §5's `tinhofer_transport` and the bad case by the guard itself. -/
 theorem deepen_branchOrbit_transport_guarded
     (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (a b : Fin n)
     (ha : a ∈ Descend.branches χ) (_hb : b ∈ Descend.branches χ) :
     Consume.WordReach
         (Consume.verified deepenSupplyGuarded (relabelAdj σ adj) (transportColouring σ χ)) (σ a) (σ b)
       ↔ Consume.WordReach (Consume.verified deepenSupplyGuarded adj χ) a b := by
-  by_cases hA : Amenable adj χ
-  · have hA' : Amenable (relabelAdj σ adj) (transportColouring σ χ) := amenable_transport σ hA
-    rw [verified_guarded_of_amenable hA', verified_guarded_of_amenable hA]
+  by_cases hA : Tinhofer adj χ
+  · have hA' : Tinhofer (relabelAdj σ adj) (transportColouring σ χ) := tinhofer_transport σ hA
+    rw [verified_guarded_of_tinhofer hA', verified_guarded_of_tinhofer hA]
     have hσa : σ a ∈ Descend.branches (transportColouring σ χ) :=
       (Descend.branches_transport_perm σ χ).mem_iff.mpr (List.mem_map_of_mem ha)
     rw [deepen_branch_orbit_iff_aut _ _ hA' hσa, deepen_branch_orbit_iff_aut _ _ hA ha]
@@ -546,14 +546,14 @@ theorem deepen_branchOrbit_transport_guarded
     · rintro ⟨β, hβ, hβa⟩
       refine ⟨σ * β * σ⁻¹, (Consume.isColAut_conj_iff σ).mpr hβ, ?_⟩
       simp [Equiv.Perm.mul_apply, hβa]
-  · have hA' : ¬ Amenable (relabelAdj σ adj) (transportColouring σ χ) :=
-      fun h => hA ((amenable_transport_iff σ).mp h)
+  · have hA' : ¬ Tinhofer (relabelAdj σ adj) (transportColouring σ χ) :=
+      fun h => hA ((tinhofer_transport_iff σ).mp h)
     rw [verified_guarded_of_not hA', verified_guarded_of_not hA, wordReach_nil_iff,
         wordReach_nil_iff]
     exact ⟨fun h => σ.injective h, fun h => congrArg σ h⟩
 
-/-- **★★★ `①c` FOR THE GUARDED DEEPEN SUPPLY — NO HYPOTHESIS.** The `∀ adj χ, Amenable adj χ` scaffold
-of `deepenSupply_guarded_canonizer_direct` is gone: where `Amenable` fails the supply defers, and §5
+/-- **★★★ `①c` FOR THE GUARDED DEEPEN SUPPLY — NO HYPOTHESIS.** The `∀ adj χ, Tinhofer adj χ` scaffold
+of `deepenSupply_guarded_canonizer_direct` is gone: where `Tinhofer` fails the supply defers, and §5
 says that failure is itself relabelling-invariant, so the canonizer stays iso-invariant on every input.
 Firing (②) is of course reduced — the guard is where the rigid side takes over — but soundness no
 longer rests on anything. -/

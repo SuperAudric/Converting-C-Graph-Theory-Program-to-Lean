@@ -34,7 +34,7 @@ collineation swaps two *forced* coords, they are automorphic (an orbit) yet sit 
 the ker-H split would wrongly mark them "rigid" and R would not be rigid there. So:
 - **`support(ker H) ⊆ K`** (poly, iso-invariant, the linear component) — **force ties this for free** (9D
   `readAgg_eq_of_aut`);
-- **`K ∖ support(ker H)` = scheme symmetry** — **consume** ties it (the `deepen`/`Amenable` contribution, §9.1);
+- **`K ∖ support(ker H)` = scheme symmetry** — **consume** ties it (the `deepen`/`Tinhofer` contribution, §9.1);
 - **R = what remains non-automorphic after both** — rigid by construction, canonized by the whole-R order.
 So `support(ker H)` is the **poly linear handle** on K, not the whole split; the scheme part is consume's, via the
 interleaving. "R rigid" is the **output** of the two-seal interleaving (consume ties ALL symmetry, force canonizes
@@ -53,7 +53,7 @@ Then the reader is:
 1. **Canonize R** (rigid subspace) with the **whole-R-rigid** order — the landed 9A–9C machinery, *restricted to R*.
    R has trivial gauge (rigid), so `min`-over-frames is unique ⟹ an equivariant order on R exists.
 2. **Tie K** — the proven 9D `readAgg` aggregate symmetry (`readAgg_eq_of_aut`) ties gauge coords by construction;
-   equivalently, K is handed to consume via the interleaving (§9.1 Amenable coupling). Either way K ties *provably*.
+   equivalently, K is handed to consume via the interleaving (§9.1 Tinhofer coupling). Either way K ties *provably*.
 
 This exactly matches the project's stated architecture (§9.1): **consume ties the gauge (K), the rigid solver
 canonizes R** — the R/K split makes the handoff explicit and poly, and reduces the whole reader to **one** carried

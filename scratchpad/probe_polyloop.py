@@ -4,7 +4,7 @@ WHERE DOES THE EXPONENTIAL ENTER, AND IS IT AVOIDABLE?
 
 Cost of any descent = PROD_k b_k  (b_k = branches explored at level k).
 
-  today's `deepen`      : b_k == 1 BY FIAT (lowest-index pick)     -> poly, needs `Amenable`
+  today's `deepen`      : b_k == 1 BY FIAT (lowest-index pick)     -> poly, needs `Tinhofer`
   min-over-cell (dual)  : b_k == |C_k| minus pruning               -> invariant, PROD can blow
 
 b_k = 1 is LEGITIMATE at level k iff one of:

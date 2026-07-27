@@ -8,40 +8,40 @@ import ChainDescent.DeepenLocated
 relabelling. Everything else force offers (`force_canonizer`, `forceBy_narrows_of_key_ne`,
 `forceBy_singleton_of_separating`, the whole `Composite`) then applies with no further hypothesis.
 
-**What `DeepenLocated` delivered.** `not_amenable_deepest`: a consume failure hands us a *reachable*
-node `ψ` that is simultaneously `Amenable` and carries a `RigidObstructionAt` at its branch cell. To
+**What `DeepenLocated` delivered.** `not_tinhofer_deepest`: a consume failure hands us a *reachable*
+node `ψ` that is simultaneously `Tinhofer` and carries a `RigidObstructionAt` at its branch cell. To
 turn that into "force fires at `ψ`" we need a key that is (i) equivariant and (ii) non-constant on a
 cell carrying ≥ 2 orbits. This file builds (i); (ii) is workstream B.
 
 **The key.** `deepen`'s own greedy descent from `v`, run to its leaf, read off invariantly:
 
 ```
-orbKey adj χ v := if AmenablePath adj χ n (step adj χ v)
+orbKey adj χ v := if TinhoferPath adj χ n (step adj χ v)
                   then readKey adj (indivOne χ v) (leafOf adj n (step adj χ v)).col
                   else []            -- defer
 ```
 
 **Why the guard, and why it is not a cheat.** The greedy descent breaks ties by *vertex index*
 (`w :: _`), which does **not** commute with relabelling — this is the obstruction the whole `C3b`
-track keeps meeting (`DeepenSupply`'s `G8` falsifier). `AmenablePath` is exactly the repair: it says
+track keeps meeting (`DeepenSupply`'s `G8` falsifier). `TinhoferPath` is exactly the repair: it says
 every level's chosen cell is a single stabiliser orbit, so a stabiliser element absorbs the pick
 mismatch and the two runs stay related by an accumulating isomorphism. The guard is therefore
-*necessary*, and it is **invariant** (`amenablePath_transport`, landed), so the `if` splits the
+*necessary*, and it is **invariant** (`tinhoferPath_transport`, landed), so the `if` splits the
 vertices into two relabelling-stable classes and `KeyEquivariant` survives it.
 
-**§3 is the technical core** (`leafOf_transport_of_amenablePath`, plan item A2): a strengthening of the
-landed `amenablePath_transport`, which already builds the accumulated relating isomorphism `τ * σ`
+**§3 is the technical core** (`leafOf_transport_of_tinhoferPath`, plan item A2): a strengthening of the
+landed `tinhoferPath_transport`, which already builds the accumulated relating isomorphism `τ * σ`
 level by level but discards it. Here it is threaded into the conclusion, together with a `Refines`
 invariant that lets the *parent* colouring travel along with the leaf — the extra component workstream
 B needs to pin the individualized vertex (a leaf-adjacency read alone proves only that the two
 *uncoloured* individualized graphs are isomorphic, which is not enough to conclude "same orbit").
 
 **⚠ Non-vacuity.** The guard is not almost-always-false: measured (`scratchpad/probe_orbit_oracle.py`)
-`Amenable` holds at **1197 of 1361** swept descent nodes over ten families, and **100** of those nodes
+`Tinhofer` holds at **1197 of 1361** swept descent nodes over ten families, and **100** of those nodes
 carry ≥ 2 orbits in the branch cell — i.e. are exactly the nodes where this key is both defined and
 required to fire. See scoping doc §2.4/§3.2.
 
-**⚠ Cost.** `orbKey` is `noncomputable` (the guard is a `Prop`; `Amenable` *is* decidable — `IsColAut`
+**⚠ Cost.** `orbKey` is `noncomputable` (the guard is a `Prop`; `Tinhofer` *is* decidable — `IsColAut`
 has a `Decidable` instance — but the search is exponential, so making it computable would be honest,
 not cheap). Per the scoping doc §7.3 that is a `②` question: `①` closes here regardless, and the
 billed `keyCost` is where the guard's price belongs.
@@ -111,7 +111,7 @@ theorem transport_eq_of_isColAut_refines {adj : AdjMatrix n} {ψ φ : Colouring 
 
 /-! ## 2. `leafOf` — the greedy descent's leaf
 
-Mirrors `AmenablePath`'s recursion **exactly** (same `chooseIdK`, same `w :: _` pick), so the two line
+Mirrors `TinhoferPath`'s recursion **exactly** (same `chooseIdK`, same `w :: _` pick), so the two line
 up level for level in §3. Total (returns the current state when the fuel runs out or the descent
 stops), which is all §3 needs; discreteness at fuel `n` is a workstream-B concern. -/
 
@@ -151,20 +151,20 @@ theorem leafOf_succ_cons (adj : AdjMatrix n) (fuel : Nat) (cur : Refine.ColData 
     leafOf adj (fuel + 1) cur = leafOf adj fuel (step adj cur.col w) := by
   simp only [leafOf, h, hf]
 
-/-! ## 3. ★★ A2 — THE LEAF TRANSPORTS ALONG AN `AmenablePath`
+/-! ## 3. ★★ A2 — THE LEAF TRANSPORTS ALONG AN `TinhoferPath`
 
-`amenablePath_transport` (landed) proves the *predicate* transports, and inside its proof it builds the
+`tinhoferPath_transport` (landed) proves the *predicate* transports, and inside its proof it builds the
 relating isomorphism `τ * σ` one level at a time — then throws it away. This is the same induction with
 that accumulator kept, plus the `Refines`-carried parent component. -/
 
-/-- **★★ THE CORE.** If the `a`-side descent is `AmenablePath` and the two states are related by `σ`,
+/-- **★★ THE CORE.** If the `a`-side descent is `TinhoferPath` and the two states are related by `σ`,
 then their **leaves** are related by an accumulated isomorphism `ρ` of the same graph — and `ρ` acts on
 any colouring `φ` that the state refines exactly as `σ` does. -/
-theorem leafOf_transport_of_amenablePath (adj : AdjMatrix n) (χp : Colouring n) :
+theorem leafOf_transport_of_tinhoferPath (adj : AdjMatrix n) (χp : Colouring n) :
     ∀ (fuel : Nat) (cur_a cur_b : Refine.ColData n) (σ : Equiv.Perm (Fin n)) (φ : Colouring n),
       cur_b.col = transportColouring σ cur_a.col →
       Refines cur_a.col φ →
-      AmenablePath adj χp fuel cur_a →
+      TinhoferPath adj χp fuel cur_a →
       ∃ ρ : Equiv.Perm (Fin n),
         relabelAdj ρ adj = relabelAdj σ adj ∧
         transportColouring ρ φ = transportColouring σ φ ∧
@@ -177,7 +177,7 @@ theorem leafOf_transport_of_amenablePath (adj : AdjMatrix n) (χp : Colouring n)
       exact ⟨σ, rfl, rfl, hrel⟩
   | succ fuel ih =>
       intro cur_a cur_b σ φ hrel href hA
-      unfold AmenablePath at hA
+      unfold TinhoferPath at hA
       dsimp only at hA
       cases hco : chooseIdK (List.finRange n) cur_a.col with
       | none =>
@@ -329,22 +329,22 @@ theorem readKey_transport (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (φ χ :
 
 /-! ## 5. The guard transports -/
 
-/-- **The guard is relabelling-invariant, both directions.** Forward is `amenablePath_transport` at
+/-- **The guard is relabelling-invariant, both directions.** Forward is `tinhoferPath_transport` at
 `σ`; backward is the same at `σ⁻¹`, using `relabelAdj_one` / `transportColouring_one`. -/
-theorem amenablePath_step_transport_iff (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n)
+theorem tinhoferPath_step_transport_iff (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n)
     (χ : Colouring n) (v : Fin n) :
-    AmenablePath (relabelAdj σ adj) (transportColouring σ χ) n
+    TinhoferPath (relabelAdj σ adj) (transportColouring σ χ) n
         (step (relabelAdj σ adj) (transportColouring σ χ) (σ v))
-      ↔ AmenablePath adj χ n (step adj χ v) := by
+      ↔ TinhoferPath adj χ n (step adj χ v) := by
   constructor
   · intro h
-    have hinv := amenablePath_transport (relabelAdj σ adj) (transportColouring σ χ) χ n
+    have hinv := tinhoferPath_transport (relabelAdj σ adj) (transportColouring σ χ) χ n
       (step (relabelAdj σ adj) (transportColouring σ χ) (σ v)) (step adj χ v) σ⁻¹ ?_ h
     · rwa [← relabelAdj_mul, inv_mul_cancel, relabelAdj_one] at hinv
     · rw [step_transport σ adj χ v, transportColouring_comp, inv_mul_cancel,
           transportColouring_one]
   · intro h
-    exact amenablePath_transport adj χ (transportColouring σ χ) n (step adj χ v)
+    exact tinhoferPath_transport adj χ (transportColouring σ χ) n (step adj χ v)
       (step (relabelAdj σ adj) (transportColouring σ χ) (σ v)) σ (step_transport σ adj χ v) h
 
 /-! ## 6. `orbKey` and `①` -/
@@ -354,31 +354,31 @@ theorem amenablePath_step_transport_iff (σ : Equiv.Perm (Fin n)) (adj : AdjMatr
 search, so the key is declared `noncomputable` here and the executable guard is left to `②` (plan
 scoping doc §7.3). Registering one instance keeps `orbKey` and `keyV_orbKey` on the *same* instance term,
 which is what makes the projection lemma `rfl`. -/
-noncomputable instance instDecidableAmenablePath (adj : AdjMatrix n) (χp : Colouring n)
-    (fuel : Nat) (cur : Refine.ColData n) : Decidable (AmenablePath adj χp fuel cur) :=
+noncomputable instance instDecidableTinhoferPath (adj : AdjMatrix n) (χp : Colouring n)
+    (fuel : Nat) (cur : Refine.ColData n) : Decidable (TinhoferPath adj χp fuel cur) :=
   Classical.dec _
 
 /-- **★★★ THE KEY.** Run `deepen`'s greedy descent from `v` to its leaf and read it invariantly —
-guarded by `AmenablePath`, which is exactly the condition making that (index-picked!) descent
+guarded by `TinhoferPath`, which is exactly the condition making that (index-picked!) descent
 labelling-independent. Off the guard the key is constant, so force simply does not act there.
 
 The cost is billed at `n⁴`: `≤ n` levels, each a warm refinement (`≤ n³`). -/
 noncomputable def orbKey : Force.Key n := fun adj χ v =>
-  (if AmenablePath adj χ n (step adj χ v)
+  (if TinhoferPath adj χ n (step adj χ v)
      then readKey adj (Descend.indivOne χ v) (leafOf adj n (step adj χ v)).col
      else [],
    n * n * n * n)
 
 @[simp] theorem keyV_orbKey (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
     Force.keyV orbKey adj χ v =
-      if AmenablePath adj χ n (step adj χ v)
+      if TinhoferPath adj χ n (step adj χ v)
         then readKey adj (Descend.indivOne χ v) (leafOf adj n (step adj χ v)).col
         else [] := rfl
 
 /-- **★★★ `①` FOR THE FORCE ROUTE — `orbKey` IS EQUIVARIANT, with no hypothesis.**
 
-Both halves of the `if` transport: the guard by `amenablePath_step_transport_iff`, and the value by
-`leafOf_transport_of_amenablePath` — which supplies an isomorphism `ρ` relating the two leaves *and*
+Both halves of the `if` transport: the guard by `tinhoferPath_step_transport_iff`, and the value by
+`leafOf_transport_of_tinhoferPath` — which supplies an isomorphism `ρ` relating the two leaves *and*
 acting on the parent colouring exactly as `σ` does, so `readKey_transport` closes it at `ρ`.
 
 Consequence: `Force.force_canonizer` and `Composite.composite_canonizer` apply to `forceBy orbKey`
@@ -386,14 +386,14 @@ with nothing further to discharge. -/
 theorem keyEquivariant_orbKey : Force.KeyEquivariant (orbKey (n := n)) := by
   intro σ adj χ v
   rw [keyV_orbKey, keyV_orbKey]
-  by_cases hA : AmenablePath adj χ n (step adj χ v)
-  · rw [if_pos ((amenablePath_step_transport_iff σ adj χ v).mpr hA), if_pos hA]
+  by_cases hA : TinhoferPath adj χ n (step adj χ v)
+  · rw [if_pos ((tinhoferPath_step_transport_iff σ adj χ v).mpr hA), if_pos hA]
     obtain ⟨ρ, hρadj, hρφ, hρleaf⟩ :=
-      leafOf_transport_of_amenablePath adj χ n (step adj χ v)
+      leafOf_transport_of_tinhoferPath adj χ n (step adj χ v)
         (step (relabelAdj σ adj) (transportColouring σ χ) (σ v)) σ (Descend.indivOne χ v)
         (step_transport σ adj χ v) (refines_step adj χ v) hA
     rw [hρleaf, ← hρadj, Descend.indivOne_transport, ← hρφ, readKey_transport]
-  · rw [if_neg (fun h => hA ((amenablePath_step_transport_iff σ adj χ v).mp h)), if_neg hA]
+  · rw [if_neg (fun h => hA ((tinhoferPath_step_transport_iff σ adj χ v).mp h)), if_neg hA]
 
 end Deepen
 end ChainDescent

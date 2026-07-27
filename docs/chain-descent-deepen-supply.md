@@ -40,7 +40,7 @@
 >    the **Chang-B root** (12 of 23 same-orbit partners fail); all-anchor falsifier at a **CFI-cubic m=8**
 >    node whose `|C|=16` cell is ONE orbit and the harvest splits 8+8.
 > 2. **"`¬CellIsOrbit ⟹ RigidObstructionAt` at THIS cell"** — refuted by the same m=8 node, so the
->    `Certified`/`Amenable` hypothesis on the located-obstruction theorems is **necessary**. No theorem of
+>    `Certified`/`Tinhofer` hypothesis on the located-obstruction theorems is **necessary**. No theorem of
 >    the form *"consume fails at `χ` ⟹ force acts at `χ`"* can hold; the obstruction must be relocated.
 > 3. **"prove `Certified` (deepen's own poly certificate) relabelling-invariant"** — **measured FALSE**,
 >    not merely unproved: at the m=8 node the harvest certifies the cell as one orbit under some
@@ -48,22 +48,22 @@
 >    so it inherits that descent's labelling dependence.
 >
 > **What replaced them.**
-> - `not_amenable_deepest` (`DeepenLocated`): `¬Amenable` ⟹ a **reachable** node that is *simultaneously*
->   `Amenable` and carries a `RigidObstructionAt` at its branch cell. Both resolvers' hypotheses at ONE
+> - `not_tinhofer_deepest` (`DeepenLocated`): `¬Tinhofer` ⟹ a **reachable** node that is *simultaneously*
+>   `Tinhofer` and carries a `RigidObstructionAt` at its branch cell. Both resolvers' hypotheses at ONE
 >   named node. (Non-vacuity measured: 100 inhabitants over 7 families.)
 > - `orbKey` + `keyEquivariant_orbKey` (`DeepenKey`): deepen's own greedy leaf, read invariantly, guarded
->   by `AmenablePath`. **`KeyEquivariant` with NO hypothesis**, so `Force.force_canonizer` /
->   `Composite.composite_canonizer` apply as they stand. The technical core `leafOf_transport_of_amenablePath`
->   is `amenablePath_transport` with its accumulator `τ * σ` **kept** instead of discarded.
+>   by `TinhoferPath`. **`KeyEquivariant` with NO hypothesis**, so `Force.force_canonizer` /
+>   `Composite.composite_canonizer` apply as they stand. The technical core `leafOf_transport_of_tinhoferPath`
+>   is `tinhoferPath_transport` with its accumulator `τ * σ` **kept** instead of discarded.
 > - `isColAut_of_readKey_eq` (`DeepenExact`): **equal keys ⟹ same orbit, UNCONDITIONALLY.** This is the
 >   FIRING direction and it needs no guard — completeness of the encoding, not a property of the descent.
->   Hence `orbKey_eq_iff_orbit` (fibres ARE the orbits at an `Amenable` node) and `forcedSet_single_orbit`
+>   Hence `orbKey_eq_iff_orbit` (fibres ARE the orbits at an `Tinhofer` node) and `forcedSet_single_orbit`
 >   (force narrows the cell to a single orbit).
 > - `orbKeyG S` + `keyEquivariant_orbKeyG` (`DeepenGuard`): the **poly** guard — guard each level by
 >   `Consume.CellIsOrbit S` for any `SupplyEquivariant S`. Instantiated at `deck2Supply`/`deckSupply`;
 >   `force_canonizer_orbKeyG_deck2` gives `①a`/`①b`/`①c` + totality with **no hypothesis at all**.
 >
-> **⚠ WHAT THE POLY GUARD COSTS — read before swapping keys.** `CertPath S ⟹ AmenablePath`, never the
+> **⚠ WHAT THE POLY GUARD COSTS — read before swapping keys.** `CertPath S ⟹ TinhoferPath`, never the
 > converse. The **localization half is unchanged** (it never mentions a guard); only **firing** becomes
 > guard-conditional (`consume_fail_force_fires_guarded` carries `CertifiedG S ψ`). The unconditional
 > theorem stays over `orbKey`. `orbKeyG_eq_orbKey_of_certPath` proves the two keys are *equal* wherever
@@ -74,7 +74,7 @@
 > **▶ NEXT (as written on 2026-07-27 morning — ⚠ items 1, 2 and 4 are DONE, see the block below).**
 > (1) ~~a decision procedure for `CellIsOrbit S`~~ **DONE** — and it was one `decidable_of_iff`;
 > (2) ~~raise the guard's firing rate~~ **DONE via the UNION** (⚠ "taking `S` deeper" was the wrong
-> lever — measured); (3) bound the **nesting depth** of `not_amenable_deepest`'s relocation —
+> lever — measured); (3) bound the **nesting depth** of `not_tinhofer_deepest`'s relocation —
 > `DescentReach` + `ncol` bound the number of *steps* by `n`, but not the product over relocations
 > — **STILL OPEN, and the honest `②` remainder**; (4) ~~wire `forcedSet_single_orbit` into the
 > composite~~ **DONE** — and it did NOT need `CellIsOrbit` on the forced sub-cell, which is false at a
@@ -90,44 +90,48 @@
 > **⚠⚠ And one correction a reader must not inherit wrong: `keySeparates_rawKey` shows `KeySeparates`
 > alone is CHEAP (poly, global); the GI-hard object is `KeySeparates ∧ KeyEquivariant`, so THE GUARD
 > BUYS EQUIVARIANCE, NOT SEPARATION.**
-> The chain above ends in *strict* narrowing, which nothing downstream consumes. **`nodeResolved_of_amenable`**
-> now gives `(narrow (forceThenConsume orbKey deepenSupply)).length = 1` at every `Amenable` node — i.e.
-> `Select.NodeResolved`, the predicate `②`/`③` actually read — and `handledS_of_reached_amenable` is the
+> The chain above ends in *strict* narrowing, which nothing downstream consumes. **`nodeResolved_of_tinhofer`**
+> now gives `(narrow (forceThenConsume orbKey deepenSupply)).length = 1` at every `Tinhofer` node — i.e.
+> `Select.NodeResolved`, the predicate `②`/`③` actually read — and `handledS_of_reached_tinhofer` is the
 > **first population of `HandledS`**. The consume half is `deepen_branch_orbit_iff_aut` (§this doc,
 > 2026-07-23) — it was already proved; only the assembly was missing. Also landed: `KeySeparatesAt`, the
-> reduction absorbing `Amenable` into the force key's separation obligation (**a unification, not a
+> reduction absorbing `Tinhofer` into the force key's separation obligation (**a unification, not a
 > weakening** — and the repaired form of the retired `assume-VT` prune). **Full analysis, both obituaries,
 > and the surviving objection: `scratchpad/DUAL_resolver_scoping.md` §10.**
 >
-> ⚠ **Naming, from the literature pass:** the project's `Amenable` is AKRV's **Tinhofer**, and AKRV's
-> "amenable" means something else entirely. Renaming the project predicate is advisable.
+> ✅ **Naming — RENAMED 2026-07-27.** The project predicate was `Amenable`; it is AKRV's **Tinhofer**,
+> while AKRV's *own* "amenable" is a different (strictly smaller) class, so the predicate is now
+> `Tinhofer`/`TinhoferPath` throughout (module `DeepenTinhofer.lean`). ⚠ It is **not literally** AKRV's
+> Tinhofer: theirs quantifies over ALL `S`, this one only over the cells a single descent selects.
+> ⛔ Do not blanket-rename `amenable → tinhofer` again — the literature notes quote AKRV's own term
+> and a replaceAll inverts them (DUAL §8.3).
 
-## ▶ STATUS (2026-07-23) — ★★★ TRACK A: `AnchorFires` ELIMINATED, `①c` modulo `{Amenable}` ONLY
+## ▶ STATUS (2026-07-23) — ★★★ TRACK A: `AnchorFires` ELIMINATED, `①c` modulo `{Tinhofer}` ONLY
 
 > **The whole-graph-discretize redesign LANDED axiom-clean; full build green (155 s).** `deepen` now
 > individualizes to **whole-graph** discreteness (not just the anchor's coupled footprint), which makes
 > `[DISC]` — the leaf being discrete — **STRUCTURAL** rather than a carried firing hypothesis. Consequences,
-> all in `DeepenAmenable.lean`, all `[propext, Classical.choice, Quot.sound]`:
+> all in `DeepenTinhofer.lean`, all `[propext, Classical.choice, Quot.sound]`:
 > - **`AnchorFires` is DELETED.** Its three components are now theorems: `deepen_discrete` (a successful
 >   leaf is discrete, via `discrete_of_chooseIdK_none`), `deepen_succeeds` (termination — fuel `n` suffices
 >   by the colour-count measure `ncol_lt_indivOne_of_partner` + `ncol_le_refine`), and `gate_of_discrete`
 >   (the gate passes on a non-trivial branch cell). `allSingletonsK_of_discrete` supports the gate.
-> - **`deepenSupply_guarded_canonizer_direct` now takes ONLY `hAmen : ∀ adj χ, Amenable adj χ`.** `①c` closes
->   modulo `{Amenable}` alone — no `AnchorFires`, no reference, no R1/R2.
->   **⚠ Read "closed modulo `{Amenable}`" precisely: `hAmen` is GLOBAL (`∀ adj χ`) and false on rigid graphs,
->   so this capstone is a CONDITIONAL SCAFFOLD, not an applicable theorem.** The `Amenable` discharge is the
+> - **`deepenSupply_guarded_canonizer_direct` now takes ONLY `hAmen : ∀ adj χ, Tinhofer adj χ`.** `①c` closes
+>   modulo `{Tinhofer}` alone — no `AnchorFires`, no reference, no R1/R2.
+>   **⚠ Read "closed modulo `{Tinhofer}`" precisely: `hAmen` is GLOBAL (`∀ adj χ`) and false on rigid graphs,
+>   so this capstone is a CONDITIONAL SCAFFOLD, not an applicable theorem.** The `Tinhofer` discharge is the
 >   per-family rigid coupling (rigid-seal §9.1) — a substantive program, not a footnote. Deepen enters
->   `Publication.canonForm?` only once `Amenable`/`CellsAreOrbits` is populated per family (T1), and on
->   non-`Amenable` graphs it defers SOUNDLY (`rigidObstruction_imp_not_cellIsOrbit`) — the residual work is
+>   `Publication.canonForm?` only once `Tinhofer`/`CellsAreOrbits` is populated per family (T1), and on
+>   non-`Tinhofer` graphs it defers SOUNDLY (`rigidObstruction_imp_not_cellIsOrbit`) — the residual work is
 >   *relocated* to the rigid side, not finished.
 > - **The entire reference apparatus is REMOVED from the build** (not just superseded): `deepenRefGens`,
 >   `DeepenRefInExec`, `ExecRecoversKMinusCell`, `sameOrbitsOnBranches_of_cell`, `deepenRefSupply`, and the
 >   files `DeepenRef`/`DeepenRefTransport`/`DeepenR1` are parked out of `build.sh`. The `imgFun` /
 >   `twistOf_eq_imgFun` helpers moved to `DeepenSupply`.
-> - **`joint` / `deepen_acc` / `AmenablePath` re-proven** for the whole-graph loop; the rigid handoff
->   (`rigidObstruction_imp_not_cellIsOrbit`, `not_amenablePath_imp_rigidObstruction`) re-proven — the
+> - **`joint` / `deepen_acc` / `TinhoferPath` re-proven** for the whole-graph loop; the rigid handoff
+>   (`rigidObstruction_imp_not_cellIsOrbit`, `not_tinhoferPath_imp_rigidObstruction`) re-proven — the
 >   exposed-rigid property survives.
-> - **`Amenable` is now the SOLE ①c condition** and it IS the "cells are orbits" domain (`CellsAreOrbits`,
+> - **`Tinhofer` is now the SOLE ①c condition** and it IS the "cells are orbits" domain (`CellsAreOrbits`,
 >   `CascadeOracle`) — free at discreteness (`cellsAreOrbits_of_discrete`), difficulty honestly on the rigid
 >   side, its failure an *exposed* rigid decision. See [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) §9.1.
 > - **Firing is UNCHANGED on every measured witness** (mp7/G8/t3/wcyc9 already whole-discretize); the change
@@ -139,7 +143,7 @@
 ## ▶ STATUS (2026-07-22)
 
 > **UPDATE 2026-07-22 — Layer-1 core + the BRIDGE REDUCTION + the BRANCH-CELL HALF all LANDED axiom-clean**
-> (`DeepenAmenable.lean`; full `build.sh` green). Reading order: this STATUS → **§2.1 (why deepen not the
+> (`DeepenTinhofer.lean`; full `build.sh` green). Reading order: this STATUS → **§2.1 (why deepen not the
 > already-closed index-free `deepMatchSupply` — the poly/quasipoly division + the `viaSpielman` sub-exp→poly
 > payoff, NEW 2026-07-22)** → §7 ledger → §8 inventory → §9.1.1 (reduction) → §9.1.2 (route ledger for the crux).
 >
@@ -159,7 +163,7 @@
 >   primary; **Route ζ** (import `RecoverableByDepth`/`CellsAreOrbits`) parallel; **α** flawed (absorbed as ε's
 >   base case). Empirically solid (t3 96-vs-6) but the genuinely hard part. The poly **all-or-nothing backup
 >   gate** sidesteps it by construction — the fallback ONLY if ε+ζ stall on the same family (per standing steer).
-> - **★★★ `①c` CLOSED modulo `{Amenable, AnchorFires}` ONLY — REFERENCE ELIMINATED (2026-07-22, axiom-clean,
+> - **★★★ `①c` CLOSED modulo `{Tinhofer, AnchorFires}` ONLY — REFERENCE ELIMINATED (2026-07-22, axiom-clean,
 >   `deepenSupply_guarded_canonizer_direct`).** The object's flag reads the supply only through `rep` on
 >   `forcedSet ⊆ branches`, so `StallEquivariant` needs only that deepen's **branch-orbit relation transports** —
 >   and it does, because deepen's branch orbits EQUAL the `IsColAut`-orbits (`deepen_branch_orbit_iff_aut`), which
@@ -168,7 +172,7 @@
 >   `deepenRefSupply`, R1 (`SameOrbits`), R2 (`twistOf`-transport) — is DISCARDED.** (Both the `K∖cell` crux and
 >   the R2 `twistOf` order-dependence subtlety are now moot; `SameOrbitsOnBranches`/`deepenRefSupply` kept only
 >   for provenance.)
-> - **NEXT for a fresh reader:** `①c` is closed modulo two **domain facts** only: **`Amenable`** (Layer 2 → the
+> - **NEXT for a fresh reader:** `①c` is closed modulo two **domain facts** only: **`Tinhofer`** (Layer 2 → the
 >   shared rigid-obstruction wall `hSmallAutThin`, §5) and **`AnchorFires`** (per-anchor: `deepen` succeeds +
 >   gate + `Discrete` leaf `[DISC]` — a firing lemma). No mechanical obligations remain.
 
@@ -181,24 +185,24 @@
 - **`①c` reduces to `SameOrbits deepenRefSupply deepenSupply`** (against an equivariant all-picks
   reference), = **R1** (the hard half) **+ R2** (reference equivariance, mechanical). The easy half of
   `SameOrbits` and the R2 algebraic core (`twistOf_transport`) are landed.
-- **R1 FACTORS:** `R1 ⟸ (Amenable ⟹ R1) + Amenable`. `Amenable` = every deepening level individualizes a
+- **R1 FACTORS:** `R1 ⟸ (Tinhofer ⟹ R1) + Tinhofer`. `Tinhofer` = every deepening level individualizes a
   single-orbit cell.
   - **`(G1 ∧ G2) → ①c` is FORMALIZED** (gate-conditional capstones + the G2 attribution) — the open links
     are explicit Lean hypotheses, not prose.
-  - **Layer 1 (`Amenable ⟹ R1`) = a mechanical re-relating induction.** All its bricks are **landed
+  - **Layer 1 (`Tinhofer ⟹ R1`) = a mechanical re-relating induction.** All its bricks are **landed
     axiom-clean** — engine (`step_rerelate`), monotonicity (piece 1: `step_refines`,
-    `isColAut_parent_of_refines`), cell transport (`cidCell_*`), the `Amenable`-transfer (piece 2a:
+    `isColAut_parent_of_refines`), cell transport (`cidCell_*`), the `Tinhofer`-transfer (piece 2a:
     `cellSingleOrbit_transport`), and the accumulator lemma (piece 2b-b0: `deepen_acc`). The remaining core
     is the joint fuel induction body (piece 2b, which composes those bricks) plus pieces 3 (twistOf verifies)
     and 4 (K-coverage).
-  - **Layer 2 (`Amenable` holds on the residue) = the WL-obstruction classification**, which **imports no
+  - **Layer 2 (`Tinhofer` holds on the residue) = the WL-obstruction classification**, which **imports no
     new conjecture** — it is gated on the project's existing single shared wall (claim #2 / `hSmallAutThin`).
 - **The one genuinely-open thing touching `①c`** is finishing Layer 1's induction (`hL1`) + R2. `G1` (the
   shared wall) is **not** needed for `①c` — only for totality. A poly **all-or-nothing backup gate** is
   designed and held in reserve.
 
-**Frontier (one live task):** finish the Layer-1 joint fuel induction `hL1 : Amenable → DeepenRefInExec`
-(piece 2b), then pieces 3+4, then the mechanical R2 assembly. All bricks are in `DeepenAmenable.lean`.
+**Frontier (one live task):** finish the Layer-1 joint fuel induction `hL1 : Tinhofer → DeepenRefInExec`
+(piece 2b), then pieces 3+4, then the mechanical R2 assembly. All bricks are in `DeepenTinhofer.lean`.
 
 ---
 
@@ -295,7 +299,7 @@ axis is **cost vs. `①c`**:
 | | `①c` | firing hypothesis | cost |
 |---|---|---|---|
 | **`deepMatchSupply d`** | **free** (index-free) | external `CellsAreOrbits` (seal import) + `SeparatesAt d` | `n^{O(d)}` — poly at fixed `d`, **quasipoly at `d = Θ(log n)`, exp at `d = Θ(n)`** |
-| **`deepenSupply`** | **hard** (the crux) | **self-certified** (verification gate; `deepenGens_sound`) — needs `Amenable`, not external `CellsAreOrbits` | **single greedy path — poly at ANY depth** |
+| **`deepenSupply`** | **hard** (the crux) | **self-certified** (verification gate; `deepenGens_sound`) — needs `Tinhofer`, not external `CellsAreOrbits` | **single greedy path — poly at ANY depth** |
 
 **Deepen's whole value is the cost column.** A single greedy path individualizes `≤ |K| ≤ n` vertices before
 the cell discretizes, so it is polynomial *regardless of separation depth*. `deepMatchSupply` pays `n^{O(d)}`
@@ -310,8 +314,8 @@ unbounded WL-dim (the linear `0.15n` ceiling, Schneider–Schweitzer) makes it e
 **`WL-dim < cell-size` is a free construction fact** (individualizing a cell's own vertices discretizes it, so
 no cell ever needs more than its own size in individualizations — `WL-dim ≥ cell-size` is vacuous), and a
 single path of that length is poly *at any WL-dim up to `0.15n`*. So deepen **relocates the obstruction off
-the WL-dim/cost axis onto `Amenable`** (single-orbit per greedy level, §5), which is *orthogonal*:
-high-WL-dim + `Amenable` ⟹ deepen poly-complete exactly where `deepMatchSupply` goes exponential. That is
+the WL-dim/cost axis onto `Tinhofer`** (single-orbit per greedy level, §5), which is *orthogonal*:
+high-WL-dim + `Tinhofer` ⟹ deepen poly-complete exactly where `deepMatchSupply` goes exponential. That is
 deepen's reason to exist, and it is precisely the A2 wall the seal has been stalled on.
 
 **Concrete payoff — `viaSpielman` sub-exp → poly.** `reachesRigidOrCameron_viaSpielman`
@@ -319,7 +323,7 @@ deepen's reason to exist, and it is precisely the A2 wall the seal has been stal
 at **sub-exponential** `n^{O(n^{1/3})}` (`SealDepthBridge.cellIsOrbit_pathCol_of_spielman`). Deepen needs only
 that *some* path separates (its own greedy one, poly-length — it does **not** need the `Õ(n^{1/3})` *bound*),
 so **if the `①c` crux closes and ζ imports the separation, the claw-bounded-SRG floor upgrades sub-exp → poly**
-(conditional on `Amenable` there; the `schemeAdj S`→realizing-graph step is the `RouteCTransport` hop, and
+(conditional on `Tinhofer` there; the `schemeAdj S`→realizing-graph step is the `RouteCTransport` hop, and
 Spielman is claw-bounded-only — the `Θ(√n)`-base Neumaier families exit via Cameron). This is the sharpest
 single motivation for closing the crux.
 
@@ -347,26 +351,26 @@ over-merge is force's to separate. That is why the residue deepen must handle is
 
 ---
 
-## 4. The `Amenable` factoring
+## 4. The `Tinhofer` factoring
 
-R1's crux is not monolithic. `R1 ⟸ (Amenable ⟹ R1) + Amenable`, where
+R1's crux is not monolithic. `R1 ⟸ (Tinhofer ⟹ R1) + Tinhofer`, where
 
-> **`Amenable adj χ`** := at every level of the canonical deepening, the cell `chooseIdK` selects is a
+> **`Tinhofer adj χ`** := at every level of the canonical deepening, the cell `chooseIdK` selects is a
 > single orbit of the pointwise-stabilizer of the vertices individualized so far
-> (`DeepenAmenable.AmenablePath` / `Amenable`).
+> (`DeepenTinhofer.TinhoferPath` / `Tinhofer`).
 
-⚠ **Firing does NOT imply `Amenable`** — a WL-merged multi-orbit cell can still discretize (a nested force
-decision the greedy pick resolves arbitrarily). So `Amenable` is a genuine domain hypothesis; a `¬Amenable`
+⚠ **Firing does NOT imply `Tinhofer`** — a WL-merged multi-orbit cell can still discretize (a nested force
+decision the greedy pick resolves arbitrarily). So `Tinhofer` is a genuine domain hypothesis; a `¬Tinhofer`
 *firing* graph is the still-missing "fires-but-strictly-incomplete" (part-III) witness.
 
-- **LAYER 1 — `Amenable ⟹ R1`** — MECHANICAL, the **re-relating induction**:
+- **LAYER 1 — `Tinhofer ⟹ R1`** — MECHANICAL, the **re-relating induction**:
   > the deepen-from-`a` and replay-from-`b` descents (`a ~ b` via `σ ∈ Aut`) stay related by an automorphism
   > `σₖ` with `ψ_b^(k) = transportColouring σₖ ψ_a^(k)`.
-  Per level: same id (`chooseIdK_transport`); the single-orbit cell (`Amenable`) supplies `τ ∈ Stab(ψ_b)`
+  Per level: same id (`chooseIdK_transport`); the single-orbit cell (`Tinhofer`) supplies `τ ∈ Stab(ψ_b)`
   with `τ(σₖ u_a) = u_b` (absorbing the lowest-index mismatch); `σₖ₊₁ = τσₖ` re-establishes the invariant
   (`step_rerelate`). At discreteness the leaves are `σ`-related ⟹ `twistOf`'s colour-match *is* `σ` on all
   `K` ⟹ the exec twist verifies ⟹ direct `WordReach`.
-- **LAYER 2 — `Amenable` holds on consume's residue** — see §5.
+- **LAYER 2 — `Tinhofer` holds on consume's residue** — see §5.
 
 ---
 
@@ -374,9 +378,9 @@ decision the greedy pick resolves arbitrarily). So `Amenable` is a genuine domai
 
 The question is **not** "is WL-dimension bounded" (unbounded WL-dim exists — CFI — and is irrelevant; the
 *cost* side of this — why a single greedy path is poly at any WL-dim — is **§2.1**). It is
-"**every `Amenable`-obstruction is a known WL-obstruction type with a handler.**"
+"**every `Tinhofer`-obstruction is a known WL-obstruction type with a handler.**"
 
-> **`Amenable`-violation ⟺ a RIGID (non-symmetric) WL-obstruction in a cell deepen visits.** A WL-stable
+> **`Tinhofer`-violation ⟺ a RIGID (non-symmetric) WL-obstruction in a cell deepen visits.** A WL-stable
 > cell fails single-orbit exactly when it WL-merges non-automorphic vertices; symmetric merges give a single
 > orbit (no obstruction).
 
@@ -388,7 +392,7 @@ The project already classifies rigid obstructions (EOL `chain-descent-exhaustive
 | **symmetry** | Phase-1 linear oracle | Cameron / excluded by rigidity |
 | **rigid** | multipede / `Z_{2^k}` → **rigid solver ✓ (built)** | **the wall** (open, no witness) |
 
-So the two handlers of `Amenable`-violations are the **rigid solver** (rigid-linear obstructions — built,
+So the two handlers of `Tinhofer`-violations are the **rigid solver** (rigid-linear obstructions — built,
 `EnableRigidSolver` on, poly-complete modulo the single open `hSmallAutThin` wall) and **the wall**
 (rigid-non-linear — the project's standing open frontier = claim #3, no constructible witness).
 
@@ -402,12 +406,12 @@ emit-nothings (verification gate) and hands off. Connect to landed CFI infra to 
 
 **⚠ The one deepen-specific new sub-question (a totality/T-gap, not a new wall):** the interleaving must
 deliver Schurian cells to consume — a mixed/**fusion** cell (symmetry over a deeper rigid obstruction, cf.
-Chang-A) is where `Amenable`/`①c` could break. Per the framing, consume's residue completeness rests on the
+Chang-A) is where `Tinhofer`/`①c` could break. Per the framing, consume's residue completeness rests on the
 §11.11 consume-schedule + verify-by-reconstruction iso-invariance, and does **not** rest on no-rigid-Cameron.
 
 ---
 
-## 6. The `(G1 ∧ G2) → ①c` formalization (`DeepenAmenable.lean §2–3`)
+## 6. The `(G1 ∧ G2) → ①c` formalization (`DeepenTinhofer.lean §2–3`)
 
 `①c` is discharged in the project's **gate-conditional** style, with the open links as explicit hypotheses:
 
@@ -419,9 +423,9 @@ Chang-A) is where `Amenable`/`①c` could break. Per the framing, consume's resi
   - `deepenSupply_guarded_canonizer_of` : `(R1 ∧ R2) → ①c` — mirrors
     `KernelTransport.kernelSupply_guarded_canonizer` via `guarded_mixed_canonizer_of_sameOrbits` +
     `sameOrbits_of_core`.
-  - `deepenSupply_canonizer_of_amenable` : `(Amenable ∧ L1 ∧ R2) → ①c` — factors R1 through the domain
+  - `deepenSupply_canonizer_of_tinhofer` : `(Tinhofer ∧ L1 ∧ R2) → ①c` — factors R1 through the domain
     hypothesis.
-- **G1 (rigid ⟹ F_k, the shared wall) is NOT a hypothesis of either capstone.** `①c` needs only `Amenable`;
+- **G1 (rigid ⟹ F_k, the shared wall) is NOT a hypothesis of either capstone.** `①c` needs only `Tinhofer`;
   G1 lives purely at the **totality** layer (it certifies the rigid cells deepen defers on are the rigid
   solver's, so the whole canonizer stays total).
 
@@ -429,24 +433,24 @@ Chang-A) is where `Amenable`/`①c` could break. Per the framing, consume's resi
 
 ## 7. The gap ledger (provability status)
 
-**▶ UPDATED 2026-07-23 (TRACK A) — `AnchorFires` ELIMINATED; `①c` closes modulo `{Amenable}` ONLY.** The
+**▶ UPDATED 2026-07-23 (TRACK A) — `AnchorFires` ELIMINATED; `①c` closes modulo `{Tinhofer}` ONLY.** The
 whole-graph-discretize redesign made `[DISC]`/gate/termination structural. The reference (R1/R2) was already
 eliminated (§2b″); now the last firing hypothesis is gone too.
 
 | Link | Statement | Status |
 |---|---|---|
-| **①c** | `{Amenable} → ①c` (reference-free, AnchorFires-free) | **PROVED axiom-clean** (`deepenSupply_guarded_canonizer_direct`, takes ONLY `hAmen`) — via deepen-branch-orbit = `IsColAut`-orbit, transports; no `deepenRefSupply`, no R1/R2, no `AnchorFires` |
+| **①c** | `{Tinhofer} → ①c` (reference-free, AnchorFires-free) | **PROVED axiom-clean** (`deepenSupply_guarded_canonizer_direct`, takes ONLY `hAmen`) — via deepen-branch-orbit = `IsColAut`-orbit, transports; no `deepenRefSupply`, no R1/R2, no `AnchorFires` |
 | ~~AnchorFires~~ | ~~per-anchor: `deepen` succeeds + gate + `Discrete` leaf~~ | **ELIMINATED (track A)** — now three theorems: `deepen_discrete` (leaf discrete), `deepen_succeeds` (termination, `ncol` measure), `gate_of_discrete`. `[DISC]` is structural because `deepen` discretizes the WHOLE graph |
-| **L2 / G2** | `¬Amenable → RigidObstructionAt` (attribution) | **PROVED** (`rigidObstruction_of_not_cellSingleOrbit`) |
+| **L2 / G2** | `¬Tinhofer → RigidObstructionAt` (attribution) | **PROVED** (`rigidObstruction_of_not_cellSingleOrbit`) |
 | **rigid handoff** | `RigidObstructionAt → ¬CellIsOrbit` (deepen defers SOUNDLY) | **PROVED** (`rigidObstruction_imp_not_cellIsOrbit`) — deepen never mishandles a rigid pair; it is the SAME obstruction type the rigid solver / §11.14 own |
 | **G1 / force-sep** | `RigidObstructionAt → CellResolved`'s force branch (key injective on branches) | the **shared wall** (`hSmallAutThin`) — totality only, NOT `①c` |
-| **exposed-rigid** | `¬AmenablePath → ∃ RigidObstructionAt` (a consume-stall surfaces a concrete rigid node) | **PROVED** (`not_amenablePath_imp_rigidObstruction`) — the honest handoff: a stall never dead-ends, it exposes a force-actionable rigid pair (possibly DEEPER than the compared pair, which may itself be automorphic = fusion) |
-| **fusion** | deep-level `Amenable` obstruction peeled before consume sees the cell | **totality scheduling** (the interleaving): stall → exposed-rigid → force distinguishes → re-expose symmetry → retry → fixpoint. `Amenable`-on-residue holds because force peels every exposed node first |
-| **force-complete** | force distinguishes each *exposed* non-automorphic pair | the **shared wall** `hSmallAutThin`, now LOCALIZED to concrete exposed pairs (not a global `Amenable` assumption) |
-| ~~L0~~ ~~R1~~ ~~R2~~ | `(R1∧R2)→①c` / `Amenable→R1` / `SupplyEquivariant deepenRefSupply` | **RETIRED** (reference eliminated); `deepenRefSupply` route kept for provenance only |
+| **exposed-rigid** | `¬TinhoferPath → ∃ RigidObstructionAt` (a consume-stall surfaces a concrete rigid node) | **PROVED** (`not_tinhoferPath_imp_rigidObstruction`) — the honest handoff: a stall never dead-ends, it exposes a force-actionable rigid pair (possibly DEEPER than the compared pair, which may itself be automorphic = fusion) |
+| **fusion** | deep-level `Tinhofer` obstruction peeled before consume sees the cell | **totality scheduling** (the interleaving): stall → exposed-rigid → force distinguishes → re-expose symmetry → retry → fixpoint. `Tinhofer`-on-residue holds because force peels every exposed node first |
+| **force-complete** | force distinguishes each *exposed* non-automorphic pair | the **shared wall** `hSmallAutThin`, now LOCALIZED to concrete exposed pairs (not a global `Tinhofer` assumption) |
+| ~~L0~~ ~~R1~~ ~~R2~~ | `(R1∧R2)→①c` / `Tinhofer→R1` / `SupplyEquivariant deepenRefSupply` | **RETIRED** (reference eliminated); `deepenRefSupply` route kept for provenance only |
 
 Everything conjectural lives in **G1** (the shared wall, covered whenever anyone covers it) + the **fusion
-scheduling** (a totality obligation). `①c` itself is prose-free modulo the **single** domain fact `{Amenable}`
+scheduling** (a totality obligation). `①c` itself is prose-free modulo the **single** domain fact `{Tinhofer}`
 (= `CellsAreOrbits`); the rigid **handoff is sound** (deepen defers, never mishandles), so deepen introduces
 **no new obstruction** — only the shared wall + scheduling remain.
 
@@ -460,7 +464,7 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
 > `deepen_discrete`, `deepen_succeeds`, `gate_of_discrete`, `allSingletonsK_of_discrete`, `joint`,
 > `exec_recovers_cell_orbits`, `exec_recovers_refgen_on_cell`, `deepen_branch_orbit_iff_aut`,
 > `deepen_branchOrbit_transport`, `deepenSupply_guarded_canonizer_direct` (all in `DeepenSupply`/`DeepenTransport`/
-> `DeepenCrux`/`DeepenAmenable`, still in build). The list below is pre-track-A provenance.
+> `DeepenCrux`/`DeepenTinhofer`, still in build). The list below is pre-track-A provenance.
 
 - **`DeepenSupply.lean`** — the executable. `classOf` · `coupled` · `allSingletonsK` · `chooseIdK` · `step`
   · `deepen` · `replay` · `twistOf` · **`twistOf_isColAut`** (every emitted twist is verified) · `deepenGens`
@@ -471,7 +475,7 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
   **`step_transport`** (individualize+refine commutes with σ).
 - **`DeepenCrux.lean`** (part II) — soundness + named predicates. **`deepenGens_isColAut`** (every gen is a
   genuine colour-automorphism) · **`deepenGens_sound`** (emitted ⊆ true orbit relation) · `GateAt` ·
-  `DeepenGateInvariant` · `DeepenForcedMatch` (the earlier truth-framed predicates, superseded by `Amenable`).
+  `DeepenGateInvariant` · `DeepenForcedMatch` (the earlier truth-framed predicates, superseded by `Tinhofer`).
 - **`DeepenRef.lean`** (part III) — the all-picks reference + easy inclusion. `deepenAll` · `replayAll` ·
   **`deepenRefGens`** · `deepenRefSupply` · `deepen_mem_deepenAll` · `replay_mem_replayAll` ·
   `deepenGens_subset_ref` · `wordReach_mono` · `verified_deepen_subset_ref` · **`wordReach_ref_of_deepen`**
@@ -480,15 +484,15 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
   · `imgFun_transport` · **`twistOf_transport`** (the twist conjugates under σ).
 - **`DeepenR1.lean`** (part V) — R1 reduced. **`DeepenRefInExec`** · `wordReach_deepen_of_ref` ·
   **`sameOrbits_of_core`** (`DeepenRefInExec → SameOrbits`) · `refInExec_of_mem_deepenGens`.
-- **`DeepenAmenable.lean`** (part VI) — Layer-1 machinery + the `①c` capstones.
+- **`DeepenTinhofer.lean`** (part VI) — Layer-1 machinery + the `①c` capstones.
   - *engine:* `transportColouring_comp` · `step_aut` · `step_isColAut` · **`step_rerelate`** (the
     invariant-maintenance step).
   - *cell transport:* `cidCell` · `mem_cidCell_iff` · `cidCell_nodup` · `mem_cidCell_transport` ·
     `cidCell_perm_transport` · `mem_cidCell_transport_apply` · `cidCell_length_transport`.
   - *piece 1 (monotonicity):* `indivOne_refines` · **`step_refines`** · `isColAut_parent_of_refines`.
   - *predicates + attribution:* `CellSingleOrbit` · `RigidObstructionAt` ·
-    **`rigidObstruction_of_not_cellSingleOrbit`** (G2) · `AmenablePath` · `Amenable`.
-  - *piece 2a:* **`cellSingleOrbit_transport`** (Amenable transfers a-descent → b-descent).
+    **`rigidObstruction_of_not_cellSingleOrbit`** (G2) · `TinhoferPath` · `Tinhofer`.
+  - *piece 2a:* **`cellSingleOrbit_transport`** (Tinhofer transfers a-descent → b-descent).
   - *piece 2b-b0:* **`deepen_acc`** (the accumulator only prefixes the output seq — reduces the joint
     induction to `acc = []`).
   - *piece 2b-b1 (2026-07-22):* **`chooseIdK_mem`** + `foldl_min_mem` (`chooseIdK = some cid ⟹ id-cell ≥ 2`;
@@ -513,20 +517,20 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
     `ExecReachesAut` (the now-UNNEEDED full-`SameOrbits` route, kept for reference).
   - *★★★ the `K∖cell`-free close (2026-07-22):* in `OrbitPrune` — `rep_congr_at` · **`SameOrbitsOnBranches`** ·
     `narrow_forceThenConsume_congr_branch` · **`guarded_mixed_canonizer_of_sameOrbitsOnBranches`** (weakened
-    reduction: branch-only orbit agreement suffices). In `DeepenAmenable` — **`wordReach_deepen_of_ref_on_branch`**
+    reduction: branch-only orbit agreement suffices). In `DeepenTinhofer` — **`wordReach_deepen_of_ref_on_branch`**
     · **`sameOrbitsOnBranches_of_cell`** · **`deepenSupply_guarded_canonizer_of_cell`** (`①c` modulo
-    `{R2, Amenable, AnchorFires}` — the `deepenRefSupply` route, superseded).
+    `{R2, Tinhofer, AnchorFires}` — the `deepenRefSupply` route, superseded).
   - *rigid handoff (2026-07-22, §2b‴):* **`rigidObstruction_imp_not_cellIsOrbit`** (deepen defers SOUNDLY on a
     rigid pair — `¬CellIsOrbit`; the same obstruction the rigid solver / §11.14 own, no new type) ·
-    **`not_amenablePath_imp_rigidObstruction`** (★ a consume-stall EXPOSES a concrete `RigidObstructionAt` — the
+    **`not_tinhoferPath_imp_rigidObstruction`** (★ a consume-stall EXPOSES a concrete `RigidObstructionAt` — the
     honest handoff: never dead-ends, surfaces a force-actionable rigid node, DEEPER than the compared pair under
     fusion).
   - *★★★★ the REFERENCE-FREE close (2026-07-22) — the intended `①c`:* in `SupplyTransport` —
     **`stallEquivariant_forceThenConsume_of_branchOrbitTransport`** (generic: `StallEquivariant` from branch-orbit
-    transport, no `SupplyEquivariant`). In `DeepenAmenable` — **`wordReach_imp_isColAut`** · **`deepen_branch_orbit_iff_aut`**
+    transport, no `SupplyEquivariant`). In `DeepenTinhofer` — **`wordReach_imp_isColAut`** · **`deepen_branch_orbit_iff_aut`**
     (deepen branch-orbits = `IsColAut`-orbits) · **`deepen_branchOrbit_transport`** · **`deepenSupply_guarded_canonizer_direct`**
-    (★★★ `①c` modulo `{Amenable, AnchorFires}` ONLY — no reference, no R1/R2).
-  - *capstones:* **`deepenSupply_guarded_canonizer_of`** · **`deepenSupply_canonizer_of_amenable`**.
+    (★★★ `①c` modulo `{Tinhofer, AnchorFires}` ONLY — no reference, no R1/R2).
+  - *capstones:* **`deepenSupply_guarded_canonizer_of`** · **`deepenSupply_canonizer_of_tinhofer`**.
 
 ---
 
@@ -534,14 +538,14 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
 
 > **⚠⚠ SUPERSEDED BY TRACK A (2026-07-23) — §9.1/§9.1.1/§9.1.2/§9.2/§9.3 below are ALL MOOT.** They plan the
 > reference/`hL1`/`DeepenRefInExec`/`K∖cell`/R2/backup-gate route to close `①c`. That route is **abandoned**:
-> `①c` is now CLOSED modulo `{Amenable}` alone (STATUS 2026-07-23). **The actual remaining work is NOT here —
+> `①c` is now CLOSED modulo `{Tinhofer}` alone (STATUS 2026-07-23). **The actual remaining work is NOT here —
 > it is (a) the RIGID SEAL** ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md): mixed-cell design
-> question → R0a → P1–P4), which also **discharges `Amenable` = `CellsAreOrbits` per family** (the coupling,
+> question → R0a → P1–P4), which also **discharges `Tinhofer` = `CellsAreOrbits` per family** (the coupling,
 > rigid-seal §9.1), and **(b)** wiring `deepenSupply` into `Publication.canonForm?`'s record object (append it
-> like `kernelSupply`, once `Amenable`/`CellsAreOrbits` totality is populated per family — T1). §9.1–§9.3 are
+> like `kernelSupply`, once `Tinhofer`/`CellsAreOrbits` totality is populated per family — T1). §9.1–§9.3 are
 > retained as provenance only.
 
-### 9.1 Layer 1 — finish `hL1 : Amenable → DeepenRefInExec` (4 pieces)
+### 9.1 Layer 1 — finish `hL1 : Tinhofer → DeepenRefInExec` (4 pieces)
 
 > **▶ READER: the current structure is §9.1.1 (the `hL1 ⟸ hreach` reduction, LANDED) + §9.1.2 (the route
 > analysis for `hreach`).** This "4 pieces" list is the ORIGINAL Layer-1 plan; pieces 1/2a/2b/3 are all
@@ -550,7 +554,7 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
 
 1. ✅ **piece 1 (refinement monotonicity)** — `indivOne_refines`, `step_refines`, `isColAut_parent_of_refines`.
    Keeps the running composite `σ' = τσ` in the parent-stabilizer.
-2a. ✅ **piece 2a (`cellSingleOrbit_transport`)** — `Amenable` (about the a-descent) delivers `τ ∈ Stab(cur_b.col)`.
+2a. ✅ **piece 2a (`cellSingleOrbit_transport`)** — `Tinhofer` (about the a-descent) delivers `τ ∈ Stab(cur_b.col)`.
 2b. **piece 2b — the joint fuel induction** (the remaining core). Substructure:
    - **b0 ✅ `deepen_acc`** — the accumulator only prefixes the output seq, so the joint induction works at
      `acc = []` (the recursion's `[cid]` accumulator becomes `cid ::` on the seq). ⚠ Its proof needed the
@@ -563,7 +567,7 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
      + both-sides "refines χp" side-invariants. At `acc = []` (`deepen_acc` handles the rest): base cases =
      `K` empty (contra) / `chooseIdK` none (terminal leaf, `σ' = σ`). Step: `deepen_acc` splits `seq = cid ::
      inner`; replay-b picks head `w_b` of b's cid-cell (nonempty by b1 + `cidCell_length_transport`);
-     `cellSingleOrbit_transport` + `Amenable` give `τ ∈ Stab(cur_b.col)` with `τ(σ w_a) = w_b`; `step_rerelate`
+     `cellSingleOrbit_transport` + `Tinhofer` give `τ ∈ Stab(cur_b.col)` with `τ(σ w_a) = w_b`; `step_rerelate`
      carries the invariant with `σ'' = τσ`; `step_refines`+`isColAut_parent_of_refines` keep `τσ` a
      parent-automorphism; the IH threads `replay inner (step..w_b)`. **Concludes: canonical deepen-a leaf &
      canonical replay-b leaf are `σ_final`-related over the WHOLE colouring** (so K-coverage is built in).
@@ -587,7 +591,7 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
    WHOLE-COLOURING equation `cur_b.col = transportColouring σ' cur_a.col`, so the re-relating automorphism is
    whole-graph and `twistOf`'s off-`K`=id support coincides with it (exec-support == full on every witness) —
    **piece 4 is SUBSUMED by the b2 invariant, not a separate wall.** `twistOf` is `id` off `K` (`DeepenSupply`
-   :187), so `∀ x` is `refl` for `x ∉ K` — K-coverage is only about `x ∈ K`. ⚠ The missing part-III `¬Amenable`
+   :187), so `∀ x` is `refl` for `x ∉ K` — K-coverage is only about `x ∈ K`. ⚠ The missing part-III `¬Tinhofer`
    witness is still the one untested regime (unrelated to K-coverage).
 
 ### 9.1.1 THE REFERENCE-GEN BRIDGE — the plan (2026-07-22)
@@ -597,7 +601,7 @@ scheduling** (a totality obligation). `①c` itself is prose-free modulo the **s
 > `hL1 ⟸ on-K` reduction; off-`K` is `refl`). So **`hL1` now reduces to `hreach`** := *each ref gen reaches
 > every `x` in its coupled component `K`*. The detailed route analysis for `hreach` is **§9.1.2**.
 
-`joint` (b2) + piece 3 close the **canonical** story: under `Amenable`, the canonical exec twist for a
+`joint` (b2) + piece 3 close the **canonical** story: under `Tinhofer`, the canonical exec twist for a
 σ-related pair verifies and equals `σ_final` on `K`. But `hL1` targets `DeepenRefInExec`, which quantifies
 over **arbitrary** `deepenRefGens` (all `deepenAll`/`replayAll` paths). This subsection is the plan to bridge
 that gap. **THE STRUCTURE — a clean reduction, a clean half, and one crux.**
@@ -619,7 +623,7 @@ that gap. **THE STRUCTURE — a clean reduction, a clean half, and one crux.**
 `α ∈ IsColAut`: the **exec generator `g_{x,y}` maps `x ↦ y` directly** (`img x = y`, because `x` is
 individualized into the anchor colour-slot and `y` into the same slot on the replay — `img anchor = rep`,
 independent of the `Stab` difference). So `WordReach exec x y` in ONE step. Needs, all tractable:
-  (i) `deepen` **terminates** from the anchor under `Amenable` (reaches `chooseIdK = none` within fuel `n` —
+  (i) `deepen` **terminates** from the anchor under `Tinhofer` (reaches `chooseIdK = none` within fuel `n` —
       each level adds a singleton; a small monotonicity lemma);
   (ii) `joint` applied with `σ := α` (via `step_isColAut`, `cur_b = step χ (α x)` transports) ⟹ the replay
        succeeds, so `g_{x,y} ∈ deepenGens`;
@@ -684,7 +688,7 @@ provable per-family; it is the honest cost of the clean half too. **Priority inf
 `σ' a₀ = σ a₀` conclusion — the per-level `τ`'s fix the protected singleton `y` via the new atoms
 `isColAut_fixes_singleton`/`step_preserves_singleton`/`step_indiv_singleton`) gives `σf x = y`; **piece 3**
 (`hfix` from `[INV]`) gives `twistOf = some σf`; **`mem_deepenGens_of`** (new) reconstructs `σf ∈ deepenGens`.
-Carries the firing/domain facts as hypotheses: `deepen` succeeds, gate passes, `Amenable`, and **`[DISC]`**
+Carries the firing/domain facts as hypotheses: `deepen` succeeds, gate passes, `Tinhofer`, and **`[DISC]`**
 (`Discrete d1.col`). ✅ **`[INV]` discharged from `[DISC]`** (2026-07-22, `offCoupled_singleton`, axiom-clean):
 `w ∉ coupled χ χc` means `w`'s `χ`-cell has constant `χc`, and `Discrete χc` collapses a constant-`χc` set to
 one vertex ⟹ `w` is a `χ`-singleton, which every `IsColAut` fixes. So the half is complete modulo the single
@@ -695,7 +699,7 @@ provable per-family; shared with the crux).
 The branch-cell half holds for ANY anchor-rep pair, and a ref gen `ρ ∈ IsColAut` maps each cell vertex `x` to
 `ρ x` in `x`'s orbit — so applying the half at anchor `x` (rep `ρ x`; `ρ x = x` is `refl`) reaches `ρ x`
 directly. Thus the **cell part of `hreach` needs no `K∖cell` content**, discharged from the domain bundle
-`AnchorFires` (deepen succeeds + gate + `Discrete` leaf, all anchors) + `Amenable`.
+`AnchorFires` (deepen succeeds + gate + `Discrete` leaf, all anchors) + `Tinhofer`.
 
 **★ R1 (full-`SameOrbits` route) REDUCED TO ONE PREDICATE (2026-07-22, `deepenRefInExec_of_cell_and_crux`,
 axiom-clean).** For the FULL `SameOrbits` route, `hreach` splits: off-`K` = `refl`, cell =
@@ -709,11 +713,11 @@ branch cell (`orbit_subset_branches`). So `①c` needs orbit agreement **only fo
 reduction `OrbitPrune.SameOrbitsOnBranches` (lemmas `rep_congr_at`, `narrow_forceThenConsume_congr_branch`,
 `guarded_mixed_canonizer_of_sameOrbitsOnBranches`, landed). And `SameOrbitsOnBranches deepenRefSupply
 deepenSupply` follows from the cell coverage ALONE (`wordReach_deepen_of_ref_on_branch` inducts a ref word, each
-step landing in the cell): **`①c` closes modulo `{R2, Amenable, AnchorFires}` only.** The `K∖cell` group-recovery
+step landing in the cell): **`①c` closes modulo `{R2, Tinhofer, AnchorFires}` only.** The `K∖cell` group-recovery
 was an artifact of the over-strong full `SameOrbits`; the greedy pick's `K∖cell` action is invisible to the
 canonizer. `ExecRecoversKMinusCell` / Route ε below are retained only as the (now-unneeded) full-`SameOrbits` route.
 
-**★★★ THE REFERENCE IS ELIMINATED — `①c` modulo `{Amenable, AnchorFires}` ONLY, no `deepenRefSupply`/R1/R2
+**★★★ THE REFERENCE IS ELIMINATED — `①c` modulo `{Tinhofer, AnchorFires}` ONLY, no `deepenRefSupply`/R1/R2
 (2026-07-22, `deepenSupply_guarded_canonizer_direct`, axiom-clean).** Reconsidering *what introduced R1/R2* (the
 equivariant-reference detour): the object's flag reads the supply only through `rep` on `forcedSet ⊆ branches`,
 so `StallEquivariant` needs only that deepen's **branch-orbit relation transports** — and it does, because
@@ -748,7 +752,7 @@ This is exactly `ExecRecoversKMinusCell` — the Route-ε target.
 **ROUTE β — per-level / `K`-extended reachability.** A `K∖cell` vertex `x` is individualized at some deepening
 level `ℓ`; read off `WordReach` from a pair whose level-`ℓ` pick is `x` vs `α x`. Content: the deeper-level
 member-swaps must be exec-reachable. **This IS the `ker φ` recovery**, re-expressed per level: it recurses
-(level-`ℓ` cells are single-orbit under `Amenable`, and their member-swaps are what deeper exec structure must
+(level-`ℓ` cells are single-orbit under `Tinhofer`, and their member-swaps are what deeper exec structure must
 generate). Viable but needs a nested induction; the risk is `chooseIdK`'s lowest-index pick — hitting a chosen
 `x` needs the **all-anchors × all-picks** quantification (which is exactly why the reference is all-picks and
 why all-anchors was forced by G8).
@@ -756,7 +760,7 @@ why all-anchors was forced by G8).
 **ROUTE ε (NEW — most promising native route) — direct `ref ⊆ exec` via a path-difference induction.** Do NOT
 route through `Aut`-completeness. A ref gen `ρ = σ'_P` (path `P`) differs from the canonical `g_{a,b} =
 σ_final` by the sequence of "pick a different member of a single-orbit cell at each level". **Induct on the
-deepening depth:** at each level the two picks lie in one `Amenable` single-orbit cell, so they differ by a
+deepening depth:** at each level the two picks lie in one `Tinhofer` single-orbit cell, so they differ by a
 `τ ∈ Stab`; if each such `τ`'s action is exec-reachable, compose. This turns the crux into a *local* claim —
 "each single-orbit-cell member-swap is exec-reachable" — instead of a global group-generation theorem, and it
 reuses the `joint`/`step_rerelate` machinery already built. **The bottom of the recursion** (level-0 = the
@@ -775,14 +779,14 @@ families the seal reaches; the residue is whatever `deepen` targets beyond them 
 **VERDICT — HYBRID is most viable.**
 1. ✅ **DONE (2026-07-22): `[DISC]`/`[INV]` + branch-cell half + WHOLE-cell coverage + R1-reduced-to-one-predicate.**
    `exec_recovers_cell_orbits` → `offCoupled_singleton` (`[INV]⟸[DISC]`) → `exec_recovers_refgen_on_cell`
-   (all cell vertices) → `deepenRefInExec_of_cell_and_crux` (R1 = `{Amenable, AnchorFires, ExecRecoversKMinusCell}`).
+   (all cell vertices) → `deepenRefInExec_of_cell_and_crux` (R1 = `{Tinhofer, AnchorFires, ExecRecoversKMinusCell}`).
    The entire remaining content of R1 is now the single predicate `ExecRecoversKMinusCell`.
 2. **★★★ SUPERSEDED — the `K∖cell` crux is OFF the critical path (2026-07-22).** Attacking
    `ExecRecoversKMinusCell` revealed it is not needed: `①c` narrows only through branch-cell reps, so
    `OrbitPrune.SameOrbitsOnBranches` (branch-only orbit agreement) suffices, and that follows from the landed
-   cell coverage. `deepenSupply_guarded_canonizer_of_cell` closes R1 modulo `{R2, Amenable, AnchorFires}`. Route
+   cell coverage. `deepenSupply_guarded_canonizer_of_cell` closes R1 modulo `{R2, Tinhofer, AnchorFires}`. Route
    ε / `ExecRecoversKMinusCell` remain only for the (unneeded) full-`SameOrbits` route. **Remaining for `①c`:
-   R2 (§9.2) + the domain facts `Amenable` (§5) and `AnchorFires`.**
+   R2 (§9.2) + the domain facts `Tinhofer` (§5) and `AnchorFires`.**
 3. **ROUTE α** is not standalone (α1 false in general) but its valid special case (single-level coupling) is
    the `ker φ = 1` base that ε's induction bottoms out on — so α is *absorbed into the hybrid*, not discarded.
 4. **ROUTE β** ≡ ε viewed per-level; keep ε's framing (cleaner recursion, reuses landed machinery).
@@ -802,7 +806,7 @@ order-dependent — but under the `allSingletonsK` gate the colour-match is UNIQ
 
 Per deepening level, check whether individualizing **each** member of the chosen id-cell gives the same
 footprint-partition; emit **all-or-nothing**, deferring on failure. Poly (`≤ n` members × `≤ n` levels × a
-refine); it **checks** `Amenable` locally instead of proving it (`①c` by construction — a canonical gate +
+refine); it **checks** `Tinhofer` locally instead of proving it (`①c` by construction — a canonical gate +
 pick-independence ⟹ a canonical group); gate-failure = honest deferral. Strictly better than a budgeted
 firing reference (route (b), off the table). Changes the landed executable, so it is the fallback, not the
 plan.
@@ -827,7 +831,7 @@ plan.
   `G8`/`t3`/`wcyc9`/`mp7`.
 - **⚠ Caveats — the honest limits.** The random-`n=8` sweeps are DEGENERATE (cells ≤ 2). The direct
   exec-vs-ref check covered **branch-cell profiles only** (K-coverage is less validated). And the one
-  untested regime is a **`¬Amenable` firing witness** — the missing part-III "fires-but-incomplete" graph;
+  untested regime is a **`¬Tinhofer` firing witness** — the missing part-III "fires-but-incomplete" graph;
   expander-base multipedes (rigid) and Chang (complete) are both closed as candidates.
 
 ---

@@ -3,7 +3,7 @@ import ChainDescent.DeepenCertified
 /-!
 # Workstream C — LOCATING the rigid obstruction a consume failure exposes
 
-**The gap this closes.** `not_amenablePath_imp_rigidObstruction` (`DeepenAmenable`) ends at
+**The gap this closes.** `not_tinhoferPath_imp_rigidObstruction` (`DeepenTinhofer`) ends at
 `∃ χc cid, RigidObstructionAt adj χc cid` — an obstruction *somewhere*, at an unnamed colouring, with
 no statement that the colouring is one the canonizer ever visits. Force cannot act on that: `forceBy`
 fires at a **node**, so it needs the obstruction to sit at the branch cell of a colouring reachable by
@@ -22,24 +22,24 @@ relocated to a **deeper reachable node**.
 
 That is what this file does, in two steps.
 
-* **§2 `not_amenablePath_located` (L2)** — the obstruction is at a colouring `ψ` reachable from the
+* **§2 `not_tinhoferPath_located` (L2)** — the obstruction is at a colouring `ψ` reachable from the
   starting state by `DescentReach`, and it is at `ψ`'s **branch cell** (`Descend.targetColour`, via the
   landed selector identity `chooseIdK_eq_targetColour`). This is a strengthening of
-  `not_amenablePath_imp_rigidObstruction`: the same induction, keeping the two facts it discarded.
-* **§3 `not_amenable_deepest` (L3)** — the *deepest* such failure is reached, and there the node is
-  **also `Amenable`**. So one node carries both hypotheses at once: consume is exact below it (which is
+  `not_tinhoferPath_imp_rigidObstruction`: the same induction, keeping the two facts it discarded.
+* **§3 `not_tinhofer_deepest` (L3)** — the *deepest* such failure is reached, and there the node is
+  **also `Tinhofer`**. So one node carries both hypotheses at once: consume is exact below it (which is
   what an orbit-separating equivariant key needs, scoping doc §3.3/§3.4) and force has a genuine
   rigid decision at its branch cell. Termination is the colour-count measure `Descend.ncol`, exactly
   the one `deepen_succeeds` uses.
 
-**What this is for.** `not_amenable_deepest` is the hook point workstream A/B build on: at `ψ` the
+**What this is for.** `not_tinhofer_deepest` is the hook point workstream A/B build on: at `ψ` the
 guarded cert key is equivariant *and* non-constant on the branch cell, so `Force.forceBy_narrows_of_key_ne`
 applies. Nothing here needs a key, so this file stands alone.
 
 **Measured shape of the located node** (scoping doc §2.3, two witnesses traced level by level): the
 descent stays aligned through every single-orbit cell and breaks at the **first** cell that is not a
 single stabiliser orbit — Chang-B at level 0 (a 12-cell with 4 stabiliser orbits), CFI cubic `m = 8` at
-level 3 (a 4-cell with 2). `not_amenablePath_located` is the proof-side statement of that trace.
+level 3 (a 4-cell with 2). `not_tinhoferPath_located` is the proof-side statement of that trace.
 -/
 
 namespace ChainDescent
@@ -118,15 +118,15 @@ theorem partner_of_chooseIdK {χ : Colouring n} {cid : Nat} {w : Fin n} {rest : 
 
 /-! ## 2. L2 — the obstruction is at a REACHABLE node's BRANCH CELL
 
-`not_amenablePath_imp_rigidObstruction` walks the path to the first level whose cell is not a single
+`not_tinhoferPath_imp_rigidObstruction` walks the path to the first level whose cell is not a single
 orbit and returns `⟨cur.col, cid, …⟩`. It then throws away (a) that `cur.col` is reachable and (b) that
 `cid` is the *branch* colour there. Both are already in hand at that point; this keeps them. -/
 
-/-- **★★ L2 — LOCATED FAILURE.** A non-`AmenablePath` state exposes a rigid obstruction at the **branch
+/-- **★★ L2 — LOCATED FAILURE.** A non-`TinhoferPath` state exposes a rigid obstruction at the **branch
 cell** of a colouring the descent can **reach** from it. Compare
-`not_amenablePath_imp_rigidObstruction`, whose `∃ χc cid` names no reachable node and no branch cell. -/
-theorem not_amenablePath_located (adj : AdjMatrix n) (χp : Colouring n) :
-    ∀ (fuel : Nat) (cur : Refine.ColData n), ¬ AmenablePath adj χp fuel cur →
+`not_tinhoferPath_imp_rigidObstruction`, whose `∃ χc cid` names no reachable node and no branch cell. -/
+theorem not_tinhoferPath_located (adj : AdjMatrix n) (χp : Colouring n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n), ¬ TinhoferPath adj χp fuel cur →
       ∃ ψ : Colouring n, DescentReach adj cur.col ψ ∧
         ∃ cid : Nat, Descend.targetColour ψ = some cid ∧ RigidObstructionAt adj ψ cid := by
   intro fuel
@@ -134,9 +134,9 @@ theorem not_amenablePath_located (adj : AdjMatrix n) (χp : Colouring n) :
   | zero => intro cur h; exact absurd trivial h
   | succ fuel ih =>
       intro cur h
-      unfold AmenablePath at h
+      unfold TinhoferPath at h
       dsimp only at h
-      -- `chooseIdK` decides the level; `none` means the path already ended (vacuously amenable).
+      -- `chooseIdK` decides the level; `none` means the path already ended (vacuously tinhofer).
       cases hco : chooseIdK (List.finRange n) cur.col with
       | none => rw [hco] at h; exact absurd trivial h
       | some cid =>
@@ -165,23 +165,23 @@ theorem not_amenablePath_located (adj : AdjMatrix n) (χp : Colouring n) :
 /-! ## 3. L3 — the DEEPEST failure: one node carrying BOTH hypotheses
 
 L2 gives a reachable obstructed node, but says nothing about the descent *below* it — and a key that
-separates the cell's orbits needs exactly that (`Amenable` at the node). Iterating L2 fixes this: keep
-descending while the located node is itself non-`Amenable`. The colour count strictly rises at every
+separates the cell's orbits needs exactly that (`Tinhofer` at the node). Iterating L2 fixes this: keep
+descending while the located node is itself non-`Tinhofer`. The colour count strictly rises at every
 step and is bounded by `n`, so the iteration stops, and it can only stop at a node that **is**
-`Amenable` — while still carrying the obstruction L2 put at its branch cell. -/
+`Tinhofer` — while still carrying the obstruction L2 put at its branch cell. -/
 
 /-- Fuelled form (the induction). `k` bounds the remaining colour deficit `n - ncol χ`. -/
-theorem not_amenable_deepest_aux (adj : AdjMatrix n) :
-    ∀ (k : Nat) (χ : Colouring n), n - Descend.ncol χ ≤ k → ¬ Amenable adj χ →
-      ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Amenable adj ψ ∧
+theorem not_tinhofer_deepest_aux (adj : AdjMatrix n) :
+    ∀ (k : Nat) (χ : Colouring n), n - Descend.ncol χ ≤ k → ¬ Tinhofer adj χ →
+      ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Tinhofer adj ψ ∧
         ∃ cid : Nat, Descend.targetColour ψ = some cid ∧ RigidObstructionAt adj ψ cid := by
   intro k
   induction k with
   | zero =>
-      -- `¬Amenable` produces a branch vertex, hence a partner, hence `ncol χ < n`: the deficit is ≥ 1.
+      -- `¬Tinhofer` produces a branch vertex, hence a partner, hence `ncol χ < n`: the deficit is ≥ 1.
       intro χ hk hnA
       exfalso
-      unfold Amenable at hnA
+      unfold Tinhofer at hnA
       push Not at hnA
       obtain ⟨r, hr, _⟩ := hnA
       have hlt : Descend.ncol χ < Descend.ncol (step adj χ r).col :=
@@ -190,14 +190,14 @@ theorem not_amenable_deepest_aux (adj : AdjMatrix n) :
       omega
   | succ k ih =>
       intro χ hk hnA
-      unfold Amenable at hnA
+      unfold Tinhofer at hnA
       push Not at hnA
       obtain ⟨r, hr, hpath⟩ := hnA
       -- L2 at the failing anchor, then prepend the anchor's own step
-      obtain ⟨ψ₀, hreach₀, cid, hct, hrig⟩ := not_amenablePath_located adj χ n (step adj χ r) hpath
+      obtain ⟨ψ₀, hreach₀, cid, hct, hrig⟩ := not_tinhoferPath_located adj χ n (step adj χ r) hpath
       have hstep : DescentReach adj χ ψ₀ :=
         DescentReach.cons r (Descend.exists_partner_of_mem_branches hr) hreach₀
-      by_cases hA : Amenable adj ψ₀
+      by_cases hA : Tinhofer adj ψ₀
       · exact ⟨ψ₀, hstep, hA, cid, hct, hrig⟩
       · -- strictly deeper, so the deficit dropped: recurse
         have h1 : Descend.ncol χ < Descend.ncol (step adj χ r).col :=
@@ -208,10 +208,10 @@ theorem not_amenable_deepest_aux (adj : AdjMatrix n) :
         obtain ⟨ψ, hreach, hA', hobs⟩ := ih ψ₀ (by omega) hA
         exact ⟨ψ, hstep.trans hreach, hA', hobs⟩
 
-/-- **★★★ L3 — THE HOOK POINT.** If the deepening is not `Amenable` at `χ`, then the descent reaches a
+/-- **★★★ L3 — THE HOOK POINT.** If the deepening is not `Tinhofer` at `χ`, then the descent reaches a
 colouring `ψ` at which
 
-* **consume is exact below** — `Amenable adj ψ`, so the harvest's branch-orbit relation *is* the
+* **consume is exact below** — `Tinhofer adj ψ`, so the harvest's branch-orbit relation *is* the
   `IsColAut`-orbit relation there (`deepen_branch_orbit_iff_aut`), and an orbit-separating equivariant
   key is available (scoping doc §3.3); and
 * **force has a real decision** — `RigidObstructionAt adj ψ cid` at `ψ`'s own **branch cell**
@@ -219,18 +219,18 @@ colouring `ψ` at which
   `Force.forceBy_no_narrowing_on_orbit`'s ceiling does not block firing.
 
 Both resolvers' hypotheses hold at the **same, named, reachable** node. This is the statement
-`not_amenablePath_imp_rigidObstruction` was reaching for; note scoping doc §1.2 — it cannot be improved to "at `χ`
+`not_tinhoferPath_imp_rigidObstruction` was reaching for; note scoping doc §1.2 — it cannot be improved to "at `χ`
 itself", since that is refuted by a measured witness. -/
-theorem not_amenable_deepest (adj : AdjMatrix n) {χ : Colouring n} (h : ¬ Amenable adj χ) :
-    ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Amenable adj ψ ∧
+theorem not_tinhofer_deepest (adj : AdjMatrix n) {χ : Colouring n} (h : ¬ Tinhofer adj χ) :
+    ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Tinhofer adj ψ ∧
       ∃ cid : Nat, Descend.targetColour ψ = some cid ∧ RigidObstructionAt adj ψ cid :=
-  not_amenable_deepest_aux adj (n - Descend.ncol χ) χ (le_refl _) h
+  not_tinhofer_deepest_aux adj (n - Descend.ncol χ) χ (le_refl _) h
 
-/-- The `Amenable` form of `consume_fail_gives_real_decision`. `DeepenCertified` states it over
-`Certified`, which is *strictly stronger* (`amenable_of_certified` goes only one way); the underlying
-exactness theorem `deepen_branch_orbit_iff_aut` already takes `Amenable`, so nothing is lost. -/
-theorem consume_fail_real_decision_of_amenable {adj : AdjMatrix n} {χ : Colouring n}
-    (hA : Amenable adj χ) (hfail : ¬ Consume.CellIsOrbit deepenSupply adj χ) :
+/-- The `Tinhofer` form of `consume_fail_gives_real_decision`. `DeepenCertified` states it over
+`Certified`, which is *strictly stronger* (`tinhofer_of_certified` goes only one way); the underlying
+exactness theorem `deepen_branch_orbit_iff_aut` already takes `Tinhofer`, so nothing is lost. -/
+theorem consume_fail_real_decision_of_tinhofer {adj : AdjMatrix n} {χ : Colouring n}
+    (hA : Tinhofer adj χ) (hfail : ¬ Consume.CellIsOrbit deepenSupply adj χ) :
     ∃ u ∈ Descend.branches χ, ∃ w ∈ Descend.branches χ,
       ∀ σ : Equiv.Perm (Fin n), IsColAut adj χ σ → σ u ≠ w := by
   by_contra hcon
@@ -240,27 +240,27 @@ theorem consume_fail_real_decision_of_amenable {adj : AdjMatrix n} {χ : Colouri
   exact (deepen_branch_orbit_iff_aut adj χ hA hu).mpr ⟨σ, hσ, hσu⟩
 
 /-- The same, as a `RigidObstructionAt` at the branch cell. -/
-theorem rigidObstructionAt_branch_of_amenable {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
-    (hc : Descend.targetColour χ = some c) (hA : Amenable adj χ)
+theorem rigidObstructionAt_branch_of_tinhofer {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
+    (hc : Descend.targetColour χ = some c) (hA : Tinhofer adj χ)
     (hfail : ¬ Consume.CellIsOrbit deepenSupply adj χ) :
     RigidObstructionAt adj χ c := by
-  obtain ⟨u, hu, w, hw, hrig⟩ := consume_fail_real_decision_of_amenable hA hfail
+  obtain ⟨u, hu, w, hw, hrig⟩ := consume_fail_real_decision_of_tinhofer hA hfail
   exact ⟨u, w, (Descend.mem_branches_iff hc u).mp hu, (Descend.mem_branches_iff hc w).mp hw, hrig⟩
 
 /-- **★★★ THE CONSUME-SIDE ENTRY POINT — every consume failure is LOCATED.** Either the node is
-`Amenable`, and then the failure is a rigid decision in **this** branch cell; or it is not, and then a
-reachable deeper node carries *both* hypotheses (`not_amenable_deepest`). Neither disjunct is an
+`Tinhofer`, and then the failure is a rigid decision in **this** branch cell; or it is not, and then a
+reachable deeper node carries *both* hypotheses (`not_tinhofer_deepest`). Neither disjunct is an
 unanchored existential, which is the whole improvement over
-`not_amenablePath_imp_rigidObstruction`. -/
+`not_tinhoferPath_imp_rigidObstruction`. -/
 theorem consume_fail_locates (adj : AdjMatrix n) {χ : Colouring n} {c : Nat}
     (hc : Descend.targetColour χ = some c)
     (hfail : ¬ Consume.CellIsOrbit deepenSupply adj χ) :
     RigidObstructionAt adj χ c ∨
-      ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Amenable adj ψ ∧
+      ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Tinhofer adj ψ ∧
         ∃ cid : Nat, Descend.targetColour ψ = some cid ∧ RigidObstructionAt adj ψ cid := by
-  by_cases hA : Amenable adj χ
-  · exact Or.inl (rigidObstructionAt_branch_of_amenable hc hA hfail)
-  · exact Or.inr (not_amenable_deepest adj hA)
+  by_cases hA : Tinhofer adj χ
+  · exact Or.inl (rigidObstructionAt_branch_of_tinhofer hc hA hfail)
+  · exact Or.inr (not_tinhofer_deepest adj hA)
 
 end Deepen
 end ChainDescent

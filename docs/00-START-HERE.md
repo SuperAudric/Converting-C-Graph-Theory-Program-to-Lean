@@ -182,11 +182,11 @@ close it — is set out in
 > relabelling-invariant.
 > **▶▶ 2026-07-27 (later) — a SIXTH module, `KeyComplete.lean` (15 thms, axiom-clean): the FIRST
 > `HandledS` POPULATION.** `consume_fail_force_fires` ends in *strict* narrowing, which nothing downstream
-> consumes; **`nodeResolved_of_amenable`** now gives `≤ 1` — `Select.NodeResolved` — at every `Amenable`
-> node, and `handledS_of_reached_amenable` populates `HandledS` on the all-`Amenable` reached CLASS
-(remaining-work §1T had **zero**; ⚠ a class, not yet a named family — the per-family `Amenable`
+> consumes; **`nodeResolved_of_tinhofer`** now gives `≤ 1` — `Select.NodeResolved` — at every `Tinhofer`
+> node, and `handledS_of_reached_tinhofer` populates `HandledS` on the all-`Tinhofer` reached CLASS
+(remaining-work §1T had **zero**; ⚠ a class, not yet a named family — the per-family `Tinhofer`
 discharge is still the rigid-side work of rigid-seal §9.1).
-> Plus **`KeySeparatesAt`**, absorbing consume's `Amenable` into force's separation obligation — **a
+> Plus **`KeySeparatesAt`**, absorbing consume's `Tinhofer` into force's separation obligation — **a
 > unification, not a weakening**, and the *repaired* form of the retired `assume-VT` prune (⚠ two
 > obituaries, only one transfers). **Authoritative: `scratchpad/DUAL_resolver_scoping.md` §10.**
 > **▶▶ AND FOUR MORE, same day (end of 2026-07-27):** `orbKeyG` is now **COMPUTABLE** (the orbit BFS
@@ -199,17 +199,17 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > **▶ Next:** relocation-nesting depth · record-object integration (`Publication.canonForm?` still uses
 > `holKeyFast`) · `SameOrbits`-licensing as the second guard lever.
 >
-> **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Amenable}` ONLY**
+> **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Tinhofer}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,
 > making `[DISC]`/gate/termination STRUCTURAL (`deepen_discrete` / `gate_of_discrete` / `deepen_succeeds` via the
 > `ncol` colour-count measure) — this **ELIMINATED `AnchorFires`** (the last firing hypothesis). The **entire
 > reference/R1/R2 apparatus is REMOVED from the build** (`DeepenRef`/`DeepenRefTransport`/`DeepenR1` parked;
 > `deepenRefSupply`/`DeepenRefInExec`/`ExecRecoversKMinusCell` deleted; `imgFun` moved to `DeepenSupply`). **The
-> SOLE remaining ①c condition, `Amenable`, IS `CellsAreOrbits`** (`CascadeOracle`) — free at discreteness
+> SOLE remaining ①c condition, `Tinhofer`, IS `CellsAreOrbits`** (`CascadeOracle`) — free at discreteness
 > (`cellsAreOrbits_of_discrete`), so NOT a GI∈P assumption; its failure is an *exposed* rigid decision
-> (`not_amenablePath_imp_rigidObstruction`). **`deepenSupply` stays out of `Publication.canonForm?` until
-> `Amenable`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
-> ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Amenable`
+> (`not_tinhoferPath_imp_rigidObstruction`). **`deepenSupply` stays out of `Publication.canonForm?` until
+> `Tinhofer`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
+> ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Tinhofer`
 > per family AND is the other seal. **✅ THE ALGORITHM-R SCAFFOLD + THE FULL `gen`-REDUCTION CHAIN (A)–(D) LANDED
 > (2026-07-24, axiom-clean, gate green ~97 modules — authoritative detail = rigid-seal STATUS/§8.2/§10):** the force
 > key `leafColKey` + composite `compKey` (`RigidSeal.lean`); **P1** (`ForcingCircuits`), **P3-I**
