@@ -48,6 +48,24 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
+> **▶▶▶ UPDATE 2026-07-27 — SECOND LIVE TRACK: the CONSUME→FORCE HOOK is CLOSED (`DeepenCertified` →
+> `DeepenLocated` → `DeepenKey` → `DeepenExact` → `DeepenGuard`, 64 theorems, axiom-clean, gate green
+> 229 s / 104 modules). AUTHORITATIVE:
+> [`scratchpad/DUAL_resolver_scoping.md`](../scratchpad/DUAL_resolver_scoping.md) + the 2026-07-27 STATUS
+> block of [`chain-descent-deepen-supply.md`](./chain-descent-deepen-supply.md).**
+> `consume_fail_force_fires`: a `deepenSupply` failure ⟹ the descent reaches a node where
+> `forceBy orbKey` **strictly narrows**. `keyEquivariant_orbKey` carries **no hypothesis**, so
+> `Force.force_canonizer` / `Composite.composite_canonizer` apply as they stand; `orbKeyG S` is the
+> poly-guarded executable variant (`force_canonizer_orbKeyG_deck2` = `①` + totality, no hypothesis).
+> **⛔ Do not re-derive:** (a) "a twist failure certifies different orbits" is FALSE (two certified
+> falsifiers); (b) "consume fails at `χ` ⟹ force acts at `χ`" cannot hold (the m=8 witness: the cell is a
+> single orbit, so `forceBy_no_narrowing_on_orbit` forbids it) — the obstruction must be RELOCATED;
+> (c) "prove `Certified` relabelling-invariant" is MEASURED FALSE, which is why `DeepenGuard` guards by an
+> *equivariant supply* instead. **▶ Next: a decision procedure for `CellIsOrbit S` (the last
+> `noncomputable` before `Publication`), guard strength, relocation-nesting depth.**
+> ⚠ This track is INDEPENDENT of the rigid-seal frontier below; both are live.
+
+
 > **▶▶▶ UPDATE 2026-07-26 (latest) — THE CONCRETE `ref` + `Recover` ARE LANDED (`RigidRefine.lean`, steps 1–9E,
 > axiom-clean, gate green ~97 modules). Authoritative: [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md)
 > STATUS + §8.2 + §10.** The (A)–(D) chain reduced the rigid **linear** `①` to *"supply a discrete equivariant `ref`"*;
@@ -129,7 +147,11 @@ transfer). "Complete" = the flag provably never fires.
 > above. It is retained for the arc, not as live plan. `deepenRefSupply`/`SameOrbitsOnBranches` survive in the
 > source for provenance only.
 
-## ▶ CURRENT FRONTIER (2026-07-21) — the prior framing (superseded on R1 by the deepen doc)
+## ▶ ⛔ SUPERSEDED FRONTIER (2026-07-21) — the prior deepen framing
+
+> ⚠ **Superseded twice over**: on R1 by the deepen doc, and wholly by the 2026-07-27 consume→force arc at
+> the top of this section. `DeepenRef`/`DeepenRefTransport`/`DeepenR1` and the `SameOrbits`/R1/R2
+> apparatus below are **parked out of `build.sh`** and are not the route. Kept for provenance only.
 
 **Where work stopped: C3b `deepenSupply`'s ①c, reduced to a single crux.** The full arc is §1C C3 (ii-c)
 below; this is the pickup summary.

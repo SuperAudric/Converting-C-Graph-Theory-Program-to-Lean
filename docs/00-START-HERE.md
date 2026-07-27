@@ -141,9 +141,11 @@ close it — is set out in
 > `GensEquivariant` (pivot-order-dependent basis = trap #7); ① rides `OrbitPrune.SameOrbits` against an
 > equivariant set-level reference, so the executable object carries zero ① obligation — the recommended
 > shape for any future supply that must make an internal choice.
-> The **frontier**: **C3b `deepenSupply`'s ①c — R1, the WL-completeness crux** (base-graph recovery + lift
-> was the earlier C3b plan, now SUPERSEDED by the deepen supply; the C3b state is the CURRENT-STATE block just
-> below + the tracker's "▶ CURRENT FRONTIER"), then T1 per-family localisation, F3b Smith/CRT, the W1 recovery
+> The **frontier**: TWO independent live tracks — **(i) the rigid seal** (see below) and **(ii) the
+> consume→force hook, now CLOSED** (2026-07-27; `DeepenLocated`/`DeepenKey`/`DeepenExact`/`DeepenGuard`,
+> block just below). ⚠ The old wording *"C3b `deepenSupply`'s ①c — R1, the WL-completeness crux"* is
+> superseded: `①c` needs no `SameOrbits`/R1/R2 apparatus, and the open items are `②` (cost) only.
+> Then T1 per-family localisation, F3b Smith/CRT, the W1 recovery
 > poly program, and the W2 wall — in that order (remaining-work §2).
 > **▶ W2 now has a dedicated, substantially-BUILT track: `docs/chain-descent-w2-solvability-route.md`** (retargets the
 > wall from "linear" to *solvable* `Γ`; Tier-A localization + Tier-B reduction + C3-Recover R-a + R-c-nonabelian + the
@@ -166,8 +168,21 @@ close it — is set out in
 > totally, profile `[28]`, so an equivariance falsifier must be PARTIALLY-firing). The landed supply quantifies
 > over all anchors.
 >
-> **▶▶▶ C3b ①c — CURRENT STATE (2026-07-23, TRACK A): read [`chain-descent-deepen-supply.md`](./chain-descent-deepen-supply.md)
-> STATUS (authoritative, self-contained).** **`deepenSupply`'s ①c is CLOSED modulo `{Amenable}` ONLY**
+> **▶▶▶ C3b — CURRENT STATE (2026-07-27): the CONSUME→FORCE HOOK IS CLOSED.** Read
+> [`scratchpad/DUAL_resolver_scoping.md`](../scratchpad/DUAL_resolver_scoping.md) (live, authoritative for
+> this arc) + the 2026-07-27 STATUS block of
+> [`chain-descent-deepen-supply.md`](./chain-descent-deepen-supply.md).
+> Five modules, 64 theorems, axiom-clean, gate green (229 s / 104 modules):
+> `DeepenCertified` → `DeepenLocated` → `DeepenKey` → `DeepenExact` → `DeepenGuard`.
+> **`consume_fail_force_fires`** — a `deepenSupply` failure ⟹ the descent reaches a node where
+> `forceBy orbKey` **strictly narrows**; `keyEquivariant_orbKey` carries **no hypothesis**, and
+> `orbKeyG S` is the poly-guarded executable (`force_canonizer_orbKeyG_deck2` = `①` + totality, no
+> hypothesis). **⛔ Refuted, do not re-derive:** a twist failure does NOT certify different orbits; "consume
+> fails at `χ` ⟹ force acts at `χ`" cannot hold (relocation is required); and `Certified` is NOT
+> relabelling-invariant. **▶ Next:** a decision procedure for `CellIsOrbit S` (the last `noncomputable`
+> before `Publication`), guard strength, relocation-nesting depth.
+>
+> **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Amenable}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,
 > making `[DISC]`/gate/termination STRUCTURAL (`deepen_discrete` / `gate_of_discrete` / `deepen_succeeds` via the
 > `ncol` colour-count measure) — this **ELIMINATED `AnchorFires`** (the last firing hypothesis). The **entire

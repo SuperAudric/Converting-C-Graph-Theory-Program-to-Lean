@@ -4713,3 +4713,138 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RigidRefine.baseReadPin` | 1483-1488 | The base-pinned forced read — vertex `v`'s forced value under (extracted system ∪ pinning `p`), encoded. Reuses `forcedVal` — ORDER-FREE, no `rrefCanon` in the `①` handle. | Definition, `noncomputable` |
 | `RigidRefine.readAtEquivariant_baseReadPin` | 1490-1498 | **★★ The pinned read is a vertex-invariant** — `ReadAtEquivariant (baseReadPin extract) pinAct ⟸ RefExtractEquivariant`, via `forcedVal_transport` + `image_union`. | — |
 | `RigidRefine.keyEquivariant_compKey_readAggB_pin` | 1500-1511 | **★★★ The concrete de-classed `①`, POLY (singleton pinning family), ZERO carried beyond the extraction** — the base-quotient analog of `readAgg_univ` but `|frames|=1` not `n!`. The TYPE ESCAPE realized (richness = bigger pinning family = P2). | — |
+## ChainDescent/DeepenCertified.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.CertifiedOrbit` | 65-72 | — | Definition |
+| `Deepen.cellSingleOrbit_of_certifiedOrbit` | 74-80 | — | — |
+| `Deepen.certifiedOrbit_of_cellIsOrbit` | 82-89 | — | — |
+| `Deepen.CertifiedPath` | 93-107 | — | Definition |
+| `Deepen.amenablePath_of_certifiedPath` | 109-135 | — | — |
+| `Deepen.Certified` | 137-139 | — | Definition |
+| `Deepen.amenable_of_certified` | 141-145 | — | — |
+| `Deepen.deepenSupply_guarded_canonizer_of_certified` | 147-157 | — | — |
+| `Deepen.classOf_eq_cidCell` | 171-172 | — | — |
+| `Deepen.cidCell_length_eq_cellOf_card` | 174-180 | — | — |
+| `Deepen.mem_nonSingletonColours_iff` | 228-242 | — | — |
+| `Deepen.chooseIdK_eq_targetColour` | 244-298 | — | — |
+| `Deepen.certifiedOrbit_of_cellIsOrbit_chooseIdK` | 300-308 | — | — |
+| `Deepen.branchOrbit_iff_aut_of_certified` | 317-324 | — | — |
+| `Deepen.consume_fail_gives_real_decision` | 326-338 | — | — |
+| `Deepen.rigidObstructionAt_branch_of_certified` | 340-349 | — | — |
+| `Deepen.relabelAdj_mul` | 363-365 | — | — |
+| `Deepen.cellSingleOrbit_transport_iso` | 367-379 | — | — |
+| `Deepen.chooseIdK_finRange_transport` | 381-386 | — | — |
+| `Deepen.amenablePath_transport` | 388-462 | — | — |
+| `Deepen.amenable_transport` | 464-477 | — | — |
+| `Deepen.relabelAdj_one` | 486 | — | — |
+| `Deepen.transportColouring_one` | 488-489 | — | — |
+| `Deepen.amenable_transport_iff` | 491-497 | — | — |
+| `Deepen.wordReach_nil_iff` | 499-505 | — | — |
+| `Deepen.deepenSupplyGuarded` | 506-512 | — | Definition, `noncomputable` |
+| `Deepen.verified_guarded_of_amenable` | 514-517 | — | — |
+| `Deepen.verified_guarded_of_not` | 519-522 | — | — |
+| `Deepen.deepen_branchOrbit_transport_guarded` | 524-553 | — | — |
+| `Deepen.deepenSupplyGuarded_canonizer` | 555-567 | — | — |
+
+## ChainDescent/DeepenExact.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.warmRefineR_lt` | 54-61 | B0 Warm refinement produces RANKS, so every colour is `< n`. | — |
+| `Deepen.step_col_lt` | 63-65 | B0 One step's colours are `< n`. | — |
+| `Deepen.leafOf_lt` | 67-85 | B0 The leaf's colours are `< n`. | — |
+| `Deepen.leafOf_discrete` | 87-117 | B0 The greedy leaf is DISCRETE once the fuel covers the colour deficit — same `Descend.ncol` measure as `deepen_succeeds`. | — |
+| `Deepen.leafOf_discrete_n` | 119-121 | B0 At fuel `n` the greedy leaf is discrete. This is what makes the read COMPLETE. | — |
+| `Deepen.filter_eq_singleton_of_discrete` | 125-131 | B0a A discrete colouring's class is a singleton. | — |
+| `Deepen.readAt_discrete` | 133-137 | B0a At a discrete colouring the adjacency read is a single entry. | — |
+| `Deepen.readColAt_discrete` | 139-142 | B0a At a discrete colouring the parent read is a single value. | — |
+| `Deepen.readKey_components` | 146-155 | B0b Key equality gives componentwise equality (`readKey` is two `map`s). | — |
+| `Deepen.colEquiv` | 164-169 | B1a A discrete colouring with colours `< n` is a permutation. | Definition, `noncomputable` |
+| `Deepen.colEquiv_val` | 171-172 | B1a Its value is the colour. | — |
+| `Deepen.matchPerm` | 174-177 | B1a The permutation matching two discrete colourings colour-for-colour. | Definition, `noncomputable` |
+| `Deepen.matchPerm_col` | 179-186 | B1a `matchPerm` matches the colours. | — |
+| `Deepen.isColAut_of_readKey_eq` | 188-251 | ★★ B1 THE COMPLETENESS DIRECTION, UNCONDITIONAL. Two discrete leaves with equal reads are related by a colour-automorphism carrying `u` to `w`. No `Amenable`: this is completeness of the ENCODING. The odd values of `indivOne χ u` sit exactly at `u`, which is what forces `ρ u = w`; halving gives `χ ∘ ρ = χ`. This is the FIRING direction, and it needs no guard. | — |
+| `Deepen.amenablePath_of_amenable` | 259-261 | The guard is open at every branch rep of an `Amenable` node. | — |
+| `Deepen.orbKey_ne_of_no_aut` | 263-278 | B3 `orbKey` SEPARATES any pair no colour-automorphism links. | — |
+| `Deepen.forceBy_orbKey_narrows` | 280-294 | ★★★ B3a At an `Amenable` node with a `RigidObstructionAt`, `forceBy orbKey` STRICTLY NARROWS. No contradiction with `forceBy_no_narrowing_on_orbit`: the obstruction is precisely the statement that the cell is NOT a single orbit. | — |
+| `Deepen.orbKey_eq_iff_orbit` | 296-313 | ★★★ B2 At an `Amenable` node `orbKey`'s FIBRES ARE THE ORBITS, both directions. `⟸` is the ceiling (`Force.keyV_aut_invariant`, free from `keyEquivariant_orbKey`), so the key is constant on each orbit and force can never cut INSIDE one — this is also the consistency check against `forceBy_no_narrowing_on_orbit`. | — |
+| `Deepen.forcedSet_single_orbit` | 315-327 | ★★★ D2 Force narrows the branch cell to a SINGLE ORBIT — the exact input `Composite.forceThenConsume_singleton_of_cellIsOrbit` wants. | — |
+| `Deepen.exists_targetColour` | 329-335 | Every non-discrete colouring has a branch colour. | — |
+| `Deepen.consume_fail_force_fires` | 337-356 | ★★★ D1 THE HOOK, CLOSED. A CONSUME FAILURE MAKES FORCE FIRE at a descent-reachable node. Strongest available form: a measured witness (CFI over a random cubic base, m=8) has consume failing at a node whose branch cell is a SINGLE ORBIT, where `forceBy_no_narrowing_on_orbit` forbids force from firing — so relocating to a reachable node is the target, not a weakening. | — |
+
+## ChainDescent/DeepenGuard.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.wordReach_isColAut` | 64-73 | `WordReach` over any list of verified automorphisms yields an automorphism — `DeepenAmenable`'s version is `deepenSupply`-specific; this is the general one. | — |
+| `Deepen.wordReach_isColAut_verified` | 75-78 | The same for a supply's `verified` list. | — |
+| `Deepen.cellSingleOrbit_of_cellIsOrbit` | 80-87 | SOUND `CellIsOrbit S` for ANY supply gives the branch cell's `CellSingleOrbit` — `DeepenCertified`'s T1 with `deepenSupply` generalised away. | — |
+| `Deepen.wordReach_transport` | 94-106 | `WordReach` transports under `SupplyEquivariant S`. | — |
+| `Deepen.cellIsOrbit_transport` | 108-115 | ★ The lemma the poly-guard design was missing: `CellIsOrbit S` transports when `S` does. | — |
+| `Deepen.CertPath` | 124-133 | The POLY guard: at every level, `S`'s verified generators act transitively on the cell the level individualizes. `AmenablePath`'s recursion with the OBSERVABLE `CellIsOrbit S` in place of the unobservable `CellSingleOrbit`. | Definition |
+| `Deepen.CertifiedG` | 135-137 | Every anchor's path is certified — the poly analogue of `Amenable`. | Definition |
+| `Deepen.amenablePath_of_certPath` | 139-164 | ★★ SOUND: the poly guard implies the real one. | — |
+| `Deepen.amenable_of_certifiedG` | 166-168 | ★★ `CertifiedG S ⟹ Amenable`. | — |
+| `Deepen.certPath_transport` | 176-249 | ★★ INVARIANT: the poly guard transports, given `SupplyEquivariant S`. Same pick-absorption induction as `amenablePath_transport`, with soundness supplying the stabiliser element. | — |
+| `Deepen.certPath_step_transport_iff` | 251-266 | The poly guard at a vertex, both directions. | — |
+| `Deepen.instDecidableCertPath` | 270-274 | ⚠ `Classical.dec` so the PARAMETRIC development elaborates. For a concrete poly `S` this is replaced by a real decision procedure — `CellIsOrbit S` is a finite `WordReach` reachability test on the branch cell. This is the last `noncomputable` in the chain. | Instance, `noncomputable` |
+| `Deepen.orbKeyG` | 276-284 | ★★★ THE POLY-GUARDED KEY. Identical to `orbKey` except the `if` tests the OBSERVABLE `CertPath S`. | Definition, `noncomputable` |
+| `Deepen.keyV_orbKeyG` | 286-290 | The guarded key's value projection, unfolded. | `@[simp]` |
+| `Deepen.keyEquivariant_orbKeyG` | 292-307 | ★★★ `①` FOR THE POLY-GUARDED KEY, from `SupplyEquivariant S` alone. ⚠ Note `CertPath S ⟹ AmenablePath` and never the converse, so `orbKeyG S` DEFERS more often than `orbKey` — a firing loss, not a soundness loss. | — |
+| `Deepen.orbKeyG_ne_of_no_aut` | 314-327 | The guarded key separates a non-automorphic pair (`isColAut_of_readKey_eq` is guard-agnostic, so this transferred verbatim). | — |
+| `Deepen.forceBy_orbKeyG_narrows` | 329-340 | ★★★ FORCE FIRES UNDER THE POLY GUARD. Same as `forceBy_orbKey_narrows` with `CertifiedG S` (poly, observable) in place of `Amenable` (an `n!` search). | — |
+| `Deepen.consume_fail_force_fires_guarded` | 342-359 | ★★ The poly-guarded hook. The LOCALIZATION half is unchanged (it never depended on a guard); what the poly guard costs is that FIRING needs the guard open, hence `CertifiedG S ψ` as a hypothesis. The unconditional statement stays `consume_fail_force_fires`, over `orbKey`. | — |
+| `Deepen.orbKeyG_eq_orbKey_of_certPath` | 361-366 | Wherever the poly guard is open the two keys are EQUAL — `orbKeyG S` is a restriction of `orbKey`, not a different function. | — |
+| `Deepen.keyEquivariant_orbKeyG_deck2` | 374-376 | Non-vacuity: the parametric design instantiated at `deck2Supply`. | — |
+| `Deepen.keyEquivariant_orbKeyG_deck` | 378-380 | Non-vacuity: instantiated at `deckSupply`. | — |
+| `Deepen.force_canonizer_orbKeyG_deck2` | 382-392 | ★★★ THE POLY-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` plus totality for the `deck2`-guarded key, with NO hypothesis at all. | — |
+
+## ChainDescent/DeepenKey.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.Refines` | 64-65 | A colouring at least as fine as another (same fine colour ⟹ same coarse colour). | Definition |
+| `Deepen.Refines.trans` | 67-68 | `Refines` is transitive. | — |
+| `Deepen.step_col_eq` | 70-75 | `(step adj χ v).col` is `warmRefineR` of `indivOne χ v`. | — |
+| `Deepen.refines_step` | 77-82 | The warm-refined individualization refines what it was applied to (from `refineSplits_encodeFreeFast`). | — |
+| `Deepen.refines_indivOne` | 84-93 | Individualization refines the colouring it splits. | — |
+| `Deepen.refines_transport` | 95-99 | `Refines` transports. | — |
+| `Deepen.transport_eq_of_isColAut_refines` | 101-110 | ★ A colour-automorphism of a FINE colouring fixes every COARSER one. This is what carries the parent colouring through the accumulated isomorphism in `leafOf_transport_of_amenablePath` — without it the key can only compare UNCOLOURED individualized graphs, which is not enough for 'same orbit'. | — |
+| `Deepen.leafOf` | 118-127 | The state deepen's greedy path reaches from `cur` in ≤ `fuel` levels. Mirrors `AmenablePath`'s recursion exactly so the two line up level for level. | Definition |
+| `Deepen.leafOf_zero` | 135 | ⚠ Reduce `leafOf` ONLY through these three equation lemmas — unfolding then `cases`-ing on `chooseIdK` descends into its internal `foldl` (the recorded `deepen` match-reduction trap). | — |
+| `Deepen.leafOf_succ_none` | 137-139 | Equation lemma: the descent stops when `chooseIdK` returns `none`. | — |
+| `Deepen.leafOf_succ_nil` | 141-145 | Equation lemma: the (impossible) empty-cell case. | — |
+| `Deepen.leafOf_succ_cons` | 147-152 | Equation lemma: one level, picking the lowest-index member. | — |
+| `Deepen.leafOf_transport_of_amenablePath` | 160-255 | ★★ A2, the technical core. Under `AmenablePath` the two LEAVES are related by an accumulated isomorphism `ρ`, and `ρ` acts on any colouring the state refines exactly as `σ` does. This is `amenablePath_transport` with its accumulator `τ * σ` KEPT rather than discarded. | — |
+| `Deepen.filter_col_transport` | 263-275 | A1 Colour classes transport by `σ`. | — |
+| `Deepen.readAt` | 277-280 | Total adjacency between the `c`-class and the `d`-class. | Definition |
+| `Deepen.readColAt` | 282-284 | Total parent colour over the `c`-class. | Definition |
+| `Deepen.readAt_transport` | 286-294 | A1 The adjacency read transports. | — |
+| `Deepen.readColAt_transport` | 296-302 | A1 The parent-colour read transports. | — |
+| `Deepen.readAtIdx` | 304-309 | The adjacency read at a FLATTENED index `k = c * n + d`. Flattening (not a nested `flatMap`) is deliberate: it makes `readKey` two plain `List.map`s, so `List.append_inj` + `List.map_inj_left` recover the components — what `readKey_components` needs. | Definition |
+| `Deepen.readKey` | 311-315 | The invariant read: adjacency between every ordered pair of colour classes, then the parent colour of every class. At a DISCRETE colouring each class is a singleton, so this is the full relabelled adjacency plus the relabelled parent colouring — the object the probes call `cert`. | Definition |
+| `Deepen.readAtIdx_transport` | 317-320 | A1 The flattened adjacency read transports. | — |
+| `Deepen.readKey_transport` | 322-328 | A1 The whole read transports. | — |
+| `Deepen.amenablePath_step_transport_iff` | 332-348 | A3 The guard is relabelling-invariant, both directions (forward `amenablePath_transport` at σ, backward at σ⁻¹). | — |
+| `Deepen.instDecidableAmenablePath` | 352-359 | `Amenable` IS decidable (`IsColAut` has an instance, `Equiv.Perm (Fin n)` is a `Fintype`) — but by an `n!` search, so this registers `Classical.dec` rather than pretend that is a cost model. One instance so `orbKey` and `keyV_orbKey` share the term and the projection is `rfl`. | Instance, `noncomputable` |
+| `Deepen.orbKey` | 361-370 | ★★★ THE KEY. deepen's greedy descent from `v` run to its leaf and read invariantly, GUARDED by `AmenablePath` — which is exactly the condition making that index-picked descent labelling-independent. Off the guard the key is constant, so force simply does not act. | Definition, `noncomputable` |
+| `Deepen.keyV_orbKey` | 372-376 | The key's value projection, unfolded. | `@[simp]` |
+| `Deepen.keyEquivariant_orbKey` | 378-396 | ★★★ A4 `①` FOR THE FORCE ROUTE, NO HYPOTHESIS. The guard transports (`amenablePath_step_transport_iff`) and the value transports along the isomorphism `leafOf_transport_of_amenablePath` supplies. `KeyEquivariant` is force's SOLE `①` obligation, so `Force.force_canonizer` / `Composite.composite_canonizer` apply with nothing left to discharge. | — |
+
+## ChainDescent/DeepenLocated.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.DescentReach` | 60-66 | C1 Reachable by PROPER descent steps (individualize a vertex with a same-colour partner, then warm-refine). The partner clause is load-bearing: it makes every step strictly raise `ncol`. | Inductive |
+| `Deepen.DescentReach.trans` | 68-72 | C1 `DescentReach` composes. | — |
+| `Deepen.ncol_lt_step_of_partner` | 74-86 | C1a One proper descent step strictly raises the colour count — the termination measure `deepen_succeeds` uses, isolated for reuse. | — |
+| `Deepen.ncol_le_of_descentReach` | 88-93 | C1a Reachability never lowers the colour count. | — |
+| `Deepen.partner_of_chooseIdK` | 95-117 | C1b A `chooseIdK` level's pick has a same-colour partner (its cell has ≥ 2 members). | — |
+| `Deepen.not_amenablePath_located` | 125-163 | ★★ C2/L2 A non-`AmenablePath` state exposes a rigid obstruction at the BRANCH CELL of a REACHABLE colouring. Strengthens `not_amenablePath_imp_rigidObstruction`, whose `∃ χc cid` names no reachable node and no branch cell — force fires at a node, so it cannot act on the weaker form. | — |
+| `Deepen.not_amenable_deepest_aux` | 173-209 | C3 Fuelled form of `not_amenable_deepest`; `k` bounds the remaining colour deficit `n - ncol χ`. | — |
+| `Deepen.not_amenable_deepest` | 211-227 | ★★★ C3/L3 THE HOOK POINT. `¬Amenable adj χ` ⟹ the descent reaches `ψ` that is SIMULTANEOUSLY `Amenable` (consume exact below, which an orbit-separating equivariant key needs) and carries a `RigidObstructionAt` at its own branch cell (so force's ceiling does not block firing). Non-vacuity measured: 100 inhabitants over 7 families. | — |
+| `Deepen.consume_fail_real_decision_of_amenable` | 229-240 | The `Amenable` form of `consume_fail_gives_real_decision`; `DeepenCertified` states it over the strictly stronger `Certified`, but `deepen_branch_orbit_iff_aut` already takes `Amenable`. | — |
+| `Deepen.rigidObstructionAt_branch_of_amenable` | 242-248 | The `Amenable` form of `rigidObstructionAt_branch_of_certified`. | — |
+| `Deepen.consume_fail_locates` | 250-263 | ★★★ Every consume failure is LOCATED: either a rigid decision in THIS branch cell (node `Amenable`), or one at a reachable node carrying both hypotheses. Neither disjunct is an unanchored existential. | — |

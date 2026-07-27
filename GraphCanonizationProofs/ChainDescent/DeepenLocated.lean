@@ -12,7 +12,7 @@ the descent's own individualizations.
 `DeepenCertified` §4 supplies the located form, but only under `Certified`
 (`rigidObstructionAt_branch_of_certified`). **That hypothesis is necessary, not an artefact** — the
 unguarded statement is FALSE, and the counterexample is measured (`scratchpad/probe_orbit_oracle.py`,
-scoping doc §13/§14.0): on the CFI graph over a random cubic base with `m = 8` there is a node whose
+scoping doc §2.1/§1.2): on the CFI graph over a random cubic base with `m = 8` there is a node whose
 branch cell has 16 vertices forming a *single* `Aut`-orbit — so `RigidObstructionAt` at that cell is
 false — while `¬ Consume.CellIsOrbit deepenSupply adj χ` nevertheless holds, because the all-anchor
 harvest splits the cell 8 + 8. (An explicit verified `IsColAut σ` with `σ 24 = 26` crosses the split.)
@@ -28,7 +28,7 @@ That is what this file does, in two steps.
   `not_amenablePath_imp_rigidObstruction`: the same induction, keeping the two facts it discarded.
 * **§3 `not_amenable_deepest` (L3)** — the *deepest* such failure is reached, and there the node is
   **also `Amenable`**. So one node carries both hypotheses at once: consume is exact below it (which is
-  what an orbit-separating equivariant key needs, scoping doc §14.2/§14.3) and force has a genuine
+  what an orbit-separating equivariant key needs, scoping doc §3.3/§3.4) and force has a genuine
   rigid decision at its branch cell. Termination is the colour-count measure `Descend.ncol`, exactly
   the one `deepen_succeeds` uses.
 
@@ -36,7 +36,7 @@ That is what this file does, in two steps.
 guarded cert key is equivariant *and* non-constant on the branch cell, so `Force.forceBy_narrows_of_key_ne`
 applies. Nothing here needs a key, so this file stands alone.
 
-**Measured shape of the located node** (scoping doc §13.5, two witnesses traced level by level): the
+**Measured shape of the located node** (scoping doc §2.3, two witnesses traced level by level): the
 descent stays aligned through every single-orbit cell and breaks at the **first** cell that is not a
 single stabiliser orbit — Chang-B at level 0 (a 12-cell with 4 stabiliser orbits), CFI cubic `m = 8` at
 level 3 (a 4-cell with 2). `not_amenablePath_located` is the proof-side statement of that trace.
@@ -213,13 +213,13 @@ colouring `ψ` at which
 
 * **consume is exact below** — `Amenable adj ψ`, so the harvest's branch-orbit relation *is* the
   `IsColAut`-orbit relation there (`deepen_branch_orbit_iff_aut`), and an orbit-separating equivariant
-  key is available (scoping doc §14.2); and
+  key is available (scoping doc §3.3); and
 * **force has a real decision** — `RigidObstructionAt adj ψ cid` at `ψ`'s own **branch cell**
   (`Descend.targetColour ψ = some cid`), so the cell carries ≥ 2 orbits and
   `Force.forceBy_no_narrowing_on_orbit`'s ceiling does not block firing.
 
 Both resolvers' hypotheses hold at the **same, named, reachable** node. This is the statement
-`not_amenablePath_imp_rigidObstruction` was reaching for; note §14.0 — it cannot be improved to "at `χ`
+`not_amenablePath_imp_rigidObstruction` was reaching for; note scoping doc §1.2 — it cannot be improved to "at `χ`
 itself", since that is refuted by a measured witness. -/
 theorem not_amenable_deepest (adj : AdjMatrix n) {χ : Colouring n} (h : ¬ Amenable adj χ) :
     ∃ ψ : Colouring n, DescentReach adj χ ψ ∧ Amenable adj ψ ∧

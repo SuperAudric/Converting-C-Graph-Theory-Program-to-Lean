@@ -39,11 +39,11 @@ B needs to pin the individualized vertex (a leaf-adjacency read alone proves onl
 **⚠ Non-vacuity.** The guard is not almost-always-false: measured (`scratchpad/probe_orbit_oracle.py`)
 `Amenable` holds at **1197 of 1361** swept descent nodes over ten families, and **100** of those nodes
 carry ≥ 2 orbits in the branch cell — i.e. are exactly the nodes where this key is both defined and
-required to fire. See scoping doc §13.3/§15.1.
+required to fire. See scoping doc §2.4/§3.2.
 
 **⚠ Cost.** `orbKey` is `noncomputable` (the guard is a `Prop`; `Amenable` *is* decidable — `IsColAut`
 has a `Decidable` instance — but the search is exponential, so making it computable would be honest,
-not cheap). Per the plan (§14.5 E1/E2) that is a `②` question: `①` closes here regardless, and the
+not cheap). Per the scoping doc §7.3 that is a `②` question: `①` closes here regardless, and the
 billed `keyCost` is where the guard's price belongs.
 -/
 
@@ -352,7 +352,7 @@ theorem amenablePath_step_transport_iff (σ : Equiv.Perm (Fin n)) (adj : AdjMatr
 /-- The guard is a `Prop` about the *true* automorphism group. It IS decidable (`IsColAut` has a
 `Decidable` instance and `Equiv.Perm (Fin n)` is a `Fintype`), but the honest instance is an `n!`
 search, so the key is declared `noncomputable` here and the executable guard is left to `②` (plan
-§14.5 E1/E2). Registering one instance keeps `orbKey` and `keyV_orbKey` on the *same* instance term,
+scoping doc §7.3). Registering one instance keeps `orbKey` and `keyV_orbKey` on the *same* instance term,
 which is what makes the projection lemma `rfl`. -/
 noncomputable instance instDecidableAmenablePath (adj : AdjMatrix n) (χp : Colouring n)
     (fuel : Nat) (cur : Refine.ColData n) : Decidable (AmenablePath adj χp fuel cur) :=

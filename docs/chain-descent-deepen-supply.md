@@ -14,6 +14,71 @@
 
 ---
 
+## ▶▶▶ STATUS (2026-07-27) — ★★★ THE CONSUME→FORCE HOOK IS CLOSED; a POLY guard exists
+
+> **AUTHORITATIVE LIVE DOC FOR THIS ARC: [`scratchpad/DUAL_resolver_scoping.md`](../scratchpad/DUAL_resolver_scoping.md)**
+> (STATUS block → §1 object → §2 measurements → §3 the landed chain → §7 frontier; **§9 is provenance,
+> not live**). Everything below this block is the pre-2026-07-27 framing, kept for provenance.
+>
+> **Five modules landed, gate green (`bash /workspace/scripts/build.sh`, 229 s, 104 modules), every
+> theorem `[propext, Classical.choice, Quot.sound]`, no `sorry`, no new `axiom`:**
+> `DeepenCertified` → `DeepenLocated` (10) → `DeepenKey` (18) → `DeepenExact` (19) → `DeepenGuard` (17).
+>
+> ```
+> consume_fail_force_fires :                                    -- DeepenExact
+>   ¬ Discrete χ → ¬ Consume.CellIsOrbit deepenSupply adj χ →
+>     ∃ ψ, DescentReach adj χ ψ ∧
+>          (narrow (forceBy orbKey) adj ψ).length < (branches ψ).length
+> ```
+>
+> **⛔⛔ THREE THINGS THAT ARE NOW REFUTED — do not re-derive** (measured, with explicit verified `σ`;
+> probes `scratchpad/probe_orbit_oracle.py`, `probe_guard_invariance.py`):
+> 1. **"a twist failure certifies the pair is in a different orbit"** — FALSE. Single-anchor falsifier at
+>    the **Chang-B root** (12 of 23 same-orbit partners fail); all-anchor falsifier at a **CFI-cubic m=8**
+>    node whose `|C|=16` cell is ONE orbit and the harvest splits 8+8.
+> 2. **"`¬CellIsOrbit ⟹ RigidObstructionAt` at THIS cell"** — refuted by the same m=8 node, so the
+>    `Certified`/`Amenable` hypothesis on the located-obstruction theorems is **necessary**. No theorem of
+>    the form *"consume fails at `χ` ⟹ force acts at `χ`"* can hold; the obstruction must be relocated.
+> 3. **"prove `Certified` (deepen's own poly certificate) relabelling-invariant"** — **measured FALSE**,
+>    not merely unproved: at the m=8 node the harvest certifies the cell as one orbit under some
+>    labellings and splits it 8+8 under others. The certificate is computed BY the index-picked descent,
+>    so it inherits that descent's labelling dependence.
+>
+> **What replaced them.**
+> - `not_amenable_deepest` (`DeepenLocated`): `¬Amenable` ⟹ a **reachable** node that is *simultaneously*
+>   `Amenable` and carries a `RigidObstructionAt` at its branch cell. Both resolvers' hypotheses at ONE
+>   named node. (Non-vacuity measured: 100 inhabitants over 7 families.)
+> - `orbKey` + `keyEquivariant_orbKey` (`DeepenKey`): deepen's own greedy leaf, read invariantly, guarded
+>   by `AmenablePath`. **`KeyEquivariant` with NO hypothesis**, so `Force.force_canonizer` /
+>   `Composite.composite_canonizer` apply as they stand. The technical core `leafOf_transport_of_amenablePath`
+>   is `amenablePath_transport` with its accumulator `τ * σ` **kept** instead of discarded.
+> - `isColAut_of_readKey_eq` (`DeepenExact`): **equal keys ⟹ same orbit, UNCONDITIONALLY.** This is the
+>   FIRING direction and it needs no guard — completeness of the encoding, not a property of the descent.
+>   Hence `orbKey_eq_iff_orbit` (fibres ARE the orbits at an `Amenable` node) and `forcedSet_single_orbit`
+>   (force narrows the cell to a single orbit).
+> - `orbKeyG S` + `keyEquivariant_orbKeyG` (`DeepenGuard`): the **poly** guard — guard each level by
+>   `Consume.CellIsOrbit S` for any `SupplyEquivariant S`. Instantiated at `deck2Supply`/`deckSupply`;
+>   `force_canonizer_orbKeyG_deck2` gives `①a`/`①b`/`①c` + totality with **no hypothesis at all**.
+>
+> **⚠ WHAT THE POLY GUARD COSTS — read before swapping keys.** `CertPath S ⟹ AmenablePath`, never the
+> converse. The **localization half is unchanged** (it never mentions a guard); only **firing** becomes
+> guard-conditional (`consume_fail_force_fires_guarded` carries `CertifiedG S ψ`). The unconditional
+> theorem stays over `orbKey`. `orbKeyG_eq_orbKey_of_certPath` proves the two keys are *equal* wherever
+> the poly guard is open, so this is one object with two guards, not two unrelated ones. Measured firing
+> (depth-0 lower bound, `probe_eqsupply_guard.py`): **120/132** hook nodes on the Chang family, **0** on
+> the disjoint-cycle and MIXED witnesses.
+>
+> **▶ NEXT, in order.** (1) a real decision procedure for `CellIsOrbit S` — a finite `WordReach`
+> reachability test on the branch cell — which is the **last `noncomputable`** before
+> `Publication.canonForm?`; (2) raise the guard's firing rate by taking `S` deeper, or as the union of the
+> five equivariant supplies (a union of equivariant supplies is equivariant); (3) bound the **nesting
+> depth** of `not_amenable_deepest`'s relocation — `DescentReach` + `ncol` bound the number of *steps* by
+> `n`, but not the product over relocations; (4) wire `forcedSet_single_orbit` into
+> `Composite.forceThenConsume_singleton_of_cellIsOrbit` (needs `CellIsOrbit` on the *forced sub-cell*).
+>
+> ⚠ **Naming, from the literature pass:** the project's `Amenable` is AKRV's **Tinhofer**, and AKRV's
+> "amenable" means something else entirely. Renaming the project predicate is advisable.
+
 ## ▶ STATUS (2026-07-23) — ★★★ TRACK A: `AnchorFires` ELIMINATED, `①c` modulo `{Amenable}` ONLY
 
 > **The whole-graph-discretize redesign LANDED axiom-clean; full build green (155 s).** `deepen` now

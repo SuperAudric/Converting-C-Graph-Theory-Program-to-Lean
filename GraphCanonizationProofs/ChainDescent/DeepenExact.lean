@@ -31,14 +31,14 @@ Chaining with `DeepenLocated.consume_fail_locates`:
 > **`consume_fail_force_fires`** — if `deepenSupply` fails to make the branch cell one orbit, then the
 > descent reaches a colouring `ψ` at which `forceBy orbKey` **strictly narrows**.
 
-That is the target this track has been aiming at, in the only form that can be true: §14.0 of the
+That is the target this track has been aiming at, in the only form that can be true: §1.2 of the
 scoping doc records the measured witness (CFI over a cubic base, `m = 8`) showing that force *cannot*
 be made to fire at `χ` itself — there the branch cell is a single orbit and
 `Force.forceBy_no_narrowing_on_orbit` forbids it. The reachable-node form is what survives.
 
 **⚠ Measured, before the proof** (`scratchpad/probe_orbit_oracle.py`): at **147 of 147** hook nodes
 across seven families `orbKey` fires *and* its fibres are exactly the true `Aut`-orbits, with every
-leaf discrete. So neither `orbKey`'s definedness nor its exactness is vacuous. See scoping doc §16.1.
+leaf discrete. So neither `orbKey`'s definedness nor its exactness is vacuous. See scoping doc §2.5.
 -/
 
 namespace ChainDescent
@@ -298,7 +298,7 @@ theorem forceBy_orbKey_narrows {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
 
 This is also the **consistency check** against `Force.forceBy_no_narrowing_on_orbit`: the key is
 constant on each orbit, so force can never cut *inside* one — it separates orbits and nothing finer.
-Measured agreement: 147/147 hook nodes (scoping doc §16.1). -/
+Measured agreement: 147/147 hook nodes (scoping doc §2.5). -/
 theorem orbKey_eq_iff_orbit {adj : AdjMatrix n} {χ : Colouring n} (hA : Amenable adj χ)
     {u w : Fin n} (hu : u ∈ Descend.branches χ) (hw : w ∈ Descend.branches χ) :
     Force.keyV orbKey adj χ u = Force.keyV orbKey adj χ w
@@ -340,7 +340,7 @@ If `deepenSupply` cannot make the branch cell a single orbit, then the descent r
 `ψ` — the node itself when it is `Amenable`, otherwise the deeper one `not_amenable_deepest`
 produces — at which `forceBy orbKey` **strictly narrows the branch cell**.
 
-This is the strongest form available: §14.0 of the scoping doc records a measured witness (CFI over a
+This is the strongest form available: §1.2 of the scoping doc records a measured witness (CFI over a
 random cubic base, `m = 8`) where consume fails at a node whose branch cell is a *single orbit*, so
 force provably cannot fire *there* (`Force.forceBy_no_narrowing_on_orbit`). Relocating to a reachable
 node is not a weakening of the target — it is the target. -/

@@ -421,3 +421,10 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `GaugeComplex.pi_univ_top` | 39-45 | — | — |
+## ChainDescent/DeepenCertified.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.foldMin_le_acc` | 186-196 | — | — |
+| `Deepen.foldMin_le` | 198-213 | — | — |
+| `Deepen.foldMin_nil_of_none` | 215-224 | — | — |
