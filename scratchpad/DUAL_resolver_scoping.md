@@ -16,10 +16,15 @@
 > **`①` never depended on any of it.** `keyEquivariant_orbKey` carries no hypothesis, so
 > `Force.force_canonizer` / `Composite.composite_canonizer` are applicable as they stand.
 >
-> **▶▶ THE FRONTIER IS §7 — A POLY, RELABELLING-INVARIANT GUARD.** `orbKey`'s guard is `Amenable`,
-> which is decidable but by an `n!` search, so `orbKey` is `noncomputable`. **§7.1 measures that the
-> obvious repair is impossible**: deepen's own poly certificate (`Certified`) is *not*
-> relabelling-invariant — falsifier included. §7.2 gives the alternate design that is left.
+> **✅ THE POLY GUARD IS ALSO LANDED** (`DeepenGuard`, 17 thms, gate 229 s / 104 modules). §7.1 measures
+> that the *obvious* repair is impossible — deepen's own certificate (`Certified`) is **not**
+> relabelling-invariant, falsifier included — so §7.2's alternate design was built instead: guard each
+> level by `CellIsOrbit S` for a supply that already transports. `keyEquivariant_orbKeyG` needs only
+> `SupplyEquivariant S`; instantiated at `deck2Supply`/`deckSupply`, and
+> `force_canonizer_orbKeyG_deck2` gives `①a`/`①b`/`①c` + totality with **no hypothesis at all**.
+> **⚠ The cost is firing, not soundness** — see §7.2's ⚠ block: the unconditional
+> `consume_fail_force_fires` stays over `orbKey`; over `orbKeyG S` the *localization* half is unchanged
+> and only *firing* becomes guard-conditional. **▶▶ The frontier is now §7.3.**
 >
 > Reading order: §1 (the object) → §2 (what is measured) → §3 (what is proved) → §7 (frontier).
 > §8 is the literature placement; **§9 is PROVENANCE — superseded claims, do not read as live.**
@@ -458,7 +463,10 @@ invariant was never a missing lemma; the statement is false.**
 (`probe_verdict_invariance.py`): that was taken at **branch cells of the plain descent**, where the
 harvest happens to be exact. Exactness and invariance coincide there; the m=8 node is where they part.
 
-### 7.2 ▶ THE ALTERNATE DESIGN — guard by an *equivariant* supply, per level
+### 7.2 ✅ LANDED — guard by an *equivariant* supply, per level (`ChainDescent/DeepenGuard.lean`)
+
+17 theorems, all `[propext, Classical.choice, Quot.sound]` or a subset; in `build.sh` after
+`DeepenExact`.
 
 Guard each level of the greedy path by `Consume.CellIsOrbit S` for a supply `S` already proven
 **`GensEquivariant`**, instead of by deepen's own harvest:
@@ -524,6 +532,41 @@ Two further points on the design space:
 * Deepen's harvest can still be used to *fire*, since it is untrusted and re-verified — only the
   **guard** needs invariance. Nothing in §3 changes.
 
+#### What landed
+
+| | statement | name |
+|---|---|---|
+| — | `WordReach` over a verified list is an automorphism — **for any supply** (`DeepenAmenable`'s version is `deepenSupply`-specific) | `wordReach_isColAut{,_verified}` |
+| **SOUND** | `CellIsOrbit S` ⟹ the branch cell's `CellSingleOrbit`; hence `CertPath S ⟹ AmenablePath` and `CertifiedG S ⟹ Amenable` | `cellSingleOrbit_of_cellIsOrbit`, `amenablePath_of_certPath`, `amenable_of_certifiedG` |
+| **the missing lemma** | `WordReach` and `CellIsOrbit S` **transport** under `SupplyEquivariant S` | `wordReach_transport`, `cellIsOrbit_transport` |
+| **INVARIANT** | `CertPath S` transports, both directions | `certPath_transport`, `certPath_step_transport_iff` |
+| **①** | **`Force.KeyEquivariant (orbKeyG S)`** from `SupplyEquivariant S` alone | **`keyEquivariant_orbKeyG`** |
+| firing | `orbKeyG S` separates a non-automorphic pair; at a `CertifiedG S` node with an obstruction, `forceBy (orbKeyG S)` **strictly narrows** | `orbKeyG_ne_of_no_aut`, `forceBy_orbKeyG_narrows` |
+| the hook | localization unchanged; firing conditional on the guard | `consume_fail_force_fires_guarded` |
+| agreement | wherever the poly guard is open the two keys are **equal** — `orbKeyG S` is a restriction of `orbKey`, not a different function | `orbKeyG_eq_orbKey_of_certPath` |
+| **non-vacuity** | instantiated at `deck2Supply` and `deckSupply`; `①a`/`①b`/`①c` + totality with no hypothesis | `keyEquivariant_orbKeyG_{deck2,deck}`, **`force_canonizer_orbKeyG_deck2`** |
+
+`B1` (`isColAut_of_readKey_eq`) is guard-agnostic — it is completeness of the *read* — so the entire
+firing argument transferred verbatim; only "both guards open" changed.
+
+#### ⚠ Exactly what the poly guard costs
+
+`CertPath S ⟹ AmenablePath`, never the converse. So:
+
+* **Unchanged:** `①` (`keyEquivariant_orbKeyG`), the localization (`not_amenable_deepest` never mentions
+  a guard), and agreement with `orbKey` wherever the guard is open.
+* **Weakened:** the *firing* half. `DeepenExact.consume_fail_force_fires` is unconditional **over
+  `orbKey`**; `consume_fail_force_fires_guarded` reaches the same node but discharges firing only under
+  `CertifiedG S ψ`. Where the guard is shut the key is constant, force does not act, and `①` is
+  untouched — a deferral, not an error.
+* **So the two keys coexist by design**: `orbKey` (`Amenable` guard, `noncomputable`) carries the
+  unconditional theory; `orbKeyG S` (poly guard) is the executable. `orbKeyG_eq_orbKey_of_certPath`
+  is the bridge that makes that honest rather than two unrelated objects.
+
+The measured firing rate is §7.2's table above (depth-0 lower bound): **120 of 132** hook nodes on the
+Chang family, **0** on the disjoint-cycle and MIXED witnesses. The obvious next lever is depth — the
+proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a different guard shape.
+
 ### 7.3 The rest of the open ledger (all `②`, none `①`)
 
 1. **Nesting depth.** D1 relocates work to a deeper node; the product over relocations is not bounded.
@@ -531,7 +574,12 @@ Two further points on the design space:
 2. **Composite assembly.** `forcedSet_single_orbit` is the exact input
    `Composite.forceThenConsume_singleton_of_cellIsOrbit` wants; wiring it needs `Consume.CellIsOrbit`
    on the *forced sub-cell*, which `Amenable` should supply.
-3. **Entry into `Publication.canonForm?`** waits on §7.2.
+3. **Entry into `Publication.canonForm?`** now waits only on a *decision procedure* for
+   `CellIsOrbit S` (a finite `WordReach` reachability test on the branch cell) — `DeepenGuard` registers
+   a `Classical.dec` instance so the parametric development elaborates, which is the last
+   `noncomputable` in the chain.
+4. **Guard strength.** Raise the measured firing rate by taking `S` deeper (or as the union of the five
+   equivariant supplies — a union of equivariant supplies is equivariant).
 
 ---
 

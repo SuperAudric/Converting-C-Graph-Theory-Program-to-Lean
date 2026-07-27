@@ -147,6 +147,7 @@ MODULES=(
   ChainDescent.DeepenLocated          # C3b: consume failure LOCATED at a reachable Amenable+obstructed node
   ChainDescent.DeepenKey              # C3b: orbKey — the equivariant force key (KeyEquivariant, no hypothesis)
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
+  ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
 
   # ── W2 solvability route (gauge complex → solvable) ──
   ChainDescent.GaugeComplex           # W2 Tier-A: split-vs-count localization spine
