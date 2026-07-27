@@ -1,332 +1,340 @@
-# The dual resolver: one descent that consumes a symmetry **or** certifies the rigid decision
+# The dual resolver — one descent that consumes a symmetry **or** certifies the rigid decision
 
-Probe: `scratchpad/probe_dualdeepen.py` (18 witnesses: mp7/Fano, CFI over C₅ and over random cubic
-bases m=8..14, mixed multipede, circ(5), 6 rigid random multipedes n=34..84).
+> ## ▶ STATUS (2026-07-27) — ✅ THE CONSUME→FORCE HOOK IS CLOSED, axiom-clean
+>
+> **A consume failure now provably makes force FIRE**, at a named node the descent reaches:
+> ```
+> consume_fail_force_fires :
+>   ¬ Discrete χ → ¬ Consume.CellIsOrbit deepenSupply adj χ →
+>     ∃ ψ, DescentReach adj χ ψ ∧
+>          (narrow (forceBy orbKey) adj ψ).length < (branches ψ).length
+> ```
+> Three modules, gate green (`bash /workspace/scripts/build.sh`, 223 s, 103 modules), every theorem
+> `[propext, Classical.choice, Quot.sound]`, no `sorry`, no new `axiom`:
+> `DeepenLocated` (10 thms) → `DeepenKey` (18) → `DeepenExact` (19).
+>
+> **`①` never depended on any of it.** `keyEquivariant_orbKey` carries no hypothesis, so
+> `Force.force_canonizer` / `Composite.composite_canonizer` are applicable as they stand.
+>
+> **▶▶ THE FRONTIER IS §7 — A POLY, RELABELLING-INVARIANT GUARD.** `orbKey`'s guard is `Amenable`,
+> which is decidable but by an `n!` search, so `orbKey` is `noncomputable`. **§7.1 measures that the
+> obvious repair is impossible**: deepen's own poly certificate (`Certified`) is *not*
+> relabelling-invariant — falsifier included. §7.2 gives the alternate design that is left.
+>
+> Reading order: §1 (the object) → §2 (what is measured) → §3 (what is proved) → §7 (frontier).
+> §8 is the literature placement; **§9 is PROVENANCE — superseded claims, do not read as live.**
+>
+> Probes: `probe_orbit_oracle.py`, `probe_dualdeepen.py` (18 witnesses: mp7/Fano, CFI over C₅ and over
+> random cubic bases m=8..14, mixed multipede, circ(5), 6 rigid random multipedes n=34..84),
+> `probe_polyloop.py`, `probe_certkey.py`, `probe_strategies.py`, `probe_splitloop.py`,
+> `probe_verdict_invariance.py`.
 
 ---
 
-## 1. Why the two sides don't unify today (the mechanism disconnect, precisely)
+## 1. The object, and the one thing that goes wrong with it
 
-`deepen` (`DeepenSupply.lean` / C# `DeepenAnchor`+`ReplayDeepening`+`HarvestTwists`) descends the
-**lowest-id non-singleton cell** to a whole-graph-discrete leaf, recording an *iso-invariant* id
-sequence `seq`, then replays `seq` from each other rep and colour-matches the leaves (`twistOf`).
-
-Two facts about that pipeline, both already in the record:
+`deepen` (`DeepenSupply.lean`; C# `DeepenAnchor` + `ReplayDeepening` + `HarvestTwists`) descends the
+**lowest-id non-singleton cell** to a whole-graph-discrete leaf, recording an *iso-invariant* cell-id
+sequence `seq`, then replays `seq` from each other representative and colour-matches the leaves
+(`twistOf`). Two facts about that pipeline:
 
 * **`chooseIdK` is invariant** (`chooseIdK_transport`) — the *cell* choice transports.
 * **The within-cell pick is by vertex index** — `deepen` takes `w :: _` of
-  `(finRange n).filter (χc · == cid)`. That does **not** transport. This is exactly the §1.1 `G8`
-  falsifier, and it is why `①c` needs `Amenable` at all.
+  `(finRange n).filter (χc · == cid)`. That does **not** transport.
 
-The leaf is discrete, so it *is* a labelling `π`. `twistOf` builds `π_j⁻¹ ∘ π_1` and gates it with
+The leaf is discrete, so it *is* a labelling `π`; `twistOf` builds `π_j⁻¹ ∘ π_1` and gates it with
 `IsColAut`. Unfolding that gate:
 
-> **`twistOf` verifies ⟺ `adj^{π_1} = adj^{π_j}`** — the twist is an automorphism exactly when the
-> two leaves are the *same relabelled graph*.
+> **`twistOf` verifies ⟺ `adj^{π_1} = adj^{π_j}`** — the twist is an automorphism exactly when the two
+> leaves are the *same relabelled graph*.
 
-So deepen already computes a per-anchor certificate `cert(r) := adj^{π_r}` and then **throws away
-every bit of it except the equality test**. When the twist fails, the code returns "no candidate,
-sound over-split" — but the *reason* it failed is `cert(r₁) ≠ cert(r_j)`, which is a **separation**,
-i.e. precisely what force wants. The disconnect is not mathematical; it is that the negative branch
-discards its own evidence. What blocks reading it as a certificate is only the index-pick: with a
-non-invariant pick, `cert(a) ≠ cert(b)` may be an artifact of the labelling rather than a fact about
-the graph.
+So deepen already computes a per-anchor certificate `cert(r) := adj^{π_r}` and throws away every bit of
+it except the equality test. The interesting question is what the *negative* branch means.
 
-## 2. The fix (one line): replace the index pick by **min over the cell**
+### 1.1 What a twist failure does and does not prove
+
+**It does not prove the pair is in a different orbit.** Measured per pair against an exact orbit
+oracle, with every false negative certified by an explicit verified `IsColAut` — see §2.1.
+
+**The mechanism is exact and exceptionless** (§2.3): cell *ids* transport but the `min`-index member
+does not, so if `σ a = b`, `σ` carries `a`'s chosen cell onto `b`'s but not min ↦ min. The two descents
+stay aligned through every **single-orbit** cell — a stabiliser element repairs any pick — and break at
+the **first cell that is not a single stabiliser orbit**, where they individualize members of
+non-corresponding orbits and every surviving isomorphism dies. Hence:
+
+> **a same-orbit twist failure ⟺ deepen's own path crosses a cell that is not a single stabiliser
+> orbit, and resolves it inconsistently between the two sides.**
+
+The ⟸ direction is the landed `joint` + `twistOf_of_transport_fixing`; ⟹ is §2.3's traces.
+
+**This is not fusion.** Fusion = the symmetry is not *there* yet at the compared level (it becomes
+certifiable only after a rigid decision), and a perfect same-level comparator would decline too. Here
+the compared pair **is** in one orbit at the very colouring being compared and the comparator still
+fails. The real fusion signature remains Chang-A's `A_stall < A_full`.
+
+### 1.2 Consequence for what can be proved
+
+`¬CellIsOrbit ⟹ RigidObstructionAt at this cell` is **refuted** (§2.1's second falsifier: the cell is a
+single orbit, so there is no obstruction in it), and at that node force provably cannot fire either
+(`Force.forceBy_no_narrowing_on_orbit`). So:
+
+> **No theorem of the shape "consume fails at `χ` ⟹ force can act at `χ`" can hold.** The obstruction
+> must be relocated to a **deeper reachable node**. That is the shape of everything in §3.
+
+---
+
+## 2. What is measured
+
+Exact orbit oracle throughout: `a ~ b ⟺ canon(adj, χ+a) = canon(adj, χ+b)` (the Karp /
+Booth–Colbourn reduction of §8.1), with `canon` the min-over-cell exhaustive canonical form.
+
+### 2.1 The harvest is NOT a perfect orbit oracle — two certified falsifiers
+
+| variant | witness | node | fact |
+|---|---|---|---|
+| **SINGLE anchor** = C# `HarvestTwists(p, part, cell, cell[0])` | **Chang-B**, `n=28` | the **root** (no force step, no deep path) | anchor `a₀=0` has **23** same-orbit partners; the twist verifies for **11** and **FAILS for 12**. Certificate: explicit `σ`, `is_aut ✓`, colour-preserving ✓, `σ(0)=10` |
+| **ALL anchors + group closure** = Lean `deepenGens` | **CFI over a random cubic base, m=8**, `n=56` | the `\|C\|=16` cell (one equivariant force-key refinement below the root) | the cell is **ONE true orbit**; the harvest splits it **8+8**. Certificate: explicit `σ`, `is_aut ✓`, colour-preserving ✓, `σ(24)=26` crossing the blocks. Reproduced by two independent implementations |
+
+**Failure mode in both cases is not `replay` bailing out.** Chang-B: replay followed the id sequence in
+**12/12** failures. CFI m=8: `replay-null = 0`, `twist-not-aut = 128` of 240 ordered pairs, and **every**
+anchor fired the gate. So the negative branch is `cert(a) ≠ cert(b)` in exactly the sense §1 describes,
+and it is **not** a separation.
+
+### 2.2 ⚠ The per-pair reading is wrong even where the ORBIT reading is right
+
+`branchOrbit_iff_aut_of_certified` equates the orbit relation with `WordReach` over the *verified
+generator set* — the **group generated**, not the individual twist. Chang-B root shows the gap: **12
+direct-twist failures, but zero false negatives after generator closure.** The C# already relies on
+this (`CoveredByPathFixingAut` BFS-closes over `Automorphisms.Generators`). **Reading a per-pair twist
+failure as a separation certificate discards precisely that closure**, and is unsound even on nodes
+where the harvest's partition is exact.
+
+### 2.3 The mechanism, traced level by level
+
+`Sigma_k` = the isomorphisms carrying `a`'s pick-sequence to `b`'s; `Sigma_k ≠ ∅` tested exactly as
+`canon(a-side) = canon(b-side)`.
 
 ```
-cert(χ):                                  -- χ a colouring of adj
-  χ := refine χ
-  if discrete χ:  return (adj^χ, parent^χ)              -- the leaf certificate
-  C := lowest-id non-singleton cell of χ
-  return MIN over v ∈ C of cert(indiv χ v)              -- no index tie-break
+Chang-B root, pair (0,10):   |Aut| = 96, |Sigma_0| = 4   (same orbit)
+  level 0: cell id=1 |C|=12  stabiliser-orbits = 4  <-- MIXED
+           a picks min=2, b picks min=1; Sigma-images of 2 = {3,12,15,26}, 1 not among them
+           |Sigma| 4 -> 0    *** DIVERGENCE
+
+CFI cubic m=8, |C|=16 node, pair (24,26):  aligned at start (same orbit)
+  level 0: |C|=2  orbits=1   a picks 28, b picks 30   aligned
+  level 1: |C|=2  orbits=1   a picks 26, b picks 24   aligned
+  level 2: |C|=2  orbits=1   a picks 30, b picks 28   aligned
+  level 3: |C|=4  orbits=2  <-- MIXED   both pick 32  *** DIVERGENCE
+                                        (32 has a different orbit-role on the two sides)
 ```
-plus the standard pruning: skip `v ∈ C` covered by an already-**verified**, path-fixing automorphism.
-Pruning only removes members whose subtree certs are provably equal, so **min-over-pruned =
-min-over-all**.
 
-This is `deepen`'s own descent with the one non-invariant step removed. Cost is no longer one path —
-it is `∏ₖ (surviving reps at level k)`.
+### 2.4 Guard conservatism — 1361 nodes, 10 families
 
-### The two readings of the one object
+Bounded descent sweeps (depth ≤ 2, all reps), `Amenable` vs. harvest exactness at every node:
 
-| | test | consumer |
-|---|---|---|
-| **CONSUME** | `cert(a) = cert(b)` | `π_b⁻¹π_a` is an automorphism — the existing `twistOf` gate verifies it; feeds `deepenGens` |
-| **FORCE** | `cert(a) ≠ cert(b)` | `cert` **is** a `Force.Key`; `forceBy` keeps the min-key branches |
+| family | nodes | `Amenable` | harvest EXACT | exact but `¬Amenable` |
+|---|---|---|---|---|
+| Chang-A / Chang-B / Chang-C | 365 / 173 / 46 | 364 / 148 / 46 | **365 / 173 / 46** | 1 / 25 / 0 |
+| T(8)=J(8,2) · mp7 · MIXED · circ(5) · CFI-C₅ · Shrikhande⊎Rook(4,4) | 365·365·13·11·61·225 | all 100 % | **all 100 %** | 0 |
+| C3+C4+C5 (cells provably ≠ orbits) | 37 | 24 | **37** | 13 |
+| **total** | **1361** | **1197 (87.9 %)** | **1361 (100 %)** | **164** |
 
-Same computation, opposite branch of one equality. That is the dual resolver.
+* The all-anchor harvest was **exact at every one of 1361 nodes**, including all 164 `¬Amenable` ones.
+* `Amenable` is **sufficient but far from necessary** — the guard defers on ~12 % of nodes where the
+  supply would have been exact. **The firing bottleneck is the GUARD, not the harvest.**
+* ⚠ But harvest-transitivity certifies only the `|P| = 1` case. Where the cell has ≥ 2 true orbits the
+  guard must certify the **partition**, and that is exactly where the CFI m=8 node lies.
+* The anchor-count claim reproduces exactly — CFI cubic m=14, `|C|=56`: **3 anchors → 36 blocks, ALL
+  anchors → 14 = TRUE**. And m=8's `(16, harvest 2, true 1)` stall **persists over every anchor**.
 
-## 3. What becomes free, and what stays carried
+### 2.5 `orbKey` fires and is exact at hook nodes — 147/147
 
-**Free (mechanical Lean, no carried hypothesis):**
+Faithful ports of the Lean `indivOne` (`2·χx + [x=v]`), `step`, `leafOf`, `readKey`. At every **hook
+node** (`Amenable` ∧ branch cell with ≥ 2 orbits — the conclusion of `not_amenable_deepest`):
 
-* **`KeyEquivariant deepKey`** by well-founded induction on colour count: cells transport, so `C ↦ σC`;
-  child certs transport by IH; the **min of a transported multiset is equal**. Base case = a discrete
-  leaf's relabelled adjacency, structural. **No `Amenable`, no rigidity, no uniqueness.**
-  ⟹ `Force.force_canonizer` gives `①` immediately (it needs `KeyEquivariant` and nothing else).
-* **`①c` for the consume side**: the emitted orbit relation is the fibre relation of an equivariant
-  key, hence invariant. The whole `deepenRefSupply`/R1/R2/`SameOrbits` apparatus is not needed —
-  it exists only to repair the index pick.
-* **No third outcome.** At every node the cell partitions into cert-classes; ties give a *verified*
-  generator, differences give a *certified* separation. The "mutual stall" residue cannot occur as a
-  **mechanism**.
+| C3+C4 | C4+C5 | C3+C4+C5 | Shrikhande⊎Rook | Chang-A | Chang-B | MIXED | **total** |
+|---|---|---|---|---|---|---|---|
+| 1/1/1 | 1/1/1 | 12/12/12 | 0 | 108/108/108 | 24/24/24 | 1/1/1 | **147 / 147 / 147** |
 
-**Carried — and this is the whole of it:** `∏ₖ (surviving reps)` is the classical I-R tree size, i.e.
-worst-case exponential. Nothing here makes GI easy.
+(hooks / `orbKey` fires / fibres == true `Aut`-orbits exactly). **Every leaf discrete** (0 exceptions),
+which is what makes the read complete.
 
-**The relocation (the actual prize).** `Amenable` today is a **soundness** hypothesis on `①c`
-(`deepenSupply_guarded_canonizer_direct` takes `hAmen : ∀ adj χ, Amenable adj χ`, which is *false on
-rigid graphs* — the STATUS block already calls it a conditional scaffold). In the dual it becomes a
-**cost** statement and nothing else:
+A second, earlier sweep counted **100** hook nodes over the same families using a rank-based `indivOne`
+ordering instead of the Lean one (`v` lands *before* rather than *after* its cellmates) — a different
+descent tree, hence a different but equally valid sample. Both are non-vacuity evidence; they are not
+two measurements of one quantity.
 
-> `Amenable` at a node ⟺ surviving reps = 1 ⟺ the descent is a single path there.
+### 2.6 Other recorded measurements (`probe_dualdeepen.py`, `probe_polyloop.py`)
 
-A non-`Amenable` node is no longer unsound — it is merely *expensive*, and lowering its cost is
-exactly the rigid solver's job (supply a key that splits the cell instead of branching over it).
-The flag stops being a mechanism flag (mutual stall) and becomes a **budget** flag.
-
-## 4. Probe results (`probe_dualdeepen.py`)
+**Verdict structure, 18 witnesses** (mp7/Fano, CFI over C₅ and over random cubic bases m=8..14, mixed
+multipede, circ(5), 6 rigid random multipedes n=34..84):
 
 | measurement | result |
 |---|---|
-| **① min-over-cell cert invariant under relabelling** | **18/18 witnesses TRUE** |
-| **① greedy index-pick (= today's `deepen`) invariant** | **FALSE on 9/18** — mixed multipede, circ(5), all 6 rigid multipedes, CFI-cubic m≥10. TRUE on mp7 and CFI-C₅ (reproduces §1.1: *mp7 cannot detect this*) |
-| **DUALITY: cert-ties failing to yield a verified path-fixing automorphism** | **0 out of ~150 ties, on every witness** — the tie reading is complete; no stall |
+| **min-over-cell cert invariant under relabelling** | **18/18 TRUE** — the §4.2 fallback's `①`, empirically |
+| **greedy index-pick cert (= today's `deepen`) invariant** | **FALSE on 9/18** — mixed multipede, circ(5), all 6 rigid multipedes, CFI-cubic m≥10. TRUE on mp7 and CFI-C₅, which is why mp7 alone cannot detect the problem |
+| **cert-ties failing to yield a verified path-fixing automorphism** | **0 of ~150 ties, every witness** — the tie reading is complete; this is §4.1's "two blocks cannot tie", measured |
 | **cost, pruned leaves** | 4–29 across all witnesses (CFI cubic m=14, n=98: **29 leaves**; rigid multipede n=84: **4 leaves**) |
 | **cost, unpruned leaves** | up to 3584; ratio tracks `\|Aut\|` (mp7: 1344 unpruned = `\|Aut\|` exactly) |
 | **consume output** | mp7 `\|Aut\| = 1344` recovered ✓ (matches the C# cross-check) |
-| **rigid verdict non-vacuous** | CFI cubic m=14: root cell `\|C\|=56` → **14 cert-classes, 13 singletons** = 13 certified rigid decisions at the root of a WL-hard graph. Mixed multipede: root cell 4 → 2 classes |
 
-⚠ **Cost caveat — do not over-read.** These are not the I-R-lower-bound families (Neuen–Schweitzer
-odd/expander multipedes, Miyazaki). Random multipedes and CFI over small cubic bases are *easy* for
-I-R; the small leaf counts are suggestive, not evidence of polynomiality. The exponential risk is
-real and **unmeasured**. What the probe does establish is the **verdict structure** (① and duality),
-which is labelling-independent and is the part the design turns on.
+**The poly loop per witness** — `bₖ=1` justified by FORCE (a key splits) or CONSUME (certified orbit),
+else a STALL. Stall triple = `(|C|, harvest-orbits, TRUE-orbits)`, harvest at 3 anchors:
 
-⚠ **Group completeness not independently verified**: `|Aut|` is read off the generators the descent
-itself discovers (nauty-style). Consistency checks pass (unpruned leaf counts track `|Aut|`), but no
-external oracle was consulted.
-
-## 5. Correction to `CORE_scoping.md` (measured, 2026-07-26)
-
-`CORE_scoping.md` §"Measured" line reports *"rigid case R=30 (30/30)"* for the `circ(5)` multipede.
-**Measured here: `circ(5)`'s multipede has `|Aut| = 10` (D₅ scheme symmetry), 5 orbits, and
-`R(Aut-fixed) = 0` — not 30.** The `R` there was computed from `support(ker H)`, the *linear* handle,
-and `circ(5)` is a circulant, so its symmetry is entirely of the **scheme** kind that CORE_scoping's
-own 2026-07-26 correction says `ker H` misses. The correction is stated in that doc but its measured
-numbers were not re-run. Since the R/K plan needs `R` to be *Aut*-fixed (not `ker H`-fixed), the
-`circ(5)` witness does not support it; the **MIXED** multipede does (`|Aut| = 8`, `R = 4` genuinely
-Aut-fixed), as do the rigid random multipedes (`|Aut| = 1`, `R = n`).
-
-This also names the poly constructor the R/K split was missing: **`K` = the orbits the dual's ties
-produce, `R` = what its certified separations leave.** The split stops being an oracle.
-
-## 6. Where the exponential enters — and how much of it is avoidable
-
-Probe: `scratchpad/probe_polyloop.py` (faithful ports of `deepen`/`replay`/`twistOf`/`lookaheadKey`).
-
-### 6.1 Deepen's polynomiality and its `Amenable` hypothesis are the SAME FACT
-
-Cost of any descent = `∏ₖ bₖ`. Today's `deepen` sets `bₖ = 1` **by fiat** (lowest-index pick). That is
-free computationally but not free logically: the leaf it computes is a function of the *labelling*, and
-is only ever usable through an equality test between two runs — which is labelling-independent exactly
-when the picked cell is a single orbit, i.e. **`Amenable`**. So deepen is not "poly and correct"; it is
-**poly, and correct-when-`Amenable`**. The dual does not *introduce* an exponential — it *prices* the
-assumption deepen was making for free. Where `Amenable` holds, the dual has `bₖ = 1` too and is exactly
-as poly as deepen.
-
-`bₖ = 1` is legitimate — no branching at all — under either justification:
-
-* **CONSUME** — the cell is certified a single orbit (harvest transitive on it): pick any member.
-* **FORCE** — a poly equivariant key *splits* the cell: then we **refine, not branch** — the cell
-  shrinks and there is no cost multiplier whatsoever.
-
-**Exponential survives only at STALL nodes (both fail).** `cost = ∏(branch factors at stalls)`.
-
-### 6.2 `Amenable` never needs to be ASSUMED — deepen witnesses it from below
-
-`CellSingleOrbit adj χc cid := ∀ u w in the cell, ∃ σ, IsColAut adj χc σ ∧ σ u = w`
-(`DeepenAmenable.lean:198`). Every harvested twist **is** an `IsColAut` (`twistOf_isColAut`, landed), and
-`IsColAut` is closed under composition — so **transitivity of the harvested twists on the cell is a
-verified witness for `CellSingleOrbit`**. It is decidable and poly (deepen's own harvest computes it).
-
-⟹ The globally-false `hAmen : ∀ adj χ, Amenable adj χ` in `deepenSupply_guarded_canonizer_direct` can be
-replaced by a **per-level run-time certificate**, making the capstone unconditional. `joint` /
-`step_rerelate` are already exactly the lemmas that consume it — they need `CellSingleOrbit` per level,
-which is what the certificate supplies. The certificate is **one-sided** (failure ⇏ rigid), which is
-correct: failure means "not certified", and the response is branch / force / flag, never a wrong answer.
-
-### 6.3 Measured — the poly loop on 18 witnesses
-
-| witness | levels | FORCE | CONSUME | STALL | stall (\|C\|, harvest-orbits, TRUE-orbits) |
+| witness | levels | FORCE | CONSUME | STALL | stalls |
 |---|---|---|---|---|---|
 | mp7 Fano | 3 | 0 | **3** | **0** | — |
 | circ(5) | 2 | 1 | 1 | **0** | — |
 | CFI cubic m=10, m=12 (pl+tw) | 6 | 1 | 5 | **0** | — |
 | CFI cubic m=8 pl | 7 | 1 | 4 | 2 | (16, 2, **1**) · (4, 2, 2) |
-| CFI cubic m=14 (pl+tw) | 7 | 0 | 6 | 1 | (56, 36→**14**, 14) |
+| CFI cubic m=14 (pl+tw) | 7 | 0 | 6 | 1 | (56, 36→**14** at all anchors, 14) |
 | MIXED multipede | 3 | 0 | 2 | 1 | (4, 2, 2) |
 | rigid multipedes n=34..84 | 1–2 | 0 | 0 | 1–2 | (4,4,4) · (2,2,2) … |
 
-**Stall triage** — comparing the harvest's orbit count on the cell against the TRUE `Aut`-orbit count
-(computed independently by the min-over-cell canonical form) separates *forced* branching from *fixable*:
+Two of the three stall kinds are benign: **genuine rigid decisions** (harvest == TRUE > 1 — branching is
+forced, and that is force's job) and **anchor-count gaps** (harvest > TRUE, closing with more anchors —
+m=14's 36 → 24 → 16 → 14). The third, m=8's `(16, 2, 1)`, is the pick-misalignment witness of §2.1.
 
-1. **Genuine rigid decisions** (harvest == TRUE > 1): rigid multipedes (4,4 / 2,2), MIXED (2,2),
-   and CFI m=14's residual 14. Branching here is **forced** — no harvest improvement helps. This is
-   exactly force's job, and the rigid reader belongs here as a **stall-branch-factor reducer**, not as
-   a separate resolver.
-2. **Anchor-count gaps** (harvest > TRUE, closes with more anchors): CFI m=14 gives
-   **36 (3 anchors) → 24 (6) → 16 (12) → 14 (ALL) = TRUE**. A quantitative confirmation of §1.1
-   ("all anchors are required"); the all-anchor supply is *exactly* complete there.
-3. **★ A measured FUSION witness** (harvest > TRUE, does NOT close with all anchors): CFI cubic m=8,
-   the `|C| = 16` cell has **TRUE orbits = 1** — it *is* a single orbit — yet the harvest stalls even
-   over every anchor. Traced level by level: `AmenablePath` breaks **4 levels deeper**, at a cell with
-   **2 orbits**. This is precisely `not_amenablePath_imp_rigidObstruction`'s claim (a stall exposes a
-   force-actionable rigid pair *deeper* than the compared pair, which is itself automorphic = fusion).
-   The deepen doc §4 records this witness as *still missing*; it is here, on a CFI cubic base.
+### 2.7 ⚠ Probe traps (recorded because both cost real time)
 
-### 6.4 Answer: avoidable at two of three scopes
+* **Close over the generators.** Compute the harvest's orbit relation as `v ~ g v` for every generator
+  `g` and every `v`, never by unioning only the `(anchor, rⱼ)` pairs. The latter manufactured a
+  spurious 176-pair "fusion falsifier" at the Chang-A root. (`probe_polyloop.py` does it correctly.)
+* **Content-key the canonical-form cache.** Keying on `id(adj)` is wrong — Python recycles ids across
+  freed graphs, silently returning another graph's canonical form.
+* **Rigid witnesses cannot test a certified-below route.** By §8.4 they certify only vacuously.
 
-* **`Amenable` nodes — avoidable entirely and unconditionally.** `bₖ=1` with a *verified* witness; no
-  hypothesis; same cost as today's deepen. The dual is a conservative extension of deepen, not a
-  replacement with worse cost.
-* **Force-separable nodes — better than avoidable.** The key shrinks the cell; no multiplier at all.
-* **Genuine stalls — not avoidable in general.** `∏` over stall nodes is the honest cost and it is the
-  wall, unmoved. But it is now a **cost multiplier at nodes you can point at**, with a *correct*
-  fallback (branch), instead of a soundness hypothesis that is false on the graphs of interest.
+---
 
-## 7. ★ CORRECTION — the exponential is in neither resolver; it is in ORDERING, not separating
+## 3. What is proved — the landed chain
 
-§6's framing put the exponential in "stall branching". That mislocates it. Neither resolver is
-exponential, and the dual does not make one so. Redone properly:
+Gate green (223 s, 103 modules); every theorem below is `[propext, Classical.choice, Quot.sound]`.
 
-### 7.1 The strong link is real, and it is provable from landed pieces
+### 3.1 `DeepenCertified.lean` — `Amenable` as a run-time certificate
 
-`Descend.targetColour = (nonSingletonColours χ).min` and `Deepen.chooseIdK (finRange n)` are the **same
-object** — lowest-id non-singleton cell. So the canonizer's descent path *is* deepen's descent path.
-That makes "deepest failure along the path" well-defined, and gives:
+| | statement | name |
+|---|---|---|
+| T1 | `CertifiedOrbit ⟹ CellSingleOrbit` — a *checked* transitivity of harvested twists **is** single-orbit-ness | `cellSingleOrbit_of_certifiedOrbit` |
+| T2 | `CertifiedPath ⟹ AmenablePath`, `Certified ⟹ Amenable` | `amenablePath_of_certifiedPath`, `amenable_of_certified` |
+| T3 | selector identity `chooseIdK (finRange n) = Descend.targetColour` — deepen's per-level cell **is** the canonizer's branch cell | `chooseIdK_eq_targetColour` |
+| T4 | per-level bridge: `Consume.CellIsOrbit` discharges the level's certificate | `certifiedOrbit_of_cellIsOrbit_chooseIdK` |
+| T5 | at a certified node, consume failing names a non-automorphic pair **in this branch cell** | `consume_fail_gives_real_decision`, `rigidObstructionAt_branch_of_certified` |
+| T6 | **`Amenable` transports** — the index-pick obstruction absorbed as in `joint` | `amenablePath_transport`, `amenable_transport{,_iff}` |
+| T7 | guarded supply ⟹ **`①c` with no hypothesis at all** | `deepenSupplyGuarded_canonizer` |
 
-> **CERTIFIED-BELOW EXACTNESS.** Let `C` be a branch cell whose descent certifies `CellSingleOrbit` at
-> **every level strictly below** (§6.2's poly witness). Then the all-anchor harvest's partition of `C`
-> is **exactly the true `Aut`-orbit partition of `C`**.
->
-> *Proof from landed pieces.* ⊆: every twist is verified (`twistOf_isColAut`), so each harvest block sits
-> inside a true orbit. ⊇: certified-below **is** `AmenablePath`, so `joint` + `twistOf_of_transport_fixing`
-> say an automorphic pair *does* produce a verifying twist. Hence equality. ∎
+T5's `Certified` hypothesis is **necessary, not an artefact** — §2.1's second falsifier refutes the
+unguarded statement.
 
-This is strictly stronger than the link in use today. `not_amenablePath_imp_rigidObstruction` says a
-consume failure *exposes an obstruction somewhere*. The above says: **at a certified-below failure, the
-cell's exact orbit partition has been computed, in polynomial time, and its non-blocks are certified
-non-automorphic.** That is the user's "a cell with the properties needed to force" — and it is a
-proof-form gap, not new mathematics.
+### 3.2 `DeepenLocated.lean` — locating the obstruction (10 theorems)
 
-Measured (`probe_verdict_invariance.py`, all-anchor harvest at the **branch cell**, 18 witnesses):
+| | statement | name |
+|---|---|---|
+| C1 | `DescentReach` — reachable by *proper* steps (individualize a vertex **with a same-colour partner**, then refine), + `trans` | `DescentReach`, `.trans` |
+| C1a | a proper step strictly raises `ncol`; reachability never lowers it | `ncol_lt_step_of_partner`, `ncol_le_of_descentReach` |
+| C1b | a `chooseIdK` level's pick has a partner | `partner_of_chooseIdK` |
+| **C2** | `¬AmenablePath ⟹ ∃ ψ` **reachable**, obstruction at `ψ`'s **branch cell** | **`not_amenablePath_located`** |
+| **C3** | `¬Amenable adj χ ⟹ ∃ ψ` reachable with **`Amenable adj ψ`** ∧ obstruction at `ψ`'s branch cell | **`not_amenable_deepest`** |
+| — | the `Amenable` (not `Certified`) form of §3.1's T5 | `consume_fail_real_decision_of_amenable`, `rigidObstructionAt_branch_of_amenable` |
+| — | every consume failure is located, one disjunct or the other | `consume_fail_locates` |
 
-* **exact = 18/18** — harvest partition == true `Aut`-orbit partition, on every witness
-  (mp7 28→1 block, CFI cubic m=14 56→14 blocks, rigid multipedes 4→4, MIXED 4→2).
-* **partition transports under relabelling = 18/18.**
+C3's point: one node carries **both** hypotheses — consume is exact below it (what an orbit-separating
+equivariant key needs) *and* force has a genuine rigid decision at its branch cell. Termination is the
+`Descend.ncol` measure, the same one `deepen_succeeds` uses; the base case needs no discreteness lemma
+because `¬Amenable` itself produces a branch vertex, hence a partner, hence `ncol χ < n`.
 
-### 7.2 Why the earlier m=8 counterexample does not contradict this
+**Non-vacuity checked** — nodes that are `Amenable` **and** whose branch cell has ≥ 2 orbits, i.e.
+inhabitants of C3's conclusion:
 
-The `(16, 2, 1)` stall of §6.3 was at a node **not** certified-below (`AmenablePath` breaks 4 levels
-deeper, at a 2-orbit cell). Exactness is not claimed there, and its verdict is provably unusable — not
-merely measured so: `Force.forceBy_no_narrowing_on_orbit` says an **equivariant** key cannot split a
-single-orbit branch cell. That cell is a single orbit and the harvest splits it 2 ways, so that verdict
-**is not an equivariant key**, full stop. The scheduling consequence is the existing interleaving:
-force acts at the deeper exposed cell first, the colouring refines, consume retries. Rounds are ≤ n
-(each force step strictly refines), so the *loop* is poly.
+| C3+C4 | C4+C5 | C3+C4+C5 | Shrikhande⊎Rook | Chang-A | Chang-B | MIXED | total |
+|---|---|---|---|---|---|---|---|
+| 1 | 1 | 24 | 1 | 24 | 48 | 1 | **100** |
 
-### 7.3 Where the exponential actually lives
+The conjunction also cannot degenerate: the obstruction requires `targetColour ψ = some cid`, so `ψ` is
+**not** discrete and `Amenable ψ` is a real constraint, not the vacuous `branches = []` case. And the C3
+iteration was validated directly on a measured `¬Amenable` node (Chang-B root): two steps, `ncol`
+2 → 3 → 10, terminating on `Amenable = True` with a 2-orbit branch cell.
 
-A branch cell with `k > 1` true orbits leaves the descent exactly two moves:
+### 3.3 `DeepenKey.lean` — `orbKey`, the equivariant force key (18 theorems)
 
-* **rank the orbits** by an invariant and `keepMin` — this is `forceBy`; or
-* **branch over them** and take the min canonical form — cost multiplier `k`.
+```
+orbKey adj χ v := if AmenablePath adj χ n (step adj χ v)
+                  then readKey adj (indivOne χ v) (leafOf adj n (step adj χ v)).col
+                  else []                                        -- defer
+```
 
-And **ranking two orbits *is* separating them by a poly invariant** — the two are the same thing
-(`forceBy`'s power is exactly its key, and `forceBy_no_narrowing_on_orbit` says a key can act only
-between orbits). So:
+| | statement | name |
+|---|---|---|
+| — | `Refines` + `trans`; `refines_step`, `refines_indivOne`, `refines_transport` | §1 of the file |
+| — | **a colour-automorphism of a FINE colouring fixes every COARSER one** | `transport_eq_of_isColAut_refines` |
+| — | `leafOf` + three equation lemmas | §2 of the file |
+| **A2** | `AmenablePath` ⟹ the two **leaves** are related by an accumulated isomorphism `ρ`, and `ρ` acts on any refined-from colouring exactly as `σ` does | **`leafOf_transport_of_amenablePath`** |
+| A1 | the invariant read + its transport | `readAt/readColAt/readAtIdx/readKey_transport`, `filter_col_transport` |
+| A3 | the guard is relabelling-invariant **both ways** | `amenablePath_step_transport_iff` |
+| **A4** | **`Force.KeyEquivariant orbKey` — no hypothesis** | **`keyEquivariant_orbKey`** |
 
-> Knowing the orbit partition **exactly** — which §7.1 now gets in poly time — still does not give
-> force a key. Force needs a **poly invariant ORDER on the certified-rigid blocks**. Absent it, the
-> only sound move is branching, and *that* is the exponential. It is the fallback for a missing order,
-> not a property of either resolver.
+**Why the guard is not a cheat.** The greedy descent breaks ties by vertex index, which does not commute
+with relabelling. `AmenablePath` is exactly the repair, and it is itself invariant (T6), so the `if`
+splits the vertices into two relabelling-stable classes and `KeyEquivariant` survives it.
 
-So the split is: **PARTITION = poly and (per §7.1) provable; ORDER = the wall.** That is independently
-exactly the rigid-seal frontier wording ("canonical column order on the rigid residue", the recover
-core) and CORE_scoping's "main blocking feature = the poly iso-invariant order on R". The dual work
-does not move that wall — but it *does* deliver R/K with a poly, exact, certified constructor, which is
-what the R/K plan was missing.
+A2 is `amenablePath_transport` with its accumulator `τ * σ` **kept** rather than discarded. The one
+thing not anticipated in the plan: a leaf-*adjacency* read alone proves only that the two *uncoloured*
+individualized graphs are isomorphic, which is not "same orbit" — so the key must carry the parent
+colouring, which needs `τ` to fix it, hence the `Refines` invariant threaded through the induction.
 
-## 8. ★★ §7.3 WAS WRONG — ranking is NOT the wall. Strategy assessment.
+⚠ **Reduce `leafOf` only through its equation lemmas.** Unfolding in place and then `cases`-ing on
+`chooseIdK` descends into its internal `foldl` and exposes spurious goals — the recorded `deepen`
+match-reduction trap. `simp only [leafOf, h, hf]` is what works.
 
-§7.3 claimed "ranking the blocks == separating them by a poly invariant == the wall". That is false,
-and the refutation is deepen's own object. Probes: `probe_certkey.py`, `probe_strategies.py`.
+### 3.4 `DeepenExact.lean` — exactness, and force fires (19 theorems)
 
-### S1 — the certified-below cert key ✅ CONFIRMED, and it is the route
+| | statement | name |
+|---|---|---|
+| B0 | leaf colours are ranks (`< n`); the greedy leaf at fuel `n` is **discrete** | `warmRefineR_lt`, `leafOf_lt`, `leafOf_discrete{,_n}` |
+| B0a | a discrete class is a **singleton**, so the read is one adjacency entry / one parent colour | `filter_eq_singleton_of_discrete`, `readAt_discrete`, `readColAt_discrete` |
+| B0b | key equality ⟹ componentwise (two `map`s ⟹ `List.append_inj` + `List.map_inj_left`) | `readKey_components` |
+| **B1** | **equal keys ⟹ SAME ORBIT — no hypothesis** | **`isColAut_of_readKey_eq`** |
+| B1a | a discrete colouring with colours `< n` is a permutation; two of them match colour-for-colour | `colEquiv`, `matchPerm`, `matchPerm_col` |
+| B3 | `orbKey` **separates** any pair no colour-automorphism links | `orbKey_ne_of_no_aut` |
+| B3a | at an `Amenable` node with a `RigidObstructionAt`, `forceBy orbKey` **strictly narrows** | `forceBy_orbKey_narrows` |
+| **B2** | at an `Amenable` node **`orbKey`'s fibres ARE the orbits** (both directions) | **`orbKey_eq_iff_orbit`** |
+| **D2** | force narrows the branch cell to a **single orbit** | **`forcedSet_single_orbit`** |
+| **D1** | **a consume failure makes force fire at a reachable node** | **`consume_fail_force_fires`** |
 
-> **Claim.** If `AmenablePath` holds along `a`'s greedy descent (certified-below), then deepen's
-> **single-path leaf cert** `cert(a) = adj^{π_a}` is **iso-invariant**.
->
-> *Proof.* Run the descent from `a` in `adj` and from `τa` in `τ·adj`. Cell ids match
-> (`chooseIdK_transport`). The min-index picks differ, `w` vs `w'`. `AmenablePath` says the chosen cell
-> is a single orbit of `IsColAut adj χ_cur`, so ∃`ρ` with `ρ w = τ⁻¹ w'`; then `τ∘ρ` is again an
-> isomorphism `adj → τ·adj` carrying pick to pick. Induct. At the discrete leaf the two are related by
-> an isomorphism, so the relabelled adjacency is **equal**. ∎
->
-> This is `joint` with an **isomorphism between two graphs** in place of an automorphism of one — the
-> project's standard transport generalization, and its atoms (`step_transport`, `chooseIdK_transport`,
-> `cellSingleOrbit_transport`) are all landed.
+**The pivot: the firing direction needs no hypothesis.** B1 is completeness of the encoding — discrete
+leaf ⟹ singleton classes ⟹ the read determines the relabelled adjacency *and* the relabelled
+`indivOne χ v`; the **odd** values of `indivOne χ u` sit exactly at `u`, so
+`transportColouring ρ (indivOne χ u) = indivOne χ w` forces `ρ u = w`, and halving gives `χ ∘ ρ = χ`.
+`Amenable` is needed only for `①` (§3.3) and for the converse half of B2.
 
-Combined with §7.1 exactness (`cert(a) = cert(b) ⟺ same orbit`), `cert` is a **poly** (one greedy path
-per rep), **equivariant**, **exactly orbit-separating** `Force.Key` — so it **ORDERS the blocks** and
-`force_canonizer` fires. No min-over-cell, no branching, no wall. It is also **gauge-tolerant**
-(automorphic pairs tie by construction), so it does not need whole-node rigidity.
+**B2 is also the consistency guard** against `Force.forceBy_no_narrowing_on_orbit`: its `⟸` direction is
+the ceiling (`Force.keyV_aut_invariant`, free from `keyEquivariant_orbKey`), so the key is constant on
+each orbit and force can never cut *inside* one. It separates orbits and nothing finer — which is what
+D2 then says. The landed theorems agree, and §2.5's 147/147 is the same statement empirically.
 
-**Measured (`probe_certkey.py`, 9 witnesses):** certified-below reps with a non-invariant cert =
-**0**. Every non-invariant cert came from an **uncertified** rep (perfect correlation). `exact = Y` on
-8/9. On the **rigid multipedes** — the case I said was walled — all reps certify, and `cert` separates
-all 4 orbit blocks invariantly. The rigid decision is resolved by a poly key.
+---
 
-### S2 — deferred schedule ✅ effective, ⚠ but it does NOT reach "purely rigid"
+## 4. Cost — where the exponential is, and where it is not
 
-Single-orbit-ness is invariant, so *"lowest-id **single-orbit** non-singleton cell, else lowest-id"* is
-an equally legal `targetColour`. Individualizing inside a single-orbit cell costs branch factor 1 and
-is free. Measured: forced decisions drop to **0–2 per witness**; **MIXED and mp7 need ZERO**.
+**Cost of any descent = `∏ₖ bₖ`.** Today's `deepen` sets `bₖ = 1` **by fiat** (lowest-index pick). That
+is free computationally but not free logically: the leaf it computes is a function of the *labelling*
+and is only ever usable through an equality test between two runs — which is labelling-independent
+exactly when the picked cell is a single orbit, i.e. **`Amenable`**. So deepen is not "poly and
+correct"; it is **poly, and correct-when-`Amenable`**. Nothing in this track *introduces* an
+exponential — it *prices* the assumption deepen was making for free.
 
-⚠ **But the node is not purely rigid when the first decision arrives.** At CFI cubic m=8/10/12 the
-first forced decision has `|Aut| = 512 / 128 / 256`. Every cell carries ≥2 orbits while the graph is
-still highly symmetric — you run out of *consumable cells* long before you run out of *symmetry*. So
-"defer until truly rigid, which is already handled" does not materialize, and the whole-node-rigid
-anchor (9A–9C, `OrdEquivariant`) does **not** become applicable this way. S1 covers it instead,
-because S1 is gauge-tolerant where 9A–9C is not.
+`bₖ = 1` is legitimate under either justification:
 
-### S3 — order-agnostic block splitting ❌ refuted on the cheap keys
+* **CONSUME** — the cell is certified a single orbit: pick any member.
+* **FORCE** — a poly equivariant key *splits* the cell: then we **refine, not branch**; the cell shrinks
+  and there is no cost multiplier at all.
 
-Blocks are invariant sets, so any invariant set-function is a legal colour — no order needed. Tested
-`|B|`, the refinement histogram after set-individualizing `B`, and that plus `B`'s neighbourhood
-colours: **0 of 8 forced decisions separated** (only circ(5), and only the third variant). The
-block-level analogue of the already-recorded `baseReadWL` blindness. Not a route on its own — though
-it remains a free *pre-filter* wherever it does fire.
+So the exponential survives only where both fail, and `cost = ∏(branch factors at stalls)`. Against the
+landed chain: `orbKey` supplies the FORCE half wherever its guard is open, and D2 says the forced set is
+a single orbit, so consume finishes it. The residual cost question is **how often D1's relocation
+recurses** — `DescentReach` + `ncol` bound it by `n` *steps*, but the product over relocations is not
+bounded here.
 
-### S4 — k-fold branch, non-recursively
-
-Where S1 is unavailable, branch over one rep per block and take the min. Cost `k` at that node,
-**not exponential unless nested**. Measured nesting: 8/9 witnesses have a single non-nested decision.
-
-### The actual residue (and it is not ordering)
-
-Nodes with an **uncertified** rep — i.e. `AmenablePath` breaks somewhere below (fusion). Measured:
-rand multipede V=12 W=8 (0/4 reps certified) and CFI cubic m=10 (4/40). There `cert` is genuinely
-non-invariant and S1 does not apply; the response is to resolve the deeper multi-orbit cell first
-(where S1 *does* apply, by induction) and re-run. So the open question is the **nesting depth of
-uncertified levels**, not the ordering of blocks. That is a cost/termination question, and it is a
-different question from the one the rigid-seal frontier is currently phrased around.
-
-## 9. ★★★ THE SPLIT LOOP — the mechanism has no third case (validated)
-
-Probe: `probe_splitloop.py`. The algorithm, exactly as stated:
+### 4.1 The split loop — the mechanism has no third case
 
 ```
 loop:  refine
@@ -336,17 +344,10 @@ loop:  refine
        else:        order the blocks, refine by rank  -- FORCE, a SPLIT, no branch
 ```
 
-**Two blocks cannot tie**: `cert(a) = cert(b) ⟺ (adj, χ+a) ≅ (adj, χ+b) ⟺ a, b are in the same
-orbit` — so a tie contradicts them being distinct blocks. The split therefore *always* succeeds.
-**There is no third outcome.** The `¬HandledS` "true mutual stall" does not exist as a mechanism;
-it exists only as cost.
-
-**One computation gives both verdicts.** Compute `cert(a)` for `a ∈ C`: its **fibres are the orbits**
-(consume) and its **values order them** (force). No separate harvest is needed — deepen's harvest
-becomes an *optimization*: where it certifies the cell is a single orbit, skip the certs entirely and
-take the free step.
-
-**Measured, 13 witnesses:** `blocks-tied = 0` everywhere; `① = OK` everywhere.
+**Two blocks cannot tie**: `cert(a) = cert(b) ⟺ (adj, χ+a) ≅ (adj, χ+b) ⟺ a, b in the same orbit`, so a
+tie contradicts them being distinct blocks. The split therefore always succeeds. **There is no third
+outcome** — the `¬HandledS` "true mutual stall" does not exist as a mechanism; it exists only as cost.
+Measured, 13 witnesses: `blocks-tied = 0` everywhere, `① = OK` everywhere.
 
 | witness | calls | splits | free | max-nesting | blocks/split |
 |---|---|---|---|---|---|
@@ -356,85 +357,187 @@ take the free step.
 | rigid multipedes n=34..84 | 5–15 | 1–6 | 0–1 | 1–2 | [4] … [4,2,2,2,2,2] |
 | CFI cubic m=8 / 10 / 12 / 14 | 3 / 9 / 8 / **17** | 1 / 2 / 1 / 2 | 14 / 39 / 43 / **96** | 1 / 2 / 1 / 1 | [2] / [6,2] / [7] / [14,2] |
 
-CFI cubic m=14 (n=98, WL-hard): **96 free consume steps, 2 splits, 17 recursive calls.**
+⚠ **Cost caveat — do not over-read.** These are not the I-R-lower-bound families (Neuen–Schweitzer
+odd/expander multipedes, Miyazaki). Random multipedes and CFI over small cubic bases are *easy* for I-R;
+the small leaf counts are suggestive, not evidence of polynomiality. The exponential risk is real and
+**unmeasured**. What the probes establish is the **verdict structure**, which is labelling-independent
+and is the part the design turns on. ⚠ Group completeness is also not independently verified: `|Aut|` is
+read off the generators the descent itself discovers; consistency checks pass, but no external oracle
+was consulted.
 
-### What this settles, and what it leaves
+### 4.2 The min-over-cell key — the standing fallback
 
-* **Settled — the mechanism.** Every cell is consumed or split; the split cannot fail; the result is
-  iso-invariant. `①` is unconditional for the whole algorithm (a canonical form is equivariant, and
-  `force_canonizer` needs only `KeyEquivariant`). The mixed-cell route (`CoveringOfAt`) collapses into
-  "split by the orbit partition, order by the key" — not a separate resolver.
-* **Left — the cost, and only the cost.** `calls = ∏` over a root-to-leaf chain of mixed cells of
-  (#blocks) = the **fully `Aut`-pruned I-R tree**. Measured 1–17 with nesting ≤ 2. In general this is
-  the object with known exponential lower bounds (Neuen–Schweitzer multipedes over expanders,
-  Miyazaki) — those families are *not* in this witness set, so the small numbers are suggestive only.
-* **Where force's key removes the cost entirely.** The recursion exists *only* to order the blocks. A
-  poly equivariant block-ordering key collapses it to depth 0 (`calls = 1 + #splits`, poly). So
-  "force handles ordering rigid cells" is exactly the hypothesis that makes the whole loop poly — the
-  model is right, and the wall is now located precisely at **"a poly key that orders the blocks of one
-  mixed cell"**, nothing else.
-* **And S1 is such a key at nesting 1.** Certified-below ⟹ deepen's single-path cert orders the blocks
-  in poly time. So **nesting ≤ 1 ⟹ poly, unconditionally** (measured: 9/13 witnesses).
+Replacing the index pick by **min over the cell** gives a key that is `KeyEquivariant`
+*unconditionally*, by a much simpler induction than §3.3's (cells transport, and the min of a
+transported multiset is equal — no `Amenable`, no isomorphism accumulation). Cost is
+`∏ₖ (surviving reps at level k)`, i.e. the classical I-R tree. It reaches the same D-level statements
+with exponential `keyCost`, so **D is reachable by two independent routes**; `orbKey` buys the *poly*
+version wherever its guard is open.
 
-⚠ **Probe idealisation.** `orbit_map` uses a true canonical form as the partition oracle. In the real
-algorithm the partition comes from the same `cert` computation (fibres), so this is faithful — but it
-means the poly *fast path* (deepen's harvest instead of certs) is only available where the harvest is
-exact, i.e. certified-below (§7.1, measured 18/18 there).
+---
 
-## 10. ✅ LANDED — `ChainDescent/DeepenCertified.lean` (block 1 of the forcibility proof)
+## 5. Correction to `CORE_scoping.md` (measured, 2026-07-26)
 
-Gate green (`bash /workspace/scripts/build.sh`, 197 s); all 9 theorems
-`[propext, Classical.choice, Quot.sound]`. In `build.sh` after `DeepenAmenable`.
+`CORE_scoping.md` §"Measured" reports *"rigid case R=30 (30/30)"* for the `circ(5)` multipede.
+**Measured here: `circ(5)`'s multipede has `|Aut| = 10` (D₅ scheme symmetry), 5 orbits, and
+`R(Aut-fixed) = 0` — not 30.** The `R` there was computed from `support(ker H)`, the *linear* handle,
+and `circ(5)` is a circulant, so its symmetry is entirely of the **scheme** kind that CORE_scoping's own
+2026-07-26 correction says `ker H` misses. Since the R/K plan needs `R` to be *Aut*-fixed (not
+`ker H`-fixed), the `circ(5)` witness does not support it; the **MIXED** multipede does (`|Aut| = 8`,
+`R = 4` genuinely Aut-fixed), as do the rigid random multipedes (`|Aut| = 1`, `R = n`).
 
-**The target chain** for *"consume failing hands force a forcible node"*:
+This also names the poly constructor the R/K split was missing: **`K` = the orbits the dual's ties
+produce, `R` = what its certified separations leave.**
 
-| | statement | status |
-|---|---|---|
-| **T1** | `CertifiedOrbit ⟹ CellSingleOrbit` — a *checked* transitivity of harvested twists **is** single-orbit-ness | ✅ `cellSingleOrbit_of_certifiedOrbit` |
-| **T2** | `CertifiedPath ⟹ AmenablePath`, `Certified ⟹ Amenable` | ✅ `amenablePath_of_certifiedPath`, `amenable_of_certified` |
-| **T3** | selector identity `chooseIdK (finRange n) = Descend.targetColour` — deepen's per-level cell **is** the canonizer's branch cell | ✅ `chooseIdK_eq_targetColour` |
-| **T4** | per-level bridge: `Consume.CellIsOrbit` discharges the level's certificate | ✅ `certifiedOrbit_of_cellIsOrbit_chooseIdK` |
-| **T5** | **located failure**: at a certified node, consume failing names a non-automorphic pair **in this branch cell** | ✅ `consume_fail_gives_real_decision`, `rigidObstructionAt_branch_of_certified` |
-| **T6** | **`Amenable` transports** — the index-pick obstruction absorbed as in `joint` | ✅ `amenablePath_transport`, `amenable_transport`, `amenable_transport_iff` |
-| **T7** | guarded supply ⟹ **`①c` with no hypothesis at all** | ✅ `deepenSupplyGuarded_canonizer` |
+---
 
-**What T1–T4 buy.** `Amenable` was unobservable — `CellSingleOrbit` quantifies over the true `IsColAut`
-group. T1 shows it does not need to be *assumed*: deepen's harvest emits only *verified* automorphisms
-(`twistOf_isColAut`) and `IsColAut` is composition-closed, so a checked transitivity **is** a proof of
-single-orbit-ness. T3 is what makes that check *achievable* — it identifies the cell `AmenablePath`
-names with the cell `deepenGens` actually harvests, so the consume side's own `CellIsOrbit` discharges
-each level (T4).
+## 6. Strategy assessment — the block-ordering question
 
-**What T5 buys — "forcible", not merely "exposed".** `not_amenablePath_imp_rigidObstruction` gives
-`∃ χc cid, RigidObstructionAt adj χc cid`: an obstruction *somewhere*, possibly far below, with no
-control over which colouring or cell. At a certified node the failure is **located** — two named
-branch vertices linked by no colour-automorphism, at *this* colouring and *this* branch cell. That is
-the strengthening asked for.
+* **S1 — the certified-below cert key. ✅ This became `orbKey` (§3.3/§3.4).** If `AmenablePath` holds
+  along `a`'s greedy descent, deepen's single-path leaf cert is iso-invariant; combined with exactness
+  it is a poly, equivariant, exactly orbit-separating `Force.Key`, so it **orders the blocks**. Measured
+  (`probe_certkey.py`, 9 witnesses): certified-below reps with a non-invariant cert = **0**; every
+  non-invariant cert came from an **uncertified** rep (perfect correlation). Now a theorem.
+* **S2 — deferred schedule. ✅ effective, ⚠ does not reach "purely rigid".** *"Lowest-id **single-orbit**
+  non-singleton cell, else lowest-id"* is an equally legal `targetColour`, and individualizing inside a
+  single-orbit cell costs branch factor 1. Measured: forced decisions drop to **0–2 per witness**; MIXED
+  and mp7 need **zero**. But at CFI cubic m=8/10/12 the first forced decision still has
+  `|Aut| = 512 / 128 / 256` — you run out of *consumable cells* long before you run out of *symmetry*,
+  so the whole-node-rigid anchor (rigid-seal 9A–9C, `OrdEquivariant`) does **not** become applicable
+  this way. S1 covers it instead, being gauge-tolerant where 9A–9C is not.
+* **S3 — order-agnostic block splitting. ❌ refuted on the cheap keys.** Blocks are invariant sets, so
+  any invariant set-function is a legal colour — no order needed. Tested `|B|`, the refinement histogram
+  after set-individualizing `B`, and that plus `B`'s neighbourhood colours: **0 of 8 forced decisions
+  separated** (only circ(5), and only the third variant) — the block-level analogue of the recorded
+  `baseReadWL` blindness. Remains a free *pre-filter* wherever it fires.
+* **S4 — k-fold branch, non-recursively.** Where S1 is unavailable, branch over one rep per block and
+  take the min. Cost `k` at that node, **not exponential unless nested**. Measured nesting: 8/9
+  witnesses have a single non-nested decision.
 
-**What T6/T7 buy — the hypothesis is gone.** `AmenablePath`'s per-level pick is by vertex index and so
-does not commute with a relabelling; that is the obstruction this track keeps meeting, and it is what
-forced `deepen_branchOrbit_transport` to carry a *global* `∀ adj χ, Amenable adj χ`. It is absorbable
-exactly as in `joint`: the level's cell **is** a single orbit (that is what `AmenablePath` says), so a
-stabilizer element carries `σ wₐ` to `w_b` and the relating isomorphism accumulates. With `Amenable`
-transport-stable, a supply that simply *defers* where `Amenable` fails is equivariant unconditionally
-(good side: §5 transports; bad side: both emit nothing). So **`deepenSupplyGuarded_canonizer` carries
-no hypothesis at all**, where `deepenSupply_guarded_canonizer_direct` carried a globally-false one.
-Soundness no longer rests on anything; only *firing* is reduced, and the guard is precisely where the
-rigid side takes over.
+**The residue is not ordering.** It is nodes with an **uncertified** rep — `AmenablePath` breaks
+somewhere below. Measured: rand multipede V=12 W=8 (0/4 reps certified) and CFI cubic m=10 (4/40).
+There the response is to resolve the deeper multi-orbit cell first (where S1 *does* apply, by
+induction) and re-run — which is exactly what `not_amenable_deepest` now proves is possible. So the open
+question is the **nesting depth of uncertified levels**, a cost/termination question.
 
-Note that T3 (the selector identity) turned out load-bearing for T6 too: with
-`Descend.targetColour_transport` it gives `chooseIdK_finRange_transport` in one line, so the
-`List.map σ` mismatch in `chooseIdK_transport` never has to be dealt with.
+---
 
-⚠ **Still open.** The guard is a `Prop` test, so `deepenSupplyGuarded` is `noncomputable`. Which
-*poly, relabelling-invariant* check to use in the executable is open: `Certified` (§2) is poly and
-sound, but its own invariance is **not** established — `deepenGens` is index-dependent. This is the
-same index-pick issue one level up, and it is where the min-over-cell / split-loop redesign (§9)
-would apply.
+## 7. ▶▶ THE FRONTIER — a poly, relabelling-invariant guard
 
-## 11. ★★★ LITERATURE PLACEMENT (4 subagent searches, 2026-07-26)
+`orbKey`'s guard is `Amenable`. It is *decidable* (`IsColAut` has a `Decidable` instance and
+`Equiv.Perm (Fin n)` is a `Fintype`), so `orbKey` could be made computable at an `n!` price; it is
+declared `noncomputable` rather than pretend that is a cost model. **`①` is unaffected either way** —
+what a poly guard buys is a `Publication`-eligible executable.
 
-### 11.1 The recalled result is real, and sharper than expected
+Two candidate repairs. The first is now closed.
+
+### 7.1 ⛔ CLOSED — deepen's own certificate is NOT relabelling-invariant
+
+`Certified` / `CertifiedOrbit` (T1/T2) is poly and sound, and the open item was its invariance. **It is
+not invariant, and this is measured, not conjectured** (`scratchpad/guardinv.py`): the all-anchor
+harvest's branch-cell partition, recomputed on relabelled copies with the node colouring recomputed
+invariantly on each copy —
+
+| node | true orbits | harvest blocks | transports? | block-size profiles seen |
+|---|---|---|---|---|
+| **CFI cubic m=8 pl, the `\|C\|=16` node** | **1** | 2 | **FALSE** | **`(8,8)` and `(16,)`** |
+| Chang-A root | 2 | 2 | TRUE | `(4,24)` |
+| Chang-B root | 2 | 2 | TRUE | `(4,24)` |
+| MIXED multipede root | 2 | 2 | TRUE | `(2,2)` |
+| C3+C4+C5 root | 3 | 3 | TRUE | `(3,4,5)` |
+
+At the m=8 node the harvest **certifies the cell as one orbit under some labellings and splits it 8+8
+under others** — so `CertifiedOrbit` is TRUE and FALSE at the same node depending on the labelling.
+A guard cannot be built from it: the `if` would itself break `KeyEquivariant`.
+
+Same node as §2.1's second falsifier, same root cause as §2.3 — the certificate is computed *by* the
+index-picked descent, so it inherits exactly that descent's labelling dependence. **Proving it
+invariant was never a missing lemma; the statement is false.**
+
+⚠ This does not contradict the earlier "partition transports 18/18" measurement
+(`probe_verdict_invariance.py`): that was taken at **branch cells of the plain descent**, where the
+harvest happens to be exact. Exactness and invariance coincide there; the m=8 node is where they part.
+
+### 7.2 ▶ THE ALTERNATE DESIGN — guard by an *equivariant* supply, per level
+
+Guard each level of the greedy path by `Consume.CellIsOrbit S` for a supply `S` already proven
+**`GensEquivariant`**, instead of by deepen's own harvest:
+
+```
+CertPathS adj : Nat → ColData → Prop
+| 0, _        => True
+| fuel+1, cur => match chooseIdK (finRange n) cur.col with
+    | none     => True
+    | some cid => Consume.CellIsOrbit S adj cur.col        -- S's verified gens transitive on the cell
+                  ∧ CertPathS adj fuel (step adj cur.col w)
+```
+
+* **SOUND** — `CellIsOrbit S adj χc` at the chosen cell ⟹ `CellSingleOrbit adj χc cid`, because `S`'s
+  generators are *verified* `IsColAut` and `WordReach` composes. This is T1 verbatim; T1's proof uses
+  nothing specific to `deepenSupply`, so it generalizes to any supply.
+* **INVARIANT** — from `GensEquivariant S`, plus the same pick-absorption induction as
+  `amenablePath_transport` (whose per-level input is supplied by SOUND). Needs one new lemma:
+  **`CellIsOrbit` transports under `GensEquivariant`** — it does not exist yet and looks routine
+  (`WordReach` over a transported generator list).
+* **POLY** — if `S` is poly.
+
+**Five supplies already carry `GensEquivariant`**, so the design has ready inputs, not a prerequisite:
+
+| supply | proof |
+|---|---|
+| `deckSupply` | `DeckSupply.lean:557` |
+| `deck2Supply` | `Deck2.lean:400` |
+| `foldSupply` | `FoldSupply.lean:396` |
+| `foldSupplyFast` | `FoldFast.lean:121` |
+| `Consume.matchSupply` | `SupplyTransport.lean:249` |
+
+#### Measured — how much would it actually certify (`probe_eqsupply_guard.py`)
+
+The concern was that these are propagation- and fold-shaped constructors, and `deepen` exists *because*
+they are defeated in principle on `mp7` (girth 6 ⟹ a seed forces one vertex and nothing chains). But the
+comparison is not at the root cell — the guard only has to certify the cells *along the greedy path*,
+which are far finer. Measured with a **depth-0 proxy** for the deck family (seed the pair, individualize
+each side, refine; if both leaves are discrete the colour match is forced — build it and verify with
+`IsColAut`). This is a **lower bound**: the real `deckSupply`/`deck2Supply` also chain, so they certify
+at least this much.
+
+| witness | hook nodes | path cells `AmenablePath` inspects | certified by the proxy | hook nodes **fully** certified |
+|---|---|---|---|---|
+| Chang-B | 24 | 48 | **48 (100 %)** | **24 / 24** |
+| Chang-A | 108 | 408 | 264 (64.7 %) | **96 / 108** |
+| MIXED multipede | 1 | 8 | 4 (50 %) | 0 / 1 |
+| C3+C4 · C4+C5 | 1 · 1 | 21 · 27 | 7 · 9 (33 %) | 0 / 1 · 0 / 1 |
+| C3+C4+C5 | 12 | 376 | 94 (25 %) | 0 / 12 |
+| mp7 Fano | 0 | — | — | — (branch cells are single orbits; pure consume) |
+
+**Verdict: viable but strictly weaker, and the weakness is a firing loss, not a soundness loss.** On the
+Chang family the guard would open at **120 of 132** hook nodes even at depth 0; on the disjoint-cycle and
+MIXED witnesses it opens at none of them. Where it is shut, `orbKey` returns `[]` and force simply does
+not act at that node — `①` is untouched, and `not_amenable_deepest` still relocates. So the design is
+usable today at a measured cost, and the obvious next lever is depth (the proxy is depth-0; `deck2Supply`
+seeds two vertices and chains) rather than a different guard shape.
+
+Two further points on the design space:
+
+* The **union of equivariant supplies is equivariant**, so the guard may use all five at once rather
+  than pick one.
+* Deepen's harvest can still be used to *fire*, since it is untrusted and re-verified — only the
+  **guard** needs invariance. Nothing in §3 changes.
+
+### 7.3 The rest of the open ledger (all `②`, none `①`)
+
+1. **Nesting depth.** D1 relocates work to a deeper node; the product over relocations is not bounded.
+   `DescentReach` + `ncol` bound the number of *steps* by `n`, not the branch factor.
+2. **Composite assembly.** `forcedSet_single_orbit` is the exact input
+   `Composite.forceThenConsume_singleton_of_cellIsOrbit` wants; wiring it needs `Consume.CellIsOrbit`
+   on the *forced sub-cell*, which `Amenable` should supply.
+3. **Entry into `Publication.canonForm?`** waits on §7.2.
+
+---
+
+## 8. Literature placement (4 subagent searches, 2026-07-26)
+
+### 8.1 The recalled result is real, and sharper than expected
 
 **Booth & Colbourn, "Problems Polynomially Equivalent to Graph Isomorphism", TR CS-77-04, Univ. of
 Waterloo, June 1979**, §2.3 (attributed to **Karp**, following Read & Corneil 1977):
@@ -458,7 +561,7 @@ The project's oracle profile **is the classical proof's own profile**. Only the 
 outside it. (Decision-only caveat: the bare yes/no gives `|Aut|` and GI; extracting *generators* needs
 B&C §2.2's search-to-decision layer.)
 
-### 11.2 ★ Neuen–Schweitzer's exponential lower bound does NOT bind this algorithm
+### 8.2 ★ Neuen–Schweitzer's exponential lower bound does NOT bind this algorithm
 
 **Neuen & Schweitzer, STOC 2018 (arXiv:1705.03283), §3**, after Prop. 3.1, verbatim:
 
@@ -468,25 +571,25 @@ B&C §2.2's search-to-decision layer.)
 > isomorphism problem itself. … it is nonsensical to allow that an individualization-refinement
 > algorithm uses a subroutine that already solves the graph isomorphism problem."
 
-**The literature names §9's algorithm, grants it a polynomial-size search tree, and excludes it from the
-model** — solely because orbits are GI-hard. Theorem 3.2 requires *k-realizability* (`WL_k ⪯ ref`, i.e.
-**coarser** than k-WL); orbit-refinement on a rigid multipede is *discrete*, strictly finer, so the
+**The literature names §4.1's algorithm, grants it a polynomial-size search tree, and excludes it from
+the model** — solely because orbits are GI-hard. Theorem 3.2 requires *k-realizability* (`WL_k ⪯ ref`,
+i.e. **coarser** than k-WL); orbit-refinement on a rigid multipede is *discrete*, strictly finer, so the
 hypothesis fails for every k. Their "all automorphisms free" clause is **vacuous** on their family
 (`|Aut| = 1`), so it is not a strengthening that covers an orbit oracle.
 
 ⚠ Not a free lunch: there `|P| = 1` never occurs, every cell splits into `|C|` singletons, and they prove
 a **linear** number of individualizations is forced. All cost lands on the block-ordering recursion.
 
-### 11.3 Naming — one collision, two matches
+### 8.3 Naming — one collision, two matches
 
 | project term | literature |
 |---|---|
 | `Amenable` / `CellsAreOrbits` | **= Tinhofer graph.** AKRV (*comput. complexity* 26(3):627–685, 2017; arXiv:1502.01255) App. A.2: *"G is Tinhofer if and only if, for every F, the orbit partition of A_F coincides with P_F."* Graded: Bhattacharjee–Panse–Sarma arXiv:2605.19702 Thm 1.1. |
 | ⚠ **name clash** | AKRV's **"amenable"** means something DIFFERENT (1-WL identifies `G` against all `H`). `Amenable ⊊ Compact ⊊ Godsil ⊊ Tinhofer ⊊ Refinable`, all strict (Thm 21). **Rename the project predicate.** |
-| the free consume step | **"symmetric choice"** (Gire–Hoang 1998; Dawar–Richerby CSL 2003); with automorphisms supplied as certificates, **"witnessed symmetric choice"** — Lichter & Schweitzer, LICS 2022 (Distinguished Paper) / **J. ACM 71(2), 2024**. Their Thm 1: definable isomorphism ⟹ definable canonization. Their stated motivation is verbatim §10's T1: *"it has to be verified that the choice set is actually an orbit and it is not known that orbits can be computed in polynomial time."* |
+| the free consume step | **"symmetric choice"** (Gire–Hoang 1998; Dawar–Richerby CSL 2003); with automorphisms supplied as certificates, **"witnessed symmetric choice"** — Lichter & Schweitzer, LICS 2022 (Distinguished Paper) / **J. ACM 71(2), 2024**. Their Thm 1: definable isomorphism ⟹ definable canonization. Their stated motivation is verbatim §3.1's T1: *"it has to be verified that the choice set is actually an orbit and it is not known that orbits can be computed in polynomial time."* |
 | the whole split loop | **Gurevich's canonization algorithm**, *From invariants to canonization*, Bull. EATCS 63:115–119, 1997: repeatedly compute a **canonical orbit**, individualize one vertex, repeat. Poly complete invariant ⟺ poly canonization (classes closed under colouring). |
 
-### 11.4 ⚠⚠ THE RIGID COLLAPSE — and a vacuity in §8's rigid measurement
+### 8.4 ⚠⚠ The rigid collapse — and what it forbids
 
 **AKRV, immediately after Theorem 21:**
 
@@ -495,8 +598,9 @@ a **linear** number of individualizations is forced. All cost lands on the block
 
 For rigid `G`, `Aut_S = 1` for all `S` ⟹ `Orb(Aut_S)` discrete ⟹ **Tinhofer ⟺ 1-WL already discretizes.**
 At a non-singleton cell of a rigid graph, "the cell is a single orbit of the stabilizer" is *impossible*.
-
-**Re-checked §8's rigid measurement against this — it was vacuous.** `descend_cert` level counts:
+Consequence for measurement design: on a rigid graph `AmenablePath` can only hold **vacuously** (zero
+levels to certify), so rigid witnesses cannot be used as evidence that a certified-below route fires.
+Measured `descend_cert` level counts confirming it:
 
 ```
 rand multipede V=6 W=5  (n=34)  levels per rep = [0,0,0,0,0,0,0,0]
@@ -506,21 +610,14 @@ rand multipede V=12 W=8 (n=64)  levels per rep = [1,1,1,1]
 CFI cubic m=8 (n=56) levels = 5 ;  m=10 (n=70) levels = 4–6      <- these ARE substantive
 ```
 
-Three of four rigid multipedes **discretize after ONE individualization**, so certified-below held with
-*zero levels to certify*. §8's "all reps certify on the rigid multipedes" is TRUE but EMPTY. The CFI
-results (4–6 levels) stand. This is the already-flagged "not the I-R-lower-bound families" caveat, now
-with a theorem saying why it *must* be so.
+**★ Where novelty can live — and it is exactly §7.2.** The project's condition is **path-local** (only
+the cells actually selected on one descent need be orbits); Tinhofer quantifies over *all* `S`. The
+searches found **no named notion for the path-local weakening**, and none for a *poly-decidable* side
+condition implying orbit-correctness — recognizing Tinhofer/refinable is P-hard and at least as hard as
+GI on vertex-transitive graphs (AKRV Thm 22; arXiv:2605.19702). AKRV's whole hierarchy is over **1-WL**;
+a condition over k-WL or coherent-configuration-stable colourings is uncovered.
 
-**★ Where novelty can live — and it is exactly §10's open item.** The project's condition is
-**path-local** (only the cells actually selected on one descent need be orbits); Tinhofer quantifies over
-*all* `S`. The searches found **no named notion for the path-local weakening**, and none for a
-*poly-decidable* side condition implying orbit-correctness — recognizing Tinhofer/refinable is P-hard and
-at least as hard as GI on vertex-transitive graphs (AKRV Thm 22; arXiv:2605.19702). AKRV's whole
-hierarchy is over **1-WL**; a condition over k-WL or coherent-configuration-stable colourings is
-uncovered. §10's ⚠ ("which poly, relabelling-invariant check to use for the guard") is therefore not a
-loose end — it is the one genuinely unclaimed spot.
-
-### 11.5 The frontier, stated in 1983
+### 8.5 The frontier, stated in 1983
 
 **Babai & Luks, "Canonical labeling of graphs", STOC 1983, §1**, verbatim:
 
@@ -528,7 +625,7 @@ loose end — it is the one genuinely unclaimed spot.
 > to **select, wisely, from the various representations.** If, as is almost always the case, Aut(X) is
 > trivial, the number of such representations is n!. **How do we select?**"
 
-That is §9's remaining question verbatim. Supporting, all verified:
+Supporting, all verified:
 
 * **Canonization ≤ₚ GI is OPEN**, both forms (`CAN ∈ FP^GI`? `GI ∈ P ⟹ CAN ∈ P`?) — Schweitzer–Wiebking
   arXiv:1806.07466 §1; Grohe–Schweitzer–Wiebking SODA 2021 arXiv:2003.10935 abstract; Lichter–Schweitzer
@@ -541,8 +638,8 @@ That is §9's remaining question verbatim. Supporting, all verified:
   where `d = cw(G)` = **composition width** (`cw = 1` for solvable). A group-supplied canonical ordering
   of blocks, poly for bounded composition width — i.e. Luks's `Γ_d`, which is precisely the project's own
   W2/solvable-tower route (`GaugeSolvable`, `isSolvable_pi`). Independent arrival at the same boundary.
-* Babai's own canonization answer (**STOC 2019**, a separate paper three years after the isomorphism
-  test) was to canonify the local-certificate structure, not to add an invariant.
+* Babai's own canonization answer (**STOC 2019**) was to canonify the local-certificate structure, not to
+  add an invariant.
 * Named culprit for isomorphism-without-canonization results: **coset intersection has no known
   canonization analogue** (Schweitzer–Wiebking §1, citing Codenotti 2011).
 
@@ -552,459 +649,49 @@ structural match is Babai's **fullness / affected–unaffected** dichotomy in Lo
 global automorphisms `K(T)` produced (= consume); *non-full* ⟹ explicit obstruction `M(T)`, aggregated
 into a canonical relational structure (= force).
 
-**Closest prior theorem to §9's architecture:** Arvind–Das–Mukhopadhyay, JCSS 76(7):509–523, 2010 —
-tournament canonization is poly-time reducible to **tournament isomorphism + canonization of *rigid*
-tournaments**. An orbit oracle buys exactly the symmetric part and no more.
-
-## 12. Build sketch (if this is taken up)
-
-**Smallest first step (§6.2 — does not need the min-over-cell descent at all):**
-
-1. `CertifiedOrbit adj χc cid : Bool` := harvested twists act transitively on the `cid`-cell.
-2. `certifiedOrbit_imp_cellSingleOrbit` — from `twistOf_isColAut` + `IsColAut` composition-closure.
-   A few lines; both ingredients landed.
-3. Guard `deepen` on the certificate per level ⟹ `AmenablePath` holds **by construction** along the
-   taken path ⟹ `joint` applies ⟹ drop `hAmen` from `deepenSupply_guarded_canonizer_direct`.
-   This alone converts the conditional scaffold into an unconditional (flagging) capstone.
-
-**Then the dual proper:**
-
-4. `DualDescent.lean` — `certOf` (min-over-cell, fuel = colour count), `deepKey`, pruning by the
-   verified-generator accumulator. Data-typed throughout (`Refine.ColData`, trap #1).
-5. `keyEquivariant_deepKey` — the induction of §3. Mechanical; no new predicate.
-6. Feed `Force.forceBy deepKey` ⟹ `force_canonizer` gives `①` unconditionally.
-   Ties ⟹ `deepenGens'`; reuse `twistOf_isColAut` verbatim as the verification gate.
-7. Cost: `keyCost` = leaves explored. `②` becomes a bound on `∏(stall branch factors)`, which is where
-   the rigid reader (`structReadAt` / RREF-column) plugs in — as a **cell splitter that removes
-   branching**, not as a separate resolver.
-8. Retire on success: `deepenRefSupply`, `DeepenRefInExec`, R1/R2, and `Amenable`-as-soundness
-   (`DeepenAmenable`'s `joint` survives as the *cost* lemma: `Amenable` ⟹ branch factor 1).
-
-## 13. ★★★ MEASURED — the harvest is NOT a perfect orbit oracle (2026-07-27)
-
-Probe: `scratchpad/probe_orbit_oracle.py`. Tests the hypothesis *"a harvest failure on `(a,b)` is a
-proof that `a`,`b` are in different orbits"* **directly, per pair**, against an exact orbit oracle
-(`a ~ b ⟺ canon(adj, χ+a) = canon(adj, χ+b)`, the Karp/Booth–Colbourn reduction of §11.1), and
-certifies every false negative by exhibiting an **explicit verified `IsColAut` automorphism**.
-
-### 13.1 The two falsifiers (both certified, not inferred)
-
-| variant | witness | node | fact |
-|---|---|---|---|
-| **SINGLE anchor** = C# `HarvestTwists(p, part, cell, cell[0])` | **Chang-B**, `n=28` | the **root** (no force step, no deep path) | anchor `a₀=0` has **23** same-orbit partners; the twist verifies for **11** and **FAILS for 12**. Certificate: explicit `σ`, `is_aut ✓`, colour-preserving ✓, `σ(0)=10` |
-| **ALL anchors + group closure** = Lean `deepenGens` | **CFI over a random cubic base, m=8**, `n=56` | the `\|C\|=16` cell (reached by one equivariant force-key refinement; = §6.3's `(16,2,1)` stall) | the cell is **ONE true orbit**; the all-anchor harvest splits it **8+8**. Certificate: explicit `σ`, `is_aut ✓`, colour-preserving ✓, `σ(24)=26` crossing the blocks. Reproduced by two independent implementations |
-
-**Failure mode in both cases is the same, and it is not `replay` returning `none`:**
-Chang-B — replay followed the id sequence in **12/12** failures, the colour-match simply was not an
-automorphism. CFI m=8 — `replay-null = 0`, `twist-not-aut = 128` of 240 ordered pairs, and **every**
-anchor fired the gate. So the negative branch is `cert(a) ≠ cert(b)` in exactly the sense §1 describes,
-and it is **not** a separation.
-
-**Mechanism (not luck).** Cell *ids* transport (`chooseIdK_transport`); the per-level `min`-index member
-(`w :: _`, C# `sub2[0]`/`members[0]`) does not. If `σ a = b`, `σ` carries `a`'s chosen cell onto `b`'s but
-not min↦min, so the descents diverge unless a stabiliser element repairs the pick — which *is*
-`CellSingleOrbit` at that level. All three measured failure nodes (Chang-A root, Chang-B root, CFI m=8)
-are **`¬Amenable`**, matching `branchOrbit_iff_aut_of_certified`'s hypothesis exactly.
-
-### 13.2 ⚠ The per-pair reading is wrong even where the ORBIT reading is right
-
-`branchOrbit_iff_aut_of_certified` equates the orbit relation with `WordReach` over the *verified
-generator set* — the **group generated**, not the individual twist. Chang-B root shows the gap
-concretely: **12 direct-twist failures, but `FN(all) = 0` after generator closure.** The C# already
-relies on this (`CoveredByPathFixingAut` BFS-closes over `Automorphisms.Generators`). **Reading a
-per-pair twist failure as a separation certificate discards precisely that closure**, and is unsound
-even on nodes where the harvest's partition is exact.
-
-⚠ Also a probe trap worth recording: a first version of the sweep unioned only the `(anchor, rⱼ)` pairs
-instead of `v ~ g(v)` for every generator, and manufactured a spurious 176-pair "fusion falsifier" at the
-Chang-A root. **Always close over the generators.** (`probe_polyloop.py` does this correctly.)
-
-### 13.3 How much of the guard's conservatism is real — 1361 nodes, 10 families
-
-Bounded descent-tree sweep (depth ≤ 2, all reps), `Amenable` vs. harvest exactness at every node:
-
-| family | nodes | `Amenable` | harvest EXACT | exact but `¬Amenable` |
-|---|---|---|---|---|
-| Chang-A / Chang-B / Chang-C | 365 / 173 / 46 | 364 / 148 / 46 | **365 / 173 / 46** | 1 / 25 / 0 |
-| T(8)=J(8,2) · mp7 · MIXED · circ(5) · CFI-C₅ · Shrikhande⊎Rook(4,4) | 365·365·13·11·61·225 | all 100 % | **all 100 %** | 0 |
-| C3+C4+C5 (cells provably ≠ orbits) | 37 | 24 | **37** | 13 |
-| **total** | **1361** | **1197 (87.9 %)** | **1361 (100 %)** | **164** |
-
-* The all-anchor harvest was **exact at every one of 1361 nodes**, including all 164 `¬Amenable` ones.
-* `Amenable` is therefore **sufficient but far from necessary** — the guard defers on ~12 % of nodes
-  where the supply would have been exact. **The firing bottleneck is the GUARD, not the harvest.**
-* ⚠ But transitivity of the harvested group certifies only the `|P| = 1` case. Where the cell has ≥ 2
-  true orbits the guard must certify the **partition**, and that is exactly where the CFI m=8 node lies
-  (harvest says 2 blocks, truth is 1). A `CertifiedOrbit`-style guard (T1/T4) fixes the single-orbit
-  half and **not** the multi-block half.
-* ★ Also measured: §6.3's anchor-count claim reproduces exactly — CFI cubic m=14, `|C|=56`:
-  **3 anchors → 36 blocks, ALL anchors → 14 = TRUE**. And m=8's `(16,2,1)` stall **persists over every
-  anchor** — it is the genuine fusion residue, not an anchor-count artifact.
-
-### 13.4 Consequence for the dual-resolver design
-
-The FORCE reading of §2/§9 (`cert(a) ≠ cert(b)` ⟹ separation) is **only** available where `cert` is
-invariant, i.e. certified-below (S1, §8) — never from today's index-picked descent as it stands. Nothing
-here touches ①: the harvest is untrusted and `Consume.verified` re-checks everything, so all three
-failures cost *firing*, never soundness. What they refute is the stronger reading the negative branch was
-about to be given.
-
-### 13.5 ★★ THE MECHANISM, TRACED — misaligned picks at the first MIXED cell below
-
-The failures of §13.1 are **not fusion**. Fusion = the symmetry is not *there* yet at the compared level
-(it becomes certifiable only after a rigid decision), and a perfect same-level comparator would decline
-too. Here the compared pair **is** in one orbit at the very colouring being compared, and the comparator
-still fails. Traced level by level (`Sigma_k` = the isomorphisms carrying `a`'s pick-sequence to `b`'s;
-`Sigma_k ≠ ∅` tested exactly, as `canon(a-side) = canon(b-side)`):
-
-```
-Chang-B root, pair (0,10):   |Aut| = 96, |Sigma_0| = 4   (same orbit)
-  level 0: cell id=1 |C|=12  stabiliser-orbits = 4  <-- MIXED
-           a picks min=2, b picks min=1; Sigma-images of 2 = {3,12,15,26}, 1 not among them
-           |Sigma| 4 -> 0    *** DIVERGENCE
-
-CFI cubic m=8, |C|=16 node, pair (24,26):  aligned at start (same orbit)
-  level 0: |C|=2  orbits=1   a picks 28, b picks 30   aligned
-  level 1: |C|=2  orbits=1   a picks 26, b picks 24   aligned
-  level 2: |C|=2  orbits=1   a picks 30, b picks 28   aligned
-  level 3: |C|=4  orbits=2  <-- MIXED   both pick 32  *** DIVERGENCE
-                                        (32 has a different orbit-role on the two sides)
-```
-
-**The pattern is exceptionless and it is the ONLY mechanism.** Single-orbit cells never break alignment
-(a stabiliser element repairs any pick); the descent stays aligned until the **first mixed cell**, where
-the two sides individualize members of non-corresponding orbits and every surviving isomorphism dies.
-That direction is not merely measured — it is the contrapositive of a landed theorem: `AmenablePath`
-along `a`'s descent ⟹ an automorphic pair *does* produce a verifying twist (`joint` +
-`twistOf_of_transport_fixing`, §7.1). So
-
-> **a same-orbit twist failure ⟺ deepen's own path crosses a cell that is not a single stabiliser orbit,
-> and resolves it inconsistently between the two sides.**
-
-**⚠ Correction to §6.3 item 3.** The CFI cubic m=8 `(16,2,1)` stall is labelled there *"★ A measured
-FUSION witness"*. That label is wrong by the above: the `|C|=16` cell is a single orbit **at that
-colouring**, with no rigid decision needed to expose it. It is a pick-misalignment witness. (The real
-fusion signature remains Chang-A's `A_stall < A_full`.)
-
-**Does this block the mixed resolver? No — provided the failure is read as a POINTER, not a verdict.**
-* ✅ *Sound as-is.* The harvest is untrusted; a failure is a sound over-split, and
-  `not_amenablePath_imp_rigidObstruction` still applies — the divergence cell **is** a
-  `RigidObstructionAt`, so force is genuinely handed something to act on. It is also **locatable**: the
-  first level at which the harvest is non-transitive on its own chosen cell is a poly, one-sided detector
-  for it (`CertifiedOrbit`, T1).
-* ⛔ *But the failure must never separate the COMPARED cell.* At the CFI node the compared cell is one
-  orbit and the harvest splits it 8+8. By `Force.forceBy_no_narrowing_on_orbit` an equivariant key cannot
-  split a single-orbit cell — so that verdict is **provably not an equivariant key**, and using it as one
-  breaks `①c`. The current design defers instead of separating, which is exactly why it is not blocked.
-  This is the concrete bound on the §2 "read the negative branch as a `Force.Key`" proposal: legal only
-  where the path below is certified single-orbit at every level.
-
-## 14. ★★★ THE CONSUME→FORCE HOOK — target ladder and tractability (2026-07-27)
-
-**Brief:** find the strongest *feasible* statement of "consume fails only where force can succeed",
-better than `not_amenablePath_imp_rigidObstruction`'s `∃ χc cid, RigidObstructionAt adj χc cid`.
-
-### 14.0 ⛔ FIRST — the literal target is FALSE, not merely unproved
-
-`DeepenCertified` §4 states the located form only under `Certified`
-(`rigidObstructionAt_branch_of_certified`). That hypothesis is **necessary**, and §13's CFI witness is
-the counterexample to dropping it:
-
-> CFI cubic m=8, the `|C| = 16` node. `¬Consume.CellIsOrbit deepenSupply adj χ` **holds** (the all-anchor
-> harvest splits the cell 8+8) while `RigidObstructionAt adj χ (targetColour χ)` is **FALSE** (the cell is
-> a single `Aut`-orbit; explicit verified `σ`, `σ(24) = 26`).
-
-So `¬CellIsOrbit ⟹ RigidObstructionAt at this cell` is refuted. Worse for the naive hope: at that node
-force **provably cannot fire either** (`Force.forceBy_no_narrowing_on_orbit` — the cell is one orbit). Any
-target of the form *"consume fails at χ ⟹ force succeeds at χ"* is therefore dead. **The statement must
-relocate the force step to a REACHABLE DEEPER node.** That is the shape of everything below, and §13.5's
-trace says exactly which node: the first cell on the descent that is not a single stabiliser orbit.
-
-### 14.1 The ladder
-
-| | statement | status |
-|---|---|---|
-| **L0** | `¬AmenablePath ⟹ ∃ χc cid, RigidObstructionAt` | ✅ landed, force cannot use it |
-| **L1** | at a `Certified` node, the obstruction is at **this** branch cell | ✅ landed, hypothesis provably necessary (§14.0) |
-| **L2** | **first-failure localization**: the obstruction sits at a colouring **reachable by the descent's own individualizations**, at *its* branch cell | ▶ target, easy |
-| **L3** | **deepest-failure**: that node is *also* `Amenable` — consume-exact below **and** force-actionable at the same node | ▶ target, moderate |
-| **L4** | at an `Amenable` node an **equivariant key exists whose fibres are exactly the orbits** ⟹ force **strictly narrows** | ▶ target, moderate (one risky lemma) |
-| **L5** | `forceThenConsume` narrows that cell to **one branch** | ▶ target, follows from L4 |
-| **L6** | all of the above with a **poly** key | ⚠ open — the §10 executable-guard item |
-
-**L3 + L4 is the deliverable**: *consume failing at `χ` ⟹ there is a descent-reachable `χ*` at which
-force provably fires, and at which consume is simultaneously exact below.* That is "consume fails only
-where force succeeds", relocated to the node where it is true.
-
-### 14.2 Workstream A — `orbKey`, the key force hooks to
-
-`Force.Key n := AdjMatrix n → Colouring n → Fin n → CostM (List Nat)`; the **only** `①` obligation is
-`KeyEquivariant`. Define the **per-vertex-guarded greedy leaf cert**:
-
-```
-orbKey adj χ v := if AmenablePath adj χ n (step adj χ v)
-                  then encode (leaf-relabelled adj, leaf-relabelled χ)   -- deepen's own discrete leaf
-                  else []                                                 -- defer
-```
-
-* **A1** encode the leaf as `List Nat` (`Vector`-materialised, trap #1). *Easy.*
-* **A2 ★ the one technical core** — `amenablePath_transport_iso`: strengthen the **landed**
-  `amenablePath_transport` ([DeepenCertified.lean:391](GraphCanonizationProofs/ChainDescent/DeepenCertified.lean#L391))
-  so it *returns* the accumulated relating isomorphism, not just the transported `AmenablePath`:
-  ```
-  AmenablePath adj χp fuel cur_a → cur_b.col = transportColouring σ cur_a.col →
-    ∃ ρ, relabelAdj ρ adj = relabelAdj σ adj ∧ leaf_b.col = transportColouring ρ leaf_a.col
-  ```
-  **The existing proof already builds `τ * σ` level by level** (lines 447–462) — this threads that
-  accumulator into the conclusion. A strengthening of a proved induction, not a new one. *Moderate; the
-  only real risk in the plan.*
-* **A3** guard invariance — from A2 / `amenablePath_transport`, both directions (apply at `σ` and `σ⁻¹`).
-  *Easy.*
-* **A4** `KeyEquivariant orbKey` from A2+A3. *Easy given A2.*
-  ⟹ `Force.force_canonizer` and `Composite.composite_canonizer` apply **with no further hypothesis**.
-
-**Free corollary (no work):** `Force.keyV_aut_invariant` then says `orbKey`'s fibres are **unions of
-orbits** — the key can never split an orbit, so it sits exactly at the `forceBy_no_narrowing_on_orbit`
-ceiling by construction.
-
-### 14.3 Workstream B — firing and exactness
-
-* **B1 (UNCONDITIONAL, and it is the firing direction)** `orbKey u = orbKey w` with both certified ⟹
-  `∃ σ, IsColAut adj χ σ ∧ σ u = w`. Equal certs *reconstruct* the automorphism (`π_w⁻¹ ∘ π_u`), exactly
-  as `twistOf_isColAut` reconstructs the twist. **Contrapositive: different orbits ⟹ different keys.**
-  *No `Amenable` needed.* *Moderate, structural.*
-* **B2** at an `Amenable` node the fibres on the branch cell are **exactly** the orbits (⊇ is A2). *Easy
-  given A2+B1.*
-* **B3** `Amenable adj χ` ∧ `RigidObstructionAt adj χ (targetColour χ)` ⟹ `forceBy orbKey` **strictly
-  narrows** — one line from B1 + `Force.forceBy_narrows_of_key_ne`. *Easy.*
-* **B4** with B2, force narrows to exactly one orbit block and consume finishes it ⟹
-  `forceThenConsume` narrows to **one branch** (`Composite.forceThenConsume_singleton_of_cellIsOrbit`
-  on the forced set). *Moderate — needs "consume exact on the forced sub-cell".*
-
-### 14.4 Workstream C — localization (independent of A/B; do this first)
-
-* **C1** `DescentReach adj χ χ'` — an inductive "reachable by individualize+refine along the descent".
-  *Easy.*
-* **C2 (L2)** strengthen `not_amenablePath_imp_rigidObstruction` to return the **failing level's
-  colouring** plus `chooseIdK (finRange n) χ' = some cid`. The landed proof already reaches that level
-  and returns `⟨cur.col, cid, …⟩`; it just discards the reachability and the selector fact. With **T3**
-  (`chooseIdK_eq_targetColour`, landed) the obstruction is at `χ'`'s **branch cell**. *Easy.*
-* **C3 (L3) — the deepest-failure theorem.**
-  ```
-  ¬Amenable adj χ → ∃ χ*, DescentReach adj χ χ* ∧ Amenable adj χ*
-                          ∧ RigidObstructionAt adj χ* (targetColour χ*)
-  ```
-  *Proof:* C2 gives a reachable `χ'` with an obstruction at its branch cell. If `Amenable χ'`, done; else
-  recurse. Each step strictly raises the colour count (`Descend.ncol_lt_indivOne_of_partner` +
-  `ncol_le_refine`, both landed — the same measure `deepen_succeeds` already uses), bounded by `n`; a
-  discrete colouring has `branches = []` so `Amenable` holds vacuously and the recursion must stop.
-  *Moderate; all atoms landed.*
-
-### 14.5 Workstream D — the headline, and E — cost
-
-* **D1** = C3 + B3: `¬Consume.CellIsOrbit deepenSupply adj χ ⟹ ∃ χ*` descent-reachable at which
-  `forceBy orbKey` strictly narrows. *One line once C3 and B3 exist.*
-* **D2** = C3 + B4: at `χ*` the composite narrows to **one** branch.
-* **E1** `Amenable` is **decidable** (`IsColAut` already has a `Decidable` instance — `twistOf` uses
-  `decide`; `Equiv.Perm (Fin n)` is a `Fintype`), so `orbKey` is *computable*, merely exponential in the
-  guard. **`①` therefore closes outright and the whole `Amenable` question becomes `②` (cost) — exactly
-  the relocation §3 wanted.** *Easy but watch elaboration cost.*
-* **E2** swap the guard for the poly `CertifiedPath` (`amenablePath_of_certifiedPath`, landed). The one
-  remaining gap is the **invariance of the certificate boolean** — note this is now weaker than what §10
-  asked for: a *Boolean* (does the harvest act transitively?), not the emitted partition.
-
-### 14.6 Order, risk, fallback
-
-**Do C1→C2→C3 first** — independent of the key, and C3 alone already replaces L0 with a genuinely
-force-actionable statement. **Then A2** (the single risky lemma), then B1→B3→D1, then B2/B4→D2, then E.
-
-**Fallback if A2 stalls.** The min-over-cell key `certMin` (§2/§9) has an *unconditional*
-`KeyEquivariant` by a much simpler induction — cells transport, and the **min of a transported multiset
-is equal**; no `Amenable`, no isomorphism accumulation. It reaches the same D-level statements with
-exponential `keyCost`. So **D is reachable by two independent routes and A2 is not a single point of
-failure**; A2 only buys the *poly* version.
-
-**Explicitly out of scope:** none of this touches the block-**ordering** wall of §7.3/§8. `orbKey` orders
-blocks only where `Amenable` holds; where it does not, D relocates the work deeper rather than ordering
-it. That is the honest boundary.
-
-## 15. ✅ LANDED — workstream C (`ChainDescent/DeepenLocated.lean`), 2026-07-27
-
-Gate green (`bash /workspace/scripts/build.sh`, **211 s**); in `build.sh` after `DeepenCertified`. All
-**10** theorems `[propext, Classical.choice, Quot.sound]`; no `sorry`, no new `axiom`.
-
-| | statement | name |
-|---|---|---|
-| C1 | `DescentReach` — reachable by *proper* descent steps (individualize a vertex **with a same-colour partner**, then warm-refine) + `trans` | `DescentReach`, `DescentReach.trans` |
-| C1a | one proper step strictly raises `ncol`; reachability never lowers it | `ncol_lt_step_of_partner`, `ncol_le_of_descentReach` |
-| C1b | a `chooseIdK` level's pick has a partner (from `chooseIdK_mem`) | `partner_of_chooseIdK` |
-| **C2 (L2)** | `¬AmenablePath ⟹ ∃ ψ` **reachable**, with `Descend.targetColour ψ = some cid` ∧ `RigidObstructionAt adj ψ cid` — the obstruction is at a **reachable node's BRANCH CELL** | **`not_amenablePath_located`** |
-| **C3 (L3)** | `¬Amenable adj χ ⟹ ∃ ψ` reachable with **`Amenable adj ψ`** ∧ obstruction at `ψ`'s branch cell | **`not_amenable_deepest`** (+ `_aux`) |
-| — | the `Amenable` (not `Certified`) form of `DeepenCertified` §4 | `consume_fail_real_decision_of_amenable`, `rigidObstructionAt_branch_of_amenable` |
-| **D-entry** | every consume failure is located: *either* a decision in **this** cell (node `Amenable`) *or* at a reachable node carrying **both** hypotheses | **`consume_fail_locates`** |
-
-**What changed relative to L0.** `not_amenablePath_imp_rigidObstruction` returns `∃ χc cid` naming no
-reachable colouring and no branch cell — force cannot act on it, since `forceBy` fires *at a node*. C2/C3
-return a node the descent stands on, with the obstruction at the cell `Descend.targetColour` selects
-there (via the landed selector identity `chooseIdK_eq_targetColour`), and — the point of C3 — a node that
-is **simultaneously `Amenable`**, which is what an orbit-separating equivariant key needs (§14.2/§14.3).
-
-**Termination** is `Descend.ncol`, the same measure `deepen_succeeds` uses: each `DescentReach` step is
-*proper*, so `ncol` strictly rises and is capped by `n`. The base case needs no discreteness lemma —
-`¬Amenable` itself produces a branch vertex, hence a partner, hence `ncol χ < n`.
-
-### 15.1 ⚠ Non-vacuity — CHECKED, per the standing steer
-
-The conclusion is a conjunction (`Amenable ψ` **and** a mixed branch cell at `ψ`) and could have been
-empty. It is not. Bounded descent sweeps (`scratchpad/probe_orbit_oracle.py`), counting nodes that are
-`Amenable` **and** whose branch cell carries ≥ 2 `Aut`-orbits — i.e. inhabitants of C3's conclusion:
-
-| C3+C4 | C4+C5 | C3+C4+C5 | Shrikhande⊎Rook(4,4) | Chang-A | Chang-B | MIXED multipede | **total** |
-|---|---|---|---|---|---|---|---|
-| 1 | 1 | 24 | 1 | 24 | 48 | 1 | **100** |
-
-Note also that the conjunction cannot degenerate: the obstruction requires `targetColour ψ = some cid`,
-so `ψ` is **not** discrete and `Amenable ψ` is a real constraint, not the vacuous `branches = []` case.
-
-**The C3 iteration validated directly** on a measured `¬Amenable` node (Chang-B root):
-
-```
-start : Amenable=False, branch-cell orbits=2   (ncol=2)
-step 1: Amenable=False, branch-cell orbits=4   (ncol=3)
-step 2: Amenable=TRUE , branch-cell orbits=2   (ncol=10)   <- the hook node
-```
-Two steps, `ncol` strictly rising exactly as the termination measure predicts, terminating on a node with
-both properties.
-
-### 15.2 Next
-
-**Workstream A** (`orbKey` + `KeyEquivariant`) is now the only thing between C3 and D1
-(`forceBy_narrows_of_key_ne` at `ψ`). A2 — threading `amenablePath_transport`'s accumulated `τ * σ` into
-the conclusion — remains the one risky lemma, with the min-over-cell key as the stated fallback (§14.6).
-
-## 16. ✅ LANDED — workstream A (`ChainDescent/DeepenKey.lean`), 2026-07-27
-
-Gate green (`bash /workspace/scripts/build.sh`, **211 s**, 102 modules); after `DeepenLocated`. All
-12 theorems `[propext, Classical.choice, Quot.sound]` or a subset; no `sorry`, no new `axiom`.
-
-```
-orbKey adj χ v := if AmenablePath adj χ n (step adj χ v)
-                  then readKey adj (indivOne χ v) (leafOf adj n (step adj χ v)).col
-                  else []                                        -- defer
-```
-
-| plan item | statement | name |
-|---|---|---|
-| — | `Refines` + `trans`; `refines_step`, `refines_indivOne`, `refines_transport` | §1 |
-| — | **a colour-automorphism of a FINE colouring fixes every COARSER one** — what carries the parent colouring through the accumulated isomorphism | `transport_eq_of_isColAut_refines` |
-| — | `leafOf` + its three equation lemmas (⚠ reduce **only** through these — unfolding then `cases` on `chooseIdK` hits the recorded `foldl` trap) | §2 |
-| **A2 ★** | `AmenablePath` ⟹ the two **leaves** are related by an accumulated isomorphism `ρ`, and `ρ` acts on any refined-from colouring exactly as `σ` does | **`leafOf_transport_of_amenablePath`** |
-| A1 | the invariant read + its transport | `readAt/readColAt/readKey_transport`, `filter_col_transport` |
-| A3 | the guard is relabelling-invariant **both ways** | `amenablePath_step_transport_iff` |
-| **A4 ★★** | **`Force.KeyEquivariant orbKey` — no hypothesis** | **`keyEquivariant_orbKey`** |
-
-**A2 came in as predicted**: `amenablePath_transport` already builds `τ * σ` level by level, so this is
-that proof with the accumulator threaded into the conclusion. The one thing the plan under-specified was
-the **parent-colouring component**: a leaf-*adjacency* read alone only proves the two *uncoloured*
-individualized graphs are isomorphic, which does not give "same orbit". Carrying `indivOne χ v` needs the
-relating `ρ` to act on it like `σ`, which needs `τ` to fix it — hence the `Refines` invariant threaded
-through the induction (`transport_eq_of_isColAut_refines`). Not in the plan; small and mechanical.
-
-**Consequence.** `Force.force_canonizer` and `Composite.composite_canonizer` now apply to
-`forceBy orbKey` / `forceThenConsume orbKey S` with **nothing left to discharge** — `KeyEquivariant` is
-their sole `①` obligation.
-
-### 16.1 Measured — `orbKey` FIRES and is EXACT at hook nodes
-
-`probe_orbit_oracle.py` extended with faithful ports of the Lean `indivOne` (`2·χx + [x=v]`), `step`,
-`leafOf` and `readKey`. At every **hook node** (`Amenable` ∧ branch cell with ≥ 2 orbits — C3's
-conclusion):
-
-| C3+C4 | C4+C5 | C3+C4+C5 | Shrikhande⊎Rook | Chang-A | Chang-B | MIXED | **total** |
-|---|---|---|---|---|---|---|---|
-| 1/1/1 | 1/1/1 | 12/12/12 | 0 | 108/108/108 | 24/24/24 | 1/1/1 | **147 / 147 / 147** |
-
-(hooks / `orbKey` fires / fibres == true `Aut`-orbits exactly). **Every leaf discrete** (0 exceptions),
-which is what makes the read complete. ⚠ Hook counts differ from §15.1's 100 because this probe uses the
-Lean `indivOne` ordering (v lands *after* its cellmates) rather than the earlier probe's rank ordering —
-a different descent tree, so a different but equally valid sample, not a re-measurement.
-
-So on this evidence D1 (`forceBy orbKey` strictly narrows at the located node) and even D2 (narrows to a
-single orbit block) hold; workstream B is now a *proof* task with the design validated, not a gamble.
-
-### 16.2 What B needs, sharpened by the build
-
-1. **`leafOf` at fuel `n` is discrete** — the same `ncol` argument as `deepen_succeeds`
-   (`ncol_lt_step_of_partner` is already isolated in `DeepenLocated`). Measured: 0 non-discrete leaves.
-2. **B1, and it is now clearly clean.** With a discrete leaf, `readKey u = readKey w` gives `ρ` with
-   `relabelAdj ρ adj = adj` and `transportColouring ρ (indivOne χ u) = indivOne χ w`. The odd values of
-   `indivOne χ u` occur **exactly at `u`** (parity), so that second equation forces `ρ u = w`, and
-   halving recovers `IsColAut adj χ ρ`. No `Amenable` needed for this direction — it is the *firing*
-   direction, exactly as §14.3 predicted.
-3. **B3/D1** is then one line from `Force.forceBy_narrows_of_key_ne`.
-
-## 17. ✅✅ LANDED — workstream B / the hook CLOSED (`ChainDescent/DeepenExact.lean`), 2026-07-27
-
-Gate green (`bash /workspace/scripts/build.sh`, **223 s**, 103 modules); after `DeepenKey`. All 17
-theorems `[propext, Classical.choice, Quot.sound]`; no `sorry`, no new `axiom`.
-
-### 17.1 The chain, end to end
-
-| | statement | name |
-|---|---|---|
-| B0 | leaf colours are ranks (`< n`); the greedy leaf at fuel `n` is **discrete** (`Descend.ncol` measure) | `warmRefineR_lt`, `leafOf_lt`, `leafOf_discrete{,_n}` |
-| B0a | a discrete class is a **singleton**, so the read is one adjacency entry / one parent colour | `filter_eq_singleton_of_discrete`, `readAt_discrete`, `readColAt_discrete` |
-| B0b | key equality ⟹ componentwise equality (`readKey` = two `map`s ⟹ `List.append_inj` + `List.map_inj_left`) | `readKey_components` |
-| **B1 ★★** | **equal keys ⟹ SAME ORBIT — no hypothesis** | **`isColAut_of_readKey_eq`** |
-| B1a | a discrete colouring with colours `< n` is a permutation; two of them match colour-for-colour | `colEquiv`, `matchPerm`, `matchPerm_col` |
-| B3 | `orbKey` **separates** any pair no colour-automorphism links | `orbKey_ne_of_no_aut` |
-| B3a | at an `Amenable` node with a `RigidObstructionAt`, `forceBy orbKey` **strictly narrows** | `forceBy_orbKey_narrows` |
-| **B2 ★★** | at an `Amenable` node **`orbKey`'s fibres ARE the orbits** (both directions) | **`orbKey_eq_iff_orbit`** |
-| **D2 ★★** | force narrows the branch cell to a **single orbit** | **`forcedSet_single_orbit`** |
-| **D1 ★★★** | **a consume failure makes force fire at a reachable node** | **`consume_fail_force_fires`** |
-
-```
-consume_fail_force_fires :
-  ¬ Discrete χ → ¬ Consume.CellIsOrbit deepenSupply adj χ →
-    ∃ ψ, DescentReach adj χ ψ ∧
-         (narrow (forceBy orbKey) adj ψ).length < (branches ψ).length
-```
-
-**The pivot predicted in §14.3 held exactly**: the *firing* direction (equal keys ⟹ same orbit) needs
-**no** `Amenable`. It is completeness of the encoding — discrete leaf ⟹ singleton classes ⟹ the read
-determines the relabelled adjacency and the relabelled `indivOne χ v`; the **odd** values of
-`indivOne χ u` sit exactly at `u`, so `transportColouring ρ (indivOne χ u) = indivOne χ w` forces
-`ρ u = w`, and halving gives `χ ∘ ρ = χ`. `Amenable` is needed only for `①` (`DeepenKey`) and for the
-converse half of B2.
-
-### 17.2 The vacuity guard, and why it is not a contradiction
-
-`orbKey_eq_iff_orbit` is also the consistency check against `Force.forceBy_no_narrowing_on_orbit`: `⟸`
-is the **ceiling** (`Force.keyV_aut_invariant`, free from `keyEquivariant_orbKey`), so the key is
-constant on each orbit and force can never cut *inside* one. It separates orbits and nothing finer —
-which is exactly what D2 then says. The two landed theorems agree, and the measured 147/147 (§16.1)
-is the same statement empirically.
-
-### 17.3 What this settles
-
-* `not_amenablePath_imp_rigidObstruction`'s `∃ χc cid` — an obstruction *somewhere* — is replaced by a
-  **named reachable node at which a specific equivariant key provably fires**, i.e. the L0 → L4/L5 jump
-  of the §14.1 ladder in one arc (C → A → B).
-* The strongest available form. §14.0's measured witness (CFI cubic `m = 8`) shows "force fires at `χ`
-  itself" is FALSE — there the branch cell is one orbit and the ceiling forbids firing. The reachable-
-  node form is the target, not a weakening of it.
-* `①` never depended on any of this: `keyEquivariant_orbKey` carries no hypothesis, so
-  `Force.force_canonizer` / `Composite.composite_canonizer` were already applicable.
-
-### 17.4 What is left (all `②`, none `①`)
-
-1. **The guard's cost.** `orbKey` is `noncomputable`; `Amenable` is decidable but by an `n!` search.
-   Plan §14.5 E1/E2: either bill the honest exponential guard, or swap in the poly `CertifiedPath`
-   (`amenablePath_of_certifiedPath`, landed) once **the certificate boolean's invariance** is proved —
-   still the one open item, and still narrower than §10 asked for (a Boolean, not a partition).
-2. **Nesting depth.** D1 relocates work to a deeper node; bounding how often that recurses is the
-   cost question §8's "actual residue" names. `DescentReach` + the `ncol` measure bound it by `n`
-   *steps*, not by branch factor.
-3. **Composite assembly.** `forcedSet_single_orbit` is the exact input
-   `Composite.forceThenConsume_singleton_of_cellIsOrbit` wants; wiring it needs
-   `Consume.CellIsOrbit` on the *forced sub-cell*, which `Amenable` should supply.
+**Closest prior theorem to the split loop's architecture:** Arvind–Das–Mukhopadhyay, JCSS
+76(7):509–523, 2010 — tournament canonization is poly-time reducible to **tournament isomorphism +
+canonization of *rigid* tournaments**. An orbit oracle buys exactly the symmetric part and no more.
+
+---
+
+## 9. ⛔ PROVENANCE — superseded claims. Do not read as live.
+
+Kept so nobody re-derives them. Each line: what was claimed → what is true → where.
+
+1. **"A twist failure certifies that the pair is in a different orbit."** → **False**, two certified
+   falsifiers. → §1.1, §2.1.
+2. **"`¬CellIsOrbit ⟹ RigidObstructionAt` at this cell (no guard)."** → **Refuted**; the `Certified` /
+   `Amenable` hypothesis on the located-obstruction theorems is necessary. → §1.2.
+3. **"A single anchor suffices for the harvest."** → **Measured false** (the `G8` falsifier in
+   `DeepenSupply.lean`): single-anchor branch-cell orbit profiles differ across relabellings
+   (`[2,2,2,2,4,4,4,4]` vs `[1,1,2,2,2,2,2,2]`). `deepenGens` loops every anchor. Independently
+   falsified per-pair at the Chang-B root. → §2.1.
+4. **"The CFI cubic m=8 `(16, 2, 1)` stall is a measured FUSION witness."** → It is a
+   **pick-misalignment** witness: the `|C|=16` cell is a single orbit *at that colouring*, with no rigid
+   decision needed to expose it. Fusion = symmetry not yet exposed (Chang-A's `A_stall < A_full`). →
+   §1.1, §2.3.
+5. **"PARTITION = poly and provable; ORDER = the wall"** — i.e. ranking two orbits *is* separating them
+   by a poly invariant, so knowing the orbit partition does not help force. → **False.**
+   Certified-below ⟹ deepen's single-path cert *is* an invariant separating key, and it orders the
+   blocks. Now the theorems `keyEquivariant_orbKey` + `orbKey_eq_iff_orbit`. → §3.3, §3.4, §6 S1.
+6. **"All reps certify on the rigid multipedes, so the rigid decision is resolved by a poly key."** →
+   **True but EMPTY.** Three of four rigid multipedes discretize after ONE individualization, so
+   certified-below held with *zero levels to certify* — and by AKRV's rigid collapse it must be so. The
+   CFI results (4–6 levels) stand. → §8.4.
+7. **"The remaining open item is proving deepen's poly certificate relabelling-invariant."** →
+   **Measured false**, not merely unproved. → §7.1.
+8. **"Chang-A leaks — the cascade certifies only order 24 of `|Aut| = 384`."** → **Retracted**; measured
+   **complete 384/384**, 17 nodes, 4 leaves, zero starvation. What survives is the **fusion** signature
+   `A_stall < A_full`, which costs deferral, not completeness.
+9. **Retracted elsewhere, repeated because it recurs:** any *"X ⟹ GI∈P, therefore X impossible"*
+   argument is BANNED — a perfect key *is* GI∈P, i.e. the target. Violated once (the "cell orbit
+   partition ≡ GI so the supply would be GI∈P" argument) and retracted.
+
+### 9.1 Build sketch, as originally scoped (kept for comparison; the delivered arc differs)
+
+The original plan was `certOf` (min-over-cell) → `keyEquivariant_deepKey` → `Force.forceBy`. What landed
+instead is the *guarded greedy* key (§3.3), poly where its guard is open, with min-over-cell retained as
+the unconditional fallback (§4.2). The retirement list from that sketch is unchanged and already
+actioned: `deepenRefSupply`, `DeepenRefInExec`, R1/R2 are parked out of `build.sh`; `DeepenAmenable`'s
+`joint` survives as the *cost* lemma (`Amenable` ⟹ branch factor 1).
