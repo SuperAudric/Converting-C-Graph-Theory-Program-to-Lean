@@ -61,9 +61,27 @@ transfer). "Complete" = the flag provably never fires.
 > falsifiers); (b) "consume fails at `χ` ⟹ force acts at `χ`" cannot hold (the m=8 witness: the cell is a
 > single orbit, so `forceBy_no_narrowing_on_orbit` forbids it) — the obstruction must be RELOCATED;
 > (c) "prove `Certified` relabelling-invariant" is MEASURED FALSE, which is why `DeepenGuard` guards by an
-> *equivariant supply* instead. **▶ Next: a decision procedure for `CellIsOrbit S` (the last
-> `noncomputable` before `Publication`), guard strength, relocation-nesting depth.**
+> *equivariant supply* instead.
 > ⚠ This track is INDEPENDENT of the rigid-seal frontier below; both are live.
+>
+> **▶▶ UPDATE (2026-07-27, later) — `ChainDescent/KeyComplete.lean` (7 thms, axiom-clean, in `build.sh`).
+> THE FIRST `HandledS` POPULATION. Authoritative: DUAL doc §10.**
+> `consume_fail_force_fires` ends in *strict* narrowing, which **nothing downstream consumes** — the
+> predicate `②`/`③` read is `Select.NodeResolved` (`cellNarrow … ≤ 1`). That gap is now closed at every
+> `Amenable` node: **`nodeResolved_of_amenable`** + **`handledS_of_reached_amenable`**, assembled from
+> `forcedSet_single_orbit` (D2) and the **already-landed** `deepen_branch_orbit_iff_aut` (2026-07-23).
+> ⚠ §1T's "zero families populated" is the bottleneck this starts on. ⚠ Note it is **NOT** reachable via
+> `Cost.CellResolved` — at a mixed node (≥2 orbits, key ties inside each) NEITHER disjunct holds while
+> the composite still resolves; route to `NodeResolved` directly.
+> Also landed: **`KeySeparatesAt`** — the reduction absorbing consume's `Amenable` into force's
+> separation obligation (two carried predicates → one). **⚠ A UNIFICATION, NOT A WEAKENING**, and it is
+> the *repaired* form of the retired `assume-VT` prune — read DUAL §10.3 (**two** obituaries: fusion/
+> Chang-A REPAIRED, 2026-07-10 vacuity DOES NOT TRANSFER) and §10.4 (the surviving FORK objection + the
+> falsifier to hunt) before re-scoping.
+> **▶ Next:** decision procedure for `CellIsOrbit S` (smaller than billed — `mem_orbit_iff_wordReach`
+> makes it one `decidable_of_iff`; DUAL §7.3 item 3) · `DescentReach ⟹ Reaches` bridge · guard strength
+> (lever is `SameOrbits`-licensing, not depth — §7.3 item 4) · `keyCost` bounds · relocation-nesting
+> depth · record-object integration (§7.3 items 5–8).
 
 
 > **▶▶▶ UPDATE 2026-07-26 (latest) — THE CONCRETE `ref` + `Recover` ARE LANDED (`RigidRefine.lean`, steps 1–9E,

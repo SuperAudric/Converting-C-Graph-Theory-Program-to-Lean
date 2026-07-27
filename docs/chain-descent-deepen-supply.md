@@ -76,6 +76,16 @@
 > `n`, but not the product over relocations; (4) wire `forcedSet_single_orbit` into
 > `Composite.forceThenConsume_singleton_of_cellIsOrbit` (needs `CellIsOrbit` on the *forced sub-cell*).
 >
+> **▶▶ UPDATE (2026-07-27, later) — `ChainDescent/KeyComplete.lean`, 7 thms axiom-clean, in `build.sh`.**
+> The chain above ends in *strict* narrowing, which nothing downstream consumes. **`nodeResolved_of_amenable`**
+> now gives `(narrow (forceThenConsume orbKey deepenSupply)).length = 1` at every `Amenable` node — i.e.
+> `Select.NodeResolved`, the predicate `②`/`③` actually read — and `handledS_of_reached_amenable` is the
+> **first population of `HandledS`**. The consume half is `deepen_branch_orbit_iff_aut` (§this doc,
+> 2026-07-23) — it was already proved; only the assembly was missing. Also landed: `KeySeparatesAt`, the
+> reduction absorbing `Amenable` into the force key's separation obligation (**a unification, not a
+> weakening** — and the repaired form of the retired `assume-VT` prune). **Full analysis, both obituaries,
+> and the surviving objection: `scratchpad/DUAL_resolver_scoping.md` §10.**
+>
 > ⚠ **Naming, from the literature pass:** the project's `Amenable` is AKRV's **Tinhofer**, and AKRV's
 > "amenable" means something else entirely. Renaming the project predicate is advisable.
 

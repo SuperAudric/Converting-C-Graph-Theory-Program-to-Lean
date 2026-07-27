@@ -4848,3 +4848,16 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.consume_fail_real_decision_of_amenable` | 229-240 | The `Amenable` form of `consume_fail_gives_real_decision`; `DeepenCertified` states it over the strictly stronger `Certified`, but `deepen_branch_orbit_iff_aut` already takes `Amenable`. | — |
 | `Deepen.rigidObstructionAt_branch_of_amenable` | 242-248 | The `Amenable` form of `rigidObstructionAt_branch_of_certified`. | — |
 | `Deepen.consume_fail_locates` | 250-263 | ★★★ Every consume failure is LOCATED: either a rigid decision in THIS branch cell (node `Amenable`), or one at a reachable node carrying both hypotheses. Neither disjunct is an unanchored existential. | — |
+## ChainDescent/KeyComplete.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `KeyComplete.KeySeparatesAt` | 77-82 | At this node the force key separates every branch pair that no colour-automorphism links. Contrapositive: equal keys inside the branch cell ⟹ same orbit. | Definition |
+| `KeyComplete.KeySeparates` | 84-87 | The global form — the carried obligation. Force's `SolverSeparates` stated against the descent's branch cell; by the corollary below it is ALSO everything the consume side needs. ⚠ A unification, not a weakening (DUAL doc §10.2). | Definition |
+| `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` | 95-109 | ★★★ THE EXHAUSTIVENESS COROLLARY — under `KeySeparatesAt` the key's argmin over the branch cell is a single `IsColAut`-orbit, so discarding all but one survivor is sound WITHOUT a certificate. Uses no property of the key beyond the hypothesis: no equivariance, no guard, no supply. | — |
+| `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` | 111-122 | The composite's firing lemma generalized from `CellIsOrbit` (about the WHOLE cell — false at a mixed node) to pairwise `WordReach` on the FORCED SET. The brick `Composite.forceThenConsume_singleton_of_cellIsOrbit` was missing. | — |
+| `KeyComplete.keySeparatesAt_orbKey_of_amenable` | 130-133 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Amenable` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
+| `KeyComplete.keySeparatesAt_orbKeyG_of_certifiedG` | 135-138 | Non-vacuity for the poly-guarded key, on its own guard (`CertifiedG S`). | — |
+| `KeyComplete.forceThenConsume_singleton_of_amenable` | 147-155 | ★★★ THE MIXED FIRING THEOREM — at an `Amenable` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
+| `KeyComplete.nodeResolved_of_amenable` | 157-167 | ★★ `Select.NodeResolved` at every `Amenable` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
+| `KeyComplete.handledS_of_reached_amenable` | 169-177 | `Select.HandledS` on the all-`Amenable` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |

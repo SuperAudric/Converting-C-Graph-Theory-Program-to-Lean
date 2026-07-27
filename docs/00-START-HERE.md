@@ -179,8 +179,17 @@ close it — is set out in
 > `orbKeyG S` is the poly-guarded executable (`force_canonizer_orbKeyG_deck2` = `①` + totality, no
 > hypothesis). **⛔ Refuted, do not re-derive:** a twist failure does NOT certify different orbits; "consume
 > fails at `χ` ⟹ force acts at `χ`" cannot hold (relocation is required); and `Certified` is NOT
-> relabelling-invariant. **▶ Next:** a decision procedure for `CellIsOrbit S` (the last `noncomputable`
-> before `Publication`), guard strength, relocation-nesting depth.
+> relabelling-invariant.
+> **▶▶ 2026-07-27 (later) — a SIXTH module, `KeyComplete.lean` (7 thms, axiom-clean): the FIRST
+> `HandledS` POPULATION.** `consume_fail_force_fires` ends in *strict* narrowing, which nothing downstream
+> consumes; **`nodeResolved_of_amenable`** now gives `≤ 1` — `Select.NodeResolved` — at every `Amenable`
+> node, and `handledS_of_reached_amenable` populates `HandledS` (remaining-work §1T had **zero** families).
+> Plus **`KeySeparatesAt`**, absorbing consume's `Amenable` into force's separation obligation — **a
+> unification, not a weakening**, and the *repaired* form of the retired `assume-VT` prune (⚠ two
+> obituaries, only one transfers). **Authoritative: `scratchpad/DUAL_resolver_scoping.md` §10.**
+> **▶ Next:** decidability of `CellIsOrbit S` (smaller than billed), the `DescentReach ⟹ Reaches` bridge,
+> guard strength via `SameOrbits`-licensing, `keyCost` bounds, relocation-nesting depth, record-object
+> integration.
 >
 > **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Amenable}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,

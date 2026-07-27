@@ -24,10 +24,22 @@
 > `force_canonizer_orbKeyG_deck2` gives `①a`/`①b`/`①c` + totality with **no hypothesis at all**.
 > **⚠ The cost is firing, not soundness** — see §7.2's ⚠ block: the unconditional
 > `consume_fail_force_fires` stays over `orbKey`; over `orbKeyG S` the *localization* half is unchanged
-> and only *firing* becomes guard-conditional. **▶▶ The frontier is now §7.3.**
+> and only *firing* becomes guard-conditional.
 >
-> Reading order: §1 (the object) → §2 (what is measured) → §3 (what is proved) → §7 (frontier).
-> §8 is the literature placement; **§9 is PROVENANCE — superseded claims, do not read as live.**
+> **✅ 2026-07-27 (later) — `ChainDescent/KeyComplete.lean` (7 thms, axiom-clean).** Two things the arc
+> was one step short of, now landed — see **§10**, the current frontier:
+> · **`nodeResolved_of_amenable`** — at an `Amenable` node the composite narrows the branch cell to
+>   **exactly one** branch, so `Select.NodeResolved` holds. `consume_fail_force_fires` gives only
+>   *strict* narrowing, which nothing downstream reads; this is the predicate `②`/`③` consume, and
+>   `handledS_of_reached_amenable` is the first population of `HandledS` (remaining-work §1T records
+>   **zero** families).
+> · **`KeySeparatesAt` + `forcedSet_single_orbit_of_keySeparatesAt`** — the reduction that absorbs the
+>   consume side's `Amenable` into the force side's separation obligation. **Label it honestly: a
+>   unification, not a weakening** (§10.2).
+>
+> Reading order: §1 (the object) → §2 (what is measured) → §3 (what is proved) → **§10 (frontier)**.
+> §7 is the guard arc that led here; §8 is the literature placement;
+> **§9 is PROVENANCE — superseded claims, do not read as live.**
 >
 > Probes: `probe_orbit_oracle.py`, `probe_dualdeepen.py` (18 witnesses: mp7/Fano, CFI over C₅ and over
 > random cubic bases m=8..14, mixed multipede, circ(5), 6 rigid random multipedes n=34..84),
@@ -567,19 +579,47 @@ The measured firing rate is §7.2's table above (depth-0 lower bound): **120 of 
 Chang family, **0** on the disjoint-cycle and MIXED witnesses. The obvious next lever is depth — the
 proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a different guard shape.
 
-### 7.3 The rest of the open ledger (all `②`, none `①`)
+### 7.3 The rest of the open ledger (all `②`, none `①`) — ⚠ item 2 is now DONE, see §10
 
 1. **Nesting depth.** D1 relocates work to a deeper node; the product over relocations is not bounded.
-   `DescentReach` + `ncol` bound the number of *steps* by `n`, not the branch factor.
-2. **Composite assembly.** `forcedSet_single_orbit` is the exact input
-   `Composite.forceThenConsume_singleton_of_cellIsOrbit` wants; wiring it needs `Consume.CellIsOrbit`
-   on the *forced sub-cell*, which `Amenable` should supply.
-3. **Entry into `Publication.canonForm?`** now waits only on a *decision procedure* for
-   `CellIsOrbit S` (a finite `WordReach` reachability test on the branch cell) — `DeepenGuard` registers
-   a `Classical.dec` instance so the parametric development elaborates, which is the last
-   `noncomputable` in the chain.
-4. **Guard strength.** Raise the measured firing rate by taking `S` deeper (or as the union of the five
-   equivariant supplies — a union of equivariant supplies is equivariant).
+   `DescentReach` + `ncol` bound the number of *steps* by `n`, not the branch factor. **Still open.**
+2. ~~**Composite assembly.**~~ **✅ DONE (§10.1)** — and it was mis-scoped here. It does *not* need
+   `Consume.CellIsOrbit` on the forced sub-cell: `CellIsOrbit` is a statement about the **whole** branch
+   cell and is FALSE at exactly the mixed nodes this is for. The needed fact is the weaker pairwise
+   `WordReach` on the forced set, and `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23) already
+   supplies it at an `Amenable` node. `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` is
+   the generalized brick; `nodeResolved_of_amenable` is the payoff.
+3. **Entry into `Publication.canonForm?`** waits on a *decision procedure* for `CellIsOrbit S` —
+   `DeepenGuard` registers a `Classical.dec` instance so the parametric development elaborates.
+   ⚠ **Smaller than billed:** `Consume.orbit` is a computable BFS and `Consume.mem_orbit_iff_wordReach`
+   is proved, so `Decidable (WordReach G u w)` is one `decidable_of_iff`, `CellIsOrbit` follows by
+   `List.decidableBAll`, and `CertPath` by structural recursion. `leafOf`/`readKey`/`readAt` are already
+   computable defs — **only the guard was placeholdered**, so `orbKeyG S` becomes computable outright.
+   (`orbKey` cannot and should stay the theory-side object: its `AmenablePath` guard is an `n!` search.)
+4. **Guard strength.** Raise the measured firing rate by taking `S` deeper, or as the union of the five
+   equivariant supplies (a union of equivariant supplies is equivariant). ⚠ **The lever is probably not
+   depth.** The strongest available certifier is `deepenSupply` itself — *exactly* complete at
+   `Amenable` nodes by `deepen_branch_orbit_iff_aut` — and it is excluded only because it is not
+   `GensEquivariant`. That is the problem `kernelSupply` solved via `OrbitPrune.SameOrbits` against an
+   equivariant reference, and the congruence machinery exists (`SelectNode.cellNarrow_congr`,
+   `handledS_of_sameOrbits`). Guarding by `S` with `SameOrbits S Ref` for equivariant `Ref` looks
+   strictly better than depth. **Untried.**
+5. **`②` is declarative at both keys.** `keyCost (orbKeyG S) = n⁴` holds *by definition*, and the guard
+   is currently not computable at all, so the bill prices nothing — the same shape as the 2026-07-14
+   "costs are now honest" finding. `SupplyCost` already has the pattern (`keyCost_lookaheadKey_le`).
+   remaining-work §1T's recorded debt ("`deepenSupply` has NO formalized cost bound") now extends to
+   both keys, and it is the **same work as item 3** — pay them together.
+6. **`DescentReach ⟹ Descend.Reaches` is missing.** `HandledS` quantifies over `Descend.Reaches`; D1
+   delivers `DescentReach`. `Descend.Reaches.step` carries *exactly* `DescentReach.cons`'s side
+   condition and `step` is `refineV encodeFreeFast ∘ indivOne`, so this is near-definitional — but
+   without it D1's `ψ` is not formally a node the canonizer visits.
+7. **Neither live track is in the record object.** `Publication.canonForm?` uses `holKeyFast`; no
+   `orbKey*` and no rigid-seal key appears. `force_canonizer_orbKeyG_deck2` is `①` for a **force-only**
+   canonizer — a different object. Integration needs a key composition (`RigidSeal.compKey`'s
+   disjoint-tag pattern is the template) plus a re-proof of `canonForm?_record`.
+8. **No Lean `#guard` for either key.** All firing evidence is Python probes; the project's own vacuity
+   discipline asks for a `#guard`ed witness in the same pass. Once item 3 lands, `orbKeyG` is
+   `#eval`-able and §2.5's 147/147 can be ported into `Regression`.
 
 ---
 
@@ -743,3 +783,109 @@ instead is the *guarded greedy* key (§3.3), poly where its guard is open, with 
 the unconditional fallback (§4.2). The retirement list from that sketch is unchanged and already
 actioned: `deepenRefSupply`, `DeepenRefInExec`, R1/R2 are parked out of `build.sh`; `DeepenAmenable`'s
 `joint` survives as the *cost* lemma (`Amenable` ⟹ branch factor 1).
+
+---
+
+## 10. ▶▶ THE FRONTIER (2026-07-27, later) — `KeySeparates` and what it does and does not buy
+
+`ChainDescent/KeyComplete.lean`, 7 theorems, all `[propext, Classical.choice, Quot.sound]`, in
+`build.sh` after `DeepenGuard`.
+
+### 10.1 ✅ The mixed firing theorem — `NodeResolved` at every `Amenable` node
+
+**The gap this closes.** `consume_fail_force_fires` ends in `narrow.length < branches.length`, and
+**nothing in the project consumes strict narrowing.** The predicate `②`/`③` read is
+`Select.NodeResolved key S adj χ := ∃ c ∈ nonSingletonColours χ, (cellNarrow key S adj χ c).length ≤ 1`.
+Strict narrowing does not imply it, so the landed chain terminated one step short of being load-bearing.
+
+**It was one step, and every ingredient was already proved.** At an `Amenable` node:
+
+| | |
+|---|---|
+| force's argmin is one true orbit | `forcedSet_single_orbit` (D2) — or generically, `forcedSet_single_orbit_of_keySeparatesAt` |
+| deepen's `WordReach` on the branch cell **IS** the `IsColAut`-orbit relation, **both directions** | `Deepen.deepen_branch_orbit_iff_aut` — **landed 2026-07-23**, not new |
+| `rep` constant on the forced set ⟹ dedup is a singleton | `rep_eq_of_wordReach` + `dedup_map_length_one` |
+
+⟹ **`forceThenConsume_singleton_of_amenable`**: the composite narrows an `Amenable` node's branch cell
+to **exactly one** branch ⟹ **`nodeResolved_of_amenable`** ⟹ **`handledS_of_reached_amenable`**, the
+first population of `HandledS` (remaining-work §1T records zero families).
+
+⚠ **This is NOT reachable through `Cost.CellResolved`,** and that is a trap worth recording. Its
+disjunction is `CellIsOrbit S ∨ (key separates the whole cell)`. At a **mixed** node — cell has ≥ 2
+orbits, key ties inside each — **neither** disjunct holds, yet the composite provably resolves. Given
+the project's own line that *almost every real residue is mixed*, route to `NodeResolved` directly;
+`nodeResolved_of_cellResolved` is a sufficient path, not the general one.
+
+### 10.2 `KeySeparates` — the reduction, and its honest label
+
+> **`KeySeparatesAt key adj χ`** — the key separates every branch pair no colour-automorphism links.
+> Contrapositive: *equal keys inside the branch cell ⟹ same orbit*.
+
+`forcedSet_single_orbit_of_keySeparatesAt` proves the argmin is then a single `IsColAut`-orbit — using
+**no** property of the key beyond this: no equivariance, no guard, no supply. So keeping one
+representative is licensed by an automorphism that **exists but was never computed** (the `CoveringAt`
+route, whose witness is `descend_transport` at an automorphism). The consume-side guard stops being a
+correctness prerequisite and becomes a *firing accelerator*.
+
+Stated at the node level this says: **under `KeySeparatesAt`, `CellResolved`'s disjunction is
+exhaustive** — if the key does not separate the cell, the survivors are semantically one orbit. Granted
+globally it gives `ResolvedAll` ⟹ `Handled` ⟹ the flag never fires.
+
+**⚠ Label it correctly: UNIFICATION, not weakening.** A single-orbit cell contains **no**
+non-automorphic pairs, so "separates every non-automorphic pair" has no exception clause to relax — a
+key with the property globally *is* the target. What the reduction buys is **one** carried predicate
+about an object under construction instead of two coupled ones (`Amenable` on consume,
+`SolverSeparates` on force). The precedent verdict is `hImprim`'s: *consolidation, not breakthrough.*
+
+### 10.3 ⛔ The obituaries — this is a REPAIRED dead route, and there are TWO of them
+
+The idea "if nothing resolves, treat the residue as vertex-transitive and consume unverified" was tried
+and died. Both obituaries must be read before re-scoping, because **only one of them transfers.**
+
+**A — fusion / Chang-A (2026-07-12).** `chain-descent-cost-model.md` §7a, `endgame-spec` §1a,
+`00-START-HERE.md` §2b. Algorithm A flagged on `base > baseMax` and assume-VT-pruned *without verifying
+an automorphism*. Verbatim: *"a conditional symmetry fused with a rigid decision (Chang-A) is not
+vertex-transitive, so assume-VT-pruning it is unsound, and the guard needed a fusion-mildness theorem
+that does not exist."*
+▶ **REPAIRED, structurally.** Algorithm A had **no force resolver**, so "unresolved" conflated *VT*
+with *fused*. Chang-A's rigid decision is exposed once the symmetry is consumed (`A_stall < A_full`)
+and force acts on it — so `KeySeparatesAt` is **false** at that node and the licence never fires there.
+The missing fusion-mildness theorem is not needed; the interleaving supplies its content operationally.
+
+**B — vacuity (2026-07-10).** The confinement audit: `ConfinementCitations.hflag` unfolds to *"every
+residue of every graph has `|Aut| > n^{log₂ n}`"* and is **machine-checked uninhabited**
+(`ConfinementCitations 2 → False`), so all four `descentCanon_showcase*` were vacuously true.
+▶ **DOES NOT TRANSFER.** That was a failure of the *citation-bundle shape* — a universally-quantified
+`hflag` over all graphs and residues. `KeySeparatesAt` is per-node with measured inhabitants (§3 of the
+module: `orbKey` at every `Amenable` node, `orbKeyG S` at every `CertifiedG S` node).
+
+### 10.4 ⚠ The surviving objection — the 2026-07-10 audit's FORK
+
+The audit recorded a table that is exactly on point, and its verdict was *"they coincide exactly when
+`hSmallAutThin`"*:
+
+| budget keyed on | `flag ⟹ VT` (needed for the prune) | `¬flag ⟹ certified` (needed so deferral never defers a true symmetry) |
+|---|---|---|
+| greedy **group** base | ✅ definitional | ❌ |
+| harvest's **discretizing** depth | ❌ rigid multipede: trivial `Aut`, deep base ⟹ would flag ⟹ prune unsound | ✅ |
+
+`KeySeparatesAt` sits in the same table with *"force did not separate"* in place of *"¬flag"*, and is
+informative **only when the key's failure to separate means "no separation exists" and not "the key
+deferred."** Concretely: `orbKey` off its guard returns the constant `[]`, so it satisfies the
+*negation* vacuously. This is why `KeyComplete` §3's instantiations carry the guard as an explicit
+hypothesis and the file does **not** claim any built key satisfies the global `KeySeparates`.
+
+Two readings of the "VT exception", both landing on the wall:
+1. **VT = "the branch cell is a single `Aut(G,χ)`-orbit."** The exception is *vacuous* (no
+   non-automorphic pairs there), so the hypothesis is a perfect key = the target.
+2. **VT = a structural test** (cell/residue transitive as a scheme). The exception is non-vacuous, and
+   the licence "structurally VT ⟹ single orbit" **is Schurian-ness** — D0 / `SchurianScheme`
+   faithfulness (remaining-work T4). So `¬force` does not remove the Schurian assumption the earlier
+   attempt carried; it relocates it into *which cells the key is excused on*. A 2-orbit cell the
+   structural test calls VT is precisely the hole.
+
+**▶ The falsifier to hunt, before any global claim:** a node where the key ties the whole cell and the
+cell has ≥ 2 true orbits. §4.1 measured `blocks-tied = 0` on 13 witnesses — but with the *cert* key, on
+families §4.1's own ⚠ block calls easy for I-R, and the standing steer is that an equivariance/
+completeness falsifier must be run on a **partially-firing** witness. Start at the CFI-cubic `m = 8`
+node (§2.1, §7.1): that is where exactness and invariance parted last time.

@@ -351,6 +351,20 @@ The cost model is thus the instrument that decides, per family, "handled at poly
 > rigid medium", carried like "or Cameron"), NOT on a threshold-gated confinement lemma. Read the rest of this section
 > for the per-node-cap mechanics (still valid: a node cannot exceed `w`, so ② stays unconditional) and the phase-tagged
 > `UnhandledResidue` idea (still valid) — but NOT for the assume-VT-prune-on-threshold soundness story.
+>
+> **▶▶ REVIVED IN REPAIRED FORM 2026-07-27 — `ChainDescent/KeyComplete.lean`, analysis in
+> [`scratchpad/DUAL_resolver_scoping.md`](../scratchpad/DUAL_resolver_scoping.md) §10.** The *idea*
+> (consume unverified when nothing separates, licensed by an automorphism that exists but was never
+> computed) is sound; what killed it here was the **antecedent**. Replace the threshold `base > baseMax`
+> by *"the force key separates every non-automorphic pair"* (`KeySeparatesAt`) and obituary A is repaired
+> structurally: Algorithm A had **no force resolver**, so "unresolved" conflated *VT* with *fused*, and
+> Chang-A's rigid decision — exposed once the symmetry is consumed, `A_stall < A_full` — is exactly what
+> a force resolver acts on, so the predicate is FALSE there and the licence never fires. The separate
+> 2026-07-10 vacuity failure (`ConfinementCitations.hflag` uninhabited) does **not** transfer; that was a
+> universally-quantified citation bundle. **⚠ But read §10.2/§10.4 before scoping it as a weakening — it
+> is a UNIFICATION** (consume's `Amenable` absorbed into force's separation obligation, two carried
+> predicates → one), and the 2026-07-10 audit's FORK still applies: the antecedent is informative only
+> when non-separation means *"none exists"* rather than *"the key deferred"*.
 
 Refining the flag from a **global** to a **per-node** budget (a small `budgetedIterate` variant: flag the moment one
 node's work hits `w`, recording *which phase* flagged) yields two consequences. Authoritative writeup:
