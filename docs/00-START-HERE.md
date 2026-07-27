@@ -172,24 +172,32 @@ close it — is set out in
 > [`scratchpad/DUAL_resolver_scoping.md`](../scratchpad/DUAL_resolver_scoping.md) (live, authoritative for
 > this arc) + the 2026-07-27 STATUS block of
 > [`chain-descent-deepen-supply.md`](./chain-descent-deepen-supply.md).
-> Five modules, 64 theorems, axiom-clean, gate green (229 s / 104 modules):
-> `DeepenCertified` → `DeepenLocated` → `DeepenKey` → `DeepenExact` → `DeepenGuard`.
+> **Six** modules, axiom-clean, gate green (EXIT 0 / 105 modules):
+> `DeepenCertified` → `DeepenLocated` → `DeepenKey` → `DeepenExact` → `DeepenGuard` → **`KeyComplete`**.
 > **`consume_fail_force_fires`** — a `deepenSupply` failure ⟹ the descent reaches a node where
 > `forceBy orbKey` **strictly narrows**; `keyEquivariant_orbKey` carries **no hypothesis**, and
 > `orbKeyG S` is the poly-guarded executable (`force_canonizer_orbKeyG_deck2` = `①` + totality, no
 > hypothesis). **⛔ Refuted, do not re-derive:** a twist failure does NOT certify different orbits; "consume
 > fails at `χ` ⟹ force acts at `χ`" cannot hold (relocation is required); and `Certified` is NOT
 > relabelling-invariant.
-> **▶▶ 2026-07-27 (later) — a SIXTH module, `KeyComplete.lean` (7 thms, axiom-clean): the FIRST
+> **▶▶ 2026-07-27 (later) — a SIXTH module, `KeyComplete.lean` (15 thms, axiom-clean): the FIRST
 > `HandledS` POPULATION.** `consume_fail_force_fires` ends in *strict* narrowing, which nothing downstream
 > consumes; **`nodeResolved_of_amenable`** now gives `≤ 1` — `Select.NodeResolved` — at every `Amenable`
-> node, and `handledS_of_reached_amenable` populates `HandledS` (remaining-work §1T had **zero** families).
+> node, and `handledS_of_reached_amenable` populates `HandledS` on the all-`Amenable` reached CLASS
+(remaining-work §1T had **zero**; ⚠ a class, not yet a named family — the per-family `Amenable`
+discharge is still the rigid-side work of rigid-seal §9.1).
 > Plus **`KeySeparatesAt`**, absorbing consume's `Amenable` into force's separation obligation — **a
 > unification, not a weakening**, and the *repaired* form of the retired `assume-VT` prune (⚠ two
 > obituaries, only one transfers). **Authoritative: `scratchpad/DUAL_resolver_scoping.md` §10.**
-> **▶ Next:** decidability of `CellIsOrbit S` (smaller than billed), the `DescentReach ⟹ Reaches` bridge,
-> guard strength via `SameOrbits`-licensing, `keyCost` bounds, relocation-nesting depth, record-object
-> integration.
+> **▶▶ AND FOUR MORE, same day (end of 2026-07-27):** `orbKeyG` is now **COMPUTABLE** (the orbit BFS
+> decides its guard) with its cost **billed** (`keyCost_orbKeyG_le`) so `②` at the key is falsifiable;
+> `reaches_of_descentReach` ⟹ `consume_fail_locates_resolved`; and guard strength closed by the
+> **UNION** `guardSupply` (measured *emergent* — on `t3` all four members shut, the union open).
+> **⚠⚠ One correction not to inherit wrong:** `keySeparates_rawKey` shows `KeySeparates` alone is CHEAP
+> (poly, global); the GI-hard object is `KeySeparates ∧ KeyEquivariant`, so **the guard buys
+> EQUIVARIANCE, not separation.**
+> **▶ Next:** relocation-nesting depth · record-object integration (`Publication.canonForm?` still uses
+> `holKeyFast`) · `SameOrbits`-licensing as the second guard lever.
 >
 > **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Amenable}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,

@@ -50,7 +50,7 @@ transfer). "Complete" = the flag provably never fires.
 
 > **▶▶▶ UPDATE 2026-07-27 — SECOND LIVE TRACK: the CONSUME→FORCE HOOK is CLOSED (`DeepenCertified` →
 > `DeepenLocated` → `DeepenKey` → `DeepenExact` → `DeepenGuard`, 64 theorems, axiom-clean, gate green
-> 229 s / 104 modules). AUTHORITATIVE:
+> EXIT 0 / 105 modules). AUTHORITATIVE:
 > [`scratchpad/DUAL_resolver_scoping.md`](../scratchpad/DUAL_resolver_scoping.md) + the 2026-07-27 STATUS
 > block of [`chain-descent-deepen-supply.md`](./chain-descent-deepen-supply.md).**
 > `consume_fail_force_fires`: a `deepenSupply` failure ⟹ the descent reaches a node where
@@ -64,12 +64,13 @@ transfer). "Complete" = the flag provably never fires.
 > *equivariant supply* instead.
 > ⚠ This track is INDEPENDENT of the rigid-seal frontier below; both are live.
 >
-> **▶▶ UPDATE (2026-07-27, later) — `ChainDescent/KeyComplete.lean` (7 thms, axiom-clean, in `build.sh`).
+> **▶▶ UPDATE (2026-07-27, later) — `ChainDescent/KeyComplete.lean` (15 thms, axiom-clean, in `build.sh`).
 > THE FIRST `HandledS` POPULATION. Authoritative: DUAL doc §10.**
 > `consume_fail_force_fires` ends in *strict* narrowing, which **nothing downstream consumes** — the
 > predicate `②`/`③` read is `Select.NodeResolved` (`cellNarrow … ≤ 1`). That gap is now closed at every
-> `Amenable` node: **`nodeResolved_of_amenable`** + **`handledS_of_reached_amenable`**, assembled from
-> `forcedSet_single_orbit` (D2) and the **already-landed** `deepen_branch_orbit_iff_aut` (2026-07-23).
+> `Amenable` node: **`nodeResolved_of_amenable`** + **`handledS_of_reached_amenable`** (the all-`Amenable` reached CLASS
+> — ⚠ not yet a named family; the per-family `Amenable` discharge is rigid-seal §9.1's work), assembled
+> from `forcedSet_single_orbit` (D2) and the **already-landed** `deepen_branch_orbit_iff_aut` (2026-07-23).
 > ⚠ §1T's "zero families populated" is the bottleneck this starts on. ⚠ Note it is **NOT** reachable via
 > `Cost.CellResolved` — at a mixed node (≥2 orbits, key ties inside each) NEITHER disjunct holds while
 > the composite still resolves; route to `NodeResolved` directly.
@@ -78,10 +79,27 @@ transfer). "Complete" = the flag provably never fires.
 > the *repaired* form of the retired `assume-VT` prune — read DUAL §10.3 (**two** obituaries: fusion/
 > Chang-A REPAIRED, 2026-07-10 vacuity DOES NOT TRANSFER) and §10.4 (the surviving FORK objection + the
 > falsifier to hunt) before re-scoping.
-> **▶ Next:** decision procedure for `CellIsOrbit S` (smaller than billed — `mem_orbit_iff_wordReach`
-> makes it one `decidable_of_iff`; DUAL §7.3 item 3) · `DescentReach ⟹ Reaches` bridge · guard strength
-> (lever is `SameOrbits`-licensing, not depth — §7.3 item 4) · `keyCost` bounds · relocation-nesting
-> depth · record-object integration (§7.3 items 5–8).
+>
+> **▶▶ UPDATE (2026-07-27, end of day) — FOUR MORE LANDED; `②` at the key is now falsifiable.
+> AUTHORITATIVE: DUAL doc §10 (read its ▶▶ HANDOFF block first).** Gate EXIT 0 / 105 modules.
+> · **`orbKeyG` is COMPUTABLE** — `Consume.decidableWordReach` (the orbit BFS decides `WordReach`;
+>   `mem_orbit_iff_wordReach` was already proved) → `decidableCellIsOrbit` → `instDecidableCertPath`.
+>   The `Classical.dec` placeholder is gone. `orbKey` is NOT repairable this way (its guard is the
+>   automorphism-partition problem) and stays theory-side.
+> · **T2 debt PAID at this key** — `certPathCost` bills the guard along its own recursion (per level:
+>   reachability + one supply call) and **`keyCost_orbKeyG_le`** (`≤ n⁴ + n·(n⁴+c₂)`) is parametric in
+>   the supply bound, so an exponential `supplyCost` now SHOWS rather than hiding behind a flat `n⁴`.
+> · **`reaches_of_descentReach`** ⟹ **`consume_fail_locates_resolved`** — the hook on a node the
+>   canonizer VISITS, resolved to `≤ 1`.
+> · **Guard strength = the UNION** (`Deepen.guardSupply` = fold++deck++deck2++match; `①`+totality free).
+>   ⚠ Measured **emergent**: on `t3` all four members are shut on every branch and the union is open on
+>   every branch — `CertPath` is a conjunction over path LEVELS and different supplies certify different
+>   levels. ⛔ "take `S` deeper" was the wrong lever.
+> **⚠⚠ CORRECTION a reader must not inherit wrong:** `keySeparates_rawKey` proves `KeySeparates` holds
+> globally for a poly key ⟹ separation alone is CHEAP; the GI-hard object is
+> `KeySeparates ∧ KeyEquivariant`. **The guard buys EQUIVARIANCE, not separation.**
+> **▶ Next:** relocation-nesting depth (the honest `②` remainder) · record-object integration
+> (`Publication.canonForm?` still uses `holKeyFast`) · `SameOrbits`-licensing as the second guard lever.
 
 
 > **▶▶▶ UPDATE 2026-07-26 (latest) — THE CONCRETE `ref` + `Recover` ARE LANDED (`RigidRefine.lean`, steps 1–9E,
@@ -820,11 +838,22 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
 
 - **T1 — per-family localisation** (`Handled` population): `∀ T, CellsAreOrbits` or the lighter `_selected`
   hook discharged per sealed family (first: CFI odd-deg via `theorem_1_HOR_cfi_oddDeg`; depth already
-  imports via P2b/P2c). Zero families populated today; this is ③'s content and each leg's totality brick.
+  imports via P2b/P2c). This is ③'s content and each leg's totality brick.
+  **⚠ "Zero families populated" is no longer accurate (2026-07-27):** `KeyComplete.nodeResolved_of_amenable`
+  + **`handledS_of_reached_amenable`** populate `Select.HandledS` on the **all-`Amenable` reached class**
+  — a *class*, not yet a named family. What T1 still needs is the per-family discharge of `Amenable`
+  itself, which rigid-seal §9.1 says is the SAME work as the rigid seal on that family. So the first real
+  family still costs a rigid-side discharge; the wiring above it is now built.
 - **T2 — cost bounds per new mechanism** (`SupplyCost` pattern: closed-form `c₂`/`keyCost` at land time —
   house rule, not a backlog). ⚠ **Outstanding debt: `deepenSupply` has NO formalized cost bound** — its
   `n⁶` bill is prose only (no `SupplyCost`/`descentCost` theorem references it). Not urgent (deepen is not
   in the record object yet), but MUST be paid when T1 wires it in; the cost-model pilot is its natural home.
+  **✅ PAID at the force key (2026-07-27):** `Deepen.certPathCost` + `certPathCost_le` +
+  **`keyCost_orbKeyG_le`** (`≤ n⁴ + n·(n⁴+c₂)`, parametric in the supply's bound) price `orbKeyG`'s guard
+  along its own recursion. ★ **The pattern to copy, and why it mattered:** the key previously declared a
+  flat `n⁴` that was true *by definition* and therefore priced nothing — the 2026-07-14 "`Key`/`Supply`
+  were cost-free ⟹ `②` is unfalsifiable" finding recurring. Any new key/supply must bill the work it
+  *delegates*, not just the work it does. `deepenSupply`'s own `n⁶` is still prose.
 - **T3 — citation discharge** per policy (everything but G3; register + M1–M5 playbook in the discharge doc;
   wiring cautions: G3 only at the Sun–Wilmes threshold, FTPG corrected predicate, Payne–Thas narrowed).
 - **T4 — D0** (`SchurianScheme` model faithfulness) — see W2.

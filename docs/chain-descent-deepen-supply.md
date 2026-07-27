@@ -20,9 +20,12 @@
 > (STATUS block → §1 object → §2 measurements → §3 the landed chain → §7 frontier; **§9 is provenance,
 > not live**). Everything below this block is the pre-2026-07-27 framing, kept for provenance.
 >
-> **Five modules landed, gate green (`bash /workspace/scripts/build.sh`, 229 s, 104 modules), every
+> **Six modules landed, gate green (`bash /workspace/scripts/build.sh`, EXIT 0, 105 modules), every
 > theorem `[propext, Classical.choice, Quot.sound]`, no `sorry`, no new `axiom`:**
-> `DeepenCertified` → `DeepenLocated` (10) → `DeepenKey` (18) → `DeepenExact` (19) → `DeepenGuard` (17).
+> `DeepenCertified` → `DeepenLocated` (10) → `DeepenKey` (18) → `DeepenExact` (19) → `DeepenGuard` (44)
+> → **`KeyComplete`** (15). ⚠ **Read the 2026-07-27-later block below and then
+> `scratchpad/DUAL_resolver_scoping.md` §10 — the headline here (strict narrowing) is NOT what `②`/`③`
+> consume, and four things changed after it.**
 >
 > ```
 > consume_fail_force_fires :                                    -- DeepenExact
@@ -68,15 +71,25 @@
 > (depth-0 lower bound, `probe_eqsupply_guard.py`): **120/132** hook nodes on the Chang family, **0** on
 > the disjoint-cycle and MIXED witnesses.
 >
-> **▶ NEXT, in order.** (1) a real decision procedure for `CellIsOrbit S` — a finite `WordReach`
-> reachability test on the branch cell — which is the **last `noncomputable`** before
-> `Publication.canonForm?`; (2) raise the guard's firing rate by taking `S` deeper, or as the union of the
-> five equivariant supplies (a union of equivariant supplies is equivariant); (3) bound the **nesting
-> depth** of `not_amenable_deepest`'s relocation — `DescentReach` + `ncol` bound the number of *steps* by
-> `n`, but not the product over relocations; (4) wire `forcedSet_single_orbit` into
-> `Composite.forceThenConsume_singleton_of_cellIsOrbit` (needs `CellIsOrbit` on the *forced sub-cell*).
+> **▶ NEXT (as written on 2026-07-27 morning — ⚠ items 1, 2 and 4 are DONE, see the block below).**
+> (1) ~~a decision procedure for `CellIsOrbit S`~~ **DONE** — and it was one `decidable_of_iff`;
+> (2) ~~raise the guard's firing rate~~ **DONE via the UNION** (⚠ "taking `S` deeper" was the wrong
+> lever — measured); (3) bound the **nesting depth** of `not_amenable_deepest`'s relocation —
+> `DescentReach` + `ncol` bound the number of *steps* by `n`, but not the product over relocations
+> — **STILL OPEN, and the honest `②` remainder**; (4) ~~wire `forcedSet_single_orbit` into the
+> composite~~ **DONE** — and it did NOT need `CellIsOrbit` on the forced sub-cell, which is false at a
+> mixed node; the weaker pairwise `WordReach` sufficed.
 >
-> **▶▶ UPDATE (2026-07-27, later) — `ChainDescent/KeyComplete.lean`, 7 thms axiom-clean, in `build.sh`.**
+> **▶▶ UPDATE (2026-07-27, later) — `ChainDescent/KeyComplete.lean` (15 thms) + `DeepenGuard` §5/§5a/§8,
+> all axiom-clean, in `build.sh`. AUTHORITATIVE DETAIL: `scratchpad/DUAL_resolver_scoping.md` §10.**
+> Four changes, in dependency order: (1) the hook now lands on `Select.NodeResolved` and gives the FIRST
+> `HandledS` population; (2) **`orbKeyG` is COMPUTABLE** (the orbit BFS decides the guard) and its cost
+> is **billed** (`keyCost_orbKeyG_le`), so `②` at this key is falsifiable; (3) `reaches_of_descentReach`
+> ⟹ `consume_fail_locates_resolved` (a node the canonizer VISITS, resolved to `≤ 1`); (4) guard strength
+> = the **UNION** `guardSupply`, measured *emergent* (on `t3` all four members shut, union open).
+> **⚠⚠ And one correction a reader must not inherit wrong: `keySeparates_rawKey` shows `KeySeparates`
+> alone is CHEAP (poly, global); the GI-hard object is `KeySeparates ∧ KeyEquivariant`, so THE GUARD
+> BUYS EQUIVARIANCE, NOT SEPARATION.**
 > The chain above ends in *strict* narrowing, which nothing downstream consumes. **`nodeResolved_of_amenable`**
 > now gives `(narrow (forceThenConsume orbKey deepenSupply)).length = 1` at every `Amenable` node — i.e.
 > `Select.NodeResolved`, the predicate `②`/`③` actually read — and `handledS_of_reached_amenable` is the

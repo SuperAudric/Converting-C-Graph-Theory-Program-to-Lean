@@ -9,14 +9,14 @@
 >     ∃ ψ, DescentReach adj χ ψ ∧
 >          (narrow (forceBy orbKey) adj ψ).length < (branches ψ).length
 > ```
-> Three modules, gate green (`bash /workspace/scripts/build.sh`, 223 s, 103 modules), every theorem
-> `[propext, Classical.choice, Quot.sound]`, no `sorry`, no new `axiom`:
-> `DeepenLocated` (10 thms) → `DeepenKey` (18) → `DeepenExact` (19).
+> Three modules, all axiom-clean: `DeepenLocated` (10 thms) → `DeepenKey` (18) → `DeepenExact` (19).
+> ⚠ **Superseded as the headline** — see the HANDOFF block below; strict narrowing is not what `②`/`③`
+> consume, and `KeyComplete.nodeResolved_of_amenable` is the statement that is.
 >
 > **`①` never depended on any of it.** `keyEquivariant_orbKey` carries no hypothesis, so
 > `Force.force_canonizer` / `Composite.composite_canonizer` are applicable as they stand.
 >
-> **✅ THE POLY GUARD IS ALSO LANDED** (`DeepenGuard`, 17 thms, gate 229 s / 104 modules). §7.1 measures
+> **✅ THE POLY GUARD IS ALSO LANDED** (`DeepenGuard`; now 44 thms). §7.1 measures
 > that the *obvious* repair is impossible — deepen's own certificate (`Certified`) is **not**
 > relabelling-invariant, falsifier included — so §7.2's alternate design was built instead: guard each
 > level by `CellIsOrbit S` for a supply that already transports. `keyEquivariant_orbKeyG` needs only
@@ -26,20 +26,84 @@
 > `consume_fail_force_fires` stays over `orbKey`; over `orbKeyG S` the *localization* half is unchanged
 > and only *firing* becomes guard-conditional.
 >
-> **✅ 2026-07-27 (later) — `ChainDescent/KeyComplete.lean` (7 thms, axiom-clean).** Two things the arc
-> was one step short of, now landed — see **§10**, the current frontier:
-> · **`nodeResolved_of_amenable`** — at an `Amenable` node the composite narrows the branch cell to
->   **exactly one** branch, so `Select.NodeResolved` holds. `consume_fail_force_fires` gives only
->   *strict* narrowing, which nothing downstream reads; this is the predicate `②`/`③` consume, and
->   `handledS_of_reached_amenable` is the first population of `HandledS` (remaining-work §1T records
->   **zero** families).
-> · **`KeySeparatesAt` + `forcedSet_single_orbit_of_keySeparatesAt`** — the reduction that absorbs the
->   consume side's `Amenable` into the force side's separation obligation. **Label it honestly: a
->   unification, not a weakening** (§10.2).
+> ---
 >
-> Reading order: §1 (the object) → §2 (what is measured) → §3 (what is proved) → **§10 (frontier)**.
-> §7 is the guard arc that led here; §8 is the literature placement;
+> ## ▶▶ HANDOFF — the state as of the end of 2026-07-27. START HERE.
+>
+> **Gate: `bash /workspace/scripts/build.sh` → EXIT 0, 105 modules, no `sorry`, no new `axiom`, every
+> theorem `[propext, Classical.choice, Quot.sound]`.** Six modules carry this arc:
+> `DeepenCertified` → `DeepenLocated` (10) → `DeepenKey` (18) → `DeepenExact` (19) → `DeepenGuard` (44)
+> → **`KeyComplete`** (15). `Regression` §17/§17a and `PerformanceTest` §18 gate the executable
+> behaviour.
+>
+> **The four things that changed on 2026-07-27 (later), in dependency order — detail in §10.1–§10.6:**
+>
+> 1. **The hook now lands on something.** `consume_fail_force_fires` ends in *strict* narrowing, and
+>    **nothing in the project consumes that**; `②`/`③` read `Select.NodeResolved` (`cellNarrow … ≤ 1`).
+>    **`nodeResolved_of_amenable`** closes the gap at every `Amenable` node and
+>    **`handledS_of_reached_amenable`** is the **first population of `HandledS`** (remaining-work §1T
+>    recorded ZERO families). Assembled from `forcedSet_single_orbit` + the **already-landed**
+>    `deepen_branch_orbit_iff_aut` — only the assembly was missing. ⚠ NOT reachable via
+>    `Cost.CellResolved`: at a mixed node **neither** of its disjuncts holds while the composite still
+>    resolves. §10.1.
+> 2. **`orbKeyG` is COMPUTABLE and its cost is BILLED.** `Consume.decidableWordReach` (the orbit BFS is
+>    the decision procedure) → `decidableCellIsOrbit` → `instDecidableCertPath`; the `Classical.dec`
+>    placeholder is gone. `certPathCost` + **`keyCost_orbKeyG_le`** (`≤ n⁴ + n·(n⁴+c₂)`, parametric in
+>    the supply bound) make `②` at this key **falsifiable** — the old flat `n⁴` priced the read and
+>    nothing of the guard. `orbKey` is NOT repairable this way and stays the theory-side object. §10.5.
+> 3. **`reaches_of_descentReach`** bridges `DescentReach` to `Descend.Reaches` (what `HandledS`
+>    quantifies over) ⟹ **`consume_fail_locates_resolved`**: the hook with *both* weaknesses removed —
+>    a node the canonizer **visits**, resolved to `≤ 1`. §10.5.
+> 4. **Guard strength = the UNION** (`guardSupply`), with `①` + totality free. **Measured emergent**:
+>    on `t3` all four equivariant supplies are shut on every branch and the union is open on every
+>    branch. §10.6.
+>
+> **⚠⚠ THE ONE CLAIM A FRESH READER MUST NOT INHERIT WRONG.** An earlier draft of §10.2 said
+> `KeySeparates` *"globally is the target"*. **False, and corrected in place.**
+> `keySeparates_rawKey` proves `KeySeparates` holds **globally for a poly key** (the unguarded read),
+> from the unconditional `isColAut_of_readKey_eq`. So separation alone is **cheap**; the GI-hard object
+> is **`KeySeparates ∧ Force.KeyEquivariant`**. `rawKey` separates without equivariance;
+> `orbKey`/`orbKeyG` buy equivariance with a guard and pay in separation coverage. **⟹ THE GUARD
+> PURCHASES EQUIVARIANCE, NOT SEPARATION** — every "guard strength" number must be read that way, and
+> coverage work should target the *equivariance* side. §10.2's correction block.
+>
+> **⛔ Two hunts that are RETIRED — do not run them.** (a) §10.4's falsifier ("a node where the key ties
+> a cell with ≥ 2 orbits"): for `rawKey` it provably does not exist, for a guarded key it exists
+> trivially wherever both guards are shut. Neither is information. (b) "take `S` deeper" as the
+> guard-strength lever (§7.3 item 4 as originally written) — **measured wrong**; the supplies are
+> incomparable, not ordered, and the union is the lever.
+>
+> **▶ WHAT IS LEFT** (§7.3 ledger; items 2–6 and 8 are done): **item 1** relocation-nesting depth (the
+> product over relocations is unbounded — the honest `②` remainder) and **item 7** record-object
+> integration (`Publication.canonForm?` still uses `holKeyFast`; needs a key composition — the
+> `RigidSeal.compKey` disjoint-tag pattern is the template — plus a re-proof of `canonForm?_record`).
+> Second guard lever, untried: **`SameOrbits`-licensing**, the only route that could admit
+> `deepenSupply` itself, which `deepen_branch_orbit_iff_aut` shows is *exactly* complete at `Amenable`
+> nodes.
+>
+> Reading order: §1 (the object) → §2 (what is measured) → §3 (what is proved) → **§10 (the current
+> state, and the frontier)**. §7 is the guard arc that led here (⚠ its §7.3 ledger is annotated with
+> what is now done); §8 is the literature placement;
 > **§9 is PROVENANCE — superseded claims, do not read as live.**
+>
+> ### Where everything is, and how to re-run it
+>
+> | | |
+> |---|---|
+> | gate | `bash /workspace/scripts/build.sh` (ABSOLUTE path — it self-`cd`s via `$0`; relative FAILS) |
+> | one module | `cd /workspace/GraphCanonizationProofs && lake build ChainDescent.KeyComplete` |
+> | axioms | `lake env lean` a file that `import`s the module and `#print axioms <name>` (from `GraphCanonizationProofs/`, or the module prefix is not found) |
+> | the arc's Lean | `ChainDescent/Deepen{Certified,Located,Key,Exact,Guard}.lean` + `ChainDescent/KeyComplete.lean` |
+> | executable guards | `ChainDescent/Regression.lean` §17/§17a (**on** the gate, must stay fast) |
+> | expensive measurements | `ChainDescent/PerformanceTest.lean` §18 (**off** the gate by design — `lake build ChainDescent.PerformanceTest`) |
+> | what is proved | `GraphCanonizationProofs/PublicTheoremIndex.md`, `## ChainDescent/KeyComplete.lean` and the `Deepen.*` rows — regenerate with `python3 scripts/GenerateTheoremIndexes.py rewrite` from the repo root, then fill the `—` descriptions it lists |
+> | probes (Python) | `probe_orbit_oracle.py` (§2.1/§2.4), `probe_guard_invariance.py` (§7.1), `probe_eqsupply_guard.py` (§7.2), `probe_dualdeepen.py`, `probe_polyloop.py`, `probe_certkey.py`, `probe_strategies.py`, `probe_splitloop.py`, `probe_verdict_invariance.py` — all in `scratchpad/` |
+>
+> ⚠ **Two traps that cost time in this arc.** (1) Reduce `CertPath` / `leafOf` **only** through their
+> equation lemmas (`certPath_none/_nil/_cons`, `leafOf`'s three) — unfolding in place and then
+> `cases`-ing on `chooseIdK` descends into its internal `foldl`. (2) A `#guard` that the guard is *open*
+> proves nothing on its own: by AKRV's rigid collapse it can hold with **zero levels to certify**.
+> **Pin `certPathCost > 0`.** Measured on `G8`: open on 8/8 branches, substantive on only 4.
 >
 > Probes: `probe_orbit_oracle.py`, `probe_dualdeepen.py` (18 witnesses: mp7/Fano, CFI over C₅ and over
 > random cubic bases m=8..14, mixed multipede, circ(5), 6 rigid random multipedes n=34..84),
@@ -225,7 +289,8 @@ m=14's 36 → 24 → 16 → 14). The third, m=8's `(16, 2, 1)`, is the pick-misa
 
 ## 3. What is proved — the landed chain
 
-Gate green (223 s, 103 modules); every theorem below is `[propext, Classical.choice, Quot.sound]`.
+Every theorem below is `[propext, Classical.choice, Quot.sound]`. ⚠ This section is the 2026-07-27
+(earlier) state; **§10 is the current one**.
 
 ### 3.1 `DeepenCertified.lean` — `Amenable` as a run-time certificate
 
@@ -451,7 +516,7 @@ Two candidate repairs. The first is now closed.
 ### 7.1 ⛔ CLOSED — deepen's own certificate is NOT relabelling-invariant
 
 `Certified` / `CertifiedOrbit` (T1/T2) is poly and sound, and the open item was its invariance. **It is
-not invariant, and this is measured, not conjectured** (`scratchpad/guardinv.py`): the all-anchor
+not invariant, and this is measured, not conjectured** (`scratchpad/probe_guard_invariance.py`): the all-anchor
 harvest's branch-cell partition, recomputed on relabelled copies with the node colouring recomputed
 invariantly on each copy —
 
