@@ -3039,11 +3039,13 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 | `Consume.consume_narrows_of_wordReach` | 708-717 | §**CONSUME FIRES ON PARTIAL POWER.** A *single* verified automorphism between two distinct branches already shortens the narrowing — the cell need **not** be one orbit. The oracle does not have to be perfect to be useful: it is rewarded for exactly the symmetry it can prove, and penalized for nothing. | — |
 | `Consume.wordReach_of_mem_iterate` | 730-745 | Everything the orbit BFS reaches is reached by a **word** in the generators (the converse of `mem_orbit_of_wordReach`). | — |
 | `Consume.mem_orbit_iff_wordReach` | 747-750 | The orbit list **is** the word-reachable set — not a depth-`n` approximation (convergence). | — |
-| `Consume.WordReach.trans` | 752-757 | Word-reachability is transitive. | — |
-| `Consume.WordReach.symm` | 759-762 | Word-reachability is symmetric (the orbit is inverse-closed, `closed_inv`). | — |
-| `Consume.wordReach_rep` | 764-766 | A branch reaches its own orbit representative. | — |
-| `Consume.rep_eq_iff_wordReach` | 768-777 | **★★★ `rep` MERGES EXACTLY THE ORBIT.** Two branches share a representative **iff** the verified generators connect them. The `←` is `rep_eq_of_wordReach`; the `→` says consume merges **nothing more** — the least-index choice adds no spurious identifications. Hence the narrowing's *length* **counts orbits**, which is exactly what `Stall.StallEquivariant` needs and a merely-sound `rep` could never give. | — |
-| `Consume.isColAut_conj_iff` | 781-803 | **The verification check transports.** `α` is a colouring-preserving automorphism of `(adj, χ)` iff its `σ`-conjugate is one of `(σ·adj, σ·χ)` — why a *structural* supply can be equivariant at all. | — |
+| `Consume.decidableWordReach` | 752-760 | ★ `WordReach` IS DECIDABLE and the decision procedure is the orbit BFS itself — `orbit` is a computable `n`-round fixpoint and `mem_orbit_iff_wordReach` is already proved, so this is one `decidable_of_iff`. No `Classical.dec`, no search over `Equiv.Perm`. This is what makes a supply-guarded key EXECUTABLE. | Instance |
+| `Consume.decidableCellIsOrbit` | 762-767 | Hence `CellIsOrbit` is decidable — two bounded `∀`s over the branch cell, each decided by the BFS. Honest cost: `≤ |cell|²` orbit closures. | Instance |
+| `Consume.WordReach.trans` | 769-774 | Word-reachability is transitive. | — |
+| `Consume.WordReach.symm` | 776-779 | Word-reachability is symmetric (the orbit is inverse-closed, `closed_inv`). | — |
+| `Consume.wordReach_rep` | 781-783 | A branch reaches its own orbit representative. | — |
+| `Consume.rep_eq_iff_wordReach` | 785-794 | **★★★ `rep` MERGES EXACTLY THE ORBIT.** Two branches share a representative **iff** the verified generators connect them. The `←` is `rep_eq_of_wordReach`; the `→` says consume merges **nothing more** — the least-index choice adds no spurious identifications. Hence the narrowing's *length* **counts orbits**, which is exactly what `Stall.StallEquivariant` needs and a merely-sound `rep` could never give. | — |
+| `Consume.isColAut_conj_iff` | 798-820 | **The verification check transports.** `α` is a colouring-preserving automorphism of `(adj, χ)` iff its `σ`-conjugate is one of `(σ·adj, σ·χ)` — why a *structural* supply can be equivariant at all. | — |
 ## ChainDescent/Force.lean
 
 | Name | Line | Description | Notes |
@@ -3187,47 +3189,47 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 47-48 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 50-52 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 54-61 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 63-66 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 70-71 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 80-81 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 104-105 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 114-115 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 143-146 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 161 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 163-165 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 180-184 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 200-203 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 205 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 207-209 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 211-213 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 214 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
-| `Regression.gSel` | 249-250 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
-| `Regression.gSelDeep` | 252-253 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
-| `Regression.vcoreB` | 285-289 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
-| `Regression.vfold2` | 291-294 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
-| `Regression.vfold2Root` | 296 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wEdge` | 326-331 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
-| `Regression.wcyc9` | 333 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
-| `Regression.wcyc9Root` | 334-336 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wcyc9Swapped` | 347 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
-| `Regression.wcyc9SwappedRoot` | 348-349 | Its materialized root (trap #1). | Definition |
-| `Regression.vfoldT` | 374-381 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
-| `Regression.ut` | 383-387 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
-| `Regression.utRoot` | 389 | Materialized root colouring (trap #1). | Definition |
-| `Regression.C7` | 420 | — | Definition |
-| `Regression.gTree` | 422-424 | — | Definition |
-| `Regression.c7Root` | 435 | — | Definition |
-| `Regression.c7Seed` | 436-443 | — | Definition |
-| `Regression.t3` | 458 | The one-pair-twisted triple cover alone (n = 15; `ut`'s T block) — the F2c witness: its commuting mirror gauge stalls fold AND deck. | Definition |
-| `Regression.t3Root` | 459-461 | Root colouring of `t3` (ColData-materialised, trap #1). | Definition |
-| `Regression.mpOnLine` | 485 | Fano line membership `{i, i+1, i+3} mod 7` for the mp7 witness. | Definition |
-| `Regression.mpInS` | 486-491 | Even-subset membership for the mp7 CFI gadgets. | Definition |
-| `Regression.mpFG` | 492-495 | Foot–gadget adjacency of the Fano multipede. | Definition |
-| `Regression.mp7` | 496-499 | The FANO MULTIPEDE (n = 42): the C3 witness — symmetric pin-blind CFI cover, gauge = the [7,3,4] simplex code (arity-3 checks, girth 6, min weight 4); fold/deck/deck2 + manual deck3 all measured dead (`PerformanceTest` §13); the kernel supply consumes its whole gauge (§14, `Regression` §15). | Definition |
-| `Regression.mp7Root` | 500-503 | mp7's root colouring (ColData — trap #1). | Definition |
+| `Regression.C5` | 48-49 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 51-53 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 55-62 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 64-67 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 71-72 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 81-82 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 105-106 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 115-116 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 144-147 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 162 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 164-166 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 181-185 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 201-204 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 206 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 208-210 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 212-214 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 215 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 250-251 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 253-254 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.vcoreB` | 286-290 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
+| `Regression.vfold2` | 292-295 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
+| `Regression.vfold2Root` | 297 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wEdge` | 327-332 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
+| `Regression.wcyc9` | 334 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
+| `Regression.wcyc9Root` | 335-337 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wcyc9Swapped` | 348 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Regression.wcyc9SwappedRoot` | 349-350 | Its materialized root (trap #1). | Definition |
+| `Regression.vfoldT` | 375-382 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
+| `Regression.ut` | 384-388 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
+| `Regression.utRoot` | 390 | Materialized root colouring (trap #1). | Definition |
+| `Regression.C7` | 421 | — | Definition |
+| `Regression.gTree` | 423-425 | — | Definition |
+| `Regression.c7Root` | 436 | — | Definition |
+| `Regression.c7Seed` | 437-444 | — | Definition |
+| `Regression.t3` | 459 | The one-pair-twisted triple cover alone (n = 15; `ut`'s T block) — the F2c witness: its commuting mirror gauge stalls fold AND deck. | Definition |
+| `Regression.t3Root` | 460-462 | Root colouring of `t3` (ColData-materialised, trap #1). | Definition |
+| `Regression.mpOnLine` | 486 | Fano line membership `{i, i+1, i+3} mod 7` for the mp7 witness. | Definition |
+| `Regression.mpInS` | 487-492 | Even-subset membership for the mp7 CFI gadgets. | Definition |
+| `Regression.mpFG` | 493-496 | Foot–gadget adjacency of the Fano multipede. | Definition |
+| `Regression.mp7` | 497-500 | The FANO MULTIPEDE (n = 42): the C3 witness — symmetric pin-blind CFI cover, gauge = the [7,3,4] simplex code (arity-3 checks, girth 6, min weight 4); fold/deck/deck2 + manual deck3 all measured dead (`PerformanceTest` §13); the kernel supply consumes its whole gauge (§14, `Regression` §15). | Definition |
+| `Regression.mp7Root` | 501-504 | mp7's root colouring (ColData — trap #1). | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -4778,28 +4780,34 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Deepen.wordReach_isColAut` | 64-73 | `WordReach` over any list of verified automorphisms yields an automorphism — `DeepenAmenable`'s version is `deepenSupply`-specific; this is the general one. | — |
-| `Deepen.wordReach_isColAut_verified` | 75-78 | The same for a supply's `verified` list. | — |
-| `Deepen.cellSingleOrbit_of_cellIsOrbit` | 80-87 | SOUND `CellIsOrbit S` for ANY supply gives the branch cell's `CellSingleOrbit` — `DeepenCertified`'s T1 with `deepenSupply` generalised away. | — |
-| `Deepen.wordReach_transport` | 94-106 | `WordReach` transports under `SupplyEquivariant S`. | — |
-| `Deepen.cellIsOrbit_transport` | 108-115 | ★ The lemma the poly-guard design was missing: `CellIsOrbit S` transports when `S` does. | — |
-| `Deepen.CertPath` | 124-133 | The POLY guard: at every level, `S`'s verified generators act transitively on the cell the level individualizes. `AmenablePath`'s recursion with the OBSERVABLE `CellIsOrbit S` in place of the unobservable `CellSingleOrbit`. | Definition |
-| `Deepen.CertifiedG` | 135-137 | Every anchor's path is certified — the poly analogue of `Amenable`. | Definition |
-| `Deepen.amenablePath_of_certPath` | 139-164 | ★★ SOUND: the poly guard implies the real one. | — |
-| `Deepen.amenable_of_certifiedG` | 166-168 | ★★ `CertifiedG S ⟹ Amenable`. | — |
-| `Deepen.certPath_transport` | 176-249 | ★★ INVARIANT: the poly guard transports, given `SupplyEquivariant S`. Same pick-absorption induction as `amenablePath_transport`, with soundness supplying the stabiliser element. | — |
-| `Deepen.certPath_step_transport_iff` | 251-266 | The poly guard at a vertex, both directions. | — |
-| `Deepen.instDecidableCertPath` | 270-274 | ⚠ `Classical.dec` so the PARAMETRIC development elaborates. For a concrete poly `S` this is replaced by a real decision procedure — `CellIsOrbit S` is a finite `WordReach` reachability test on the branch cell. This is the last `noncomputable` in the chain. | Instance, `noncomputable` |
-| `Deepen.orbKeyG` | 276-284 | ★★★ THE POLY-GUARDED KEY. Identical to `orbKey` except the `if` tests the OBSERVABLE `CertPath S`. | Definition, `noncomputable` |
-| `Deepen.keyV_orbKeyG` | 286-290 | The guarded key's value projection, unfolded. | `@[simp]` |
-| `Deepen.keyEquivariant_orbKeyG` | 292-307 | ★★★ `①` FOR THE POLY-GUARDED KEY, from `SupplyEquivariant S` alone. ⚠ Note `CertPath S ⟹ AmenablePath` and never the converse, so `orbKeyG S` DEFERS more often than `orbKey` — a firing loss, not a soundness loss. | — |
-| `Deepen.orbKeyG_ne_of_no_aut` | 314-327 | The guarded key separates a non-automorphic pair (`isColAut_of_readKey_eq` is guard-agnostic, so this transferred verbatim). | — |
-| `Deepen.forceBy_orbKeyG_narrows` | 329-340 | ★★★ FORCE FIRES UNDER THE POLY GUARD. Same as `forceBy_orbKey_narrows` with `CertifiedG S` (poly, observable) in place of `Amenable` (an `n!` search). | — |
-| `Deepen.consume_fail_force_fires_guarded` | 342-359 | ★★ The poly-guarded hook. The LOCALIZATION half is unchanged (it never depended on a guard); what the poly guard costs is that FIRING needs the guard open, hence `CertifiedG S ψ` as a hypothesis. The unconditional statement stays `consume_fail_force_fires`, over `orbKey`. | — |
-| `Deepen.orbKeyG_eq_orbKey_of_certPath` | 361-366 | Wherever the poly guard is open the two keys are EQUAL — `orbKeyG S` is a restriction of `orbKey`, not a different function. | — |
-| `Deepen.keyEquivariant_orbKeyG_deck2` | 374-376 | Non-vacuity: the parametric design instantiated at `deck2Supply`. | — |
-| `Deepen.keyEquivariant_orbKeyG_deck` | 378-380 | Non-vacuity: instantiated at `deckSupply`. | — |
-| `Deepen.force_canonizer_orbKeyG_deck2` | 382-392 | ★★★ THE POLY-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` plus totality for the `deck2`-guarded key, with NO hypothesis at all. | — |
+| `Deepen.wordReach_isColAut` | 69-78 | `WordReach` over any list of verified automorphisms yields an automorphism — `DeepenAmenable`'s version is `deepenSupply`-specific; this is the general one. | — |
+| `Deepen.wordReach_isColAut_verified` | 80-83 | The same for a supply's `verified` list. | — |
+| `Deepen.cellSingleOrbit_of_cellIsOrbit` | 85-92 | SOUND `CellIsOrbit S` for ANY supply gives the branch cell's `CellSingleOrbit` — `DeepenCertified`'s T1 with `deepenSupply` generalised away. | — |
+| `Deepen.wordReach_transport` | 99-111 | `WordReach` transports under `SupplyEquivariant S`. | — |
+| `Deepen.cellIsOrbit_transport` | 113-120 | ★ The lemma the poly-guard design was missing: `CellIsOrbit S` transports when `S` does. | — |
+| `Deepen.CertPath` | 129-138 | The POLY guard: at every level, `S`'s verified generators act transitively on the cell the level individualizes. `AmenablePath`'s recursion with the OBSERVABLE `CellIsOrbit S` in place of the unobservable `CellSingleOrbit`. | Definition |
+| `Deepen.CertifiedG` | 140-142 | Every anchor's path is certified — the poly analogue of `Amenable`. | Definition |
+| `Deepen.amenablePath_of_certPath` | 144-169 | ★★ SOUND: the poly guard implies the real one. | — |
+| `Deepen.amenable_of_certifiedG` | 171-173 | ★★ `CertifiedG S ⟹ Amenable`. | — |
+| `Deepen.certPath_transport` | 181-254 | ★★ INVARIANT: the poly guard transports, given `SupplyEquivariant S`. Same pick-absorption induction as `amenablePath_transport`, with soundness supplying the stabiliser element. | — |
+| `Deepen.certPath_step_transport_iff` | 256-271 | The poly guard at a vertex, both directions. | — |
+| `Deepen.certPath_none` | 279-282 | `CertPath` equation lemma (no cell chosen). Reduce `CertPath` ONLY through these — unfolding in place then `cases`-ing on `chooseIdK` descends into its internal `foldl` (the recorded `deepen` match-reduction trap). | — |
+| `Deepen.certPath_nil` | 284-288 | `CertPath` equation lemma (chosen cell empty). | — |
+| `Deepen.certPath_cons` | 290-296 | `CertPath` equation lemma (chosen cell non-empty) — the recursive case that feeds the decidability instance. | — |
+| `Deepen.instDecidableCertPath` | 298-319 | ⚠ `Classical.dec` so the PARAMETRIC development elaborates. For a concrete poly `S` this is replaced by a real decision procedure — `CellIsOrbit S` is a finite `WordReach` reachability test on the branch cell. This is the last `noncomputable` in the chain. | Instance |
+| `Deepen.certPathCost` | 329-338 | The guard's OWN cost, billed along its own recursion: per level one `CellIsOrbit` reachability test plus **one call to `S`**, at the colouring that level actually visits. The key previously declared a flat `n⁴` that priced the read and nothing of the guard. | Definition |
+| `Deepen.certPathCost_le` | 340-370 | The guard costs `fuel` levels of (reachability + one supply call), parametric in the supply's own bound `c₂` — the `SupplyCost` pattern, so a real bound rather than a restatement of a declared constant. | — |
+| `Deepen.orbKeyG` | 374-381 | ★★★ THE POLY-GUARDED KEY. Identical to `orbKey` except the `if` tests the OBSERVABLE `CertPath S`. | Definition |
+| `Deepen.keyV_orbKeyG` | 383-387 | The guarded key's value projection, unfolded. | `@[simp]` |
+| `Deepen.keyCost_orbKeyG_le` | 389-396 | ★★ THE KEY'S BILL: `keyCost (orbKeyG S) ≤ n⁴ + n·(n⁴ + c₂)`. Parametric in the supply's cost bound, so an exponential `supplyCost` now yields an exponential `keyCost` — `②` at this key is falsifiable, which the flat constant could not express. | — |
+| `Deepen.keyEquivariant_orbKeyG` | 398-413 | ★★★ `①` FOR THE POLY-GUARDED KEY, from `SupplyEquivariant S` alone. ⚠ Note `CertPath S ⟹ AmenablePath` and never the converse, so `orbKeyG S` DEFERS more often than `orbKey` — a firing loss, not a soundness loss. | — |
+| `Deepen.orbKeyG_ne_of_no_aut` | 420-433 | The guarded key separates a non-automorphic pair (`isColAut_of_readKey_eq` is guard-agnostic, so this transferred verbatim). | — |
+| `Deepen.forceBy_orbKeyG_narrows` | 435-446 | ★★★ FORCE FIRES UNDER THE POLY GUARD. Same as `forceBy_orbKey_narrows` with `CertifiedG S` (poly, observable) in place of `Amenable` (an `n!` search). | — |
+| `Deepen.consume_fail_force_fires_guarded` | 448-465 | ★★ The poly-guarded hook. The LOCALIZATION half is unchanged (it never depended on a guard); what the poly guard costs is that FIRING needs the guard open, hence `CertifiedG S ψ` as a hypothesis. The unconditional statement stays `consume_fail_force_fires`, over `orbKey`. | — |
+| `Deepen.orbKeyG_eq_orbKey_of_certPath` | 467-472 | Wherever the poly guard is open the two keys are EQUAL — `orbKeyG S` is a restriction of `orbKey`, not a different function. | — |
+| `Deepen.keyEquivariant_orbKeyG_deck2` | 480-482 | Non-vacuity: the parametric design instantiated at `deck2Supply`. | — |
+| `Deepen.keyEquivariant_orbKeyG_deck` | 484-486 | Non-vacuity: instantiated at `deckSupply`. | — |
+| `Deepen.force_canonizer_orbKeyG_deck2` | 488-498 | ★★★ THE POLY-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` plus totality for the `deck2`-guarded key, with NO hypothesis at all. | — |
 
 ## ChainDescent/DeepenKey.lean
 
@@ -4852,12 +4860,19 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `KeyComplete.KeySeparatesAt` | 77-82 | At this node the force key separates every branch pair that no colour-automorphism links. Contrapositive: equal keys inside the branch cell ⟹ same orbit. | Definition |
-| `KeyComplete.KeySeparates` | 84-87 | The global form — the carried obligation. Force's `SolverSeparates` stated against the descent's branch cell; by the corollary below it is ALSO everything the consume side needs. ⚠ A unification, not a weakening (DUAL doc §10.2). | Definition |
-| `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` | 95-109 | ★★★ THE EXHAUSTIVENESS COROLLARY — under `KeySeparatesAt` the key's argmin over the branch cell is a single `IsColAut`-orbit, so discarding all but one survivor is sound WITHOUT a certificate. Uses no property of the key beyond the hypothesis: no equivariance, no guard, no supply. | — |
-| `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` | 111-122 | The composite's firing lemma generalized from `CellIsOrbit` (about the WHOLE cell — false at a mixed node) to pairwise `WordReach` on the FORCED SET. The brick `Composite.forceThenConsume_singleton_of_cellIsOrbit` was missing. | — |
-| `KeyComplete.keySeparatesAt_orbKey_of_amenable` | 130-133 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Amenable` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
-| `KeyComplete.keySeparatesAt_orbKeyG_of_certifiedG` | 135-138 | Non-vacuity for the poly-guarded key, on its own guard (`CertifiedG S`). | — |
-| `KeyComplete.forceThenConsume_singleton_of_amenable` | 147-155 | ★★★ THE MIXED FIRING THEOREM — at an `Amenable` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
-| `KeyComplete.nodeResolved_of_amenable` | 157-167 | ★★ `Select.NodeResolved` at every `Amenable` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
-| `KeyComplete.handledS_of_reached_amenable` | 169-177 | `Select.HandledS` on the all-`Amenable` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |
+| `KeyComplete.KeySeparatesAt` | 90-95 | At this node the force key separates every branch pair that no colour-automorphism links. Contrapositive: equal keys inside the branch cell ⟹ same orbit. | Definition |
+| `KeyComplete.KeySeparates` | 97-100 | The global form — the carried obligation. Force's `SolverSeparates` stated against the descent's branch cell; by the corollary below it is ALSO everything the consume side needs. ⚠ A unification, not a weakening (DUAL doc §10.2). | Definition |
+| `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` | 108-122 | ★★★ THE EXHAUSTIVENESS COROLLARY — under `KeySeparatesAt` the key's argmin over the branch cell is a single `IsColAut`-orbit, so discarding all but one survivor is sound WITHOUT a certificate. Uses no property of the key beyond the hypothesis: no equivariance, no guard, no supply. | — |
+| `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` | 124-135 | The composite's firing lemma generalized from `CellIsOrbit` (about the WHOLE cell — false at a mixed node) to pairwise `WordReach` on the FORCED SET. The brick `Composite.forceThenConsume_singleton_of_cellIsOrbit` was missing. | — |
+| `KeyComplete.keySeparatesAt_orbKey_of_amenable` | 143-146 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Amenable` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
+| `KeyComplete.keySeparatesAt_orbKeyG_of_certifiedG` | 148-151 | Non-vacuity for the poly-guarded key, on its own guard (`CertifiedG S`). | — |
+| `KeyComplete.forceThenConsume_singleton_of_amenable` | 160-168 | ★★★ THE MIXED FIRING THEOREM — at an `Amenable` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
+| `KeyComplete.nodeResolved_of_amenable` | 170-180 | ★★ `Select.NodeResolved` at every `Amenable` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
+| `KeyComplete.rawKey` | 203-208 | The UNGUARDED read (`orbKey` with the `if` removed). NOT `KeyEquivariant` — `leafOf` breaks ties by vertex index — so unusable as a force key; it exists to make the `KeySeparates` / `KeyEquivariant` decomposition a theorem. | Definition |
+| `KeyComplete.keyV_rawKey` | 210-213 | Value projection of `rawKey` (`rfl`). | `@[simp]` |
+| `KeyComplete.keySeparates_rawKey` | 215-227 | ★★ `KeySeparates` HOLDS GLOBALLY for the raw read at `n⁴`, no hypothesis — from the unconditional `isColAut_of_readKey_eq`. ⟹ `KeySeparates` alone is CHEAP and is NOT the wall; the GI-hard object is `KeySeparates ∧ KeyEquivariant`, and the guard on `orbKey`/`orbKeyG` purchases EQUIVARIANCE, not separation. | — |
+| `KeyComplete.forcedSet_single_orbit_rawKey` | 229-235 | The exhaustiveness corollary at a key that satisfies its hypothesis unconditionally: `rawKey`'s forced set is a single `IsColAut`-orbit. | — |
+| `KeyComplete.step_col_eq_refineV` | 245-248 | `Deepen.step` IS `refineV encodeFreeFast ∘ indivOne` — the identification the `Reaches` bridge needs. | — |
+| `KeyComplete.reaches_of_descentReach` | 250-264 | ★ THE BRIDGE: everything `DescentReach` walks to, the descent `Reaches`. `Descend.Reaches.step` and `DescentReach.cons` carry exactly the same side condition, so this is near-definitional — but without it the node `DeepenLocated`'s relocation produces is not formally one the canonizer visits, and `HandledS` quantifies over `Reaches`. | — |
+| `KeyComplete.consume_fail_locates_resolved` | 266-285 | ★★ A consume failure locates a REACHED node that the fused resolver RESOLVES, carrying a genuine rigid decision. `DeepenExact.consume_fail_force_fires` with both weaknesses removed: the node is one the canonizer visits (the bridge above) and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing — which nothing downstream consumed. | — |
+| `KeyComplete.handledS_of_reached_amenable` | 287-295 | `Select.HandledS` on the all-`Amenable` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |

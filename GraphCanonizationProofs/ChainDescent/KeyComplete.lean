@@ -43,9 +43,16 @@ predicate with measured inhabitants (§3).
 `KeySeparatesAt` is only informative when the key's failure to separate means *"no separation exists"*
 and not *"the key deferred"*. A guarded key that returns a constant off its guard satisfies the
 *negation* of the hypothesis vacuously — which is why §3's instantiations carry the guard as an
-explicit hypothesis rather than dropping it. The falsifier to hunt is a node where the key ties the
-whole cell and the cell has ≥ 2 true orbits; the CFI-cubic `m = 8` node is where exactness and
-invariance parted before.
+explicit hypothesis rather than dropping it.
+
+**★ §4a SHARPENS THE LABEL ABOVE, and settles the falsifier question by theorem.** The unguarded read
+satisfies `KeySeparates` **globally, at `n⁴` cost** (`keySeparates_rawKey`, from the unconditional
+`isColAut_of_readKey_eq`). So `KeySeparates` *alone* is cheap and is **not** the wall; what is GI-hard
+is the conjunction `KeySeparates ∧ Force.KeyEquivariant`. The two built keys sit on opposite sides of
+it: `rawKey` separates but is not equivariant (its `leafOf` breaks ties by vertex index); `orbKey` /
+`orbKeyG` buy equivariance with a guard and pay in separation coverage wherever the guard shuts. **The
+guard purchases equivariance, not separation** — and the "falsifier" for the guarded keys is therefore
+trivial and uninformative (any two non-automorphic branches whose guards are both shut).
 
 ## What is proved here
 
@@ -62,6 +69,12 @@ invariance parted before.
   branch, hence `Select.NodeResolved`. Note this is *not* reachable through `Cost.CellResolved`: at a
   mixed node (cell has ≥ 2 orbits, key ties inside each) **neither** of its two disjuncts holds, yet
   the composite resolves. `NodeResolved` is the honest predicate and is discharged directly.
+* §4a **`keySeparates_rawKey`** — the separation half is poly-achievable on its own; the wall is its
+  conjunction with `KeyEquivariant`.
+* §5 **`reaches_of_descentReach`** — the bridge from `DeepenLocated`'s relocation relation to
+  `Descend.Reaches`, which is what `HandledS` quantifies over; then
+  **`consume_fail_locates_resolved`**, which is `consume_fail_force_fires` with both of its weaknesses
+  removed (the node is a node the canonizer *visits*, and the conclusion is `≤ 1`, not merely strict).
 -/
 
 namespace ChainDescent
@@ -165,6 +178,111 @@ theorem nodeResolved_of_amenable {adj : AdjMatrix n} {χ : Colouring n} (hd : ¬
   refine ⟨c₀, Finset.mem_of_min hc₀, ?_⟩
   rw [Select.cellNarrow_targetColour hc₀]
   exact le_of_eq (forceThenConsume_singleton_of_amenable hd hA)
+
+/-! ## 4a. ★★★ `KeySeparates` ALONE IS POLY-ACHIEVABLE — the honest decomposition
+
+The scoping doc's §10.4 asks for a falsifier: *a node where the key ties the whole cell and the cell has
+≥ 2 true orbits.* For the **guarded** keys that falsifier is trivial and uninteresting — off its guard
+`orbKey` returns the constant `[]`, so any two non-automorphic branches with both guards shut tie. But
+that is a statement about the *guard*, not about the read, and the read settles the question outright:
+
+> `DeepenExact.isColAut_of_readKey_eq` is **unconditional** — equal reads of two whole-graph-discrete
+> leaves force a colour-automorphism. So the **unguarded** read *never* ties a non-automorphic pair.
+
+Hence `KeySeparates` is satisfied, globally and at poly cost, by the raw read (`rawKey` below). **This
+sharpens §10.2's label.** `KeySeparates` on its own is *not* the wall and is *not* equivalent to the
+target — it is cheap. What is GI-hard is the **conjunction**
+
+    `KeySeparates key adj`  ∧  `Force.KeyEquivariant key`
+
+and the two built keys sit on the two sides of it: `rawKey` has separation and **fails** equivariance
+(its `leafOf` breaks ties by vertex index); `orbKey`/`orbKeyG` buy equivariance with a guard and **pay
+in separation coverage** wherever the guard shuts. The guard is not protecting the *separation* — it is
+purchasing the *equivariance*, and that is the whole trade. -/
+
+/-- The unguarded read: `orbKey` with the `if` removed. **Not** `KeyEquivariant` — the greedy descent
+picks by vertex index — so it is not usable as a force key. It exists to make the decomposition above a
+theorem rather than a remark. -/
+def rawKey : Force.Key n := fun adj χ v =>
+  (Deepen.readKey adj (Descend.indivOne χ v) (Deepen.leafOf adj n (Deepen.step adj χ v)).col,
+   n * n * n * n)
+
+@[simp] theorem keyV_rawKey (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    keyV (rawKey (n := n)) adj χ v =
+      Deepen.readKey adj (Descend.indivOne χ v) (Deepen.leafOf adj n (Deepen.step adj χ v)).col :=
+  rfl
+
+/-- **★★ `KeySeparates` holds for the raw read, with no hypothesis and at `n⁴` cost.** So the predicate
+is *non-vacuous globally*, and the wall is the conjunction with `KeyEquivariant`, not this half. -/
+theorem keySeparates_rawKey (adj : AdjMatrix n) : KeySeparates (rawKey (n := n)) adj := by
+  intro χ _ u _ w _ hno hkey
+  rw [keyV_rawKey, keyV_rawKey] at hkey
+  obtain ⟨ρ, hρ, hρu⟩ :=
+    Deepen.isColAut_of_readKey_eq (χ := χ) (u := u) (w := w)
+      (Deepen.leafOf_discrete_n adj (Deepen.step adj χ u))
+      (Deepen.leafOf_lt adj n (Deepen.step adj χ u) (fun x => Deepen.step_col_lt adj χ u x))
+      (Deepen.leafOf_discrete_n adj (Deepen.step adj χ w))
+      (Deepen.leafOf_lt adj n (Deepen.step adj χ w) (fun x => Deepen.step_col_lt adj χ w x))
+      hkey
+  exact hno ρ hρ hρu
+
+/-- Consequently the forced set of the raw read is a single orbit — the exhaustiveness corollary at a
+key that satisfies its hypothesis unconditionally. -/
+theorem forcedSet_single_orbit_rawKey {adj : AdjMatrix n} {χ : Colouring n} (hd : ¬ Discrete χ)
+    {u w : Fin n} (hu : u ∈ Composite.forcedSet (rawKey (n := n)) adj χ)
+    (hw : w ∈ Composite.forcedSet (rawKey (n := n)) adj χ) :
+    ∃ σ : Equiv.Perm (Fin n), IsColAut adj χ σ ∧ σ u = w :=
+  forcedSet_single_orbit_of_keySeparatesAt (keySeparates_rawKey adj χ hd) hu hw
+
+/-! ## 5. `DescentReach ⟹ Descend.Reaches` — the bridge D1 needed
+orbKeyG
+`Select.HandledS` quantifies over `Descend.Reaches`; `DeepenLocated`'s relocation delivers
+`DescentReach`. The two step relations carry **exactly** the same side condition (a vertex with a
+same-colour partner — `Descend.Reaches.step` vs `DescentReach.cons`) and `Deepen.step` *is*
+`refineV encodeFreeFast ∘ indivOne`, so the bridge is near-definitional. Without it the node D1 produces
+is not formally known to be one the canonizer visits. -/
+
+theorem step_col_eq_refineV (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    (Deepen.step adj χ v).col
+      = Descend.refineV (Refine.encodeFreeFast (n := n)) adj (Descend.indivOne χ v) := by
+  rw [Refine.refineV_encodeFreeFast]; exact Deepen.step_col_eq adj χ v
+
+/-- **The bridge.** Everything `DescentReach` can walk to, the descent can reach. -/
+theorem reaches_of_descentReach {adj : AdjMatrix n} {χ ψ : Colouring n}
+    (h : Deepen.DescentReach adj χ ψ) :
+    Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ →
+      Descend.Reaches (Refine.encodeFreeFast (n := n)) adj ψ := by
+  induction h with
+  | refl _ => exact id
+  | cons v hp _ ih =>
+      intro hχ
+      refine ih ?_
+      obtain ⟨u, huv, hcol⟩ := hp
+      have hnd : ¬ Discrete _ := fun hdisc => huv (hdisc u v hcol)
+      have hstep := Descend.Reaches.step (v := v) hχ hnd ⟨u, huv, hcol⟩
+      rw [← step_col_eq_refineV] at hstep
+      exact hstep
+
+/-- **★★ A consume failure locates a REACHED node that the fused resolver RESOLVES** — and which
+carries a genuine rigid decision in its branch cell. This is `DeepenExact.consume_fail_force_fires`
+with its two weaknesses removed: the node is now known to be one the canonizer visits (§5), and the
+conclusion is `NodeResolved` (`≤ 1`) rather than strict narrowing (§4). -/
+theorem consume_fail_locates_resolved {adj : AdjMatrix n} {χ : Colouring n}
+    (hr : Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ) (hd : ¬ Discrete χ)
+    (hfail : ¬ Consume.CellIsOrbit Deepen.deepenSupply adj χ) :
+    ∃ ψ : Colouring n,
+      Descend.Reaches (Refine.encodeFreeFast (n := n)) adj ψ ∧
+      Select.NodeResolved Deepen.orbKey Deepen.deepenSupply adj ψ ∧
+      ∃ cid, Descend.targetColour ψ = some cid ∧ Deepen.RigidObstructionAt adj ψ cid := by
+  obtain ⟨ψ, hreach, hAψ, ⟨cid, hct, hobs⟩, _⟩ :=
+    Deepen.consume_fail_force_fires_guarded (Deck.deckSupply (n := n)) adj hd hfail
+  have hrψ := reaches_of_descentReach hreach hr
+  -- the obstruction itself witnesses non-discreteness: a same-colour pair no automorphism links
+  -- cannot be a single vertex (the identity would link it), so `ψ` has two vertices of colour `cid`.
+  obtain ⟨u, w, hu, hw, hno⟩ := hobs
+  have huw : u ≠ w := fun h => hno 1 (IsColAut.one adj ψ) (by simpa using h)
+  have hdψ : ¬ Discrete ψ := fun hdisc => huw (hdisc u w (hu.trans hw.symm))
+  exact ⟨ψ, hrψ, nodeResolved_of_amenable hdψ hAψ, cid, hct, ⟨u, w, hu, hw, hno⟩⟩
 
 /-- **`HandledS` on the all-`Amenable` class** — the first population of the sel-aware capability
 predicate, which `chain-descent-remaining-work.md` §1T records as having **zero** families today.

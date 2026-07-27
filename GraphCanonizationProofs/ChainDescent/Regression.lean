@@ -10,6 +10,7 @@ import ChainDescent.SelectNode
 import ChainDescent.FoldSupply
 import ChainDescent.DeckSupply
 import ChainDescent.HolKey
+import ChainDescent.DeepenGuard
 import ChainDescent.FoldFast
 
 /-!
@@ -501,5 +502,50 @@ def mp7Root : Refine.ColData 42 := Refine.warmRefineVec mp7 (fun _ => 0)
 
 #guard (Kernel.kernelGens mp7 mp7Root.col).length = 3
 #guard (Kernel.kernelGens t3 t3Root.col).length = 0
+
+/-! ## §17 — `orbKeyG` IS EXECUTABLE, and its guard is NON-VACUOUSLY open (2026-07-27)
+
+The poly-guarded force key shipped `noncomputable`, guarded by a `Classical.dec` placeholder, so **no
+`#guard` could exist for it** and every firing measurement lived in Python probes. `DeepenGuard` §5 now
+decides `CertPath` by the orbit BFS (`Consume.decidableWordReach`), so the key evaluates and the
+behaviour is gated here.
+
+**⚠ Why `certPathCost > 0` is the discriminator, not `CertPath = true`.** By AKRV's rigid collapse
+(scoping doc §8.4) a guard can hold with **zero levels to certify** — if one individualization already
+discretizes, `chooseIdK` returns `none` immediately and the guard is *vacuously* open. Measured on
+`G8`: **4 of its 8 branches are vacuous (cost 0) and 4 are substantive (cost 135168)**. A guard witness
+that does not also pin a non-zero `certPathCost` proves nothing, which is the `mp7`-fires-totally lesson
+in its cost form. Every OPEN guard below is pinned substantive.
+
+Also recorded: **`deck2Supply` is not a superset of `deckSupply` for this guard** — `C5` certifies under
+`deckSupply` at every branch and fails under `deck2Supply` at branch 0. That is the direct argument for
+the *union* of the equivariant supplies (scoping doc §7.3 item 4), and it is measured, not assumed. -/
+
+/-! Guard OPEN and SUBSTANTIVE on every branch of `C5` under `deckSupply` (5 branches, cost 13125
+each, so ≥ 1 level genuinely certified). -/
+#guard (Descend.branches (Refine.warmRefineVec C5 (fun _ => 0)).col).all (fun v =>
+  decide (Deepen.CertPath (Deck.deckSupply (n := 5)) C5 5
+      (Deepen.step C5 (Refine.warmRefineVec C5 (fun _ => 0)).col v))
+  && (0 < Deepen.certPathCost (Deck.deckSupply (n := 5)) C5 5
+      (Deepen.step C5 (Refine.warmRefineVec C5 (fun _ => 0)).col v)))
+
+/-! The key therefore FIRES there — a non-empty read, not the `[]` deferral. -/
+#guard (Force.keyV (Deepen.orbKeyG (Deck.deckSupply (n := 5))) C5
+  (Refine.warmRefineVec C5 (fun _ => 0)).col 0).length = 30
+
+/-! `G8` — a PARTIALLY-firing witness (the recorded equivariance-falsifier shape). Guard open on all
+8 branches, but substantive on exactly 4: the vacuity trap above, in the record. -/
+#guard ((Descend.branches (Refine.warmRefineVec G8 (fun _ => 0)).col).filter (fun v =>
+  0 < Deepen.certPathCost (Deck.deckSupply (n := 8)) G8 8
+      (Deepen.step G8 (Refine.warmRefineVec G8 (fun _ => 0)).col v))).length = 4
+
+/-! Guard SHUT on `t3` under `deckSupply` — a real deferral (the key returns `[]`, force does not
+act, `①` is untouched). The firing loss `CertPath S ⟹ AmenablePath`, never the converse, is observable. -/
+#guard (Descend.branches t3Root.col).all (fun v =>
+  !decide (Deepen.CertPath (Deck.deckSupply (n := 15)) t3 15 (Deepen.step t3 t3Root.col v)))
+
+/-! `deck2Supply` ⊅ `deckSupply` at this guard — the measured case for taking the UNION. -/
+#guard !decide (Deepen.CertPath (Deck2.deck2Supply (n := 5)) C5 5
+  (Deepen.step C5 (Refine.warmRefineVec C5 (fun _ => 0)).col 0))
 
 end ChainDescent.Regression

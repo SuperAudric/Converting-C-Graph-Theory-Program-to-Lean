@@ -749,6 +749,23 @@ theorem mem_orbit_iff_wordReach {G : List (Equiv.Perm (Fin n))} {b m : Fin n} :
     m ∈ orbit G b ↔ WordReach G b m :=
   ⟨wordReach_of_mem_iterate n m, mem_orbit_of_wordReach⟩
 
+/-- **★ `WordReach` IS DECIDABLE, and the decision procedure is the orbit BFS itself.** `orbit` is a
+computable `n`-round fixpoint and the equivalence above is already proved, so this is one
+`decidable_of_iff` — no `Classical.dec`, no search over `Equiv.Perm (Fin n)`.
+
+This is what lets a *supply-guarded* object be **executable** rather than classically stubbed; see
+`Deepen.orbKeyG`, whose guard was a `Classical.dec` placeholder until this instance existed. -/
+instance decidableWordReach (G : List (Equiv.Perm (Fin n))) (u w : Fin n) :
+    Decidable (WordReach G u w) :=
+  decidable_of_iff (w ∈ orbit G u) mem_orbit_iff_wordReach
+
+/-- Hence **`CellIsOrbit` is decidable** — two bounded `∀`s over the branch cell, each disjunct decided
+by the BFS above. The cost is the honest one: `≤ |cell|²` orbit closures. -/
+instance decidableCellIsOrbit (S : Supply n) (adj : AdjMatrix n) (χ : Colouring n) :
+    Decidable (CellIsOrbit S adj χ) := by
+  unfold CellIsOrbit
+  infer_instance
+
 /-- Word-reachability is **transitive**. -/
 theorem WordReach.trans {G : List (Equiv.Perm (Fin n))} {u m w : Fin n}
     (h₁ : WordReach G u m) (h₂ : WordReach G m w) : WordReach G u w := by

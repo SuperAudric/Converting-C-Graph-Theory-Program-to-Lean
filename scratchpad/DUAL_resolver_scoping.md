@@ -579,7 +579,7 @@ The measured firing rate is §7.2's table above (depth-0 lower bound): **120 of 
 Chang family, **0** on the disjoint-cycle and MIXED witnesses. The obvious next lever is depth — the
 proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a different guard shape.
 
-### 7.3 The rest of the open ledger (all `②`, none `①`) — ⚠ item 2 is now DONE, see §10
+### 7.3 The rest of the open ledger (all `②`, none `①`) — ⚠ items 2, 3, 5, 6, 8 are DONE (§10.5)
 
 1. **Nesting depth.** D1 relocates work to a deeper node; the product over relocations is not bounded.
    `DescentReach` + `ncol` bound the number of *steps* by `n`, not the branch factor. **Still open.**
@@ -831,11 +831,40 @@ Stated at the node level this says: **under `KeySeparatesAt`, `CellResolved`'s d
 exhaustive** — if the key does not separate the cell, the survivors are semantically one orbit. Granted
 globally it gives `ResolvedAll` ⟹ `Handled` ⟹ the flag never fires.
 
-**⚠ Label it correctly: UNIFICATION, not weakening.** A single-orbit cell contains **no**
-non-automorphic pairs, so "separates every non-automorphic pair" has no exception clause to relax — a
-key with the property globally *is* the target. What the reduction buys is **one** carried predicate
-about an object under construction instead of two coupled ones (`Amenable` on consume,
+**⚠ Label it correctly: UNIFICATION, not weakening.** What the reduction buys is **one** carried
+predicate about an object under construction instead of two coupled ones (`Amenable` on consume,
 `SolverSeparates` on force). The precedent verdict is `hImprim`'s: *consolidation, not breakthrough.*
+
+#### ⚠⚠ CORRECTION (same day, `keySeparates_rawKey`) — `KeySeparates` alone is NOT the wall
+
+An earlier draft of this block said *"a key with the property globally **is** the target."* **That is
+wrong, and the correction sharpens the decomposition rather than weakening it.**
+
+`DeepenExact.isColAut_of_readKey_eq` is **unconditional**: equal reads of two whole-graph-discrete
+leaves force a colour-automorphism. So the **unguarded** read never ties a non-automorphic pair, and
+
+> **`KeyComplete.keySeparates_rawKey` — `KeySeparates` holds globally, for a poly (`n⁴`) key, with no
+> hypothesis.**
+
+`KeySeparates` on its own is therefore *cheap*. The GI-hard object is the **conjunction**
+
+    KeySeparates key adj  ∧  Force.KeyEquivariant key
+
+and the built keys sit on opposite sides of it:
+
+| key | separates | equivariant | why |
+|---|---|---|---|
+| `rawKey` | ✅ **unconditionally** (`keySeparates_rawKey`) | ❌ | `leafOf` breaks ties by vertex index |
+| `orbKey` / `orbKeyG S` | only where the guard is open | ✅ (`keyEquivariant_orbKey{,G}`) | the guard is exactly the equivariance repair |
+
+**⟹ The guard purchases EQUIVARIANCE, not separation.** That re-reads every "guard strength"
+measurement in §7.2/§7.3: the shut-guard nodes are not places where the read fails to see the
+difference — the read sees it fine — they are places where the read is not yet known to be
+labelling-independent. Coverage work should target the *equivariance* side.
+
+**And it retires §10.4's falsifier hunt as posed.** For a guarded key the falsifier is trivial and
+uninformative (any two non-automorphic branches whose guards are both shut tie at the constant `[]`);
+for the raw read it provably does not exist. Nothing needs measuring here.
 
 ### 10.3 ⛔ The obituaries — this is a REPAIRED dead route, and there are TWO of them
 
@@ -875,6 +904,12 @@ deferred."** Concretely: `orbKey` off its guard returns the constant `[]`, so it
 *negation* vacuously. This is why `KeyComplete` §3's instantiations carry the guard as an explicit
 hypothesis and the file does **not** claim any built key satisfies the global `KeySeparates`.
 
+**⚠ RESOLVED by `keySeparates_rawKey` (§10.2's correction) — do not run this hunt.** The FORK's warning
+is real but it bites the *guard*, not the read: the read provably never ties a non-automorphic pair, so
+a "falsifier" can only be a node where the guard is shut at both branches, which is a restatement of
+the guard's coverage and not new information. The paragraph below is retained because its analysis of
+the **VT exception** is unaffected and still governs any *structural* VT test.
+
 Two readings of the "VT exception", both landing on the wall:
 1. **VT = "the branch cell is a single `Aut(G,χ)`-orbit."** The exception is *vacuous* (no
    non-automorphic pairs there), so the hypothesis is a perfect key = the target.
@@ -884,8 +919,43 @@ Two readings of the "VT exception", both landing on the wall:
    attempt carried; it relocates it into *which cells the key is excused on*. A 2-orbit cell the
    structural test calls VT is precisely the hole.
 
-**▶ The falsifier to hunt, before any global claim:** a node where the key ties the whole cell and the
-cell has ≥ 2 true orbits. §4.1 measured `blocks-tied = 0` on 13 witnesses — but with the *cert* key, on
-families §4.1's own ⚠ block calls easy for I-R, and the standing steer is that an equivariance/
-completeness falsifier must be run on a **partially-firing** witness. Start at the CFI-cubic `m = 8`
-node (§2.1, §7.1): that is where exactness and invariance parted last time.
+**▶ ⚠ The falsifier hunt this section proposed is RETIRED** — see the note above and §10.2's
+correction. It was misconceived: the read provably never ties a non-automorphic pair
+(`isColAut_of_readKey_eq` is unconditional), so for `rawKey` no falsifier exists, and for a guarded key
+one exists trivially wherever both guards are shut. Neither outcome is information.
+
+---
+
+### 10.5 ✅ LANDED — the executable guard, the honest bill, the `Reaches` bridge (gate 878 s, 105 mods)
+
+All axiom-clean. Ledger items 2, 3, 5, 6 and 8 of §7.3 are discharged.
+
+| | statement | name |
+|---|---|---|
+| **decidable** | `WordReach` is decided by the orbit BFS — `mem_orbit_iff_wordReach` was already proved, so it is one `decidable_of_iff`; hence `CellIsOrbit` (`List.decidableBAll`) and `CertPath` (structural recursion) | `Consume.decidableWordReach`, `Consume.decidableCellIsOrbit`, `Deepen.instDecidableCertPath` (+ `certPath_none/_nil/_cons` equation lemmas) |
+| **executable** | **`orbKeyG` is a plain `def`** — the `Classical.dec` placeholder is gone, the key evaluates | `Deepen.orbKeyG` |
+| **billed** | the guard's own work, along its own recursion: per level one reachability test **plus one call to `S`**, at the colouring that level visits; bound parametric in the supply's `c₂` | `Deepen.certPathCost`, `certPathCost_le`, **`keyCost_orbKeyG_le`** (`≤ n⁴ + n·(n⁴+c₂)`) |
+| **bridge** | `DescentReach ⟹ Descend.Reaches` (same side condition, `step = refineV encodeFreeFast ∘ indivOne`) | `KeyComplete.reaches_of_descentReach` |
+| **the hook, repaired** | `consume_fail_force_fires` with **both** weaknesses removed — the located node is one the canonizer *visits*, and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing | **`KeyComplete.consume_fail_locates_resolved`** |
+| **separation is cheap** | `KeySeparates` holds globally for the unguarded read at `n⁴` | **`KeyComplete.keySeparates_rawKey`** (§10.2's correction) |
+
+**⚠ Why `②` at this key was previously unfalsifiable, and is not now.** The key shipped a flat `n⁴`,
+which prices the *read* (`leafOf`: `≤ n` warm refinements) and **nothing** of the guard — the 2026-07-14
+"`Key`/`Supply` were cost-free" finding recurring. `keyCost_orbKeyG_le` is parametric in the supply's
+own bound, so a supply with an exponential `supplyCost` now yields an exponential `keyCost` instead of
+disappearing behind a constant.
+
+#### ⚠⚠ MEASURED, and it changes §7.3 item 4's recommendation (`Regression` §17)
+
+The key is now `#guard`-able, so the firing evidence is no longer Python-only. Two findings:
+
+* **A `CertPath = true` guard can be VACUOUS, and the first witness tried was.** By AKRV's rigid
+  collapse (§8.4) a guard holds trivially when one individualization already discretizes —
+  `chooseIdK` returns `none`, there are **zero levels to certify**. Measured on `G8`: the guard opens
+  on all 8 branches but `certPathCost = 0` on **4 of them** and `135168` on the other 4. **So the
+  discriminator is `certPathCost > 0`, not `CertPath`** — the `mp7`-fires-totally lesson in its cost
+  form, now mechanically checkable. Every OPEN guard in `Regression` §17 pins it substantive.
+* **`deck2Supply` is NOT a superset of `deckSupply` at this guard.** `C5` certifies under `deckSupply`
+  at every branch (cost 13125 each) and **fails** under `deck2Supply` at branch 0. ⟹ §7.3 item 4's
+  "take `S` deeper" is the wrong lever; the **union** of the equivariant supplies is the right one, and
+  this is measured rather than argued. (`SameOrbits`-licensing remains the other candidate.)

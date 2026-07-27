@@ -24,7 +24,12 @@ descent, so it inherits exactly that descent's labelling dependence. A guard bui
 * **INVARIANT** (§2, §4) — `CellIsOrbit S` transports (`cellIsOrbit_transport`, from
   `SupplyEquivariant` + `branches_transport_perm`), and the per-level index-pick mismatch is absorbed
   exactly as in `amenablePath_transport`, with SOUND supplying the stabiliser element.
-* **POLY** — if `S` is.
+* **POLY, and now genuinely EXECUTABLE** (§5, §5a) — `Consume.decidableWordReach` decides `WordReach`
+  by the orbit BFS that `mem_orbit_iff_wordReach` already characterises, so `CellIsOrbit` and then
+  `CertPath` are decidable by structural recursion and `orbKeyG` is a plain `def`. The `Classical.dec`
+  placeholder this file shipped with is gone. The guard's own work is **billed** along the same
+  recursion (`certPathCost`, bound `certPathCost_le`), so `②` at this key is a real claim rather than a
+  restatement of a declared constant.
 
 Five supplies already carry `GensEquivariant` (hence `SupplyEquivariant` via
 `supplyEquivariant_of_gensEquivariant`): `deckSupply`, `deck2Supply`, `foldSupply`, `foldSupplyFast`,
@@ -265,29 +270,130 @@ theorem certPath_step_transport_iff {S : Supply n} (hS : SupplyEquivariant S)
     exact certPath_transport hS adj n (step adj χ v)
       (step (relabelAdj σ adj) (transportColouring σ χ) (σ v)) σ (step_transport σ adj χ v) h
 
-/-! ## 5. `orbKeyG` — the same read, the poly guard -/
+/-! ## 5. ★ THE GUARD IS DECIDABLE — no `Classical.dec`
 
-/-- Registered once so `orbKeyG` and `keyV_orbKeyG` share the instance term (which is what makes the
-projection lemma `rfl`). For a concrete poly `S` this is replaced by a genuine decision procedure —
-`CellIsOrbit S` is a finite `WordReach` reachability test on the branch cell. -/
-noncomputable instance instDecidableCertPath (S : Supply n) (adj : AdjMatrix n) (fuel : Nat)
-    (cur : Refine.ColData n) : Decidable (CertPath S adj fuel cur) := Classical.dec _
+The equation lemmas first (the recorded `deepen` match-reduction recipe: reduce only through
+`simp only [CertPath, h, hf]`, never by unfolding in place and then `cases`-ing on `chooseIdK`, which
+descends into its internal `foldl`). -/
+
+theorem certPath_none {S : Supply n} {adj : AdjMatrix n} {fuel : Nat} {cur : Refine.ColData n}
+    (h : chooseIdK (List.finRange n) cur.col = none) :
+    CertPath S adj (fuel + 1) cur ↔ True := by
+  simp only [CertPath, h]
+
+theorem certPath_nil {S : Supply n} {adj : AdjMatrix n} {fuel : Nat} {cur : Refine.ColData n}
+    {cid : Nat} (h : chooseIdK (List.finRange n) cur.col = some cid)
+    (hf : (List.finRange n).filter (fun v => cur.col v == cid) = []) :
+    CertPath S adj (fuel + 1) cur ↔ (CellIsOrbit S adj cur.col ∧ True) := by
+  simp only [CertPath, h, hf]
+
+theorem certPath_cons {S : Supply n} {adj : AdjMatrix n} {fuel : Nat} {cur : Refine.ColData n}
+    {cid : Nat} {w : Fin n} {rest : List (Fin n)}
+    (h : chooseIdK (List.finRange n) cur.col = some cid)
+    (hf : (List.finRange n).filter (fun v => cur.col v == cid) = w :: rest) :
+    CertPath S adj (fuel + 1) cur ↔
+      (CellIsOrbit S adj cur.col ∧ CertPath S adj fuel (step adj cur.col w)) := by
+  simp only [CertPath, h, hf]
+
+/-- **★★ `CertPath` IS DECIDABLE.** Structural recursion on the fuel; each level is one
+`Consume.decidableCellIsOrbit` test (the orbit BFS), no search over `Equiv.Perm (Fin n)`. This replaces
+the `Classical.dec` placeholder the file shipped with, and is what makes `orbKeyG` **computable** — the
+last `noncomputable` between this track and `Publication.canonForm?`.
+
+⚠ `orbKey` is *not* repairable this way and should stay the theory-side object: its `AmenablePath`
+guard asks whether a cell is a single orbit of the *whole* colour-automorphism group, which is the
+automorphism-partition problem (GI-complete, Booth–Colbourn §2.3). `CertPath` asks the same question of
+a *supply's verified generators*, which is a finite reachability test. -/
+instance instDecidableCertPath (S : Supply n) (adj : AdjMatrix n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n), Decidable (CertPath S adj fuel cur)
+  | 0, _ => inferInstanceAs (Decidable True)
+  | fuel + 1, cur =>
+      match hco : chooseIdK (List.finRange n) cur.col with
+      | none => decidable_of_iff _ (certPath_none (S := S) (adj := adj) (fuel := fuel) hco).symm
+      | some cid =>
+          match hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
+          | [] => decidable_of_iff _ (certPath_nil (S := S) (adj := adj) (fuel := fuel) hco hfl).symm
+          | w :: rest =>
+              have : Decidable (CertPath S adj fuel (step adj cur.col w)) :=
+                instDecidableCertPath S adj fuel (step adj cur.col w)
+              decidable_of_iff _ (certPath_cons (S := S) (adj := adj) (fuel := fuel) hco hfl).symm
+
+/-! ## 5a. The guard's own COST — billed, not assumed
+
+⚠ The key shipped with a flat `n⁴`, which prices the *read* (`leafOf`: `≤ n` levels of warm refinement)
+and **nothing of the guard**. That is the 2026-07-14 "`Key`/`Supply` were cost-free ⟹ `②` is
+unfalsifiable" finding recurring, so the guard is billed here along its own recursion: per level, one
+`CellIsOrbit` test (`≤ n²` orbit closures, each `≤ n²`) **plus one call to `S`**, at the colouring the
+level actually visits. -/
+
+def certPathCost (S : Supply n) (adj : AdjMatrix n) : Nat → Refine.ColData n → Nat
+  | 0, _ => 0
+  | fuel + 1, cur =>
+      match chooseIdK (List.finRange n) cur.col with
+        | none => 0
+        | some cid =>
+            (n * n * n * n + Consume.supplyCost S adj cur.col) +
+            (match (List.finRange n).filter (fun v => cur.col v == cid) with
+             | [] => 0
+             | w :: _ => certPathCost S adj fuel (step adj cur.col w))
+
+/-- **The guard's cost is `fuel` levels of (reachability + one supply call).** Parametric in the
+supply's own bound `c₂`, exactly the `SupplyCost` pattern — so this is a real bound, not a restatement
+of a declared constant. -/
+theorem certPathCost_le {S : Supply n} {adj : AdjMatrix n} {c₂ : Nat}
+    (hS : ∀ χ : Colouring n, Consume.supplyCost S adj χ ≤ c₂) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n),
+      certPathCost S adj fuel cur ≤ fuel * (n * n * n * n + c₂) := by
+  intro fuel
+  induction fuel with
+  | zero => intro cur; simp [certPathCost]
+  | succ fuel ih =>
+      intro cur
+      cases hco : chooseIdK (List.finRange n) cur.col with
+      | none => simp only [certPathCost, hco]; exact Nat.zero_le _
+      | some cid =>
+          cases hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
+          | nil =>
+              simp only [certPathCost, hco, hfl]
+              have : n * n * n * n + Consume.supplyCost S adj cur.col
+                  ≤ n * n * n * n + c₂ := Nat.add_le_add_left (hS _) _
+              calc n * n * n * n + Consume.supplyCost S adj cur.col + 0
+                  ≤ n * n * n * n + c₂ := by omega
+                _ ≤ (fuel + 1) * (n * n * n * n + c₂) := Nat.le_mul_of_pos_left _ (by omega)
+          | cons w rest =>
+              simp only [certPathCost, hco, hfl]
+              have h1 : n * n * n * n + Consume.supplyCost S adj cur.col
+                  ≤ n * n * n * n + c₂ := Nat.add_le_add_left (hS _) _
+              have h2 := ih (step adj cur.col w)
+              have : (fuel + 1) * (n * n * n * n + c₂)
+                  = (n * n * n * n + c₂) + fuel * (n * n * n * n + c₂) := by ring
+              omega
+
+/-! ## 6. `orbKeyG` — the same read, the poly guard, the billed cost -/
 
 /-- **★★★ THE GUARDED KEY.** Identical to `orbKey` except that the `if` tests the *observable*
-`CertPath S` instead of `AmenablePath`. Computable whenever `CellIsOrbit S` is decidable and `S` is
-poly; `Classical.dec` is used here only so the definition elaborates without committing to a decision
-procedure for a general `S`. -/
-noncomputable def orbKeyG (S : Supply n) : Force.Key n := fun adj χ v =>
+`CertPath S` instead of `AmenablePath` — and, since §5, it is **computable**: the guard is the orbit
+BFS, not a classical choice. The cost bills the read (`n⁴`) *and* the guard (`certPathCost`). -/
+def orbKeyG (S : Supply n) : Force.Key n := fun adj χ v =>
   (if CertPath S adj n (step adj χ v)
      then readKey adj (Descend.indivOne χ v) (leafOf adj n (step adj χ v)).col
      else [],
-   n * n * n * n)
+   n * n * n * n + certPathCost S adj n (step adj χ v))
 
 @[simp] theorem keyV_orbKeyG (S : Supply n) (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
     Force.keyV (orbKeyG S) adj χ v =
       if CertPath S adj n (step adj χ v)
         then readKey adj (Descend.indivOne χ v) (leafOf adj n (step adj χ v)).col
         else [] := rfl
+
+/-- **★★ THE KEY'S BILL, in the `SupplyCost` shape** — read (`n⁴`) plus guard (`≤ n` levels of one
+reachability test and one supply call each). Parametric in the supply's own bound `c₂`, so it is a real
+`②` statement: a supply with an exponential `supplyCost` gives an exponential `keyCost` here, which is
+exactly what the flat declared constant could not express. -/
+theorem keyCost_orbKeyG_le {S : Supply n} {adj : AdjMatrix n} {c₂ : Nat}
+    (hS : ∀ χ : Colouring n, Consume.supplyCost S adj χ ≤ c₂) (χ : Colouring n) (v : Fin n) :
+    Force.keyCost (orbKeyG S) adj χ v ≤ n * n * n * n + n * (n * n * n * n + c₂) :=
+  Nat.add_le_add_left (certPathCost_le hS n (step adj χ v)) _
 
 /-- **★★★ `①` FOR THE POLY-GUARDED KEY.** The guard transports (§4) and the value transports along the
 `AmenablePath` the guard implies (§3 + `leafOf_transport_of_amenablePath`). No hypothesis beyond `S`
