@@ -144,6 +144,7 @@ MODULES=(
   ChainDescent.DeepenCrux             # C3b: crux decomposed + soundness half (deepenGens_sound)
   ChainDescent.DeepenAmenable         # C3b track A: ①c modulo {Amenable}; rigid handoff lemmas
   ChainDescent.DeepenCertified        # C3b: Amenable as a RUN-TIME CERTIFICATE (Certified ⟹ Amenable)
+  ChainDescent.DeepenLocated          # C3b: consume failure LOCATED at a reachable Amenable+obstructed node
 
   # ── W2 solvability route (gauge complex → solvable) ──
   ChainDescent.GaugeComplex           # W2 Tier-A: split-vs-count localization spine

@@ -827,3 +827,57 @@ failure**; A2 only buys the *poly* version.
 **Explicitly out of scope:** none of this touches the block-**ordering** wall of §7.3/§8. `orbKey` orders
 blocks only where `Amenable` holds; where it does not, D relocates the work deeper rather than ordering
 it. That is the honest boundary.
+
+## 15. ✅ LANDED — workstream C (`ChainDescent/DeepenLocated.lean`), 2026-07-27
+
+Gate green (`bash /workspace/scripts/build.sh`, **211 s**); in `build.sh` after `DeepenCertified`. All
+**10** theorems `[propext, Classical.choice, Quot.sound]`; no `sorry`, no new `axiom`.
+
+| | statement | name |
+|---|---|---|
+| C1 | `DescentReach` — reachable by *proper* descent steps (individualize a vertex **with a same-colour partner**, then warm-refine) + `trans` | `DescentReach`, `DescentReach.trans` |
+| C1a | one proper step strictly raises `ncol`; reachability never lowers it | `ncol_lt_step_of_partner`, `ncol_le_of_descentReach` |
+| C1b | a `chooseIdK` level's pick has a partner (from `chooseIdK_mem`) | `partner_of_chooseIdK` |
+| **C2 (L2)** | `¬AmenablePath ⟹ ∃ ψ` **reachable**, with `Descend.targetColour ψ = some cid` ∧ `RigidObstructionAt adj ψ cid` — the obstruction is at a **reachable node's BRANCH CELL** | **`not_amenablePath_located`** |
+| **C3 (L3)** | `¬Amenable adj χ ⟹ ∃ ψ` reachable with **`Amenable adj ψ`** ∧ obstruction at `ψ`'s branch cell | **`not_amenable_deepest`** (+ `_aux`) |
+| — | the `Amenable` (not `Certified`) form of `DeepenCertified` §4 | `consume_fail_real_decision_of_amenable`, `rigidObstructionAt_branch_of_amenable` |
+| **D-entry** | every consume failure is located: *either* a decision in **this** cell (node `Amenable`) *or* at a reachable node carrying **both** hypotheses | **`consume_fail_locates`** |
+
+**What changed relative to L0.** `not_amenablePath_imp_rigidObstruction` returns `∃ χc cid` naming no
+reachable colouring and no branch cell — force cannot act on it, since `forceBy` fires *at a node*. C2/C3
+return a node the descent stands on, with the obstruction at the cell `Descend.targetColour` selects
+there (via the landed selector identity `chooseIdK_eq_targetColour`), and — the point of C3 — a node that
+is **simultaneously `Amenable`**, which is what an orbit-separating equivariant key needs (§14.2/§14.3).
+
+**Termination** is `Descend.ncol`, the same measure `deepen_succeeds` uses: each `DescentReach` step is
+*proper*, so `ncol` strictly rises and is capped by `n`. The base case needs no discreteness lemma —
+`¬Amenable` itself produces a branch vertex, hence a partner, hence `ncol χ < n`.
+
+### 15.1 ⚠ Non-vacuity — CHECKED, per the standing steer
+
+The conclusion is a conjunction (`Amenable ψ` **and** a mixed branch cell at `ψ`) and could have been
+empty. It is not. Bounded descent sweeps (`scratchpad/probe_orbit_oracle.py`), counting nodes that are
+`Amenable` **and** whose branch cell carries ≥ 2 `Aut`-orbits — i.e. inhabitants of C3's conclusion:
+
+| C3+C4 | C4+C5 | C3+C4+C5 | Shrikhande⊎Rook(4,4) | Chang-A | Chang-B | MIXED multipede | **total** |
+|---|---|---|---|---|---|---|---|
+| 1 | 1 | 24 | 1 | 24 | 48 | 1 | **100** |
+
+Note also that the conjunction cannot degenerate: the obstruction requires `targetColour ψ = some cid`,
+so `ψ` is **not** discrete and `Amenable ψ` is a real constraint, not the vacuous `branches = []` case.
+
+**The C3 iteration validated directly** on a measured `¬Amenable` node (Chang-B root):
+
+```
+start : Amenable=False, branch-cell orbits=2   (ncol=2)
+step 1: Amenable=False, branch-cell orbits=4   (ncol=3)
+step 2: Amenable=TRUE , branch-cell orbits=2   (ncol=10)   <- the hook node
+```
+Two steps, `ncol` strictly rising exactly as the termination measure predicts, terminating on a node with
+both properties.
+
+### 15.2 Next
+
+**Workstream A** (`orbKey` + `KeyEquivariant`) is now the only thing between C3 and D1
+(`forceBy_narrows_of_key_ne` at `ψ`). A2 — threading `amenablePath_transport`'s accumulated `τ * σ` into
+the conclusion — remains the one risky lemma, with the min-over-cell key as the stated fallback (§14.6).
