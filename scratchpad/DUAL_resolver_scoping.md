@@ -881,3 +881,64 @@ both properties.
 **Workstream A** (`orbKey` + `KeyEquivariant`) is now the only thing between C3 and D1
 (`forceBy_narrows_of_key_ne` at `ψ`). A2 — threading `amenablePath_transport`'s accumulated `τ * σ` into
 the conclusion — remains the one risky lemma, with the min-over-cell key as the stated fallback (§14.6).
+
+## 16. ✅ LANDED — workstream A (`ChainDescent/DeepenKey.lean`), 2026-07-27
+
+Gate green (`bash /workspace/scripts/build.sh`, **211 s**, 102 modules); after `DeepenLocated`. All
+12 theorems `[propext, Classical.choice, Quot.sound]` or a subset; no `sorry`, no new `axiom`.
+
+```
+orbKey adj χ v := if AmenablePath adj χ n (step adj χ v)
+                  then readKey adj (indivOne χ v) (leafOf adj n (step adj χ v)).col
+                  else []                                        -- defer
+```
+
+| plan item | statement | name |
+|---|---|---|
+| — | `Refines` + `trans`; `refines_step`, `refines_indivOne`, `refines_transport` | §1 |
+| — | **a colour-automorphism of a FINE colouring fixes every COARSER one** — what carries the parent colouring through the accumulated isomorphism | `transport_eq_of_isColAut_refines` |
+| — | `leafOf` + its three equation lemmas (⚠ reduce **only** through these — unfolding then `cases` on `chooseIdK` hits the recorded `foldl` trap) | §2 |
+| **A2 ★** | `AmenablePath` ⟹ the two **leaves** are related by an accumulated isomorphism `ρ`, and `ρ` acts on any refined-from colouring exactly as `σ` does | **`leafOf_transport_of_amenablePath`** |
+| A1 | the invariant read + its transport | `readAt/readColAt/readKey_transport`, `filter_col_transport` |
+| A3 | the guard is relabelling-invariant **both ways** | `amenablePath_step_transport_iff` |
+| **A4 ★★** | **`Force.KeyEquivariant orbKey` — no hypothesis** | **`keyEquivariant_orbKey`** |
+
+**A2 came in as predicted**: `amenablePath_transport` already builds `τ * σ` level by level, so this is
+that proof with the accumulator threaded into the conclusion. The one thing the plan under-specified was
+the **parent-colouring component**: a leaf-*adjacency* read alone only proves the two *uncoloured*
+individualized graphs are isomorphic, which does not give "same orbit". Carrying `indivOne χ v` needs the
+relating `ρ` to act on it like `σ`, which needs `τ` to fix it — hence the `Refines` invariant threaded
+through the induction (`transport_eq_of_isColAut_refines`). Not in the plan; small and mechanical.
+
+**Consequence.** `Force.force_canonizer` and `Composite.composite_canonizer` now apply to
+`forceBy orbKey` / `forceThenConsume orbKey S` with **nothing left to discharge** — `KeyEquivariant` is
+their sole `①` obligation.
+
+### 16.1 Measured — `orbKey` FIRES and is EXACT at hook nodes
+
+`probe_orbit_oracle.py` extended with faithful ports of the Lean `indivOne` (`2·χx + [x=v]`), `step`,
+`leafOf` and `readKey`. At every **hook node** (`Amenable` ∧ branch cell with ≥ 2 orbits — C3's
+conclusion):
+
+| C3+C4 | C4+C5 | C3+C4+C5 | Shrikhande⊎Rook | Chang-A | Chang-B | MIXED | **total** |
+|---|---|---|---|---|---|---|---|
+| 1/1/1 | 1/1/1 | 12/12/12 | 0 | 108/108/108 | 24/24/24 | 1/1/1 | **147 / 147 / 147** |
+
+(hooks / `orbKey` fires / fibres == true `Aut`-orbits exactly). **Every leaf discrete** (0 exceptions),
+which is what makes the read complete. ⚠ Hook counts differ from §15.1's 100 because this probe uses the
+Lean `indivOne` ordering (v lands *after* its cellmates) rather than the earlier probe's rank ordering —
+a different descent tree, so a different but equally valid sample, not a re-measurement.
+
+So on this evidence D1 (`forceBy orbKey` strictly narrows at the located node) and even D2 (narrows to a
+single orbit block) hold; workstream B is now a *proof* task with the design validated, not a gamble.
+
+### 16.2 What B needs, sharpened by the build
+
+1. **`leafOf` at fuel `n` is discrete** — the same `ncol` argument as `deepen_succeeds`
+   (`ncol_lt_step_of_partner` is already isolated in `DeepenLocated`). Measured: 0 non-discrete leaves.
+2. **B1, and it is now clearly clean.** With a discrete leaf, `readKey u = readKey w` gives `ρ` with
+   `relabelAdj ρ adj = adj` and `transportColouring ρ (indivOne χ u) = indivOne χ w`. The odd values of
+   `indivOne χ u` occur **exactly at `u`** (parity), so that second equation forces `ρ u = w`, and
+   halving recovers `IsColAut adj χ ρ`. No `Amenable` needed for this direction — it is the *firing*
+   direction, exactly as §14.3 predicted.
+3. **B3/D1** is then one line from `Force.forceBy_narrows_of_key_ne`.
