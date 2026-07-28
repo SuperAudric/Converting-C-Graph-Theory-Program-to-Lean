@@ -16,9 +16,17 @@
 
 ## ▶▶▶ STATUS (2026-07-27) — ★★★ THE CONSUME→FORCE HOOK IS CLOSED; a POLY guard exists
 
+> **▶▶▶ THE ARC IS FINISHED (2026-07-28). For the handoff, read
+> [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)'s ▶▶▶ HANDOFF block (top of its
+> CURRENT FRONTIER section) — it names the state, the next three steps, and the do-not-re-open list.
+> Gate EXIT 0 / 107 modules.** This doc's STATUS blocks are the *deepen-side* record of how the arc got
+> there; the nine modules in dependency order are `DeepenCertified → DeepenLocated → DeepenKey →
+> DeepenExact → DeepenGuard → KeyComplete → ForcePick → RecordCost → RecordKey`.
+>
 > **AUTHORITATIVE LIVE DOC FOR THIS ARC: [`scratchpad/DUAL_resolver_scoping.md`](../scratchpad/DUAL_resolver_scoping.md)**
-> (STATUS block → §1 object → §2 measurements → §3 the landed chain → §7 frontier; **§9 is provenance,
-> not live**). Everything below this block is the pre-2026-07-27 framing, kept for provenance.
+> (its ▶▶▶ WHAT A FRESH READER PICKS UP block → §1 object → §2 measurements → §3 the landed chain →
+> §10 the current state; **§9 is provenance, not live**). Everything below this block is the
+> pre-2026-07-27 framing, kept for provenance.
 >
 > **Six modules landed, gate green (`bash /workspace/scripts/build.sh`, EXIT 0, 105 modules), every
 > theorem `[propext, Classical.choice, Quot.sound]`, no `sorry`, no new `axiom`:**

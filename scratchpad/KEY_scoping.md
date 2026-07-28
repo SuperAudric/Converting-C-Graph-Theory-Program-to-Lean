@@ -30,7 +30,19 @@
 >   equivariance a *Finset equality*, so `kmin?` needed no permutation-invariance lemma at all.
 > · **Increment 3's prerequisite is also done** — the record object's `②` (`RecordCost.lean`,
 >   `descentCostS_selNode_record_le`), i.e. the measurement instrument §4's "Sequence unchanged" line
->   names. **Next per that line: 3g (integration) → Track R P2.**
+>   names.
+> · **✅ AND 3g IS DONE TOO (`ChainDescent/RecordKey.lean`, DUAL §10.10).** `pairKey` = plain
+>   concatenation under **`ConstLen k₁`**; `recordKey = pairKey holKeyFast (orbKeyG guardSupply)` with
+>   `①` + `②`. ⚠ Measured non-vacuous: `G8` cell **8 → 2** where `holKeyFast` keeps all 8.
+>   ⚠⚠ **A trap this increment found:** the "obvious" product encoding `(len a :: a) ++ (len b :: b)`
+>   is **wrong** — it orders the first component by *shortlex*, which `lexLeList` is not, so it
+>   re-orders `holKeyFast`'s own narrowing. Do not re-propose it.
+>
+> **▶ NEXT (unchanged in shape, one step advanced): the `Publication` swap — `canonForm?` onto
+> `RecordKey.recordKey` TOGETHER WITH reshaping the `②` bound into the pinned `costConst * n ^ costDeg`
+> monomial (one pass; both touch pinned statements) → then item 1's equivariance half → then Track R
+> P2.** §3's ladder is unchanged by any of this: the `F₂` rung is Track R's `②`, and the poly clause is
+> still the only open one (`ForcePick.forcePick_open_clause_is_poly`).
 
 ## 0. Two defects found while scoping — read these first
 
@@ -82,7 +94,7 @@ its hypotheses are very weak**: it needs only two colourings `χa`, `χb` that a
 descent, no guard. So:
 
 > **Any map `(adj, χ, v) ↦ ψ` producing a discrete `< n` colouring induces a separating key**
-> (`readKey adj (indivOne χ v) ψ`). That is all `keySeparates_rawKey` uses.
+> (`readKey adj (indivOne χ v) ψ`). That is all `keySeparatesAll_rawKey` uses.
 
 And the converse direction is `readKey_transport`: a colour-automorphism sends a witness for `u` to a
 witness for `σ u`, so the read's fibres **contain** the orbits. Putting the two together:
@@ -111,7 +123,7 @@ table is the consolidated view, which no single doc had.
 
 | corner | occupants | why it fails the third clause |
 |---|---|---|
-| **rich + poly**, not invariant | `KeyComplete.rawKey`, `Deepen.leafOf`, `structReadAt` under an indexed order | the discrete `ψ` is produced by a greedy/index-broken pick, so the read is a function of the labelling. `keySeparates_rawKey` ✓, `KeyEquivariant` ✗ |
+| **rich + poly**, not invariant | `KeyComplete.rawKey`, `Deepen.leafOf`, `structReadAt` under an indexed order | the discrete `ψ` is produced by a greedy/index-broken pick, so the read is a function of the labelling. `keySeparatesAll_rawKey` ✓, `KeyEquivariant` ✗ |
 | **invariant + poly**, not rich | `Force.lookaheadKey` (cell-size histogram), `refineByFrame` (1 F₂ bit ⟹ ≤ 2 classes/cell), `baseReadWL` (**REFUTED**: 10–16 classes on the rigid multipede, even iterated to a fixpoint), block-level set invariants (DUAL §6 S3: **0 of 8** forced decisions separated), `Hol.holKeyFast` (holonomy signature — invariant + poly, separation never claimed) | 1-WL-plus-a-colour is still 1-WL, and the multipede is *designed* against it |
 | **rich + invariant**, not poly | `readMin` (§4, unbuilt), `RigidRefine.readAgg` over `framesUniv` (`keyEquivariant_compKey_readAgg_univ` — ① unconditional, `|frames| = n!`), `Deepen.orbKey` (guard is an `n!` search) | the invariance is bought by aggregating over an exponential family |
 | **all three** | — | **the target** |

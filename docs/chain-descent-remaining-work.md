@@ -48,6 +48,72 @@ transfer). "Complete" = the flag provably never fires.
 
 ## ▶ CURRENT FRONTIER — the one live task, for a fresh reader
 
+> # ▶▶▶ HANDOFF (2026-07-28, end of the dual-resolver arc) — READ THIS BLOCK FIRST
+>
+> Everything below this block is dated provenance for how the arc got here. **Gate: `bash
+> /workspace/scripts/build.sh` → EXIT 0, 107 modules, no `sorry`, no new `axiom`, every theorem
+> `[propext, Classical.choice, Quot.sound]`.** (~210 s warm, ~300 s when `Regression` is rebuilt — its
+> own elaboration is ~85 s and it is the single most expensive module on the gate.)
+>
+> **State of the two live tracks.**
+> - **Track A (consume→force) is CLOSED, and its ledger is empty except item 1.** The chain is
+>   `DeepenCertified → DeepenLocated → DeepenKey → DeepenExact → DeepenGuard → KeyComplete → ForcePick
+>   → RecordCost → RecordKey` (read in that order). Authoritative:
+>   [`scratchpad/DUAL_resolver_scoping.md`](../scratchpad/DUAL_resolver_scoping.md) — its **▶▶▶ WHAT A
+>   FRESH READER PICKS UP** block, then §10.
+> - **Track R (rigid seal) is UNTOUCHED by this arc and is where the research is.**
+>   [`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) STATUS + §8.2 (~lines 819–847);
+>   frontier = **P2, the recover-core read**.
+>
+> **The single most useful sentence about where the project now stands.**
+> `ForcePick.forcePick_record` proves: **an equivariant, separating, poly force key is a complete
+> polynomial canonizer** — `①`, an explicit-polynomial `②`, and "the flag never fires", all from that
+> one conjunction. `ForcePick.readMin` inhabits the first two clauses *unconditionally* (at exponential
+> cost), so **`forcePick_open_clause_is_poly` pins the entire remaining difficulty to the poly clause
+> alone.** `scratchpad/KEY_scoping.md` §3 then grades that clause by tie-group into a ladder whose rungs
+> are the live tracks — which is why Track R's `②` is not a separate program.
+>
+> **▶ NEXT, in order.**
+> 1. **The `Publication` swap — one pass, both halves.** Point `Publication.canonForm?` at
+>    `RecordKey.recordKey` **and** reshape `RecordKey.descentCostS_selNode_recordKey_le`'s bound into
+>    the `costConst * n ^ costDeg` monomial `canon_poly_or_flag` pins. One pass because both touch
+>    pinned statements under the finalization steer. Input is `RecordKey.recordKey_canonizer_with_cost`
+>    (`①` + `②` already proved at the composed key), so this is re-pointing plus arithmetic — no new
+>    mathematics. It closes `Publication.cost` (still `opaque`) and `canon_poly_or_flag` (still `sorry`).
+> 2. **Item 1, restated by the user:** *the flag is not reached via a stall.* ¬consume⟹force has the
+>    free contrapositive ¬force⟹consume, so **no mutual stall occurs in theory**; the dependency is
+>    **equivariance** (unproved), and the cost half is settled in prose except the guards — whose bill
+>    is now a theorem (`RecordKey.supplyCost_guardSupply_le` → `keyCost_recordKey_le`). ⚠ The honest
+>    residual: `consume_fail_locates_resolved` resolves a node the descent *reaches*, while `HandledS`
+>    quantifies over *every* reached node, so the hook alone does not prevent a flag at `χ`.
+> 3. **Track R P2** — the recover-core read.
+>
+> **⛔ Do not re-open** (each is recorded with its falsifier): the §10.4 falsifier hunt · "take `S`
+> deeper" as the guard lever · `SameOrbits`-licensing *as an independent lever* (its instance is R1,
+> the parked crux) · the length-prefixed key product `(len a :: a) ++ …` (**shortlex — it re-orders
+> `holKeyFast`'s own narrowing**) · `forceThenPick` instantiated at `orbKey`/`orbKeyG` and read as a
+> canonizer (DUAL §10.8's FORK warning).
+>
+> **⚠ Two process facts that cost time.** (1) The theorem-index regen **adds and updates but never
+> prunes** — after a rename, grep the index for the old identifier and delete the ghost row by hand
+> (two ghosts had to be removed this way after `KeySeparates → KeySeparatesAll`). (2) Module count: the
+> gate prints one `✔` per module *plus* a summary line, and the top-level module `ChainDescent` has no
+> dot, so `grep -c '✔ ChainDescent'` is the correct count.
+>
+> **⚠ ONE THING LEFT UNVERIFIED, on purpose.** `ChainDescent/PerformanceTest.lean` §18 (the union-guard
+> measurement, added 2026-07-27) is **written but has never been confirmed to compile in a finished
+> run**: two attempts each exceeded ~45 min wall / ~12 CPU-min on that one file and were stopped. It is
+> **off `build.sh`**, so the gate is unaffected and nothing depends on it — but do not cite §18 as
+> machine-checked. Its cheap half *is* gated: `Regression` §17a pins the `deck2`-shut side, and
+> `Regression` §18 pins the `G8` narrowing. To verify it, budget an hour, or first split §16 (`mp7`,
+> n = 42) and §18 (`t3`) into separate files.
+>
+> **⚠ Where the live docs live.** Two of the authoritative documents for this arc are under
+> `scratchpad/`, which understates them: **`scratchpad/DUAL_resolver_scoping.md`** (the arc's record and
+> its ledger) and **`scratchpad/KEY_scoping.md`** (the scoping of the one open object, incl. the
+> tie-group ladder). Treat both as `docs/`-grade; they are cited from `00-START-HERE.md`,
+> `chain-descent-deepen-supply.md` and `chain-descent-rigid-seal.md`.
+
 > **▶▶▶ UPDATE 2026-07-27 — SECOND LIVE TRACK: the CONSUME→FORCE HOOK is CLOSED (`DeepenCertified` →
 > `DeepenLocated` → `DeepenKey` → `DeepenExact` → `DeepenGuard`, 64 theorems, axiom-clean, gate green
 > EXIT 0 / 105 modules). AUTHORITATIVE:
@@ -100,7 +166,7 @@ transfer). "Complete" = the flag provably never fires.
 > `KeySeparates ∧ KeyEquivariant`. **The guard buys EQUIVARIANCE, not separation.**
 >
 > **▶▶ UPDATE (2026-07-28) — TWO MORE LANDED; and the `②` hole that was invisible in the ledger.
-> AUTHORITATIVE: DUAL doc §10.7/§10.8 + §7.3 items 1, 7, 9.** Gate EXIT 0 / 106 modules.
+> AUTHORITATIVE: DUAL doc §10.7/§10.8 + §7.3 items 1, 7, 9.** Gate EXIT 0 / 107 modules.
 > · **`ChainDescent/ForcePick.lean` (10 thms, axiom-clean) — the exhaustiveness corollary CASHED.**
 >   `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` licenses discarding survivors *without a
 >   certificate*, and nothing used that licence. `forceThenPick key` = force + `take 1`: no supply, no
@@ -119,9 +185,8 @@ transfer). "Complete" = the flag provably never fires.
 >   `deck2Supply`, `kernelSupply` have **no** `supplyCost` bound and `holKeyFast` has **no** `keyCost`
 >   bound (`keyCost_holKey` is a `@[simp]` equation). `SupplyCost`'s end-to-end theorems are at
 >   `lookaheadKey`+`prunedSupply` — a *different* object. See §1T T2, extended below.
-> **▶ Next, in order:** (1) bill the four record supplies + `holKeyFast` (item 9 — the concrete content
-> of the restated item 1) · (2) the lex-product key combinator + record-object integration (item 7) ·
-> (3) item 1's remaining half.
+> **⚠ Both of those are now CLOSED** — item 9 by `RecordCost.lean` (queue 3f) and item 7 by
+> `RecordKey.lean` (queue 3g). The live "next" is the ▶▶▶ HANDOFF block at the very top of this section.
 >
 > **▶▶ SCOPED (2026-07-28): `scratchpad/KEY_scoping.md` — the equivariant + separating + poly key.**
 > Read it before opening any new force-key program. Findings: (a) the conjunction restates **exactly** as

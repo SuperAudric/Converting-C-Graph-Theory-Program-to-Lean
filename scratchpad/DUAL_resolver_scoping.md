@@ -73,7 +73,7 @@
 > guard-strength lever (§7.3 item 4 as originally written) — **measured wrong**; the supplies are
 > incomparable, not ordered, and the union is the lever.
 >
-> **▶▶ UPDATE 2026-07-28 — two more landed, and the ledger's shape changed. Gate EXIT 0, 106 modules.**
+> **▶▶ UPDATE 2026-07-28 — two more landed, and the ledger's shape changed. Gate EXIT 0, 107 modules.**
 > · **`ChainDescent/ForcePick.lean` (10 thms) — the exhaustiveness corollary CASHED.** `forceThenPick`
 >   is force + `take 1`: no supply, no certificate. `①` rides `CoveringOfAt` at `N = forcedSet` with the
 >   automorphism from `forcedSet_single_orbit_of_keySeparatesAt`. **It has no stall channel at all**
@@ -87,8 +87,7 @@
 > · **⚠⚠ NEW LEDGER ITEM 9 — the RECORD OBJECT HAS NO `②` AT ALL.** None of `foldSupplyFast`,
 >   `deckSupply`, `deck2Supply`, `kernelSupply` has a `supplyCost` bound and `holKeyFast` has no
 >   `keyCost` bound; the two end-to-end cost theorems are at `lookaheadKey`+`prunedSupply`, a different
->   object. **This is now the first thing to build** — it is the concrete content of item 1's
->   restatement, and item 7 must wait for it.
+>   object. ✅ **CLOSED the same day** by `RecordCost.lean` (queue 3f) — see the next update block.
 >
 > **▶▶ UPDATE 2026-07-28 (later) — `KEY_scoping.md` §0's two defects PAID, and item 9 CLOSED. §10.9.**
 > · **The `KeySeparates` duplication is de-silenced**: `KeyComplete.KeySeparates` → **`KeySeparatesAll`**
@@ -102,11 +101,49 @@
 > · **Item 9 CLOSED**: `ChainDescent/RecordCost.lean`, **`descentCostS_selNode_record_le`** — the record
 >   object's first `②`, explicit polynomial, no hypotheses.
 >
-> **▶ WHAT IS LEFT** (§7.3 ledger; items 2–6, 8 and 9 are done): **item 1** restated 2026-07-28 by the user — *the flag is not reached via a stall*
-> (¬consume⟹force has the free contrapositive ¬force⟹consume, so no mutual stall occurs in theory);
-> what the argument depends on is **equivariance**, and what remains after it is **cost**, settled in
-> prose except for the **guards** · **item 7** record-object integration, whose `①` half is one
-> `KeyEquivariant` proof plus a missing **lex-product key combinator**.
+> **▶▶ UPDATE 2026-07-28 (last) — item 7 / queue 3g DONE: `ChainDescent/RecordKey.lean`. §10.10.**
+> `pairKey k₁ k₂` = **plain concatenation** of values, summed costs; `keyEquivariant_pairKey` is
+> unconditional. **⚠⚠ The encoding this ledger and `remaining-work` both proposed —
+> `(len a :: a) ++ (len b :: b)` — is WRONG and must not be re-proposed:** prefixing the length orders
+> the first component by **shortlex**, which `lexLeList` is not, so it silently re-orders `holKeyFast`'s
+> own narrowing. Correct = plain concatenation under **`ConstLen k₁`** (equal first-component length
+> across the branches compared), which every built key satisfies. Under it: separation transfers from
+> *either* component, and **`keepMin_pairKey_subset`** proves the tiebreak never *widens* the narrowing.
+> **`recordKey := pairKey holKeyFast (orbKeyG guardSupply)`** with `recordKey_canonizer` (`①`) and
+> `descentCostS_selNode_recordKey_le` (`②`, explicit poly, no hypotheses). ★ Measured non-vacuous
+> (`Regression` §18): on **`G8` the root cell goes 8 → 2** where `holKeyFast` alone keeps all 8;
+> `t3`/`wcyc9` are pinned as single-orbit **controls** where firing is *forbidden*.
+>
+> ---
+>
+> ## ▶▶▶ WHAT A FRESH READER PICKS UP (2026-07-28, end of arc)
+>
+> **Everything in the §7.3 ledger is closed except item 1.** Items 2–9 are done; item 7's remainder is
+> named below.
+>
+> **▶ NEXT, in order.**
+> 1. **The `Publication` swap — ONE pass, both halves together.** Edit `Publication.canonForm?` from
+>    `Hol.holKeyFast` onto **`RecordKey.recordKey`**, *and* reshape
+>    `RecordKey.descentCostS_selNode_recordKey_le`'s bound into the **`costConst * n ^ costDeg`
+>    monomial** `Publication.canon_poly_or_flag` pins. They are one pass because both touch pinned
+>    statements under the finalization steer. `RecordKey.recordKey_canonizer_with_cost` is the input:
+>    it already carries `①` + `②` at the composed key, so this is a re-pointing plus arithmetic, not
+>    new mathematics. ⚠ `Publication.cost` is still `opaque` and `canon_poly_or_flag` still a `sorry`;
+>    that is what this closes.
+> 2. **Item 1, restated by the user (2026-07-28):** *the flag is not reached via a stall.*
+>    ¬consume⟹force has the free contrapositive ¬force⟹consume, so **no mutual stall occurs in
+>    theory**. The dependency is **equivariance** (unproved); what remains after it is **cost**, settled
+>    in prose except the **guards** — and the guards' bill is now a theorem
+>    (`RecordKey.supplyCost_guardSupply_le` → `keyCost_recordKey_le`), so the remaining half is the
+>    equivariance argument, not the arithmetic. ⚠ The honest residual gap:
+>    `consume_fail_locates_resolved` resolves a node the descent **reaches**, while `HandledS`
+>    quantifies over **every** reached node, so the hook does not by itself prevent a flag at `χ`.
+> 3. **Track R P2** — the recover-core read (`chain-descent-rigid-seal.md` §8.2, ~lines 819–847).
+>
+> **⛔ Do not re-open** (each cost real time and is recorded with its falsifier): the §10.4 falsifier
+> hunt · "take `S` deeper" as the guard lever · `SameOrbits`-licensing *as an independent lever* (its
+> instance is R1) · the length-prefixed key product · `forceThenPick` instantiated at `orbKey`/`orbKeyG`
+> read as a canonizer (§10.8's FORK warning).
 >
 > Reading order: §1 (the object) → §2 (what is measured) → §3 (what is proved) → **§10 (the current
 > state, and the frontier)**. §7 is the guard arc that led here (⚠ its §7.3 ledger is annotated with
@@ -120,10 +157,12 @@
 > | gate | `bash /workspace/scripts/build.sh` (ABSOLUTE path — it self-`cd`s via `$0`; relative FAILS) |
 > | one module | `cd /workspace/GraphCanonizationProofs && lake build ChainDescent.KeyComplete` |
 > | axioms | `lake env lean` a file that `import`s the module and `#print axioms <name>` (from `GraphCanonizationProofs/`, or the module prefix is not found) |
-> | the arc's Lean | `ChainDescent/Deepen{Certified,Located,Key,Exact,Guard}.lean` + `ChainDescent/KeyComplete.lean` |
-> | executable guards | `ChainDescent/Regression.lean` §17/§17a (**on** the gate, must stay fast) |
-> | expensive measurements | `ChainDescent/PerformanceTest.lean` §18 (**off** the gate by design — `lake build ChainDescent.PerformanceTest`) |
-> | what is proved | `GraphCanonizationProofs/PublicTheoremIndex.md`, `## ChainDescent/KeyComplete.lean` and the `Deepen.*` rows — regenerate with `python3 scripts/GenerateTheoremIndexes.py rewrite` from the repo root, then fill the `—` descriptions it lists |
+> | the arc's Lean, in dependency order | `ChainDescent/Deepen{Certified,Located,Key,Exact,Guard}.lean` → `KeyComplete.lean` → `ForcePick.lean` → `RecordCost.lean` → `RecordKey.lean` |
+> | executable guards | `ChainDescent/Regression.lean` §17/§17a/**§18** (**on** the gate, must stay fast; §18 is ~5 s) |
+> | expensive measurements | `ChainDescent/PerformanceTest.lean` §18 (**off** the gate by design — `lake build ChainDescent.PerformanceTest`). ⚠⚠ **The "~10 min" estimate is WRONG**: two attempts (2026-07-27 and 2026-07-28) each ran **> 45 min of wall time / > 12 CPU-min on the file itself** without completing, and were stopped. So **§18 has never been confirmed to compile in a finished run** — it is written and believed correct, but unverified. Budget an hour, or split §16 (`mp7`, n = 42) and §18 (`t3` union guard) into separate files before trying again. This does **not** affect the gate: `PerformanceTest` is not in `build.sh`. |
+> | what is proved | `GraphCanonizationProofs/PublicTheoremIndex.md` — sections `KeyComplete`, `ForcePick`, `RecordCost`, `RecordKey` and the `Deepen.*` rows. Regenerate with `python3 scripts/GenerateTheoremIndexes.py rewrite` from the repo root, then fill the `—` descriptions it lists |
+> | ⚠ after a RENAME | **the regen adds and updates but does not PRUNE** — a renamed theorem leaves a ghost row under its old name (this bit once: `keySeparates_rawKey` survived the rename to `keySeparatesAll_rawKey` and had to be deleted by hand). After renaming, grep the index for the old identifier and delete the stale row |
+> | ⚠ counting modules | the gate prints one `✔` per module **plus** a final `✔ serial build complete`, and the top-level module is `ChainDescent` with **no dot** — so `grep -c '✔ ChainDescent'` is the right count (currently **107**), and `grep -c '✔'` over-counts by one |
 > | probes (Python) | `probe_orbit_oracle.py` (§2.1/§2.4), `probe_guard_invariance.py` (§7.1), `probe_eqsupply_guard.py` (§7.2), `probe_dualdeepen.py`, `probe_polyloop.py`, `probe_certkey.py`, `probe_strategies.py`, `probe_splitloop.py`, `probe_verdict_invariance.py` — all in `scratchpad/` |
 >
 > ⚠ **Two traps that cost time in this arc.** (1) Reduce `CertPath` / `leafOf` **only** through their
@@ -728,7 +767,10 @@ proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a dif
    delivers `DescentReach`. `Descend.Reaches.step` carries *exactly* `DescentReach.cons`'s side
    condition and `step` is `refineV encodeFreeFast ∘ indivOne`, so this is near-definitional — but
    without it D1's `ψ` is not formally a node the canonizer visits.
-7. **Neither live track is in the record object.** `Publication.canonForm?` uses `holKeyFast`; no
+7. **Neither live track is in the record object.** ✅ **DONE 2026-07-28 (§10.10) except the
+   `Publication` edit itself** — `RecordKey.recordKey` is built and carries `①`+`②`; what remains is
+   pointing `Publication.canonForm?` at it *together with* the monomial reshape (see the HANDOFF block
+   at the top of this doc). Original wording: `Publication.canonForm?` uses `holKeyFast`; no
    `orbKey*` and no rigid-seal key appears. `force_canonizer_orbKeyG_deck2` is `①` for a **force-only**
    canonizer — a different object. Integration needs a key composition (`RigidSeal.compKey`'s
    disjoint-tag pattern is the template) plus a re-proof of `canonForm?_record`.
@@ -1155,7 +1197,8 @@ invisible. Firing bought at an honest price.
 
 **▶ Remaining on guard strength:** `SameOrbits`-licensing (guard by a non-equivariant `S` with
 `SameOrbits S Ref` for an equivariant `Ref` — the `kernelSupply` pattern) is the other candidate and is
-still untried; it is the only route that could admit `deepenSupply` itself, which
+**⚠ its generic half landed 2026-07-28 (§10.7) and its INSTANCE IS R1** — the parked crux, so it is not
+the independent lever this paragraph implies. It is the only route that could admit `deepenSupply` itself, which
 `deepen_branch_orbit_iff_aut` shows is *exactly* complete at `Tinhofer` nodes. ⚠ But note §10.2's
 correction: the guard buys **equivariance**, so coverage work should target that side.
 **▶▶ Generic half landed 2026-07-28 — and it is NOT an independent lever. See §10.7.**

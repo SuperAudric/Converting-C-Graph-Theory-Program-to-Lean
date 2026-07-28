@@ -97,8 +97,9 @@ def KeySeparatesAt (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) : Prop :
 /-- The global form — the carried obligation. This is the force side's `SolverSeparates` stated against
 the descent's own branch cell, and by §2 it is *also* everything the consume side needs.
 
-⚠ **Named `…All`, not `KeySeparatesAll`, deliberately** — `Hol.KeySeparates` (F3a, `HolKey.lean` §1, and
-*earlier*) already owns that identifier for the **per-node** predicate. See §1a. -/
+⚠ **Named `KeySeparatesAll`, not `KeySeparates`, deliberately** — `Hol.KeySeparates` (F3a,
+`HolKey.lean` §1, and *earlier*) already owns the bare identifier for the **per-node** predicate.
+See §1a. -/
 def KeySeparatesAll (key : Key n) (adj : AdjMatrix n) : Prop :=
   ∀ χ : Colouring n, ¬ Discrete χ → KeySeparatesAt key adj χ
 

@@ -196,7 +196,7 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > **⚠⚠ One correction not to inherit wrong:** `keySeparatesAll_rawKey` shows `KeySeparates` alone is CHEAP
 > (poly, global); the GI-hard object is `KeySeparates ∧ KeyEquivariant`, so **the guard buys
 > EQUIVARIANCE, not separation.**
-> **▶▶ AND TWO MORE + ONE AUDIT FINDING (2026-07-28; gate EXIT 0 / 106 modules). Authoritative: DUAL
+> **▶▶ AND TWO MORE + ONE AUDIT FINDING (2026-07-28; gate EXIT 0 / 107 modules). Authoritative: DUAL
 > §10.7/§10.8 + `remaining-work` §2 items 3f/3g.**
 > · **`ChainDescent/ForcePick.lean` (10 thms) — the exhaustiveness corollary CASHED.** `forceThenPick`
 > = force + `take 1`, no supply and no certificate; `①` rides `CoveringOfAt` at `N = forcedSet` with the
@@ -210,7 +210,8 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > independent lever, as "untried" suggested.
 > · **⚠⚠ THE RECORD OBJECT HAS NO `②`.** No `supplyCost` bound for `foldSupplyFast`/`deckSupply`/
 > `deck2Supply`/`kernelSupply`, no `keyCost` bound for `holKeyFast`; the end-to-end cost theorems are at
-> `lookaheadKey`+`prunedSupply`, a different object. **This is the next thing to build.**
+> `lookaheadKey`+`prunedSupply`, a different object. ✅ **CLOSED the same day by `RecordCost.lean`
+> (queue 3f) — see the next block.**
 >
 > **▶▶ AND (2026-07-28, later) — `scratchpad/KEY_scoping.md` §0's TWO DEFECTS PAID + queue 3f DONE.**
 > · **De-duplication:** `KeyComplete.KeySeparates` → **`KeySeparatesAll`** (the bare name belongs to
@@ -239,9 +240,14 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > hypotheses). **★ Measured non-vacuous (`Regression` §18): on `G8` the root cell goes 8 → 2 where
 > `holKeyFast` alone keeps all 8**; `t3`/`wcyc9` are pinned as single-orbit controls where firing is
 > *forbidden*.
-> **▶ Next:** edit `Publication.canonForm?` onto `recordKey` **together with** reshaping the `②` bound
-> into the pinned `costConst * n ^ costDeg` monomial · then the restated item 1 (the flag is not a
-> stall — it is equivariance, then the guards' cost) · then Track R P2.
+> **▶▶▶ NEXT — and the full handoff is
+> [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)'s ▶▶▶ HANDOFF block (top of
+> its CURRENT FRONTIER section); read that, not this summary.** In one line: (1) point
+> `Publication.canonForm?` at `RecordKey.recordKey` **together with** reshaping the `②` bound into the
+> pinned `costConst * n ^ costDeg` monomial — one pass, both touch pinned statements, and
+> `recordKey_canonizer_with_cost` is the input so it is re-pointing plus arithmetic; (2) the restated
+> item 1 (the flag is not a stall — it is **equivariance**, then the guards' cost, whose bill is now a
+> theorem); (3) Track R P2, the recover-core read.
 >
 > **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Tinhofer}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,

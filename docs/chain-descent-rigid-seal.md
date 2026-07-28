@@ -18,6 +18,15 @@
 
 ## ▶ STATUS (2026-07-26)
 
+> **▶ Currency note (2026-07-28).** Track R is **untouched** by the 2026-07-27/28 consume→force arc
+> (`KeyComplete` → `ForcePick` → `RecordCost` → `RecordKey`), which is Track A only. Everything in this
+> doc still holds; only the ambient module count moved (gate is now **EXIT 0 / 107 modules**). ⚠ The
+> "~97 modules" figures below are the counts at *their* increment, not stale claims about this doc's
+> content. **Track R is where the research is: the frontier is P2, the recover-core read (§8.2, ~lines
+> 819–847).** ★ And `scratchpad/KEY_scoping.md` §3 places it: Track R's `②` is the **`F₂` rung** of one
+> tie-group ladder whose top is the wall — the live tracks are rungs of a single program, not
+> independent attempts.
+
 > **The C# rigid solver is COMPLETE, and on the Lean side the Algorithm-R *scaffold* (seam R0a/R0b/`compKey` +
 > reduction layers P1/P3-I/P3-Sound/P2/P3-F₂ core), the full `gen`-labelling reduction chain (A)–(D), AND the concrete
 > rigid refinement `ref` + `Recover` (`RigidRefine.lean`, steps 1–9E) are all built (axiom-clean, gate green, ~97

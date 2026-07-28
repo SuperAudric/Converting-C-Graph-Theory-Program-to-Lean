@@ -51,6 +51,18 @@ Per-obligation state:
   · ② — now fillable PER FIXED DEPTH `d`: pin the canonizer-of-record (encode-free refiner + `lookaheadKey` +
     `prunedSupply d`) and `SupplyCost.descentCost_pruned_lookahead_le` supplies the explicit polynomial for
     `costConst`/`costDeg`. The status comment inside `canon_poly_or_flag` below is SUPERSEDED (see its banner).
+    ▶▶ **UPDATE 2026-07-28 — the upgrade target now EXISTS, and `②` no longer needs a different object.**
+    `ChainDescent/RecordCost.lean` bills the *actual* record (`descentCostS_selNode_record_le`: explicit
+    polynomial, every input, no hypotheses) — until then the only end-to-end cost theorems were at
+    `lookaheadKey`+`prunedSupply`, i.e. NOT this file's object. And `ChainDescent/RecordKey.lean` supplies
+    the strictly stronger composed force key `recordKey = pairKey holKeyFast (orbKeyG guardSupply)` with
+    **`recordKey_canonizer_with_cost` = `①` + `②` together** (measured non-vacuous: on `G8` the root cell
+    goes 8 → 2 where `holKeyFast` alone keeps all 8 — `Regression` §18).
+    ▶ **THE NEXT EDIT TO THIS FILE, and it is ONE pass:** point `canonForm?` at `RecordKey.recordKey`
+    (re-proving `canonForm?_record` from `recordKey_canonizer`) **and** reshape that `②` bound into the
+    `costConst * n ^ costDeg` monomial `canon_poly_or_flag` pins, replacing the `opaque cost` stub. Both
+    halves touch pinned statements, which is why they go together rather than one at a time. Full handoff:
+    `docs/chain-descent-remaining-work.md` ▶▶▶ HANDOFF block.
   · ③ — TWO LAYERS, not a design conflict: the library's operational residue (`Residue.Residue := ¬Handled`, key/
     supply-parameterized) is the intermediate; this file's structural atoms are the target; the missing object is
     the ATTRIBUTION theorem `¬Handled(record) → D1 ∨ D2`. ⚠ The strong reading "flag ⟹ genuine obstruction" is NOT
