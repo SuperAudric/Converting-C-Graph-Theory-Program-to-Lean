@@ -87,7 +87,7 @@
 > is **billed** (`keyCost_orbKeyG_le`), so `②` at this key is falsifiable; (3) `reaches_of_descentReach`
 > ⟹ `consume_fail_locates_resolved` (a node the canonizer VISITS, resolved to `≤ 1`); (4) guard strength
 > = the **UNION** `guardSupply`, measured *emergent* (on `t3` all four members shut, union open).
-> **⚠⚠ And one correction a reader must not inherit wrong: `keySeparates_rawKey` shows `KeySeparates`
+> **⚠⚠ And one correction a reader must not inherit wrong: `keySeparatesAll_rawKey` shows `KeySeparates`
 > alone is CHEAP (poly, global); the GI-hard object is `KeySeparates ∧ KeyEquivariant`, so THE GUARD
 > BUYS EQUIVARIANCE, NOT SEPARATION.**
 > The chain above ends in *strict* narrowing, which nothing downstream consumes. **`nodeResolved_of_tinhofer`**
@@ -116,7 +116,14 @@
 >   poly keyCost}`. ⚠ Fires nowhere new today — no built key has both conjuncts.
 > · **⚠⚠ The record object has NO `②`.** None of `foldSupplyFast`/`deckSupply`/`deck2Supply`/
 >   `kernelSupply` has a `supplyCost` bound and `holKeyFast` has no `keyCost` bound; `deepenSupply`'s
->   missing bound (below, and §1T T2) is one case of a much larger hole. **Next thing to build.**
+>   missing bound (below, and §1T T2) is one case of a much larger hole.
+>   ✅ **PAID later the same day — `ChainDescent/RecordCost.lean` (16 thms):**
+>   `descentCostS_selNode_record_le`, explicit polynomial, no hypotheses. ⚠ **`deepenSupply`'s own bound
+>   is STILL prose** — it is not in the record, and T2 says pay it when T1 wires it in.
+> · **De-duplication + vacuity (from `scratchpad/KEY_scoping.md` §0):** `KeyComplete.KeySeparates` →
+>   **`KeySeparatesAll`** with the bridge `keySeparatesAt_iff_hol` to F3a's earlier `Hol.KeySeparates`;
+>   and **`readMin`** (`ForcePick` §8) inhabits `forcePick_record`'s hypotheses unconditionally
+>   (⚠ exponential brute force — vacuity insurance, not progress on the wall).
 >
 > ✅ **Naming — RENAMED 2026-07-27.** The project predicate was `Amenable`; it is AKRV's **Tinhofer**,
 > while AKRV's *own* "amenable" is a different (strictly smaller) class, so the predicate is now

@@ -2,7 +2,7 @@ import ChainDescent.DeepenGuard
 import ChainDescent.SelectNode
 
 /-!
-# `KeySeparates` — the ONE predicate the dual resolver reduces to
+# `KeySeparatesAll` — the ONE predicate the dual resolver reduces to
 
 ## What this file is
 
@@ -22,7 +22,7 @@ The consume-side guard (`Tinhofer` / `CertPath`) stops being a correctness prere
 
 ## ⚠ The honest label: this is a UNIFICATION, not a weakening
 
-`KeySeparates` is not weaker than the wall. A cell that is a single orbit contains **no**
+`KeySeparatesAll` is not weaker than the wall. A cell that is a single orbit contains **no**
 non-automorphic pairs, so "separates every non-automorphic pair" carries no exception clause — a key
 with this property globally collapses every cell to one orbit, which is the target. What the reduction
 buys is that there is now **one** named carried predicate about an object under construction, instead
@@ -46,9 +46,9 @@ and not *"the key deferred"*. A guarded key that returns a constant off its guar
 explicit hypothesis rather than dropping it.
 
 **★ §4a SHARPENS THE LABEL ABOVE, and settles the falsifier question by theorem.** The unguarded read
-satisfies `KeySeparates` **globally, at `n⁴` cost** (`keySeparates_rawKey`, from the unconditional
-`isColAut_of_readKey_eq`). So `KeySeparates` *alone* is cheap and is **not** the wall; what is GI-hard
-is the conjunction `KeySeparates ∧ Force.KeyEquivariant`. The two built keys sit on opposite sides of
+satisfies `KeySeparatesAll` **globally, at `n⁴` cost** (`keySeparatesAll_rawKey`, from the unconditional
+`isColAut_of_readKey_eq`). So `KeySeparatesAll` *alone* is cheap and is **not** the wall; what is GI-hard
+is the conjunction `KeySeparatesAll ∧ Force.KeyEquivariant`. The two built keys sit on opposite sides of
 it: `rawKey` separates but is not equivariant (its `leafOf` breaks ties by vertex index); `orbKey` /
 `orbKeyG` buy equivariance with a guard and pay in separation coverage wherever the guard shuts. **The
 guard purchases equivariance, not separation** — and the "falsifier" for the guarded keys is therefore
@@ -69,7 +69,7 @@ trivial and uninformative (any two non-automorphic branches whose guards are bot
   branch, hence `Select.NodeResolved`. Note this is *not* reachable through `Cost.CellResolved`: at a
   mixed node (cell has ≥ 2 orbits, key ties inside each) **neither** of its two disjuncts holds, yet
   the composite resolves. `NodeResolved` is the honest predicate and is discharged directly.
-* §4a **`keySeparates_rawKey`** — the separation half is poly-achievable on its own; the wall is its
+* §4a **`keySeparatesAll_rawKey`** — the separation half is poly-achievable on its own; the wall is its
   conjunction with `KeyEquivariant`.
 * §5 **`reaches_of_descentReach`** — the bridge from `DeepenLocated`'s relocation relation to
   `Descend.Reaches`, which is what `HandledS` quantifies over; then
@@ -95,9 +95,42 @@ def KeySeparatesAt (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) : Prop :
       keyV key adj χ u ≠ keyV key adj χ w
 
 /-- The global form — the carried obligation. This is the force side's `SolverSeparates` stated against
-the descent's own branch cell, and by §2 it is *also* everything the consume side needs. -/
-def KeySeparates (key : Key n) (adj : AdjMatrix n) : Prop :=
+the descent's own branch cell, and by §2 it is *also* everything the consume side needs.
+
+⚠ **Named `…All`, not `KeySeparatesAll`, deliberately** — `Hol.KeySeparates` (F3a, `HolKey.lean` §1, and
+*earlier*) already owns that identifier for the **per-node** predicate. See §1a. -/
+def KeySeparatesAll (key : Key n) (adj : AdjMatrix n) : Prop :=
   ∀ χ : Colouring n, ¬ Discrete χ → KeySeparatesAt key adj χ
+
+/-! ## 1a. ⚠ THE F3a DUPLICATION, made visible
+
+`Hol.KeySeparates` (`HolKey.lean` §1) is **this same per-node predicate in positive form**:
+
+```lean
+Hol.KeySeparates key adj χ  :=  ∀ u ∈ branches χ, ∀ w ∈ branches χ,
+                                  keyV key adj χ u = keyV key adj χ w → ∃ ρ, IsColAut adj χ ρ ∧ ρ u = w
+```
+
+against this file's contrapositive `KeySeparatesAt`. They are equivalent (`keySeparatesAt_iff_hol`
+below), and consequently **`forcedSet_single_orbit_of_keySeparatesAt` (§2) re-proves
+`Hol.keepMin_pairwise_aut_of_separates`** — `Composite.forcedSet key adj χ` *is*
+`keepMin key adj χ (branches χ)` definitionally. Recorded rather than silently left to a future reader
+(the T6 statement-audit discipline, applied to this file's own increment).
+
+**What is NOT duplicated, and is the reason the later work still has content:** F3a hands its
+pairwise-`Aut` conclusion to **consume** (`forceThenConsume`), i.e. it still collapses through a
+*computed* certificate. Discarding on the **uncomputed** automorphism is `ForcePick.forceThenPick`, and
+that had no predecessor. -/
+
+theorem keySeparatesAt_iff_hol {key : Key n} {adj : AdjMatrix n} {χ : Colouring n} :
+    KeySeparatesAt key adj χ ↔ Hol.KeySeparates key adj χ := by
+  constructor
+  · intro h u hu w hw heq
+    by_contra hno
+    exact h u hu w hw (fun σ hσ hσuw => hno ⟨σ, hσ, hσuw⟩) heq
+  · intro h u hu w hw hno heq
+    obtain ⟨ρ, hρ, hρu⟩ := h u hu w hw heq
+    exact hno ρ hρ hρu
 
 /-! ## 2. ★★ THE EXHAUSTIVENESS COROLLARY
 
@@ -137,7 +170,7 @@ theorem forceThenConsume_singleton_of_forcedWordReach {key : Key n} {S : Supply 
 /-! ## 3. Non-vacuity — the built keys satisfy the predicate on their guards
 
 ⚠ Neither instantiation is global: both carry the guard, exactly as the FORK warns. `orbKey` off its
-guard returns the constant `[]`, so it does **not** satisfy `KeySeparates` unconditionally, and this
+guard returns the constant `[]`, so it does **not** satisfy `KeySeparatesAll` unconditionally, and this
 file does not pretend otherwise. -/
 
 /-- `orbKey` separates every non-automorphic branch pair at an `Tinhofer` node. -/
@@ -179,7 +212,7 @@ theorem nodeResolved_of_tinhofer {adj : AdjMatrix n} {χ : Colouring n} (hd : ¬
   rw [Select.cellNarrow_targetColour hc₀]
   exact le_of_eq (forceThenConsume_singleton_of_tinhofer hd hA)
 
-/-! ## 4a. ★★★ `KeySeparates` ALONE IS POLY-ACHIEVABLE — the honest decomposition
+/-! ## 4a. ★★★ `KeySeparatesAll` ALONE IS POLY-ACHIEVABLE — the honest decomposition
 
 The scoping doc's §10.4 asks for a falsifier: *a node where the key ties the whole cell and the cell has
 ≥ 2 true orbits.* For the **guarded** keys that falsifier is trivial and uninteresting — off its guard
@@ -189,11 +222,11 @@ that is a statement about the *guard*, not about the read, and the read settles 
 > `DeepenExact.isColAut_of_readKey_eq` is **unconditional** — equal reads of two whole-graph-discrete
 > leaves force a colour-automorphism. So the **unguarded** read *never* ties a non-automorphic pair.
 
-Hence `KeySeparates` is satisfied, globally and at poly cost, by the raw read (`rawKey` below). **This
-sharpens §10.2's label.** `KeySeparates` on its own is *not* the wall and is *not* equivalent to the
+Hence `KeySeparatesAll` is satisfied, globally and at poly cost, by the raw read (`rawKey` below). **This
+sharpens §10.2's label.** `KeySeparatesAll` on its own is *not* the wall and is *not* equivalent to the
 target — it is cheap. What is GI-hard is the **conjunction**
 
-    `KeySeparates key adj`  ∧  `Force.KeyEquivariant key`
+    `KeySeparatesAll key adj`  ∧  `Force.KeyEquivariant key`
 
 and the two built keys sit on the two sides of it: `rawKey` has separation and **fails** equivariance
 (its `leafOf` breaks ties by vertex index); `orbKey`/`orbKeyG` buy equivariance with a guard and **pay
@@ -212,9 +245,9 @@ def rawKey : Force.Key n := fun adj χ v =>
       Deepen.readKey adj (Descend.indivOne χ v) (Deepen.leafOf adj n (Deepen.step adj χ v)).col :=
   rfl
 
-/-- **★★ `KeySeparates` holds for the raw read, with no hypothesis and at `n⁴` cost.** So the predicate
+/-- **★★ `KeySeparatesAll` holds for the raw read, with no hypothesis and at `n⁴` cost.** So the predicate
 is *non-vacuous globally*, and the wall is the conjunction with `KeyEquivariant`, not this half. -/
-theorem keySeparates_rawKey (adj : AdjMatrix n) : KeySeparates (rawKey (n := n)) adj := by
+theorem keySeparatesAll_rawKey (adj : AdjMatrix n) : KeySeparatesAll (rawKey (n := n)) adj := by
   intro χ _ u _ w _ hno hkey
   rw [keyV_rawKey, keyV_rawKey] at hkey
   obtain ⟨ρ, hρ, hρu⟩ :=
@@ -232,7 +265,7 @@ theorem forcedSet_single_orbit_rawKey {adj : AdjMatrix n} {χ : Colouring n} (hd
     {u w : Fin n} (hu : u ∈ Composite.forcedSet (rawKey (n := n)) adj χ)
     (hw : w ∈ Composite.forcedSet (rawKey (n := n)) adj χ) :
     ∃ σ : Equiv.Perm (Fin n), IsColAut adj χ σ ∧ σ u = w :=
-  forcedSet_single_orbit_of_keySeparatesAt (keySeparates_rawKey adj χ hd) hu hw
+  forcedSet_single_orbit_of_keySeparatesAt (keySeparatesAll_rawKey adj χ hd) hu hw
 
 /-! ## 5. `DescentReach ⟹ Descend.Reaches` — the bridge D1 needed
 orbKeyG

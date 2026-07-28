@@ -193,7 +193,7 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > decides its guard) with its cost **billed** (`keyCost_orbKeyG_le`) so `②` at the key is falsifiable;
 > `reaches_of_descentReach` ⟹ `consume_fail_locates_resolved`; and guard strength closed by the
 > **UNION** `guardSupply` (measured *emergent* — on `t3` all four members shut, the union open).
-> **⚠⚠ One correction not to inherit wrong:** `keySeparates_rawKey` shows `KeySeparates` alone is CHEAP
+> **⚠⚠ One correction not to inherit wrong:** `keySeparatesAll_rawKey` shows `KeySeparates` alone is CHEAP
 > (poly, global); the GI-hard object is `KeySeparates ∧ KeyEquivariant`, so **the guard buys
 > EQUIVARIANCE, not separation.**
 > **▶▶ AND TWO MORE + ONE AUDIT FINDING (2026-07-28; gate EXIT 0 / 106 modules). Authoritative: DUAL
@@ -211,8 +211,24 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > · **⚠⚠ THE RECORD OBJECT HAS NO `②`.** No `supplyCost` bound for `foldSupplyFast`/`deckSupply`/
 > `deck2Supply`/`kernelSupply`, no `keyCost` bound for `holKeyFast`; the end-to-end cost theorems are at
 > `lookaheadKey`+`prunedSupply`, a different object. **This is the next thing to build.**
-> **▶ Next, in order:** the record object's `②` (queue 3f) · lex-product key + record integration (3g) ·
-> the restated item 1 (the flag is not a stall — it is equivariance, then the guards' cost).
+>
+> **▶▶ AND (2026-07-28, later) — `scratchpad/KEY_scoping.md` §0's TWO DEFECTS PAID + queue 3f DONE.**
+> · **De-duplication:** `KeyComplete.KeySeparates` → **`KeySeparatesAll`** (the bare name belongs to
+> F3a's earlier `Hol.KeySeparates`), bridge `keySeparatesAt_iff_hol`, cross-references both ways.
+> `forcedSet_single_orbit_of_keySeparatesAt` *does* re-prove `Hol.keepMin_pairwise_aut_of_separates`;
+> what is genuinely new is only `forceThenPick`, which discards on the **uncomputed** automorphism.
+> · **Vacuity paid:** **`readMin`** (`ForcePick` §8) is `KeyEquivariant` **and** `KeySeparatesAll`, both
+> unconditionally — the aggregate is indexed by `Perm (Fin n)`, an index set mentioning neither `adj`
+> nor `χ`, so equivariance is reindexing by `π ↦ π * σ` and separation is `isColAut_of_readKey_eq`.
+> ⚠ **Brute force restated, not progress on the wall**; its job is that `forcePick_record`'s hypotheses
+> are provably inhabited and the open clause is provably **poly alone**
+> (`forcePick_open_clause_is_poly`).
+> · **✅ The record object now has a `②`:** `ChainDescent/RecordCost.lean` —
+> **`descentCostS_selNode_record_le`**, explicit polynomial, every input, no hypotheses; and
+> `record_canonizer_with_cost` = `①` + `②` together.
+> **▶ Next, in order:** reshape the record bound into `Publication`'s `costConst * n ^ costDeg` monomial ·
+> lex-product key + record integration (3g) · the restated item 1 (the flag is not a stall — it is
+> equivariance, then the guards' cost).
 >
 > **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Tinhofer}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,

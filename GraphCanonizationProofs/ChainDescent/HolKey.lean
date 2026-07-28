@@ -93,7 +93,15 @@ variable {n : Nat}
 
 /-- **The force-side firing predicate**: on this node, equal key values occur only on `Aut`-equivalent
 branches. (The contrapositive is the useful reading: the key SEPARATES every genuinely-different pair.)
-Graded per node, like `CellIsOrbit` — never claimed globally. -/
+Graded per node, like `CellIsOrbit` — never claimed globally.
+
+⚠ **This predicate has a later twin.** `KeyComplete.KeySeparatesAt` (2026-07-27) is the same thing
+written contrapositively, and `KeyComplete.keySeparatesAt_iff_hol` is the bridge; consequently
+`KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` re-proves `keepMin_pairwise_aut_of_separates`
+below (`Composite.forcedSet key adj χ` *is* `keepMin key adj χ (branches χ)`). The genuinely new part
+of that later work is `ForcePick.forceThenPick`, which discards on the **uncomputed** automorphism;
+this file's theorem still routes its conclusion through consume. Prefer the bridge over re-deriving
+either side. -/
 def KeySeparates (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
   ∀ u ∈ branches χ, ∀ w ∈ branches χ,
     keyV key adj χ u = keyV key adj χ w →

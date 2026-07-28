@@ -60,7 +60,7 @@
 >
 > **⚠⚠ THE ONE CLAIM A FRESH READER MUST NOT INHERIT WRONG.** An earlier draft of §10.2 said
 > `KeySeparates` *"globally is the target"*. **False, and corrected in place.**
-> `keySeparates_rawKey` proves `KeySeparates` holds **globally for a poly key** (the unguarded read),
+> `keySeparatesAll_rawKey` proves `KeySeparates` holds **globally for a poly key** (the unguarded read),
 > from the unconditional `isColAut_of_readKey_eq`. So separation alone is **cheap**; the GI-hard object
 > is **`KeySeparates ∧ Force.KeyEquivariant`**. `rawKey` separates without equivariance;
 > `orbKey`/`orbKeyG` buy equivariance with a guard and pay in separation coverage. **⟹ THE GUARD
@@ -90,8 +90,19 @@
 >   object. **This is now the first thing to build** — it is the concrete content of item 1's
 >   restatement, and item 7 must wait for it.
 >
-> **▶ WHAT IS LEFT** (§7.3 ledger; items 2–6 and 8 are done): **item 9** the record object's `②`
-> (do first) · **item 1** restated 2026-07-28 by the user — *the flag is not reached via a stall*
+> **▶▶ UPDATE 2026-07-28 (later) — `KEY_scoping.md` §0's two defects PAID, and item 9 CLOSED. §10.9.**
+> · **The `KeySeparates` duplication is de-silenced**: `KeyComplete.KeySeparates` → **`KeySeparatesAll`**
+>   (the bare identifier belongs to F3a's `Hol.KeySeparates`), bridge **`keySeparatesAt_iff_hol`**, and a
+>   `⚠` cross-reference in *both* files naming the re-derivation.
+> · **`forcePick_record` is no longer claimed for no key**: **`readMin`** (`ForcePick` §8) is
+>   `KeyEquivariant` *and* `KeySeparatesAll`, both unconditionally, by indexing the aggregate over
+>   `Perm (Fin n)` — an index set that mentions neither `adj` nor `χ`, so equivariance is reindexing by
+>   `π ↦ π * σ`. ⚠ Brute force restated, **not** progress on the wall; its job is vacuity insurance plus
+>   **`forcePick_open_clause_is_poly`** — the open clause is now provably *poly alone*.
+> · **Item 9 CLOSED**: `ChainDescent/RecordCost.lean`, **`descentCostS_selNode_record_le`** — the record
+>   object's first `②`, explicit polynomial, no hypotheses.
+>
+> **▶ WHAT IS LEFT** (§7.3 ledger; items 2–6, 8 and 9 are done): **item 1** restated 2026-07-28 by the user — *the flag is not reached via a stall*
 > (¬consume⟹force has the free contrapositive ¬force⟹consume, so no mutual stall occurs in theory);
 > what the argument depends on is **equivariance**, and what remains after it is **cost**, settled in
 > prose except for the **guards** · **item 7** record-object integration, whose `①` half is one
@@ -751,7 +762,12 @@ proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a dif
 
    This is the direct target of item 1's restatement — "poly-bounded cost for both resolvers, settled
    in prose except the guards" — and it is the T2 house rule ("closed-form `c₂` at land time") not
-   having been applied to any record supply. **Do it before item 7.**
+   having been applied to any record supply. ~~**Do it before item 7.**~~
+   **✅ DONE 2026-07-28 — `ChainDescent/RecordCost.lean` (16 thms, axiom-clean).** All five bounds,
+   `supplyCost_appendSupply` (definitional), and **`descentCostS_selNode_record_le`**: an explicit
+   polynomial on every input, **no hypotheses**. `record_canonizer_with_cost` puts `①` and `②` in one
+   place. ⚠ Reshaping it into `Publication`'s `costConst * n ^ costDeg` monomial is the remaining step
+   and touches pinned statements — sequence with item 7.
 
 ---
 
@@ -967,7 +983,7 @@ globally it gives `ResolvedAll` ⟹ `Handled` ⟹ the flag never fires.
 predicate about an object under construction instead of two coupled ones (`Tinhofer` on consume,
 `SolverSeparates` on force). The precedent verdict is `hImprim`'s: *consolidation, not breakthrough.*
 
-#### ⚠⚠ CORRECTION (same day, `keySeparates_rawKey`) — `KeySeparates` alone is NOT the wall
+#### ⚠⚠ CORRECTION (same day, `keySeparatesAll_rawKey`) — `KeySeparates` alone is NOT the wall
 
 An earlier draft of this block said *"a key with the property globally **is** the target."* **That is
 wrong, and the correction sharpens the decomposition rather than weakening it.**
@@ -975,7 +991,7 @@ wrong, and the correction sharpens the decomposition rather than weakening it.**
 `DeepenExact.isColAut_of_readKey_eq` is **unconditional**: equal reads of two whole-graph-discrete
 leaves force a colour-automorphism. So the **unguarded** read never ties a non-automorphic pair, and
 
-> **`KeyComplete.keySeparates_rawKey` — `KeySeparates` holds globally, for a poly (`n⁴`) key, with no
+> **`KeyComplete.keySeparatesAll_rawKey` — `KeySeparates` holds globally, for a poly (`n⁴`) key, with no
 > hypothesis.**
 
 `KeySeparates` on its own is therefore *cheap*. The GI-hard object is the **conjunction**
@@ -986,7 +1002,7 @@ and the built keys sit on opposite sides of it:
 
 | key | separates | equivariant | why |
 |---|---|---|---|
-| `rawKey` | ✅ **unconditionally** (`keySeparates_rawKey`) | ❌ | `leafOf` breaks ties by vertex index |
+| `rawKey` | ✅ **unconditionally** (`keySeparatesAll_rawKey`) | ❌ | `leafOf` breaks ties by vertex index |
 | `orbKey` / `orbKeyG S` | only where the guard is open | ✅ (`keyEquivariant_orbKey{,G}`) | the guard is exactly the equivariance repair |
 
 **⟹ The guard purchases EQUIVARIANCE, not separation.** That re-reads every "guard strength"
@@ -1036,7 +1052,7 @@ deferred."** Concretely: `orbKey` off its guard returns the constant `[]`, so it
 *negation* vacuously. This is why `KeyComplete` §3's instantiations carry the guard as an explicit
 hypothesis and the file does **not** claim any built key satisfies the global `KeySeparates`.
 
-**⚠ RESOLVED by `keySeparates_rawKey` (§10.2's correction) — do not run this hunt.** The FORK's warning
+**⚠ RESOLVED by `keySeparatesAll_rawKey` (§10.2's correction) — do not run this hunt.** The FORK's warning
 is real but it bites the *guard*, not the read: the read provably never ties a non-automorphic pair, so
 a "falsifier" can only be a node where the guard is shut at both branches, which is a restatement of
 the guard's coverage and not new information. The paragraph below is retained because its analysis of
@@ -1069,7 +1085,7 @@ All axiom-clean. Ledger items 2, 3, 5, 6 and 8 of §7.3 are discharged.
 | **billed** | the guard's own work, along its own recursion: per level one reachability test **plus one call to `S`**, at the colouring that level visits; bound parametric in the supply's `c₂` | `Deepen.certPathCost`, `certPathCost_le`, **`keyCost_orbKeyG_le`** (`≤ n⁴ + n·(n⁴+c₂)`) |
 | **bridge** | `DescentReach ⟹ Descend.Reaches` (same side condition, `step = refineV encodeFreeFast ∘ indivOne`) | `KeyComplete.reaches_of_descentReach` |
 | **the hook, repaired** | `consume_fail_force_fires` with **both** weaknesses removed — the located node is one the canonizer *visits*, and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing | **`KeyComplete.consume_fail_locates_resolved`** |
-| **separation is cheap** | `KeySeparates` holds globally for the unguarded read at `n⁴` | **`KeyComplete.keySeparates_rawKey`** (§10.2's correction) |
+| **separation is cheap** | `KeySeparates` holds globally for the unguarded read at `n⁴` | **`KeyComplete.keySeparatesAll_rawKey`** (§10.2's correction) |
 
 **⚠ Why `②` at this key was previously unfalsifiable, and is not now.** The key shipped a flat `n⁴`,
 which prices the *read* (`leafOf`: `≤ n` warm refinements) and **nothing** of the guard — the 2026-07-14
@@ -1224,3 +1240,47 @@ guard, and plugged into this resolver that is not merely uninformative but would
 different branches — so the hypothesis is carried explicitly and never claimed for a built key. The
 module header says this in the same words; do not instantiate at `orbKeyG` and read the result as a
 canonizer.
+
+---
+
+### 10.9 ✅ LANDED — the two `KEY_scoping` §0 defects PAID, and the record's `②`
+
+Three pieces, all `[propext, Classical.choice, Quot.sound]`, gate EXIT 0.
+
+**(a) The `KeySeparates` duplication is now visible, not silent (KEY_scoping §0.1).**
+`Hol.KeySeparates` (F3a, `HolKey.lean` §1, **earlier**) is this arc's `KeySeparatesAt` in positive
+form. Fixed three ways rather than one: the global predicate is renamed
+**`KeyComplete.KeySeparates` → `KeySeparatesAll`** (so the identifier `KeySeparates` belongs to F3a
+alone, and `keySeparates_rawKey` → `keySeparatesAll_rawKey`); **`keySeparatesAt_iff_hol`** is the
+bridge; and both files now carry a `⚠` cross-reference naming the duplication —
+`forcedSet_single_orbit_of_keySeparatesAt` **does** re-prove `Hol.keepMin_pairwise_aut_of_separates`,
+since `Composite.forcedSet key adj χ` *is* `keepMin key adj χ (branches χ)`. What is **not**
+duplicated, and is why the later work still has content: F3a routes its pairwise-`Aut` conclusion back
+through **consume**, so `ForcePick.forceThenPick` — discarding on the *uncomputed* automorphism — had
+no predecessor.
+
+**(b) `forcePick_record`'s vacuity debt is PAID by `readMin` (KEY_scoping §4).** `ForcePick` §8:
+`colOf π` (the discrete colouring of a permutation) → `readSet` (the aggregate indexed by
+`Perm (Fin n)`, so the index type mentions **neither `adj` nor `χ`**) → **`readSet_transport`** (the
+whole index set is invariant, by the bijection `π ↦ π * σ`) → **`keyEquivariant_readMin`** →
+**`keySeparatesAll_readMin`** (unconditional, straight from `isColAut_of_readKey_eq` — whose only
+hypotheses, discrete and `< n`, hold for `colOf` by construction) → **`forcePick_readMin`**.
+
+> ⚠ **This is brute force restated, NOT progress on the wall** — `Refine.exhaustive_canonizer` already
+> gives an unconditional exponential canonizer. Its value is exactly two things: the hypothesis set of
+> `forcePick_record` is now **provably inhabited** (the `ConfinementCitations.hflag` shape does not
+> recur here), and the residual difficulty is pinned to the **poly clause alone**, stated as
+> **`forcePick_open_clause_is_poly`**.
+
+⚠ Note it is a *better* anchor than the rigid track's exponential object:
+`keyEquivariant_compKey_readAgg_univ` gets equivariance at `framesUniv` but its separation is the
+**carried** `AggFaithful`; `readMin`'s is unconditional.
+
+**(c) Ledger item 9 / queue 3f — `ChainDescent/RecordCost.lean` (16 thms).** The record object now has
+a `②`. `supplyCost_appendSupply` is definitional; the four supplies' closed forms bound out to
+`recordSupplyBound`/`recordGensBound`; **`descentCostS_selNode_record_le`** is an explicit polynomial
+on every input with **no hypotheses**, and `record_canonizer_with_cost` states `①` and `②` together.
+The two facts that were missing rather than hard: `nullBasis` emits one word per **free column**, so
+`|kernelGens| ≤ |rails| ≤ n`; and `secondsV` is a `flatMap` of filters of `finRange n`, so
+`|deck2Batch| ≤ n²`. ▶ Remaining: reshape into `Publication`'s `costConst * n ^ costDeg` monomial —
+statement-side work, sequence it with item 7.

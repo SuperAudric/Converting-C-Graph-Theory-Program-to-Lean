@@ -3723,50 +3723,50 @@ the first inhabited `AbelianConsumed` instance and the imprimitive-branch non-va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Hol.KeySeparates` | 94-100 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
-| `Hol.keyV_eq_of_mem_keepMin` | 102-114 | Members of the narrowed set all attain the minimum key value. | — |
-| `Hol.keepMin_pairwise_aut_of_separates` | 116-138 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
-| `Hol.relComp_closed` | 213-229 | The closure really is closed: a `rel`-step out of `relComp` stays inside (monotone-rounds pigeonhole — the convergence content F2a never needed). | — |
-| `Hol.relComp_subset_of_closed` | 231-247 | Anything reachable from a member of a closed set is in it. | — |
-| `Hol.mem_relComp_self` | 249-254 | Component membership is reflexive. | — |
-| `Hol.mem_relComp_trans` | 256-259 | Component membership is transitive (via closedness). | — |
-| `Hol.mem_relComp_symm` | 261-278 | Component membership is symmetric — for a symmetric relation. | — |
-| `Hol.mem_relComp_congr` | 280-285 | **★ Copy-designator well-definedness**: any member of a component designates the same component. | — |
-| `Hol.symSame` | 294-296 | Symmetrized same-cell (vertical) adjacency — weak components; `AdjMatrix` guarantees no symmetry. | Definition |
-| `Hol.symCross` | 298-300 | Symmetrized cross-cell (horizontal) adjacency. | Definition |
-| `Hol.symSame_symm` | 302-303 | The symmetrized vertical relation is symmetric (by construction). | — |
-| `Hol.symCross_symm` | 305-306 | The symmetrized horizontal relation is symmetric (by construction). | — |
-| `Hol.symSame_transport` | 308-312 | The symmetrized vertical relation transports. | — |
-| `Hol.symCross_transport` | 314-318 | The symmetrized horizontal relation transports. | — |
-| `Hol.partnerTo` | 322-326 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
-| `Hol.walkOk` | 328-332 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
-| `Hol.holMoved` | 334-348 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
-| `Hol.holHas` | 350-353 | Is some valid walk's moved-count equal to `c`? — the signature's membership test. | Definition |
-| `Hol.holSig` | 355-361 | **The holonomy signature**: the indicator vector over `[0, n]` of attained moved-counts — representative-free (trap #7) and canonical BY CONSTRUCTION (no sort/dedup, so equivariance is existential reindexing). | Definition |
-| `Hol.holKey` | 363-367 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3-vs-3 where `lookaheadKey` keeps 6. | Definition |
-| `Hol.keyV_holKey` | 369-370 | The key's value projection is `holSig`. | `@[simp]` |
-| `Hol.keyCost_holKey` | 372-373 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |
-| `Hol.partnerTo_conj` | 392-399 | The partner lookup conjugates (`uniqueMem_transport` on the transported component memberships). | — |
-| `Hol.walkOk_conj` | 401-408 | Walk validity transports (three component-membership rewrites). | — |
-| `Hol.holMoved_conj` | 410-436 | The moved-count transports: `countP` fused over the filter, reindexed over `finRange` by σ, pointwise via the conjugated partner chain. | — |
-| `Hol.holHas_conj` | 438-457 | The membership test transports — pure existential reindexing (what the indicator form buys). | — |
-| `Hol.holSig_conj` | 459-462 | The signature is invariant under relabelling — map-congruence over `holHas_conj`. | — |
-| `Hol.keyEquivariant_holKey` | 464-470 | **★★ The holonomy key is equivariant** — the whole `①` obligation of a force key, discharged. | — |
-| `Hol.compIdx` | 516-518 | The component id: the least member index — INTERNAL (outputs consult only id-equality). | Definition |
-| `Hol.compIdx_eq_iff` | 520-548 | **★ Id-equality tests exactly component membership** (symmetric relation) — the well-definedness letting the twin replace membership scans with `O(1)` id comparisons. | — |
-| `Hol.compTbl` | 550-552 | The forced id-table (data, not a function — trap #1). | Definition |
-| `Hol.compTbl_get` | 554-556 | Table reads are `compIdx` values. | — |
-| `Hol.pfT` | 558-560 | Table-level partner lookup (`c` = the target copy's id). | Definition |
-| `Hol.walkOkT` | 562-564 | Table-level walk validity. | Definition |
-| `Hol.holMovedT` | 566-577 | Table-level holonomy moved-count. | Definition |
-| `Hol.holSigFast` | 643-650 | **The runnable signature** — two forced id-tables per call, then `O(1)` reads everywhere. | Definition |
-| `Hol.holSigFast_eq` | 652-657 | **The runnable signature computes exactly the reasoned-about one.** | — |
-| `Hol.holKeyFast` | 659-661 | The runnable key — value-equal to `holKey`, so every theorem transfers. | Definition |
-| `Hol.holKeyFast_eq` | 663-666 | The runnable key equals the spec key. | — |
-| `Hol.keyEquivariant_holKeyFast` | 668-670 | `①` for the runnable key, by transfer. | — |
-| `Hol.holKey_canonizer` | 674-682 | **★★★ The pure-force canonizer over the holonomy key** — sound, iso-invariant, always answers. | — |
-| `Hol.holKey_foldDeck_guarded_canonizer` | 684-694 | **★★★ The F3a canonizer of record for the fold family (guarded blind object)**: force = holonomy, consume = `foldSupply ++ deckSupply`. | — |
-| `Hol.holKey_foldDeck_selNode_canonizer` | 696-705 | **★★★ The fused (resolver-aware) mirror** — the selector probes every cell with the same force + supply pair. | — |
+| `Hol.KeySeparates` | 94-108 | **The force-side firing predicate** (dual of `CellIsOrbit`): equal key values occur only on `Aut`-equivalent branches — graded per node, never claimed globally. | Definition |
+| `Hol.keyV_eq_of_mem_keepMin` | 110-122 | Members of the narrowed set all attain the minimum key value. | — |
+| `Hol.keepMin_pairwise_aut_of_separates` | 124-146 | **★ The force firing theorem**: a separating key keeps only pairwise `Aut`-equivalent branches — one orbit, which consume then collapses (the graded mirror of `cellIsOrbit_*`). | — |
+| `Hol.relComp_closed` | 221-237 | The closure really is closed: a `rel`-step out of `relComp` stays inside (monotone-rounds pigeonhole — the convergence content F2a never needed). | — |
+| `Hol.relComp_subset_of_closed` | 239-255 | Anything reachable from a member of a closed set is in it. | — |
+| `Hol.mem_relComp_self` | 257-262 | Component membership is reflexive. | — |
+| `Hol.mem_relComp_trans` | 264-267 | Component membership is transitive (via closedness). | — |
+| `Hol.mem_relComp_symm` | 269-286 | Component membership is symmetric — for a symmetric relation. | — |
+| `Hol.mem_relComp_congr` | 288-293 | **★ Copy-designator well-definedness**: any member of a component designates the same component. | — |
+| `Hol.symSame` | 302-304 | Symmetrized same-cell (vertical) adjacency — weak components; `AdjMatrix` guarantees no symmetry. | Definition |
+| `Hol.symCross` | 306-308 | Symmetrized cross-cell (horizontal) adjacency. | Definition |
+| `Hol.symSame_symm` | 310-311 | The symmetrized vertical relation is symmetric (by construction). | — |
+| `Hol.symCross_symm` | 313-314 | The symmetrized horizontal relation is symmetric (by construction). | — |
+| `Hol.symSame_transport` | 316-320 | The symmetrized vertical relation transports. | — |
+| `Hol.symCross_transport` | 322-326 | The symmetrized horizontal relation transports. | — |
+| `Hol.partnerTo` | 330-334 | The unique fiber partner of `x` in the copy of `t` — F2a's one-sided lookup with the target copy designated by a vertex (no ids, no representatives). | Definition |
+| `Hol.walkOk` | 336-340 | A valid L = 3 walk: the three copies pairwise distinct (membership tests only). | Definition |
+| `Hol.holMoved` | 342-356 | The holonomy moved-count of `copy(v) → copy(t₁) → copy(t₂) → copy(v)`: vertices of `v`'s copy failing to return under the composed partner maps (missing/ambiguous counts as moved). | Definition |
+| `Hol.holHas` | 358-361 | Is some valid walk's moved-count equal to `c`? — the signature's membership test. | Definition |
+| `Hol.holSig` | 363-369 | **The holonomy signature**: the indicator vector over `[0, n]` of attained moved-counts — representative-free (trap #7) and canonical BY CONSTRUCTION (no sort/dedup, so equivariance is existential reindexing). | Definition |
+| `Hol.holKey` | 371-375 | **★ The holonomy key (F3a)** — ranks a branch by its copy's monodromy/coset data, the thing 1-WL look-ahead cannot see; flat `n⁵` cost. Measured: splits the WL-merged twisted/untwisted union 3-vs-3 where `lookaheadKey` keeps 6. | Definition |
+| `Hol.keyV_holKey` | 377-378 | The key's value projection is `holSig`. | `@[simp]` |
+| `Hol.keyCost_holKey` | 380-381 | The key's cost projection is the flat `n⁵` bill. | `@[simp]` |
+| `Hol.partnerTo_conj` | 400-407 | The partner lookup conjugates (`uniqueMem_transport` on the transported component memberships). | — |
+| `Hol.walkOk_conj` | 409-416 | Walk validity transports (three component-membership rewrites). | — |
+| `Hol.holMoved_conj` | 418-444 | The moved-count transports: `countP` fused over the filter, reindexed over `finRange` by σ, pointwise via the conjugated partner chain. | — |
+| `Hol.holHas_conj` | 446-465 | The membership test transports — pure existential reindexing (what the indicator form buys). | — |
+| `Hol.holSig_conj` | 467-470 | The signature is invariant under relabelling — map-congruence over `holHas_conj`. | — |
+| `Hol.keyEquivariant_holKey` | 472-478 | **★★ The holonomy key is equivariant** — the whole `①` obligation of a force key, discharged. | — |
+| `Hol.compIdx` | 524-526 | The component id: the least member index — INTERNAL (outputs consult only id-equality). | Definition |
+| `Hol.compIdx_eq_iff` | 528-556 | **★ Id-equality tests exactly component membership** (symmetric relation) — the well-definedness letting the twin replace membership scans with `O(1)` id comparisons. | — |
+| `Hol.compTbl` | 558-560 | The forced id-table (data, not a function — trap #1). | Definition |
+| `Hol.compTbl_get` | 562-564 | Table reads are `compIdx` values. | — |
+| `Hol.pfT` | 566-568 | Table-level partner lookup (`c` = the target copy's id). | Definition |
+| `Hol.walkOkT` | 570-572 | Table-level walk validity. | Definition |
+| `Hol.holMovedT` | 574-585 | Table-level holonomy moved-count. | Definition |
+| `Hol.holSigFast` | 651-658 | **The runnable signature** — two forced id-tables per call, then `O(1)` reads everywhere. | Definition |
+| `Hol.holSigFast_eq` | 660-665 | **The runnable signature computes exactly the reasoned-about one.** | — |
+| `Hol.holKeyFast` | 667-669 | The runnable key — value-equal to `holKey`, so every theorem transfers. | Definition |
+| `Hol.holKeyFast_eq` | 671-674 | The runnable key equals the spec key. | — |
+| `Hol.keyEquivariant_holKeyFast` | 676-678 | `①` for the runnable key, by transfer. | — |
+| `Hol.holKey_canonizer` | 682-690 | **★★★ The pure-force canonizer over the holonomy key** — sound, iso-invariant, always answers. | — |
+| `Hol.holKey_foldDeck_guarded_canonizer` | 692-702 | **★★★ The F3a canonizer of record for the fold family (guarded blind object)**: force = holonomy, consume = `foldSupply ++ deckSupply`. | — |
+| `Hol.holKey_foldDeck_selNode_canonizer` | 704-713 | **★★★ The fused (resolver-aware) mirror** — the selector probes every cell with the same force + supply pair. | — |
 ## ChainDescent/FoldFast.lean
 
 The F2a evaluation constant: `foldSupplyFast`, the materialised-table twin of `foldSupply` — component-MEMBERSHIP rows forced once per supply call (NOT the F3a `compIdx` id-tables: those need a symmetric relation and F2a's spec closures are directed), with a function-level equality so every `foldSupply` theorem transfers by rewriting. Unblocked the n = 30 F3a composite measurement (`PerformanceTest` §10).
@@ -4884,20 +4884,23 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 |------|------|-------------|-------|
 | `KeyComplete.KeySeparatesAt` | 90-95 | At this node the force key separates every branch pair that no colour-automorphism links. Contrapositive: equal keys inside the branch cell ⟹ same orbit. | Definition |
 | `KeyComplete.KeySeparates` | 97-100 | The global form — the carried obligation. Force's `SolverSeparates` stated against the descent's branch cell; by the corollary below it is ALSO everything the consume side needs. ⚠ A unification, not a weakening (DUAL doc §10.2). | Definition |
-| `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` | 108-122 | ★★★ THE EXHAUSTIVENESS COROLLARY — under `KeySeparatesAt` the key's argmin over the branch cell is a single `IsColAut`-orbit, so discarding all but one survivor is sound WITHOUT a certificate. Uses no property of the key beyond the hypothesis: no equivariance, no guard, no supply. | — |
-| `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` | 124-135 | The composite's firing lemma generalized from `CellIsOrbit` (about the WHOLE cell — false at a mixed node) to pairwise `WordReach` on the FORCED SET. The brick `Composite.forceThenConsume_singleton_of_cellIsOrbit` was missing. | — |
-| `KeyComplete.keySeparatesAt_orbKey_of_tinhofer` | 143-146 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Tinhofer` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
-| `KeyComplete.keySeparatesAt_orbKeyG_of_certifiedG` | 148-151 | Non-vacuity for the poly-guarded key, on its own guard (`CertifiedG S`). | — |
-| `KeyComplete.forceThenConsume_singleton_of_tinhofer` | 160-168 | ★★★ THE MIXED FIRING THEOREM — at an `Tinhofer` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
-| `KeyComplete.nodeResolved_of_tinhofer` | 170-180 | ★★ `Select.NodeResolved` at every `Tinhofer` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
-| `KeyComplete.rawKey` | 203-208 | The UNGUARDED read (`orbKey` with the `if` removed). NOT `KeyEquivariant` — `leafOf` breaks ties by vertex index — so unusable as a force key; it exists to make the `KeySeparates` / `KeyEquivariant` decomposition a theorem. | Definition |
-| `KeyComplete.keyV_rawKey` | 210-213 | Value projection of `rawKey` (`rfl`). | `@[simp]` |
+| `KeyComplete.KeySeparatesAll` | 97-103 | The global form — the carried obligation. ⚠ Named `…All`, not `KeySeparates`: F3a's earlier `Hol.KeySeparates` (`HolKey.lean` §1) owns that identifier for the PER-NODE predicate. | Definition |
+| `KeyComplete.keySeparatesAt_iff_hol` | 125-133 | ★ §1a THE BRIDGE — `KeySeparatesAt` is `Hol.KeySeparates` written contrapositively. Makes the F3a duplication visible: `forcedSet_single_orbit_of_keySeparatesAt` re-proves `Hol.keepMin_pairwise_aut_of_separates` (`Composite.forcedSet` IS `keepMin … (branches χ)`). What is NOT duplicated is `ForcePick.forceThenPick` — F3a routes its conclusion back through consume, i.e. through a COMPUTED certificate. | — |
+| `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` | 141-155 | ★★★ THE EXHAUSTIVENESS COROLLARY — under `KeySeparatesAt` the key's argmin over the branch cell is a single `IsColAut`-orbit, so discarding all but one survivor is sound WITHOUT a certificate. Uses no property of the key beyond the hypothesis: no equivariance, no guard, no supply. | — |
+| `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` | 157-168 | The composite's firing lemma generalized from `CellIsOrbit` (about the WHOLE cell — false at a mixed node) to pairwise `WordReach` on the FORCED SET. The brick `Composite.forceThenConsume_singleton_of_cellIsOrbit` was missing. | — |
+| `KeyComplete.keySeparatesAt_orbKey_of_tinhofer` | 176-179 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Tinhofer` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
+| `KeyComplete.keySeparatesAt_orbKeyG_of_certifiedG` | 181-184 | Non-vacuity for the poly-guarded key, on its own guard (`CertifiedG S`). | — |
+| `KeyComplete.forceThenConsume_singleton_of_tinhofer` | 193-201 | ★★★ THE MIXED FIRING THEOREM — at an `Tinhofer` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
+| `KeyComplete.nodeResolved_of_tinhofer` | 203-213 | ★★ `Select.NodeResolved` at every `Tinhofer` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
+| `KeyComplete.rawKey` | 236-241 | The UNGUARDED read (`orbKey` with the `if` removed). NOT `KeyEquivariant` — `leafOf` breaks ties by vertex index — so unusable as a force key; it exists to make the `KeySeparates` / `KeyEquivariant` decomposition a theorem. | Definition |
+| `KeyComplete.keyV_rawKey` | 243-246 | Value projection of `rawKey` (`rfl`). | `@[simp]` |
 | `KeyComplete.keySeparates_rawKey` | 215-227 | ★★ `KeySeparates` HOLDS GLOBALLY for the raw read at `n⁴`, no hypothesis — from the unconditional `isColAut_of_readKey_eq`. ⟹ `KeySeparates` alone is CHEAP and is NOT the wall; the GI-hard object is `KeySeparates ∧ KeyEquivariant`, and the guard on `orbKey`/`orbKeyG` purchases EQUIVARIANCE, not separation. | — |
-| `KeyComplete.forcedSet_single_orbit_rawKey` | 229-235 | The exhaustiveness corollary at a key that satisfies its hypothesis unconditionally: `rawKey`'s forced set is a single `IsColAut`-orbit. | — |
-| `KeyComplete.step_col_eq_refineV` | 245-248 | `Deepen.step` IS `refineV encodeFreeFast ∘ indivOne` — the identification the `Reaches` bridge needs. | — |
-| `KeyComplete.reaches_of_descentReach` | 250-264 | ★ THE BRIDGE: everything `DescentReach` walks to, the descent `Reaches`. `Descend.Reaches.step` and `DescentReach.cons` carry exactly the same side condition, so this is near-definitional — but without it the node `DeepenLocated`'s relocation produces is not formally one the canonizer visits, and `HandledS` quantifies over `Reaches`. | — |
-| `KeyComplete.consume_fail_locates_resolved` | 266-285 | ★★ A consume failure locates a REACHED node that the fused resolver RESOLVES, carrying a genuine rigid decision. `DeepenExact.consume_fail_force_fires` with both weaknesses removed: the node is one the canonizer visits (the bridge above) and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing — which nothing downstream consumed. | — |
-| `KeyComplete.handledS_of_reached_tinhofer` | 287-295 | `Select.HandledS` on the all-`Tinhofer` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |
+| `KeyComplete.keySeparatesAll_rawKey` | 248-260 | ★★ `KeySeparatesAll` HOLDS GLOBALLY for the raw read at `n⁴`, no hypothesis — from the unconditional `isColAut_of_readKey_eq`. ⟹ separation alone is CHEAP and is NOT the wall; the GI-hard object is `KeySeparatesAll ∧ KeyEquivariant`, and the guard on `orbKey`/`orbKeyG` purchases EQUIVARIANCE, not separation. | — |
+| `KeyComplete.forcedSet_single_orbit_rawKey` | 262-268 | The exhaustiveness corollary at a key that satisfies its hypothesis unconditionally: `rawKey`'s forced set is a single `IsColAut`-orbit. | — |
+| `KeyComplete.step_col_eq_refineV` | 278-281 | `Deepen.step` IS `refineV encodeFreeFast ∘ indivOne` — the identification the `Reaches` bridge needs. | — |
+| `KeyComplete.reaches_of_descentReach` | 283-297 | ★ THE BRIDGE: everything `DescentReach` walks to, the descent `Reaches`. `Descend.Reaches.step` and `DescentReach.cons` carry exactly the same side condition, so this is near-definitional — but without it the node `DeepenLocated`'s relocation produces is not formally one the canonizer visits, and `HandledS` quantifies over `Reaches`. | — |
+| `KeyComplete.consume_fail_locates_resolved` | 299-318 | ★★ A consume failure locates a REACHED node that the fused resolver RESOLVES, carrying a genuine rigid decision. `DeepenExact.consume_fail_force_fires` with both weaknesses removed: the node is one the canonizer visits (the bridge above) and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing — which nothing downstream consumed. | — |
+| `KeyComplete.handledS_of_reached_tinhofer` | 320-328 | `Select.HandledS` on the all-`Tinhofer` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |
 ## ChainDescent/ForcePick.lean
 
 | Name | Line | Description | Notes |
@@ -4915,3 +4918,46 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `ForcePick.forceThenPick_cost_le` | 206-217 | The per-node bill: `n` key evaluations plus `n²`, and nothing else — no supply call, no verification, no BFS. | — |
 | `ForcePick.descentCost_forceThenPick_le` | 219-227 | ★★ `②` EXPLICIT, WITH NO FIRING HYPOTHESIS — the fan-out bound is structural, so the only input is a `keyCost` bound. | — |
 | `ForcePick.forcePick_record` | 239-254 | ★★★ THE RECORD STATEMENT — `①a`/`①b`/`①c`, "the flag never fires", and an explicit polynomial `②`, in one theorem. Read the hypothesis list as the project's target stated once: **an equivariant, separating, poly force key is a complete polynomial canonizer.** ⚠ Nothing here claims such a key exists — `keySeparates_rawKey` gives separation + poly without equivariance, `keyEquivariant_orbKey` gives equivariance without separation; the wall is having both. | — |
+| `ForcePick.colOf` | 277-278 | The discrete colouring induced by a permutation, `x ↦ (π x).val`. Values `< n` by construction — exactly `isColAut_of_readKey_eq`'s hypotheses. | Definition |
+| `ForcePick.colOf_discrete` | 280-281 | `colOf π` is discrete (π is injective). | — |
+| `ForcePick.colOf_lt` | 283 | `colOf π`'s values are `< n`. | — |
+| `ForcePick.colOf_transport` | 285-290 | The reindexing identity: transporting `colOf (π * σ)` by `σ` gives `colOf π`. This is what makes `π ↦ π * σ` the bijection the equivariance proof runs on. | — |
+| `ForcePick.readKey_colOf_transport` | 292-297 | One term of the aggregate transports, with its index shifted by `σ` (`indivOne_transport` + `colOf_transport` + `readKey_transport`). | — |
+| `ForcePick.readSet` | 299-302 | §8 The anchor's index set: every read of `v`'s individualization against every permutation colouring. Exponential by design — and crucially its index TYPE mentions neither `adj` nor `χ`, which is the whole design point. | Definition, `noncomputable` |
+| `ForcePick.readSet_transport` | 304-317 | ★ §8 THE WHOLE INDEX SET IS INVARIANT — the bijection `π ↦ π * σ` matches the two families term for term. `readEquivariant_readAgg`'s proof shape, with the frame set replaced by one the relabelling cannot move. Because the two Finsets are EQUAL, `kmin?` needs no permutation-invariance lemma. | — |
+| `ForcePick.readSet_nonempty` | 319-321 | The index set is nonempty (witness: the identity permutation), so the minimum is attained. | — |
+| `ForcePick.readMin` | 323-326 | ★★ §8 THE NON-VACUITY ANCHOR — the lex-least read over all permutation colourings. `noncomputable` and exponential BY DESIGN, exactly as `orbKey` is; the bill says so out loud. ⚠ Brute force restated, NOT progress on the wall. | Definition, `noncomputable` |
+| `ForcePick.keyV_readMin` | 328-329 | Value projection of `readMin` (`rfl`). | `@[simp]` |
+| `ForcePick.keyCost_readMin` | 331-332 | `readMin`'s bill: `n! · n⁴`, exponential and visible — `②` rejects it, `①` does not. | `@[simp]` |
+| `ForcePick.keyEquivariant_readMin` | 334-337 | ★★ §8 `KeyEquivariant` for the anchor, from the index-set invariance alone. | — |
+| `ForcePick.exists_perm_keyV_readMin` | 339-352 | The minimum is attained: the key's value IS one of the reads (`kmin?_mem` + `Finset.mem_toList`). | — |
+| `ForcePick.keySeparatesAll_readMin` | 354-365 | ★★★ §8 `KeySeparatesAll` UNCONDITIONALLY — equal minima are equal reads of two discrete `< n` colourings, which is exactly `isColAut_of_readKey_eq`'s hypothesis set. No guard, no faithfulness assumption, no rigidity. ⚠ Strictly better as an anchor than `keyEquivariant_compKey_readAgg_univ`, whose separation is the CARRIED `AggFaithful`. | — |
+| `ForcePick.forcePick_readMin` | 367-380 | ★★★ §8 `forcePick_record`'s HYPOTHESIS SET IS INHABITED — an unconditional `①` + totality + (exponential) `②` canonizer. Pays the vacuity debt of §7 (the `ConfinementCitations.hflag` shape, machine-checked uninhabited, must not recur). | — |
+| `ForcePick.forcePick_open_clause_is_poly` | 382-395 | ★ §8 THE REDUCTION, stated once: given the anchor, a POLYNOMIAL `keyCost` on any key with the same two `①` properties is all that separates the project from a complete polynomial canonizer. The open clause is exactly `poly keyCost` — not equivariance, not separation. | — |
+## ChainDescent/RecordCost.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RecordCost.length_flatMap_le` | 52-60 | §1 A `flatMap` whose blocks are uniformly bounded — the counting workhorse for all four supplies' candidate lists. | — |
+| `RecordCost.supplyCost_appendSupply` | 62-64 | §1 `appendSupply` SUMS THE COSTS — definitional, and the reason composing the four bounds is free. Its absence is why the record had no `②`: there was nothing to compose. | `@[simp]` |
+| `RecordCost.gens_appendSupply_length` | 66-70 | §1 …and concatenates the candidate lists. | `@[simp]` |
+| `RecordCost.supplyCost_foldSupplyFast_le` | 79-82 | §2a F2a's work: `|B|²·n⁵ ≤ n⁷`. | — |
+| `RecordCost.gens_foldSupplyFast_length_le` | 84-88 | §2a F2a hands back `≤ n²` candidates. | — |
+| `RecordCost.supplyCost_deckSupply_le` | 90-93 | §2a F2b's work: the same all-pairs shape, `≤ n⁷`. | — |
+| `RecordCost.gens_deckSupply_length_le` | 95-99 | §2a F2b hands back `≤ n²` candidates. | — |
+| `RecordCost.length_secondsV_le` | 106-115 | §2b `secondsV` is a `flatMap` over `finRange n` whose blocks are filters of `finRange n` ⟹ `≤ n²` seeds. One of the two facts that were missing rather than hard. | — |
+| `RecordCost.length_deck2Batch_le` | 117-119 | §2b Hence a second-seed batch has `≤ n²` members (`filterMap` never grows a list). | — |
+| `RecordCost.supplyCost_deck2Supply_le` | 121-125 | §2b F2c's work: `|B|²·(1+n²)·n⁵`. | — |
+| `RecordCost.gens_deck2Supply_length_le` | 127-134 | §2b F2c hands back `≤ n⁴` candidates (the extra factor over 2a is the seed list). | — |
+| `RecordCost.length_nullBasis_le` | 141-144 | §2c `nullBasis m rows` emits ONE WORD PER FREE COLUMN, so its length is `≤ m`. The second fact that was missing rather than hard. | — |
+| `RecordCost.length_rails_le` | 146-148 | §2c Rails are a `filterMap` of `finRange n`, so `≤ n` of them. | — |
+| `RecordCost.supplyCost_kernelSupply_le` | 150-151 | §2c C3a bills a flat `n⁵` by definition. | — |
+| `RecordCost.gens_kernelSupply_length_le` | 153-160 | §2c Hence `|kernelGens| ≤ |kernelBasis| ≤ |rails| ≤ n` — the F₂ kernel supply hands back at most `n` generators. | — |
+| `RecordCost.keyCost_holKeyFast_le` | 169-170 | §2d The force key of record bills a flat `n⁵`. Honest here (unlike the pre-2026-07-27 `orbKeyG`): `holSig` really is one `n⁵` sweep and delegates nothing. | — |
+| `RecordCost.recordSupplyFast` | 174-178 | §3 The record consume-side supply, in the exact shape `Publication.canonForm?` uses. | `abbrev` |
+| `RecordCost.recordSupplyBound` | 180-184 | §3 The record's per-node WORK budget: the four closed forms, summed. | Definition |
+| `RecordCost.recordGensBound` | 186-188 | §3 The record's CANDIDATE-COUNT budget. | Definition |
+| `RecordCost.supplyCost_record_le` | 190-195 | §3 The composite work bound, through `supplyCost_appendSupply`. | — |
+| `RecordCost.gens_record_length_le` | 197-202 | §3 The composite candidate-count bound. | — |
+| `RecordCost.descentCostS_selNode_record_le` | 210-222 | ★★★ §4 `②` END-TO-END FOR THE CANONIZER OF RECORD — an explicit polynomial `descentCostS` for `selNode holKeyFast (foldFast++deck++deck2++kernel)` on EVERY input, with NO hypotheses (fan-out `≤ 1` is `selNode_children_length_le_one`, structural). Before this the object with `②` proved (`lookaheadKey`+`prunedSupply`) was not the object of record. | — |
+| `RecordCost.record_canonizer_with_cost` | 224-240 | ★★★ §4 THE RECORD CAPSTONE — `①` (`Kernel.holKey_foldDeck2KernelFast_selNode_canonizer`) and `②` in one place. ▶ Remaining before `Publication.cost` can stop being `opaque`: reshape this bound into the `costConst * n ^ costDeg` MONOMIAL the statement there pins. | — |

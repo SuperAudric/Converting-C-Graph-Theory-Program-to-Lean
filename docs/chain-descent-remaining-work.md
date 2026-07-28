@@ -95,7 +95,7 @@ transfer). "Complete" = the flag provably never fires.
 >   ⚠ Measured **emergent**: on `t3` all four members are shut on every branch and the union is open on
 >   every branch — `CertPath` is a conjunction over path LEVELS and different supplies certify different
 >   levels. ⛔ "take `S` deeper" was the wrong lever.
-> **⚠⚠ CORRECTION a reader must not inherit wrong:** `keySeparates_rawKey` proves `KeySeparates` holds
+> **⚠⚠ CORRECTION a reader must not inherit wrong:** `keySeparatesAll_rawKey` proves `KeySeparates` holds
 > globally for a poly key ⟹ separation alone is CHEAP; the GI-hard object is
 > `KeySeparates ∧ KeyEquivariant`. **The guard buys EQUIVARIANCE, not separation.**
 >
@@ -917,8 +917,11 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   is not the object of record**, and `Publication.cost` is still an `opaque` stub with
   `canon_poly_or_flag` a `sorry`. There is no `supplyCost_appendSupply` lemma either, though it is
   definitionally `rfl` (`appendSupply` sums the costs), so composition is free once the four parts
-  exist. ▶ **This is the first item on the near-term queue** (§2), it is the concrete content of the
-  restated DUAL item 1, and record-object integration (DUAL item 7) must not precede it.
+  exist. ▶ ✅ **PAID 2026-07-28 — `ChainDescent/RecordCost.lean`** (queue 3f): all four bounds,
+  `keyCost_holKeyFast_le`, `supplyCost_appendSupply`, and the end-to-end
+  **`descentCostS_selNode_record_le`** (explicit polynomial, no hypotheses). What remains of T2 is
+  `deepenSupply`'s bound (still prose; pay when T1 wires it in) and reshaping the record bound into
+  `Publication`'s `costConst * n ^ costDeg` monomial form.
 - **T3 — citation discharge** per policy (everything but G3; register + M1–M5 playbook in the discharge doc;
   wiring cautions: G3 only at the Sun–Wilmes threshold, FTPG corrected predicate, Payne–Thas narrowed).
 - **T4 — D0** (`SchurianScheme` model faithfulness) — see W2.
@@ -959,13 +962,18 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    supports = checks — already computed), get its automorphism generators, lift by any gauge-consistent
    completion; ① rides `SameOrbits` because two lifts differ by a pure gauge element ∈ K. Settle the
    three open design questions in ii-c BEFORE building. Acceptance: `mp7` answers end-to-end.
-3f. **★ THE RECORD OBJECT'S `②` — DO THIS FIRST (added 2026-07-28; T2 above has the audit).** Closed-form
-   `supplyCost` bounds for `foldSupplyFast` / `deckSupply` / `deck2Supply` / `kernelSupply`, a `keyCost`
-   bound for `holKeyFast`, and the (definitionally `rfl`) `supplyCost_appendSupply`. Then
-   `Select.selProbeCost_le` + `descentCostS_le_of_le_one` give the record its first end-to-end `②`, and
-   `Publication.cost` can stop being `opaque`. Acceptance: a `descentCostS_selNode_record_le`
-   with an explicit polynomial, no hypotheses. ⚠ Prerequisite for 3g — do not add a fifth unbilled
-   component to an object with no cost theorem.
+3f. ✅ **THE RECORD OBJECT'S `②` — DONE 2026-07-28 (`ChainDescent/RecordCost.lean`, 16 thms, axiom-clean,
+   in `build.sh`).** `supplyCost_appendSupply` (definitional — `appendSupply` sums), closed-form work and
+   candidate-count bounds for all four record supplies, and `keyCost_holKeyFast_le`. Capstone
+   **`descentCostS_selNode_record_le`**: an explicit polynomial `descentCostS` for
+   `selNode holKeyFast (foldFast++deck++deck2++kernel)` on **every** input, **with no hypotheses** (fan-out
+   `≤ 1` is `selNode_children_length_le_one`, structural). Plus `record_canonizer_with_cost` = `①` + `②`
+   in one place. The two supporting facts that were missing rather than hard: `nullBasis` emits one word
+   per free column so `|kernelGens| ≤ |rails| ≤ n`, and `secondsV` is a `flatMap` of filters of
+   `finRange n` so `|deck2Batch| ≤ n²`.
+   ▶ **Follow-on, NOT done and deliberately so:** swapping `Publication.cost` off `opaque` onto this needs
+   the bound reshaped into `costConst * n ^ costDeg` (a monomial), which is arithmetic on the statement
+   side and touches `Publication`'s pinned statements — sequence it with 3g under the finalization steer.
 3g. **Record-object integration** (DUAL item 7): a **lex-product key combinator** (`compKey`'s disjoint
    tag is a case split, not a product; `(len a :: a) ++ (len b :: b)` under `lexLeList` is one, with
    componentwise equivariance and summed cost), then swap `holKeyFast → pairKey holKeyFast (orbKeyG

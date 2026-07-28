@@ -14,6 +14,24 @@
 
 ---
 
+> **✅ STATUS 2026-07-28 (later) — §0's BOTH defects are PAID, and increment 1 + increment 2 are LANDED.**
+> Gate EXIT 0, 107 modules, axiom-clean. Full record: `DUAL_resolver_scoping.md` §10.9.
+> · **§0.1** — `KeyComplete.KeySeparates` renamed **`KeySeparatesAll`** (the bare identifier is left to
+>   F3a's earlier `Hol.KeySeparates`), `keySeparates_rawKey` → `keySeparatesAll_rawKey`, bridge
+>   **`KeyComplete.keySeparatesAt_iff_hol`**, and a `⚠` cross-reference added to *both* files stating
+>   plainly that `forcedSet_single_orbit_of_keySeparatesAt` re-proves
+>   `Hol.keepMin_pairwise_aut_of_separates`, and that only `ForcePick.forceThenPick` is new.
+> · **§0.2 / §4** — **`readMin` LANDED** exactly as designed (`ForcePick` §8): `colOf` → `readSet`
+>   (indexed by `Perm (Fin n)`) → `readSet_transport` → `keyEquivariant_readMin` →
+>   `keySeparatesAll_readMin` (**unconditional**) → **`forcePick_readMin`**, plus
+>   **`forcePick_open_clause_is_poly`** stating the reduction. All four clauses of §4's table went
+>   through as predicted; no new machinery was needed, and `Force.kmin?` already had `kmin?_mem` and
+>   `kmin?_eq_none_iff`. The one deviation: indexing by `Finset.univ.image` (as §4 recommended) made
+>   equivariance a *Finset equality*, so `kmin?` needed no permutation-invariance lemma at all.
+> · **Increment 3's prerequisite is also done** — the record object's `②` (`RecordCost.lean`,
+>   `descentCostS_selNode_record_le`), i.e. the measurement instrument §4's "Sequence unchanged" line
+>   names. **Next per that line: 3g (integration) → Track R P2.**
+
 ## 0. Two defects found while scoping — read these first
 
 ### 0.1 ⚠⚠ `KeySeparates` EXISTS TWICE, and `KeyComplete` §2 re-derived F3a
