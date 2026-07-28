@@ -4826,6 +4826,11 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.certifiedG_guard_of_deck` | 633-635 | Firing dominance over `deckSupply`. | — |
 | `Deepen.certifiedG_guard_of_deck2` | 637-639 | Firing dominance over `deck2Supply`. | — |
 | `Deepen.certifiedG_guard_of_match` | 641-643 | Firing dominance over `Consume.matchSupply`. | — |
+| `Deepen.cellIsOrbit_congr` | 666-670 | §9 Orbit-equal supplies certify the same cells — `CellIsOrbit` reads its supply only through `WordReach` on `verified`, which is exactly what `SameOrbits` equates. | — |
+| `Deepen.certPath_congr` | 672-691 | ★★ §9 **The guard is a function of the supply's ORBITS, not of its generators.** The path's shape (`chooseIdK`, the cell filter, `step`) never mentions `S`, so the whole recursion is congruent. Proved through the §5 equation lemmas, never by unfolding `CertPath` in place. | — |
+| `Deepen.certifiedG_congr` | 693-696 | §9 The node-level form: orbit-equal supplies certify the same nodes. | — |
+| `Deepen.keyV_orbKeyG_congr` | 698-704 | §9 Orbit-equal supplies give the same key VALUE. Only the cost differs (`certPathCost` calls `S` itself), which carries no `①` obligation. | — |
+| `Deepen.keyEquivariant_orbKeyG_of_sameOrbits` | 706-713 | ★★★ §9 `①` FOR A NON-EQUIVARIANT GUARD SUPPLY — the `SameOrbits` reduction at the key, mirroring `OrbitPrune`'s at the resolver. ⚠⚠ The generic half only: the sole supply worth admitting this way is `deepenSupply`, and `SameOrbits deepenSupply Ref` IS **R1**, the crux the parked `DeepenRef`/`DeepenR1` apparatus was built for. The lever is not independent of that retired route. | — |
 ## ChainDescent/DeepenKey.lean
 
 | Name | Line | Description | Notes |
@@ -4893,3 +4898,20 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `KeyComplete.reaches_of_descentReach` | 250-264 | ★ THE BRIDGE: everything `DescentReach` walks to, the descent `Reaches`. `Descend.Reaches.step` and `DescentReach.cons` carry exactly the same side condition, so this is near-definitional — but without it the node `DeepenLocated`'s relocation produces is not formally one the canonizer visits, and `HandledS` quantifies over `Reaches`. | — |
 | `KeyComplete.consume_fail_locates_resolved` | 266-285 | ★★ A consume failure locates a REACHED node that the fused resolver RESOLVES, carrying a genuine rigid decision. `DeepenExact.consume_fail_force_fires` with both weaknesses removed: the node is one the canonizer visits (the bridge above) and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing — which nothing downstream consumed. | — |
 | `KeyComplete.handledS_of_reached_tinhofer` | 287-295 | `Select.HandledS` on the all-`Tinhofer` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |
+## ChainDescent/ForcePick.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ForcePick.forceThenPick` | 72-79 | ★ THE RESOLVER — force, then keep ONE survivor (`take 1`). No supply, no verification, no orbit BFS: the discarded survivors are pairwise automorphic under `KeySeparatesAt`, and that automorphism is never computed. Cost is exactly `forceBy`'s. | Definition |
+| `ForcePick.narrow_forceThenPick` | 81-83 | The narrowing is the first element of the forced set (definitional). | — |
+| `ForcePick.forceThenPick_cost` | 85-87 | The pick itself is free — the bill is `forceBy`'s, one key evaluation per branch (definitional). | — |
+| `ForcePick.narrow_length_le_one` | 95-98 | The narrowing has at most one element, structurally (`take 1`). | — |
+| `ForcePick.resolvedAll_forceThenPick` | 100-103 | ★★ `Cost.ResolvedAll` with NO hypothesis — the descent is a single path on every input. `Stall.guard` buys this by FLAGGING the nodes it cannot resolve; this buys it by RESOLVING them, at the price of `KeySeparates` on `①`. | — |
+| `ForcePick.narrowProper_forceThenPick` | 111-120 | ★★ THE FLAG NEVER FIRES, with no hypothesis: force never empties a non-discrete cell (`Composite.forcedSet_ne_nil`) and `take 1` of a nonempty list is a singleton. This resolver has no stall channel, so `③`'s residue is empty for it and everything is pushed onto `①`'s `KeySeparates`. | — |
+| `ForcePick.coveringOfAt_forceThenPick` | 129-166 | ★★ THE ONE NEW PROOF — the covering, from `KeySeparates` alone. Every survivor is automorphic to the picked one (`KeyComplete.forcedSet_single_orbit_of_keySeparatesAt`), hence carries the same branch value (`Consume.branchVal_eq_of_isColAut` = `descend_transport` at that automorphism), so the two mapped value lists have the same MEMBERSHIP — all `aggregate` reads. This is the third contract route (`CoveringOfAt`) at the intermediate witness no instance had used. | — |
+| `ForcePick.narrowTransport_forceThenPick` | 168-174 | ★★★ THE CONTRACT, from `{KeyEquivariant, KeySeparates}`: equivariance makes the forced set an equivariant intermediate, separation makes the singleton pick cover it. | — |
+| `ForcePick.forcePick_canonizer` | 178-189 | ★★★ `①` + TOTALITY. The totality half carries NO hypothesis — this object cannot flag. | — |
+| `ForcePick.forcePick_canonizer_fast` | 191-199 | The runnable version (`encodeFreeFast`). | — |
+| `ForcePick.forceThenPick_cost_le` | 206-217 | The per-node bill: `n` key evaluations plus `n²`, and nothing else — no supply call, no verification, no BFS. | — |
+| `ForcePick.descentCost_forceThenPick_le` | 219-227 | ★★ `②` EXPLICIT, WITH NO FIRING HYPOTHESIS — the fan-out bound is structural, so the only input is a `keyCost` bound. | — |
+| `ForcePick.forcePick_record` | 239-254 | ★★★ THE RECORD STATEMENT — `①a`/`①b`/`①c`, "the flag never fires", and an explicit polynomial `②`, in one theorem. Read the hypothesis list as the project's target stated once: **an equivariant, separating, poly force key is a complete polynomial canonizer.** ⚠ Nothing here claims such a key exists — `keySeparates_rawKey` gives separation + poly without equivariance, `keyEquivariant_orbKey` gives equivariance without separation; the wall is having both. | — |

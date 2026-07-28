@@ -196,8 +196,23 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > **⚠⚠ One correction not to inherit wrong:** `keySeparates_rawKey` shows `KeySeparates` alone is CHEAP
 > (poly, global); the GI-hard object is `KeySeparates ∧ KeyEquivariant`, so **the guard buys
 > EQUIVARIANCE, not separation.**
-> **▶ Next:** relocation-nesting depth · record-object integration (`Publication.canonForm?` still uses
-> `holKeyFast`) · `SameOrbits`-licensing as the second guard lever.
+> **▶▶ AND TWO MORE + ONE AUDIT FINDING (2026-07-28; gate EXIT 0 / 106 modules). Authoritative: DUAL
+> §10.7/§10.8 + `remaining-work` §2 items 3f/3g.**
+> · **`ChainDescent/ForcePick.lean` (10 thms) — the exhaustiveness corollary CASHED.** `forceThenPick`
+> = force + `take 1`, no supply and no certificate; `①` rides `CoveringOfAt` at `N = forcedSet` with the
+> automorphism from `forcedSet_single_orbit_of_keySeparatesAt`. **It has no stall channel** (totality
+> and the single-path bound carry no hypothesis), so **`forcePick_record`** states `①`+`②`+"never flags"
+> under one conjunction: *an equivariant, separating, poly force key is a complete polynomial
+> canonizer.* ⚠ No built key has both conjuncts — it fires nowhere new and its instantiations are
+> conditional scaffolds.
+> · **`DeepenGuard` §9 — `SameOrbits`-licensing, generic half** (`certPath_congr`: the guard reads its
+> supply only through the orbit relation). ⚠⚠ **The instance is R1**, the retired crux — not an
+> independent lever, as "untried" suggested.
+> · **⚠⚠ THE RECORD OBJECT HAS NO `②`.** No `supplyCost` bound for `foldSupplyFast`/`deckSupply`/
+> `deck2Supply`/`kernelSupply`, no `keyCost` bound for `holKeyFast`; the end-to-end cost theorems are at
+> `lookaheadKey`+`prunedSupply`, a different object. **This is the next thing to build.**
+> **▶ Next, in order:** the record object's `②` (queue 3f) · lex-product key + record integration (3g) ·
+> the restated item 1 (the flag is not a stall — it is equivariance, then the guards' cost).
 >
 > **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Tinhofer}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,

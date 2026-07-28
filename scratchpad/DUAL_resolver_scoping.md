@@ -73,13 +73,29 @@
 > guard-strength lever (§7.3 item 4 as originally written) — **measured wrong**; the supplies are
 > incomparable, not ordered, and the union is the lever.
 >
-> **▶ WHAT IS LEFT** (§7.3 ledger; items 2–6 and 8 are done): **item 1** relocation-nesting depth (the
-> product over relocations is unbounded — the honest `②` remainder) and **item 7** record-object
-> integration (`Publication.canonForm?` still uses `holKeyFast`; needs a key composition — the
-> `RigidSeal.compKey` disjoint-tag pattern is the template — plus a re-proof of `canonForm?_record`).
-> Second guard lever, untried: **`SameOrbits`-licensing**, the only route that could admit
-> `deepenSupply` itself, which `deepen_branch_orbit_iff_aut` shows is *exactly* complete at `Tinhofer`
-> nodes.
+> **▶▶ UPDATE 2026-07-28 — two more landed, and the ledger's shape changed. Gate EXIT 0, 106 modules.**
+> · **`ChainDescent/ForcePick.lean` (10 thms) — the exhaustiveness corollary CASHED.** `forceThenPick`
+>   is force + `take 1`: no supply, no certificate. `①` rides `CoveringOfAt` at `N = forcedSet` with the
+>   automorphism from `forcedSet_single_orbit_of_keySeparatesAt`. **It has no stall channel at all**
+>   (totality and the single-path bound carry *no* hypothesis), so `forcePick_record` states the whole
+>   package under one conjunction: **an equivariant, separating, poly key is a complete polynomial
+>   canonizer.** ⚠ It fires nowhere new today and its instantiations are conditional scaffolds — §10.8.
+> · **`DeepenGuard` §9 (5 thms) — `SameOrbits`-licensing, generic half.** `certPath_congr`:
+>   the guard reads its supply only through the orbit relation, so `keyEquivariant_orbKeyG_of_sameOrbits`
+>   admits a non-equivariant `S` against an equivariant reference. ⚠⚠ **The instance is NOT independent:
+>   `SameOrbits deepenSupply Ref` IS R1**, the retired crux (`DeepenR1`, parked) — §10.7.
+> · **⚠⚠ NEW LEDGER ITEM 9 — the RECORD OBJECT HAS NO `②` AT ALL.** None of `foldSupplyFast`,
+>   `deckSupply`, `deck2Supply`, `kernelSupply` has a `supplyCost` bound and `holKeyFast` has no
+>   `keyCost` bound; the two end-to-end cost theorems are at `lookaheadKey`+`prunedSupply`, a different
+>   object. **This is now the first thing to build** — it is the concrete content of item 1's
+>   restatement, and item 7 must wait for it.
+>
+> **▶ WHAT IS LEFT** (§7.3 ledger; items 2–6 and 8 are done): **item 9** the record object's `②`
+> (do first) · **item 1** restated 2026-07-28 by the user — *the flag is not reached via a stall*
+> (¬consume⟹force has the free contrapositive ¬force⟹consume, so no mutual stall occurs in theory);
+> what the argument depends on is **equivariance**, and what remains after it is **cost**, settled in
+> prose except for the **guards** · **item 7** record-object integration, whose `①` half is one
+> `KeyEquivariant` proof plus a missing **lex-product key combinator**.
 >
 > Reading order: §1 (the object) → §2 (what is measured) → §3 (what is proved) → **§10 (the current
 > state, and the frontier)**. §7 is the guard arc that led here (⚠ its §7.3 ledger is annotated with
@@ -646,8 +662,28 @@ proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a dif
 
 ### 7.3 The rest of the open ledger (all `②`, none `①`) — ⚠ items 2, 3, 5, 6, 8 are DONE (§10.5)
 
-1. **Nesting depth.** D1 relocates work to a deeper node; the product over relocations is not bounded.
-   `DescentReach` + `ncol` bound the number of *steps* by `n`, not the branch factor. **Still open.**
+1. **Nesting depth.** ⚠⚠ **RESTATED 2026-07-28 (user) — the old wording below was wrong about where the
+   difficulty sits, and the correction is a genuine narrowing.**
+
+   > **The flag is not reached via a stall.** *"Consume fails ⟹ force fires somewhere"* has as its free
+   > contrapositive *"force fails everywhere ⟹ some consume node fires"* — so in theory **no mutual
+   > stall occurs**, and the residue is not a stall channel at all. What the argument depends on is
+   > **equivariance**, which is not yet proved; and what remains after it is **cost**: do both
+   > resolvers finish in poly-bounded time? That is currently settled *in prose* for everything except
+   > the **guards**.
+
+   So this item is not "bound a branching product." Two things follow, and they change what to build:
+   * **There is no product to bound in the record object.** `Select.selNode_children_length_le_one` is
+     unconditional and `Select.descendS_cost_le_of_le_one` already gives a single path, so nothing
+     multiplies. The old wording imported a branching object (§6's S4 `k`-fold move) that the record
+     object is not.
+   * **The live question is the guards' bill**, and that is now concrete: `keyCost_orbKeyG_le` is
+     parametric in the supply's `c₂` (§10.5), and **no record supply has a `c₂` at all** — see item 9.
+
+   ⚠ What is *still* honestly open under the restatement: `consume_fail_locates_resolved` resolves a
+   node the descent **reaches**, while `HandledS` quantifies over **every** reached node, so the hook
+   does not by itself prevent a flag at `χ`. Under the restatement that gap is the *equivariance*
+   dependency named above, not a cost product.
 2. ~~**Composite assembly.**~~ **✅ DONE (§10.1)** — and it was mis-scoped here. It does *not* need
    `Consume.CellIsOrbit` on the forced sub-cell: `CellIsOrbit` is a statement about the **whole** branch
    cell and is FALSE at exactly the mixed nodes this is for. The needed fact is the weaker pairwise
@@ -668,7 +704,8 @@ proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a dif
    `GensEquivariant`. That is the problem `kernelSupply` solved via `OrbitPrune.SameOrbits` against an
    equivariant reference, and the congruence machinery exists (`SelectNode.cellNarrow_congr`,
    `handledS_of_sameOrbits`). Guarding by `S` with `SameOrbits S Ref` for equivariant `Ref` looks
-   strictly better than depth. **Untried.**
+   strictly better than depth. ~~**Untried.**~~ **▶ GENERIC HALF LANDED 2026-07-28 (`DeepenGuard` §9)
+   — and the instance is NOT independent of a retired route; see §10.7.**
 5. ~~**`②` is declarative at both keys.**~~ **✅ DONE (§10.5)** — `certPathCost` + `keyCost_orbKeyG_le`.
    The original diagnosis, kept because it is the reason the fix was needed: `keyCost (orbKeyG S) = n⁴`
    held *by definition*, and the guard
@@ -684,9 +721,37 @@ proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a dif
    `orbKey*` and no rigid-seal key appears. `force_canonizer_orbKeyG_deck2` is `①` for a **force-only**
    canonizer — a different object. Integration needs a key composition (`RigidSeal.compKey`'s
    disjoint-tag pattern is the template) plus a re-proof of `canonForm?_record`.
+   ⚠ **Two corrections (2026-07-28).** (a) The `①` half is *smaller* than this reads:
+   `Select.selNode_canonizer_of_sameOrbits` is **key-generic**, so swapping the key costs exactly one
+   `KeyEquivariant` proof, which `keyEquivariant_orbKeyG_guard` already supplies. What is genuinely
+   missing is a **lex-product key combinator** — `compKey`'s disjoint tag is a *case split*, not a
+   product; `(len a :: a) ++ (len b :: b)` under `lexLeList` is a real product and equivariance is
+   componentwise. (b) **Do this AFTER item 9**, or it adds a fifth unbilled component to an object
+   that has no cost theorem.
 8. ~~**No Lean `#guard` for either key.**~~ **✅ DONE** — `Regression` §17/§17a. All firing evidence is Python probes; the project's own vacuity
    discipline asks for a `#guard`ed witness in the same pass. Once item 3 lands, `orbKeyG` is
    `#eval`-able and §2.5's 147/147 can be ported into `Regression`.
+9. **⚠⚠ NEW (2026-07-28) — THE RECORD OBJECT HAS NO `②` AT ALL.** This was invisible in the ledger
+   because every `②` conversation here was about *this track's* key. Measured by grep, not argued:
+
+   | component of `Publication.canonForm?` | `supplyCost` / `keyCost` bound |
+   |---|---|
+   | `Fold.foldSupplyFast` | **none** |
+   | `Deck.deckSupply` | **none** |
+   | `Deck2.deck2Supply` | **none** |
+   | `Kernel.kernelSupply` | **none** |
+   | `Hol.holKeyFast` | **none** (`keyCost_holKey` is a `@[simp]` *equation*, not a bound) |
+
+   `SupplyCost.lean`'s bounds cover `matchSupply` / `deepMatchSupply` / `partialMatchSupply` /
+   `prunedSupply`, and the two end-to-end theorems (`descentCostS_selNode_pruned_lookahead_le`,
+   `descentCostS_selNode_match_lookahead_le`) are at **`lookaheadKey` + `prunedSupply`** — *not* the
+   record. So the object with `②` proved is not the object of record. There is also no
+   `supplyCost_appendSupply` lemma, though it is definitionally `rfl`
+   (`appendSupply` sums the costs), so composition is free once the four parts exist.
+
+   This is the direct target of item 1's restatement — "poly-bounded cost for both resolvers, settled
+   in prose except the guards" — and it is the T2 house rule ("closed-form `c₂` at land time") not
+   having been applied to any record supply. **Do it before item 7.**
 
 ---
 
@@ -1070,3 +1135,65 @@ invisible. Firing bought at an honest price.
 still untried; it is the only route that could admit `deepenSupply` itself, which
 `deepen_branch_orbit_iff_aut` shows is *exactly* complete at `Tinhofer` nodes. ⚠ But note §10.2's
 correction: the guard buys **equivariance**, so coverage work should target that side.
+**▶▶ Generic half landed 2026-07-28 — and it is NOT an independent lever. See §10.7.**
+
+---
+
+### 10.7 ✅ LANDED — `SameOrbits`-licensing, generic half (`DeepenGuard` §9); ⚠ the instance is R1
+
+Five theorems, all `[propext, Classical.choice, Quot.sound]`:
+`cellIsOrbit_congr` → **`certPath_congr`** → `certifiedG_congr` → `keyV_orbKeyG_congr` →
+**`keyEquivariant_orbKeyG_of_sameOrbits`**.
+
+The content is that `CertPath` reads its supply **only through the orbit relation**: `CellIsOrbit` is
+`WordReach` on `verified`, which is exactly what `SameOrbits` equates, and the path's *shape*
+(`chooseIdK`, the cell filter, `step`) never mentions `S`. So `orbKeyG S` inherits `①` from any
+equivariant reference `Ref` with `SameOrbits S Ref` — the `kernelSupply` pattern, now available at the
+**key** as well as at the resolver. Note only the *value* transfers; `certPathCost` still calls `S`
+itself, which is correct — cost carries no `①` obligation.
+
+**⚠⚠ THE CORRECTION THIS SECTION EXISTS FOR.** §7.3 item 4 and §10.6 both call this lever "untried",
+which reads as *independent*. It is not. The only supply worth admitting through it is `deepenSupply`,
+and **`SameOrbits deepenSupply Ref` for an equivariant `Ref` IS R1** — the crux the whole reference
+apparatus was built for and then abandoned (`DeepenRef` / `DeepenRefTransport` / `DeepenR1`, parked out
+of `build.sh`; remaining-work's superseded-frontier block records "R1 is THE crux" and that the
+all-picks reference is exponential). So the lever inherits R1's open half wholesale. What landed is the
+reusable plumbing; what is open is unchanged.
+
+---
+
+### 10.8 ✅ LANDED — `forceThenPick`: the exhaustiveness corollary, CASHED (`ChainDescent/ForcePick.lean`)
+
+Ten theorems, all `[propext, Classical.choice, Quot.sound]`, in `build.sh` after `KeyComplete`.
+
+**The gap it closes.** §10.2 says that under `KeySeparatesAt` *"keeping one representative of the
+forced set is licensed by an automorphism that exists but was never computed."* Nothing exercised that
+licence — every built resolver still reaches its singleton through consume, i.e. through a **computed**
+certificate. `forceThenPick key` is force followed by `take 1`: no supply, no verification, no orbit
+BFS. Its `①` rides `Descend.CoveringOfAt` at `N = forcedSet` with the covering automorphism supplied by
+`forcedSet_single_orbit_of_keySeparatesAt` instead of by a `verified` list — precisely the third
+contract route's intended shape, which no instance had used.
+
+| | statement | hypothesis |
+|---|---|---|
+| `①a` | `Descend.isCanonicalFormOpt_canonForm?` | — |
+| `①b`/`①c` | **`narrowTransport_forceThenPick`** | **`KeyEquivariant` + `KeySeparates`** |
+| **the flag never fires** | `narrowProper_forceThenPick` | **none** |
+| `②` single path | `resolvedAll_forceThenPick` (`take 1`, structural) | **none** |
+| `②` explicit poly | `descentCost_forceThenPick_le` | a `keyCost` bound |
+| all three at once | **`forcePick_record`** | the conjunction below |
+
+⟹ the project's target, stated once as a theorem's hypothesis list:
+
+> **an equivariant, separating, poly force key is a complete polynomial canonizer.**
+
+**⚠ What this is NOT.** It fires nowhere new today: at a `Tinhofer` node the composite already resolves,
+and off its guard `orbKey`/`orbKeyG` return the constant `[]`, which does not separate — so no *built*
+key has both conjuncts and every instantiation is the same kind of conditional scaffold as
+`deepenSupply_guarded_canonizer_direct`. The gain is that **two** coupled carried predicates
+(`Tinhofer` on consume, `SolverSeparates` on force) become **one**. And §10.4's FORK objection applies
+with extra force here: a guarded key satisfies the *negation* of `KeySeparatesAt` vacuously off its
+guard, and plugged into this resolver that is not merely uninformative but would discard genuinely
+different branches — so the hypothesis is carried explicitly and never claimed for a built key. The
+module header says this in the same words; do not instantiate at `orbKeyG` and read the result as a
+canonizer.

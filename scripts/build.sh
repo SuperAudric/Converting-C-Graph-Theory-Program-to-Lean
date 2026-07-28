@@ -149,6 +149,7 @@ MODULES=(
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.KeyComplete            # KeySeparates: consume's guard absorbed into force's separation obligation
+  ChainDescent.ForcePick              # forceThenPick: the exhaustiveness corollary cashed (no stall channel)
 
   # ── W2 solvability route (gauge complex → solvable) ──
   ChainDescent.GaugeComplex           # W2 Tier-A: split-vs-count localization spine

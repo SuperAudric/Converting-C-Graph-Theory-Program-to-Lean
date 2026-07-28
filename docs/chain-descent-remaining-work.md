@@ -98,8 +98,39 @@ transfer). "Complete" = the flag provably never fires.
 > **⚠⚠ CORRECTION a reader must not inherit wrong:** `keySeparates_rawKey` proves `KeySeparates` holds
 > globally for a poly key ⟹ separation alone is CHEAP; the GI-hard object is
 > `KeySeparates ∧ KeyEquivariant`. **The guard buys EQUIVARIANCE, not separation.**
-> **▶ Next:** relocation-nesting depth (the honest `②` remainder) · record-object integration
-> (`Publication.canonForm?` still uses `holKeyFast`) · `SameOrbits`-licensing as the second guard lever.
+>
+> **▶▶ UPDATE (2026-07-28) — TWO MORE LANDED; and the `②` hole that was invisible in the ledger.
+> AUTHORITATIVE: DUAL doc §10.7/§10.8 + §7.3 items 1, 7, 9.** Gate EXIT 0 / 106 modules.
+> · **`ChainDescent/ForcePick.lean` (10 thms, axiom-clean) — the exhaustiveness corollary CASHED.**
+>   `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` licenses discarding survivors *without a
+>   certificate*, and nothing used that licence. `forceThenPick key` = force + `take 1`: no supply, no
+>   verification, no orbit BFS; `①` rides `Descend.CoveringOfAt` at `N = forcedSet` with the covering
+>   automorphism supplied by the corollary. **It has NO stall channel** — totality and the single-path
+>   bound carry no hypothesis — so **`forcePick_record`** states `①`+`②`+"the flag never fires" under
+>   one conjunction: *an equivariant, separating, poly force key is a complete polynomial canonizer.*
+>   ⚠ It fires nowhere new today (no built key has both conjuncts) and §10.4's FORK objection binds
+>   harder here; the hypotheses are carried explicitly and claimed for no built key.
+> · **`DeepenGuard` §9 (5 thms, axiom-clean) — `SameOrbits`-licensing, generic half.**
+>   **`certPath_congr`**: the guard reads its supply only through the orbit relation ⟹
+>   `keyEquivariant_orbKeyG_of_sameOrbits`. ⚠⚠ **The instance is NOT an independent lever:**
+>   `SameOrbits deepenSupply Ref` **is R1**, the crux the parked `DeepenRef`/`DeepenR1` apparatus was
+>   built for. The ledger's "untried" wording read as independent; it is not.
+> · **⚠⚠ THE RECORD OBJECT HAS NO `②` AT ALL (new ledger item 9).** `foldSupplyFast`, `deckSupply`,
+>   `deck2Supply`, `kernelSupply` have **no** `supplyCost` bound and `holKeyFast` has **no** `keyCost`
+>   bound (`keyCost_holKey` is a `@[simp]` equation). `SupplyCost`'s end-to-end theorems are at
+>   `lookaheadKey`+`prunedSupply` — a *different* object. See §1T T2, extended below.
+> **▶ Next, in order:** (1) bill the four record supplies + `holKeyFast` (item 9 — the concrete content
+> of the restated item 1) · (2) the lex-product key combinator + record-object integration (item 7) ·
+> (3) item 1's remaining half.
+>
+> **▶ ITEM 1 RESTATED (2026-07-28, user steer) — "relocation-nesting depth" was the wrong frame.**
+> The flag is **not** reached via a stall: *consume fails ⟹ force fires somewhere* has as its free
+> contrapositive *force fails everywhere ⟹ some consume node fires*, so in theory **no mutual stall
+> occurs**. The argument depends on **equivariance** (not yet proved); what remains after it is
+> **cost** — do both resolvers finish poly-bounded? — which is settled in prose for everything except
+> the **guards**. ⚠ Note also that no branching product exists in the record object at all:
+> `Select.selNode_children_length_le_one` is unconditional. The old "product over relocations"
+> wording imported a branching object the record object is not.
 
 
 > **▶▶▶ UPDATE 2026-07-26 (latest) — THE CONCRETE `ref` + `Recover` ARE LANDED (`RigidRefine.lean`, steps 1–9E,
@@ -854,6 +885,22 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   flat `n⁴` that was true *by definition* and therefore priced nothing — the 2026-07-14 "`Key`/`Supply`
   were cost-free ⟹ `②` is unfalsifiable" finding recurring. Any new key/supply must bill the work it
   *delegates*, not just the work it does. `deepenSupply`'s own `n⁶` is still prose.
+  **⚠⚠ THE DEBT IS MUCH LARGER THAN `deepenSupply` (audited 2026-07-28, by grep — not argued). EVERY
+  COMPONENT OF THE RECORD OBJECT IS UNBILLED:**
+
+  | in `Publication.canonForm?` | bound |
+  |---|---|
+  | `Fold.foldSupplyFast` · `Deck.deckSupply` · `Deck2.deck2Supply` · `Kernel.kernelSupply` | **none** |
+  | `Hol.holKeyFast` | **none** (`keyCost_holKey` is a `@[simp]` equation, not a bound) |
+
+  `SupplyCost.lean` covers `matchSupply` / `deepMatchSupply` / `partialMatchSupply` / `prunedSupply`,
+  and both end-to-end theorems (`Select.descentCostS_selNode_pruned_lookahead_le`,
+  `…_match_lookahead_le`) are at **`lookaheadKey` + `prunedSupply`** — so **the object with `②` proved
+  is not the object of record**, and `Publication.cost` is still an `opaque` stub with
+  `canon_poly_or_flag` a `sorry`. There is no `supplyCost_appendSupply` lemma either, though it is
+  definitionally `rfl` (`appendSupply` sums the costs), so composition is free once the four parts
+  exist. ▶ **This is the first item on the near-term queue** (§2), it is the concrete content of the
+  restated DUAL item 1, and record-object integration (DUAL item 7) must not precede it.
 - **T3 — citation discharge** per policy (everything but G3; register + M1–M5 playbook in the discharge doc;
   wiring cautions: G3 only at the Sun–Wilmes threshold, FTPG corrected predicate, Payne–Thas narrowed).
 - **T4 — D0** (`SchurianScheme` model faithfulness) — see W2.
@@ -894,6 +941,18 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    supports = checks — already computed), get its automorphism generators, lift by any gauge-consistent
    completion; ① rides `SameOrbits` because two lifts differ by a pure gauge element ∈ K. Settle the
    three open design questions in ii-c BEFORE building. Acceptance: `mp7` answers end-to-end.
+3f. **★ THE RECORD OBJECT'S `②` — DO THIS FIRST (added 2026-07-28; T2 above has the audit).** Closed-form
+   `supplyCost` bounds for `foldSupplyFast` / `deckSupply` / `deck2Supply` / `kernelSupply`, a `keyCost`
+   bound for `holKeyFast`, and the (definitionally `rfl`) `supplyCost_appendSupply`. Then
+   `Select.selProbeCost_le` + `descentCostS_le_of_le_one` give the record its first end-to-end `②`, and
+   `Publication.cost` can stop being `opaque`. Acceptance: a `descentCostS_selNode_record_le`
+   with an explicit polynomial, no hypotheses. ⚠ Prerequisite for 3g — do not add a fifth unbilled
+   component to an object with no cost theorem.
+3g. **Record-object integration** (DUAL item 7): a **lex-product key combinator** (`compKey`'s disjoint
+   tag is a case split, not a product; `(len a :: a) ++ (len b :: b)` under `lexLeList` is one, with
+   componentwise equivariance and summed cost), then swap `holKeyFast → pairKey holKeyFast (orbKeyG
+   guardSupply)` in `Publication.canonForm?`. The `①` is one `KeyEquivariant` proof —
+   `Select.selNode_canonizer_of_sameOrbits` is key-generic — plus a re-proof of `canonForm?_record`.
 4. **T1 first family** — CFI odd-deg localisation through the weakest hook (de-risk on a C₆-style toy
    first). Output: the first real family in `HandledS` at the record = Publication's handled-half witness.
 5. **F1 / F3b** — gate review (the witnesses exist; confirm necessity), then the Smith/CRT key + C# wiring.

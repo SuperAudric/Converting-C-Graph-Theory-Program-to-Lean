@@ -642,5 +642,75 @@ theorem certifiedG_guard_of_match {adj : AdjMatrix n} {χ : Colouring n}
     (h : CertifiedG (Consume.matchSupply (n := n)) adj χ) : CertifiedG (guardSupply (n := n)) adj χ :=
   certifiedG_append_right (certifiedG_append_right (certifiedG_append_right h))
 
+/-! ## 9. The SECOND guard lever — `SameOrbits`-licensing
+
+§8's union widens the guard among supplies that are already `SupplyEquivariant`. The other lever
+(DUAL doc §10.6, recorded there as untried) drops that requirement: guard by a **non**-equivariant `S`
+and buy the `if`'s relabelling-stability from an equivariant *reference* `Ref` with
+`OrbitPrune.SameOrbits S Ref` — the pattern `kernelSupply` already uses for its `①`.
+
+**The generic half is cheap and is proved here.** `CertPath` reads `S` only through `CellIsOrbit`,
+which reads it only through `WordReach` on `verified` — which is exactly what `SameOrbits` equates.
+The path's *shape* (`chooseIdK`, the cell filter, `step`) does not mention `S` at all, so the whole
+recursion is congruent and `orbKeyG S` inherits `①` from `Ref`.
+
+⚠⚠ **BUT READ THIS BEFORE SPENDING A SESSION ON THE INSTANCE.** The only supply worth admitting this
+way is **`deepenSupply`** — `deepen_branch_orbit_iff_aut` makes it *exactly* complete at `Tinhofer`
+nodes, and it is excluded from `guardSupply` only for want of equivariance. But
+`SameOrbits deepenSupply Ref` for an equivariant `Ref` **is R1**, the crux the reference apparatus was
+built for and then abandoned: `DeepenRef`/`DeepenRefTransport`/`DeepenR1` are parked out of `build.sh`
+precisely because R1 did not close, and the all-picks reference is exponential (harmless for `①`, but
+it means no cheap witness). So this lever is *not* independent of the retired route — it inherits its
+crux. The lemmas below are the reusable half; the instance is the open half. -/
+
+theorem cellIsOrbit_congr {S₁ S₂ : Supply n} (h : ChainDescent.OrbitPrune.SameOrbits S₁ S₂)
+    (adj : AdjMatrix n) (χ : Colouring n) :
+    CellIsOrbit S₁ adj χ ↔ CellIsOrbit S₂ adj χ :=
+  ⟨fun hc u hu w hw => (h adj χ u w).mp (hc u hu w hw),
+   fun hc u hu w hw => (h adj χ u w).mpr (hc u hu w hw)⟩
+
+/-- **★★ The guard is a function of the supply's ORBITS, not of its generators.** Proved through the
+§5 equation lemmas, never by unfolding `CertPath` in place. -/
+theorem certPath_congr {S₁ S₂ : Supply n} (h : ChainDescent.OrbitPrune.SameOrbits S₁ S₂)
+    (adj : AdjMatrix n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n), CertPath S₁ adj fuel cur ↔ CertPath S₂ adj fuel cur := by
+  intro fuel
+  induction fuel with
+  | zero => intro _; exact Iff.rfl
+  | succ fuel ih =>
+      intro cur
+      cases hco : chooseIdK (List.finRange n) cur.col with
+      | none => rw [certPath_none hco, certPath_none hco]
+      | some cid =>
+          cases hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
+          | nil =>
+              rw [certPath_nil hco hfl, certPath_nil hco hfl]
+              exact and_congr (cellIsOrbit_congr h adj cur.col) Iff.rfl
+          | cons w rest =>
+              rw [certPath_cons hco hfl, certPath_cons hco hfl]
+              exact and_congr (cellIsOrbit_congr h adj cur.col) (ih _)
+
+theorem certifiedG_congr {S₁ S₂ : Supply n} (h : ChainDescent.OrbitPrune.SameOrbits S₁ S₂)
+    (adj : AdjMatrix n) (χ : Colouring n) : CertifiedG S₁ adj χ ↔ CertifiedG S₂ adj χ :=
+  ⟨fun hc r hr => (certPath_congr h adj n _).mp (hc r hr),
+   fun hc r hr => (certPath_congr h adj n _).mpr (hc r hr)⟩
+
+/-- Orbit-equal supplies give the **same key value** — only the *cost* differs (`certPathCost` calls
+`S` itself), which carries no `①` obligation. -/
+theorem keyV_orbKeyG_congr {S₁ S₂ : Supply n} (h : ChainDescent.OrbitPrune.SameOrbits S₁ S₂)
+    (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
+    Force.keyV (orbKeyG S₁) adj χ v = Force.keyV (orbKeyG S₂) adj χ v := by
+  simp only [keyV_orbKeyG]
+  exact if_congr (certPath_congr h adj n _) rfl rfl
+
+/-- **★★★ `①` FOR A NON-EQUIVARIANT GUARD SUPPLY** — the `SameOrbits` reduction at the key, mirroring
+`OrbitPrune`'s at the resolver. This is the lemma the second lever needs; what it still needs is an
+instance, and §9's header says where that bites. -/
+theorem keyEquivariant_orbKeyG_of_sameOrbits {S Ref : Supply n} (hRef : SupplyEquivariant Ref)
+    (hso : ChainDescent.OrbitPrune.SameOrbits S Ref) : Force.KeyEquivariant (orbKeyG S) := by
+  intro σ adj χ v
+  rw [keyV_orbKeyG_congr hso, keyV_orbKeyG_congr hso]
+  exact keyEquivariant_orbKeyG hRef σ adj χ v
+
 end Deepen
 end ChainDescent

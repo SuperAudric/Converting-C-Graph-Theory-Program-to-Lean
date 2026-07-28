@@ -99,6 +99,25 @@
 > weakening** — and the repaired form of the retired `assume-VT` prune). **Full analysis, both obituaries,
 > and the surviving objection: `scratchpad/DUAL_resolver_scoping.md` §10.**
 >
+> **▶▶ UPDATE (2026-07-28) — two more landed + one audit finding. AUTHORITATIVE: DUAL §10.7/§10.8.**
+> Gate EXIT 0 / **106** modules, all axiom-clean.
+> · **`DeepenGuard` §9 (5 thms) — `SameOrbits`-licensing, the GENERIC half.** `cellIsOrbit_congr` →
+>   **`certPath_congr`** → `certifiedG_congr` → `keyV_orbKeyG_congr` →
+>   **`keyEquivariant_orbKeyG_of_sameOrbits`**: the guard reads its supply **only through the orbit
+>   relation** (the path's shape never mentions `S`), so a non-equivariant `S` can be licensed by an
+>   equivariant reference — the `kernelSupply` pattern, now at the key as well as the resolver.
+>   ⚠⚠ **The instance is NOT an independent lever: the only supply worth admitting is `deepenSupply`,
+>   and `SameOrbits deepenSupply Ref` IS R1** — the crux `DeepenRef`/`DeepenRefTransport`/`DeepenR1`
+>   were built for and which is parked out of `build.sh`. What landed is the reusable plumbing.
+> · **`ChainDescent/ForcePick.lean` (10 thms) — `KeyComplete`'s exhaustiveness corollary CASHED.**
+>   `forceThenPick` = force + `take 1`, discarding survivors on the *uncomputed* automorphism
+>   `forcedSet_single_orbit_of_keySeparatesAt` supplies. **No stall channel at all**;
+>   `forcePick_record` = `①` + `②` + "the flag never fires" under `{KeyEquivariant, KeySeparates,
+>   poly keyCost}`. ⚠ Fires nowhere new today — no built key has both conjuncts.
+> · **⚠⚠ The record object has NO `②`.** None of `foldSupplyFast`/`deckSupply`/`deck2Supply`/
+>   `kernelSupply` has a `supplyCost` bound and `holKeyFast` has no `keyCost` bound; `deepenSupply`'s
+>   missing bound (below, and §1T T2) is one case of a much larger hole. **Next thing to build.**
+>
 > ✅ **Naming — RENAMED 2026-07-27.** The project predicate was `Amenable`; it is AKRV's **Tinhofer**,
 > while AKRV's *own* "amenable" is a different (strictly smaller) class, so the predicate is now
 > `Tinhofer`/`TinhoferPath` throughout (module `DeepenTinhofer.lean`). ⚠ It is **not literally** AKRV's
