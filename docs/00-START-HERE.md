@@ -226,9 +226,22 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > · **✅ The record object now has a `②`:** `ChainDescent/RecordCost.lean` —
 > **`descentCostS_selNode_record_le`**, explicit polynomial, every input, no hypotheses; and
 > `record_canonizer_with_cost` = `①` + `②` together.
-> **▶ Next, in order:** reshape the record bound into `Publication`'s `costConst * n ^ costDeg` monomial ·
-> lex-product key + record integration (3g) · the restated item 1 (the flag is not a stall — it is
-> equivariance, then the guards' cost).
+>
+> **▶▶ AND (2026-07-28, queue 3g) — `ChainDescent/RecordKey.lean`: the LEX-PRODUCT KEY.**
+> `pairKey k₁ k₂` concatenates values and sums costs; `keyEquivariant_pairKey` is **unconditional**.
+> **⚠ The scoped encoding `(len a :: a) ++ (len b :: b)` is WRONG** — it orders the first component by
+> *shortlex*, which `lexLeList` is not, so it silently re-orders `holKeyFast`'s own narrowing. Plain
+> concatenation is correct **under `ConstLen k₁`** (equal first-component length across the branches
+> compared), which every built key satisfies. Under it: separation transfers from *either* component,
+> and **`keepMin_pairKey_subset`** proves the tiebreak never *widens* the narrowing.
+> **`recordKey := pairKey holKeyFast (orbKeyG guardSupply)`** with `recordKey_canonizer` (`①`, one
+> `KeyEquivariant` proof) and `descentCostS_selNode_recordKey_le` (`②`, explicit polynomial, no
+> hypotheses). **★ Measured non-vacuous (`Regression` §18): on `G8` the root cell goes 8 → 2 where
+> `holKeyFast` alone keeps all 8**; `t3`/`wcyc9` are pinned as single-orbit controls where firing is
+> *forbidden*.
+> **▶ Next:** edit `Publication.canonForm?` onto `recordKey` **together with** reshaping the `②` bound
+> into the pinned `costConst * n ^ costDeg` monomial · then the restated item 1 (the flag is not a
+> stall — it is equivariance, then the guards' cost) · then Track R P2.
 >
 > **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Tinhofer}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,

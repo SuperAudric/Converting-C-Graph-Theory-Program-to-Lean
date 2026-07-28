@@ -736,9 +736,16 @@ proxy is depth-0 while `deck2Supply` seeds two vertices and chains — not a dif
    `Select.selNode_canonizer_of_sameOrbits` is **key-generic**, so swapping the key costs exactly one
    `KeyEquivariant` proof, which `keyEquivariant_orbKeyG_guard` already supplies. What is genuinely
    missing is a **lex-product key combinator** — `compKey`'s disjoint tag is a *case split*, not a
-   product; `(len a :: a) ++ (len b :: b)` under `lexLeList` is a real product and equivariance is
-   componentwise. (b) **Do this AFTER item 9**, or it adds a fifth unbilled component to an object
+   product. ⚠⚠ **This item's proposed encoding `(len a :: a) ++ (len b :: b)` is WRONG** — it orders the
+   first component by *shortlex*, which `lexLeList` is not, so it silently re-orders `holKeyFast`'s own
+   narrowing. The correct product is **plain concatenation under `ConstLen`**; see §10.10.
+   (b) **Do this AFTER item 9**, or it adds a fifth unbilled component to an object
    that has no cost theorem.
+   **✅ DONE 2026-07-28 — `ChainDescent/RecordKey.lean` (§10.10).** `pairKey`, `ConstLen`,
+   `keepMin_pairKey_subset`, and `recordKey = pairKey holKeyFast (orbKeyG guardSupply)` with `①`+`②`.
+   Measured non-vacuous: on `G8` the cell goes **8 → 2** where `holKeyFast` alone keeps all 8.
+   ▶ Still open: editing `Publication.canonForm?` itself, which wants the `②` bound reshaped into the
+   pinned `costConst * n ^ costDeg` monomial — do the two together.
 8. ~~**No Lean `#guard` for either key.**~~ **✅ DONE** — `Regression` §17/§17a. All firing evidence is Python probes; the project's own vacuity
    discipline asks for a `#guard`ed witness in the same pass. Once item 3 lands, `orbKeyG` is
    `#eval`-able and §2.5's 147/147 can be ported into `Regression`.
@@ -1284,3 +1291,60 @@ The two facts that were missing rather than hard: `nullBasis` emits one word per
 `|kernelGens| ≤ |rails| ≤ n`; and `secondsV` is a `flatMap` of filters of `finRange n`, so
 `|deck2Batch| ≤ n²`. ▶ Remaining: reshape into `Publication`'s `costConst * n ^ costDeg` monomial —
 statement-side work, sequence it with item 7.
+
+---
+
+### 10.10 ✅ LANDED — item 7 / queue 3g: the lex-product key, and the record's composed force key
+
+`ChainDescent/RecordKey.lean`, 16 theorems, all `[propext, Classical.choice, Quot.sound]`.
+
+**⚠ The combinator's shape is NOT what item 7 predicted, and the correction matters.** This ledger and
+`remaining-work` both proposed the length-prefixed encoding `(len a :: a) ++ (len b :: b)` "so that
+concatenation is a genuine lex product". **That is wrong.** Prefixing the length orders the first
+component by **shortlex**, and `Descend.lexLeList` is *not* shortlex — it compares elementwise and only
+falls back on length when one list runs out, so `lexLeList [5] [1,1] = false` while shortlex ranks `[5]`
+first. Prefixing therefore silently **re-orders `holKeyFast`'s own narrowing**, which is the one thing
+an integration step must not do.
+
+**What is correct: plain concatenation, plus a named side condition.**
+
+> **`ConstLen k₁`** — `k₁`'s value has the same length at every vertex of a node.
+
+Under it, any difference between two branches is decided *inside* the first component and ties fall
+through to the second: concatenation is exactly the lex product. Every built key satisfies it
+(`constLen_holKeyFast`: `holSigFast` is a `map` over `List.range (n + 1)`), so carrying the condition
+costs nothing and keeps the order honest.
+
+| | |
+|---|---|
+| `①`, **unconditional** | `keyEquivariant_pairKey` — componentwise |
+| cost | `keyCost_pairKey_le` — costs add |
+| the product determines both components | `keyV_pairKey_inj` (from `ConstLen` + `List.append_inj`) |
+| **firing gain** | `keySeparatesAt_pairKey_left` / `_right` — the product separates whatever **either** component does |
+| **no strength loss** | **`keepMin_pairKey_subset`** — the tiebreak never *widens* the narrowing (engine: `lexLeList_append_left`) |
+
+**The record's key.** `recordKey := pairKey holKeyFast (orbKeyG guardSupply)`.
+**`recordKey_canonizer`** is `①` at the record supply — and it really is *one* `KeyEquivariant` proof,
+because `Select.selNode_canonizer_of_sameOrbits` is key-generic (this ledger's item-7 correction (a),
+confirmed in the doing). **`descentCostS_selNode_recordKey_le`** is `②`, explicit polynomial, no
+hypotheses; it needed one new bound, **`supplyCost_guardSupply_le`**, since `orbKeyG`'s bill is
+parametric in its guard supply's — three of `guardSupply`'s four members were bounded in `RecordCost`
+and the fourth (`matchSupply`) in `SupplyCost`.
+
+#### ★★ MEASURED — the swap is not a no-op (`Regression` §18, ~5 s)
+
+`keepMin_pairKey_subset` says the product never widens; **nothing proves it ever shrinks**, so that
+half is a measurement, exactly as with the union guard.
+
+| witness | cell | `holKeyFast` | **`recordKey`** | reading |
+|---|---|---|---|---|
+| **`G8`** | 8 | **8** (constant holonomy signature) | **2** | the composed key resolves a cell the record's key leaves untouched |
+| `t3` | 3 | 3 | 3 | single orbit — firing is *forbidden* (`forceBy_no_narrowing_on_orbit`) |
+| `wcyc9` | 3 | 3 | 3 | same |
+
+The two negative rows are pinned as **controls**: an equivariant key that ever fired inside an orbit
+would be a soundness regression, so "no improvement" is the correct result there and a future change
+that "improves" it must fail the gate.
+
+**▶ Remaining on item 7:** `Publication.canonForm?` still names `holKeyFast`. Editing it wants the `②`
+bound reshaped into the pinned `costConst * n ^ costDeg` monomial as well — do the two in one pass.

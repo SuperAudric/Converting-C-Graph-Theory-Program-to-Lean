@@ -151,6 +151,7 @@ MODULES=(
   ChainDescent.KeyComplete            # KeySeparates: consume's guard absorbed into force's separation obligation
   ChainDescent.ForcePick              # forceThenPick: the exhaustiveness corollary cashed (no stall channel)
   ChainDescent.RecordCost             # ② for the OBJECT OF RECORD: the four supplies + holKeyFast, billed
+  ChainDescent.RecordKey              # lex-product key combinator + the record's composed force key (①+②)
 
   # ── W2 solvability route (gauge complex → solvable) ──
   ChainDescent.GaugeComplex           # W2 Tier-A: split-vs-count localization spine

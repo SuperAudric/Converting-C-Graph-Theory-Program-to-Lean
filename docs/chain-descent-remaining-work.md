@@ -974,11 +974,28 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    ▶ **Follow-on, NOT done and deliberately so:** swapping `Publication.cost` off `opaque` onto this needs
    the bound reshaped into `costConst * n ^ costDeg` (a monomial), which is arithmetic on the statement
    side and touches `Publication`'s pinned statements — sequence it with 3g under the finalization steer.
-3g. **Record-object integration** (DUAL item 7): a **lex-product key combinator** (`compKey`'s disjoint
-   tag is a case split, not a product; `(len a :: a) ++ (len b :: b)` under `lexLeList` is one, with
-   componentwise equivariance and summed cost), then swap `holKeyFast → pairKey holKeyFast (orbKeyG
-   guardSupply)` in `Publication.canonForm?`. The `①` is one `KeyEquivariant` proof —
-   `Select.selNode_canonizer_of_sameOrbits` is key-generic — plus a re-proof of `canonForm?_record`.
+3g. ✅ **RECORD-OBJECT INTEGRATION — DONE 2026-07-28 (`ChainDescent/RecordKey.lean`, 16 thms,
+   axiom-clean, in `build.sh`).** `pairKey k₁ k₂` = **plain concatenation** of values, summed costs;
+   `keyEquivariant_pairKey` is unconditional. **`recordKey := pairKey holKeyFast (orbKeyG guardSupply)`**,
+   with `recordKey_canonizer` (`①`, one `KeyEquivariant` proof — `selNode_canonizer_of_sameOrbits` is
+   key-generic) and `descentCostS_selNode_recordKey_le` (`②`, explicit polynomial, no hypotheses; the
+   key bound carries the guard's own work via a new `supplyCost_guardSupply_le`).
+   **⚠ CORRECTION to this item as originally scoped:** the length-prefixed encoding
+   `(len a :: a) ++ (len b :: b)` is **wrong** — it orders the first component by **shortlex**, silently
+   re-ordering `holKeyFast`'s own narrowing (`lexLeList` ranks a shorter list first, so a long first
+   component can be out-ranked by a short one). Plain concatenation is the correct product **given a
+   side condition** — `ConstLen k₁`, equal first-component length across the branches being compared —
+   which every built key satisfies (`constLen_holKeyFast`: `holSigFast` is a `map` over
+   `List.range (n+1)`). Under it: `keyV_pairKey_inj`, the two separation-transfer lemmas (the product
+   separates whatever *either* component does), and **`keepMin_pairKey_subset`** — the no-strength-loss
+   theorem, that the tiebreak never *widens* the narrowing.
+   **★ MEASURED (`Regression` §18, ~5 s): the swap is not a no-op.** On `G8` the root cell has 8
+   members, `holKeyFast` keeps **all 8**, `recordKey` keeps **2** — a cell the record's current key
+   leaves completely untouched. ⚠ And the negative controls are pinned too: on `t3` and `wcyc9` the
+   product keeps everything, *correctly*, because those cells are single orbits and
+   `forceBy_no_narrowing_on_orbit` forbids an equivariant key from firing there.
+   ▶ **Not done, deliberately:** editing `Publication.canonForm?` itself — that also wants the `②`
+   bound reshaped into the pinned `costConst * n ^ costDeg` monomial. Do the two together.
 4. **T1 first family** — CFI odd-deg localisation through the weakest hook (de-risk on a C₆-style toy
    first). Output: the first real family in `HandledS` at the record = Publication's handled-half witness.
 5. **F1 / F3b** — gate review (the witnesses exist; confirm necessity), then the Smith/CRT key + C# wiring.

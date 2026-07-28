@@ -12,6 +12,7 @@ import ChainDescent.DeckSupply
 import ChainDescent.HolKey
 import ChainDescent.DeepenGuard
 import ChainDescent.FoldFast
+import ChainDescent.RecordKey
 
 /-!
 # The build-gating REGRESSION suite — cheap, and on the critical path
@@ -573,5 +574,42 @@ contract is that it stays fast (the kernel guards, the most expensive thing here
 the stronger claim anyway — that on `t3` **every** member is shut while the union is open — which is
 the evidence that §8 buys anything and which `certPath_append_*` cannot supply (monotonicity is not
 strictness). The `deck2`-shut half of the comparison is already pinned just above, at no extra cost. -/
+
+/-! ## §18 — the COMPOSED record key strictly out-narrows `holKeyFast` (2026-07-28)
+
+`RecordKey.pairKey` is only worth putting in the record object if the tiebreak actually fires
+somewhere the holonomy key does not. `RecordKey.keepMin_pairKey_subset` proves the product never
+*widens* the narrowing; nothing proves it ever *shrinks* it, so — exactly as with the union guard —
+that half is a measurement.
+
+**`G8` is the witness, and it is decisive:** the root branch cell has 8 members, `holKeyFast` keeps
+**all 8** (its holonomy signature is constant there), and `recordKey` keeps **2**. So the composed key
+resolves a cell the record's current key leaves completely untouched. Consistent with G8's recorded
+orbit structure on that cell (`{4, 2, 2}` — `DeepenSupply`'s falsifier note): an equivariant key
+cannot cut inside an orbit, and 2 is an orbit.
+
+⚠ Read the negative results too, since they bound the claim: on `t3` (3 branches) and `wcyc9`
+(3 branches) the product keeps everything the holonomy key does — correctly, because those cells are
+single orbits and `Force.forceBy_no_narrowing_on_orbit` *forbids* an equivariant key from firing
+there. The gain is on mixed cells, which is where it was designed to be.
+
+(~5 s. Cheap because `n = 8`; the `guardSupply` evaluations that made §17a expensive are at `n = 15`.) -/
+
+def g8Root : Refine.ColData 8 := Refine.warmRefineVec G8 (fun _ => 0)
+
+#guard ((Descend.branches g8Root.col).length,
+        (Force.keepMin (Hol.holKeyFast (n := 8)) G8 g8Root.col
+          (Descend.branches g8Root.col)).length,
+        (Force.keepMin (RecordKey.recordKey (n := 8)) G8 g8Root.col
+          (Descend.branches g8Root.col)).length) = (8, 8, 2)
+
+/-! The two single-orbit controls, pinned so a future change that "improves" them is caught as the
+soundness regression it would be (an equivariant key firing inside an orbit contradicts
+`forceBy_no_narrowing_on_orbit`). -/
+
+#guard ((Force.keepMin (Hol.holKeyFast (n := 9)) wcyc9 wcyc9Root.col
+          (Descend.branches wcyc9Root.col)).length,
+        (Force.keepMin (RecordKey.recordKey (n := 9)) wcyc9 wcyc9Root.col
+          (Descend.branches wcyc9Root.col)).length) = (3, 3)
 
 end ChainDescent.Regression

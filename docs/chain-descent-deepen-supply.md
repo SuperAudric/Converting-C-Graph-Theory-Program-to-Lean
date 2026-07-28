@@ -120,6 +120,12 @@
 >   ✅ **PAID later the same day — `ChainDescent/RecordCost.lean` (16 thms):**
 >   `descentCostS_selNode_record_le`, explicit polynomial, no hypotheses. ⚠ **`deepenSupply`'s own bound
 >   is STILL prose** — it is not in the record, and T2 says pay it when T1 wires it in.
+> · **✅ 3g DONE — `ChainDescent/RecordKey.lean` (16 thms):** `pairKey` = plain concatenation under
+>   **`ConstLen k₁`** (⚠ the scoped `(len a :: a) ++ …` encoding is WRONG — shortlex, re-orders
+>   `holKeyFast`); `keepMin_pairKey_subset` = no strength loss; **`recordKey = pairKey holKeyFast
+>   (orbKeyG guardSupply)`** with `①` (`recordKey_canonizer`) and `②`
+>   (`descentCostS_selNode_recordKey_le`). ★ Measured non-vacuous: **`G8` cell 8 → `holKeyFast` 8 →
+>   `recordKey` 2** (`Regression` §18); `t3`/`wcyc9` pinned as single-orbit controls.
 > · **De-duplication + vacuity (from `scratchpad/KEY_scoping.md` §0):** `KeyComplete.KeySeparates` →
 >   **`KeySeparatesAll`** with the bridge `keySeparatesAt_iff_hol` to F3a's earlier `Hol.KeySeparates`;
 >   and **`readMin`** (`ForcePick` §8) inhabits `forcePick_record`'s hypotheses unconditionally

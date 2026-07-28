@@ -3189,47 +3189,48 @@ correctness to (i) each candidate is a relabelling + (ii) `cand (relabelAdj σ G
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Regression.C5` | 48-49 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
-| `Regression.P5` | 51-53 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
-| `Regression.G8` | 55-62 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
-| `Regression.dihSupply` | 64-67 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
-| `Regression.form` | 71-72 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
-| `Regression.formC` | 81-82 | Oracle-driven canonical form (`consume`). Definition. | Definition |
-| `Regression.gForce` | 105-106 | Guarded **force** canonical form. Definition. | Definition |
-| `Regression.gMatch` | 115-116 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
-| `Regression.gMix` | 144-147 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
-| `Regression.C4` | 162 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
-| `Regression.gDeep` | 164-166 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
-| `Regression.gPruned` | 181-185 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
-| `Regression.coreE` | 201-204 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
-| `Regression.core6` | 206 | The fold demo's core graph. Definition. | Definition |
-| `Regression.fold4` | 208-210 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
-| `Regression.core6Root` | 212-214 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
-| `Regression.fold4Root` | 215 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
-| `Regression.gSel` | 250-251 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
-| `Regression.gSelDeep` | 253-254 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
-| `Regression.vcoreB` | 286-290 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
-| `Regression.vfold2` | 292-295 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
-| `Regression.vfold2Root` | 297 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wEdge` | 327-332 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
-| `Regression.wcyc9` | 334 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
-| `Regression.wcyc9Root` | 335-337 | Materialized root colouring (trap #1). | Definition |
-| `Regression.wcyc9Swapped` | 348 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
-| `Regression.wcyc9SwappedRoot` | 349-350 | Its materialized root (trap #1). | Definition |
-| `Regression.vfoldT` | 375-382 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
-| `Regression.ut` | 384-388 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
-| `Regression.utRoot` | 390 | Materialized root colouring (trap #1). | Definition |
-| `Regression.C7` | 421 | — | Definition |
-| `Regression.gTree` | 423-425 | — | Definition |
-| `Regression.c7Root` | 436 | — | Definition |
-| `Regression.c7Seed` | 437-444 | — | Definition |
-| `Regression.t3` | 459 | The one-pair-twisted triple cover alone (n = 15; `ut`'s T block) — the F2c witness: its commuting mirror gauge stalls fold AND deck. | Definition |
-| `Regression.t3Root` | 460-462 | Root colouring of `t3` (ColData-materialised, trap #1). | Definition |
-| `Regression.mpOnLine` | 486 | Fano line membership `{i, i+1, i+3} mod 7` for the mp7 witness. | Definition |
-| `Regression.mpInS` | 487-492 | Even-subset membership for the mp7 CFI gadgets. | Definition |
-| `Regression.mpFG` | 493-496 | Foot–gadget adjacency of the Fano multipede. | Definition |
-| `Regression.mp7` | 497-500 | The FANO MULTIPEDE (n = 42): the C3 witness — symmetric pin-blind CFI cover, gauge = the [7,3,4] simplex code (arity-3 checks, girth 6, min weight 4); fold/deck/deck2 + manual deck3 all measured dead (`PerformanceTest` §13); the kernel supply consumes its whole gauge (§14, `Regression` §15). | Definition |
-| `Regression.mp7Root` | 501-504 | mp7's root colouring (ColData — trap #1). | Definition |
+| `Regression.C5` | 49-50 | The 5-cycle: vertex-transitive ⟹ **every cell is an orbit** — consume's domain, force's blind spot. Definition. | Definition |
+| `Regression.P5` | 52-54 | The 5-path: `Aut = ℤ₂`, and individualizing **discretizes** ⟹ it is `Consume.Discretizing`, so the colour-match oracle can actually fire on it. Definition. | Definition |
+| `Regression.G8` | 56-63 | §**A cubic non-vertex-transitive graph on 8 vertices** (two triangles; `6`,`7` in none). Being **regular**, 1-WL leaves a **single cell of all 8**; not being vertex-transitive, that cell is **not an orbit** — force's domain, at `n = 8` instead of the Frucht graph's `n = 12`. **~8× cheaper**, and the reason the regression suite left the critical path's slow lane. Definition. | Definition |
+| `Regression.dihSupply` | 65-68 | The full `Aut(Cₙ) = Dₙ`, as a **fixed** generator list — hence **not equivariant**, which is exactly what the `①c` counterexample needs. Definition. | Definition |
+| `Regression.form` | 72-73 | Exhaustive canonical form, as a comparable value. Definition. | Definition |
+| `Regression.formC` | 82-83 | Oracle-driven canonical form (`consume`). Definition. | Definition |
+| `Regression.gForce` | 106-107 | Guarded **force** canonical form. Definition. | Definition |
+| `Regression.gMatch` | 116-117 | Guarded **mixed** form with the **structural** cascade-oracle supply. Definition. | Definition |
+| `Regression.gMix` | 145-148 | Guarded **mixed** form with the fixed-generator (non-equivariant) supply — the `①c` counterexample. Definition. | Definition |
+| `Regression.C4` | 163 | The 4-cycle — the cheapest P2 witness (a reflection fixes each vertex ⟹ the one-step oracle provably cannot fire). | Definition |
+| `Regression.gDeep` | 165-167 | Guarded **mixed** form with the bounded-depth oracle at depth `d`. Definition. | Definition |
+| `Regression.gPruned` | 182-186 | Guarded **mixed** form with the reference-matching pruned supply. Definition. | Definition |
+| `Regression.coreE` | 202-205 | Edge predicate of the fold demo's 6-vertex core (path `0…5` + chord `1-3`) — 1-WL-discrete, hence asymmetric. | Definition |
+| `Regression.core6` | 207 | The fold demo's core graph. Definition. | Definition |
+| `Regression.fold4` | 209-211 | **The F_k fold witness:** 4 disjoint copies of the core — copies are 1-WL twins, the branch cell is the 4 copies of one core vertex (`docs/chain-descent-fold-tower-plan.md` §3). | Definition |
+| `Regression.core6Root` | 213-215 | Materialized root colouring — `ColData`-backed (standing trap #1: an inline `Colouring`-typed expression re-runs refinement per lookup). | Definition |
+| `Regression.fold4Root` | 216 | Materialized fold root colouring — same trap-#1 discipline, at `n = 24` the difference between ~2 s and minutes. | Definition |
+| `Regression.gSel` | 251-252 | The fused canonizer (`Select.canonFormFastS?`, `lookaheadKey` + `matchSupply`) flattened for the §9 dominance-parity and flag-parity guards. | Definition |
+| `Regression.gSelDeep` | 254-255 | The fused canonizer over the depth-`d` oracle, flattened — the C₄ `d = 1` parity guard against `gDeep`. | Definition |
+| `Regression.vcoreB` | 287-291 | `C₄` + pendant — the mirror (1↔3) survives every pin on the mirror axis, so a copy is NEVER refinement-discretized (the WL-blind mechanism in miniature). | Definition |
+| `Regression.vfold2` | 293-296 | **The F2a witness:** 2 copies of the mirror-tied core, one vertical matching edge per fiber. | Definition |
+| `Regression.vfold2Root` | 298 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wEdge` | 328-333 | Weighted cycle edge function: edge `i—i+1` of `C_N` has weight `i % 3 + 1` — `Aut = Z_{N/3}`, involution-free for odd `N/3` (kills every reflection). | Definition |
+| `Regression.wcyc9` | 335 | **The F2b witness**: weighted `C₉`, `Aut = Z₃` exactly — no involutions in `Aut` at all, so every involution-based constructor is structurally out. | Definition |
+| `Regression.wcyc9Root` | 336-338 | Materialized root colouring (trap #1). | Definition |
+| `Regression.wcyc9Swapped` | 349 | Cross relabelling — the supply-level `①c` observation's graph. | Definition |
+| `Regression.wcyc9SwappedRoot` | 350-351 | Its materialized root (trap #1). | Definition |
+| `Regression.vfoldT` | 376-383 | The twisted/untwisted vertical 3-fold: `twist01` crosses the `{1,3}` fiber edges of the (0,1) copy-pair. | Definition |
+| `Regression.ut` | 385-389 | **The F3a witness** `U3 ⊔ T3` (n = 30): non-isomorphic by twist parity, 1-WL-merged — the distinguishable-but-WL-merged cell force must separate. | Definition |
+| `Regression.utRoot` | 391 | Materialized root colouring (trap #1). | Definition |
+| `Regression.C7` | 422 | — | Definition |
+| `Regression.gTree` | 424-426 | — | Definition |
+| `Regression.c7Root` | 437 | — | Definition |
+| `Regression.c7Seed` | 438-445 | — | Definition |
+| `Regression.t3` | 460 | The one-pair-twisted triple cover alone (n = 15; `ut`'s T block) — the F2c witness: its commuting mirror gauge stalls fold AND deck. | Definition |
+| `Regression.t3Root` | 461-463 | Root colouring of `t3` (ColData-materialised, trap #1). | Definition |
+| `Regression.mpOnLine` | 487 | Fano line membership `{i, i+1, i+3} mod 7` for the mp7 witness. | Definition |
+| `Regression.mpInS` | 488-493 | Even-subset membership for the mp7 CFI gadgets. | Definition |
+| `Regression.mpFG` | 494-497 | Foot–gadget adjacency of the Fano multipede. | Definition |
+| `Regression.mp7` | 498-501 | The FANO MULTIPEDE (n = 42): the C3 witness — symmetric pin-blind CFI cover, gauge = the [7,3,4] simplex code (arity-3 checks, girth 6, min weight 4); fold/deck/deck2 + manual deck3 all measured dead (`PerformanceTest` §13); the kernel supply consumes its whole gauge (§14, `Regression` §15). | Definition |
+| `Regression.mp7Root` | 502-505 | mp7's root colouring (ColData — trap #1). | Definition |
+| `Regression.g8Root` | 598-604 | — | Definition |
 ## ChainDescent/SealBridge.lean
 
 | Name | Line | Description | Notes |
@@ -4961,3 +4962,33 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RecordCost.gens_record_length_le` | 197-202 | §3 The composite candidate-count bound. | — |
 | `RecordCost.descentCostS_selNode_record_le` | 210-222 | ★★★ §4 `②` END-TO-END FOR THE CANONIZER OF RECORD — an explicit polynomial `descentCostS` for `selNode holKeyFast (foldFast++deck++deck2++kernel)` on EVERY input, with NO hypotheses (fan-out `≤ 1` is `selNode_children_length_le_one`, structural). Before this the object with `②` proved (`lookaheadKey`+`prunedSupply`) was not the object of record. | — |
 | `RecordCost.record_canonizer_with_cost` | 224-240 | ★★★ §4 THE RECORD CAPSTONE — `①` (`Kernel.holKey_foldDeck2KernelFast_selNode_canonizer`) and `②` in one place. ▶ Remaining before `Publication.cost` can stop being `opaque`: reshape this bound into the `costConst * n ^ costDeg` MONOMIAL the statement there pins. | — |
+## ChainDescent/RecordKey.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RecordKey.pairKey` | 55-57 | ★ THE LEX PRODUCT of two force keys — values concatenate, costs add. ⚠ NOT the length-prefixed `(len a :: a) ++ …` encoding originally scoped: prefixing orders the first component by SHORTLEX, which `lexLeList` is not, so it would silently re-order `holKeyFast`'s own narrowing. Plain concatenation is correct under `ConstLen` (§2). | Definition |
+| `RecordKey.keyV_pairKey` | 59-60 | Value projection of the product (`rfl`). | `@[simp]` |
+| `RecordKey.keyCost_pairKey` | 62-63 | Cost projection of the product (`rfl`) — the two bills add. | `@[simp]` |
+| `RecordKey.keyEquivariant_pairKey` | 65-69 | ★★ `①` FOR THE PRODUCT, UNCONDITIONAL — force's sole obligation is componentwise, so combining two equivariant keys needs no side condition. | — |
+| `RecordKey.keyCost_pairKey_le` | 71-74 | The product's bill from the components'. | — |
+| `RecordKey.keyV_pairKey_of_right_nil` | 76-79 | Where the second key defers (constant `[]`), the product IS the first key — so a shut guard costs nothing but the evaluation. | — |
+| `RecordKey.ConstLen` | 86-89 | §2 The side condition that makes concatenation a genuine lex product: the key's value has the same length at every vertex of a node. Without it a shorter first component wins on length and the second is consulted at the wrong time. | Definition |
+| `RecordKey.keyV_pairKey_inj` | 91-96 | §2 The product's value determines BOTH components (`List.append_inj` at the `ConstLen` length equality). | — |
+| `RecordKey.keySeparatesAt_pairKey_left` | 98-101 | §2 The product separates whatever the FIRST component separates. | — |
+| `RecordKey.keySeparatesAt_pairKey_right` | 103-107 | §2 …and whatever the SECOND does. Together these are the firing gain of a product over either component alone: the separated set is the union, never smaller. | — |
+| `RecordKey.keySeparatesAll_pairKey_left` | 109-111 | §2 The global form, left. | — |
+| `RecordKey.keySeparatesAll_pairKey_right` | 113-115 | §2 The global form, right. | — |
+| `RecordKey.lexLeList_append_left` | 123-146 | §3 With equal-length prefixes, `lexLeList` on the concatenations refines `lexLeList` on the prefixes — the engine of the no-strength-loss theorem, and exactly where `ConstLen` does its work. | — |
+| `RecordKey.keepMin_pairKey_subset` | 148-156 | ★★ §3 NO STRENGTH LOSS — the product's argmin sits inside the first key's, so a tiebreak can only SHRINK the narrowing, never widen it. The key-level analogue of `Select.canonFormS?_selNode_dominates`. ⚠ That it ever *does* shrink is a measurement, not a theorem (`Regression` §18: `G8` 8 → 2). | — |
+| `RecordKey.constLen_holKeyFast` | 164-167 | §4 `holKeyFast` is `ConstLen`: `holSigFast` is a `map` over `List.range (n + 1)`. | — |
+| `RecordKey.recordKey` | 169-171 | ★★ THE RECORD'S FORCE KEY — the holonomy key, tie-broken by the union-guarded orbit key. `holKeyFast` goes first so §3 preserves its ranking. | `abbrev` |
+| `RecordKey.keyEquivariant_recordKey` | 173-175 | ★★★ `①`'s whole force-side obligation for the composed key, with no hypothesis. | — |
+| `RecordKey.keepMin_recordKey_subset` | 177-181 | The tiebreak is never a regression: the holonomy key's narrowing is preserved. | — |
+| `RecordKey.keySeparatesAt_recordKey_of_certifiedG` | 183-189 | The firing gain, stated: wherever `guardSupply`'s guard is open and the orbit key separates, so does the record key — even where the holonomy key ties. | — |
+| `RecordKey.recordKey_canonizer` | 191-207 | ★★★ `①` FOR THE RECORD OBJECT AT THE COMPOSED KEY. Same supply, same refiner, same capstone: `Select.selNode_canonizer_of_sameOrbits` is KEY-GENERIC, so the swap costs exactly the `KeyEquivariant` proof above. | — |
+| `RecordKey.guardSupplyBound` | 216-219 | §4a `guardSupply`'s work budget — three members bounded in `RecordCost`, `matchSupply` in `SupplyCost`. | Definition |
+| `RecordKey.supplyCost_guardSupply_le` | 221-227 | §4a The union guard's own `supplyCost` bound. Needed because `orbKeyG`'s bill is parametric in its guard supply's (`keyCost_orbKeyG_le`). | — |
+| `RecordKey.recordKeyBound` | 229-231 | §4a The composed key's per-evaluation bill: the holonomy sweep plus the guarded read AND its guard. | Definition |
+| `RecordKey.keyCost_recordKey_le` | 233-236 | §4a The composed key's cost bound. | — |
+| `RecordKey.descentCostS_selNode_recordKey_le` | 238-252 | ★★★ §4a `②` END-TO-END AT THE COMPOSED KEY — the same explicit-polynomial shape as `RecordCost.descentCostS_selNode_record_le`, with the key bound now carrying the guard's own work. No hypotheses. | — |
+| `RecordKey.recordKey_canonizer_with_cost` | 254-269 | ★★★ THE UPGRADED RECORD CAPSTONE — `①` + `②` at the composed key. This is the object `Publication.canonForm?` should name; the remaining step there is reshaping the `②` bound into the `costConst * n ^ costDeg` monomial its statement pins. | — |
