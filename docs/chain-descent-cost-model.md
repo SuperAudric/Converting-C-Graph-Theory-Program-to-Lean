@@ -123,7 +123,12 @@ authoritative record of what is proved is `PublicTheoremIndex.md`).**
 ## 1. Purpose, and the relocation of "where poly lives"
 
 The cost model discharges two `Publication.lean` obligations:
-- **② `canon_poly_or_flag`** — `cost G ≤ costConst·n^costDeg ∨ canonForm? G = none`.
+- **② `canon_poly_or_flag`** — `cost G ≤ costConst·(n+1)^costDeg ∨ canonForm? G = none`.
+  ✅ **DISCHARGED 2026-07-28** (`RecordKey` §5 → `Publication`), on the LEFT disjunct, at
+  `costConst = 53`, `costDeg = 13`. ⚠⚠ **The `n^costDeg` form this doc used to quote is FALSE** for
+  the real object at any numerals — `Select.descendS` bills 1 for a leaf and every `n = 0` colouring
+  is vacuously `Discrete`, so the object costs 1 and *answers* while `c·0^d = 0`; and `costDeg = 0`
+  fails at `n = 2` (cost 1162, measured). Same polynomial class, corrected shape.
 - **③-forward `residue_if_flag`** — `canonForm? G = none → UnhandledResidue G` (the weakened, `→`-only form:
   the `↔` was dropped because the headline never used `residue → flag`, and that backward direction is the
   prove-the-hard-case-fails direction the project struggles with).
@@ -157,7 +162,7 @@ only place the flag still emits `none` is the **rigid Phase-2** residue (IR row-
 | **D2** | Cost decomposition | **`cost = node_count × per_node`** — localizes the hard content (`node_count` ← seal/branching) away from the easy (`per_node` ← concrete poly). | `budgetedIterate` (fuel=nodes, `w`=per-node); `BudgetedCanonizer.nbud`/`w` |
 | **D3** | Budget-capped vs uncapped | **Budget-capped** ⟹ ② unconditional, content relocated to ③-forward (§1). Matches the real hard-budget algorithm. | `cost_budgetedIterate_le`, `BudgetedCanonizer.cost_run_le` |
 | **D4** | Node-accounting model | The descent is a **node-sequential traversal**: `σ` carries the branch frontier/stack + best-so-far, `step` processes one node, `fuel` = total node budget. Branching lives *inside* `σ`, so the linear iterate counts the whole tree. | `budgetedIterate` + the §3 `σ` framing |
-| **D5** | Bound form | **Explicit `C·n^k`** (not `∃ p : Polynomial`): honest, avoids formalizing the class P, reviewer reads the degree. Degree TBD from `w`·`nbud`. | `BudgetedCanonizer.nbud`/`w`; `Publication.costConst`/`costDeg` |
+| **D5** | Bound form | **Explicit `C·(n+1)^k`** (not `∃ p : Polynomial`): honest, avoids formalizing the class P, reviewer reads the degree. ✅ PINNED 2026-07-28: `C = 53`, `k = 13`, both `ring`-checked (`RecordKey.recordKeyBound_expand`). ⚠ `(n+1)`, not `n` — the `n`-form is false at `n = 0`. | `BudgetedCanonizer.nbud`/`w`; `Publication.costConst`/`costDeg` |
 | **D6** | Input size measure | **Vertex count `n`** (poly in `n` ⟺ poly in bit-size `n²`). | `nbud n`, `w n` |
 | **D7** | Declared unit-cost primitives | An **explicit list** of what counts as one tick (e.g. an `F_q` op, one `warmRefine` signature compare). Proven poly-size where cheap; declared where formalizing bit-cost is disproportionate. The new, small "meta" footprint. | §4 + §8 |
 

@@ -47,22 +47,21 @@ Per-obligation state:
     `#print axioms` = `[propext, Classical.choice, Quot.sound]`, no `sorryAx`, no citation axioms (① carries
     nothing, as designed). Zero glue was needed: `Labelled n` ≡ the matrix type, `Iso` ≡ `CanonSpec.GraphIso`,
     `canonFormFastS?_eq` is `rfl`. The record pin is PROVISIONAL (strengthening it = edit `canonForm?` +
-    `canonForm?_record`, nothing downstream). `cost`/the ③ atoms remain stubs; ②/③/non-vacuity remain `sorry`.
-  · ② — now fillable PER FIXED DEPTH `d`: pin the canonizer-of-record (encode-free refiner + `lookaheadKey` +
-    `prunedSupply d`) and `SupplyCost.descentCost_pruned_lookahead_le` supplies the explicit polynomial for
-    `costConst`/`costDeg`. The status comment inside `canon_poly_or_flag` below is SUPERSEDED (see its banner).
-    ▶▶ **UPDATE 2026-07-28 — the upgrade target now EXISTS, and `②` no longer needs a different object.**
-    `ChainDescent/RecordCost.lean` bills the *actual* record (`descentCostS_selNode_record_le`: explicit
-    polynomial, every input, no hypotheses) — until then the only end-to-end cost theorems were at
-    `lookaheadKey`+`prunedSupply`, i.e. NOT this file's object. And `ChainDescent/RecordKey.lean` supplies
-    the strictly stronger composed force key `recordKey = pairKey holKeyFast (orbKeyG guardSupply)` with
-    **`recordKey_canonizer_with_cost` = `①` + `②` together** (measured non-vacuous: on `G8` the root cell
-    goes 8 → 2 where `holKeyFast` alone keeps all 8 — `Regression` §18).
-    ▶ **THE NEXT EDIT TO THIS FILE, and it is ONE pass:** point `canonForm?` at `RecordKey.recordKey`
-    (re-proving `canonForm?_record` from `recordKey_canonizer`) **and** reshape that `②` bound into the
-    `costConst * n ^ costDeg` monomial `canon_poly_or_flag` pins, replacing the `opaque cost` stub. Both
-    halves touch pinned statements, which is why they go together rather than one at a time. Full handoff:
-    `docs/chain-descent-remaining-work.md` ▶▶▶ HANDOFF block.
+    `canonForm?_record`, nothing downstream) — **and that is exactly what happened on 2026-07-28: the force
+    key is now `RecordKey.recordKey`** (`holKeyFast` tie-broken by the union-guarded `orbKeyG`), a strict
+    strengthening (`keepMin_pairKey_subset`) that cost one `KeyEquivariant` proof and **turns a flag into an
+    answer on `Regression.G8`**. Only ③ + non-vacuity remain `sorry`.
+  · ② — ✅ **SWAPPED AND DISCHARGED 2026-07-28, in one pass with the key swap above.** `canon_poly_or_flag`
+    is proved, `#print axioms` = `[propext, Classical.choice, Quot.sound]`, **no `sorryAx`** — and on the
+    LEFT disjunct, so the cost claim needs no flag escape. `cost` and `costConst`/`costDeg` are no longer
+    `opaque`: `cost` is the `CostM` cost projection of the very definition `canonForm?` is the value
+    projection of, and the numerals are `RecordKey.costConst = 53` / `RecordKey.costDeg = 13`, both
+    *computed* (a `ring`-checked expansion, `RecordKey.recordKeyBound_expand`) rather than guessed.
+    Provenance of why this took three shapes to get right: `SupplyCost`'s end-to-end theorems are at
+    `lookaheadKey`+`prunedSupply`, which is NOT this file's object (closed by `RecordCost.lean`); and the
+    pinned monomial itself was **`n ^ costDeg`, which is false at `n = 0` for the real object at any
+    numerals** — see the `costConst`/`costDeg` block below for the measurements. It is now
+    `costConst * (n + 1) ^ costDeg`, the same polynomial class, true on every input.
   · ③ — TWO LAYERS, not a design conflict: the library's operational residue (`Residue.Residue := ¬Handled`, key/
     supply-parameterized) is the intermediate; this file's structural atoms are the target; the missing object is
     the ATTRIBUTION theorem `¬Handled(record) → D1 ∨ D2`. ⚠ The strong reading "flag ⟹ genuine obstruction" is NOT
@@ -88,6 +87,7 @@ Per-obligation state:
 import ChainDescent.Spine
 import ChainDescent.Deck2
 import ChainDescent.KernelTransport
+import ChainDescent.RecordKey
 
 namespace Showcase
 
@@ -122,20 +122,32 @@ i.e. exactly the object the end-to-end acceptance measurements run (`Performance
 provably cannot be — `GensEquivariant` (its Gaussian basis is pivot-order dependent), so its ① rides the
 `OrbitPrune.SameOrbits` reduction against the equivariant set-level reference. ⚠ The record pin is
 PROVISIONAL by design — strengthening the record later is this one definition plus `canonForm?_record`
-below; nothing downstream changes shape. (`cost` remains a stub: ② is not yet swapped.) -/
+below; nothing downstream changes shape.
+
+**★ THE FORCE KEY SWAP (2026-07-28): the key is now `RecordKey.recordKey`** = the lex product
+`pairKey holKeyFast (orbKeyG guardSupply)` — the holonomy key, tie-broken by the union-guarded orbit
+key. `keepMin_pairKey_subset` proves the tiebreak never *widens* the narrowing, so this is a strict
+strengthening of the previous pin, and it is **measured non-vacuous**: on `Regression.G8` (a regular,
+non-vertex-transitive cubic graph) the previous pin **flags** and this one **answers** — the root cell
+of 8 is left untouched by `holKeyFast` and cut to 2 by the product (`Regression` §18). ⚠ The price is
+interpreted wall-clock: `t3` (n = 15) goes 12 s → 412 s, so the `PerformanceTest` acceptance
+measurements were taken at the *previous* key and do not describe this object until re-run. -/
 def canonForm? (n : ℕ) (G : AdjMatrix n) : Option (Fin n → Fin n → Nat) :=
-  Select.canonFormFastS? (Hol.holKeyFast (n := n))
-    (Deck.appendSupply (Fold.foldSupplyFast (n := n))
-      (Deck.appendSupply (Deck.deckSupply (n := n))
-        (Deck.appendSupply (Deck2.deck2Supply (n := n)) (Kernel.kernelSupply (n := n))))) G
+  Select.canonFormFastS? (RecordKey.recordKey (n := n)) (RecordCost.recordSupplyFast (n := n)) G
 
-/-- The record object satisfies the full canonical-form spec —
-`Kernel.holKey_foldDeck2KernelFast_selNode_canonizer` read through the definitional bridge
-`SelectNode.canonFormFastS?_eq`. -/
+/-- The record object satisfies the full canonical-form spec — `RecordKey.recordKey_canonizer` read
+through the definitional bridge `SelectNode.canonFormFastS?_eq`. (`selNode_canonizer_of_sameOrbits` is
+key-generic, so the swap cost exactly one `KeyEquivariant` proof: `keyEquivariant_recordKey`.) -/
 theorem canonForm?_record (n : ℕ) : CanonSpec.IsCanonicalFormOpt (canonForm? n) :=
-  Kernel.holKey_foldDeck2KernelFast_selNode_canonizer
+  RecordKey.recordKey_canonizer
 
-opaque cost (n : ℕ) (G : AdjMatrix n) : ℕ := 0
+/-- **★ `cost` IS REAL (2026-07-28)** — no longer an `opaque` stub. It is the `cost` projection of the
+*same* definition `canonForm?` is the `value` projection of (`descendS` is written in `CostM`), so
+there is no bridge and no second object: `②` below is a theorem about the object `①` is about. -/
+def cost (n : ℕ) (G : AdjMatrix n) : ℕ :=
+  Select.descentCostS (Refine.encodeFreeFast (n := n))
+    (Select.selNode (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+      (RecordCost.recordSupplyFast (n := n))) G
 
 /-! ### `UnhandledResidue` — the firewall valve, given its structural shape.
 
@@ -181,11 +193,30 @@ opaque residueRigidObstruction  (n : ℕ) (G : AdjMatrix n) : Prop
 def UnhandledResidue (n : ℕ) (G : AdjMatrix n) : Prop :=
   residueNonSchurian n G ∨ residueHiddenJohnson n G ∨ residueRigidObstruction n G
 
-/-- Explicit polynomial cost bound `costConst * n ^ costDeg`. The paper pins concrete numerals for
-`costConst`, `costDeg` (explicit polynomial ≫ `∃ p : Polynomial …`: more honest, avoids formalizing the
-class P, and the reviewer reads the degree off the statement). -/
-opaque costConst : ℕ := 0
-opaque costDeg : ℕ := 0
+/-! ### The explicit polynomial — numerals, not an `∃ p : Polynomial …`
+
+Explicit ≫ existential: more honest, avoids formalizing the class P, and the reviewer reads the degree
+off the statement. **★ PINNED 2026-07-28** at the object above, from `RecordKey`'s §5 — and neither
+numeral is asserted: `RecordKey.recordKeyBound_expand` has `ring` check that the `②` bound polynomial
+has degree **13** and coefficients summing to **53**.
+
+⚠⚠ **THE BOUND IS `costConst * (n + 1) ^ costDeg`, NOT `costConst * n ^ costDeg`** — the `n`-form (as
+this file pinned it until 2026-07-28) is **not provable for this object at any numerals**, and the flag
+disjunct does not rescue it:
+
+* `Select.descendS` bills **1** for a leaf node, and at `n = 0` every colouring is vacuously
+  `Discrete`, so the canonizer costs **1** and *answers* (`canonForm? 0 G ≠ none`, measured) — while
+  `costConst * 0 ^ costDeg = 0` for every `costDeg ≥ 1`.
+* `costDeg = 0` degenerates the claim to a constant bound, false at `n = 2` (cost `1162`, measured).
+
+Nothing about the guarantee weakens: `(n + 1) ^ 13 ≤ 2 ^ 13 · n ^ 13` for `n ≥ 1`, so this is the same
+polynomial class, stated so that it is also true on the degenerate input. -/
+
+/-- `RecordKey.costConst` — the coefficient sum of the `②` bound polynomial. -/
+def costConst : ℕ := RecordKey.costConst
+
+/-- `RecordKey.costDeg` — the degree of the `②` bound polynomial. -/
+def costDeg : ℕ := RecordKey.costDeg
 
 /-! ## 2. The trusted base — CITATIONS ONLY (placeholders; the ONLY custom axioms)
 
@@ -308,7 +339,18 @@ theorem flag_iso_invariant (n : ℕ) (G H : AdjMatrix n) (h : Iso G H) :
 /-- **② Poly-or-flag (the budget guarantee — the ONLY cost claim).** The descent either runs within the
 explicit polynomial budget or it emits an honest flag. No residue predicate appears here. -/
 theorem canon_poly_or_flag (n : ℕ) (G : AdjMatrix n) :
-    cost n G ≤ costConst * n ^ costDeg ∨ canonForm? n G = none := by
+    cost n G ≤ costConst * (n + 1) ^ costDeg ∨ canonForm? n G = none :=
+  -- ★ DISCHARGED 2026-07-28 — and on the LEFT disjunct, unconditionally: the record object is a
+  -- single path of ≤ n+1 nodes by construction (`Select.selNode_children_length_le_one`, structural),
+  -- every component is billed (`RecordCost` for the four supplies + the holonomy key,
+  -- `RecordKey.supplyCost_guardSupply_le` for the union guard inside `orbKeyG`), and
+  -- `RecordKey.descentCostS_selNode_recordKey_monomial` folds those into the pinned monomial.
+  -- So the cost half needs no flag escape at all; what the flag is still needed for is ③.
+  Or.inl (RecordKey.descentCostS_selNode_recordKey_monomial G)
+
+/-! ⊘ **PROVENANCE for `canon_poly_or_flag`** (superseded 2026-07-28 by the discharge above; retained
+because it records the two shapes that were *not* the answer).
+
   -- ⊘ THE STATUS BELOW IS SUPERSEDED (2026-07-17; retained for provenance). The guard design (`Stall.lean`)
   -- replaced the verify-consume-monovariant / fuel-placeholder plan: deferral IS the failure mode, the guarded
   -- descent is a SINGLE PATH of ≤ n+1 nodes or it flags (`Stall.resolvedAll_guard`, by construction), and the
@@ -327,7 +369,10 @@ theorem canon_poly_or_flag (n : ℕ) (G : AdjMatrix n) :
   --  · The flag is the MUTUAL STALL, not `base > baseMax` (the threshold-gated assume-VT flag is retired —
   --    it could misprune a fused rigid residue). `descend`'s current `fuel`-exhaustion `none` is a PLACEHOLDER
   --    for that stall test. NB fuel is PER-LAYER, never threaded, so each resolver is poly-or-flag LOCALLY.
-  sorry
+  --
+  -- ⊘ And the last shape that was wrong: the pinned `costConst * n ^ costDeg` monomial itself. See the
+  -- `costConst`/`costDeg` block above — it is false at `n = 0` for the real object, at any numerals.
+-/
 
 /-- **③ Flag characterization (where the citations live).** A flag is emitted iff the input genuinely
 contains an unhandled obstruction — NOT because the algorithm is weak. This is the theorem that earns the
@@ -359,7 +404,7 @@ within the explicit polynomial budget, unless `G` contains a genuine unhandled o
 theorem canonizer (n : ℕ) (G : AdjMatrix n) :
     (∀ (H : AdjMatrix n) (cG cH : Fin n → Fin n → Nat),
         canonForm? n G = some cG → canonForm? n H = some cH → (Iso G H ↔ cG = cH))
-    ∧ (cost n G ≤ costConst * n ^ costDeg ∨ UnhandledResidue n G) := by
+    ∧ (cost n G ≤ costConst * (n + 1) ^ costDeg ∨ UnhandledResidue n G) := by
   refine ⟨fun H cG cH hG hH => canon_complete n G H cG cH hG hH, ?_⟩
   rcases canon_poly_or_flag n G with hpoly | hflag
   · exact Or.inl hpoly
@@ -379,6 +424,10 @@ the correctness half of the showcase is real, today, for the record object. -/
 #print axioms canon_sound
 #print axioms canon_complete
 #print axioms flag_iso_invariant
+
+/-! …and ② after the 2026-07-28 swap — same expectation, no `sorryAx`: the cost half of the showcase is
+real too, for the record object at the composed force key. Only ③ and non-vacuity remain. -/
+#print axioms canon_poly_or_flag
 
 
 end Showcase

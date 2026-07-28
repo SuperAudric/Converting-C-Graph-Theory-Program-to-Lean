@@ -1389,5 +1389,65 @@ The two negative rows are pinned as **controls**: an equivariant key that ever f
 would be a soundness regression, so "no improvement" is the correct result there and a future change
 that "improves" it must fail the gate.
 
-**▶ Remaining on item 7:** `Publication.canonForm?` still names `holKeyFast`. Editing it wants the `②`
-bound reshaped into the pinned `costConst * n ^ costDeg` monomial as well — do the two in one pass.
+**▶ Remaining on item 7: NOTHING — see §10.11.**
+
+---
+
+### 10.11 ✅ LANDED — the `Publication` swap, and `②` discharged (2026-07-28, closes the arc)
+
+`RecordKey` §5 (6 declarations, axiom-clean) + `Publication.lean`. **`Publication` goes from 3 `sorry`s
+to 2**, and `#print axioms canon_poly_or_flag` = `[propext, Classical.choice, Quot.sound]`.
+
+| | |
+|---|---|
+| the object | `canonForm? = Select.canonFormFastS? RecordKey.recordKey RecordCost.recordSupplyFast`; `canonForm?_record` = `recordKey_canonizer` (still zero glue — `canonFormFastS?_eq` is `rfl`) |
+| `cost` | no longer `opaque`: `Select.descentCostS` at that object = the `CostM` cost projection of the definition `①` rides on |
+| the numerals | `costConst = 53`, `costDeg = 13`, **computed not guessed** — `recordKeyBound_expand` has `ring` check the degree and the coefficient sum |
+| `②` | `canon_poly_or_flag`, proved on the **left** disjunct (no flag escape: fan-out `≤ 1` is structural and every component is billed) |
+
+#### ⚠⚠ THE PINNED MONOMIAL WAS WRONG — `n ^ costDeg` → `(n + 1) ^ costDeg`. Do not restore it.
+
+`cost n G ≤ costConst * n ^ costDeg ∨ canonForm? n G = none` is **not provable for this object at any
+numerals**, and the flag disjunct does not rescue it:
+
+* `Select.descendS` bills **1** for a leaf, and at `n = 0` every colouring is vacuously `Discrete` — so
+  the record object costs **1** and *answers* (`isSome`, measured). But `costConst * 0 ^ costDeg = 0`
+  for every `costDeg ≥ 1`.
+* `costDeg = 0` degenerates the claim to a constant bound, false at `n = 2` (cost `1162`, measured).
+
+`(n + 1)` is the same polynomial class (`(n+1)^13 ≤ 2^13·n^13` for `n ≥ 1`) and it is *also* what makes
+the proof uniform: `pow_le_succ_pow` bounds every `n^k`, `k ≤ 13`, by monotonicity alone, so there is no
+`1 ≤ n` case split anywhere. This is a **statement-shape** defect that survived every previous audit
+because nothing had ever tried to prove the statement.
+
+#### ★★ MEASURED — the swap is a TOTALITY gain, not only a firing gain
+
+§10.10's table is at the root cell; this is end-to-end on the record supply:
+
+| witness | `holKeyFast` | **`recordKey`** |
+|---|---|---|
+| **`G8`** (n = 8, regular, not vertex-transitive) | **FLAGS**, 8.7 s | **ANSWERS**, 21.4 s |
+| `wcyc9` (n = 9) | answers, 0.34 s | answers, 0.93 s |
+| `t3` (n = 15) | answers, 12.0 s | answers, **412.5 s** |
+
+The first row is the point: it is the first **handled/unhandled pair at the record resolvers** —
+exactly the witnesses `Publication`'s STATUS block says are still the target for non-vacuity, and the
+`constKey`/`emptySupply` witness in `Residue.residue_nonvacuous` does not transfer to this object.
+
+⚠ **The price is real and is interpreted wall-clock, not the cost model:** `t3` is 34×. Consequences:
+(a) do **not** put an end-to-end `recordKey` guard on `t3`/`mp7` on the gate; (b) `PerformanceTest`
+§11/§12/§14's acceptance numbers were taken at the *previous* key and no longer describe `canonForm?`.
+
+**▶ Worth scoping, not done:** the product bills `orbKeyG`'s union guard on **every** vertex of every
+cell. Sequential narrowing (`keepMin k₂` over `keepMin k₁`'s survivors) has the same value under
+`ConstLen`, pays the second key only on the argmin (`G8`: 2 vertices, not 8), and removes the `n²·kc`
+term that alone drives `costDeg` from 10 to 13. It is a **resolver**-level variant — a `Force.Key` is
+per-vertex and cannot express the laziness.
+
+⚠ **One more thing a reader should know about the product, found while auditing it:** `orbKeyG`'s guard
+is **per-vertex** (`CertPath S adj n (step adj χ v)`), and `[]` is `lexLeList`-minimal. So at a node
+where the guard is open on some branches and shut on others, the **shut** ones sort first — the
+tiebreak keeps precisely the branches the orbit key knows nothing about. This is *sound* (`①` rides
+`KeyEquivariant` alone) and `keepMin_pairKey_subset` still holds; and `keySeparatesAt_pairKey_right`
+correctly demands `CertifiedG` = open on **all** branches. But the firing intent is inverted there, and
+a sentinel that sorts the shut case last would flip it — measure before adopting.

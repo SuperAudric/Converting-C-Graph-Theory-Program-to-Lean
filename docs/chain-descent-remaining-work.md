@@ -74,12 +74,11 @@ transfer). "Complete" = the flag provably never fires.
 > are the live tracks — which is why Track R's `②` is not a separate program.
 >
 > **▶ NEXT, in order.**
-> 1. **The `Publication` swap — one pass, both halves.** Point `Publication.canonForm?` at
->    `RecordKey.recordKey` **and** reshape `RecordKey.descentCostS_selNode_recordKey_le`'s bound into
->    the `costConst * n ^ costDeg` monomial `canon_poly_or_flag` pins. One pass because both touch
->    pinned statements under the finalization steer. Input is `RecordKey.recordKey_canonizer_with_cost`
->    (`①` + `②` already proved at the composed key), so this is re-pointing plus arithmetic — no new
->    mathematics. It closes `Publication.cost` (still `opaque`) and `canon_poly_or_flag` (still `sorry`).
+> 1. ✅ **DONE 2026-07-28 — the `Publication` swap, both halves. See the ▶▶ UPDATE block immediately
+>    below this one.** `canonForm?` is `RecordKey.recordKey` at the record supply, `cost` /
+>    `costConst` / `costDeg` are real definitions, and **`canon_poly_or_flag` is proved axiom-clean on
+>    its LEFT disjunct**. ⚠⚠ The pinned monomial had to change shape — `costConst * n ^ costDeg` is
+>    **false at `n = 0`** for the real object at any numerals; it is now `costConst * (n + 1) ^ costDeg`.
 > 2. **Item 1, restated by the user:** *the flag is not reached via a stall.* ¬consume⟹force has the
 >    free contrapositive ¬force⟹consume, so **no mutual stall occurs in theory**; the dependency is
 >    **equivariance** (unproved), and the cost half is settled in prose except the guards — whose bill
@@ -107,6 +106,42 @@ transfer). "Complete" = the flag provably never fires.
 > machine-checked. Its cheap half *is* gated: `Regression` §17a pins the `deck2`-shut side, and
 > `Regression` §18 pins the `G8` narrowing. To verify it, budget an hour, or first split §16 (`mp7`,
 > n = 42) and §18 (`t3`) into separate files.
+>
+> **▶▶ UPDATE 2026-07-28 (last) — THE `Publication` SWAP IS DONE, AND `②` IS DISCHARGED.
+> `Publication.lean`: 3 `sorry`s → **2**; `#print axioms canon_poly_or_flag` =
+> `[propext, Classical.choice, Quot.sound]`.**
+> · **`canonForm?` is now `Select.canonFormFastS? RecordKey.recordKey RecordCost.recordSupplyFast`**;
+>   `canonForm?_record` = `RecordKey.recordKey_canonizer` (`canonFormFastS?_eq` is `rfl`, so still zero
+>   glue). `cost` is no longer `opaque` — it is `Select.descentCostS` at that object, i.e. the `CostM`
+>   cost projection of the same definition `①` rides on.
+> · **`canon_poly_or_flag` is proved on its LEFT disjunct** — no flag escape is used, because the
+>   fan-out bound is structural (`selNode_children_length_le_one`) and every component is billed.
+>   Numerals: **`costConst = 53`, `costDeg = 13`**, and neither is asserted —
+>   **`RecordKey.recordKeyBound_expand`** has `ring` check that §4a's bound polynomial has degree 13
+>   and coefficients summing to 53. New in `RecordKey` §5: `costConst`/`costDeg`/`pow_le_succ_pow`/
+>   `recordKeyBound_expand`/**`descentCostS_selNode_recordKey_monomial`**/`recordKey_canonizer_monomial`
+>   (6 declarations, axiom-clean, gated).
+> · **⚠⚠ THE PINNED SHAPE WAS WRONG AND IS NOW `costConst * (n + 1) ^ costDeg`. Do not "restore" the
+>   `n`-form.** `cost n G ≤ costConst * n ^ costDeg ∨ canonForm? n G = none` is **not provable for this
+>   object at any numerals**: `Select.descendS` bills **1** for a leaf and at `n = 0` every colouring is
+>   vacuously `Discrete`, so the object costs `1` and *answers* (measured), while
+>   `costConst * 0 ^ costDeg = 0` for every `costDeg ≥ 1`; and `costDeg = 0` degenerates to a constant
+>   bound, false at `n = 2` (cost `1162`, measured). `(n+1)` is the same polynomial class
+>   (`(n+1)^13 ≤ 2^13·n^13` for `n ≥ 1`) and it also removes the `1 ≤ n` case split — every monomial
+>   `n^k`, `k ≤ 13`, is `≤ (n+1)^13` by monotonicity alone.
+> · **★ MEASURED — the key swap is a TOTALITY gain, not only a firing gain.** End-to-end on the record
+>   supply: **`G8` (n = 8, regular non-vertex-transitive cubic) FLAGS under `holKeyFast` and ANSWERS
+>   under `recordKey`.** That is the first handled/unhandled pair available *at the record resolvers*
+>   (the witnesses Publication's STATUS says are still the target). ⚠ **The price is interpreted
+>   wall-clock:** `G8` 8.7 s → 21.4 s, `wcyc9` 0.3 s → 0.9 s, **`t3` (n = 15) 12 s → 412 s (34×)**. So
+>   do **not** put an end-to-end `recordKey` guard on `t3`/`mp7` on the gate, and note that
+>   `PerformanceTest` §11/§12/§14's acceptance numbers were taken at the *previous* key and do not
+>   describe `canonForm?` until re-run.
+> · ▶ **Follow-on worth scoping (not done):** the product bills `orbKeyG`'s union guard on *every*
+>   vertex of every cell. Sequential narrowing (`keepMin k₂` over `keepMin k₁`'s survivors) has the
+>   same value under `ConstLen` but pays the second key only on the argmin — on `G8`, 2 vertices
+>   instead of 8 — and it removes the `n²·kc` term that alone drives `costDeg` from 10 to 13. It is a
+>   resolver-level variant, not a `Force.Key` (which is per-vertex).
 >
 > **⚠ Where the live docs live.** Two of the authoritative documents for this arc are under
 > `scratchpad/`, which understates them: **`scratchpad/DUAL_resolver_scoping.md`** (the arc's record and
@@ -985,8 +1020,10 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   exist. ▶ ✅ **PAID 2026-07-28 — `ChainDescent/RecordCost.lean`** (queue 3f): all four bounds,
   `keyCost_holKeyFast_le`, `supplyCost_appendSupply`, and the end-to-end
   **`descentCostS_selNode_record_le`** (explicit polynomial, no hypotheses). What remains of T2 is
-  `deepenSupply`'s bound (still prose; pay when T1 wires it in) and reshaping the record bound into
-  `Publication`'s `costConst * n ^ costDeg` monomial form.
+  `deepenSupply`'s bound (still prose; pay when T1 wires it in). ▶ ✅ **The monomial reshape is DONE
+  2026-07-28** (`RecordKey` §5 → `Publication`): `costConst = 53`, `costDeg = 13`, `ring`-checked, and
+  **the pinned shape is `costConst * (n + 1) ^ costDeg`** — the `n`-form is false at `n = 0` for the
+  real object at any numerals. `canon_poly_or_flag` is discharged axiom-clean on its left disjunct.
 - **T3 — citation discharge** per policy (everything but G3; register + M1–M5 playbook in the discharge doc;
   wiring cautions: G3 only at the Sun–Wilmes threshold, FTPG corrected predicate, Payne–Thas narrowed).
 - **T4 — D0** (`SchurianScheme` model faithfulness) — see W2.
@@ -1059,8 +1096,19 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    leaves completely untouched. ⚠ And the negative controls are pinned too: on `t3` and `wcyc9` the
    product keeps everything, *correctly*, because those cells are single orbits and
    `forceBy_no_narrowing_on_orbit` forbids an equivariant key from firing there.
-   ▶ **Not done, deliberately:** editing `Publication.canonForm?` itself — that also wants the `②`
-   bound reshaped into the pinned `costConst * n ^ costDeg` monomial. Do the two together.
+   ▶ ✅ **Follow-on DONE (3h, below).**
+3h. ✅ **THE `Publication` SWAP + THE MONOMIAL — DONE 2026-07-28** (`RecordKey` §5, 6 declarations,
+   axiom-clean, gated; `Publication.lean` edited). `canonForm?` is `recordKey` at
+   `recordSupplyFast`; `cost`/`costConst`/`costDeg` are real definitions (**53**, **13**, both
+   `ring`-checked by `recordKeyBound_expand`); **`canon_poly_or_flag` is proved on its LEFT
+   disjunct**, axiom-clean — `Publication` goes 3 `sorry`s → **2** (③ + non-vacuity).
+   **⚠⚠ The pinned shape was FALSE and is now `costConst * (n + 1) ^ costDeg`** — `descendS` bills 1
+   for a leaf and every `n = 0` colouring is vacuously `Discrete`, so the object costs 1 and
+   *answers* while `c * 0 ^ d = 0`; `costDeg = 0` fails at `n = 2` (1162). Same polynomial class.
+   **★ And the swap is a TOTALITY gain, now gated (`Regression` §19, ~32 s): `G8` FLAGS under
+   `holKeyFast` and ANSWERS under `recordKey`** — the first handled/unhandled pair at the record
+   resolvers. ⚠ Interpreted price: `t3` 12 s → 412 s, so no `t3`/`mp7` twin on the gate, and
+   `PerformanceTest` §11/§12/§14 predate this object.
 4. **T1 first family** — CFI odd-deg localisation through the weakest hook (de-risk on a C₆-style toy
    first). Output: the first real family in `HandledS` at the record = Publication's handled-half witness.
 5. **F1 / F3b** — gate review (the witnesses exist; confirm necessity), then the Smith/CRT key + C# wiring.

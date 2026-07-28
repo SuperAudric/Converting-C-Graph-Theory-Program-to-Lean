@@ -612,4 +612,28 @@ soundness regression it would be (an equivariant key firing inside an orbit cont
         (Force.keepMin (RecordKey.recordKey (n := 9)) wcyc9 wcyc9Root.col
           (Descend.branches wcyc9Root.col)).length) = (3, 3)
 
+/-! ## §19 — the swap is a TOTALITY gain: `G8` FLAGS at the old key and ANSWERS at `recordKey`
+(2026-07-28)
+
+§18 measures one cell; this measures the **whole descent**, at the consume supply
+`Publication.canonForm?` uses. The composed key does not merely narrow `G8`'s root cell — it takes the
+record object from *flagging* to *answering* on it. That is the justification for the `Publication`
+swap, and it is also the project's first **handled/unhandled pair at the record resolvers**, which is
+what `Publication`'s non-vacuity obligation asks for (`Residue.residue_nonvacuous`'s
+`constKey`/`emptySupply` witness does not transfer to this object).
+
+⚠ The `holKeyFast` component is a **provenance pin**, not a property anyone wants: if a future change
+makes it answer here, this `#guard` fails and the swap's justification has to be restated — which is
+the intended behaviour, exactly like §18's controls.
+
+⚠⚠ **Do NOT extend this to `t3` or `mp7`.** Interpreted, the record object at `recordKey` costs 21 s on
+`G8` (n = 8) but **412 s on `t3`** (n = 15) against `holKeyFast`'s 12 s — the union guard inside
+`orbKeyG` is evaluated at every vertex of every cell. This `#guard` adds ~30 s to the gate; a `t3` twin
+would add seven minutes. -/
+
+#guard ((Select.canonFormFastS? (Hol.holKeyFast (n := 8))
+            (RecordCost.recordSupplyFast (n := 8)) G8).isSome,
+        (Select.canonFormFastS? (RecordKey.recordKey (n := 8))
+            (RecordCost.recordSupplyFast (n := 8)) G8).isSome) = (false, true)
+
 end ChainDescent.Regression

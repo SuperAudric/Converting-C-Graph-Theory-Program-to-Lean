@@ -252,8 +252,7 @@ theorem descentCostS_selNode_recordKey_le (adj : AdjMatrix n) :
   exact fun χ' => le_of_eq (Cost.refiner_cost adj χ')
 
 /-- **The upgraded record capstone: `①` + `②` at the composed key.** This is the object
-`Publication.canonForm?` should name; the remaining step there is reshaping the `②` bound into the
-`costConst * n ^ costDeg` monomial its statement pins. -/
+`Publication.canonForm?` names; §5 reshapes the `②` bound into the monomial its statement pins. -/
 theorem recordKey_canonizer_with_cost :
     CanonSpec.IsCanonicalFormOpt
         (Select.canonFormS? (Refine.encodeFreeFast (n := n))
@@ -267,6 +266,85 @@ theorem recordKey_canonizer_with_cost :
               * (1 + (Select.selProbeBound n (RecordCost.recordSupplyBound n)
                   (RecordCost.recordGensBound n) (recordKeyBound n) + n * n * n)) :=
   ⟨recordKey_canonizer, descentCostS_selNode_recordKey_le⟩
+
+/-! ## 5. ★ THE MONOMIAL — the exact shape `Publication.canon_poly_or_flag` pins
+
+§4a's bound is a *sum*; the publication statement pins a single monomial with numerals a reviewer can
+read off. This section supplies it, and fixes the numerals: **`costConst = 53`, `costDeg = 13`**
+(the coefficient sum and the degree of §4a's polynomial — `ring` checks both in `recordKeyBound_expand`,
+so neither number is asserted).
+
+⚠⚠ **The pinned shape must be `costConst * (n + 1) ^ costDeg`, NOT `costConst * n ^ costDeg`.** The
+`n`-form is **not provable for this object at any numerals**, and the flag disjunct does not rescue it:
+
+* `Select.descendS` bills **1** for a leaf (`Select.lean`, both branches), and at `n = 0` every
+  colouring is vacuously `Discrete` — so the record object costs **1** and *answers*
+  (`canonFormS? … ≠ none`, measured). But `costConst * 0 ^ costDeg = 0` for every `costDeg ≥ 1`.
+* `costDeg = 0` degenerates the bound to the constant `costConst`, which fails at `n = 2` (the object
+  costs `1162` there, measured).
+
+`(n + 1)` is also what makes the proof uniform: every monomial `n ^ k` with `k ≤ costDeg` is
+`≤ (n + 1) ^ costDeg` by monotonicity **alone** (`pow_le_succ_pow`), with no `1 ≤ n` side condition to
+case-split on. Nothing about the guarantee weakens — `(n+1)^13 ≤ 2^13 · n^13` for `n ≥ 1`. -/
+
+/-- The pinned cost constant = the coefficient sum of §4a's bound polynomial. -/
+def costConst : Nat := 53
+
+/-- The pinned cost degree = the degree of §4a's bound polynomial. -/
+def costDeg : Nat := 13
+
+/-- Every monomial below the pinned degree is dominated by the pinned monomial — monotonicity only,
+no `1 ≤ n` hypothesis. This is the whole reason the statement is pinned at `n + 1`. -/
+theorem pow_le_succ_pow (n : Nat) {k : Nat} (hk : k ≤ costDeg) : n ^ k ≤ (n + 1) ^ costDeg :=
+  le_trans (Nat.pow_le_pow_left (Nat.le_succ n) k)
+    (Nat.pow_le_pow_right (Nat.succ_le_succ (Nat.zero_le n)) hk)
+
+/-- §4a's bound, expanded. `ring` checks the transcription, so `costConst`/`costDeg` are *computed*
+from the object rather than guessed: the degree is 13 and the coefficients sum to 53. -/
+theorem recordKeyBound_expand (n : Nat) :
+    n * n * n + (n + 1)
+        * (1 + (Select.selProbeBound n (RecordCost.recordSupplyBound n)
+            (RecordCost.recordGensBound n) (recordKeyBound n) + n * n * n))
+      = n ^ 13 + n ^ 12 + 3 * n ^ 11 + 4 * n ^ 10 + 2 * n ^ 9 + 8 * n ^ 8 + 11 * n ^ 7
+          + 6 * n ^ 6 + 5 * n ^ 5 + 6 * n ^ 4 + 4 * n ^ 3 + n + 1 := by
+  simp only [Select.selProbeBound, RecordCost.recordSupplyBound, RecordCost.recordGensBound,
+    recordKeyBound, guardSupplyBound, SupplyCost.matchSupplyBound]
+  ring
+
+/-- **★★★ `②` IN THE PUBLICATION SHAPE** — the canonizer of record, at the composed force key, runs
+within `53 * (n + 1) ^ 13` on **every** input, with **no hypotheses and no flag disjunct**. -/
+theorem descentCostS_selNode_recordKey_monomial (adj : AdjMatrix n) :
+    Select.descentCostS (Refine.encodeFreeFast (n := n))
+        (Select.selNode (Refine.encodeFreeFast (n := n)) (recordKey (n := n))
+          (RecordCost.recordSupplyFast (n := n))) adj
+      ≤ costConst * (n + 1) ^ costDeg := by
+  refine le_trans (descentCostS_selNode_recordKey_le adj) ?_
+  rw [recordKeyBound_expand n]
+  simp only [costConst, costDeg]
+  have H : ∀ k : Nat, k ≤ 13 → n ^ k ≤ (n + 1) ^ 13 := fun k hk =>
+    le_trans (Nat.pow_le_pow_left (Nat.le_succ n) k)
+      (Nat.pow_le_pow_right (Nat.succ_le_succ (Nat.zero_le n)) hk)
+  have e13 := H 13 (by omega); have e12 := H 12 (by omega); have e11 := H 11 (by omega)
+  have e10 := H 10 (by omega); have e9 := H 9 (by omega); have e8 := H 8 (by omega)
+  have e7 := H 7 (by omega); have e6 := H 6 (by omega); have e5 := H 5 (by omega)
+  have e4 := H 4 (by omega); have e3 := H 3 (by omega)
+  have e1 : n ≤ (n + 1) ^ 13 := by simpa using H 1 (by omega)
+  have e0 : 1 ≤ (n + 1) ^ 13 := by simpa using H 0 (by omega)
+  omega
+
+/-- **The publication capstone: `①` + `②`-as-a-monomial, at the object `Publication.canonForm?`
+names.** `Showcase.canon_poly_or_flag` is this theorem's left disjunct. -/
+theorem recordKey_canonizer_monomial :
+    CanonSpec.IsCanonicalFormOpt
+        (Select.canonFormS? (Refine.encodeFreeFast (n := n))
+          (Select.selNode (Refine.encodeFreeFast (n := n)) (recordKey (n := n))
+            (RecordCost.recordSupplyFast (n := n))))
+    ∧ ∀ adj : AdjMatrix n,
+        Select.descentCostS (Refine.encodeFreeFast (n := n))
+            (Select.selNode (Refine.encodeFreeFast (n := n)) (recordKey (n := n))
+              (RecordCost.recordSupplyFast (n := n))) adj
+          ≤ costConst * (n + 1) ^ costDeg :=
+  ⟨recordKey_canonizer, descentCostS_selNode_recordKey_monomial⟩
 
 end RecordKey
 end ChainDescent

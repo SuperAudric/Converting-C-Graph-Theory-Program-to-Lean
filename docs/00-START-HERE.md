@@ -240,14 +240,27 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > hypotheses). **★ Measured non-vacuous (`Regression` §18): on `G8` the root cell goes 8 → 2 where
 > `holKeyFast` alone keeps all 8**; `t3`/`wcyc9` are pinned as single-orbit controls where firing is
 > *forbidden*.
+> **▶▶ AND (2026-07-28, last) — THE `Publication` SWAP IS DONE AND `②` IS DISCHARGED.**
+> `Publication.canonForm?` is now `RecordKey.recordKey` at the record supply, `cost`/`costConst`/
+> `costDeg` are real definitions (**53** and **13**, both `ring`-checked by
+> `RecordKey.recordKeyBound_expand`, not guessed), and **`canon_poly_or_flag` is proved axiom-clean on
+> its LEFT disjunct** — 3 `sorry`s → **2** (③ + non-vacuity). `RecordKey` §5 carries the monomial.
+> **⚠⚠ The pinned shape had to change and must not be "restored": `costConst * n ^ costDeg` is FALSE
+> at `n = 0`** for the real object at any numerals (`descendS` bills 1 for a leaf, every `n = 0`
+> colouring is vacuously `Discrete`, so the object costs 1 and *answers*, while `c * 0 ^ d = 0`;
+> `costDeg = 0` fails at `n = 2`, cost 1162). It is now **`costConst * (n + 1) ^ costDeg`** — same
+> polynomial class, true on every input, and it removes the `1 ≤ n` case split from the proof.
+> **★ And the swap is a TOTALITY gain, measured end-to-end: `G8` FLAGS under `holKeyFast` and ANSWERS
+> under `recordKey`** — the first handled/unhandled pair at the record resolvers. ⚠ Price:
+> `t3` 12 s → 412 s interpreted, so `PerformanceTest`'s acceptance numbers predate this object.
+>
 > **▶▶▶ NEXT — and the full handoff is
 > [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)'s ▶▶▶ HANDOFF block (top of
-> its CURRENT FRONTIER section); read that, not this summary.** In one line: (1) point
-> `Publication.canonForm?` at `RecordKey.recordKey` **together with** reshaping the `②` bound into the
-> pinned `costConst * n ^ costDeg` monomial — one pass, both touch pinned statements, and
-> `recordKey_canonizer_with_cost` is the input so it is re-pointing plus arithmetic; (2) the restated
+> its CURRENT FRONTIER section); read that, not this summary.** In one line: (1) the restated
 > item 1 (the flag is not a stall — it is **equivariance**, then the guards' cost, whose bill is now a
-> theorem); (3) Track R P2, the recover-core read.
+> theorem) ⚠ but note its equivariance dependency resolves to `SameOrbits deepenSupply Ref` = **R1**,
+> the parked crux, so it is not an independent increment; (2) **Track R P2, the recover-core read** —
+> the live research.
 >
 > **(pre-2026-07-27 framing, provenance) C3b ①c — 2026-07-23, TRACK A:** **`deepenSupply`'s ①c is CLOSED modulo `{Tinhofer}` ONLY**
 > (`deepenSupply_guarded_canonizer_direct`, axiom-clean, full build green). `deepen` now WHOLE-GRAPH-discretizes,

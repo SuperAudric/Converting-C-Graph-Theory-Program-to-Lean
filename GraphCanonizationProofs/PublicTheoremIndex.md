@@ -2694,25 +2694,28 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Showcase.Iso` | 86-89 | — | Definition |
-| `Showcase.canonForm?` | 106-118 | **THE SWAP (spike 2026-07-19): the showcase canonizer is REAL** — the fused record object (encode-free refiner; force = `holKeyFast`; consume = `foldSupplyFast ++ deckSupply ++ deck2Supply`), exactly what the end-to-end acceptance measurements run. Record pin provisional: strengthening it = this def + `canonForm?_record`, nothing downstream. | Definition |
-| `Showcase.canonForm?_record` | 120-126 | The record object satisfies the full canonical-form spec — `Deck2.holKey_foldDeck2Fast_selNode_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
-| `Showcase.UnhandledResidue` | 169-176 | — | Definition |
-| `Showcase.cameron_classification` | 197-202 | — | axiom |
-| `Showcase.skresanov_two_closure` | 203-206 | — | axiom |
-| `Showcase.liebeck_rank3` | 207-210 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 211-219 | — | axiom |
-| `Showcase.ftpg` | 220-226 | — | axiom |
-| `Showcase.buekenhout_shult` | 227-234 | — | axiom |
-| `Showcase.payne_thas` | 235-243 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 244 | — | axiom |
-| `Showcase.canon_sound` | 252-259 | — | — |
-| `Showcase.canon_complete` | 261-286 | — | — |
-| `Showcase.flag_iso_invariant` | 288-294 | — | — |
-| `Showcase.canon_poly_or_flag` | 296-318 | — | — |
-| `Showcase.residue_if_flag` | 320-329 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 331-337 | — | — |
-| `Showcase.canonizer` | 344-354 | — | — |
+| `Showcase.Iso` | 98-101 | — | Definition |
+| `Showcase.canonForm?` | 118-136 | **The showcase canonizer, REAL and at the composed force key (2026-07-28)** — encode-free refiner; force = `RecordKey.recordKey`; consume = `RecordCost.recordSupplyFast`. The key swap is a totality gain: `G8` flags at the previous pin and answers here (`Regression` §19). | Definition |
+| `Showcase.canonForm?_record` | 138-142 | The record object satisfies the full canonical-form spec — `RecordKey.recordKey_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
+| `Showcase.cost` | 144-150 | The canonizer's operation count — no longer an `opaque` stub: the `CostM` cost projection of the very definition `canonForm?` is the value projection of, so `②` is a theorem about the object `①` is about. | Definition |
+| `Showcase.UnhandledResidue` | 193-194 | — | Definition |
+| `Showcase.costConst` | 215-216 | The pinned cost constant `= RecordKey.costConst = 53` — the coefficient sum of the `②` bound polynomial, `ring`-checked rather than asserted. | Definition |
+| `Showcase.costDeg` | 218-219 | The pinned cost degree `= RecordKey.costDeg = 13`. ⚠ The bound is `costConst * (n+1) ^ costDeg`: the `n`-form is false at `n = 0`, where the object costs 1 and answers. | Definition |
+| `Showcase.cameron_classification` | 240-245 | — | axiom |
+| `Showcase.skresanov_two_closure` | 246-249 | — | axiom |
+| `Showcase.liebeck_rank3` | 250-253 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 254-262 | — | axiom |
+| `Showcase.ftpg` | 263-269 | — | axiom |
+| `Showcase.buekenhout_shult` | 270-277 | — | axiom |
+| `Showcase.payne_thas` | 278-286 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 287 | — | axiom |
+| `Showcase.canon_sound` | 295-302 | — | — |
+| `Showcase.canon_complete` | 304-329 | — | — |
+| `Showcase.flag_iso_invariant` | 331-337 | — | — |
+| `Showcase.canon_poly_or_flag` | 339-349 | — | — |
+| `Showcase.residue_if_flag` | 377-386 | — | — |
+| `Showcase.unhandledResidue_nonvacuous` | 388-394 | — | — |
+| `Showcase.canonizer` | 401-411 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -4884,22 +4887,22 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `KeyComplete.KeySeparatesAt` | 90-95 | At this node the force key separates every branch pair that no colour-automorphism links. Contrapositive: equal keys inside the branch cell ⟹ same orbit. | Definition |
-| `KeyComplete.KeySeparatesAll` | 97-103 | The global form — the carried obligation. ⚠ Named `…All`, not `KeySeparates`: F3a's earlier `Hol.KeySeparates` (`HolKey.lean` §1) owns that identifier for the PER-NODE predicate. | Definition |
-| `KeyComplete.keySeparatesAt_iff_hol` | 125-133 | ★ §1a THE BRIDGE — `KeySeparatesAt` is `Hol.KeySeparates` written contrapositively. Makes the F3a duplication visible: `forcedSet_single_orbit_of_keySeparatesAt` re-proves `Hol.keepMin_pairwise_aut_of_separates` (`Composite.forcedSet` IS `keepMin … (branches χ)`). What is NOT duplicated is `ForcePick.forceThenPick` — F3a routes its conclusion back through consume, i.e. through a COMPUTED certificate. | — |
-| `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` | 141-155 | ★★★ THE EXHAUSTIVENESS COROLLARY — under `KeySeparatesAt` the key's argmin over the branch cell is a single `IsColAut`-orbit, so discarding all but one survivor is sound WITHOUT a certificate. Uses no property of the key beyond the hypothesis: no equivariance, no guard, no supply. | — |
-| `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` | 157-168 | The composite's firing lemma generalized from `CellIsOrbit` (about the WHOLE cell — false at a mixed node) to pairwise `WordReach` on the FORCED SET. The brick `Composite.forceThenConsume_singleton_of_cellIsOrbit` was missing. | — |
-| `KeyComplete.keySeparatesAt_orbKey_of_tinhofer` | 176-179 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Tinhofer` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
-| `KeyComplete.keySeparatesAt_orbKeyG_of_certifiedG` | 181-184 | Non-vacuity for the poly-guarded key, on its own guard (`CertifiedG S`). | — |
-| `KeyComplete.forceThenConsume_singleton_of_tinhofer` | 193-201 | ★★★ THE MIXED FIRING THEOREM — at an `Tinhofer` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
-| `KeyComplete.nodeResolved_of_tinhofer` | 203-213 | ★★ `Select.NodeResolved` at every `Tinhofer` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
-| `KeyComplete.rawKey` | 236-241 | The UNGUARDED read (`orbKey` with the `if` removed). NOT `KeyEquivariant` — `leafOf` breaks ties by vertex index — so unusable as a force key; it exists to make the `KeySeparates` / `KeyEquivariant` decomposition a theorem. | Definition |
-| `KeyComplete.keyV_rawKey` | 243-246 | Value projection of `rawKey` (`rfl`). | `@[simp]` |
-| `KeyComplete.keySeparatesAll_rawKey` | 248-260 | ★★ `KeySeparatesAll` HOLDS GLOBALLY for the raw read at `n⁴`, no hypothesis — from the unconditional `isColAut_of_readKey_eq`. ⟹ separation alone is CHEAP and is NOT the wall; the GI-hard object is `KeySeparatesAll ∧ KeyEquivariant`, and the guard on `orbKey`/`orbKeyG` purchases EQUIVARIANCE, not separation. | — |
-| `KeyComplete.forcedSet_single_orbit_rawKey` | 262-268 | The exhaustiveness corollary at a key that satisfies its hypothesis unconditionally: `rawKey`'s forced set is a single `IsColAut`-orbit. | — |
-| `KeyComplete.step_col_eq_refineV` | 278-281 | `Deepen.step` IS `refineV encodeFreeFast ∘ indivOne` — the identification the `Reaches` bridge needs. | — |
-| `KeyComplete.reaches_of_descentReach` | 283-297 | ★ THE BRIDGE: everything `DescentReach` walks to, the descent `Reaches`. `Descend.Reaches.step` and `DescentReach.cons` carry exactly the same side condition, so this is near-definitional — but without it the node `DeepenLocated`'s relocation produces is not formally one the canonizer visits, and `HandledS` quantifies over `Reaches`. | — |
-| `KeyComplete.consume_fail_locates_resolved` | 299-318 | ★★ A consume failure locates a REACHED node that the fused resolver RESOLVES, carrying a genuine rigid decision. `DeepenExact.consume_fail_force_fires` with both weaknesses removed: the node is one the canonizer visits (the bridge above) and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing — which nothing downstream consumed. | — |
-| `KeyComplete.handledS_of_reached_tinhofer` | 320-328 | `Select.HandledS` on the all-`Tinhofer` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |
+| `KeyComplete.KeySeparatesAll` | 97-104 | The global form — the carried obligation. ⚠ Named `…All`, not `KeySeparates`: F3a's earlier `Hol.KeySeparates` (`HolKey.lean` §1) owns that identifier for the PER-NODE predicate. | Definition |
+| `KeyComplete.keySeparatesAt_iff_hol` | 126-134 | ★ §1a THE BRIDGE — `KeySeparatesAt` is `Hol.KeySeparates` written contrapositively. Makes the F3a duplication visible: `forcedSet_single_orbit_of_keySeparatesAt` re-proves `Hol.keepMin_pairwise_aut_of_separates` (`Composite.forcedSet` IS `keepMin … (branches χ)`). What is NOT duplicated is `ForcePick.forceThenPick` — F3a routes its conclusion back through consume, i.e. through a COMPUTED certificate. | — |
+| `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` | 142-156 | ★★★ THE EXHAUSTIVENESS COROLLARY — under `KeySeparatesAt` the key's argmin over the branch cell is a single `IsColAut`-orbit, so discarding all but one survivor is sound WITHOUT a certificate. Uses no property of the key beyond the hypothesis: no equivariance, no guard, no supply. | — |
+| `KeyComplete.forceThenConsume_singleton_of_forcedWordReach` | 158-169 | The composite's firing lemma generalized from `CellIsOrbit` (about the WHOLE cell — false at a mixed node) to pairwise `WordReach` on the FORCED SET. The brick `Composite.forceThenConsume_singleton_of_cellIsOrbit` was missing. | — |
+| `KeyComplete.keySeparatesAt_orbKey_of_tinhofer` | 177-180 | Non-vacuity: `orbKey` separates every non-automorphic branch pair at an `Tinhofer` node. ⚠ Carries the guard — off it `orbKey` is constant, so this is NOT the global `KeySeparates`. | — |
+| `KeyComplete.keySeparatesAt_orbKeyG_of_certifiedG` | 182-185 | Non-vacuity for the poly-guarded key, on its own guard (`CertifiedG S`). | — |
+| `KeyComplete.forceThenConsume_singleton_of_tinhofer` | 194-202 | ★★★ THE MIXED FIRING THEOREM — at an `Tinhofer` node the composite narrows the branch cell to EXACTLY ONE branch. Force half = the corollary above; consume half = `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23). NOT reachable via `Cost.CellResolved`: at a mixed node neither of its disjuncts holds. | — |
+| `KeyComplete.nodeResolved_of_tinhofer` | 204-214 | ★★ `Select.NodeResolved` at every `Tinhofer` node — the predicate `②`/`③` actually consume. `Deepen.consume_fail_force_fires` gives only STRICT narrowing, which nothing downstream reads; this gives `≤ 1`. | — |
+| `KeyComplete.rawKey` | 237-242 | The UNGUARDED read (`orbKey` with the `if` removed). NOT `KeyEquivariant` — `leafOf` breaks ties by vertex index — so unusable as a force key; it exists to make the `KeySeparates` / `KeyEquivariant` decomposition a theorem. | Definition |
+| `KeyComplete.keyV_rawKey` | 244-247 | Value projection of `rawKey` (`rfl`). | `@[simp]` |
+| `KeyComplete.keySeparatesAll_rawKey` | 249-261 | ★★ `KeySeparatesAll` HOLDS GLOBALLY for the raw read at `n⁴`, no hypothesis — from the unconditional `isColAut_of_readKey_eq`. ⟹ separation alone is CHEAP and is NOT the wall; the GI-hard object is `KeySeparatesAll ∧ KeyEquivariant`, and the guard on `orbKey`/`orbKeyG` purchases EQUIVARIANCE, not separation. | — |
+| `KeyComplete.forcedSet_single_orbit_rawKey` | 263-269 | The exhaustiveness corollary at a key that satisfies its hypothesis unconditionally: `rawKey`'s forced set is a single `IsColAut`-orbit. | — |
+| `KeyComplete.step_col_eq_refineV` | 279-282 | `Deepen.step` IS `refineV encodeFreeFast ∘ indivOne` — the identification the `Reaches` bridge needs. | — |
+| `KeyComplete.reaches_of_descentReach` | 284-298 | ★ THE BRIDGE: everything `DescentReach` walks to, the descent `Reaches`. `Descend.Reaches.step` and `DescentReach.cons` carry exactly the same side condition, so this is near-definitional — but without it the node `DeepenLocated`'s relocation produces is not formally one the canonizer visits, and `HandledS` quantifies over `Reaches`. | — |
+| `KeyComplete.consume_fail_locates_resolved` | 300-319 | ★★ A consume failure locates a REACHED node that the fused resolver RESOLVES, carrying a genuine rigid decision. `DeepenExact.consume_fail_force_fires` with both weaknesses removed: the node is one the canonizer visits (the bridge above) and the conclusion is `NodeResolved` (`≤ 1`), not strict narrowing — which nothing downstream consumed. | — |
+| `KeyComplete.handledS_of_reached_tinhofer` | 321-329 | `Select.HandledS` on the all-`Tinhofer` reached class — the FIRST population of the sel-aware capability predicate (remaining-work §1T records zero families). Hypothesis is per-node over `Reaches`, not the global `∀ adj χ` of `deepenSupply_guarded_canonizer_direct`. | — |
 ## ChainDescent/ForcePick.lean
 
 | Name | Line | Description | Notes |
@@ -4989,4 +4992,10 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RecordKey.recordKeyBound` | 229-231 | §4a The composed key's per-evaluation bill: the holonomy sweep plus the guarded read AND its guard. | Definition |
 | `RecordKey.keyCost_recordKey_le` | 233-236 | §4a The composed key's cost bound. | — |
 | `RecordKey.descentCostS_selNode_recordKey_le` | 238-252 | ★★★ §4a `②` END-TO-END AT THE COMPOSED KEY — the same explicit-polynomial shape as `RecordCost.descentCostS_selNode_record_le`, with the key bound now carrying the guard's own work. No hypotheses. | — |
-| `RecordKey.recordKey_canonizer_with_cost` | 254-269 | ★★★ THE UPGRADED RECORD CAPSTONE — `①` + `②` at the composed key. This is the object `Publication.canonForm?` should name; the remaining step there is reshaping the `②` bound into the `costConst * n ^ costDeg` monomial its statement pins. | — |
+| `RecordKey.recordKey_canonizer_with_cost` | 254-268 | ★★★ THE UPGRADED RECORD CAPSTONE — `①` + `②` at the composed key. This is the object `Publication.canonForm?` should name; the remaining step there is reshaping the `②` bound into the `costConst * n ^ costDeg` monomial its statement pins. | — |
+| `RecordKey.costConst` | 290-291 | The pinned cost constant **53** — the coefficient sum of §4a's `②` bound polynomial, computed (`recordKeyBound_expand`), not guessed. `Publication.costConst` is this. | Definition |
+| `RecordKey.costDeg` | 293-294 | The pinned cost degree **13** — the degree of §4a's `②` bound polynomial. `Publication.costDeg` is this. | Definition |
+| `RecordKey.pow_le_succ_pow` | 296-300 | §5 Every monomial below the pinned degree is dominated by the pinned one, `n ^ k ≤ (n+1) ^ costDeg` for `k ≤ costDeg` — by monotonicity alone, with no `1 ≤ n` side condition. This is why the published bound is pinned at `n + 1`. | — |
+| `RecordKey.recordKeyBound_expand` | 302-312 | §5 §4a's `②` bound, expanded to `n^13 + n^12 + 3n^11 + … + n + 1` and checked by `ring` — which is what makes `costConst = 53` / `costDeg = 13` computed facts about the object rather than chosen numerals. | — |
+| `RecordKey.descentCostS_selNode_recordKey_monomial` | 314-333 | ★★★ §5 **`②` in the publication shape:** the canonizer of record, at the composed force key, runs within `costConst * (n+1) ^ costDeg` on **every** input — no hypotheses, no flag disjunct. Discharges `Showcase.canon_poly_or_flag` on its left disjunct. ⚠ `(n+1)`, not `n`: `descendS` bills 1 for a leaf, so at `n = 0` the object costs 1 and answers while `c * 0 ^ d = 0`. | — |
+| `RecordKey.recordKey_canonizer_monomial` | 335-347 | §5 **The publication capstone:** `①` (`recordKey_canonizer`) and `②`-as-a-monomial together, at exactly the object `Publication.canonForm?` names. | — |
