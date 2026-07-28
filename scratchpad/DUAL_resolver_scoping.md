@@ -1187,6 +1187,33 @@ contract route's intended shape, which no instance had used.
 
 > **an equivariant, separating, poly force key is a complete polynomial canonizer.**
 
+**▶▶ That hypothesis set is SCOPED in its own doc: `scratchpad/KEY_scoping.md` (2026-07-28).** Its four
+results, so they are not re-derived here: (i) the obligation restates *exactly* as **"produce a discrete
+`ψ` in poly time, canonical up to `Aut(adj, indivOne χ v)`"** — because
+`isColAut_of_readKey_eq`'s only hypotheses are `Discrete` + values `< n`, so separation is free for *any*
+discretizing map and the whole difficulty is labelling-independence of the *read* (never of `ψ` — that is
+`OrdEquivariant`-impossible off rigid inputs); (ii) the **rich / invariant / poly triangle** — every built
+and refuted key occupies a corner, and the third clause always fails for a recorded reason; (iii) **the
+tie-group ladder**: the exponential in the rich+invariant corner is always "enumerate the group `T` the
+read cannot see inside", so a poly key exists exactly where `T` has a poly canonical form — trivial /
+Aut-equivalent-picks (`Tinhofer`) / `F₂` (RREF, done) / `Z_{2^k}` (P3-ring) / solvable (L4) / bounded-local
+`Γ` (Luks, citable) / **non-solvable = the wall**. ⟹ **the live tracks are RUNGS OF ONE LADDER, not
+independent attempts**, and Track R's `②` is the top of the `F₂` rung; (iv) two defects — see below.
+
+**⚠⚠ TWO DEFECTS THE SCOPING FOUND IN THIS ARC (KEY_scoping §0).**
+1. **`KeySeparates` exists TWICE.** `Hol.KeySeparates` (`HolKey.lean` §1, F3a, **earlier**) is the same
+   predicate per-node in contrapositive form, and `Hol.keepMin_pairwise_aut_of_separates` **duplicates**
+   `KeyComplete.forcedSet_single_orbit_of_keySeparatesAt` (`Composite.forcedSet` *is*
+   `keepMin … (branches χ)`). Neither file references the other, and the two `KeySeparates` differ only
+   in arity. What is *not* duplicated: F3a routes its conclusion back through consume, so
+   `forceThenPick` is still the new content. ▶ Add a bridge lemma + rename one.
+2. **`forcePick_record`'s hypothesis set is claimed for no key** — the `ConfinementCitations.hflag`
+   vacuity shape. ▶ Pay it with the `readMin` anchor (KEY_scoping §4): index the aggregate by
+   `Perm (Fin n)` instead of by descent leaves, so the index set mentions neither `adj` nor `χ`;
+   equivariance is reindexing by `π ↦ π * σ` (`readKey_transport` + `indivOne_transport`) and separation
+   is **unconditional** via `isColAut_of_readKey_eq`. Strictly better as an anchor than
+   `keyEquivariant_compKey_readAgg_univ`, whose separation is the carried `AggFaithful`.
+
 **⚠ What this is NOT.** It fires nowhere new today: at a `Tinhofer` node the composite already resolves,
 and off its guard `orbKey`/`orbKeyG` return the constant `[]`, which does not separate — so no *built*
 key has both conjuncts and every instantiation is the same kind of conditional scaffold as

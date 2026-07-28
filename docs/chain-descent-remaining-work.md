@@ -123,6 +123,24 @@ transfer). "Complete" = the flag provably never fires.
 > of the restated item 1) · (2) the lex-product key combinator + record-object integration (item 7) ·
 > (3) item 1's remaining half.
 >
+> **▶▶ SCOPED (2026-07-28): `scratchpad/KEY_scoping.md` — the equivariant + separating + poly key.**
+> Read it before opening any new force-key program. Findings: (a) the conjunction restates **exactly** as
+> *"produce a discrete `ψ` in poly time, canonical up to `Aut(adj, indivOne χ v)`"* — separation is free
+> for any discretizing map (`isColAut_of_readKey_eq` needs only `Discrete` + `< n`), so the whole
+> difficulty is labelling-independence of the **read**, never of `ψ` (that is `OrdEquivariant`-impossible
+> off rigid inputs); (b) a **rich / invariant / poly** triangle in which every built and refuted key
+> occupies a corner for a recorded reason; (c) ★ **the TIE-GROUP LADDER** — the exponential is always
+> "enumerate the group `T` the read cannot see inside", so a poly key exists exactly where `T` has a poly
+> canonical form: trivial · Aut-equivalent picks (`Tinhofer`, measured 1197/1361 nodes) · `F₂` (RREF,
+> **done**) · `Z_{2^k}` (P3-ring) · solvable (**L4**) · bounded-local `Γ` (Luks, **citable poly**) ·
+> non-solvable = **the wall**. ⟹ **the live tracks are rungs of ONE ladder, not independent attempts**,
+> and Track R's `②` is the top of the `F₂` rung — so do **not** open a new key program.
+> (d) Two defects: `KeySeparates` exists twice (`Hol.KeySeparates`, F3a, duplicates
+> `KeyComplete.KeySeparatesAt`, and `keepMin_pairwise_aut_of_separates` duplicates
+> `forcedSet_single_orbit_of_keySeparatesAt`), and `forcePick_record`'s hypotheses are instantiated at no
+> key — paid by the `readMin` anchor (§4 there), which gets separation **unconditionally** where
+> `readAgg`-over-`framesUniv` carries `AggFaithful`.
+>
 > **▶ ITEM 1 RESTATED (2026-07-28, user steer) — "relocation-nesting depth" was the wrong frame.**
 > The flag is **not** reached via a stall: *consume fails ⟹ force fires somewhere* has as its free
 > contrapositive *force fails everywhere ⟹ some consume node fires*, so in theory **no mutual stall
