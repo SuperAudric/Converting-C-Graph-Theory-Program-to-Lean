@@ -54,13 +54,13 @@ form** — the graph content is gone after §1's reduction.
 (the target) → §3 (the mechanism; this is the conceptual core) → §12 (the proof plan). Then §4/§5
 before proposing anything, and §7 before investing in anything.
 
-**First actions, cheapest first.**
-1. §12.6(1) / §10.2 — run the sharp-Cayley `E1/E2` measurement. Minutes, and it is the only
-   measurement whose input class is known to be capable.
-2. §12.6(2) — is the separation round count bounded? Separation was at round 3–4 in all three
-   deficient roots; a *bounded-round* claim is union-stable (unlike bounded depth) and would be
-   formalizable.
-3. §10.3 — the coupling construction. The only falsifier design not already excluded by §5.
+**First actions — ▶▶ THE ORDERED PLAN IS §12.6 (M1–M6); start there.** In one line: **M1** run the
+step on its real input class at a population that pays §7.2's entry ticket (⚠ and *fix* the
+measurement first — the sharp-Cayley probe silently caps at ~24 inputs, not 729); **M2** is the
+separation round count bounded (the only union-stable formalizable shape); **M3** instrument the
+feedback loop, not the round number — the actual mechanism ask; **M4** the coupling construction, in
+parallel with M3; **M5** reuse the already-built `CoherentConfig.lean` substrate; **M6** the group
+bridge. ⚠ **M1 can end the track** — if 2-WL falls, §10.5's selector route (A) becomes the only path.
 
 **Before proposing any new route or invariant, apply §7 in order.** Two proof routes and two
 falsifier habitats died to those filters in one session each; they are cheap and they are decisive.
@@ -95,8 +95,19 @@ fails from **supply incompleteness**, and at a single-orbit cell `Force.forceBy_
 `χ`" can hold.* Force is structurally barred from precisely the failure mode that occurs.
 `Tinhofer ⟹ R1` closes that mode at its source — with single-orbit cells at every level the
 re-relating induction makes the harvest complete, so supply incompleteness cannot arise. **All the
-load therefore sits on "every level's cell is a single orbit" = CAO propagation.** Refuted at 1-WL
-⟹ the current design has no route to a general completeness theorem; open at 2-WL ⟹ it would.
+load therefore sits on "every level's cell is a single orbit" = CAO propagation.**
+
+⚠⚠ **"The 1-WL design is provably dead" IS TOO STRONG — walked back 2026-07-30 (user), after
+independent verification between iterations.** On the existing VT-non-`Tinhofer`-at-1-WL witnesses
+**consume _can_ fire, and measurably does**: the index-min vertex selection usually happens to choose
+vertices in the same orbit (this is the same selector luck as §7.5's Shrikhande, and it is why the
+force-key tally in limit 2 below finds zero blind cells). What is missing is a **guarantee** — nothing
+says the selector is lucky on an antagonistic input, and in particular nothing covers the **root**.
+⟹ the honest verdict is **"no completeness theorem at 1-WL", not "dead"**, and there are **two**
+routes to one, not one:
+- **(A) the SELECTOR route** — see §10.5. Prove index-min (or a better canonical selector) always
+  lands on a resolvable cell. Recorded and parked, not dead.
+- **(B) the MECHANISM route** — the 2-WL swap, this doc's subject. Plan = §12.6 (M1–M6).
 
 **⚠ TWO SCOPE LIMITS on "revived at 2-WL" — do not overclaim.**
 1. **Propagation is the induction STEP; the base case is separate.** A descent starts at the uniform
@@ -415,6 +426,33 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
    needed. Related but distinct: the node-4 families reportedly shatter under ≤ 4 individualizations.
    ⚠ Bounded depth is **not** union-stable (§4.3), so it can only ever be a per-family statement.
 
+5. **★ THE SELECTOR ROUTE (A) — RECORDED AND PARKED, not dead (2026-07-30, user).** The alternative to
+   the whole 2-WL swap. **Measured fact it rests on:** on every recorded VT-non-`Tinhofer`-at-1-WL
+   witness, consume *does* fire, because index-min selection happens to pick vertices in one orbit.
+   (§7.5's Shrikhande is the same phenomenon; limit 2 of §0.0 is the force-side tally). 
+   Disjoint antagonistic copies of VT graphs can be made to fail comparisons between them,
+   but some consumable comparisons survive. **The target:**
+   *prove the lowest-index selector — or a better canonical one — always lands on a resolvable cell.*
+   User's concrete variant: **lowest index, with priority to vertices shared under both descents.**
+   - **⚠ Do NOT kill this with the `⛔⛔ NO STABILIZER CHAIN` steer — it does not apply.** That steer
+     forbids an *iso-invariant within-cell vertex pick* as the guarded object. Here (i) choosing a
+     **cell** is canonical (`targetColour` transports), and (ii) `deepen`'s within-cell pick is already
+     non-canonical and is legitimised downstream by the all-anchors quantification + the verification
+     gate, not by canonicity of the pick. A *better* pick is therefore legal where a *canonical* one is
+     not.
+   - **The obstruction to state plainly:** "pick a single-orbit cell if one exists" is not a selector a
+     refinement can compute — orbit membership is the thing being decided. The realistic form is
+     **resolver-level, not selector-level**: try cells, keep one where the supply certifies
+     transitivity (poly: ≤ n cells × one supply call). That is a `Select`-layer change, and it converts
+     the question from "is the selector lucky" into "does *some* cell resolve", which is strictly
+     weaker and matches `Select.NodeResolved`'s shape.
+   - **⚠ The gap the user named and it is the load-bearing one:** no guarantee at the **root**, where
+     there is no parent structure to exploit and an antagonistic input has the most freedom. Any
+     attempt should attack the root case first — if it fails there, the route is over cheaply.
+   - **⚠ Selector claims are convention-dependent** (§7.4, §8.3): anything proved here must be pinned
+     against the concrete `chooseIdK` + `warmRefineVec` id numbering by Lean `#eval`, never by
+     hand-reasoning the colour order (gotten wrong twice).
+
 ---
 
 ## 11. FILE INDEX
@@ -536,11 +574,73 @@ Steps 1–2 are real, free, and formalizable now, and they reduce the problem to
 under a fibre hypothesis), not a lemma to be discharged by effort. The practical route is therefore
 R2 + R3: pin the crux as a per-family certificate and prove it for the families that matter.
 
-### 12.6 The two measurements that would most inform Step 3
+### 12.6 ▶▶ THE PLAN for route (B) — the mechanism track (2026-07-30, user-directed)
 
-1. **The §10.2 sharp Cayley inputs** — the 729 non-schurian S-rings through the descent
-   instrumentation. Cheapest remaining measurement; the guard for its earlier crash is now in place.
-2. **Is the round count bounded?** Separation was at round 3–4 in all three deficient roots. If it
-   stays bounded across the 729, a *bounded-round* separation theorem becomes a plausible and
-   formalizable target — and unlike bounded *depth* (§4.3) a bounded-round claim is about a single
-   cell pair, so it is union-stable by construction.
+**What "the mechanism" means, and how much of it is already settled.** The question is *how
+individualizing `v` changes the other cells' orbits, and whether 2-WL's classes coincide with that
+change*. **The first half is DONE and formalized**: §3's fibring — individualizing `v ∈ D` changes
+`C`'s orbits **only** by fibring `C` over the `K`-orbitals inside `D × C`, and **nothing else can
+happen** (`CaoFibring.exists_row_transport` +
+`sameOrbital_iff_sameStabOrbit_of_transport`). So the whole remaining question is the **second** half:
+
+> **when does a 2-WL class properly contain ≥ 2 orbitals meeting `v`'s row?** (= `hsep` = §12.3)
+
+**The organising fact for the plan.** The target is an *induction along the descent*, so its step is
+applied where the input **arose from individualization** — a strictly wider class than "orbit
+partitions of plain graphs", which is the only class ever swept. Every step below is chosen against
+that.
+
+| # | step | cost | what it DECIDES |
+|---|---|---|---|
+| **M1** | **Run the step on its real input class, at a population that pays the entry ticket** (= the old §12.6(1)/§10.2, but *fixed* — see the ⚠ below) | hours | whether "no 2-WL counterexample" survives a population where §7.2's ticket is genuinely paid. **If it falls, route (B) ends** and §10.5's selector route (A) becomes the only path |
+| **M2** | **Is the separation ROUND count bounded?** (= the old §12.6(2)) across M1's population; record whether it grows with `n` or with `\|Aut\|` | hours | pursue a **bounded-round** theorem, or drop it. Bounded-round is the **only** shape found so far that is *both* union-stable (unlike bounded depth, §4.3) *and* formalizable |
+| **M3** | **★ Instrument the FEEDBACK LOOP, not the round number** — the actual mechanism ask, and new work | days | supplies R1's missing *"why must the `v`-profile distributions differ?"* |
+| **M4** | **The coupling construction** (§10.3) — build an object with group-change and deficiency at the **same** cell pair | open-ended | kills the track cheaply, or its principled failure *is* the mechanism. Run **in parallel with M3** — same question from opposite sides |
+| **M5** | **Lean: reuse the CC substrate that already exists** (see below — it is not referenced anywhere in this plan and should be) | days | turns R2's "carry a per-family certificate" from a plan into a deliverable |
+| **M6** | the group-identification bridge (`IsColAut` of a refined colouring ↔ the point stabilizer) | hours | needed by **any** consumer of `CaoFibring`, at either WL level |
+
+**⚠ M1 — the measurement is not what §10.2 says it is.** `probe_cao_induction.py`'s
+sharp-Cayley section iterates **8 groups of order 16 only** and `break`s at `hits > 3` per group ⟹ at
+most ~24 sharp inputs, **not** "the 729 non-schurian S-rings" (which came from 38 groups of orders
+8–32). Remove the cap, extend to the full population, and **log what was skipped** (§9's discipline —
+a silent cap reads as full coverage). Until then the "729" figure describes the *hunt*, not the
+*instrumentation*.
+
+**★ M3 — what to actually record.** §12.3's round-1 barrier is proved: coherence makes the round-1
+count of `(v,u)` an intersection number, identical across the class, so **the base point learns
+nothing directly**; the marking must travel — a far pair `(a,b)` acquires its triangle type
+`(X`-class`(a,v), X`-class`(v,b))`, that splits far classes, and only their feedback reaches `(v,u)`.
+Measured round 3 / 3 / 4 confirms it. **Nobody has measured *which* far split does the work.** Per
+round, record: (a) how many orbital-fusions remain; (b) which triangle types were newly created;
+(c) the **minimal cause chain** — the specific far class whose split, on removal, leaves the target
+pair fused. Output is the mechanism *in the form a proof consumes*: "the marking travels via `X`, and
+`X` is forced to exist because `Y`". This is the one step that attacks the crux rather than
+characterising it.
+
+**★ M5 — the substrate is already built and gated, and this plan never mentions it.**
+`ChainDescent/CoherentConfig.lean` (in `build.sh`, axiom-clean) carries: **`IsPointExtension X T Y`**
+(the coarsest coherent fission with `T` singled out — *the object of Step 3*), the **construction**
+`pointExtension` via `pairStep`/`pairIter`/`stableSetoid` with the universal property discharged
+(`isPointExtension_pointExtension`, `exists_isPointExtension`, `isPointExtension_unique`),
+`AlgIso`/`AlgIso.InducedBy`, **`Separable`/`SeparablePointed`**, **`ExtensionSeparable`** (= R2's
+statement, verbatim), and **`Theorem41Statement`** — Ponomarenko arXiv:2006.13592 Thm 4.1 as a
+citation-carrier, whose hypotheses a probe found **hold precisely on the one-point extension and fail
+on the residue itself**. §12.4 ranks R2 as "must be proved per class" without noting that a cited
+route to it is already in-build. ⚠ Two honest gaps before it closes anything: **`Separable ⟹
+schurian`** (standard, must be cited or proved — it is what converts R2 into the target) and the
+**D0/T4 modelling seam** (`CoherentConfig` is abstract; connecting it to graphs is the faithfulness
+obligation W2 already tracks).
+
+**▶ Order:** M1 + M2 first (cheap, and M1 can end the track). Then M3 and M4 in parallel — they are
+the same question from both sides. M5 is the Lean deliverable and can start once M1 has not falsified.
+M6 anytime.
+
+**▶ If 2-WL falls (M1 turns up a counterexample).** Re-run M1/M2 at **3-WL** before concluding
+anything: the same measurements decide whether this is a ladder that continues or whether refiner
+strength cannot fix the design at all — and only the second warrants the structural change. ⚠ Note
+§0.0's negative branch: a "fails at every `k`" witness has **no candidate** today, because §5's
+self-limiting lesson excludes every standard unbounded-WL family from the CAO hypothesis.
+
+> *(The former §12.6, "the two measurements that would most inform Step 3", is absorbed into §12.6's
+> **M1** and **M2** above — with the correction that the sharp-Cayley instrumentation does **not**
+> currently cover the 729. Old cross-references to "§12.6(1)/(2)" resolve to M1/M2.)*
