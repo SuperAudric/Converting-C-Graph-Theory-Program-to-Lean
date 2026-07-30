@@ -65,6 +65,65 @@ before proposing anything, and §7 before investing in anything.
 **Before proposing any new route or invariant, apply §7 in order.** Two proof routes and two
 falsifier habitats died to those filters in one session each; they are cheap and they are decisive.
 
+### 0.0 ▶▶ WHY THIS QUESTION IS WORTH ITS COST — the unrecorded reason (added 2026-07-30)
+
+⚠ **This was understood but never written down, and a fresh reader reconstructs the wrong target
+without it.** Two readings have now been made and corrected: (a) that this doc serves the *existing*
+`Tinhofer` predicate, and (b) that a 2-WL result would feed the **force** resolver. Both are wrong.
+
+**The Lean `Tinhofer` is a 1-WL predicate.** `Deepen.step = Refine.warmRefineVec ∘ Descend.indivOne`,
+and `warmRefineVec` iterates `sigKey`, whose `signature` is the multiset of `(χ u, adj v u, P v u)`
+over `u ≠ v` — plain colour refinement. `CellSingleOrbit` is stated at `IsColAut adj χc` for that
+1-WL `χc`. **So proving §2 (a 2-WL statement) does not discharge `Tinhofer` as it stands**, and it is
+not meant to: 2-WL cells refine 1-WL cells, and a 1-WL cell is a *union* of 2-WL cells, so nothing
+transfers. Measured on the flagship witness (`net(Z₄)`, n = 28, from the exact orbit partition,
+either root-orbit rep): 1-WL → 5 cells, **2 mixed**; 2-WL → 7 cells, **0 mixed**.
+
+**This doc is a probe into a DESIGN CHANGE, not a lemma for the current object.** The question is:
+*if the refiner were swapped 1-WL → 2-WL — a direct polynomial cost increase, `n²` → `n³` per round —
+does the architecture gain a theorem it provably cannot have at 1-WL?* The chain that would cash it:
+
+> **CAO all the way down ⟹ Layer 1 (`Tinhofer ⟹ R1`) ⟹ the deepen supply is COMPLETE ⟹ consume
+> resolves every node.** Force is not fed by this; it is made *unnecessary* on the consume domain.
+
+**Why nothing weaker will do — the obstruction is not about mixed cells.** The recorded refutation
+(`scratchpad/DUAL_resolver_scoping.md` §1.2; CFI over a random cubic base, m = 8, n = 56, the
+`|C| = 16` node) has the *opposite* shape from what one expects: the cell **is one true orbit**
+(explicit σ, `is_aut ✓`, colour-preserving ✓, σ(24) = 26 crossing the harvest's 8+8 split), so consume
+fails from **supply incompleteness**, and at a single-orbit cell `Force.forceBy_no_narrowing_on_orbit`
+**forbids** force from acting. ⟹ *no theorem of the shape "consume fails at `χ` ⟹ force can act at
+`χ`" can hold.* Force is structurally barred from precisely the failure mode that occurs.
+`Tinhofer ⟹ R1` closes that mode at its source — with single-orbit cells at every level the
+re-relating induction makes the harvest complete, so supply incompleteness cannot arise. **All the
+load therefore sits on "every level's cell is a single orbit" = CAO propagation.** Refuted at 1-WL
+⟹ the current design has no route to a general completeness theorem; open at 2-WL ⟹ it would.
+
+**⚠ TWO SCOPE LIMITS on "revived at 2-WL" — do not overclaim.**
+1. **Propagation is the induction STEP; the base case is separate.** A descent starts at the uniform
+   colouring, so "root CAO" is *"k-WL computes the orbit partition of the input"* — false at every
+   fixed `k` for rigid multipedes. The revival is on the **consume domain** (inputs whose k-WL root
+   partition already is the orbit partition); rigid and mixed roots stay Track R's. It makes consume's
+   ownership of its domain *complete*, not the whole design safe.
+2. **The known 1-WL witnesses do NOT exhibit a concrete stall.** Measured 2026-07-30
+   (`probe_stall.py`/`probe_stall3.py`/`probe_stall4.py`): across **all four** recorded witnesses —
+   `net(Z₄)`, Shrikhande, Chang-2 and the named VT witness `Cay(Z₁₂⋊₅Z₂)` — **13 manufactured mixed
+   cells, and the force key separates the true `Aut_v`-orbits at every one of them**: lookahead depth 1
+   (which *is* `lookaheadKey`'s non-discrete branch) on 10, depth 2 on 3 (one size-3 `net(Z₄)` cell and
+   the two size-2 cells of the VT witness). **Zero blind cells.** 2-WL splits all 13 at depth 0.
+   ⟹ **the death is the missing theorem, not a failing run.** Do not cite these graphs as "the design
+   dies here" exhibits. ⚠ This does *not* rescue 1-WL: bounded lookahead depth is not a theorem either,
+   and "some bounded depth always suffices" is the WL-dimension question in another costume.
+
+**▶ And the stakes of the negative branch.** If CAO propagation fails at *every* `k`, the design
+cannot be made viable by refiner strength and needs deeper structural change. The reason to expect
+otherwise is §5's **self-limiting** lesson, which has never been connected to this question: the CAO
+hypothesis *excludes* the standard "no bounded `k` works" constructions — rigid ⟹ discrete orbit
+partition ⟹ vacuous kills the multipede/Lichter family, and CFI is excluded separately (it is about
+distinguishing two graphs, not orbit recovery within one; its large gauge group keeps orbits coarse
+enough that even 1-WL matches). A "fails at every `k`" witness would have to be simultaneously
+non-rigid, orbit-coarse, and closure-deficient **at the same cell pair** — §3's coupling requirement,
+which no falsifier has ever met. **That branch currently has no candidate witness at all.**
+
 ### 0.1 How to reproduce anything here
 
 *Probes* — pure Python 3 stdlib, **no dependencies** (no networkx/sympy/nauty; none are installed).
@@ -120,6 +179,13 @@ one:** `Tinhofer` (`DeepenTinhofer.lean`) inspects **only the `chooseIdK`-select
 level, so CAO may break at a node — even on a cell the descent will later visit — and the graph can
 still be `Tinhofer` (Shrikhande does exactly this, §7.5). **Proving CAO propagation is proving
 strictly more than the chain needs**; check whether the weaker statement suffices before starting.
+
+⚠⚠ **The ladder above holds at a FIXED WL level and does NOT cross levels.** The built `Tinhofer` is
+**1-WL** (`step = warmRefineVec ∘ indivOne`); this doc's target (§2) is **2-WL**. Since 1-WL cells are
+unions of 2-WL cells, the 2-WL statement implies nothing about the 1-WL one — measured, `net(Z₄)`:
+2-WL 0 mixed cells, 1-WL 2 mixed. **A proof of §2 is a result about a 2-WL-refined descent, i.e. about
+a proposed design change, not about the object in `build.sh`.** See §0.0 for why that change is the
+point rather than a defect.
 
 ---
 
@@ -229,6 +295,7 @@ too. Every "shrink the group" design dies on this.
 |---|---|
 | **S-ring sweep, COMPLETE**: 38 verified groups, orders 8–32, **66,888 connection sets · 62,147 non-discrete S-rings · 729 NON-SCHURIAN (genuine entry tickets) · 0 counterexamples** | **the strongest evidence on record.** The entry ticket actually occurs here |
 | Parameter-determined SRGs (T(8) + 3 Chang graphs, nets, Paley, Johnson/Kneser) | moderate; Chang-2 is a real 1-WL failure repaired exactly by 2-WL |
+| **2-WL recovers the `Aut_v`-orbits EXACTLY on the named VT witness** `Cay(Z₁₂⋊₅Z₂)` (n=24, \|Aut\|=48, \|Aut_v\|=2): `same_partition(2-WL diag, Aut_v-orbits) = True`, while 1-WL = `False` with **all 6** non-singleton cells mixed (2026-07-30, `probe_stall4.py`) | **strong, and sharp.** The input class is known-capable — this is the graph that refutes `VT ⟹ Tinhofer` at 1-WL — so the §7.2 entry ticket is paid, unlike the worthless 21-object sweep |
 | VT voltage covers (`Z₂`/`Z₃`/`Z₄` over 9 VT bases): 122 covers, 0 failures | moderate — imprimitive, blocks of size 2–4, not circulant-dominated |
 | Descent instrumentation: 11 objects, **16,048 nodes**, fibre-schurian everywhere | ⚠ **DISCOUNT HEAVILY** — only **364** of those nodes still have a cell of size ≥ 3; the rest are near-discrete where schurity is trivial. **The honest figure is 364, not 16k** |
 | The original 2-WL sweep (21 objects) | ⛔ **WORTHLESS** — 0/21 had a non-schurian one-point extension, so it could not possibly have found a counterexample. The recorded vacuity failure |
@@ -362,7 +429,12 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
 (fibre- and full-schurity at every descent node) · `probe_cao_coarse.py` (the discount in §6) ·
 `probe_cao_union.py` (the `G ⊔ G` stress test) · `probe_cao_mechanism.py` (the `CFI[K4]` twisted-vs-
 untwisted dissection: wire-pairs as a block system, and the `|Aut|` 192-vs-576 accident) ·
-`probe_cao_mechanism2.py` (the coupling / fused-orbital measurements of §3) · `probe_cao_rounds.py` (§12.3: the round at which the extension separates fused orbitals — 3 for Shrikhande/Chang-2, 4 for `net(Z₄)`).
+`probe_cao_mechanism2.py` (the coupling / fused-orbital measurements of §3) · `probe_cao_rounds.py` (§12.3: the round at which the extension separates fused orbitals — 3 for Shrikhande/Chang-2, 4 for `net(Z₄)`) ·
+**`probe_stall.py` / `probe_stall2.py` / `probe_stall3.py` / `probe_stall4.py`** (§0.0 limit 2 — at each
+1-WL *manufactured* mixed cell, the minimum lookahead depth at which the force key separates the true
+`Aut_v`-orbits; depth 1 = `lookaheadKey`'s own non-discrete branch. `probe_stall4.py` is the named VT
+witness `Cay(Z₁₂⋊₅Z₂)` — ⚠ its connection-set search is slow (~2048 masks × `all_isos` at n = 24), so
+run it detached per §9; **result recorded at `probe_stall4.out`**).
 Shared machinery lives in `probe_cao_cleanroom.py` (§8.1); most files import it, so they are
 `__main__`-guarded — keep them that way (§9).
 

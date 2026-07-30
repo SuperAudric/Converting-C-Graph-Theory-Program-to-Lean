@@ -1,0 +1,10 @@
+Cay(Z12:_5 Z2)  n=24 |Aut|=48 |Aut_v|=2  S=[(0, 1), (1, 1), (2, 1), (4, 1), (7, 1)]
+  root: 1-WL one cell, Aut-orbit = one orbit (CAO holds)
+  depth 1: 1-WL cells (1, 1, 2, 2, 3, 3, 6, 6); ALL 6 non-singleton cells mixed
+  depth 1: 2-WL cells (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2)
+   cell [1, 9] -> orbits [[1], [9]] | 1-WL force key: depth 2 | 2-WL splits: True
+   cell [2, 12, 14] -> orbits [[2, 14], [12]] | 1-WL force key: depth 1 | 2-WL splits: True
+   cell [3, 5, 15] -> orbits [[3, 15], [5]] | 1-WL force key: depth 1 | 2-WL splits: True
+   cell [4, 6, 10, 18, 20, 22] -> orbits [[4], [6, 18], [10, 22], [20]] | 1-WL force key: depth 1 | 2-WL splits: True
+   cell [7, 11, 13, 19, 21, 23] -> orbits [[7, 19], [11, 23], [13], [21]] | 1-WL force key: depth 1 | 2-WL splits: True
+   cell [8, 16] -> orbits [[8], [16]] | 1-WL force key: depth 2 | 2-WL splits: True
