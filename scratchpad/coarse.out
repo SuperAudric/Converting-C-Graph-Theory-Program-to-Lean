@@ -1,0 +1,22 @@
+=== is 'non-schurity only at depth 0' real, or just fast discretization? ===
+  Shrikhande             n= 16 nodes=   40 | root coarse=16 full-schur@root=False | max cell by depth {0: 16, 1: 6, 2: 4, 3: 2, 4: 1}
+      depth>=1 nodes:    39   of which STILL COARSE (cell>=3):     2   full-schurity failures among them: 0   (0s)
+  rook 4x4               n= 16 nodes=  113 | root coarse=16 full-schur@root=True  | max cell by depth {0: 16, 1: 9, 2: 6, 3: 4, 4: 2, 5: 1}
+      depth>=1 nodes:   112   of which STILL COARSE (cell>=3):     7   full-schurity failures among them: 0   (1s)
+  net(Z4)                n= 28 nodes=  444 | root coarse=16 full-schur@root=False | max cell by depth {0: 16, 1: 8, 2: 8, 3: 2, 4: 1}
+      depth>=1 nodes:   443   of which STILL COARSE (cell>=3):     8   full-schurity failures among them: 0   (7s)
+  net(Z2xZ2)             n= 28 nodes=  995 | root coarse=16 full-schur@root=True  | max cell by depth {0: 16, 1: 12, 2: 8, 3: 8, 4: 2, 5: 1}
+      depth>=1 nodes:   994   of which STILL COARSE (cell>=3):    20   full-schurity failures among them: 0   (15s)
+  T(8)                   n= 28 nodes= 2384 | root coarse=28 full-schur@root=True  | max cell by depth {0: 28, 1: 15, 2: 10, 3: 6, 4: 4, 5: 2, 6: 1}
+      depth>=1 nodes:  2383   of which STILL COARSE (cell>=3):    58   full-schurity failures among them: 0   (89s)
+  Chang-1                n= 28 nodes= 1392 | root coarse=24 full-schur@root=True  | max cell by depth {0: 24, 1: 12, 2: 8, 3: 4, 4: 4, 5: 2, 6: 1}
+      depth>=1 nodes:  1391   of which STILL COARSE (cell>=3):    30   full-schurity failures among them: 0   (13s)
+  Chang-2                n= 28 nodes=  109 | root coarse=24 full-schur@root=False | max cell by depth {0: 24, 1: 12, 2: 8, 3: 4, 4: 1}
+      depth>=1 nodes:   108   of which STILL COARSE (cell>=3):     4   full-schurity failures among them: 0   (2s)
+  Chang-3                n= 28 nodes=10547 | root coarse=15 full-schur@root=True  | max cell by depth {0: 15, 1: 10, 2: 10, 3: 6, 4: 4, 5: 2, 6: 1}
+      depth>=1 nodes: 10546   of which STILL COARSE (cell>=3):   234   full-schurity failures among them: 0   (98s)
+  Paley(17)              n= 17 nodes=    4 | root coarse=17 full-schur@root=True  | max cell by depth {0: 17, 1: 8, 2: 1}
+      depth>=1 nodes:     3   of which STILL COARSE (cell>=3):     1   full-schurity failures among them: 0   (0s)
+
+  TOTAL still-coarse depth>=1 nodes: 364  full-schurity failures: 0
+  (a small first number means the law is an ARTIFACT of fast discretization)

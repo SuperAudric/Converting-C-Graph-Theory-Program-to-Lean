@@ -1,0 +1,22 @@
+=== C2: does non-schurity survive one individualization under disjoint union? ===
+
+=== Shrikhande (+) Shrikhande ===  n=32  |Aut(G)|=192  |Aut(G(+)G)| = 2*192^2 = 73728  (generators used: 385)
+  1-WL root cells [32]  Aut-orbit sizes [32]
+  ROOT : CAO(fibres=orbits) = True | full-schurian = False
+  DEPTH 1 (individualize v=0 in copy A): |Aut_v| = 12*192 = 2304
+         2-WL cells [1, 3, 6, 6, 16]
+         Aut_v-orbit sizes [1, 3, 6, 6, 16]
+         CAO(fibres=orbits) = True    full-schurian = False   <<<< NON-SCHURITY SURVIVED THE INDIVIDUALIZATION
+
+=== rook4x4 (+) rook4x4 ===  n=32  |Aut(G)|=1152  |Aut(G(+)G)| = 2*1152^2 = 2654208  (generators used: 2305)
+  1-WL root cells [32]  Aut-orbit sizes [32]
+  ROOT : CAO(fibres=orbits) = True | full-schurian = True
+  DEPTH 1 (individualize v=0 in copy A): |Aut_v| = 72*1152 = 82944
+         2-WL cells [1, 6, 9, 16]
+         Aut_v-orbit sizes [1, 6, 9, 16]
+         CAO(fibres=orbits) = True    full-schurian = True
+
+=== C1: shattering depth under k disjoint copies (2-WL descent to discreteness) ===
+  Shrikhande x1: n= 16  individualizations to discreteness = 3   (0s)
+  Shrikhande x2: n= 32  individualizations to discreteness = 6   (0s)
+  Shrikhande x3: n= 48  individualizations to discreteness = 9   (1s)

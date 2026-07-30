@@ -1,0 +1,31 @@
+=== E1/E2: fibre- and full-schurity at EVERY node of the descent ===
+(one representative per cell; CAO makes the other choices conjugate)
+  Shrikhande                 n= 16 |Aut|=   192 nodes=  40 maxdepth= 4 | fibre-schurian everywhere: YES | full-schurian: NO at [(0, 192)] | fibre-ok-but-full-fail nodes: 1  (0s)
+  rook 4x4                   n= 16 |Aut|=  1152 nodes= 113 maxdepth= 5 | fibre-schurian everywhere: YES | full-schurian: YES | fibre-ok-but-full-fail nodes: 0  (1s)
+  net(Z4) = CFI[K4]-tw       n= 28 |Aut|=   192 nodes= 444 maxdepth= 4 | fibre-schurian everywhere: YES | full-schurian: NO at [(0, 192)] | fibre-ok-but-full-fail nodes: 1  (6s)
+  net(Z2xZ2)                 n= 28 |Aut|=   576 nodes= 995 maxdepth= 5 | fibre-schurian everywhere: YES | full-schurian: YES | fibre-ok-but-full-fail nodes: 0  (16s)
+  T(8)                       n= 28 |Aut|= 40320 nodes=2384 maxdepth= 6 | fibre-schurian everywhere: YES | full-schurian: YES | fibre-ok-but-full-fail nodes: 0  (92s)
+  Chang-1 (4K2)              n= 28 |Aut|=   384 nodes=1392 maxdepth= 6 | fibre-schurian everywhere: YES | full-schurian: YES | fibre-ok-but-full-fail nodes: 0  (14s)
+  Chang-2 (C8)               n= 28 |Aut|=    96 nodes= 109 maxdepth= 4 | fibre-schurian everywhere: YES | full-schurian: NO at [(0, 96)] | fibre-ok-but-full-fail nodes: 1  (2s)
+  Chang-3 (K3+K5)            n= 28 |Aut|=   720 nodes=10547 maxdepth= 6 | fibre-schurian everywhere: YES | full-schurian: YES | fibre-ok-but-full-fail nodes: 0  (102s)
+  Petersen                   n= 10 |Aut|=   120 nodes=  16 maxdepth= 4 | fibre-schurian everywhere: YES | full-schurian: YES | fibre-ok-but-full-fail nodes: 0  (0s)
+  Paley(13)                  n= 13 |Aut|=    78 nodes=   4 maxdepth= 2 | fibre-schurian everywhere: YES | full-schurian: YES | fibre-ok-but-full-fail nodes: 0  (0s)
+  Paley(17)                  n= 17 |Aut|=   136 nodes=   4 maxdepth= 2 | fibre-schurian everywhere: YES | full-schurian: YES | fibre-ok-but-full-fail nodes: 0  (0s)
+
+=== Cayley graphs whose ROOT S-ring is non-schurian (the sharp inputs) ===
+Traceback (most recent call last):
+  File "/workspace/scratchpad/probe_cao_induction.py", line 242, in <module>
+    A = all_isos(nn, adj, wl(nn, adj, [0] * nn), wl(nn, adj, [0] * nn), limit=2_000_000)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratchpad/probe_cao_cleanroom.py", line 122, in all_isos
+    rec(list(cA), list(cB))
+  File "/workspace/scratchpad/probe_cao_cleanroom.py", line 120, in rec
+    rec(individualize(n, cA, x), individualize(n, cB, y))
+  File "/workspace/scratchpad/probe_cao_cleanroom.py", line 120, in rec
+    rec(individualize(n, cA, x), individualize(n, cB, y))
+  File "/workspace/scratchpad/probe_cao_cleanroom.py", line 120, in rec
+    rec(individualize(n, cA, x), individualize(n, cB, y))
+  [Previous line repeated 4 more times]
+  File "/workspace/scratchpad/probe_cao_cleanroom.py", line 100, in rec
+    raise RuntimeError('budget exhausted')
+RuntimeError: budget exhausted
