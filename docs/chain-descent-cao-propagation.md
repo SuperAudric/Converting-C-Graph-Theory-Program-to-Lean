@@ -31,6 +31,68 @@ Two fragments are **already landed** — do not re-prove them:
 
 ---
 
+## 0. ▶ HANDOFF — start here
+
+**Where the work stands, in a few sentences.** At **1-WL the question is settled: refuted**, four
+independent witnesses (§ STATUS). At **2-WL it is open**, no counterexample after a large and
+now-non-vacuous search (§6), and §3 explains *why* the search keeps failing. The **reduction is
+finished and in Lean**: `ChainDescent/CaoFibring.lean` proves that preservation is equivalent to
+*separating orbitals*, with nothing left over (§12.1–12.2). What remains is exactly **one
+hypothesis**.
+
+**The remaining obligation has a name.** In `CaoFibring.levelSet_iff_stabOrbit_of_separates`,
+
+```
+hsep : ∀ u w, f v u = f v w → SameOrbital adj χ v u v w
+```
+
+`f` = any `IsColAut`-invariant pair colouring (a 2-WL closure is one). Discharging `hsep` for the
+2-WL closure *is* the theorem; everything else is done. **Do not attack the target in its graph
+form** — the graph content is gone after §1's reduction.
+
+**Read in this order.** § STATUS → §1 (the reduction — nothing later makes sense without it) → §2
+(the target) → §3 (the mechanism; this is the conceptual core) → §12 (the proof plan). Then §4/§5
+before proposing anything, and §7 before investing in anything.
+
+**First actions, cheapest first.**
+1. §12.6(1) / §10.2 — run the sharp-Cayley `E1/E2` measurement. Minutes, and it is the only
+   measurement whose input class is known to be capable.
+2. §12.6(2) — is the separation round count bounded? Separation was at round 3–4 in all three
+   deficient roots; a *bounded-round* claim is union-stable (unlike bounded depth) and would be
+   formalizable.
+3. §10.3 — the coupling construction. The only falsifier design not already excluded by §5.
+
+**Before proposing any new route or invariant, apply §7 in order.** Two proof routes and two
+falsifier habitats died to those filters in one session each; they are cheap and they are decisive.
+
+### 0.1 How to reproduce anything here
+
+*Probes* — pure Python 3 stdlib, **no dependencies** (no networkx/sympy/nauty; none are installed).
+Every probe that another probe **imports** is `__main__`-guarded, so importing it does not run its
+sweep (verified — the import graph was checked and the two stragglers fixed). Leaf drivers are not
+guarded; they are meant to be run directly. ⚠ If you add a probe that imports another, re-check
+(§9: this trap fired three times in one session):
+
+```bash
+cd /workspace/scratchpad && python3 -u probe_cao_cleanroom.py     # the core witnesses
+python3 -u probe_cao_provenance.py                                # 11 known |Aut| values + the broken-oracle proof
+```
+
+Long sweeps write logs; **do not pipe them through `tail`** (§9). Run them detached and read the log.
+
+*Lean* — the gate is the **absolute** path (it self-`cd`s via `$0`; a relative path fails):
+
+```bash
+bash /workspace/scripts/build.sh          # full serial gate, ~220 s, 108 modules
+cd /workspace/GraphCanonizationProofs && lake build ChainDescent.CaoFibring   # this module alone
+lake env lean /workspace/scratchpad/CaoFibringAxioms.lean                     # #print axioms, all 18 decls
+```
+
+⚠ bare `lake build` builds a **partial** 14-module subset and omits this cluster — always use
+`build.sh`. Lean probe files live **outside** the package root so they cannot enter any build.
+
+---
+
 ## 1. The question, stated three ways
 
 **Graph form.** Let `χ` be the exact `Aut(G)`-orbit partition (so `CellsAreOrbits` holds by
@@ -265,9 +327,15 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
 
 ## 10. OPEN ITEMS
 
-1. **The live target (§2), unproven.** Treat it as a genuine question of algebraic combinatorics — the
-   schurity of one-point extensions — not a lemma to discharge. Consider pinning it in Lean as a
-   **per-family certificate**, matching the project's carried-obligation pattern.
+> ✅ **Closed since this doc was written:** the reduction (Steps 1–2 of the proof plan) is proved and
+> gated — `ChainDescent/CaoFibring.lean`, §12.1–12.2. The open items below are what is left.
+
+1. **The live target (§2), unproven — and it is now a single named hypothesis**, `hsep` in
+   `CaoFibring.levelSet_iff_stabOrbit_of_separates` (§0). Treat it as a genuine question of algebraic
+   combinatorics — the schurity of one-point extensions — not a lemma to discharge. The practical
+   route is a **per-family certificate** (§12.4 R2/R3), matching the project's carried-obligation
+   pattern; note `ChainDescent/Separability.lean` and `ChainDescent/CoherentConfig.lean` already
+   carry `Separable` / `SeparablePointed` / `ExtensionSeparable`, which is R2's vocabulary.
 2. **Not yet run:** the `E1/E2` descent instrumentation over the **sharp Cayley inputs** (the 729
    non-schurian S-rings). The section exists in `probe_cao_induction.py` but its first attempt died on
    an unguarded budget exception; the guard is now in place and it has not been re-run. **This is the
@@ -294,11 +362,13 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
 (fibre- and full-schurity at every descent node) · `probe_cao_coarse.py` (the discount in §6) ·
 `probe_cao_union.py` (the `G ⊔ G` stress test) · `probe_cao_mechanism.py` (the `CFI[K4]` twisted-vs-
 untwisted dissection: wire-pairs as a block system, and the `|Aut|` 192-vs-576 accident) ·
-`probe_cao_mechanism2.py` (the coupling / fused-orbital measurements of §3).
+`probe_cao_mechanism2.py` (the coupling / fused-orbital measurements of §3) · `probe_cao_rounds.py` (§12.3: the round at which the extension separates fused orbitals — 3 for Shrikhande/Chang-2, 4 for `net(Z₄)`).
 Shared machinery lives in `probe_cao_cleanroom.py` (§8.1); most files import it, so they are
 `__main__`-guarded — keep them that way (§9).
 
-**Provenance** — `probe_cao_provenance.py` (§8.1/§8.2). **Lean** — `ShrikhandeTinhoferProbe.lean`.
+**Provenance** — `probe_cao_provenance.py` (§8.1/§8.2).
+
+**Lean (this doc's own results)** — `ChainDescent/CaoFibring.lean` (Steps 1–2, in `build.sh`; all 18 decls in `PublicTheoremIndex.md`) · `scratchpad/CaoFibringAxioms.lean` (the `#print axioms` check) · `scratchpad/ShrikhandeTinhoferProbe.lean` (the `chooseIdK` `#eval` cross-check of §8.3). The two Lean files sit **outside** the package root by design (§8.3).
 
 **Parallel branch (1-WL VT hunt, succeeded)** — [`../scratchpad/HANDOFF_2wl.md`](../scratchpad/HANDOFF_2wl.md),
 `probe_vt_witness.py`, `VTNotTinhoferProbe.lean`.

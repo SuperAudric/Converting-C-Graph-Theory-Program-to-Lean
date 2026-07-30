@@ -200,33 +200,34 @@ CUBIC8 = [(0,1),(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(7,0),(0,4),(1,5),(2,6),(3,7
 PETB = [(0,1),(1,2),(2,3),(3,4),(4,0),(5,7),(7,9),(9,6),(6,8),(8,5),
         (0,5),(1,6),(2,7),(3,8),(4,9)]
 
-print("=== (I) CFI-twisted over bases of growing treewidth ===")
-for lab, base, m in [("CFI[K4]-tw (=net Z4)", K(4), 4), ("CFI[prism]-tw", PRISM, 6),
-                     ("CFI[K3,3]-tw", K33, 6), ("CFI[Q3]-tw", Q3, 8),
-                     ("CFI[cubic8]-tw", CUBIC8, 8), ("CFI[K5]-tw", K(5), 5),
-                     ("CFI[Petersen]-tw", PETB, 10)]:
-    n, adj, names, idx = cfi(base, m, (0,))
-    if n > 80:
-        print(f"  {lab:30s} n={n:4d}  SKIPPED (aut search too slow)")
-        continue
-    run(lab, n, adj)
+if __name__ == "__main__":
+    print("=== (I) CFI-twisted over bases of growing treewidth ===")
+    for lab, base, m in [("CFI[K4]-tw (=net Z4)", K(4), 4), ("CFI[prism]-tw", PRISM, 6),
+                         ("CFI[K3,3]-tw", K33, 6), ("CFI[Q3]-tw", Q3, 8),
+                         ("CFI[cubic8]-tw", CUBIC8, 8), ("CFI[K5]-tw", K(5), 5),
+                         ("CFI[Petersen]-tw", PETB, 10)]:
+        n, adj, names, idx = cfi(base, m, (0,))
+        if n > 80:
+            print(f"  {lab:30s} n={n:4d}  SKIPPED (aut search too slow)")
+            continue
+        run(lab, n, adj)
 
-print("\n=== (II) highly regular objects (where WL-blindness actually lives) ===")
-CASES = [("net(Z4)", *net((4,))[:2]), ("net(Z2xZ2)", *net((2, 2))[:2]),
-         ("net(Z6)", *net((6,))[:2]), ("net(Z8)", *net((8,))[:2]),
-         ("net(Z9)", *net((9,))[:2]),
-         ("Petersen", *from_edges(10, PETB)), ("rook4x4", *rook(4)),
-         ("Shrikhande", *shrikhande()), ("Clebsch", *clebsch()),
-         ("Paley(13)", *paley(13)), ("Paley(17)", *paley(17)),
-         ("J(5,2)=T(5)", *johnson(5, 2)), ("J(6,2)=T(6)", *johnson(6, 2)),
-         ("J(8,2)=T(8)", *johnson(8, 2)), ("Kneser(7,2)", *kneser(7, 2)),
-         ("Q3 cube", *from_edges(8, Q3)), ("rook3x3=Ham(2,3)", *rook(3)),
-         ("Cay(Z2^4,wt1+all1)", *cayley((2,2,2,2), [(1,0,0,0),(0,1,0,0),(0,0,1,0),
-                                                    (0,0,0,1),(1,1,1,1)])),
-         ("Cay(Z4xZ4,{+-e})", *cayley((4,4), [(1,0),(3,0),(0,1),(0,3)])),
-         ("Cay(Z4xZ2^2,...)", *cayley((4,2,2), [(1,0,0),(3,0,0),(0,1,0),(0,0,1)])),
-         ("circ(13,{1,3,9})", *circ(13, (1, 3, 9))),
-         ("circ(16,{1,2,7})", *circ(16, (1, 2, 7))),
-         ("circ(20,{1,4,5})", *circ(20, (1, 4, 5)))]
-for lab, n, adj in CASES:
-    run(lab, n, adj)
+    print("\n=== (II) highly regular objects (where WL-blindness actually lives) ===")
+    CASES = [("net(Z4)", *net((4,))[:2]), ("net(Z2xZ2)", *net((2, 2))[:2]),
+             ("net(Z6)", *net((6,))[:2]), ("net(Z8)", *net((8,))[:2]),
+             ("net(Z9)", *net((9,))[:2]),
+             ("Petersen", *from_edges(10, PETB)), ("rook4x4", *rook(4)),
+             ("Shrikhande", *shrikhande()), ("Clebsch", *clebsch()),
+             ("Paley(13)", *paley(13)), ("Paley(17)", *paley(17)),
+             ("J(5,2)=T(5)", *johnson(5, 2)), ("J(6,2)=T(6)", *johnson(6, 2)),
+             ("J(8,2)=T(8)", *johnson(8, 2)), ("Kneser(7,2)", *kneser(7, 2)),
+             ("Q3 cube", *from_edges(8, Q3)), ("rook3x3=Ham(2,3)", *rook(3)),
+             ("Cay(Z2^4,wt1+all1)", *cayley((2,2,2,2), [(1,0,0,0),(0,1,0,0),(0,0,1,0),
+                                                        (0,0,0,1),(1,1,1,1)])),
+             ("Cay(Z4xZ4,{+-e})", *cayley((4,4), [(1,0),(3,0),(0,1),(0,3)])),
+             ("Cay(Z4xZ2^2,...)", *cayley((4,2,2), [(1,0,0),(3,0,0),(0,1,0),(0,0,1)])),
+             ("circ(13,{1,3,9})", *circ(13, (1, 3, 9))),
+             ("circ(16,{1,2,7})", *circ(16, (1, 2, 7))),
+             ("circ(20,{1,4,5})", *circ(20, (1, 4, 5)))]
+    for lab, n, adj in CASES:
+        run(lab, n, adj)

@@ -993,6 +993,12 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   — a *class*, not yet a named family. What T1 still needs is the per-family discharge of `Tinhofer`
   itself, which rigid-seal §9.1 says is the SAME work as the rigid seal on that family. So the first real
   family still costs a rigid-side discharge; the wiring above it is now built.
+  **▶ EVIDENCE BASE + PROOF PLAN: [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)**
+  (read its §0 handoff first). `CellsAreOrbits` propagation is **REFUTED at 1-WL** (4 witnesses) and
+  **open at 2-WL**. ✅ The *reduction* is landed and gated — `ChainDescent/CaoFibring.lean`: preservation
+  ⟺ the one-point extension separates the `D–C` **orbitals**, so what is left is the single named
+  hypothesis `hsep` in `CaoFibring.levelSet_iff_stabOrbit_of_separates`. ⚠ Bounded shattering depth is
+  **not** union-stable, so it can only ever be a per-family statement (that doc §4.3).
 - **T2 — cost bounds per new mechanism** (`SupplyCost` pattern: closed-form `c₂`/`keyCost` at land time —
   house rule, not a backlog). ⚠ **Outstanding debt: `deepenSupply` has NO formalized cost bound** — its
   `n⁶` bill is prose only (no `SupplyCost`/`descentCost` theorem references it). Not urgent (deepen is not

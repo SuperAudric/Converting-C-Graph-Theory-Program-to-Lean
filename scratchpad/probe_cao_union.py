@@ -126,14 +126,15 @@ def depth_to_discrete(n, adj, k):
             return None
 
 
-print("=== C2: does non-schurity survive one individualization under disjoint union? ===")
-for lab, (n, adj) in [("Shrikhande", shrikhande()), ("rook4x4", rook(4))]:
-    analyse(lab, n, adj)
+if __name__ == "__main__":
+    print("=== C2: does non-schurity survive one individualization under disjoint union? ===")
+    for lab, (n, adj) in [("Shrikhande", shrikhande()), ("rook4x4", rook(4))]:
+        analyse(lab, n, adj)
 
-print("\n=== C1: shattering depth under k disjoint copies (2-WL descent to discreteness) ===")
-for lab, (n, adj) in [("Shrikhande", shrikhande())]:
-    for k in (1, 2, 3):
-        t0 = time.time()
-        d = depth_to_discrete(n, adj, k)
-        print(f"  {lab} x{k}: n={n*k:3d}  individualizations to discreteness = {d}"
-              f"   ({time.time()-t0:.0f}s)")
+    print("\n=== C1: shattering depth under k disjoint copies (2-WL descent to discreteness) ===")
+    for lab, (n, adj) in [("Shrikhande", shrikhande())]:
+        for k in (1, 2, 3):
+            t0 = time.time()
+            d = depth_to_discrete(n, adj, k)
+            print(f"  {lab} x{k}: n={n*k:3d}  individualizations to discreteness = {d}"
+                  f"   ({time.time()-t0:.0f}s)")

@@ -274,6 +274,9 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > **▶ THE T1 EVIDENCE BASE IS [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)** — what
 > `CellsAreOrbits` propagation is *measured* to do, what is REFUTED at 1-WL (`net(Z₄)`, Shrikhande,
 > `Cay(Z₁₂⋊₅Z₂)`), the open 2-WL target, and the dead routes/habitats. **Read it before any `Tinhofer` work.**
+> ✅ **Its reduction is now LANDED in Lean and gated — `ChainDescent/CaoFibring.lean`** (18 decls, axiom-clean):
+> CAO-propagation ⟺ the one-point extension separates the **orbitals** between fibres, leaving exactly one
+> named hypothesis (`hsep` in `levelSet_iff_stabOrbit_of_separates`). Start at that doc's **§0 handoff**.
 > **`deepenSupply` stays out of `Publication.canonForm?` until
 > `Tinhofer`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
 > ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Tinhofer`
