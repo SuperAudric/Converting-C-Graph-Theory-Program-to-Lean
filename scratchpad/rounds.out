@@ -1,0 +1,25 @@
+
+=== Shrikhande (n=16) ===
+  root: X-classes 3 vs orbitals 4; fused classes 1
+  fused classes meeting v's row in >1 orbital: 1
+    class 2: orbital fibres over v of sizes [3, 6] -> separated at round 3
+
+=== net(Z4) (n=28) ===
+  root: X-classes 10 vs orbitals 14; fused classes 4
+  fused classes meeting v's row in >1 orbital: 2
+    class 1: orbital fibres over v of sizes [3, 6] -> separated at round 4
+    class 4: orbital fibres over v of sizes [3, 6] -> separated at round 4
+
+=== Chang-2 (n=28) ===
+  root: X-classes 12 vs orbitals 14; fused classes 2
+  fused classes meeting v's row in >1 orbital: 2
+    class 1: orbital fibres over v of sizes [4, 4] -> separated at round 3
+    class 4: orbital fibres over v of sizes [4, 4] -> separated at round 3
+
+=== rook 4x4 (control, schurian) (n=16) ===
+  root: X-classes 3 vs orbitals 3; fused classes 0
+  (schurian root -- the target is trivially satisfied here)
+
+=== T(8) (control, schurian) (n=28) ===
+  root: X-classes 3 vs orbitals 3; fused classes 0
+  (schurian root -- the target is trivially satisfied here)

@@ -270,7 +270,11 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > `deepenRefSupply`/`DeepenRefInExec`/`ExecRecoversKMinusCell` deleted; `imgFun` moved to `DeepenSupply`). **The
 > SOLE remaining ①c condition, `Tinhofer`, IS `CellsAreOrbits`** (`CascadeOracle`) — free at discreteness
 > (`cellsAreOrbits_of_discrete`), so NOT a GI∈P assumption; its failure is an *exposed* rigid decision
-> (`not_tinhoferPath_imp_rigidObstruction`). **`deepenSupply` stays out of `Publication.canonForm?` until
+> (`not_tinhoferPath_imp_rigidObstruction`).
+> **▶ THE T1 EVIDENCE BASE IS [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)** — what
+> `CellsAreOrbits` propagation is *measured* to do, what is REFUTED at 1-WL (`net(Z₄)`, Shrikhande,
+> `Cay(Z₁₂⋊₅Z₂)`), the open 2-WL target, and the dead routes/habitats. **Read it before any `Tinhofer` work.**
+> **`deepenSupply` stays out of `Publication.canonForm?` until
 > `Tinhofer`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
 > ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Tinhofer`
 > per family AND is the other seal. **✅ THE ALGORITHM-R SCAFFOLD + THE FULL `gen`-REDUCTION CHAIN (A)–(D) LANDED
