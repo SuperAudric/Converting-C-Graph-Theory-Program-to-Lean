@@ -1,0 +1,13 @@
+=== non-rigid multipedes: searching for kernel = <all-ones> exactly ===
+    (every row even => all-ones in ker; rank W-1 => ker is EXACTLY <all-ones>)
+  W=6 V=5 wt=4 s=0: n=52 |Aut|=20 orbit-start sizes [2, 10, 20] | after indiv a_0: |Aut_v|=2 1-WL cells=30 mixed=0 | 2-WL cells=30 mixed=0
+  W=6 V=7 wt=4 s=0: n=68 |Aut|=2 orbit-start sizes [2] | after indiv a_0: |Aut_v|=1 1-WL cells=68 mixed=0 | 2-WL cells=68 mixed=0
+  W=7 V=6 wt=4 s=0: n=62 |Aut|=4 orbit-start sizes [2, 4] | after indiv a_0: |Aut_v|=2 1-WL cells=46 mixed=0 | 2-WL cells=46 mixed=0
+  W=7 V=9 wt=4 s=0: n=86 |Aut|=2 orbit-start sizes [2] | after indiv a_0: |Aut_v|=1 1-WL cells=86 mixed=0 | 2-WL cells=86 mixed=0
+  W=8 V=7 wt=4 s=0: n=72 |Aut|=4 orbit-start sizes [2, 4] | after indiv a_0: |Aut_v|=2 1-WL cells=58 mixed=0 | 2-WL cells=58 mixed=0
+  W=8 V=10 wt=4 s=0: n=96 |Aut|=2 orbit-start sizes [2] | after indiv a_0: |Aut_v|=1 1-WL cells=96 mixed=0 | 2-WL cells=96 mixed=0
+  W=8 V=12 wt=4 s=0: n=112 |Aut|=2 orbit-start sizes [2] | after indiv a_0: |Aut_v|=1 1-WL cells=112 mixed=0 | 2-WL cells=112 mixed=0
+  W=9 V=8 wt=4 s=0: n=82 |Aut|=2 orbit-start sizes [2] | after indiv a_0: |Aut_v|=1 1-WL cells=82 mixed=0 | 2-WL cells=82 mixed=0
+  W=9 V=12 wt=4 s=0: n=114 |Aut|=2 orbit-start sizes [2] | after indiv a_0: |Aut_v|=1 1-WL cells=114 mixed=0 | 2-WL cells=114 mixed=0
+  W=10 V=9 wt=4 s=0: n=92 |Aut|=2 orbit-start sizes [2] | after indiv a_0: |Aut_v|=1 1-WL cells=92 mixed=0 | 2-WL cells=92 mixed=0
+  W=10 V=14 wt=4 seed=0: n=132 too big, skipped

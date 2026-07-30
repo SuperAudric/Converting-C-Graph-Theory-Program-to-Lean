@@ -1,0 +1,15 @@
+=== SRG(28,12,6,4): T(8) and the three CHANG graphs (identical rank-3 2-WL closure) ===
+  T(8) = J(8,2)        n= 28 |Aut|= 40320 VT=True  root orbits [28] (1-WL root cells [28])
+      v0=  0: |Aut_v|= 1440 stab-orbits [1, 12, 15] | 1-WL cells=3 mixed=0 | 2-WL cells=3 mixed=0
+  Chang-1 (4K2)        n= 28 |Aut|=   384 VT=False root orbits [4, 24] (1-WL root cells [28])
+      v0=  0: |Aut_v|=   96 stab-orbits [1, 3, 12, 12] | 1-WL cells=4 mixed=0 | 2-WL cells=4 mixed=0
+      v0=  1: |Aut_v|=   16 stab-orbits [1, 1, 2, 2, 2, 4, 8, 8] | 1-WL cells=8 mixed=0 | 2-WL cells=8 mixed=0
+  Chang-2 (C8)         n= 28 |Aut|=    96 VT=False root orbits [4, 24] (1-WL root cells [28])
+      v0=  0: |Aut_v|=    4 stab-orbits [1, 1, 2, 2, 2, 4, 4, 4, 4, 4] | 1-WL cells=8 mixed=2 | 2-WL cells=10 mixed=0
+      v0=  3: |Aut_v|=   24 stab-orbits [1, 3, 12, 12] | 1-WL cells=4 mixed=0 | 2-WL cells=4 mixed=0
+  Chang-3 (K3+K5)      n= 28 |Aut|=   720 VT=False root orbits [3, 10, 15] (1-WL root cells [3, 10, 15])
+      v0=  0: |Aut_v|=  240 stab-orbits [1, 2, 5, 10, 10] | 1-WL cells=5 mixed=0 | 2-WL cells=5 mixed=0
+      v0=  2: |Aut_v|=   48 stab-orbits [1, 1, 2, 2, 4, 4, 6, 8] | 1-WL cells=8 mixed=0 | 2-WL cells=8 mixed=0
+      v0= 18: |Aut_v|=   72 stab-orbits [1, 3, 3, 6, 6, 9] | 1-WL cells=6 mixed=0 | 2-WL cells=6 mixed=0
+
+=== other parameter-determined families ===
