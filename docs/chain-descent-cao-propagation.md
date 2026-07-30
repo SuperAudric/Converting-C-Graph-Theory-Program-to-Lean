@@ -468,6 +468,13 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
 `probe_cao_union.py` (the `G ⊔ G` stress test) · `probe_cao_mechanism.py` (the `CFI[K4]` twisted-vs-
 untwisted dissection: wire-pairs as a block system, and the `|Aut|` 192-vs-576 accident) ·
 `probe_cao_mechanism2.py` (the coupling / fused-orbital measurements of §3) · `probe_cao_rounds.py` (§12.3: the round at which the extension separates fused orbitals — 3 for Shrikhande/Chang-2, 4 for `net(Z₄)`) ·
+**★ `probe_cao_cause.py`** (§12.6 M3 — the cause-chain instrument: witness triangle types at the
+separating round, birth-round trace, recursive explanation. **The uniform depth-3 chain**) ·
+**`probe_cao_diameter.py`** (§12.3 convention box, term 1: Johnson recovers `Aut_v`-orbits at round
+⌈diam/2⌉ — the construction refuting a constant bound on the *total* count) ·
+**`probe_cao_diam_deficient.py`** (term 2: Shrikhande □ `C_m`, a **deficient** root at growing
+diameter — the Doob-graph shape — fused orbitals separate at round **3** at diameters 3/4/5, removing
+the diameter-2 confound) ·
 **`probe_stall.py` / `probe_stall2.py` / `probe_stall3.py` / `probe_stall4.py`** (§0.0 limit 2 — at each
 1-WL *manufactured* mixed cell, the minimum lookahead depth at which the force key separates the true
 `Aut_v`-orbits; depth 1 = `lookaheadKey`'s own non-discrete branch. `probe_stall4.py` is the named VT
@@ -558,6 +565,30 @@ splits reaches `(v,u)`. **Measured** (`probe_cao_rounds.py`): separation first o
 classes) — never earlier, exactly as the barrier predicts. **Any proof is a statement about this
 feedback loop, not about the base point.**
 
+> ### ⚠⚠ ROUND-COUNT CONVENTION — the "3/3/4" above is a CONFLATED figure (corrected 2026-07-30)
+> `probe_cao_rounds.py` counts from the **raw** colouring, so its figure is the sum of two terms
+> that behave completely differently:
+>
+> **`rounds_total = rounds_to_BUILD X  +  rounds_of_the_EXTENSION from X`**
+>
+> - **Term 1 grows with DIAMETER and is unbounded** — refinement carries information ~2 hops per
+>   round. Measured (`probe_cao_diameter.py`): Johnson `J(m,k)` recovers its `Aut_v`-orbits at round
+>   **⌈diam/2⌉** exactly — `J(6,2)/J(6,3)/J(8,4)/J(10,5)` → **1/2/2/3** at diameters 2/3/4/5. **So no
+>   constant bounds `rounds_total`, by construction** (user, 2026-07-30: any VT family of growing
+>   diameter does it).
+> - **Term 2 is the one §12.3 and M2 are about**, and it is measured **constant 3** across every
+>   deficient root on record — including at growing diameter (`probe_cao_diam_deficient.py`):
+>   Shrikhande □ `C₃`/`C₅`/`C₇`, diameters 3/4/5, **all fused classes separate at round 3**, while
+>   term 1 goes 3/3/3 and 4 at diameter 6.
+>
+> ⚠ **The old figures were also CONFOUNDED**: all three original deficient roots (Shrikhande,
+> `net(Z₄)`, Chang-2) have **diameter 2**, so the count had no room to vary. The □`C_m` family
+> removes that confound — and it is the **Doob-graph shape** (distance-regular, *not*
+> distance-transitive), so the deficiency is real at every diameter; it simply stays localized in the
+> Shrikhande factor, so separating it never needs long-range information.
+> ⟹ **State which term you mean.** A bound on term 1 is refuted; a bound on term 2 is live and now
+> has evidence at diameter > 2.
+
 ### 12.4 Candidate resolutions, ranked
 
 | route | content | gap |
@@ -593,7 +624,7 @@ that.
 | # | step | cost | what it DECIDES |
 |---|---|---|---|
 | **M1** | **Run the step on its real input class, at a population that pays the entry ticket** (= the old §12.6(1)/§10.2, but *fixed* — see the ⚠ below) | hours | whether "no 2-WL counterexample" survives a population where §7.2's ticket is genuinely paid. **If it falls, route (B) ends** and §10.5's selector route (A) becomes the only path |
-| **M2** | **Is the separation ROUND count bounded?** (= the old §12.6(2)) across M1's population; record whether it grows with `n` or with `\|Aut\|` | hours | pursue a **bounded-round** theorem, or drop it. Bounded-round is the **only** shape found so far that is *both* union-stable (unlike bounded depth, §4.3) *and* formalizable |
+| **M2** | **Is the EXTENSION round count bounded?** ⚠ **RESTATED 2026-07-30** — see §12.3's convention box. The *total* count is **refuted** by any VT family of growing diameter (Johnson, measured ⌈diam/2⌉); only **term 2**, the rounds *after* coherent `X`, is the live quantity. Measured **constant 3** on every deficient root incl. Shrikhande □ `C₃`/`C₅`/`C₇` at diameters 3/4/5 | hours | pursue a **bounded-extension-round** theorem, or drop it. Still the only shape that is *both* union-stable (unlike bounded depth, §4.3) *and* formalizable. **▶ The falsifier to hunt: a deficiency that is inherently LONG-RANGE** — in a Cartesian product the fusion stays factor-local, which is why □`C_m` does not refute it |
 | **M3** | **★ Instrument the FEEDBACK LOOP, not the round number** — the actual mechanism ask, and new work | days | supplies R1's missing *"why must the `v`-profile distributions differ?"* |
 | **M4** | **The coupling construction** (§10.3) — build an object with group-change and deficiency at the **same** cell pair | open-ended | kills the track cheaply, or its principled failure *is* the mechanism. Run **in parallel with M3** — same question from opposite sides |
 | **M5** | **Lean: reuse the CC substrate that already exists** (see below — it is not referenced anywhere in this plan and should be) | days | turns R2's "carry a per-family certificate" from a plan into a deliverable |
@@ -616,6 +647,42 @@ round, record: (a) how many orbital-fusions remain; (b) which triangle types wer
 pair fused. Output is the mechanism *in the form a proof consumes*: "the marking travels via `X`, and
 `X` is forced to exist because `Y`". This is the one step that attacks the crux rather than
 characterising it.
+
+#### ★★ M3 — FIRST RESULT (2026-07-30, `probe_cao_cause.py`): the cause chain is UNIFORM
+
+Built and run on every deficient root on record (Shrikhande, `net(Z₄)`, Chang-2 — **7 fused classes**,
+all counted from the coherent `X`). The instrument extracts, at the round `r*` where `(v,u)` and
+`(v,w)` first separate, the **triangle types** `(c1, c2) = (class of (v,x), class of (x,u))` whose
+multiplicity differs — literally §12.3's object — then traces each witness class to its **birth
+round** and recursively explains the later-born one. **Every chain has the same shape and the same
+depth 3:**
+
+```
+r0   v's flag           — the only new information in the extension
+r1   FAR classes split  — witness = a triangle type of two r0 classes, ≥1 of them v-ROW / v-COL
+r2   deeper FAR split   — witness = a triangle type of two r1 FAR classes
+r3   THE TARGET SEPARATES — witness = (v-ROW class born r0,  FAR class born r2)
+```
+
+**Three things this pins down, and they are what a proof needs.**
+1. **The barrier is confirmed constructively, not just by counting**: the target pair is never
+   separated by anything on `v`'s row alone — the returning half of every final witness is a **far**
+   class, and one that did not exist before round 2.
+2. **The final witness is always the SAME SHAPE** — `(v-ROW born r0, FAR born r2)`. Never two far
+   classes, never two `v`-row classes. So the feedback returns through **exactly one** twice-refined
+   far class, and R1's *"two orbitals in one `X`-class have different `v`-profile distributions"* is
+   the right statement: the profile that differs is a count of one triangle type.
+3. **The chain always grounds at `v`'s flag** in 3 steps, on every witness, at every diameter tested
+   (§12.3's convention box: Shrikhande □ `C_m` also separates at round 3, diameters 3–5).
+
+⟹ **The target for R1 is now concrete:** show that the round-2 far class `c2` *must* split, and that
+its split *must* register unequally on the two fibres. The first half is caused by round-1 splits
+that are directly caused by `v`'s flag — a two-step chain, not an unbounded induction. ⚠ Still open,
+and this is measurement not proof: 7 witnesses, all with `|fibres| ∈ {[3,6], [4,4], [6,12], [1,2]}`.
+**▶ Next for M3:** (a) the **ablation** — merge `c2` back and confirm the target stays fused (proves
+minimality rather than inferring it); (b) run the instrument over M1's population to see whether
+depth 3 and the `(r0 v-ROW, r2 FAR)` witness shape survive a real population, or are an artifact of
+the diameter-2 SRG witnesses.
 
 **★ M5 — the substrate is already built and gated, and this plan never mentions it.**
 `ChainDescent/CoherentConfig.lean` (in `build.sh`, axiom-clean) carries: **`IsPointExtension X T Y`**
