@@ -428,3 +428,9 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `Deepen.foldMin_le_acc` | 186-196 | — | — |
 | `Deepen.foldMin_le` | 198-213 | — | — |
 | `Deepen.foldMin_nil_of_none` | 215-224 | — | — |
+## ChainDescent/CaoFibring.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `CaoFibring.perm_apply_inv` | 62-67 | — | — |
+| `CaoFibring.perm_inv_apply` | 69-72 | — | — |

@@ -4999,3 +4999,25 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RecordKey.recordKeyBound_expand` | 302-312 | §5 §4a's `②` bound, expanded to `n^13 + n^12 + 3n^11 + … + n + 1` and checked by `ring` — which is what makes `costConst = 53` / `costDeg = 13` computed facts about the object rather than chosen numerals. | — |
 | `RecordKey.descentCostS_selNode_recordKey_monomial` | 314-333 | ★★★ §5 **`②` in the publication shape:** the canonizer of record, at the composed force key, runs within `costConst * (n+1) ^ costDeg` on **every** input — no hypotheses, no flag disjunct. Discharges `Showcase.canon_poly_or_flag` on its left disjunct. ⚠ `(n+1)`, not `n`: `descendS` bills 1 for a leaf, so at `n = 0` the object costs 1 and answers while `c * 0 ^ d = 0`. | — |
 | `RecordKey.recordKey_canonizer_monomial` | 335-347 | §5 **The publication capstone:** `①` (`recordKey_canonizer`) and `②`-as-a-monomial together, at exactly the object `Publication.canonForm?` names. | — |
+## ChainDescent/CaoFibring.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `CaoFibring.isColAut_one` | 59-60 | The identity is a colour-automorphism. (`IsColAut adj χ` is a group — §1; the fibring argument composes and inverts.) | — |
+| `CaoFibring.isColAut_mul` | 74-80 | Colour-automorphisms are closed under composition. | — |
+| `CaoFibring.isColAut_inv` | 82-90 | Colour-automorphisms are closed under inverse. | — |
+| `CaoFibring.SameOrbital` | 94-96 | Two ordered pairs lie in one **orbital** (2-orbit) of `IsColAut adj χ`. This is the object the CAO-propagation question is really about (doc §1). | Definition |
+| `CaoFibring.SameStabOrbit` | 98-103 | Two vertices lie in one orbit of the **point stabilizer** of `v` — the partition individualizing `v` imposes on every other cell. | Definition |
+| `CaoFibring.sameOrbital_refl` | 105-106 | `SameOrbital` is reflexive. | — |
+| `CaoFibring.sameOrbital_symm` | 108-113 | `SameOrbital` is symmetric. | — |
+| `CaoFibring.sameOrbital_trans` | 115-121 | `SameOrbital` is transitive. | — |
+| `CaoFibring.sameStabOrbit_refl` | 123-124 | `SameStabOrbit` is reflexive. | — |
+| `CaoFibring.sameStabOrbit_symm` | 126-132 | `SameStabOrbit` is symmetric. | — |
+| `CaoFibring.sameStabOrbit_trans` | 134-140 | `SameStabOrbit` is transitive. | — |
+| `CaoFibring.sameStabOrbit_iff_sameOrbital_row` | 142-145 | On `v`'s row the two notions coincide: the `K_v`-orbits on a cell are exactly the fibres of the orbital classification over `v`. Definitional, and the statement Step 2 consumes. | — |
+| `CaoFibring.exists_row_transport` | 149-156 | ★ **Every orbital meets `v`'s row** — the surjectivity half of the fibring lemma, and **the only place transitivity on `v`'s cell (`CellSingleOrbit`) is used**. | — |
+| `CaoFibring.sameStabOrbit_of_transports` | 158-162 | The row transport is well defined up to the stabilizer: two transports of one pair into `v`'s row differ by an element of `K_v`. | — |
+| `CaoFibring.sameOrbital_iff_sameStabOrbit_of_transport` | 164-180 | ★★ **THE FIBRING LEMMA** (doc §12.1). The row transport is a **complete invariant** of the orbital class; with `exists_row_transport` this is the bijection `{K-orbitals in D × C} ≃ {K_v-orbits on C}`. Needs no hypothesis — `CellSingleOrbit` is used only for existence of transports. | — |
+| `CaoFibring.PairInvariant` | 187-189 | An `IsColAut`-invariant colouring of ordered pairs — what any 2-WL closure supplies. | Definition |
+| `CaoFibring.pairInvariant_eq_of_sameOrbital` | 191-197 | **Soundness:** an invariant pair colouring is constant on orbitals, so its classes are *unions* of orbitals. This is why refinement can never split an orbit. | — |
+| `CaoFibring.levelSet_iff_stabOrbit_of_separates` | 199-213 | ★★ **STEP 2** (doc §12.2). If an invariant pair colouring merely *separates the orbitals in `v`'s row*, the vertex colouring it induces there has level sets **exactly** the `K_v`-orbits. ⟹ CAO-propagation reduces to orbital separation with no remainder; the hypothesis `hsep` is the open crux (doc §12.3). | — |

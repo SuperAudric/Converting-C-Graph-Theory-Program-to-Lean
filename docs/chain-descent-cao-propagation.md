@@ -315,20 +315,44 @@ Shared machinery lives in `probe_cao_cleanroom.py` (§8.1); most files import it
 `v ∈ D`, and `X_v` = the coherent closure of `X` with `v` individualized. Target: the fibres of `X_v`
 on `C` are the `K_v`-orbits on `C`.
 
-### 12.1 Step 1 — the fibring lemma  ✅ free, formalizable now
+### 12.1 Step 1 — the fibring lemma  ✅ **LANDED** (`ChainDescent/CaoFibring.lean`, in `build.sh`)
 
 > `K` is transitive on `D` ⟹ the map `O ↦ {u ∈ C : (v,u) ∈ O}` is a bijection from the `K`-orbitals
-> inside `D × C` onto the `K_v`-orbits on `C`, with `|O|/|D|` the size of the corresponding orbit.
+> inside `D × C` onto the `K_v`-orbits on `C`.
 
 Pure group theory (no WL, no graphs). It converts the target into orbital separation and is the
-reason §3's mechanism table is exhaustive. **This is the first thing to pin in Lean.**
+reason §3's mechanism table is exhaustive. Axiom-clean (`[propext, Classical.choice, Quot.sound]`),
+no `sorry`, stated in the project's own `IsColAut` / `CellSingleOrbit` idiom so it composes with
+`DeepenTinhofer.lean`:
 
-### 12.2 Step 2 — reduction to the FUSED classes  ✅ free, and it does most of the work
+| name | content |
+|---|---|
+| `isColAut_one` / `_mul` / `_inv` | `IsColAut adj χ` is a group (needed: the argument composes and inverts) |
+| `SameOrbital` / `SameStabOrbit` | the 2-orbit relation and the point-stabilizer orbit relation, + refl/symm/trans for both |
+| `sameStabOrbit_iff_sameOrbital_row` | on `v`'s row the two coincide — the statement Step 2 consumes |
+| **`exists_row_transport`** | **every orbital meets `v`'s row**; the surjectivity half, and *the only place transitivity on `D` is used* |
+| `sameStabOrbit_of_transports` | the row transport is well defined up to `K_v` |
+| **`sameOrbital_iff_sameStabOrbit_of_transport`** | the row transport is a **complete invariant** of the orbital class ⟹ with `exists_row_transport`, the bijection. Needs **no** hypothesis — `CellSingleOrbit` is required only for *existence* of transports |
+
+⚠ **Not** formalized: the size statement `|O| = |D| · |fibre|`. It needs `Finset` cardinality work and
+nothing downstream uses it; the logical content Steps 2–3 consume is complete without it.
+
+### 12.2 Step 2 — reduction to the FUSED classes  ✅ **LANDED** (same module, §4)
 
 > If `X` already separates the orbitals inside `D × C`, the target holds automatically.
 
 *Proof.* The `X`-colour of the pair `(v,u)` is an invariant `X_v` inherits, and by Step 1 its level
 sets are exactly the `K_v`-orbits. ∎
+
+Formalized for an arbitrary `IsColAut`-invariant pair colouring `f` (`PairInvariant`) — which is what
+any 2-WL closure supplies, so the statement is independent of the refinement's details:
+- `pairInvariant_eq_of_sameOrbital` — **soundness**: `f` is constant on orbitals, i.e. its classes
+  are *unions* of orbitals. This is why refinement can never split an orbit.
+- **`levelSet_iff_stabOrbit_of_separates`** — if `f` merely *separates the orbitals in `v`'s row*
+  (`hsep`), then `u ↦ f v u` has level sets **exactly** the `K_v`-orbits.
+
+⟹ preservation reduces to orbital separation **with no remainder**, and `hsep` is precisely the open
+crux of §12.3 — now isolated as a single named hypothesis rather than diffused through the problem.
 
 ⟹ **all content is confined to `X`-classes that fuse ≥ 2 orbitals meeting `v`'s row.** This is not a
 cosmetic reduction: in the completed Schur-ring sweep only **729 of 62,147** non-discrete instances

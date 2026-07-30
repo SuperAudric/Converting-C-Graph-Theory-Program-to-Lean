@@ -146,6 +146,7 @@ MODULES=(
   ChainDescent.DeepenCertified        # C3b: Tinhofer as a RUN-TIME CERTIFICATE (Certified ⟹ Tinhofer)
   ChainDescent.DeepenLocated          # C3b: consume failure LOCATED at a reachable Tinhofer+obstructed node
   ChainDescent.DeepenKey              # C3b: orbKey — the equivariant force key (KeyEquivariant, no hypothesis)
+  ChainDescent.CaoFibring             # CAO-propagation Step 1: orbitals ↔ stabilizer orbits; the Step-2 bridge
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.KeyComplete            # KeySeparates: consume's guard absorbed into force's separation obligation
