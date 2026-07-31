@@ -258,5 +258,79 @@ theorem witness_ne_base {β : Type*} {f : Fin n → Fin n → β} {v u w : Fin n
     htail
   simpa [Multiset.map_map, Function.comp] using this
 
+/-! ## 4. The round-2 barrier — separation cannot occur before round 3
+
+M3 measured the separation round to be **3, uniformly** (11 fused classes, 5 objects, diameters 2–4).
+This section shows that is *forced*, not a coincidence: round 1 and round 2 are **both** blind on `v`'s
+row, so round 3 is the earliest that can see anything.
+
+The mechanism, made explicit. One round of the individualized configuration gives each pair exactly its
+**triangle type through the base point** — `zAug f v a b = (f a b, f a v, f v b)` — measured to be
+*exactly* the round-1 partition on every object tested (`probe_cao_round2.py`, 5/5). And on `v`'s row
+`zAug` degenerates: the intermediate point's relation to `v` is the *same coordinate* the row already
+carries, so by the transpose axiom the whole round-2 signature is the image of the round-**0**
+signature under a fixed map — and coherence makes that equal across an `X`-class. -/
+
+/-- The **transpose axiom** of a coherent configuration: the colour of `(b,a)` is a function of the
+colour of `(a,b)`. Measured to hold for every root closure in the evidence base. -/
+def Transposable {β : Type*} (f : Fin n → Fin n → β) : Prop :=
+  ∃ T : β → β, ∀ a b, f b a = T (f a b)
+
+/-- The **`v`-augmented colouring**: each pair tagged with its triangle type through the base point.
+This is the round-1 information of the extension, made explicit. -/
+def zAug {β : Type*} (f : Fin n → Fin n → β) (v : Fin n) : Fin n → Fin n → β × β × β :=
+  fun a b => (f a b, f a v, f v b)
+
+/-- **★★ THE ROUND-2 BARRIER (core).** At a coherent, transpose-closed `X`, the `v`-augmented
+colouring's signature still does not separate two pairs of `v`'s row that `X` identified.
+
+The proof is the reason: on `v`'s row the augmentation adds *nothing independent* — the intermediate
+point `x` contributes `(X v x, X v v, X v x)` and `(X x u, X x v, X v u)`, and `X x v = T (X v x)`, so
+the whole signature is the image of `sig X v u` under a fixed map `Φ`. Coherence then closes it. -/
+theorem sig_zAug_row_eq {β : Type*} {f : Fin n → Fin n → β} (hc : Coherent f)
+    (ht : Transposable f) {v u w : Fin n} (h : f v u = f v w) :
+    sig (zAug f v) v u = sig (zAug f v) v w := by
+  obtain ⟨T, hT⟩ := ht
+  set Φ : β × β → (β × β × β) × (β × β × β) :=
+    fun p => ((p.1, f v v, p.1), (p.2, T p.1, f v u)) with hΦ
+  have hu : (fun x => (zAug f v v x, zAug f v x u)) = Φ ∘ (fun x => (f v x, f x u)) := by
+    funext x
+    show ((f v x, f v v, f v x), (f x u, f x v, f v u)) = Φ (f v x, f x u)
+    rw [hΦ]
+    rw [hT v x]
+  have hw : (fun x => (zAug f v v x, zAug f v x w)) = Φ ∘ (fun x => (f v x, f x w)) := by
+    funext x
+    show ((f v x, f v v, f v x), (f x w, f x v, f v w)) = Φ (f v x, f x w)
+    rw [hΦ]
+    rw [hT v x, h]
+  have e1 : sig (zAug f v) v u = Multiset.map Φ (sig f v u) := by
+    unfold sig; rw [Multiset.map_map, hu]
+  have e2 : sig (zAug f v) v w = Multiset.map Φ (sig f v w) := by
+    unfold sig; rw [Multiset.map_map, hw]
+  rw [e1, e2, hc v u v w h]
+
+/-- A colouring that factors through `zAug` has its signature the `Ψ`-image of `zAug`'s. -/
+theorem sig_factor {β γ : Type*} {f : Fin n → Fin n → β} {g : Fin n → Fin n → γ} {v : Fin n}
+    {Ψ : β × β × β → γ} (hg : ∀ a b, g a b = Ψ (zAug f v a b)) (a b : Fin n) :
+    sig g a b = Multiset.map (fun p => (Ψ p.1, Ψ p.2)) (sig (zAug f v) a b) := by
+  unfold sig
+  rw [Multiset.map_map]
+  refine Multiset.map_congr rfl (fun x _ => ?_)
+  simp only [Function.comp_apply]
+  rw [hg a x, hg x b]
+
+/-- **★★ THE ROUND-2 BARRIER.** Any colouring that factors through the triangle-type-through-`v` data
+— which is what one round of the individualized configuration produces — **still** fails to separate
+`v`'s row. With `round1_barrier` this gives: **separation cannot occur before round 3**, exactly the
+uniform depth M3 measured (11/11).
+
+⟹ the crux (doc §12.3) is not merely non-local; it needs the *third* round, i.e. the feedback from far
+pairs that have themselves been refined by a count `X` does not determine. -/
+theorem round2_barrier {β γ : Type*} {f : Fin n → Fin n → β} {g : Fin n → Fin n → γ}
+    {v u w : Fin n} {Ψ : β × β × β → γ} (hc : Coherent f) (ht : Transposable f)
+    (hg : ∀ a b, g a b = Ψ (zAug f v a b)) (h : f v u = f v w) :
+    sig g v u = sig g v w := by
+  rw [sig_factor hg, sig_factor hg, sig_zAug_row_eq hc ht h]
+
 end CaoRound
 end ChainDescent

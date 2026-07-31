@@ -470,6 +470,10 @@ untwisted dissection: wire-pairs as a block system, and the `|Aut|` 192-vs-576 a
 `probe_cao_mechanism2.py` (the coupling / fused-orbital measurements of §3) · `probe_cao_rounds.py` (§12.3: the round at which the extension separates fused orbitals — 3 for Shrikhande/Chang-2, 4 for `net(Z₄)`) ·
 **★ `probe_cao_cause.py`** (§12.6 M3 — the cause-chain instrument: witness triangle types at the
 separating round, birth-round trace, recursive explanation. **The uniform depth-3 chain**) ·
+**★ `probe_cao_round2.py`** (§12.6: round 1 == `zAug` and NO separation before round 3 — the measurement behind `round2_barrier`; also checks the transpose axiom) ·
+**★ `probe_cao_cause2.py`** (M3 follow-ups: the **ablation** — necessary class distinctions, measured
+**0** ⟹ over-determined — and the **population** run over deficient roots at diameters 3–4 via
+Shrikhande □ `C_m`; takes explicit automorphism generators, so no `all_isos` at n = 80) ·
 **`probe_cao_diameter.py`** (§12.3 convention box, term 1: Johnson recovers `Aut_v`-orbits at round
 ⌈diam/2⌉ — the construction refuting a constant bound on the *total* count) ·
 **`probe_cao_diam_deficient.py`** (term 2: Shrikhande □ `C_m`, a **deficient** root at growing
@@ -606,11 +610,13 @@ feedback loop, not about the base point.**
 >   Shrikhande □ `C₃`/`C₅`/`C₇`, diameters 3/4/5, **all fused classes separate at round 3**, while
 >   term 1 goes 3/3/3 and 4 at diameter 6.
 >
-> ⚠ **The old figures were also CONFOUNDED**: all three original deficient roots (Shrikhande,
-> `net(Z₄)`, Chang-2) have **diameter 2**, so the count had no room to vary. The □`C_m` family
-> removes that confound — and it is the **Doob-graph shape** (distance-regular, *not*
-> distance-transitive), so the deficiency is real at every diameter; it simply stays localized in the
-> Shrikhande factor, so separating it never needs long-range information.
+> ⚠ **PARTIAL confound in the old figures** — ⚠ and a correction to an earlier version of this box,
+> which claimed *all three* original roots were diameter 2. **Measured**: Shrikhande **2**, Chang-2
+> **2**, but `net(Z₄)` is **diameter 4**. So `net(Z₄)` was already a >2-diameter deficient root and
+> still separates at term-2 round 3. The □`C_m` family widens it further — and it is the **Doob-graph
+> shape** (distance-regular, *not* distance-transitive), so the deficiency is real at every diameter;
+> it simply stays localized in the Shrikhande factor, so separating it never needs long-range
+> information.
 > ⟹ **State which term you mean.** A bound on term 1 is refuted; a bound on term 2 is live and now
 > has evidence at diameter > 2.
 
@@ -700,14 +706,62 @@ r3   THE TARGET SEPARATES — witness = (v-ROW class born r0,  FAR class born r2
 3. **The chain always grounds at `v`'s flag** in 3 steps, on every witness, at every diameter tested
    (§12.3's convention box: Shrikhande □ `C_m` also separates at round 3, diameters 3–5).
 
-⟹ **The target for R1 is now concrete:** show that the round-2 far class `c2` *must* split, and that
-its split *must* register unequally on the two fibres. The first half is caused by round-1 splits
-that are directly caused by `v`'s flag — a two-step chain, not an unbounded induction. ⚠ Still open,
-and this is measurement not proof: 7 witnesses, all with `|fibres| ∈ {[3,6], [4,4], [6,12], [1,2]}`.
-**▶ Next for M3:** (a) the **ablation** — merge `c2` back and confirm the target stays fused (proves
-minimality rather than inferring it); (b) run the instrument over M1's population to see whether
-depth 3 and the `(r0 v-ROW, r2 FAR)` witness shape survive a real population, or are an artifact of
-the diameter-2 SRG witnesses.
+#### ★★ M3 — FOLLOW-UP RESULTS (`probe_cao_cause2.py`): the law holds, the "minimal cause" does not
+
+**(b) The law survives beyond diameter 2 — POSITIVE.** Extended to the deficient **Shrikhande □ `C_m`**
+family (Doob shape, diameters 3 and 4) and re-measured on `net(Z₄)` (**diameter 4**, not 2 as an
+earlier version of §12.3's box claimed). **11 fused classes across 5 objects at diameters 2/2/3/4/4:
+every one separates at round 3, and every final witness is `(v-ROW born r0, FAR born r2)`.** Depth and
+witness shape are *not* artifacts of diameter-2 SRGs.
+
+**(a) The ablation — NEGATIVE, and it retracts a framing this doc proposed.** M3 was scoped to find
+*"the specific far class whose split, on removal, leaves the target pair fused."* **There is no such
+class.** For every one of the 11 fused classes, the number of single class-merges at round `r*-1` that
+kill the separation is **0**, and a greedy merge sequence must collapse *almost the entire* partition
+before separation dies (21 of 22 classes, 60/61, 130/157, 107/110, 281/286, 285/286, …). The
+separation is **massively over-determined**: 6–40 differing triangle types per witness, no one of them
+necessary.
+
+⟹ **the instrument's "minimal cause chain" is one path among many, not a minimal cause** — the
+max-|Δ| pick is a heuristic. The depth-3 *structure* is real and reproducible; the *uniqueness* of the
+deciding class is not, and was my inference rather than a measurement.
+
+#### ★★★ M3 → R1: the uniform depth 3 is FORCED — `round2_barrier` (proved, `CaoRound.lean` §4)
+
+The follow-ups left one thing unexplained: *why is the separation round always exactly 3?* It is not a
+coincidence. **Rounds 1 and 2 are both provably blind on `v`'s row**, so round 3 is the earliest that
+can see anything — and 3 is what all 11 measurements give.
+
+**The mechanism, now explicit and machine-checked.** One round of the individualized configuration
+gives each pair exactly its **triangle type through the base point**,
+`zAug f v a b = (f a b, f a v, f v b)` — *measured to be exactly the round-1 partition on 5/5 objects*
+(`probe_cao_round2.py`; the transpose axiom also holds 5/5). And on `v`'s row that augmentation adds
+**nothing independent**: the intermediate point `x` contributes `(X v x, X v v, X v x)` and
+`(X x u, X x v, X v u)`, and the transpose axiom makes `X x v = T(X v x)` — so the entire round-2
+signature is the image of the round-**0** signature under one fixed map `Φ`, and coherence equates it
+across an `X`-class.
+
+| landed | content |
+|---|---|
+| `Transposable` / `zAug` | the transpose axiom, and the round-1 information made explicit |
+| **`sig_zAug_row_eq`** | the barrier core: `sig (zAug f v) v u = sig (zAug f v) v w` whenever `X v u = X v w` |
+| `sig_factor` | a colouring factoring through `zAug` has its signature the `Ψ`-image of `zAug`'s |
+| **`round2_barrier`** | ⟹ **any** colouring factoring through the triangle-type-through-`v` data still fails to separate `v`'s row |
+
+⟹ with `round1_barrier`: **separation cannot occur before round 3.** The crux is not merely non-local
+(§12.3) — it needs the *third* round, i.e. the feedback from far pairs that have themselves been
+refined by a count `X` does not determine. ⚠ The one measured-not-proved link is `zAug` = round 1
+(5/5 objects); it enters `round2_barrier` as the explicit hypothesis `hg`, not as an assumption
+buried in a definition.
+
+**▶ What this changes for R1 — and it is a sharpening, not a setback.** R1 asks *"why must two orbitals
+in one `X`-class have different `v`-profile distributions?"* The ablation says they differ in **many
+coordinates at once**, none load-bearing. So a proof should **not** try to construct a distinguished
+witness class — that object does not exist. It should target the **whole profile vector**: an
+aggregate or rank argument showing that agreement across all coordinates would force a coincidence the
+CAO hypothesis forbids. Over-determination is *evidence the statement is robustly true* and a
+redirection of how to prove it. ⚠ Note the constraint from §4.2: `k`-WL sees only structure constants,
+so the aggregate argument must conclude *separation*, never *"an automorphism exists"*.
 
 **★ M5 — the substrate is already built and gated, and this plan never mentions it.**
 `ChainDescent/CoherentConfig.lean` (in `build.sh`, axiom-clean) carries: **`IsPointExtension X T Y`**

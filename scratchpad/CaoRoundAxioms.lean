@@ -11,3 +11,6 @@ open ChainDescent.CaoRound
 #print axioms ChainDescent.CaoRound.step2_closure
 #print axioms ChainDescent.CaoRound.round1_barrier
 #print axioms ChainDescent.CaoRound.witness_ne_base
+#print axioms ChainDescent.CaoRound.sig_zAug_row_eq
+#print axioms ChainDescent.CaoRound.sig_factor
+#print axioms ChainDescent.CaoRound.round2_barrier
