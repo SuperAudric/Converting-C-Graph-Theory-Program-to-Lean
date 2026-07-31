@@ -1,0 +1,54 @@
+probe_step2.py — S1 + S4(python): the 2-WL deepening step, and what it BUYS at the failing nodes.
+
+docs/chain-descent-cao-propagation.md §13.5 (S1, S4).
+
+============================================================================================
+WHAT THIS IS
+============================================================================================
+S1.  A concrete **2-WL `Deepen.step`**: individualize `v`, run the 2-WL pair closure, read back a
+     vertex colouring.  This is the object §13 says the swap is confined to — `Deepen.step`, NOT the
+     descent's refiner.  The descent's nodes below are still generated with the **1-WL** step, which
+     is exactly the design under scoping (swap the supply-internal step, leave `Descend`/`Refine`).
+
+S4.  The A/B: rerun `probe_route_a.py`'s experiment with the 2-WL step inside the harvest ONLY, and
+     ask what changes at the two nodes where the 1-WL harvest certified nothing —
+       * the m=8 CFI **root** (cells 32, 24), and
+       * **`root/id1/id9`**, the 8-cell node carrying the recorded `|C| = 16` cell (DUAL §2.1).
+
+============================================================================================
+SOUNDNESS (unchanged from probe_route_a.py — read it there)
+============================================================================================
+Every ✓ is a POSITIVE certificate: the harvest emits permutations, they are re-verified
+(`is_aut` + colour-preservation), and transitivity is BFS closure over the verified generator SET.
+"Not certified" means *this supply did not certify*, never "different orbits".  No orbit oracle is
+used anywhere; `probe_orbit_oracle` (§8.2, PROVEN BROKEN) is not imported.
+
+CALIBRATION FIRST (§8.1 discipline, and my own "validate cheap before long runs"):
+`--calibrate` reproduces the doc §0.0 measurement — `net(Z₄)`, n=28, from the EXACT orbit partition:
+1-WL → 5 cells, 2 mixed;  2-WL → 7 cells, 0 mixed.  If that does not reproduce, the 2-WL
+implementation is wrong and nothing below means anything.
+
+    cd /workspace/scratchpad
+    python3 -u probe_step2.py --calibrate                 # ~seconds; MUST pass first
+    python3 -u probe_step2.py > probe_step2.out 2>&1      # the A/B, run detached (§9)
+
+
+CFI cubic m=8 TWISTED, n=56, base=[(0, 1), (0, 5), (0, 7), (1, 3), (1, 6), (2, 4), (2, 5), (2, 7), (3, 4), (3, 6), (4, 6), (5, 7)]
+
+  --- node root:  cells = [(0, 32), (1, 24)]
+      id=0    |C|=32   1-WL ✗ (gens=480  lvl=5   0.6s)   2-WL ✗ (gens=480  lvl=5   438.6s)  <-- SELECTED
+      id=1    |C|=24   1-WL ✗ (gens=264  lvl=6   0.4s)   2-WL ✗ (gens=264  lvl=6   267.0s)
+      ⟹ ANY cell certified:  1-WL = False,  2-WL = False
+
+  --- node root/id1/id9:  cells = [(0, 4), (1, 4), (2, 16), (3, 4), (4, 4), (6, 8), (8, 4), (9, 8)]
+      id=0    |C|=4    1-WL ✗ (gens=4    lvl=5   0.0s)   2-WL ✗ (gens=4    lvl=5   13.5s)  <-- SELECTED
+      id=1    |C|=4    1-WL ✗ (gens=4    lvl=5   0.0s)   2-WL ✗ (gens=4    lvl=5   12.6s)
+      id=2    |C|=16   1-WL ✗ (gens=112  lvl=3   0.1s)   2-WL ✗ (gens=112  lvl=3   127.8s)
+      id=3    |C|=4    1-WL ✗ (gens=4    lvl=5   0.0s)   2-WL ✗ (gens=4    lvl=5   14.3s)
+      id=4    |C|=4    1-WL ✗ (gens=4    lvl=5   0.0s)   2-WL ✗ (gens=4    lvl=5   13.2s)
+      id=6    |C|=8    1-WL ✗ (gens=24   lvl=4   0.0s)   2-WL ✗ (gens=24   lvl=4   40.7s)
+      id=8    |C|=4    1-WL ✗ (gens=4    lvl=5   0.0s)   2-WL ✗ (gens=4    lvl=5   13.6s)
+      id=9    |C|=8    1-WL ✗ (gens=24   lvl=4   0.1s)   2-WL ✗ (gens=24   lvl=4   40.4s)
+      ⟹ ANY cell certified:  1-WL = False,  2-WL = False
+
+wall: 983.1s

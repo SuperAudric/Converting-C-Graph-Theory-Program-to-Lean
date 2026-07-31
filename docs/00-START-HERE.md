@@ -298,11 +298,20 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > ⛔ **And the cheap alternative is now closed: the SELECTOR route (A)'s resolver-level form ("try
 > cells, keep one the supply certifies") is MEASURED DEAD** (2026-07-31, `scratchpad/probe_route_a.py`)
 > — 58 reached nodes, three witnesses, **zero** where the selected cell fails and another certifies;
-> at the two failing nodes every cell fails together. The failure is **supply incompleteness**, uniform
-> across a node's cells, not cell selection.
+> at the two failing nodes every cell fails together, measurably because **no cell there is a single
+> orbit at all** (`|Aut_χ| = 512`/`64` against the exact group) ⟹ the harvest's `✗` is *correct* and
+> those are **force-domain** nodes. ⚠ "supply incompleteness" was my first write-up of this and is
+> retracted (that doc §13.6b).
+> ★★ **AND THE 2-WL A/B ON THOSE NODES INVERTED THE SCOPING (that doc §13.6):** swapping
+> `Deepen.step` alone buys **nothing** (identical harvest, identical partitions at every level), while
+> the **2-WL closure of the node colouring IS the exact orbit partition** at both (2 cells/2 mixed →
+> 5/0; 8 cells/8 mixed → 16/0). ⟹ the swap that pays is the **descent's refiner** — the larger,
+> unscoped project — and this is evidence about the CAO **base case**, not about propagation.
 > **⚠⚠ AND IT IS A PROBE, NOT A PROGRAM (user, 2026-07-31)** — promoted only if shown viable; competing
 > resolutions (prove the residue cannot exist by another route; run **force at every descent step**,
-> expensive and uncosted) are not ranked below it.
+> expensive and uncosted) are not ranked below it. ⚠ *"Probe" governs what may be CLAIMED, not what may
+> be SPENT* — a "spend only on the cheap steps" wording was retracted the same day: **a clear answer
+> that takes a while beats abandoning a viable route and stalling the project.**
 > **`deepenSupply` stays out of `Publication.canonForm?` until
 > `Tinhofer`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
 > ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Tinhofer`

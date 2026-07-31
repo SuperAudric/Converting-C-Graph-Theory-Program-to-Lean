@@ -1,0 +1,52 @@
+probe_step2.py — S1 + S4(python): the 2-WL deepening step, and what it BUYS at the failing nodes.
+
+docs/chain-descent-cao-propagation.md §13.5 (S1, S4).
+
+============================================================================================
+WHAT THIS IS
+============================================================================================
+S1.  A concrete **2-WL `Deepen.step`**: individualize `v`, run the 2-WL pair closure, read back a
+     vertex colouring.  This is the object §13 says the swap is confined to — `Deepen.step`, NOT the
+     descent's refiner.  The descent's nodes below are still generated with the **1-WL** step, which
+     is exactly the design under scoping (swap the supply-internal step, leave `Descend`/`Refine`).
+
+S4.  The A/B: rerun `probe_route_a.py`'s experiment with the 2-WL step inside the harvest ONLY, and
+     ask what changes at the two nodes where the 1-WL harvest certified nothing —
+       * the m=8 CFI **root** (cells 32, 24), and
+       * **`root/id1/id9`**, the 8-cell node carrying the recorded `|C| = 16` cell (DUAL §2.1).
+
+============================================================================================
+SOUNDNESS (unchanged from probe_route_a.py — read it there)
+============================================================================================
+Every ✓ is a POSITIVE certificate: the harvest emits permutations, they are re-verified
+(`is_aut` + colour-preservation), and transitivity is BFS closure over the verified generator SET.
+"Not certified" means *this supply did not certify*, never "different orbits".  No orbit oracle is
+used anywhere; `probe_orbit_oracle` (§8.2, PROVEN BROKEN) is not imported.
+
+CALIBRATION FIRST (§8.1 discipline, and my own "validate cheap before long runs"):
+`--calibrate` reproduces the doc §0.0 measurement — `net(Z₄)`, n=28, from the EXACT orbit partition:
+1-WL → 5 cells, 2 mixed;  2-WL → 7 cells, 0 mixed.  If that does not reproduce, the 2-WL
+implementation is wrong and nothing below means anything.
+
+    cd /workspace/scratchpad
+    python3 -u probe_step2.py --calibrate                 # ~seconds; MUST pass first
+    python3 -u probe_step2.py > probe_step2.out 2>&1      # the A/B, run detached (§9)
+
+
+m=8 twisted ROOT:  |Aut_chi| = 512,  orbit classes = 5
+  (i)  1-WL node colouring : 2 non-singleton cells, 2 MIXED  ⟹ NOT consume domain — force may fire here
+  (ii) 2-WL closure of it  : 5 non-singleton cells, 0 MIXED  ⟹ = THE ORBIT PARTITION
+
+m=8 twisted root/id1/id9:  |Aut_chi| = 64,  orbit classes = 20
+  (i)  1-WL node colouring : 8 non-singleton cells, 8 MIXED  ⟹ NOT consume domain — force may fire here
+  (ii) 2-WL closure of it  : 16 non-singleton cells, 0 MIXED  ⟹ = THE ORBIT PARTITION
+
+(iii) deepening path from the |C|=16 cell of root/id1/id9 — 1-WL step vs 2-WL step:
+   anchor 36: 4 vs 4 levels, PARTITIONS IDENTICAL = True
+   anchor 37: 4 vs 4 levels, PARTITIONS IDENTICAL = True
+   anchor 38: 4 vs 4 levels, PARTITIONS IDENTICAL = True
+   anchor 39: 4 vs 4 levels, PARTITIONS IDENTICAL = True
+
+⟹ read §13.6 of the doc for what these three together mean.
+
+wall: 4.6s

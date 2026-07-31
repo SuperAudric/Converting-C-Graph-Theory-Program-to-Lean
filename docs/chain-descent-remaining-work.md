@@ -1010,9 +1010,17 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   ⛔ **(A)'s cheap resolver-level form is MEASURED DEAD (2026-07-31, `scratchpad/probe_route_a.py`,
   result at `probe_route_a.out`):** across **58** reached nodes on three witnesses there is **no** node
   where the `chooseIdK`-selected cell fails and some *other* cell certifies; at the two failing nodes
-  (the m=8 root, and the node carrying the recorded `|C| = 16` cell) **all** cells fail together. The
-  failure is **supply incompleteness**, uniform across a node's cells, not cell selection — so "try
-  other cells" is not the lever, and what remains of (A) is only "build a stronger supply".
+  **all** cells fail together — and measurably because **no cell at either node is a single orbit**
+  (`|Aut_χ| = 512` / `64`, every cell mixed, against the exact group). The harvest's `✗` is therefore
+  **correct**, these are **force-domain** nodes, and there was nothing for a selector to find.
+  ⟹ "try other cells" is not the lever. ⚠ *(My first write-up called this "supply incompleteness" —
+  retracted; and these are not DUAL §2.1's node, which does have a single-orbit `|C| = 16` cell.)*
+  ★★ **AND THE 2-WL A/B ON THE SAME NODES INVERTED THE SCOPING (that doc §13.6):** swapping
+  `Deepen.step` alone changes **nothing** (identical harvest, identical partitions at every level),
+  but the **2-WL closure of the node colouring equals the exact orbit partition at both nodes**
+  (2 cells/2 mixed → 5 cells/0 mixed; 8 cells/8 mixed → 16 cells/0 mixed). ⟹ the swap that pays is
+  the **descent's refiner**, a different and much larger project than §13.1–13.3's `step` interface —
+  and it is evidence about the CAO **base case**, not about propagation.
   ✅ **Landed and gated:** `ChainDescent/CaoFibring.lean` (the reduction: preservation ⟺ the one-point
   extension separates the `D–C` **orbitals**) **and `ChainDescent/CaoRound.lean`** — which (i) supplies
   **`step2_closure`**, the reduction at the **real** individualized closure (`CaoFibring`'s version
@@ -1035,9 +1043,11 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   **⚠⚠ AND THIS TRACK IS A PROBE, NOT A PROGRAM (user, 2026-07-31).** It is promoted to *the pursued
   route* only if shown viable; competing resolutions of a CAO-unconsumable residue — proving the
   residue cannot exist by another route, or running **force at every step** of the descent
-  (straightforward, expensive, uncosted) — are not ranked below it. Spend only on the cheap decisive
-  steps (that doc §13, then R1c/R1d) until there is a viability verdict; the falsifier hunt is **not**
-  the lever (an extensive one preceded formalization).
+  (straightforward, expensive, uncosted) — are not ranked below it. ⚠⚠ **"Probe" governs what may be
+  CLAIMED, not what may be SPENT** — the user retracted an earlier "spend only on the cheap steps"
+  wording: *a clear answer that takes a while beats abandoning a viable route and stalling the
+  project.* The one pacing note that survives: the falsifier hunt is **not** the lever (an extensive
+  one preceded formalization).
   ⚠ Bounded shattering depth is **not** union-stable, so it can only ever be a per-family statement
   (that doc §4.3); and a constant bound on the *total* round count is **refuted** by any VT family of
   growing diameter (that doc §12.3's convention box — only the *extension* term is live).

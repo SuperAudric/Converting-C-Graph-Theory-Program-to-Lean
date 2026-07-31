@@ -162,10 +162,12 @@ routes to one, not one:
 - **(A) the SELECTOR route** — see §10.5. Prove index-min (or a better canonical selector) always
   lands on a resolvable cell. ⛔ **Its cheap, resolver-level form is MEASURED DEAD (2026-07-31,
   `probe_route_a.py`): on 58 nodes across three witnesses there is not one node where the selected
-  cell fails and another cell certifies** — at the two failing nodes (the m=8 root, and the
-  8-cell node carrying the recorded `|C|=16` cell) *every* cell fails together. The failure is
-  **supply incompleteness**, uniform across a node's cells, not cell selection. What remains of (A)
-  is only "supply a stronger supply", which is not a selector question.
+  cell fails and another cell certifies** — at the two failing nodes (the m=8 root, and an 8-cell
+  node sharing the `|C|=16` shape) *every* cell fails together, and **measurably because no cell at
+  either node is a single orbit at all** (`|Aut_χ| = 512` / `64`, every cell mixed — §13.6b). The
+  harvest's `✗` is therefore *correct*: these are **force-domain** nodes, and there was nothing for
+  any selector to find. ⟹ route (A)'s cheap form is dead for a sharper reason than "supply
+  incompleteness" — that phrasing was my first write-up and is **retracted**.
 - **(B) the MECHANISM route** — the 2-WL swap, this doc's subject. Plan = §12.6 (M1–M6).
 
 **⚠ TWO SCOPE LIMITS on "revived at 2-WL" — do not overclaim.**
@@ -194,6 +196,15 @@ ranked below it:
   on a single-orbit cell, so "force everywhere" buys *relocation depth*, not the cell itself — costing
   it is the open question, not whether it fires);
 - **a method not yet thought of.**
+
+⚠⚠ **BUT "probe" DOES NOT MEAN "budget-capped" — an earlier version of this block said *"do not spend
+past the cheap decisive steps"* and the user RETRACTED it (2026-07-31).** The standing position:
+**a clear answer that takes a while beats giving up on a viable route and stalling the project.**
+So "probe" governs *what may be claimed* — the track is not the pursued route until viability is
+shown, and the competitors above stay unranked — **not how much may be spent** deciding it. Run the
+work that produces a verdict, cheap or not. ⚠ Still true, and the only pacing note that survives:
+**the falsifier hunt is not the lever** (an extensive one preceded formalization); R1c is a
+*population fix* to an existing instrument.
 
 **▶ And the stakes of the negative branch.** If CAO propagation fails at *every* `k`, the design
 cannot be made viable by refiner strength and needs deeper structural change. The reason to expect
@@ -542,9 +553,14 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
 
      **Zero nodes on any witness where trying other cells helps.** The two twisted failures are the
      **root** (cells 32 and 24, both uncertified) and **`root/id1/id9`** — the recorded shape, an
-     8-cell node containing the **`|C| = 16`** cell of DUAL §2.1 — where **all eight** cells fail
-     together. The failure is not cell-selection; it is **supply incompleteness at the node**, and it
-     is uniform across the node's cells.
+     8-cell node sharing the **`|C| = 16`** shape of DUAL §2.1 — where **all eight** cells fail
+     together.
+     ⚠⚠ **CORRECTED SAME DAY (§13.6b): the failure is NOT "supply incompleteness".** Measured against
+     the exact automorphism group: root `|Aut_χ| = 512` with **both** cells mixed (32 → 2 orbits,
+     24 → 3), and `root/id1/id9` `|Aut_χ| = 64` with **all eight** cells mixed. **No cell at either
+     node is a single orbit**, so the harvest's `✗` is *correct* — there was nothing for any selector
+     or supply to certify. These are **force-domain** nodes. ⚠ They are also **not** DUAL §2.1's node
+     (which is one force-key refinement below the root and whose `|C| = 16` cell *is* one orbit).
      ⟹ **route (A)'s cheap form is dead at the recorded witnesses.** What survives of (A) is only the
      expensive form: a *stronger supply*, which is not a selector question at all.
      ★ Note the positive half is also confirmed: **25/27** nodes resolve at the selected cell — §0.0's
@@ -591,6 +607,14 @@ the diameter-2 confound) ·
 `Aut_v`-orbits; depth 1 = `lookaheadKey`'s own non-discrete branch. `probe_stall4.py` is the named VT
 witness `Cay(Z₁₂⋊₅Z₂)` — ⚠ its connection-set search is slow (~2048 masks × `all_isos` at n = 24), so
 run it detached per §9; **result recorded at `probe_stall4.out`**).
+**★★★ `probe_step2.py`** (§13.5 **S1 + S4**: the concrete **2-WL `Deepen.step`** — individualize,
+2-WL pair closure, read `(diag u, c(v,u), c(u,v))` — and the **A/B** running the harvest at the 1-WL
+step vs the 2-WL step on the two nodes where the 1-WL harvest certified nothing. ★ **`--calibrate`
+reproduces doc §0.0's `net(Z₄)` figures exactly** (1-WL 5 cells/2 mixed, 2-WL 7 cells/0 mixed) — run
+it before believing anything else in the file. Three modes: `--calibrate` · `--nodes` (**the decisive
+diagnostic of §13.6** — cells-vs-exact-orbits, the 2-WL closure vs the orbit partition, and the
+step-by-step path comparison; output **`probe_step2_nodes.out`**) · no flag = the A/B, output
+**`probe_step2.out`**) ·
 **★★ `probe_route_a.py`** (§10.5 — the **route (A) resolver-level experiment**: at every reached node,
 the record's deepen harvest run on the `chooseIdK`-selected cell *and on every other cell*, asking
 whether any cell certifies where the selected one fails. **Answer: 0 of 58 nodes, on all three
@@ -1110,7 +1134,7 @@ consequences, and they point opposite ways:
 
 | # | step | cost | acceptance |
 |---|---|---|---|
-| **S1** | **Write the 2-WL step concretely** (outside the package root first, §8.3 pattern): `step2 adj χ v` = individualize `v`, iterate `CaoRound.roundBy` on the pair colouring to a fixpoint, return the induced vertex colouring `u ↦ f v u` as `ColData` | hours | it `#eval`s, and on `net(Z₄)` it gives the 7-cell / 0-mixed partition §0.0 records for 2-WL |
+| **S1** ✅ **DONE (python) 2026-07-31 — `probe_step2.py`** | **Write the 2-WL step concretely.** `step2 adj χ v` = individualize `v`, close under 2-WL (`c'(a,b) = (c(a,b), {{(c(a,x), c(x,b))}}_x)` — literally `CaoRound.roundBy`), read back the vertex colouring `(diag u, c(v,u), c(u,v))`. ▶ The **Lean** half (return `ColData`, §8.3 placement) is still to do | done (py) | ✅ **CALIBRATED against doc §0.0**, `python3 -u probe_step2.py --calibrate`: `net(Z₄)` n=28, `\|Aut\|=192`, from the EXACT orbit partition — **1-WL → 5 cells, 2 MIXED; 2-WL → 7 cells, 0 MIXED**, matching the 7 `Aut_v`-orbits exactly. The recorded figures reproduce |
 | **S2** | **Prove the four interface lemmas for `step2`** | ~a day | equivariance from `pairInvariantAt_iterRoundBy`; refines/singleton are structural. ⚠ trap #1: never return `… → Colouring n`; `ColData` only |
 | **S3** | **Abstract the interface** — make `deepen`/`replay`/`TinhoferPath`/`CertPath`/`leafOf`/… take the step as a parameter with the four properties | ~a day | gate stays EXIT 0 with the 1-WL instance plugged in, and **`Regression` §18/§19 numbers are unchanged** (`G8` still FLAGS under `holKeyFast`, ANSWERS under `recordKey`) |
 | **S4** | **Instantiate at `step2` and measure** — not on the gate; a scratch `#eval` on the m=8 witness and on `net(Z₄)` | hours | does `CertPath` certify where it previously failed? This is the first evidence the swap *buys* anything |
@@ -1124,3 +1148,66 @@ otherwise it is churn on 13 modules for one implementation.
 without anyone attacking the crux. If it does, §12.5a becomes worth its cost and the track is a
 candidate for promotion (§0.0: promotion needs viability, and the competitors — a residue-cannot-exist
 proof, or force at every descent step — are still unranked).
+
+### 13.6 ★★★ S4 RESULT (2026-07-31) — and it INVERTS §13.1's conclusion
+
+**⚠⚠ §13.1 above is right about the PREDICATE and wrong about the PAYOFF. Read this before acting on
+it.** `Tinhofer` is indeed stated over `Deepen.step` alone — but the benefit measured at the recorded
+obstruction comes from swapping the **descent's refiner**, which §13.1 said would not need to change.
+Both halves are measured (`probe_step2.py`, calibrated against §0.0's `net(Z₄)` figures first; raw
+output `probe_step2.out` + `probe_step2_nodes.out`).
+
+**(a) Swapping `Deepen.step` alone buys NOTHING here — measured.** The A/B ran the harvest at the
+1-WL step and at the 2-WL step on the two nodes where the 1-WL harvest certified nothing:
+
+| node | cells | 1-WL harvest | 2-WL harvest |
+|---|---|---|---|
+| m=8 twisted **root** | 32, 24 | ✗ ✗ (480 / 264 gens, 5 / 6 levels) | ✗ ✗ (**480 / 264 gens, 5 / 6 levels — identical**) |
+| **`root/id1/id9`** (carries the `\|C\|=16` cell) | 4,4,16,4,4,8,4,8 | all ✗ | all ✗, **every gen count and level count identical** |
+
+Not merely "also fails" — *the same object*. Diagnosis (iii): along the harvest's own deepening path
+from the `|C| = 16` cell, the 2-WL step produces **partitions identical to the 1-WL step at every
+level, on 4/4 anchors**. Nothing at that depth is left for a stronger refiner to split. (⚠ 2-WL is
+*not* globally equal to 1-WL on this graph — a random-descent sweep found it strictly finer at 9 of
+59 colourings, all shallow. It coincides exactly where the harvest works.)
+
+**(b) Why the harvest was right to fail — and why route (A) could not have helped.** Measured against
+the **exact** automorphism group (`all_isos`, not an oracle): at the root `|Aut_χ| = 512` and **both**
+cells are mixed (32 → 2 orbits, 24 → 3); at `root/id1/id9` `|Aut_χ| = 64` and **all eight** cells are
+mixed. ⟹ **no cell at either node is a single orbit**, so no supply and no selector could certify one:
+the harvest's `✗` is **correct, not incomplete**, and these are **force-domain** nodes (mixed cells —
+`forceBy_no_narrowing_on_orbit` does *not* forbid force there). ⚠ **This corrects §10.5's first
+write-up**, which called the two failures "supply incompleteness". They are not.
+⚠ **And these are not DUAL §2.1's node.** That one is *one equivariant force-key refinement* below the
+root and its `|C| = 16` cell **is** one true orbit; these two are 1-WL descent nodes that merely share
+the `|C| = 16` shape. Reproducing DUAL's node needs the force key — **that is the outstanding S4
+target**, and it is the one that tests CAO *propagation* rather than the base case.
+
+**(c) ★★★ But the full refiner swap recovers the orbit partition EXACTLY — at both nodes.**
+
+| node | 1-WL (what the descent builds) | **2-WL closure of the same colouring** | exact orbits |
+|---|---|---|---|
+| m=8 twisted **root** | 2 cells, **2 mixed** | **5 cells, 0 mixed** | 5 classes |
+| **`root/id1/id9`** | 8 cells, **8 mixed** | **16 cells, 0 mixed** | 20 classes |
+
+⟹ **on this witness the consume failure is entirely a refiner-strength failure, and 2-WL removes it
+completely** — both nodes go from *"no cell is an orbit"* (force's domain) to *"every cell is an
+orbit"* (consume's domain, where the harvest's re-relating induction is exactly what applies).
+
+**▶ What this changes.**
+1. **The swap that pays is the DESCENT's refiner, not `Deepen.step`.** §13.1's "the refiner does not
+   change" is right about what `Tinhofer` *mentions* and wrong about what the payoff *needs*. The
+   original three-doc framing ("swap the refiner, `n²` → `n³`") had the target right; what it got
+   wrong was only the implication that `Tinhofer` alone forces it. **The two swaps are different
+   projects.** §13.2/§13.3's cheap 4-lemma interface finding applies to the `step` half; the refiner
+   half is the expensive one — it moves `Refine`, `Descend`'s cost model, `costDeg`, and every
+   `Regression`/`PerformanceTest` number — and is **not yet scoped.**
+2. **This is evidence about §0.0's scope limit 1 (the BASE case), not about propagation.** These nodes
+   are not CAO starts — 1-WL from uniform gives 2 cells against 5 orbit classes — so the crux does not
+   apply to them. What is measured is *"2-WL computes the orbit partition of this input"*, which
+   limit 1 flags as false in general (rigid multipedes) and is **true here**. It raises the track's
+   viability without touching the crux.
+3. ⚠ **It does not contradict §5's "CFI is a dead falsifier habitat".** §5 is about CAO *propagation
+   from a CAO start*, where CFI propagates even at 1-WL. This is about **reaching** a CAO start at
+   all. Two different statements about the same graphs — worth keeping straight, because §0.0's
+   motivating exhibit (m=8) lives in §5's "dead" habitat and nobody had connected them.
