@@ -620,6 +620,41 @@ feedback loop, not about the base point.**
 > ⟹ **State which term you mean.** A bound on term 1 is refuted; a bound on term 2 is live and now
 > has evidence at diameter > 2.
 
+### 12.5a ▶▶ THE CRUX WORK PLAN (R1a–R1f) — added 2026-07-31
+
+**What the crux now is, exactly.** Rounds 1 and 2 are proved blind on `v`'s row
+(`CaoRound.round1_barrier`, `round2_barrier`), so the whole question is what **round 3** does. Round 2
+gives a far pair `(a,b)` the **triple count**
+
+```
+N(a,b; i,j,k) = #{ x : X(a,x) = i,  X(v,x) = j,  X(x,b) = k }
+```
+
+and this is the first quantity **coherence does not determine** — coherence fixes only the *pair*
+intersection numbers `c^{X(a,b)}_{ik}`. Round 3 at `(v,u)` then aggregates it:
+
+> **R1, fully sharpened.** For `u, w` in different `K_v`-orbits inside one `X`-class on `v`'s row,
+> the multiset over `x` of `(X(v,x), N(x,u; ·,·,·))` differs from the same multiset for `w`.
+
+This is a **single explicit finite invariant**, computable, and `K_v`-invariant by construction. The
+target is that it is *injective on `K_v`-orbits within an `X`-class*.
+
+| # | step | cost | why / what it decides |
+|---|---|---|---|
+| **R1a** | **Coordinate-level ablation of `N`.** Which *projection* of the triple count does the work — the full `N`, or a marginal (e.g. fixing `j`, the relation to `v`)? | hours | §12.6's ablation was at *class* granularity and came back "over-determined"; at **coordinate** granularity it can still be sharp, and it names the smallest object a proof must control |
+| **R1b** | **Base-point uniformity.** CAO makes `D` a single `K`-orbit, so the invariant transports across base points. Measure whether separating power is uniform over `v ∈ D` | hours | decides whether the theorem is *"for all `v`"* or only *"for some `v`"* — materially different statements, and §7.4/§7.5 show selector-dependence is a real hazard here |
+| **R1c** | **The falsifier, in the one place it can live** (= M1, sharpened). A Cayley root over a **transitive** group satisfies CAO *automatically* (one fibre = one orbit), so the **729 non-schurian S-rings are exactly the sharp inputs.** Fix the probe cap and run them | hours | **can end the track.** This is also why M1 is the falsifier and the evidence at once |
+| **R1d** | **Literature check.** *"Point extensions of schurian CCs need not be schurian"* is standard ⟹ **the CAO hypothesis must be doing essential work**, and any known non-schurian point extension whose root is *fibre*-schurian is an immediate counterexample | hours | far cheaper than §10.3's build-one-from-scratch, and it tests the same thing |
+| **R1e** | **Lean: name the invariant.** Once R1a fixes the needed projection, define it and restate `hsep` in terms of it | days | converts the crux from "the closure separates" into a concrete named invariant — which is what makes the R2/R3 per-family pin a *deliverable* rather than a plan |
+| **R1f** | **The aggregate/rank attempt.** Informed by R1a/R1b | open | the actual proof. ⚠ Expect a sharper statement, not a proof |
+
+**⚠ Two constraints any attempt must respect.** (i) §4.2 — `k`-WL sees only structure constants, so
+the argument must conclude **separation**, never *"an automorphism exists"*. (ii) §12.6's ablation —
+do **not** hunt a distinguished witness class; it does not exist.
+
+**▶ Order:** R1a + R1b (cheap, and they aim everything else) → R1c + R1d in parallel (either can end
+the track) → R1e → R1f.
+
 ### 12.4 Candidate resolutions, ranked
 
 | route | content | gap |
@@ -750,9 +785,26 @@ across an `X`-class.
 
 ⟹ with `round1_barrier`: **separation cannot occur before round 3.** The crux is not merely non-local
 (§12.3) — it needs the *third* round, i.e. the feedback from far pairs that have themselves been
-refined by a count `X` does not determine. ⚠ The one measured-not-proved link is `zAug` = round 1
-(5/5 objects); it enters `round2_barrier` as the explicit hypothesis `hg`, not as an assumption
-buried in a definition.
+refined by a count `X` does not determine.
+
+**✅ AND THE LAST HYPOTHESIS IS NOW DISCHARGED (2026-07-31, `CaoRound.lean` §5).** `round2_barrier`
+carried `hg` — that the colouring factors through `zAug` — which was *measured* (5/5) but not proved.
+It is now proved **from the coherent-configuration axioms and nothing else**:
+
+| landed | content |
+|---|---|
+| `DiagSep` | the diagonal axiom at `v` (`X a v = X v v ⟹ a = v`), in the two forms used |
+| `sig_split` / `sig_ext0_split` | the base-point split, general form (the `a = v` cases were §3's) |
+| **`sig_ext0_congr`** | ★ the round-1 **signature** is determined by `zAug`: the `x = v` term is `(X a v, X v b)` outright, and the far part is `sig X a b` minus that term — coherence-determined |
+| `flag_left` / `flag_right` | the base-point flags are recoverable from `zAug` (this is the *only* use of the diagonal axiom) |
+| `roundBy_ext0_congr` | the whole round-1 **colour**, not just its signature |
+| **`exists_factor_roundBy_ext0`** | ★★ `hg`, as a genuine factorization |
+| **`round2_barrier_real`** | ★★★ **the round-2 barrier with NO factorization hypothesis** |
+
+⟹ **"separation cannot occur before round 3" is now unconditional on the real object**, from
+`{Coherent, Transposable, DiagSep}` — all three literally the CC axioms, all three present in
+`CoherentConfig.lean` (`inter_card_eq` / `transpose_eq` / `diag_eq`). The measured uniform depth 3
+(11/11) is *explained*, not just observed.
 
 **▶ What this changes for R1 — and it is a sharpening, not a setback.** R1 asks *"why must two orbitals
 in one `X`-class have different `v`-profile distributions?"* The ablation says they differ in **many

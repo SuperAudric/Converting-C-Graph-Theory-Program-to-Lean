@@ -442,3 +442,7 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `CaoRound.univ_cons` | 194-198 | The universe multiset splits off the base point `v` (via `Finset.erase`, whose `Nodup` is what makes membership give `x ≠ v`). | — |
 | `CaoRound.sig_ext0_row` | 200-214 | The `ext0` signature along `v`'s row, split into the base-point term and the far points. Off `v` both flags are determined, so the far part is a relabelling of the plain triangle types — the decomposition both `round1_barrier` and `witness_ne_base` run on. | — |
 | `CaoRound.sig_row` | 216-222 | The plain signature along `v`'s row, split the same way. | — |
+| `CaoRound.sig_split` | 351-357 | The signature splits at the base point — general form of `sig_row` (no `a = v` restriction). | — |
+| `CaoRound.sig_ext0_split` | 359-372 | The `ext0` signature splits the same way; off the base point both flags are determined. General form of `sig_ext0_row`. | — |
+| `CaoRound.flag_left` | 374-377 | The base-point flag `decide (a = v)` is recoverable from `zAug`'s second coordinate (diagonal axiom). | — |
+| `CaoRound.flag_right` | 379-382 | The base-point flag `decide (b = v)` is recoverable from `zAug`'s third coordinate (diagonal axiom). | — |

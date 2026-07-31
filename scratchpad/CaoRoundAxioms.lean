@@ -14,3 +14,7 @@ open ChainDescent.CaoRound
 #print axioms ChainDescent.CaoRound.sig_zAug_row_eq
 #print axioms ChainDescent.CaoRound.sig_factor
 #print axioms ChainDescent.CaoRound.round2_barrier
+#print axioms ChainDescent.CaoRound.sig_ext0_congr
+#print axioms ChainDescent.CaoRound.roundBy_ext0_congr
+#print axioms ChainDescent.CaoRound.exists_factor_roundBy_ext0
+#print axioms ChainDescent.CaoRound.round2_barrier_real

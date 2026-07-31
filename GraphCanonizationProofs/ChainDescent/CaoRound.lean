@@ -332,5 +332,112 @@ theorem round2_barrier {β γ : Type*} {f : Fin n → Fin n → β} {g : Fin n �
     sig g v u = sig g v w := by
   rw [sig_factor hg, sig_factor hg, sig_zAug_row_eq hc ht h]
 
+/-! ## 5. Discharging `hg` — the round-1 colour really does factor through `zAug`
+
+`round2_barrier` carried one hypothesis: that the colouring factors through the
+triangle-type-through-`v` data. That was *measured* (5/5 objects) but not proved. It is proved here,
+from the coherent-configuration axioms and nothing else.
+
+The content is `sig_ext0_congr`: **the round-1 signature is determined by `(X a b, X a v, X v b)`**.
+Splitting at the base point, the `x = v` term is `(X a v, X v b)` outright, and the far part is
+`sig X a b` minus that term — coherence-determined. The two remaining CC axioms enter only to recover
+the base-point *flags* from `zAug`: `a = v` iff `X a v = X v v`, which is the diagonal axiom. -/
+
+/-- The **diagonal axiom** at `v`, in the two forms used: a point related to `v` exactly as `v` is
+must *be* `v`. In a coherent configuration this is "a class meeting the diagonal lies in it". -/
+def DiagSep {β : Type*} (f : Fin n → Fin n → β) (v : Fin n) : Prop :=
+  (∀ a, f a v = f v v → a = v) ∧ (∀ b, f v b = f v v → b = v)
+
+/-- The signature splits at the base point (general form of `sig_row`). -/
+private theorem sig_split {β : Type*} (f : Fin n → Fin n → β) (v a b : Fin n) :
+    sig f a b = (f a v, f v b) ::ₘ
+      ((((Finset.univ : Finset (Fin n)).erase v).val).map (fun x => (f a x, f x b))) := by
+  unfold sig
+  conv_lhs => rw [univ_cons v]
+  rw [Multiset.map_cons]
+
+/-- The `ext0` signature splits the same way; off the base point both flags are determined. -/
+private theorem sig_ext0_split {β : Type*} (f : Fin n → Fin n → β) (v a b : Fin n) :
+    sig (ext0 f v) a b =
+      ((f a v, decide (a = v), true), (f v b, true, decide (b = v))) ::ₘ
+        ((((Finset.univ : Finset (Fin n)).erase v).val).map
+          (fun x => ((f a x, decide (a = v), false), (f x b, false, decide (b = v))))) := by
+  unfold sig ext0
+  conv_lhs => rw [univ_cons v]
+  rw [Multiset.map_cons]
+  congr 1
+  · simp
+  · refine Multiset.map_congr rfl (fun x hx => ?_)
+    have hxv : x ≠ v := (Finset.mem_erase.mp (Finset.mem_val.mp hx)).1
+    simp [hxv]
+
+/-- The base-point flag is recoverable from `zAug`'s second coordinate (diagonal axiom). -/
+private theorem flag_left {β : Type*} {f : Fin n → Fin n → β} {v a a' : Fin n}
+    (hd : DiagSep f v) (hav : f a v = f a' v) : decide (a = v) = decide (a' = v) :=
+  decide_eq_decide.mpr ⟨fun h => hd.1 a' (by rw [← hav, h]), fun h => hd.1 a (by rw [hav, h])⟩
+
+/-- The base-point flag is recoverable from `zAug`'s third coordinate (diagonal axiom). -/
+private theorem flag_right {β : Type*} {f : Fin n → Fin n → β} {v b b' : Fin n}
+    (hd : DiagSep f v) (hvb : f v b = f v b') : decide (b = v) = decide (b' = v) :=
+  decide_eq_decide.mpr ⟨fun h => hd.2 b' (by rw [← hvb, h]), fun h => hd.2 b (by rw [hvb, h])⟩
+
+/-- **★★ THE ROUND-1 SIGNATURE IS DETERMINED BY `zAug`.** Pairs with the same colour *and* the same
+triangle type through `v` have the same round-1 signature. This is the mathematical content of `hg`. -/
+theorem sig_ext0_congr {β : Type*} {f : Fin n → Fin n → β} (hc : Coherent f) {v : Fin n}
+    (hd : DiagSep f v) {a b a' b' : Fin n}
+    (hab : f a b = f a' b') (hav : f a v = f a' v) (hvb : f v b = f v b') :
+    sig (ext0 f v) a b = sig (ext0 f v) a' b' := by
+  have ha := flag_left hd hav
+  have hb := flag_right hd hvb
+  have htail : (((Finset.univ : Finset (Fin n)).erase v).val).map (fun x => (f a x, f x b)) =
+      (((Finset.univ : Finset (Fin n)).erase v).val).map (fun x => (f a' x, f x b')) := by
+    have hs := hc a b a' b' hab
+    rw [sig_split f v a b, sig_split f v a' b', hav, hvb] at hs
+    exact (Multiset.cons_inj_right _).mp hs
+  rw [sig_ext0_split f v a b, sig_ext0_split f v a' b', hav, hvb, ha, hb]
+  congr 1
+  have := congrArg (Multiset.map (fun p : β × β =>
+    ((p.1, decide (a' = v), false), (p.2, false, decide (b' = v))))) htail
+  simpa [Multiset.map_map, Function.comp] using this
+
+/-- The whole round-1 colour (not just its signature) is determined by `zAug`. -/
+theorem roundBy_ext0_congr {β : Type*}
+    {enc : (β × Bool × Bool) × Multiset ((β × Bool × Bool) × (β × Bool × Bool)) → β × Bool × Bool}
+    {f : Fin n → Fin n → β} (hc : Coherent f) {v : Fin n} (hd : DiagSep f v) {a b a' b' : Fin n}
+    (hz : zAug f v a b = zAug f v a' b') :
+    roundBy enc (ext0 f v) a b = roundBy enc (ext0 f v) a' b' := by
+  obtain ⟨hab, hav, hvb⟩ : f a b = f a' b' ∧ f a v = f a' v ∧ f v b = f v b' := by
+    simpa [zAug, Prod.mk.injEq, and_assoc] using hz
+  show enc (ext0 f v a b, sig (ext0 f v) a b) = enc (ext0 f v a' b', sig (ext0 f v) a' b')
+  rw [sig_ext0_congr hc hd hab hav hvb]
+  unfold ext0
+  rw [hab, flag_left hd hav, flag_right hd hvb]
+
+/-- **★★★ `hg` DISCHARGED.** The round-1 colour of the individualized configuration is genuinely a
+function of the `v`-augmented colouring. Together with §4 this makes **`round2_barrier` unconditional
+on the real object**: separation cannot occur before round 3, from the CC axioms alone. -/
+theorem exists_factor_roundBy_ext0 {β : Type*} [Nonempty β]
+    {enc : (β × Bool × Bool) × Multiset ((β × Bool × Bool) × (β × Bool × Bool)) → β × Bool × Bool}
+    {f : Fin n → Fin n → β} (hc : Coherent f) {v : Fin n} (hd : DiagSep f v) :
+    ∃ Ψ : β × β × β → β × Bool × Bool,
+      ∀ a b, roundBy enc (ext0 f v) a b = Ψ (zAug f v a b) := by
+  classical
+  refine ⟨fun z => if h : ∃ p : Fin n × Fin n, zAug f v p.1 p.2 = z then
+      roundBy enc (ext0 f v) h.choose.1 h.choose.2
+    else Classical.arbitrary (β × Bool × Bool), fun a b => ?_⟩
+  have hex : ∃ p : Fin n × Fin n, zAug f v p.1 p.2 = zAug f v a b := ⟨(a, b), rfl⟩
+  simp only [dif_pos hex]
+  exact (roundBy_ext0_congr hc hd hex.choose_spec).symm
+
+/-- **THE ROUND-2 BARRIER, UNCONDITIONAL.** No factorization hypothesis: from the coherent-configuration
+axioms alone, two rounds of the individualized configuration do not separate `v`'s row. -/
+theorem round2_barrier_real {β : Type*} [Nonempty β]
+    {enc : (β × Bool × Bool) × Multiset ((β × Bool × Bool) × (β × Bool × Bool)) → β × Bool × Bool}
+    {f : Fin n → Fin n → β} (hc : Coherent f) (ht : Transposable f) {v u w : Fin n}
+    (hd : DiagSep f v) (h : f v u = f v w) :
+    sig (roundBy enc (ext0 f v)) v u = sig (roundBy enc (ext0 f v)) v w := by
+  obtain ⟨Ψ, hΨ⟩ := exists_factor_roundBy_ext0 (enc := enc) hc hd
+  exact round2_barrier hc ht hΨ h
+
 end CaoRound
 end ChainDescent
