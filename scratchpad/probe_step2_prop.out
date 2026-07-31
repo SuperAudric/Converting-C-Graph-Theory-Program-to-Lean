@@ -1,0 +1,108 @@
+probe_step2.py — S1 + S4(python): the 2-WL deepening step, and what it BUYS at the failing nodes.
+
+docs/chain-descent-cao-propagation.md §13.5 (S1, S4).
+
+============================================================================================
+WHAT THIS IS
+============================================================================================
+S1.  A concrete **2-WL `Deepen.step`**: individualize `v`, run the 2-WL pair closure, read back a
+     vertex colouring.  This is the object §13 says the swap is confined to — `Deepen.step`, NOT the
+     descent's refiner.  The descent's nodes below are still generated with the **1-WL** step, which
+     is exactly the design under scoping (swap the supply-internal step, leave `Descend`/`Refine`).
+
+S4.  The A/B: rerun `probe_route_a.py`'s experiment with the 2-WL step inside the harvest ONLY, and
+     ask what changes at the two nodes where the 1-WL harvest certified nothing —
+       * the m=8 CFI **root** (cells 32, 24), and
+       * **`root/id1/id9`**, the 8-cell node carrying the recorded `|C| = 16` cell (DUAL §2.1).
+
+============================================================================================
+SOUNDNESS (unchanged from probe_route_a.py — read it there)
+============================================================================================
+Every ✓ is a POSITIVE certificate: the harvest emits permutations, they are re-verified
+(`is_aut` + colour-preservation), and transitivity is BFS closure over the verified generator SET.
+"Not certified" means *this supply did not certify*, never "different orbits".  No orbit oracle is
+used anywhere; `probe_orbit_oracle` (§8.2, PROVEN BROKEN) is not imported.
+
+CALIBRATION FIRST (§8.1 discipline, and my own "validate cheap before long runs"):
+`--calibrate` reproduces the doc §0.0 measurement — `net(Z₄)`, n=28, from the EXACT orbit partition:
+1-WL → 5 cells, 2 mixed;  2-WL → 7 cells, 0 mixed.  If that does not reproduce, the 2-WL
+implementation is wrong and nothing below means anything.
+
+    cd /workspace/scratchpad
+    python3 -u probe_step2.py --calibrate                 # ~seconds; MUST pass first
+    python3 -u probe_step2.py > probe_step2.out 2>&1      # the A/B, run detached (§9)
+
+
+=== CFI cubic m=8 TWISTED   n=56
+  root                   |Aut_chi|=512   NOT a CAO start (force's job)  orbit-cells=5  propagation FAILS: 1-WL 2, 2-WL 0   ★ 2-WL REPAIRS ALL
+        cell |C|=4    mixed-after-step: 1-WL 1, 2-WL 0
+        cell |C|=16   mixed-after-step: 1-WL 3, 2-WL 0
+  root/id0               |Aut_chi|=32    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1               |Aut_chi|=128   NOT a CAO start (force's job)  orbit-cells=9  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id1           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id3           |Aut_chi|=8     CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id4           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id5           |Aut_chi|=8     CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id6           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id7           |Aut_chi|=16    CAO start                      orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id8           |Aut_chi|=4     CAO start                      orbit-cells=9  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id9           |Aut_chi|=16    CAO start                      orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id10          |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id12          |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id14          |Aut_chi|=16    CAO start                      orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id15          |Aut_chi|=8     CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id16          |Aut_chi|=8     NOT a CAO start (force's job)  orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id17          |Aut_chi|=32    CAO start                      orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id18          |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id19          |Aut_chi|=8     NOT a CAO start (force's job)  orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id0           |Aut_chi|=32    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id1           |Aut_chi|=32    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id2           |Aut_chi|=8     CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id3           |Aut_chi|=32    CAO start                      orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id5           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id7           |Aut_chi|=32    NOT a CAO start (force's job)  orbit-cells=16  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id8           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id9           |Aut_chi|=64    NOT a CAO start (force's job)  orbit-cells=16  propagation FAILS: 1-WL 0, 2-WL 0
+  --- CFI cubic m=8 TWISTED: {'nodes': 27, 'noncao_nodes': 17, '1-WL:noncao:FAIL': 2, '2-WL:noncao:ok': 271, '1-WL:noncao:ok': 269, 'cao_nodes': 10, '1-WL:cao:ok': 129, '2-WL:cao:ok': 129}
+
+=== CFI cubic m=8 plain   n=56
+  root                   |Aut_chi|=512   NOT a CAO start (force's job)  orbit-cells=5  propagation FAILS: 1-WL 2, 2-WL 0   ★ 2-WL REPAIRS ALL
+        cell |C|=4    mixed-after-step: 1-WL 2, 2-WL 0
+        cell |C|=16   mixed-after-step: 1-WL 3, 2-WL 0
+  root/id0               |Aut_chi|=32    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1               |Aut_chi|=128   NOT a CAO start (force's job)  orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id1           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id3           |Aut_chi|=8     CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id4           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id5           |Aut_chi|=8     CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id6           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id7           |Aut_chi|=16    CAO start                      orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id8           |Aut_chi|=4     CAO start                      orbit-cells=9  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id9           |Aut_chi|=16    CAO start                      orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id10          |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id12          |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id14          |Aut_chi|=16    CAO start                      orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id15          |Aut_chi|=8     CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id16          |Aut_chi|=8     NOT a CAO start (force's job)  orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id17          |Aut_chi|=32    CAO start                      orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id18          |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id19          |Aut_chi|=8     NOT a CAO start (force's job)  orbit-cells=18  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id0           |Aut_chi|=32    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id1           |Aut_chi|=32    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id2           |Aut_chi|=8     CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id3           |Aut_chi|=32    CAO start                      orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id5           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id7           |Aut_chi|=32    NOT a CAO start (force's job)  orbit-cells=16  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id8           |Aut_chi|=16    NOT a CAO start (force's job)  orbit-cells=17  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id1/id9           |Aut_chi|=128   CAO start                      orbit-cells=8  propagation FAILS: 1-WL 0, 2-WL 0
+  --- CFI cubic m=8 plain: {'nodes': 27, 'noncao_nodes': 16, '1-WL:noncao:FAIL': 2, '2-WL:noncao:ok': 254, '1-WL:noncao:ok': 252, 'cao_nodes': 11, '1-WL:cao:ok': 137, '2-WL:cao:ok': 137}
+
+=== Shrikhande   n=16
+  root                   |Aut_chi|=192   CAO start                      orbit-cells=1  propagation FAILS: 1-WL 1, 2-WL 0   ★ 2-WL REPAIRS ALL
+        cell |C|=16   mixed-after-step: 1-WL 1, 2-WL 0
+  root/id0               |Aut_chi|=12    NOT a CAO start (force's job)  orbit-cells=3  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id1           |Aut_chi|=2     NOT a CAO start (force's job)  orbit-cells=6  propagation FAILS: 1-WL 0, 2-WL 0
+  root/id0/id2           |Aut_chi|=4     NOT a CAO start (force's job)  orbit-cells=5  propagation FAILS: 1-WL 0, 2-WL 0
+  --- Shrikhande: {'nodes': 4, 'cao_nodes': 1, '1-WL:cao:FAIL': 1, '2-WL:cao:ok': 1, 'noncao_nodes': 3, '1-WL:noncao:ok': 14, '2-WL:noncao:ok': 14}
+
+wall: 120.4s

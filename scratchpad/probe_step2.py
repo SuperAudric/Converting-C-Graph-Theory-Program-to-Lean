@@ -271,6 +271,123 @@ def node_diagnostics():
     print("\n⟹ read §13.6 of the doc for what these three together mean.")
 
 
+def propagation_at_nodes(name, n, adj, depth=2, limit=6 * 10 ** 6):
+    """★★ THE PROPAGATION TEST, RUN AT DESCENT NODES (user steer, 2026-07-31).
+
+    The base case — mixed cells at a node — is **force's** job, not consume's.  What separates
+    *"consume will verify on a node it should"* from *"this is a node consume should verify"* is
+    **propagation**.  So: at every reached node, replace the node colouring by its **CAO start** (the
+    exact `Aut(adj, χ)`-orbit partition — what force is supposed to deliver), individualize, refine,
+    and ask whether the cells are still orbits of the point stabilizer.  That is doc §1's question,
+    asked on the class §12.6 says was never swept: colourings **arising from individualization**,
+    not orbit partitions of plain graphs.
+
+    One representative per orbit-cell suffices: `K` is transitive on each cell of its own orbit
+    partition, so all base points in one cell are conjugate and the verdict transports.
+
+    Sound: `all_isos` is the validated complete enumeration (§8.1); every orbit here is exact, and
+    no `probe_orbit_oracle` is involved.
+    """
+    print(f"\n=== {name}   n={n}")
+    nbrs = RA.nbrs_of(n, adj)
+    col0 = RA.wl(n, nbrs, [0] * n)
+    tot = defaultdict(int)
+    for lbl, col in RA.descend_nodes(n, nbrs, col0, depth):
+        A = all_isos(n, adj, col, col, limit=limit)
+        orb = orbits(n, A)
+        cl_node = RA.cells_of(col)
+        was_cao = all(len({orb[u] for u in x}) == 1 for x in cl_node.values())
+        cells = [x for x in RA.cells_of(orb).values() if len(x) >= 2]
+        tot["nodes"] += 1
+        tot["cao_nodes" if was_cao else "noncao_nodes"] += 1
+        if not cells:
+            continue
+        rows = []
+        for cell in cells:
+            v = cell[0]                                   # one rep per orbit-cell (see docstring)
+            Av = [g for g in A if g[v] == v]
+            tgt = orbits(n, Av)
+            r = {}
+            for tag, fn in (("1-WL", step1), ("2-WL", step2)):
+                c = fn(n, nbrs, adj, orb, v)
+                mixed = sum(1 for x in RA.cells_of(c).values() if len({tgt[u] for u in x}) > 1)
+                r[tag] = mixed
+                tot[f"{tag}:{'cao' if was_cao else 'noncao'}:" +
+                    ("ok" if mixed == 0 else "FAIL")] += 1
+            rows.append((len(cell), r["1-WL"], r["2-WL"]))
+        flag = "CAO start" if was_cao else "NOT a CAO start (force's job)"
+        bad1 = sum(1 for _, a, _ in rows if a)
+        bad2 = sum(1 for _, _, b in rows if b)
+        print(f"  {lbl:<22} |Aut_chi|={len(A):<5} {flag:<30} "
+              f"orbit-cells={len(rows)}  propagation FAILS: 1-WL {bad1}, 2-WL {bad2}"
+              + ("   ★ 2-WL REPAIRS ALL" if bad1 and not bad2 else "")
+              + ("   ⛔⛔ 2-WL COUNTEREXAMPLE" if bad2 else ""))
+        for sz, a, b in rows:
+            if a or b:
+                print(f"        cell |C|={sz:<4} mixed-after-step: 1-WL {a}, 2-WL {b}")
+    print(f"  --- {name}: {dict(tot)}")
+    return tot
+
+
+def orbital_partition(n, auts):
+    """The 2-orbits (orbitals) of `auts` acting diagonally on ordered pairs."""
+    par = list(range(n * n))
+
+    def f(x):
+        while par[x] != x:
+            par[x] = par[par[x]]
+            x = par[x]
+        return x
+    for g in auts:
+        for a in range(n):
+            for b in range(n):
+                i, j = f(a * n + b), f(g[a] * n + g[b])
+                if i != j:
+                    par[i] = j
+    return [f(a * n + b) for a in range(n) for b in range(n)]
+
+
+def same_part(x, y):
+    mx, my = {}, {}
+    for a, b in zip(x, y):
+        if mx.setdefault(a, b) != b or my.setdefault(b, a) != a:
+            return False
+    return True
+
+
+def entry_ticket(name, n, adj):
+    """★ §7.2 THE ENTRY TICKET — run this before quoting ANY 2-WL sweep as evidence.
+
+    A 2-WL vertex-level failure REQUIRES a non-schurian one-point extension: if the extension is
+    schurian its diagonal classes *are* the orbits, so 2-WL cannot fail and a "0 counterexamples"
+    verdict is FORCED, not evidence.  This is the recorded vacuity failure of the old 21-object
+    sweep (doc §6), and it must not be repeated.
+
+    Re-implemented here rather than imported: `probe_2wl_vacuity.py` is NOT `__main__`-guarded and
+    runs its whole sweep on import (§0.1/§9's trap).
+    """
+    nbrs = RA.nbrs_of(n, adj)
+    root = RA.wl(n, nbrs, [0] * n)
+    A = all_isos(n, adj, root, root, limit=6 * 10 ** 6)
+    orb = orbits(n, A)
+    p2 = [c for row in wl2_closure(n, adj, root) for c in row]
+    obl = orbital_partition(n, A)
+    sr = same_part(p2, obl)
+    exts = []
+    for cell in RA.cells_of(orb).values():
+        if len(cell) < 2:
+            continue
+        v0 = cell[0]
+        A1 = [g for g in A if g[v0] == v0]
+        p2e = [c for row in wl2_closure(n, adj, RA.indiv(n, orb, v0)) for c in row]
+        exts.append(same_part(p2e, orbital_partition(n, A1)))
+    paid = not all(exts)
+    print(f"  {name:<26} |Aut|={len(A):<6} 2-WL rank={len(set(p2)):<4} orbital rank={len(set(obl)):<4} "
+          f"schurian(root)={sr}  schurian(1-pt exts)={exts}")
+    print(f"      ⟹ §7.2 ticket {'PAID — a 2-WL failure is POSSIBLE here' if paid else 'UNPAID — every extension is schurian, so 2-WL success is FORCED and proves nothing'}")
+    return paid
+
+
 def _sizes(part):
     d = defaultdict(int)
     for x in part:
@@ -283,6 +400,27 @@ if __name__ == "__main__":
     if "--calibrate" in sys.argv:
         print(__doc__)
         calibrate()
+        print(f"\nwall: {time.time() - T0:.1f}s")
+        sys.exit(0)
+
+    if "--ticket" in sys.argv:
+        print(__doc__)
+        print("§7.2 ENTRY TICKET — is a 2-WL failure even possible on this population?")
+        es = RA.cubic(8, 19)
+        for tw in (True, False):
+            n, adj, _, _ = cfi(es, 8, twisted_nodes=(0,) if tw else ())
+            entry_ticket(f"CFI cubic m=8 {'twisted' if tw else 'plain'}", n, adj)
+        print(f"\nwall: {time.time() - T0:.1f}s")
+        sys.exit(0)
+
+    if "--propagate" in sys.argv:
+        print(__doc__)
+        es = RA.cubic(8, 19)
+        for tw in (True, False):
+            n, adj, _, _ = cfi(es, 8, twisted_nodes=(0,) if tw else ())
+            propagation_at_nodes(f"CFI cubic m=8 {'TWISTED' if tw else 'plain'}", n, adj, depth=2)
+        n, adj = RA.shrikhande()
+        propagation_at_nodes("Shrikhande", n, adj, depth=2)
         print(f"\nwall: {time.time() - T0:.1f}s")
         sys.exit(0)
 

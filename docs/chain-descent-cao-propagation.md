@@ -366,11 +366,34 @@ doomed. (Also: it fails §7.1.)
 
 | habitat | why it cannot work | measured |
 |---|---|---|
-| **CFI over any base** | CFI is about *distinguishing two graphs*, not orbit recovery inside one; the gauge group is huge, so orbits stay coarse and WL matches them | twisted over prism, K3,3, Q3, cubic8, K5, Petersen (treewidth ≤ 4) propagate **even at 1-WL**; only `CFI[K4]-tw` fails, and that graph *is* `net(Z₄)` |
+| **CFI over any base** ⚠⚠ **NARROWED 2026-07-31 — see the correction below the table** | CFI is about *distinguishing two graphs*, not orbit recovery inside one; the gauge group is huge, so orbits stay coarse and WL matches them | twisted over prism, K3,3, Q3, cubic8, K5, Petersen (treewidth ≤ 4) propagate **even at 1-WL**; only `CFI[K4]-tw` fails, and that graph *is* `net(Z₄)` |
 | **rigid multipedes** | theorem `Cascade.recoverableAt_base_iff_discrete`: rigid ⟹ orbit partition discrete ⟹ CAO start is discrete ⟹ vacuous | — |
 | **non-rigid multipedes** | the loophole, and it is closed: F₂ kernel = ⟨all-ones⟩ ⟹ \|Aut\|=2, CAO start = all 2-element orbits, `\|Aut_v\|=1` so *any* non-singleton cell would be a hit | 10 instances, W=6–10, n=52–114: **1-WL already discretizes** |
 | **abelian Cayley, generalized dicyclic** | `x ↦ x⁻¹` fixes `e` ⟹ `\|Aut_e\| ≥ 2`, no GRR exists (⚠ a *GRR-hunt* exclusion only — these remain legitimate 2-WL inputs, and the Schur-ring sweep uses them) | 3681/3681, 1312 resp. — parallel branch, `HANDOFF_2wl.md` §3 |
 | **group-derived generally** (Cayley, Johnson, Kneser, Paley, rook, nets over abelian groups) | tend to be schurian outright ⟹ the sharp case never arises | see §6 vacuity ledger |
+
+> ### ⚠⚠ CORRECTION to row 1 (2026-07-31, `probe_step2.py --propagate`, output `probe_step2_prop.out`)
+> **"CFI over any base propagates even at 1-WL" is FALSE as stated — every base ever swept was a
+> SYMMETRIC NAMED graph.** `cubic8` in that row is the circulant `C₈(1,4)`. Taking instead a **random
+> cubic base on 8 nodes** (`probe_route_a.cubic(8, 19)`), CFI over it — **twisted *and* plain**,
+> n = 56, `|Aut| = 512` — is a genuine **1-WL CAO-propagation counterexample**: from the exact orbit
+> partition (5 orbit-cells), individualizing a rep of the `|C| = 4` cell leaves **1** mixed cell and of
+> the `|C| = 16` cell leaves **3**. ⟹ the habitat is **not** dead at 1-WL; the sampling was.
+> ★ Note it fails for the **untwisted** CFI too, so this is not a twist phenomenon.
+> ★★ **And every 1-WL failure on record from this sweep is at DEPTH 0.** Across 58 reached nodes on
+> three witnesses (~800 propagation tests), 1-WL fails **5** times — the m=8 twisted root (2), the
+> m=8 plain root (2), the Shrikhande root (1) — and **never at any deeper node**. That is §10.5's and
+> §0.0's *"nothing covers the root"* showing up as a measurement, and it is the shape §4.4 warns is
+> **not** a general law (`Shrikhande ⊔ Shrikhande` breaks it) — so read it as a property of these
+> witnesses, not as an invariant.
+> ⛔⛔ **AND THE MATCHING 2-WL RESULT IS WORTHLESS — I ran §7.2 on my own population and it FAILS.**
+> 2-WL repaired all 5 and gave 0 failures in ~800 tests, but `probe_step2.py --ticket`
+> (`probe_step2_ticket.out`): the roots ARE non-schurian (2-WL rank 78 vs orbital rank 82 / 83), yet
+> **every one-point extension is schurian** (`[True, True, True, True, True]`) ⟹ 2-WL success is
+> **forced**, exactly the recorded vacuity failure of the 21-object sweep (§6's last-but-one row).
+> **Do not enter it in §6's ledger.** ★ What it *does* show, and what is worth chasing: at this root
+> the non-schurity lives **entirely off-diagonal** and dies under a single individualization — §7.2's
+> own warning (`G ⊔ G`) observed in a new place, and a concrete handle for M1/R1c.
 
 **★ The general lesson from all five rows:** these all fail for the *same* reason — they separate the
 group-change from the deficiency (§3). **The CAO hypothesis is self-limiting**: a small group means a
@@ -391,6 +414,7 @@ too. Every "shrink the group" design dies on this.
 | VT voltage covers (`Z₂`/`Z₃`/`Z₄` over 9 VT bases): 122 covers, 0 failures | moderate — imprimitive, blocks of size 2–4, not circulant-dominated |
 | Descent instrumentation: 11 objects, **16,048 nodes**, fibre-schurian everywhere | ⚠ **DISCOUNT HEAVILY** — only **364** of those nodes still have a cell of size ≥ 3; the rest are near-discrete where schurity is trivial. **The honest figure is 364, not 16k** |
 | The original 2-WL sweep (21 objects) | ⛔ **WORTHLESS** — 0/21 had a non-schurian one-point extension, so it could not possibly have found a counterexample. The recorded vacuity failure |
+| **CFI cubic m=8, node sweep (2026-07-31)**: 58 nodes, ~800 propagation tests, **1-WL fails 5× (all at depth 0), 2-WL fails 0×** | ⛔ **THE 2-WL HALF IS WORTHLESS — same failure as the row above**, and I checked it on myself: `--ticket` shows the roots are non-schurian but **all 5 one-point extensions are schurian**, so 2-WL could not have failed. ✅ **The 1-WL half is real and new** — it narrows §5's "CFI over any base" row (which sampled only symmetric named bases) |
 | The old 498 + 313 VT pins | ⛔ **UNSOUND** — produced by the broken oracle (§8.2), which errs by *merging* ⟹ false "ok"s |
 
 **Why the descent numbers collapse:** max cell size drops per level (Shrikhande 16→6→4→2→1;
@@ -607,7 +631,10 @@ the diameter-2 confound) ·
 `Aut_v`-orbits; depth 1 = `lookaheadKey`'s own non-discrete branch. `probe_stall4.py` is the named VT
 witness `Cay(Z₁₂⋊₅Z₂)` — ⚠ its connection-set search is slow (~2048 masks × `all_isos` at n = 24), so
 run it detached per §9; **result recorded at `probe_stall4.out`**).
-**★★★ `probe_step2.py`** (§13.5 **S1 + S4**: the concrete **2-WL `Deepen.step`** — individualize,
+**★★★ `probe_step2.py`** — four modes, and **run `--ticket` before quoting any 2-WL number from it**
+(`--calibrate` · `--nodes` · **`--propagate`** = §5's correction: the propagation test run at every
+reached descent node, from that node's CAO start, 1-WL vs 2-WL, output `probe_step2_prop.out` ·
+**`--ticket`** = §7.2's entry ticket, output `probe_step2_ticket.out`). (§13.5 **S1 + S4**: the concrete **2-WL `Deepen.step`** — individualize,
 2-WL pair closure, read `(diag u, c(v,u), c(u,v))` — and the **A/B** running the harvest at the 1-WL
 step vs the 2-WL step on the two nodes where the 1-WL harvest certified nothing. ★ **`--calibrate`
 reproduces doc §0.0's `net(Z₄)` figures exactly** (1-WL 5 cells/2 mixed, 2-WL 7 cells/0 mixed) — run
