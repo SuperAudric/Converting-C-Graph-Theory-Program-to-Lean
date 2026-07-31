@@ -541,6 +541,23 @@ any 2-WL closure supplies, so the statement is independent of the refinement's d
 ⟹ preservation reduces to orbital separation **with no remainder**, and `hsep` is precisely the open
 crux of §12.3 — now isolated as a single named hypothesis rather than diffused through the problem.
 
+> ### ⚠ CORRECTION + ✅ FIX — Step 2 did not literally apply to the real object (`CaoRound.lean`, 2026-07-30)
+> `levelSet_iff_stabOrbit_of_separates` asks for `PairInvariant adj χ f` = invariance under **all** of
+> `IsColAut adj χ`. But the colouring the algorithm builds is the closure of the configuration with `v`
+> **individualized**, which is invariant only under the **stabilizer of `v`**. So the landed Step 2 was
+> a true theorem about an abstract `f` that the real closure did not satisfy.
+> **Fixed and gated — `ChainDescent/CaoRound.lean` (11 theorems, axiom-clean):**
+> - **`PairInvariantAt`** — invariance under `{σ ∈ IsColAut adj χ : σ v = v}`, exactly the group
+>   `SameStabOrbit` is about; **`levelSet_iff_stabOrbit_of_separatesAt`** = Step 2 at it. Nothing is
+>   lost — the `←` direction only ever used a `σ` fixing `v`, because it *comes from* `SameStabOrbit`.
+> - **`pairInvariantAt_ext0`** (individualizing `v` keeps stabilizer-invariance) +
+>   **`sig_congr`**/**`pairInvariantAt_roundBy`**/**`pairInvariantAt_iterRoundBy`** (a refinement round
+>   preserves it — the content is that `σ` may be absorbed into the intermediate point, since it
+>   permutes the universe) ⟹ **`step2_closure`**: start from any invariant root colouring,
+>   individualize `v`, take **any** number of rounds — if the result separates the orbitals in `v`'s
+>   row, its level sets there are exactly the `K_v`-orbits. **Step 2 now applies to the real object,
+>   with `hsep` the only thing left.**
+
 ⟹ **all content is confined to `X`-classes that fuse ≥ 2 orbitals meeting `v`'s row.** This is not a
 cosmetic reduction: in the completed Schur-ring sweep only **729 of 62,147** non-discrete instances
 (≈ 1.2%) had a non-schurian root at all, and §6's other families are mostly schurian outright. Steps
@@ -553,7 +570,15 @@ the free territory well beyond the two landed fragments (`cellsAreOrbits_of_disc
 Remaining case: a fused class `R = O₁ ⊎ O₂ ⊎ …  ⊆ D × C` meeting `v`'s row in ≥ 2 orbitals. Show
 `X_v` separates them.
 
-> **⛔ THE ROUND-1 BARRIER (proved, negative — do not attempt a local argument).** The round-1
+> **⛔ THE ROUND-1 BARRIER — ✅ NOW MACHINE-CHECKED** (`CaoRound.round1_barrier`, axiom-clean; it was
+> prose until 2026-07-30, and per the project's own steer a pinned statement nobody has tried to prove
+> can be false — this one is not). Coherence is stated in the form that actually says it: a coherent
+> colouring is a **fixpoint** of the round (`CaoRound.Coherent`). The proof splits the signature at the
+> base point: the flags contribute the *same single term* to both sides, and the remaining multisets are
+> equal by coherence + multiset cancellation. Its positive companion **`witness_ne_base`** is the other
+> half of what M3 measures: if a round *does* separate `(v,u)` from `(v,w)` while they share a colour,
+> the difference provably lives in the intermediate points **`x ≠ v`** — so *the marking must leave `v`
+> and come back* is a theorem, not an observation. The round-1
 > refinement of the pair `(v,u)` is the multiset over `x` of `(col(v,x), col(x,u))`, and by
 > **coherence** that count is the intersection number `p^k_{ij}` with `k = X`-class`(v,u)` —
 > *identical for every `u` in the same `X`-class*. **The base point learns nothing directly.**

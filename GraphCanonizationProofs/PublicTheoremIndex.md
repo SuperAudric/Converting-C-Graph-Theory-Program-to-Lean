@@ -5021,3 +5021,24 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `CaoFibring.PairInvariant` | 187-189 | An `IsColAut`-invariant colouring of ordered pairs — what any 2-WL closure supplies. | Definition |
 | `CaoFibring.pairInvariant_eq_of_sameOrbital` | 191-197 | **Soundness:** an invariant pair colouring is constant on orbitals, so its classes are *unions* of orbitals. This is why refinement can never split an orbit. | — |
 | `CaoFibring.levelSet_iff_stabOrbit_of_separates` | 199-213 | ★★ **STEP 2** (doc §12.2). If an invariant pair colouring merely *separates the orbitals in `v`'s row*, the vertex colouring it induces there has level sets **exactly** the `K_v`-orbits. ⟹ CAO-propagation reduces to orbital separation with no remainder; the hypothesis `hsep` is the open crux (doc §12.3). | — |
+## ChainDescent/CaoRound.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `CaoRound.PairInvariantAt` | 50-57 | A pair colouring invariant under the **stabilizer of `v`** — the group that acts once `v` is individualized, and the one `CaoFibring.SameStabOrbit` quantifies over. Strictly weaker than `PairInvariant`, and it is what the real closure satisfies. | Definition |
+| `CaoRound.pairInvariantAt_of_pairInvariant` | 59-61 | Full `IsColAut`-invariance implies invariance at any base point. | — |
+| `CaoRound.pairInvariantAt_eq_of_sameStabOrbit` | 63-71 | **Soundness at the pointed group:** an invariant pair colouring is constant along `v`'s row on orbits of the `v`-stabilizer. | — |
+| `CaoRound.levelSet_iff_stabOrbit_of_separatesAt` | 73-83 | ★★ **STEP 2 AT THE HYPOTHESIS THE REAL OBJECT SATISFIES** (doc §12.2). Supersedes `CaoFibring.levelSet_iff_stabOrbit_of_separates` for applications: that version needs invariance under all of `IsColAut adj χ`, which the individualized closure does **not** have. | — |
+| `CaoRound.sig` | 90-92 | The multiset of **triangle types** `(f a x, f x b)` over intermediate points `x` — one refinement round's entire content, and the object `probe_cao_cause.py` extracts witnesses from. | Definition |
+| `CaoRound.roundBy` | 94-97 | One 2-dimensional refinement round, re-encoded by `enc` so the colour type is stable under iteration (the rank-renumbering every implementation does). | Definition |
+| `CaoRound.iterRoundBy` | 99-103 | `k` refinement rounds. | Definition |
+| `CaoRound.sig_congr` | 114-126 | ★ **The heart of invariance-preservation:** a `σ` under which `f` is invariant may be absorbed into the intermediate point, because it permutes the universe. | — |
+| `CaoRound.pairInvariantAt_roundBy` | 128-134 | A refinement round preserves pointed invariance. | — |
+| `CaoRound.pairInvariantAt_iterRoundBy` | 136-141 | **Any number of rounds preserves it** — hence the whole closure is invariant. | — |
+| `CaoRound.pairInvariant_roundBy` | 143-149 | The unpointed version, for the closure taken *before* individualization. | — |
+| `CaoRound.ext0` | 153-156 | The individualized initial colouring: the old colour plus the two flags marking `v`. This is where — and the **only** where — the extension's new information enters. | Definition |
+| `CaoRound.pairInvariantAt_ext0` | 158-169 | Individualizing `v` keeps the colouring invariant under the **stabilizer** of `v`; the flags are exactly what a `σ` fixing `v` preserves. | — |
+| `CaoRound.step2_closure` | 171-184 | ★★ **THE CAPSTONE — Step 2 applies to the real object.** From any invariant root colouring, individualize `v` and take **any** number of rounds: if the result separates the orbitals in `v`'s row, its level sets there are exactly the `K_v`-orbits. Only `hsep` (doc §12.3) is left. | — |
+| `CaoRound.Coherent` | 188-192 | **Coherence in the form that states the barrier**: the colouring is a *fixpoint* of the round — equal-coloured pairs have equal triangle-type multisets. | Definition |
+| `CaoRound.round1_barrier` | 224-242 | ★★ **THE ROUND-1 BARRIER** (doc §12.3, prose until now). At a coherent `X`, individualizing `v` and taking **one** round does not separate two pairs of `v`'s row that `X` already identified — the base point learns nothing directly. ⟹ any proof of the crux needs ≥ 2 rounds; no local argument at `v` can work. | — |
+| `CaoRound.witness_ne_base` | 244-259 | ★ **The marking is provably non-local.** If a round *does* separate `(v,u)` from `(v,w)` while they share a colour, the difference lives in the intermediate points `x ≠ v` — the base point's own term is identical on both sides. This is the theorem behind M3's measured cause chains. | — |

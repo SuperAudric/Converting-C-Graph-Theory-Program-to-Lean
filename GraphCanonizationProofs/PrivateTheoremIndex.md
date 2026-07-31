@@ -434,3 +434,11 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 |------|------|-------------|-------|
 | `CaoFibring.perm_apply_inv` | 62-67 | — | — |
 | `CaoFibring.perm_inv_apply` | 69-72 | — | — |
+## ChainDescent/CaoRound.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `CaoRound.map_univ_perm` | 105-112 | Reindexing by a permutation leaves the universe multiset alone — the mechanical fact behind `sig_congr`. | — |
+| `CaoRound.univ_cons` | 194-198 | The universe multiset splits off the base point `v` (via `Finset.erase`, whose `Nodup` is what makes membership give `x ≠ v`). | — |
+| `CaoRound.sig_ext0_row` | 200-214 | The `ext0` signature along `v`'s row, split into the base-point term and the far points. Off `v` both flags are determined, so the far part is a relabelling of the plain triangle types — the decomposition both `round1_barrier` and `witness_ne_base` run on. | — |
+| `CaoRound.sig_row` | 216-222 | The plain signature along `v`'s row, split the same way. | — |
