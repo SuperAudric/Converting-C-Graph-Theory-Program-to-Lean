@@ -439,5 +439,95 @@ theorem round2_barrier_real {β : Type*} [Nonempty β]
   obtain ⟨Ψ, hΨ⟩ := exists_factor_roundBy_ext0 (enc := enc) hc hd
   exact round2_barrier hc ht hΨ h
 
+/-! ## 6. The conditional converse — round 3 separates **exactly when** the counts differ
+
+§§3–5 give a sharp *lower* bound: separation cannot occur before round 3. They cannot give the matching
+upper bound, and the reason is structural — every step there shows two objects are **equal**, which is
+what coherence hands you for free, whereas separation needs an **inequality**, which no
+"these counts are determined" statement can produce (the dual of §4.2's *"`k`-WL computes only
+structure constants"*).
+
+What *is* provable is the converse *conditionally*, and it is the useful shape: the round-3 row colours
+differ **iff** the round-2 signatures differ. Since the barriers make everything on `v`'s row agree
+through round 2, the entire remaining content is one inequality between **triangle counts** — a finite,
+explicit, `K_v`-invariant object with no reference to rounds, the row, or the closure.
+
+⟹ this is the honest form of *"must separation occur at round 3?"*: **not** unconditionally, but
+*exactly when* `triCount` differs. That is the statement the per-family certificate (§12.4 R2/R3)
+should be pinned to. -/
+
+/-- The **triangle count**: how many intermediate points realize the triangle type `q` at `(a,b)`.
+This is the object doc §12.5a's sharpened R1 is about. -/
+def triCount {β : Type*} [DecidableEq β] (f : Fin n → Fin n → β) (a b : Fin n) (q : β × β) : Nat :=
+  Multiset.count q (sig f a b)
+
+theorem triCount_eq_card {β : Type*} [DecidableEq β] (f : Fin n → Fin n → β) (a b : Fin n)
+    (q : β × β) :
+    triCount f a b q = (Finset.univ.filter (fun x => q = (f a x, f x b))).card := by
+  unfold triCount sig
+  rw [Multiset.count_map]
+  rfl
+
+/-- A round cannot separate what the signature does not. (No hypothesis on `enc`.) -/
+theorem roundBy_eq_of_sig_eq {β : Type*} {enc : β × Multiset (β × β) → β} {f : Fin n → Fin n → β}
+    {a b a' b' : Fin n} (hcol : f a b = f a' b') (hsig : sig f a b = sig f a' b') :
+    roundBy enc f a b = roundBy enc f a' b' := by
+  show enc (f a b, sig f a b) = enc (f a' b', sig f a' b')
+  rw [hcol, hsig]
+
+/-- **★ THE CONDITIONAL CONVERSE.** For a faithful re-encoding, a round separates two pairs of equal
+colour **exactly when** their signatures differ. -/
+theorem roundBy_ne_iff_sig_ne {β : Type*} {enc : β × Multiset (β × β) → β}
+    (henc : Function.Injective enc) {f : Fin n → Fin n → β} {a b a' b' : Fin n}
+    (hcol : f a b = f a' b') :
+    roundBy enc f a b ≠ roundBy enc f a' b' ↔ sig f a b ≠ sig f a' b' := by
+  constructor
+  · intro hne hsig
+    exact hne (roundBy_eq_of_sig_eq hcol hsig)
+  · intro hsig hne
+    exact hsig (congrArg Prod.snd (henc hne))
+
+/-- The signatures differ exactly when some **triangle type** has a different count — the concrete
+inequality the crux reduces to. -/
+theorem sig_ne_iff_exists_triCount_ne {β : Type*} [DecidableEq β] {f : Fin n → Fin n → β}
+    {a b a' b' : Fin n} :
+    sig f a b ≠ sig f a' b' ↔ ∃ q, triCount f a b q ≠ triCount f a' b' q := by
+  constructor
+  · intro hne
+    by_contra hall
+    push Not at hall
+    exact hne (Multiset.ext.mpr hall)
+  · rintro ⟨q, hq⟩ h
+    exact hq (by unfold triCount; rw [h])
+
+/-- Through round 2 the row colours themselves agree — the colour-level form of §§3–5. -/
+theorem round2_row_colour_eq {β : Type*} [Nonempty β]
+    {enc : (β × Bool × Bool) × Multiset ((β × Bool × Bool) × (β × Bool × Bool)) → β × Bool × Bool}
+    {f : Fin n → Fin n → β} (hc : Coherent f) (ht : Transposable f) {v u w : Fin n}
+    (hd : DiagSep f v) (hu : u ≠ v) (hw : w ≠ v) (h : f v u = f v w) :
+    roundBy enc (roundBy enc (ext0 f v)) v u = roundBy enc (roundBy enc (ext0 f v)) v w := by
+  refine roundBy_eq_of_sig_eq ?_ (round2_barrier_real hc ht hd h)
+  refine roundBy_eq_of_sig_eq ?_ (round1_barrier hc hu hw h)
+  show (f v u, decide (v = v), decide (u = v)) = (f v w, decide (v = v), decide (w = v))
+  rw [h]
+  simp [hu, hw]
+
+/-- **★★★ THE CRUX, REDUCED TO ONE INEQUALITY.** Under the coherent-configuration axioms and a
+faithful re-encoding, the **round-3** row colours differ **iff** some triangle type of the round-2
+colouring has a different count at `(v,u)` than at `(v,w)`.
+
+Everything about rounds, the row, and the closure has been discharged; what remains — the open crux
+(doc §12.3, §12.5a) — is exactly that one inequality between finite explicit counts. -/
+theorem round3_separates_iff_triCount_ne {β : Type*} [Nonempty β] [DecidableEq β]
+    {enc : (β × Bool × Bool) × Multiset ((β × Bool × Bool) × (β × Bool × Bool)) → β × Bool × Bool}
+    (henc : Function.Injective enc) {f : Fin n → Fin n → β} (hc : Coherent f) (ht : Transposable f)
+    {v u w : Fin n} (hd : DiagSep f v) (hu : u ≠ v) (hw : w ≠ v) (h : f v u = f v w) :
+    roundBy enc (roundBy enc (roundBy enc (ext0 f v))) v u ≠
+        roundBy enc (roundBy enc (roundBy enc (ext0 f v))) v w ↔
+      ∃ q, triCount (roundBy enc (roundBy enc (ext0 f v))) v u q ≠
+        triCount (roundBy enc (roundBy enc (ext0 f v))) v w q := by
+  rw [roundBy_ne_iff_sig_ne henc (round2_row_colour_eq hc ht hd hu hw h),
+    sig_ne_iff_exists_triCount_ne]
+
 end CaoRound
 end ChainDescent

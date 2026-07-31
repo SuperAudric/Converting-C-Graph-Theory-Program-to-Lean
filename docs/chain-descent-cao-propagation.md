@@ -806,6 +806,41 @@ It is now proved **from the coherent-configuration axioms and nothing else**:
 `CoherentConfig.lean` (`inter_card_eq` / `transpose_eq` / `diag_eq`). The measured uniform depth 3
 (11/11) is *explained*, not just observed.
 
+#### ★★★ "Must it occur AT round 3?" — NO, and the method cannot say so (2026-07-31)
+
+Asked directly, and worth recording because the answer is structural, not a gap in effort.
+
+**1. It is strictly stronger than the crux.** The crux says separation happens *eventually* (at the
+fixpoint); *"at round 3"* says it happens **and** by round 3. Proving it proves the open problem plus a
+round bound, so it cannot follow from the barrier.
+
+**2. The method is one-directional by construction.** Every step of §§3–5 shows two objects are
+**equal** — which is exactly what coherence hands you, since coherence *is* the statement that certain
+counts are determined. Separation needs an **inequality**, and no "these counts are determined"
+statement produces one. This is the dual of §4.2's *"`k`-WL computes only structure constants"*.
+
+**3. Where the chain breaks is the useful part.** The barrier propagates while the data feeding `v`'s
+row is coherence-determined, and stops at round 3 because the round-2 far colours carry the **triple
+count**, which coherence does *not* fix. So the barrier **localizes the freedom** — it proves the only
+thing that *can* separate the row is that count. But "there is room" ≠ "the room is used".
+
+**✅ WHAT IS PROVABLE — the conditional converse, LANDED (`CaoRound.lean` §6).**
+
+| landed | content |
+|---|---|
+| **`triCount`** | the **triangle count** `#{x : (f a x, f x b) = q}` (+ `triCount_eq_card`) — R1's object, named |
+| `roundBy_eq_of_sig_eq` | a round cannot separate what the signature does not (no hypothesis on `enc`) |
+| **`roundBy_ne_iff_sig_ne`** | for a *faithful* re-encoding, a round separates equal-coloured pairs **exactly when** their signatures differ |
+| `sig_ne_iff_exists_triCount_ne` | signatures differ **iff** some triangle type has a different count |
+| `round2_row_colour_eq` | the colour-level form of §§3–5: through round 2 the row colours themselves agree |
+| **`round3_separates_iff_triCount_ne`** | ★★★ **THE CRUX, REDUCED TO ONE INEQUALITY** |
+
+⟹ **round 3 separates `iff` some triangle type of the round-2 colouring has a different count at
+`(v,u)` than at `(v,w)`.** Rounds, the row, and the closure are fully discharged; what remains is one
+inequality between finite explicit counts, with no reference to any of them. **That is the object the
+per-family certificate (§12.4 R2/R3) should be pinned to** — and the honest form of "must it occur at
+round 3": *not unconditionally, but exactly when `triCount` differs.*
+
 **▶ What this changes for R1 — and it is a sharpening, not a setback.** R1 asks *"why must two orbitals
 in one `X`-class have different `v`-profile distributions?"* The ablation says they differ in **many
 coordinates at once**, none load-bearing. So a proof should **not** try to construct a distinguished

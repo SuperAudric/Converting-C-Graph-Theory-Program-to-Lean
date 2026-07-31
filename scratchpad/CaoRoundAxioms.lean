@@ -18,3 +18,9 @@ open ChainDescent.CaoRound
 #print axioms ChainDescent.CaoRound.roundBy_ext0_congr
 #print axioms ChainDescent.CaoRound.exists_factor_roundBy_ext0
 #print axioms ChainDescent.CaoRound.round2_barrier_real
+#print axioms ChainDescent.CaoRound.triCount_eq_card
+#print axioms ChainDescent.CaoRound.roundBy_eq_of_sig_eq
+#print axioms ChainDescent.CaoRound.roundBy_ne_iff_sig_ne
+#print axioms ChainDescent.CaoRound.sig_ne_iff_exists_triCount_ne
+#print axioms ChainDescent.CaoRound.round2_row_colour_eq
+#print axioms ChainDescent.CaoRound.round3_separates_iff_triCount_ne
