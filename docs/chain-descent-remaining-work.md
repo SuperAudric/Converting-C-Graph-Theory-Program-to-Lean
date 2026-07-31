@@ -994,11 +994,35 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   itself, which rigid-seal §9.1 says is the SAME work as the rigid seal on that family. So the first real
   family still costs a rigid-side discharge; the wiring above it is now built.
   **▶ EVIDENCE BASE + PROOF PLAN: [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)**
-  (read its §0 handoff first). `CellsAreOrbits` propagation is **REFUTED at 1-WL** (4 witnesses) and
-  **open at 2-WL**. ✅ The *reduction* is landed and gated — `ChainDescent/CaoFibring.lean`: preservation
-  ⟺ the one-point extension separates the `D–C` **orbitals**, so what is left is the single named
-  hypothesis `hsep` in `CaoFibring.levelSet_iff_stabOrbit_of_separates`. ⚠ Bounded shattering depth is
-  **not** union-stable, so it can only ever be a per-family statement (that doc §4.3).
+  — **read its §0.0 FIRST, then §0.** `CellsAreOrbits` propagation is **REFUTED at 1-WL** (4 witnesses)
+  and **open at 2-WL**.
+  **⚠⚠ THE FRAMING CORRECTION THAT DOC NOW CARRIES (2026-07-30/31) — do not inherit the old reading.**
+  The Lean **`Tinhofer` is a 1-WL predicate** (`Deepen.step = warmRefineVec ∘ indivOne`, and `sigKey`'s
+  `signature` is plain colour refinement), while that doc's target is **2-WL**. 1-WL cells are *unions*
+  of 2-WL cells, so **nothing transfers**: proving the 2-WL target does **not** discharge `Tinhofer` as
+  it stands, and it is not meant to. That doc is a probe into a **design change** — swap the refiner
+  1-WL → 2-WL (`n²` → `n³` per round) — whose payoff is *CAO all the way down ⟹ Layer 1 ⟹ the deepen
+  supply is COMPLETE ⟹ consume resolves every node*, making force **unnecessary** on the consume
+  domain rather than feeding it. ⚠ Also walked back there: *"the 1-WL design is provably dead"* is too
+  strong — consume measurably **does** fire on the known witnesses (index-min selector luck); what is
+  missing is a **guarantee**, especially at the **root**. Two routes to one: **(A) selector** (that doc
+  §10.5, parked) and **(B) mechanism/2-WL** (that doc §12.5a).
+  ✅ **Landed and gated:** `ChainDescent/CaoFibring.lean` (the reduction: preservation ⟺ the one-point
+  extension separates the `D–C` **orbitals**) **and `ChainDescent/CaoRound.lean`** — which (i) supplies
+  **`step2_closure`**, the reduction at the **real** individualized closure (`CaoFibring`'s version
+  needs `PairInvariant`, which that closure does *not* satisfy — only `PairInvariantAt`, the
+  `v`-stabilizer), and (ii) proves **`round1_barrier` + `round2_barrier_real`**: *separation cannot
+  occur before round 3*, unconditional, from the coherent-configuration axioms alone.
+  ▶ **What is left is ONE INEQUALITY.** `CaoRound.round3_separates_iff_triCount_ne` (§6): round-3 row
+  colours differ **iff** some triangle type of the round-2 colouring has a different `triCount` at
+  `(v,u)` vs `(v,w)` — the **triple count** `N(a,b;i,j,k) = #{x : X(a,x)=i, X(v,x)=j, X(x,b)=k}` being
+  the first quantity coherence does *not* determine. Rounds, the row and the closure are all
+  discharged ⟹ **pin the per-family T1/R2/R3 certificate to `triCount`.** Ordered attack = that doc
+  **§12.5a (R1a–R1f)**; ⛔ do **not** try to strengthen the barrier to "must occur at round 3" (that
+  doc §12.6's "Must it occur AT round 3?" box says why the method cannot).
+  ⚠ Bounded shattering depth is **not** union-stable, so it can only ever be a per-family statement
+  (that doc §4.3); and a constant bound on the *total* round count is **refuted** by any VT family of
+  growing diameter (that doc §12.3's convention box — only the *extension* term is live).
 - **T2 — cost bounds per new mechanism** (`SupplyCost` pattern: closed-form `c₂`/`keyCost` at land time —
   house rule, not a backlog). ⚠ **Outstanding debt: `deepenSupply` has NO formalized cost bound** — its
   `n⁶` bill is prose only (no `SupplyCost`/`descentCost` theorem references it). Not urgent (deepen is not

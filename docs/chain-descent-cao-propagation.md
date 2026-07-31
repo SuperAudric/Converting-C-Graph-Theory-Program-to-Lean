@@ -12,12 +12,18 @@
 | level | verdict | witness |
 |---|---|---|
 | **1-WL** | ⛔ **REFUTED** | `net(Z₄) ≅ CFI[K4]-tw` (n=28); also Shrikhande (n=16, VT), Chang-2 (n=28), `Cay(Z₁₂⋊₅Z₂)` (n=24, VT) |
-| **2-WL** | **OPEN — no counterexample, and the evidence is now non-vacuous but thin** | — |
+| **2-WL** | **OPEN — no counterexample; evidence upgraded 2026-07-30/31 (see §6)** | — |
 | `VT ⟹ Tinhofer` | ⛔ **REFUTED at 1-WL** by the parallel branch — see [`../scratchpad/HANDOFF_2wl.md`](../scratchpad/HANDOFF_2wl.md) §5 | `Cay(Z₁₂⋊₅Z₂)` |
 | `CAO ⟹ Tinhofer` | ⛔ **REFUTED at 1-WL** | `net(Z₄)` |
+| **separation before round 3** | ⛔ **IMPOSSIBLE — PROVED** (`CaoRound.round1_barrier` + `round2_barrier_real`, unconditional, CC axioms only) | — |
 
-**The live target is §2's sharpened statement.** It is union-stable, strictly weaker than "schurity of
-point extensions", and it isolates the one thing that actually has to happen (§3's coupling principle).
+**⚠⚠ READ §0.0 BEFORE ANYTHING ELSE.** This doc is a probe into a **design change** — swapping the
+refiner 1-WL → 2-WL — **not** a lemma for the `Tinhofer` in `build.sh`, which is a **1-WL** predicate.
+Two readers have already reconstructed the wrong target.
+
+**The live target is §2's sharpened statement**, now sharpened again by the barriers to the **triple
+count** `N(a,b;i,j,k)` (§12.5a). It is union-stable, strictly weaker than "schurity of point
+extensions", and it isolates the one thing that actually has to happen (§3's coupling principle).
 
 **Why the project cares.** Per [`00-START-HERE.md`](./00-START-HERE.md) §2, *"the SOLE remaining `①c`
 condition, `Tinhofer`, IS `CellsAreOrbits`"*, and `deepenSupply` stays out of `Publication.canonForm?`
@@ -34,33 +40,55 @@ Two fragments are **already landed** — do not re-prove them:
 ## 0. ▶ HANDOFF — start here
 
 **Where the work stands, in a few sentences.** At **1-WL the question is settled: refuted**, four
-independent witnesses (§ STATUS). At **2-WL it is open**, no counterexample after a large and
-now-non-vacuous search (§6), and §3 explains *why* the search keeps failing. The **reduction is
-finished and in Lean**: `ChainDescent/CaoFibring.lean` proves that preservation is equivalent to
-*separating orbitals*, with nothing left over (§12.1–12.2). What remains is exactly **one
-hypothesis**.
+independent witnesses (§ STATUS). At **2-WL it is open**, no counterexample, and §3 explains *why* the
+search keeps failing. **Two Lean modules are landed and gated** — `CaoFibring.lean` (the reduction to
+orbital separation) and `CaoRound.lean` (that reduction applied to the **real** closure, plus the
+round-1 and round-2 barriers). What remains is **one hypothesis**, and the barriers have sharpened it
+to a single named quantity.
 
-**The remaining obligation has a name.** In `CaoFibring.levelSet_iff_stabOrbit_of_separates`,
+**The remaining obligation has a name — use the `CaoRound` form.** The statement that applies to the
+object the algorithm actually builds is
 
 ```
-hsep : ∀ u w, f v u = f v w → SameOrbital adj χ v u v w
+CaoRound.step2_closure :   hsep → (closure v u = closure v w  ↔  SameStabOrbit adj χ v u w)
+    hsep : ∀ u w, f v u = f v w → SameStabOrbit adj χ v u w
 ```
 
-`f` = any `IsColAut`-invariant pair colouring (a 2-WL closure is one). Discharging `hsep` for the
-2-WL closure *is* the theorem; everything else is done. **Do not attack the target in its graph
-form** — the graph content is gone after §1's reduction.
+⚠ **Do not use `CaoFibring.levelSet_iff_stabOrbit_of_separates` for applications** — it requires
+`PairInvariant` (invariance under *all* of `IsColAut adj χ`), which the **individualized** closure does
+not have; it has only `PairInvariantAt` (the `v`-stabilizer). `CaoRound` fixes exactly that.
+**Do not attack the target in its graph form** — the graph content is gone after §1's reduction.
 
-**Read in this order.** § STATUS → §1 (the reduction — nothing later makes sense without it) → §2
-(the target) → §3 (the mechanism; this is the conceptual core) → §12 (the proof plan). Then §4/§5
-before proposing anything, and §7 before investing in anything.
+**What the barriers bought (2026-07-31, unconditional, CC axioms only).** Rounds 1 **and** 2 are
+provably blind on `v`'s row, so separation cannot occur before **round 3** — which is what M3 measured
+11/11. Round 2 gives far pairs the **triple count** `N(a,b;i,j,k) = #{x : X(a,x)=i, X(v,x)=j,
+X(x,b)=k}`, the first quantity **coherence does not determine**. ⟹ the crux is now a statement about
+*that* object (§12.5a), not about the closure in the abstract.
 
-**First actions — ▶▶ THE ORDERED PLAN IS §12.6 (M1–M6); start there.** In one line: **M1** run the
-step on its real input class at a population that pays §7.2's entry ticket (⚠ and *fix* the
-measurement first — the sharp-Cayley probe silently caps at ~24 inputs, not 729); **M2** is the
-separation round count bounded (the only union-stable formalizable shape); **M3** instrument the
-feedback loop, not the round number — the actual mechanism ask; **M4** the coupling construction, in
-parallel with M3; **M5** reuse the already-built `CoherentConfig.lean` substrate; **M6** the group
-bridge. ⚠ **M1 can end the track** — if 2-WL falls, §10.5's selector route (A) becomes the only path.
+> ### ★★★ THE ONE THING TO KNOW — the crux is now a SINGLE INEQUALITY
+> **`CaoRound.round3_separates_iff_triCount_ne`** (§6, axiom-clean): round-3 row colours differ **iff**
+> some triangle type of the round-2 colouring has a different `triCount` at `(v,u)` vs `(v,w)`.
+> **Rounds, the row and the closure are all discharged** — what is left is that one inequality.
+> ⟹ **pin the per-family R2/R3 certificate to `triCount`**, and read §12.5a for how to attack it.
+> ⚠ It carries one hypothesis, `Function.Injective enc` (faithful re-encoding — true of the rank
+> renumbering, but it must be supplied).
+> ⛔ **Do not try to strengthen the barrier to "separation MUST occur at round 3"** — **§12.6's
+> "Must it occur AT round 3?" box** explains why the method cannot yield it (barriers give
+> *equalities*; separation needs an *inequality*), and why it is strictly stronger than the crux.
+
+**Read in this order.** **§0.0 (why this question exists — non-optional)** → § STATUS → §1 (the
+reduction) → §2 (the target) → §3 (the mechanism; the conceptual core) → **§12.5a (the crux work
+plan)** → §12.3/§12.6 (the barriers and what M3 measured). Then §4/§5 before proposing anything, and
+§7 before investing in anything.
+
+**First actions — ▶▶ THE CRUX PLAN IS §12.5a (R1a–R1f); start there.** In one line: **R1a**
+coordinate-level ablation of `N` (the class-level one came back *over-determined* — §12.6); **R1b**
+base-point uniformity (∀`v` or ∃`v`?); **R1c** the falsifier = §12.6's M1, and note a Cayley root over
+a **transitive** group satisfies CAO *automatically*, so the 729 non-schurian S-rings **are** the sharp
+inputs ⚠ *and the probe silently caps at ~24, not 729 — fix that first*; **R1d** the literature check;
+**R1e** ✅ *landed* (`CaoRound.lean` §6 — the crux is now one `triCount` inequality); **R1f** the aggregate/rank attempt.
+⚠ **R1c can end the track** — if 2-WL falls, §10.5's selector route (A) becomes the only path.
+⚠ **§12.6's M2 is ANSWERED** (see §12.3's convention box) and **M3 is DONE** (§12.6); M4–M6 stand.
 
 **Before proposing any new route or invariant, apply §7 in order.** Two proof routes and two
 falsifier habitats died to those filters in one session each; they are cheap and they are decisive.
@@ -405,19 +433,28 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
 
 ## 10. OPEN ITEMS
 
-> ✅ **Closed since this doc was written:** the reduction (Steps 1–2 of the proof plan) is proved and
-> gated — `ChainDescent/CaoFibring.lean`, §12.1–12.2. The open items below are what is left.
+> ✅ **Closed since this doc was written:** (a) the reduction (Steps 1–2) — `CaoFibring.lean`,
+> §12.1–12.2; (b) **that reduction applied to the REAL closure, plus the round-1 and round-2
+> barriers** — `CaoRound.lean`, §12.3/§12.6; (c) **M2 is answered** (§12.3's convention box) and
+> **M3 is done** (§12.6). The open items below are what is left.
 
-1. **The live target (§2), unproven — and it is now a single named hypothesis**, `hsep` in
-   `CaoFibring.levelSet_iff_stabOrbit_of_separates` (§0). Treat it as a genuine question of algebraic
-   combinatorics — the schurity of one-point extensions — not a lemma to discharge. The practical
-   route is a **per-family certificate** (§12.4 R2/R3), matching the project's carried-obligation
-   pattern; note `ChainDescent/Separability.lean` and `ChainDescent/CoherentConfig.lean` already
-   carry `Separable` / `SeparablePointed` / `ExtensionSeparable`, which is R2's vocabulary.
-2. **Not yet run:** the `E1/E2` descent instrumentation over the **sharp Cayley inputs** (the 729
-   non-schurian S-rings). The section exists in `probe_cao_induction.py` but its first attempt died on
-   an unguarded budget exception; the guard is now in place and it has not been re-run. **This is the
-   cheapest remaining measurement.**
+1. **The live target (§2), unproven — and now sharpened past "a single named hypothesis" to a single
+   named QUANTITY.** The barriers reduce it to the **triple count** `N(a,b;i,j,k)` and the round-3
+   aggregate over it; the full statement and the ordered attack are **§12.5a (R1a–R1f)**. Treat it as
+   a genuine question of algebraic combinatorics — the schurity of one-point extensions — not a lemma
+   to discharge. ⚠ Use the `CaoRound.step2_closure` form, not `CaoFibring`'s (§0). The practical
+   fallback is a **per-family certificate** (§12.4 R2/R3); note `ChainDescent/Separability.lean` and
+   `ChainDescent/CoherentConfig.lean` already carry `Separable` / `SeparablePointed` /
+   `ExtensionSeparable` — R2's vocabulary — and `CoherentConfig` also carries `IsPointExtension`, the
+   *construction* `pointExtension`, and `Theorem41Statement` (§12.6 M5).
+2. **Not yet run, and the cheapest remaining measurement:** the `E1/E2` descent instrumentation over
+   the **sharp Cayley inputs** (= §12.5a R1c = §12.6 M1). ⚠⚠ **The probe does NOT currently do what
+   this item says.** `probe_cao_induction.py`'s sharp-Cayley section iterates **8 groups of order 16
+   only** and `break`s at `hits > 3` per group ⟹ **≤ ~24 inputs, not 729** (the 729 came from 38
+   groups of orders 8–32). **Remove the cap, extend to the full population, and log what is skipped**
+   (§9) before quoting any number from it. ★ Why this population and no other: a Cayley root over a
+   **transitive** group satisfies CAO *automatically* (one fibre = one orbit), so these are exactly
+   the inputs that pay §7.2's entry ticket.
 3. **The coupling construction (§2, §3).** Nobody has yet tried to *build* an object with the
    group-change and the deficiency at the same cell pair. That is the falsifier design, and it is the
    only one not already excluded by §5.
@@ -489,7 +526,25 @@ Shared machinery lives in `probe_cao_cleanroom.py` (§8.1); most files import it
 
 **Provenance** — `probe_cao_provenance.py` (§8.1/§8.2).
 
-**Lean (this doc's own results)** — `ChainDescent/CaoFibring.lean` (Steps 1–2, in `build.sh`; all 18 decls in `PublicTheoremIndex.md`) · `scratchpad/CaoFibringAxioms.lean` (the `#print axioms` check) · `scratchpad/ShrikhandeTinhoferProbe.lean` (the `chooseIdK` `#eval` cross-check of §8.3). The two Lean files sit **outside** the package root by design (§8.3).
+**Lean (this doc's own results)** — both in `build.sh`, axiom-clean, all declarations described in
+`PublicTheoremIndex.md` / `PrivateTheoremIndex.md`:
+- **`ChainDescent/CaoFibring.lean`** (18 decls) — Steps 1–2: the fibring lemma and the reduction to
+  orbital separation, for an *abstract* invariant pair colouring.
+- **`ChainDescent/CaoRound.lean`** (**42 decls**) — §1 `PairInvariantAt` + **`step2_closure`** (Step 2
+  at the **real** individualized closure — the version applications must use); §2 the round and that it
+  preserves invariance; §3 **`round1_barrier`** + `witness_ne_base`; §4 `zAug`/`Transposable` +
+  **`round2_barrier`**; §5 `sig_ext0_congr` → **`exists_factor_roundBy_ext0`** (`hg` discharged) →
+  **`round2_barrier_real`** (unconditional); **§6 the conditional converse = R1e** — `triCount`,
+  `roundBy_ne_iff_sig_ne`, `sig_ne_iff_exists_triCount_ne`, `round2_row_colour_eq` ⟹
+  **`round3_separates_iff_triCount_ne`**: round-3 row colours differ **iff** some triangle type of the
+  round-2 colouring has a different `triCount` at `(v,u)` vs `(v,w)`. ⚠ carries one hypothesis,
+  `Function.Injective enc` (faithful re-encoding — true of the rank renumbering, must be supplied).
+  ⟹ **rounds, the row and the closure are all discharged; pin the per-family R2/R3 certificate to that
+  inequality.**
+
+Checks and cross-checks (**outside** the package root by design, §8.3) — `scratchpad/CaoFibringAxioms.lean`,
+`scratchpad/CaoRoundAxioms.lean` (`#print axioms` for all of both modules) ·
+`scratchpad/ShrikhandeTinhoferProbe.lean` (the `chooseIdK` `#eval` cross-check of §8.3).
 
 **Parallel branch (1-WL VT hunt, succeeded)** — [`../scratchpad/HANDOFF_2wl.md`](../scratchpad/HANDOFF_2wl.md),
 `probe_vt_witness.py`, `VTNotTinhoferProbe.lean`.
@@ -645,7 +700,7 @@ target is that it is *injective on `K_v`-orbits within an `X`-class*.
 | **R1b** | **Base-point uniformity.** CAO makes `D` a single `K`-orbit, so the invariant transports across base points. Measure whether separating power is uniform over `v ∈ D` | hours | decides whether the theorem is *"for all `v`"* or only *"for some `v`"* — materially different statements, and §7.4/§7.5 show selector-dependence is a real hazard here |
 | **R1c** | **The falsifier, in the one place it can live** (= M1, sharpened). A Cayley root over a **transitive** group satisfies CAO *automatically* (one fibre = one orbit), so the **729 non-schurian S-rings are exactly the sharp inputs.** Fix the probe cap and run them | hours | **can end the track.** This is also why M1 is the falsifier and the evidence at once |
 | **R1d** | **Literature check.** *"Point extensions of schurian CCs need not be schurian"* is standard ⟹ **the CAO hypothesis must be doing essential work**, and any known non-schurian point extension whose root is *fibre*-schurian is an immediate counterexample | hours | far cheaper than §10.3's build-one-from-scratch, and it tests the same thing |
-| **R1e** | **Lean: name the invariant.** Once R1a fixes the needed projection, define it and restate `hsep` in terms of it | days | converts the crux from "the closure separates" into a concrete named invariant — which is what makes the R2/R3 per-family pin a *deliverable* rather than a plan |
+| **R1e** ✅ **LANDED** (`CaoRound.lean` §6) | **Lean: name the invariant.** **`round3_separates_iff_triCount_ne`** — round 3 separates **iff** some triangle type of the round-2 colouring has a different `triCount` at `(v,u)` vs `(v,w)`. Rounds, row and closure all discharged. ⚠ one hypothesis: `Function.Injective enc` | done | **the crux is now ONE INEQUALITY**, and the R2/R3 per-family pin is a *deliverable*: pin it to `triCount`. R1a still sharpens *which projection* of the count to pin |
 | **R1f** | **The aggregate/rank attempt.** Informed by R1a/R1b | open | the actual proof. ⚠ Expect a sharper statement, not a proof |
 
 **⚠ Two constraints any attempt must respect.** (i) §4.2 — `k`-WL sees only structure constants, so
@@ -653,7 +708,7 @@ the argument must conclude **separation**, never *"an automorphism exists"*. (ii
 do **not** hunt a distinguished witness class; it does not exist.
 
 **▶ Order:** R1a + R1b (cheap, and they aim everything else) → R1c + R1d in parallel (either can end
-the track) → R1e → R1f.
+the track) → ~~R1e~~ (done) → R1f.
 
 ### 12.4 Candidate resolutions, ranked
 
@@ -689,12 +744,12 @@ that.
 
 | # | step | cost | what it DECIDES |
 |---|---|---|---|
-| **M1** | **Run the step on its real input class, at a population that pays the entry ticket** (= the old §12.6(1)/§10.2, but *fixed* — see the ⚠ below) | hours | whether "no 2-WL counterexample" survives a population where §7.2's ticket is genuinely paid. **If it falls, route (B) ends** and §10.5's selector route (A) becomes the only path |
-| **M2** | **Is the EXTENSION round count bounded?** ⚠ **RESTATED 2026-07-30** — see §12.3's convention box. The *total* count is **refuted** by any VT family of growing diameter (Johnson, measured ⌈diam/2⌉); only **term 2**, the rounds *after* coherent `X`, is the live quantity. Measured **constant 3** on every deficient root incl. Shrikhande □ `C₃`/`C₅`/`C₇` at diameters 3/4/5 | hours | pursue a **bounded-extension-round** theorem, or drop it. Still the only shape that is *both* union-stable (unlike bounded depth, §4.3) *and* formalizable. **▶ The falsifier to hunt: a deficiency that is inherently LONG-RANGE** — in a Cartesian product the fusion stays factor-local, which is why □`C_m` does not refute it |
-| **M3** | **★ Instrument the FEEDBACK LOOP, not the round number** — the actual mechanism ask, and new work | days | supplies R1's missing *"why must the `v`-profile distributions differ?"* |
+| **M1** ▶ **LIVE** (= §12.5a R1c) | **Run the step on its real input class, at a population that pays the entry ticket** (= the old §12.6(1)/§10.2, but *fixed* — see the ⚠ below) | hours | whether "no 2-WL counterexample" survives a population where §7.2's ticket is genuinely paid. **If it falls, route (B) ends** and §10.5's selector route (A) becomes the only path |
+| **M2** ✅ **ANSWERED** | **Is the EXTENSION round count bounded?** ⚠ **RESTATED 2026-07-30** — see §12.3's convention box. The *total* count is **refuted** by any VT family of growing diameter (Johnson, measured ⌈diam/2⌉); only **term 2**, the rounds *after* coherent `X`, is the live quantity. Measured **constant 3** on every deficient root incl. Shrikhande □ `C₃`/`C₅`/`C₇` at diameters 3/4/5 | hours | pursue a **bounded-extension-round** theorem, or drop it. Still the only shape that is *both* union-stable (unlike bounded depth, §4.3) *and* formalizable. **▶ The falsifier to hunt: a deficiency that is inherently LONG-RANGE** — in a Cartesian product the fusion stays factor-local, which is why □`C_m` does not refute it |
+| **M3** ✅ **DONE** (results below) | **★ Instrument the FEEDBACK LOOP, not the round number** — the actual mechanism ask, and new work | days | supplies R1's missing *"why must the `v`-profile distributions differ?"* |
 | **M4** | **The coupling construction** (§10.3) — build an object with group-change and deficiency at the **same** cell pair | open-ended | kills the track cheaply, or its principled failure *is* the mechanism. Run **in parallel with M3** — same question from opposite sides |
 | **M5** | **Lean: reuse the CC substrate that already exists** (see below — it is not referenced anywhere in this plan and should be) | days | turns R2's "carry a per-family certificate" from a plan into a deliverable |
-| **M6** | the group-identification bridge (`IsColAut` of a refined colouring ↔ the point stabilizer) | hours | needed by **any** consumer of `CaoFibring`, at either WL level |
+| **M6** ▶ partly subsumed by `CaoRound` §1 (`PairInvariantAt`/`step2_closure`) | the group-identification bridge (`IsColAut` of a refined colouring ↔ the point stabilizer) | hours | needed by **any** consumer of `CaoFibring`, at either WL level |
 
 **⚠ M1 — the measurement is not what §10.2 says it is.** `probe_cao_induction.py`'s
 sharp-Cayley section iterates **8 groups of order 16 only** and `break`s at `hits > 3` per group ⟹ at

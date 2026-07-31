@@ -5,3 +5,4 @@ sharp Cayley sweep -- separation round of DEFICIENT roots, counted from coherent
   D8        n= 8  deficient roots:    0   max sep round: 0
   Q8        n= 8  deficient roots:    0   max sep round: 0
   Z16       n=16  deficient roots:    0   max sep round: 0
+  Z4^2      n=16  deficient roots:   64   max sep round: 3

@@ -274,9 +274,21 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > **▶ THE T1 EVIDENCE BASE IS [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)** — what
 > `CellsAreOrbits` propagation is *measured* to do, what is REFUTED at 1-WL (`net(Z₄)`, Shrikhande,
 > `Cay(Z₁₂⋊₅Z₂)`), the open 2-WL target, and the dead routes/habitats. **Read it before any `Tinhofer` work.**
-> ✅ **Its reduction is now LANDED in Lean and gated — `ChainDescent/CaoFibring.lean`** (18 decls, axiom-clean):
-> CAO-propagation ⟺ the one-point extension separates the **orbitals** between fibres, leaving exactly one
-> named hypothesis (`hsep` in `levelSet_iff_stabOrbit_of_separates`). Start at that doc's **§0 handoff**.
+> ✅ **LANDED in Lean and gated — `ChainDescent/CaoFibring.lean`** (18 decls) **and
+> `ChainDescent/CaoRound.lean`** (42 decls), both axiom-clean: CAO-propagation ⟺ the one-point extension
+> separates the **orbitals** between fibres, leaving one named hypothesis; `CaoRound.step2_closure` is the
+> form that applies to the **real** individualized closure (`CaoFibring`'s needs `PairInvariant`, which that
+> closure lacks), and `round1_barrier` + `round2_barrier_real` prove **separation cannot occur before round 3**,
+> unconditionally from the coherent-configuration axioms.
+> **⚠⚠ FRAMING CORRECTION (2026-07-30/31) — start at that doc's §0.0, not §0.** The Lean **`Tinhofer` is a
+> 1-WL predicate** while that doc's target is **2-WL**, and 1-WL cells are *unions* of 2-WL cells ⟹ **nothing
+> transfers**: proving the 2-WL target does **not** discharge `Tinhofer`, and is not meant to. The doc is a
+> probe into a **design change** (swap the refiner 1-WL → 2-WL, `n²` → `n³` per round), whose payoff is
+> *CAO all the way down ⟹ Layer 1 ⟹ the deepen supply is COMPLETE ⟹ consume resolves every node* — making
+> force **unnecessary** on the consume domain, which is the only escape from the recorded m=8 obstruction
+> (consume fails on a **single-orbit** cell, where `forceBy_no_narrowing_on_orbit` *forbids* force).
+> ⚠ *"The 1-WL design is provably dead"* was **walked back**: consume measurably does fire on the known
+> witnesses (selector luck); what is missing is a **guarantee**, especially at the root.
 > **`deepenSupply` stays out of `Publication.canonForm?` until
 > `Tinhofer`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
 > ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Tinhofer`
