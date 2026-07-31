@@ -1006,20 +1006,38 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   domain rather than feeding it. ⚠ Also walked back there: *"the 1-WL design is provably dead"* is too
   strong — consume measurably **does** fire on the known witnesses (index-min selector luck); what is
   missing is a **guarantee**, especially at the **root**. Two routes to one: **(A) selector** (that doc
-  §10.5, parked) and **(B) mechanism/2-WL** (that doc §12.5a).
+  §10.5) and **(B) mechanism/2-WL** (that doc §12.5a).
+  ⛔ **(A)'s cheap resolver-level form is MEASURED DEAD (2026-07-31, `scratchpad/probe_route_a.py`,
+  result at `probe_route_a.out`):** across **58** reached nodes on three witnesses there is **no** node
+  where the `chooseIdK`-selected cell fails and some *other* cell certifies; at the two failing nodes
+  (the m=8 root, and the node carrying the recorded `|C| = 16` cell) **all** cells fail together. The
+  failure is **supply incompleteness**, uniform across a node's cells, not cell selection — so "try
+  other cells" is not the lever, and what remains of (A) is only "build a stronger supply".
   ✅ **Landed and gated:** `ChainDescent/CaoFibring.lean` (the reduction: preservation ⟺ the one-point
   extension separates the `D–C` **orbitals**) **and `ChainDescent/CaoRound.lean`** — which (i) supplies
   **`step2_closure`**, the reduction at the **real** individualized closure (`CaoFibring`'s version
   needs `PairInvariant`, which that closure does *not* satisfy — only `PairInvariantAt`, the
   `v`-stabilizer), and (ii) proves **`round1_barrier` + `round2_barrier_real`**: *separation cannot
   occur before round 3*, unconditional, from the coherent-configuration axioms alone.
-  ▶ **What is left is ONE INEQUALITY.** `CaoRound.round3_separates_iff_triCount_ne` (§6): round-3 row
-  colours differ **iff** some triangle type of the round-2 colouring has a different `triCount` at
-  `(v,u)` vs `(v,w)` — the **triple count** `N(a,b;i,j,k) = #{x : X(a,x)=i, X(v,x)=j, X(x,b)=k}` being
-  the first quantity coherence does *not* determine. Rounds, the row and the closure are all
-  discharged ⟹ **pin the per-family T1/R2/R3 certificate to `triCount`.** Ordered attack = that doc
-  **§12.5a (R1a–R1f)**; ⛔ do **not** try to strengthen the barrier to "must occur at round 3" (that
-  doc §12.6's "Must it occur AT round 3?" box says why the method cannot).
+  ▶ **What is left has a SUFFICIENT PIN — one inequality.** `CaoRound.round3_separates_iff_triCount_ne`
+  (§6): round-3 row colours differ **iff** some triangle type of the round-2 colouring has a different
+  `triCount` at `(v,u)` vs `(v,w)` — the **triple count** `N(a,b;i,j,k) = #{x : X(a,x)=i, X(v,x)=j,
+  X(x,b)=k}` being the first quantity coherence does *not* determine. Everything **up to round 3** is
+  discharged ⟹ **pin the per-family T1/R2/R3 certificate to `triCount`.**
+  **⚠⚠ CORRECTED 2026-07-31 — do not inherit the earlier wording "rounds, the row and the closure are
+  all discharged."** Refinement is monotone, so `triCount` differing is **sufficient** for the crux,
+  not equivalent: if it agrees at round 3 the row can still separate at round 4+ (far pairs keep
+  refining). The `triCount` target is therefore **strictly stronger than the crux**, and a family
+  where it agrees is *not* a counterexample to CAO propagation.
+  Ordered attack = that doc **§12.5a**, but **§13 (the conversion gap) comes first**; ⛔ do **not** try
+  to strengthen the barrier to "must occur at round 3" (that doc §12.6's box says why the method
+  cannot).
+  **⚠⚠ AND THIS TRACK IS A PROBE, NOT A PROGRAM (user, 2026-07-31).** It is promoted to *the pursued
+  route* only if shown viable; competing resolutions of a CAO-unconsumable residue — proving the
+  residue cannot exist by another route, or running **force at every step** of the descent
+  (straightforward, expensive, uncosted) — are not ranked below it. Spend only on the cheap decisive
+  steps (that doc §13, then R1c/R1d) until there is a viability verdict; the falsifier hunt is **not**
+  the lever (an extensive one preceded formalization).
   ⚠ Bounded shattering depth is **not** union-stable, so it can only ever be a per-family statement
   (that doc §4.3); and a constant bound on the *total* round count is **refuted** by any VT family of
   growing diameter (that doc §12.3's convention box — only the *extension* term is live).

@@ -279,16 +279,30 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > separates the **orbitals** between fibres, leaving one named hypothesis; `CaoRound.step2_closure` is the
 > form that applies to the **real** individualized closure (`CaoFibring`'s needs `PairInvariant`, which that
 > closure lacks), and `round1_barrier` + `round2_barrier_real` prove **separation cannot occur before round 3**,
-> unconditionally from the coherent-configuration axioms.
+> unconditionally from the coherent-configuration axioms. `round3_separates_iff_triCount_ne` then pins round-3
+> separation to one `triCount` inequality — ⚠⚠ **a SUFFICIENT pin, NOT a reduction of the crux** (refinement is
+> monotone, so `triCount` agreement at round 3 leaves round 4+ free; corrected 2026-07-31 — the earlier wording
+> *"rounds, the row and the closure are all discharged"* is an overclaim and must not be inherited).
 > **⚠⚠ FRAMING CORRECTION (2026-07-30/31) — start at that doc's §0.0, not §0.** The Lean **`Tinhofer` is a
 > 1-WL predicate** while that doc's target is **2-WL**, and 1-WL cells are *unions* of 2-WL cells ⟹ **nothing
 > transfers**: proving the 2-WL target does **not** discharge `Tinhofer`, and is not meant to. The doc is a
-> probe into a **design change** (swap the refiner 1-WL → 2-WL, `n²` → `n³` per round), whose payoff is
-> *CAO all the way down ⟹ Layer 1 ⟹ the deepen supply is COMPLETE ⟹ consume resolves every node* — making
-> force **unnecessary** on the consume domain, which is the only escape from the recorded m=8 obstruction
-> (consume fails on a **single-orbit** cell, where `forceBy_no_narrowing_on_orbit` *forbids* force).
+> probe into a **design change** — ⚠ **not "swap the refiner"** (three docs said that; corrected 2026-07-31,
+> that doc §13): `Tinhofer` is a property of **`Deepen.step` alone**, so `Descend`/`Refine`/the `Colouring`
+> type do **not** change; the swap is confined to the `Deepen*` cluster, but it is *not* free — `CertPath`
+> also calls `step` and `orbKeyG guardSupply` is inside `recordKey`, so it re-bills the record key's cost.
+> Payoff if cashed: *CAO all the way down ⟹ Layer 1 ⟹ the deepen supply is COMPLETE ⟹ consume resolves every
+> node* — making force **unnecessary** on the consume domain, which is the only escape from the recorded m=8
+> obstruction (consume fails on a **single-orbit** cell, where `forceBy_no_narrowing_on_orbit` *forbids* force).
 > ⚠ *"The 1-WL design is provably dead"* was **walked back**: consume measurably does fire on the known
 > witnesses (selector luck); what is missing is a **guarantee**, especially at the root.
+> ⛔ **And the cheap alternative is now closed: the SELECTOR route (A)'s resolver-level form ("try
+> cells, keep one the supply certifies") is MEASURED DEAD** (2026-07-31, `scratchpad/probe_route_a.py`)
+> — 58 reached nodes, three witnesses, **zero** where the selected cell fails and another certifies;
+> at the two failing nodes every cell fails together. The failure is **supply incompleteness**, uniform
+> across a node's cells, not cell selection.
+> **⚠⚠ AND IT IS A PROBE, NOT A PROGRAM (user, 2026-07-31)** — promoted only if shown viable; competing
+> resolutions (prove the residue cannot exist by another route; run **force at every descent step**,
+> expensive and uncosted) are not ranked below it.
 > **`deepenSupply` stays out of `Publication.canonForm?` until
 > `Tinhofer`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
 > ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Tinhofer`

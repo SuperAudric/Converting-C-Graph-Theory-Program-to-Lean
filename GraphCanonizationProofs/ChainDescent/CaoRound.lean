@@ -449,12 +449,31 @@ structure constants"*).
 
 What *is* provable is the converse *conditionally*, and it is the useful shape: the round-3 row colours
 differ **iff** the round-2 signatures differ. Since the barriers make everything on `v`'s row agree
-through round 2, the entire remaining content is one inequality between **triangle counts** — a finite,
-explicit, `K_v`-invariant object with no reference to rounds, the row, or the closure.
+through round 2, the remaining content **at round 3** is one inequality between **triangle counts** —
+a finite, explicit, `K_v`-invariant object.
 
 ⟹ this is the honest form of *"must separation occur at round 3?"*: **not** unconditionally, but
 *exactly when* `triCount` differs. That is the statement the per-family certificate (§12.4 R2/R3)
-should be pinned to. -/
+should be pinned to.
+
+## ⚠⚠ READ THE DIRECTION — this is a SUFFICIENT pin, not a reduction of the crux
+
+Refinement is **monotone**, so `triCount` differing at round 3 gives: round 3 separates ⟹ the closure
+separates ⟹ the crux holds on that pair. **The converse fails.** If `triCount` agrees at round 3, the
+row can still separate at round 4 or later, because the round-3 colours of *far* pairs go on refining
+and nothing here bounds them. So
+
+    (∀ such u w, ∃ q, triCount ... ≠ ...)   is STRICTLY STRONGER than the crux.
+
+Do **not** read `round3_separates_iff_triCount_ne` as "the closure is discharged" (an earlier version
+of doc §0 and of this file's summary did — corrected 2026-07-31). What is discharged is everything
+**up to** round 3. A family where `triCount` agrees is not a counterexample to CAO propagation; it is
+a family needing a different pin.
+
+⚠ `Function.Injective enc` is satisfiable in the abstract (a pairing encode; it computes the same
+partition) but is **not** met by the rank renumbering the real refiner uses — bounded range on an
+unbounded domain. Instantiating at the real object needs `Set.InjOn` over the pairs that occur, or an
+enc-independence lemma (doc §12.5a R1g). -/
 
 /-- The **triangle count**: how many intermediate points realize the triangle type `q` at `(a,b)`.
 This is the object doc §12.5a's sharpened R1 is about. -/
@@ -512,12 +531,15 @@ theorem round2_row_colour_eq {β : Type*} [Nonempty β]
   rw [h]
   simp [hu, hw]
 
-/-- **★★★ THE CRUX, REDUCED TO ONE INEQUALITY.** Under the coherent-configuration axioms and a
+/-- **★★★ THE CRUX'S SUFFICIENT PIN — one inequality.** Under the coherent-configuration axioms and a
 faithful re-encoding, the **round-3** row colours differ **iff** some triangle type of the round-2
 colouring has a different count at `(v,u)` than at `(v,w)`.
 
-Everything about rounds, the row, and the closure has been discharged; what remains — the open crux
-(doc §12.3, §12.5a) — is exactly that one inequality between finite explicit counts. -/
+Everything **up to round 3** — the rounds, the row, the first three steps of the closure — is
+discharged; what remains at round 3 is exactly that one inequality between finite explicit counts.
+
+⚠⚠ **Direction:** `triCount` differing is **sufficient** for the crux (refinement is monotone), not
+equivalent to it — round 4+ can separate a row where round 3 does not. See this section's header. -/
 theorem round3_separates_iff_triCount_ne {β : Type*} [Nonempty β] [DecidableEq β]
     {enc : (β × Bool × Bool) × Multiset ((β × Bool × Bool) × (β × Bool × Bool)) → β × Bool × Bool}
     (henc : Function.Injective enc) {f : Fin n → Fin n → β} (hc : Coherent f) (ht : Transposable f)

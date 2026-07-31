@@ -16,6 +16,7 @@
 | `VT ⟹ Tinhofer` | ⛔ **REFUTED at 1-WL** by the parallel branch — see [`../scratchpad/HANDOFF_2wl.md`](../scratchpad/HANDOFF_2wl.md) §5 | `Cay(Z₁₂⋊₅Z₂)` |
 | `CAO ⟹ Tinhofer` | ⛔ **REFUTED at 1-WL** | `net(Z₄)` |
 | **separation before round 3** | ⛔ **IMPOSSIBLE — PROVED** (`CaoRound.round1_barrier` + `round2_barrier_real`, unconditional, CC axioms only) | — |
+| **route (A), resolver-level** ("try cells, keep one the supply certifies") | ⛔ **MEASURED DEAD 2026-07-31** — 0 of 58 reached nodes helped (§10.5) | `probe_route_a.py` / `.out` |
 
 **⚠⚠ READ §0.0 BEFORE ANYTHING ELSE.** This doc is a probe into a **design change** — swapping the
 refiner 1-WL → 2-WL — **not** a lemma for the `Tinhofer` in `build.sh`, which is a **1-WL** predicate.
@@ -45,6 +46,10 @@ search keeps failing. **Two Lean modules are landed and gated** — `CaoFibring.
 orbital separation) and `CaoRound.lean` (that reduction applied to the **real** closure, plus the
 round-1 and round-2 barriers). What remains is **one hypothesis**, and the barriers have sharpened it
 to a single named quantity.
+⛔ **And the cheap competitor is closed:** §10.5's route (A), in its resolver-level form, is
+**measured dead** (2026-07-31, `probe_route_a.py` — 0 of 58 reached nodes). That does *not* promote
+this track (§0.0: it is a **probe, not a program**, and the other resolutions are unranked); it only
+removes the one alternative that would have been cheap.
 
 **The remaining obligation has a name — use the `CaoRound` form.** The statement that applies to the
 object the algorithm actually builds is
@@ -65,28 +70,49 @@ provably blind on `v`'s row, so separation cannot occur before **round 3** — w
 X(x,b)=k}`, the first quantity **coherence does not determine**. ⟹ the crux is now a statement about
 *that* object (§12.5a), not about the closure in the abstract.
 
-> ### ★★★ THE ONE THING TO KNOW — the crux is now a SINGLE INEQUALITY
+> ### ★★★ THE ONE THING TO KNOW — the crux has a SUFFICIENT PIN: one inequality
 > **`CaoRound.round3_separates_iff_triCount_ne`** (§6, axiom-clean): round-3 row colours differ **iff**
 > some triangle type of the round-2 colouring has a different `triCount` at `(v,u)` vs `(v,w)`.
-> **Rounds, the row and the closure are all discharged** — what is left is that one inequality.
 > ⟹ **pin the per-family R2/R3 certificate to `triCount`**, and read §12.5a for how to attack it.
-> ⚠ It carries one hypothesis, `Function.Injective enc` (faithful re-encoding — true of the rank
-> renumbering, but it must be supplied).
+>
+> ⚠⚠ **READ THE DIRECTION — corrected 2026-07-31. This is a SUFFICIENT condition, NOT a reduction of
+> the crux.** Refinement is monotone, so *`triCount` differs at round 3* ⟹ round 3 separates ⟹ the
+> closure separates ⟹ the crux holds on that pair. **The converse FAILS:** if `triCount` agrees at
+> round 3 the row can still separate at round 4+, because the round-3 colours of **far** pairs go on
+> refining. So *"∀ such `u,w`, some `triCount` differs"* is **strictly stronger than the crux** — the
+> same fact §12.6's "Must it occur AT round 3?" box states in prose. An earlier version of this box
+> read *"rounds, the row and the closure are all discharged"*; that is an **OVERCLAIM, do not inherit
+> it.** What is discharged is everything **up to** round 3. In particular a measured `triCount`
+> agreement would **not** be a counterexample to CAO propagation.
+> ★ Why it is still the right object: it fires at **11/11** fused classes on record, it is finite,
+> explicit and `K_v`-invariant, and proving it proves the crux. Treat it as the **pin**, not the crux.
+> ⚠ It carries one hypothesis, `Function.Injective enc` (a faithful re-encoding). ⚠⚠ **NOT satisfied
+> by the rank renumbering** — an earlier version of this doc claimed it was. A renumbering has bounded
+> range on an unbounded domain, so it is not globally injective; it is injective only on the values
+> that **occur**. The hypothesis is satisfiable in the abstract (take a pairing encode, which computes
+> the same partition), but any instantiation at the real refiner must weaken it to `Set.InjOn` over
+> the occurring pairs, or carry an enc-independence lemma. **Repair = §12.5a R1g.**
 > ⛔ **Do not try to strengthen the barrier to "separation MUST occur at round 3"** — **§12.6's
 > "Must it occur AT round 3?" box** explains why the method cannot yield it (barriers give
-> *equalities*; separation needs an *inequality*), and why it is strictly stronger than the crux.
+> *equalities*; separation needs an *inequality*).
 
-**Read in this order.** **§0.0 (why this question exists — non-optional)** → § STATUS → §1 (the
-reduction) → §2 (the target) → §3 (the mechanism; the conceptual core) → **§12.5a (the crux work
-plan)** → §12.3/§12.6 (the barriers and what M3 measured). Then §4/§5 before proposing anything, and
-§7 before investing in anything.
+**Read in this order.** **§0.0 (why this question exists, and why it is a PROBE — non-optional)** →
+§ STATUS → **§13 (the conversion gap — what this track would cost to cash)** → §1 (the reduction) →
+§2 (the target) → §3 (the mechanism; the conceptual core) → **§12.5a (the crux work plan)** →
+§12.3/§12.6 (the barriers and what M3 measured). Then §4/§5 before proposing anything, and §7 before
+investing in anything.
 
-**First actions — ▶▶ THE CRUX PLAN IS §12.5a (R1a–R1f); start there.** In one line: **R1a**
-coordinate-level ablation of `N` (the class-level one came back *over-determined* — §12.6); **R1b**
-base-point uniformity (∀`v` or ∃`v`?); **R1c** the falsifier = §12.6's M1, and note a Cayley root over
-a **transitive** group satisfies CAO *automatically*, so the 729 non-schurian S-rings **are** the sharp
-inputs ⚠ *and the probe silently caps at ~24, not 729 — fix that first*; **R1d** the literature check;
-**R1e** ✅ *landed* (`CaoRound.lean` §6 — the crux is now one `triCount` inequality); **R1f** the aggregate/rank attempt.
+**First actions — ▶▶ §13 (THE CONVERSION GAP) FIRST, then §12.5a.** Revised 2026-07-31: **nothing in
+this track can reach the built object until the `Deepen.step` swap is scoped and decided** (§13), so
+that scoping gates the value of every crux row. Only then §12.5a: **R1a** coordinate-level ablation of
+`N` (the class-level one came back *over-determined* — §12.6); **R1b** base-point uniformity (∀`v` or
+∃`v`?); **R1c** the falsifier = §12.6's M1 — a Cayley root over a **transitive** group satisfies CAO
+*automatically*, so the 729 non-schurian S-rings **are** the sharp inputs ⚠ *and the probe silently
+caps at ~24, not 729* ⚠⚠ *this is a POPULATION FIX to an existing instrument, **not** a new falsifier
+hunt — an extensive hunt already ran before the track was formalized (§6), which is why no further
+sweep is queued*; **R1d** the literature check; **R1e** ✅ *landed* (`CaoRound.lean` §6 — the
+`triCount` pin, ⚠ *sufficient, not equivalent* — see the box above); **R1f** the aggregate/rank
+attempt; **R1g** the `enc`-hypothesis repair.
 ⚠ **R1c can end the track** — if 2-WL falls, §10.5's selector route (A) becomes the only path.
 ⚠ **§12.6's M2 is ANSWERED** (see §12.3's convention box) and **M3 is DONE** (§12.6); M4–M6 stand.
 
@@ -134,7 +160,12 @@ says the selector is lucky on an antagonistic input, and in particular nothing c
 ⟹ the honest verdict is **"no completeness theorem at 1-WL", not "dead"**, and there are **two**
 routes to one, not one:
 - **(A) the SELECTOR route** — see §10.5. Prove index-min (or a better canonical selector) always
-  lands on a resolvable cell. Recorded and parked, not dead.
+  lands on a resolvable cell. ⛔ **Its cheap, resolver-level form is MEASURED DEAD (2026-07-31,
+  `probe_route_a.py`): on 58 nodes across three witnesses there is not one node where the selected
+  cell fails and another cell certifies** — at the two failing nodes (the m=8 root, and the
+  8-cell node carrying the recorded `|C|=16` cell) *every* cell fails together. The failure is
+  **supply incompleteness**, uniform across a node's cells, not cell selection. What remains of (A)
+  is only "supply a stronger supply", which is not a selector question.
 - **(B) the MECHANISM route** — the 2-WL swap, this doc's subject. Plan = §12.6 (M1–M6).
 
 **⚠ TWO SCOPE LIMITS on "revived at 2-WL" — do not overclaim.**
@@ -152,6 +183,17 @@ routes to one, not one:
    ⟹ **the death is the missing theorem, not a failing run.** Do not cite these graphs as "the design
    dies here" exhibits. ⚠ This does *not* rescue 1-WL: bounded lookahead depth is not a theorem either,
    and "some bounded depth always suffices" is the WL-dimension question in another costume.
+
+**⚠⚠ THIS IS A PROBE, NOT A PROGRAM — and that is deliberate (user steer, 2026-07-31).** The track
+earns promotion to *"the pursued route"* **only by being shown viable**. Until then it is one
+candidate resolution of a theoretical CAO-unconsumable residue among several, and the others are not
+ranked below it:
+- **prove the residue cannot exist**, by a route that never needs CAO propagation;
+- **run force at every step of the descent** — straightforward, expensive, and *not yet costed*
+  (⚠ note it is not free of the m=8 shape either: `forceBy_no_narrowing_on_orbit` still forbids force
+  on a single-orbit cell, so "force everywhere" buys *relocation depth*, not the cell itself — costing
+  it is the open question, not whether it fires);
+- **a method not yet thought of.**
 
 **▶ And the stakes of the negative branch.** If CAO propagation fails at *every* `k`, the design
 cannot be made viable by refiner strength and needs deeper structural change. The reason to expect
@@ -181,7 +223,7 @@ Long sweeps write logs; **do not pipe them through `tail`** (§9). Run them deta
 *Lean* — the gate is the **absolute** path (it self-`cd`s via `$0`; a relative path fails):
 
 ```bash
-bash /workspace/scripts/build.sh          # full serial gate, ~220 s, 108 modules
+bash /workspace/scripts/build.sh          # full serial gate, ~235 s, 109 modules (measured 2026-07-31)
 cd /workspace/GraphCanonizationProofs && lake build ChainDescent.CaoFibring   # this module alone
 lake env lean /workspace/scratchpad/CaoFibringAxioms.lean                     # #print axioms, all 18 decls
 ```
@@ -440,7 +482,8 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
 
 1. **The live target (§2), unproven — and now sharpened past "a single named hypothesis" to a single
    named QUANTITY.** The barriers reduce it to the **triple count** `N(a,b;i,j,k)` and the round-3
-   aggregate over it; the full statement and the ordered attack are **§12.5a (R1a–R1f)**. Treat it as
+   aggregate over it; the full statement and the ordered attack are **§12.5a (R1a–R1g)** — after §13.
+   Treat it as
    a genuine question of algebraic combinatorics — the schurity of one-point extensions — not a lemma
    to discharge. ⚠ Use the `CaoRound.step2_closure` form, not `CaoFibring`'s (§0). The practical
    fallback is a **per-family certificate** (§12.4 R2/R3); note `ChainDescent/Separability.lean` and
@@ -463,7 +506,8 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
    needed. Related but distinct: the node-4 families reportedly shatter under ≤ 4 individualizations.
    ⚠ Bounded depth is **not** union-stable (§4.3), so it can only ever be a per-family statement.
 
-5. **★ THE SELECTOR ROUTE (A) — RECORDED AND PARKED, not dead (2026-07-30, user).** The alternative to
+5. **★ THE SELECTOR ROUTE (A) — ⛔ ITS CHEAP (RESOLVER-LEVEL) FORM IS NOW MEASURED DEAD (2026-07-31);
+   the expensive form (a stronger supply) is what is left.** The alternative to
    the whole 2-WL swap. **Measured fact it rests on:** on every recorded VT-non-`Tinhofer`-at-1-WL
    witness, consume *does* fire, because index-min selection happens to pick vertices in one orbit.
    (§7.5's Shrikhande is the same phenomenon; limit 2 of §0.0 is the force-side tally). 
@@ -483,6 +527,32 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
      transitivity (poly: ≤ n cells × one supply call). That is a `Select`-layer change, and it converts
      the question from "is the selector lucky" into "does *some* cell resolve", which is strictly
      weaker and matches `Select.NodeResolved`'s shape.
+   - **⛔⛔ AND THAT RESOLVER-LEVEL VARIANT IS NOW MEASURED — IT BUYS NOTHING (2026-07-31,
+     `probe_route_a.py`, result at `probe_route_a.out`).** The experiment: at every reached node, run
+     the record's own deepen harvest (`DeepenSupply.lean` ported faithfully — all anchors, `coupled`
+     footprint match, `twistOf` re-verified, transitivity by BFS closure over the *verified generator
+     set*, never per-pair) on the `chooseIdK`-**selected** cell **and on every other non-singleton
+     cell**, and ask whether any cell certifies where the selected one does not.
+
+     | witness | nodes | selected cell certifies | **selected fails, another certifies** | no cell certifies |
+     |---|---|---|---|---|
+     | CFI cubic m=8 **twisted** (n=56, the recorded obstruction) | 27 | 25 | **0** | 2 |
+     | CFI cubic m=8 plain (n=56) | 27 | 26 | **0** | 1 |
+     | Shrikhande (n=16) | 4 | 4 | **0** | 0 |
+
+     **Zero nodes on any witness where trying other cells helps.** The two twisted failures are the
+     **root** (cells 32 and 24, both uncertified) and **`root/id1/id9`** — the recorded shape, an
+     8-cell node containing the **`|C| = 16`** cell of DUAL §2.1 — where **all eight** cells fail
+     together. The failure is not cell-selection; it is **supply incompleteness at the node**, and it
+     is uniform across the node's cells.
+     ⟹ **route (A)'s cheap form is dead at the recorded witnesses.** What survives of (A) is only the
+     expensive form: a *stronger supply*, which is not a selector question at all.
+     ★ Note the positive half is also confirmed: **25/27** nodes resolve at the selected cell — §0.0's
+     "consume measurably does fire (selector luck)", now with a denominator.
+     ⚠ **Read the verdict correctly.** "Not certified" means *this supply did not certify*, never
+     "different orbits" (the probe uses **no orbit oracle**; every ✓ is a verified certificate). And
+     the id order is Python's, not Lean's `sigKey` (§8.3) — so "which cell is *selected*" is
+     convention-dependent; the **0 in the middle column is not**, since it quantifies over all cells.
    - **⚠ The gap the user named and it is the load-bearing one:** no guarantee at the **root**, where
      there is no parent structure to exploit and an antagonistic input has the most freedom. Any
      attempt should attack the root case first — if it fails there, the route is over cheaply.
@@ -521,6 +591,11 @@ the diameter-2 confound) ·
 `Aut_v`-orbits; depth 1 = `lookaheadKey`'s own non-discrete branch. `probe_stall4.py` is the named VT
 witness `Cay(Z₁₂⋊₅Z₂)` — ⚠ its connection-set search is slow (~2048 masks × `all_isos` at n = 24), so
 run it detached per §9; **result recorded at `probe_stall4.out`**).
+**★★ `probe_route_a.py`** (§10.5 — the **route (A) resolver-level experiment**: at every reached node,
+the record's deepen harvest run on the `chooseIdK`-selected cell *and on every other cell*, asking
+whether any cell certifies where the selected one fails. **Answer: 0 of 58 nodes, on all three
+witnesses.** Faithful port of `DeepenSupply.lean`; every verdict is a re-verified certificate and **no
+orbit oracle is used**; skips are logged per §9. Result recorded at **`probe_route_a.out`**, ~9 s).
 Shared machinery lives in `probe_cao_cleanroom.py` (§8.1); most files import it, so they are
 `__main__`-guarded — keep them that way (§9).
 
@@ -538,9 +613,10 @@ Shared machinery lives in `probe_cao_cleanroom.py` (§8.1); most files import it
   `roundBy_ne_iff_sig_ne`, `sig_ne_iff_exists_triCount_ne`, `round2_row_colour_eq` ⟹
   **`round3_separates_iff_triCount_ne`**: round-3 row colours differ **iff** some triangle type of the
   round-2 colouring has a different `triCount` at `(v,u)` vs `(v,w)`. ⚠ carries one hypothesis,
-  `Function.Injective enc` (faithful re-encoding — true of the rank renumbering, must be supplied).
-  ⟹ **rounds, the row and the closure are all discharged; pin the per-family R2/R3 certificate to that
-  inequality.**
+  `Function.Injective enc` (faithful re-encoding) — ⚠⚠ **NOT met by the rank renumbering**; repair =
+  §12.5a R1g. ⟹ **everything up to round 3 is discharged; pin the per-family R2/R3 certificate to
+  that inequality** — ⚠⚠ it is **sufficient, not equivalent** (§0's box: the closure is *not*
+  discharged, round 4+ remains free).
 
 Checks and cross-checks (**outside** the package root by design, §8.3) — `scratchpad/CaoFibringAxioms.lean`,
 `scratchpad/CaoRoundAxioms.lean` (`#print axioms` for all of both modules) ·
@@ -675,7 +751,7 @@ feedback loop, not about the base point.**
 > ⟹ **State which term you mean.** A bound on term 1 is refuted; a bound on term 2 is live and now
 > has evidence at diameter > 2.
 
-### 12.5a ▶▶ THE CRUX WORK PLAN (R1a–R1f) — added 2026-07-31
+### 12.5a ▶▶ THE CRUX WORK PLAN (R1a–R1g) — added 2026-07-31, re-ordered the same day (§13 first)
 
 **What the crux now is, exactly.** Rounds 1 and 2 are proved blind on `v`'s row
 (`CaoRound.round1_barrier`, `round2_barrier`), so the whole question is what **round 3** does. Round 2
@@ -700,15 +776,19 @@ target is that it is *injective on `K_v`-orbits within an `X`-class*.
 | **R1b** | **Base-point uniformity.** CAO makes `D` a single `K`-orbit, so the invariant transports across base points. Measure whether separating power is uniform over `v ∈ D` | hours | decides whether the theorem is *"for all `v`"* or only *"for some `v`"* — materially different statements, and §7.4/§7.5 show selector-dependence is a real hazard here |
 | **R1c** | **The falsifier, in the one place it can live** (= M1, sharpened). A Cayley root over a **transitive** group satisfies CAO *automatically* (one fibre = one orbit), so the **729 non-schurian S-rings are exactly the sharp inputs.** Fix the probe cap and run them | hours | **can end the track.** This is also why M1 is the falsifier and the evidence at once |
 | **R1d** | **Literature check.** *"Point extensions of schurian CCs need not be schurian"* is standard ⟹ **the CAO hypothesis must be doing essential work**, and any known non-schurian point extension whose root is *fibre*-schurian is an immediate counterexample | hours | far cheaper than §10.3's build-one-from-scratch, and it tests the same thing |
-| **R1e** ✅ **LANDED** (`CaoRound.lean` §6) | **Lean: name the invariant.** **`round3_separates_iff_triCount_ne`** — round 3 separates **iff** some triangle type of the round-2 colouring has a different `triCount` at `(v,u)` vs `(v,w)`. Rounds, row and closure all discharged. ⚠ one hypothesis: `Function.Injective enc` | done | **the crux is now ONE INEQUALITY**, and the R2/R3 per-family pin is a *deliverable*: pin it to `triCount`. R1a still sharpens *which projection* of the count to pin |
-| **R1f** | **The aggregate/rank attempt.** Informed by R1a/R1b | open | the actual proof. ⚠ Expect a sharper statement, not a proof |
+| **R1e** ✅ **LANDED** (`CaoRound.lean` §6) | **Lean: name the invariant.** **`round3_separates_iff_triCount_ne`** — round 3 separates **iff** some triangle type of the round-2 colouring has a different `triCount` at `(v,u)` vs `(v,w)`. Everything **up to round 3** is discharged | done | the R2/R3 per-family pin is a *deliverable*: pin it to `triCount`. R1a still sharpens *which projection* of the count to pin. ⚠⚠ **SUFFICIENT, NOT EQUIVALENT** — see §0's box: `triCount` agreement at round 3 does **not** refute the crux (round 4+ can still separate), so this target is strictly stronger than the crux |
+| **R1f** | **The aggregate/rank attempt.** Informed by R1a/R1b | open | the actual proof. ⚠ Expect a sharper statement, not a proof. ⚠ And note it would be aimed at the *strengthened* statement (R1e's caveat) — if that resists, the fallback target is the crux itself (separation at the fixpoint), which no current instrument addresses |
+| **R1g** | **The `enc`-hypothesis repair.** `Function.Injective enc` is **not** satisfied by the rank renumbering (bounded range, unbounded domain). Weaken to `Set.InjOn` over the pairs that occur, or add an enc-independence lemma (the induced *partition* is the same for any faithful-on-occurring-values encode) | hours | the per-family certificate is pinned to a theorem whose hypothesis the real refiner does not meet as stated — the project's recurring statement-level trap. Cheap, and it makes the pin instantiable |
 
 **⚠ Two constraints any attempt must respect.** (i) §4.2 — `k`-WL sees only structure constants, so
 the argument must conclude **separation**, never *"an automorphism exists"*. (ii) §12.6's ablation —
 do **not** hunt a distinguished witness class; it does not exist.
 
-**▶ Order:** R1a + R1b (cheap, and they aim everything else) → R1c + R1d in parallel (either can end
-the track) → ~~R1e~~ (done) → R1f.
+**▶ Order (revised 2026-07-31, user).** **§13's conversion-gap scoping FIRST** — it gates the value of
+every row here. Then **R1c + R1d** in parallel (either can end the track; ⚠ R1c is a *population fix*,
+not a new falsifier hunt — §0.0). **R1g** is a cheap statement-level repair, do it alongside any §6
+work. **R1a + R1b** only if the track survives that, and **R1f** last — and as a per-family
+certificate program (§12.4 R2/R3 + §12.6 M5), not a general proof attempt.
 
 ### 12.4 Candidate resolutions, ranked
 
@@ -891,10 +971,23 @@ thing that *can* separate the row is that count. But "there is room" ≠ "the ro
 | **`round3_separates_iff_triCount_ne`** | ★★★ **THE CRUX, REDUCED TO ONE INEQUALITY** |
 
 ⟹ **round 3 separates `iff` some triangle type of the round-2 colouring has a different count at
-`(v,u)` than at `(v,w)`.** Rounds, the row, and the closure are fully discharged; what remains is one
-inequality between finite explicit counts, with no reference to any of them. **That is the object the
-per-family certificate (§12.4 R2/R3) should be pinned to** — and the honest form of "must it occur at
-round 3": *not unconditionally, but exactly when `triCount` differs.*
+`(v,u)` than at `(v,w)`.** Everything **up to round 3** — the rounds, the row, the closure's first
+three steps — is discharged; what remains at round 3 is one inequality between finite explicit counts.
+**That is the object the per-family certificate (§12.4 R2/R3) should be pinned to** — and the honest
+form of "must it occur at round 3": *not unconditionally, but exactly when `triCount` differs.*
+
+> **⚠⚠ DIRECTION CORRECTION (2026-07-31) — an earlier version of this paragraph and of §0's box said
+> "rounds, the row and the closure are **fully** discharged; what remains is one inequality."** That
+> is wrong in one direction and must not be inherited. Refinement is **monotone**, so
+> `triCount` differs ⟹ round 3 separates ⟹ the closure separates ⟹ the crux holds *on that pair*.
+> **The converse fails:** `triCount` agreement at round 3 leaves round 4+ free to separate the row,
+> because the round-3 colours of **far** pairs keep refining and nothing here bounds them. So the
+> `triCount` statement is a **sufficient pin, strictly stronger than the crux** — which is exactly
+> what the box above this one says about *"must it occur AT round 3"*, stated there in prose and
+> contradicted here in the summary. Two consequences: (i) a family where `triCount` agrees is **not**
+> a counterexample to CAO propagation — it is a family whose certificate needs a different pin;
+> (ii) R1f aims at the strengthened statement, and if that resists, the crux itself (separation at the
+> **fixpoint**) is still open and currently has no instrument at all.
 
 **▶ What this changes for R1 — and it is a sharpening, not a setback.** R1 asks *"why must two orbitals
 in one `X`-class have different `v`-profile distributions?"* The ablation says they differ in **many
@@ -932,3 +1025,102 @@ self-limiting lesson excludes every standard unbounded-WL family from the CAO hy
 > *(The former §12.6, "the two measurements that would most inform Step 3", is absorbed into §12.6's
 > **M1** and **M2** above — with the correction that the sharp-Cayley instrumentation does **not**
 > currently cover the 729. Old cross-references to "§12.6(1)/(2)" resolve to M1/M2.)*
+
+---
+
+## 13. ▶▶ THE CONVERSION GAP — what this track would cost to cash (scoping, 2026-07-31)
+
+**The gap, stated once.** Every result in this doc is about a **2-WL** closure. The `Tinhofer` in
+`build.sh` is a **1-WL** predicate. So **nothing landed here can affect the built object until the
+step the predicate is stated over is swapped** — and *whether that swap is affordable* is a separate
+question from *whether the crux is true*. It is cheaper to answer, and it gates the value of §12.5a.
+**This section is the scoping; it is not a decision to do the swap.**
+
+### 13.1 ⚠ "Swap the refiner" was the wrong description — three docs said it
+
+`00-START-HERE.md` §2, `chain-descent-remaining-work.md` §1T and this doc's §0.0 all described the
+design change as *"swap the refiner 1-WL → 2-WL, `n²` → `n³` per round"*. **Source-checked and
+corrected:**
+
+```
+Tinhofer / TinhoferPath / CellSingleOrbit   are stated over   Deepen.step   ONLY
+Deepen.step adj χ v = Refine.warmRefineVec adj (Descend.indivOne χ v)      (DeepenSupply.lean:147)
+```
+
+`Deepen.step` is the **supply-internal** deepening step. The descent's own refiner — `Refine`'s
+`warmRefineVec` as consumed by `Descend.descend` — the `Colouring` type, `Select`, and
+`Publication.canonForm?`'s object are **not** mentioned by `Tinhofer` and would **not** change. The
+`n² → n³` framing describes a change to the canonizer that this predicate never asked for.
+
+⚠ **It is not free either, and the earlier framing hid that too, in the other direction.**
+`DeepenGuard.CertPath` also calls `step` (`DeepenGuard.lean:138`), `orbKeyG` is defined from
+`CertPath`, and **`recordKey := pairKey holKeyFast (orbKeyG guardSupply)` is the record object's key**.
+So the swap *does* reach `Publication.canonForm?` — through the key, not through the refiner.
+
+### 13.2 The blast radius, measured
+
+| measure | value | how |
+|---|---|---|
+| modules mentioning `Deepen.step` | **13** — `DeepenTinhofer` (44 refs), `DeepenGuard` (27), `DeepenKey` (20), `KeyComplete` (9), `DeepenLocated` (9), `PerformanceTest` (8), `DeepenExact` (7), `DeepenCertified` (7), `Regression` (5), `DeepenSupply` (3), `DeepenRef` (3, parked), `DeepenTransport` (1), `DeepenCrux` (1) | grep |
+| **definitions** that call it | **~20** — `deepen`, `replay`, `deepenGens`, `TinhoferPath`, `Tinhofer`, `cidCell`, `CertPath`, `CertifiedG`, `certPathCost`, `orbKeyG`, `CertifiedPath`, `Certified`, `GateAt`, `leafOf`, `readKey`, `Refines`, `rawKey`, … | awk over `def` blocks |
+| places that **unfold** it | **3**, all inside its own cluster — `DeepenTransport.lean:188`, `DeepenTinhofer.lean:148`, `:181` | grep `unfold step` |
+| modules **outside** the cluster | **0** (`Descend`, `Refine`, `Select`, `Force`, `RecordKey`, `RecordCost`, `Publication` never mention it) | grep |
+
+### 13.3 ★ THE FINDING THAT MAKES THIS CHEAP — `step` is used through a **4-lemma interface**
+
+Only three proofs ever look inside `step`. Every other proof in the 13 modules goes through these:
+
+| lemma | content | where |
+|---|---|---|
+| `step_transport` / `step_aut` / `step_isColAut` / `step_rerelate` | **equivariance** — an automorphism transports one step | `DeepenTransport:185`, `DeepenTinhofer:54/65/77` |
+| `step_refines` | the step only **splits** the parent colouring | `DeepenTinhofer:146` |
+| `step_indiv_singleton` | the individualized vertex is a **singleton** afterwards | `DeepenTinhofer:178` |
+| `step_preserves_singleton` | a singleton **stays** a singleton (corollary of `step_refines`) | `DeepenTinhofer:169` |
+
+⟹ **the swap is an interface swap, not a rewrite.** Abstract `step` to a parameter carrying those
+four properties, make the ~20 definitions step-generic, and the 1-WL step becomes one instance and a
+2-WL step another. The downstream proofs are re-usable **verbatim** — they never see the refiner.
+
+★ And **`CaoRound` already supplies the hard half for the 2-WL instance**: `pairInvariantAt_ext0` +
+`pairInvariantAt_iterRoundBy` are the equivariance of the individualized 2-WL closure, and
+`step2_closure` says its induced vertex colouring `u ↦ f v u` has level sets **exactly** the
+`K_v`-orbits — which is `CellSingleOrbit` for that step, given `hsep`. That is the whole point of the
+track, arriving in the right shape.
+
+### 13.4 The cost side — and a pre-existing `②` hole it surfaced
+
+`certPathCost` (`DeepenGuard.lean:329`) bills, per level, `n⁴` (the reachability test) **plus one
+supply call** — and **does not bill `step` at all**. `orbKeyG`'s read term is likewise a **declared
+flat `n⁴`** covering `readKey ∘ leafOf`, where `leafOf` runs an entire `n`-level deepening. Two
+consequences, and they point opposite ways:
+
+- **For the swap: no current cost theorem changes.** `certPathCost_le`, `keyCost_orbKeyG_le`,
+  `descentCostS_selNode_recordKey_le`, `costConst = 53` / `costDeg = 13` are all statements about
+  *declared* costs that never mention `step`. A 2-WL step would leave every one of them true and
+  every proof unchanged.
+- **⚠ Which is exactly the problem.** That is the project's own recorded failure mode — *"the key
+  declared a flat `n⁴` that was true by definition and therefore priced nothing"*
+  (`remaining-work` §1T T2) — recurring one level over: the guard's *recursion* was billed
+  (2026-07-27) but the *read* it delegates was not. Today the omission is `warmRefineVec` per level;
+  with a 2-WL step it grows by roughly a factor of `n`. **So `②` would not notice the swap, and that
+  is a defect of `②`, not a licence.** ▶ Worth fixing regardless of this track: it is a `RecordCost`
+  item, not a CAO item.
+
+### 13.5 The scoping plan (S1–S5) — hours, not weeks, and each is separately abandonable
+
+| # | step | cost | acceptance |
+|---|---|---|---|
+| **S1** | **Write the 2-WL step concretely** (outside the package root first, §8.3 pattern): `step2 adj χ v` = individualize `v`, iterate `CaoRound.roundBy` on the pair colouring to a fixpoint, return the induced vertex colouring `u ↦ f v u` as `ColData` | hours | it `#eval`s, and on `net(Z₄)` it gives the 7-cell / 0-mixed partition §0.0 records for 2-WL |
+| **S2** | **Prove the four interface lemmas for `step2`** | ~a day | equivariance from `pairInvariantAt_iterRoundBy`; refines/singleton are structural. ⚠ trap #1: never return `… → Colouring n`; `ColData` only |
+| **S3** | **Abstract the interface** — make `deepen`/`replay`/`TinhoferPath`/`CertPath`/`leafOf`/… take the step as a parameter with the four properties | ~a day | gate stays EXIT 0 with the 1-WL instance plugged in, and **`Regression` §18/§19 numbers are unchanged** (`G8` still FLAGS under `holKeyFast`, ANSWERS under `recordKey`) |
+| **S4** | **Instantiate at `step2` and measure** — not on the gate; a scratch `#eval` on the m=8 witness and on `net(Z₄)` | hours | does `CertPath` certify where it previously failed? This is the first evidence the swap *buys* anything |
+| **S5** | **Cost re-model** (§13.4) — bill the read and the step | open | `②` becomes sensitive to the swap; do it before any claim that the swap is "a direct polynomial increase" |
+
+**⛔ Do not start S3 before S1/S2.** The abstraction is only justified if a second instance exists;
+otherwise it is churn on 13 modules for one implementation.
+
+**▶ The decision S1–S4 informs.** *"Is the 2-WL swap affordable?"* — separate from, and cheaper than,
+*"is the crux true?"* If S4 shows the swap does not fix the recorded obstruction, the track ends
+without anyone attacking the crux. If it does, §12.5a becomes worth its cost and the track is a
+candidate for promotion (§0.0: promotion needs viability, and the competitors — a residue-cannot-exist
+proof, or force at every descent step — are still unranked).

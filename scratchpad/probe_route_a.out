@@ -1,0 +1,948 @@
+probe_route_a.py — the SELECTOR route (A), resolver-level form, at the recorded witnesses.
+
+docs/chain-descent-cao-propagation.md §10.5 (+ §0.0 limit 2, scratchpad/DUAL_resolver_scoping.md §1.2).
+
+============================================================================================
+THE QUESTION
+============================================================================================
+The recorded consume obstruction (DUAL §2.1, CFI over a random cubic base, m=8, n=56) is a node
+where the harvest fails to certify the cell the descent SELECTED.  §10.5's realistic form of route
+(A) is *resolver-level, not selector-level*:
+
+    "try cells, keep one where the supply certifies transitivity (poly: <= n cells x one supply
+     call).  That converts 'is the selector lucky' into 'does SOME cell resolve', which is strictly
+     weaker and matches Select.NodeResolved's shape."
+
+Nobody has measured it.  This probe does, at each reached node:
+
+    selected-cell certified?      (what the built object asks)
+    ANY-cell certified?           (what the resolver-level variant would ask)
+
+============================================================================================
+SOUNDNESS — read before quoting any number
+============================================================================================
+* Every verdict here is a POSITIVE certificate.  The harvest emits permutations which are
+  re-verified (`is_aut` + colour-preservation), and transitivity is decided by BFS closure over the
+  verified generator SET, never per-pair (DUAL §2.2: a per-pair twist failure is NOT a separation).
+  So "certified" is a theorem about the graph.  "not certified" means only *this supply did not
+  certify it* — never "different orbits".  That asymmetry is exactly what the resolver needs, and it
+  is why no orbit oracle appears below.
+* `probe_orbit_oracle` (doc §8.2, PROVEN BROKEN — it errs by merging) is NOT imported and NOT used.
+* The harvest is a faithful port of `ChainDescent/DeepenSupply.lean`
+  (`step` / `chooseIdK` / `deepen` / `replay` / `coupled` / `allSingletonsK` / `twistOf` /
+  `deepenGens`), with `deepenGens`' cell argument generalized from `Descend.branches chi` to an
+  ARBITRARY cell — which is the only change the resolver-level variant needs.
+* ⚠ CONVENTION LIMIT (doc §7.4 / §8.3).  Python ranks colour ids by `sorted(set(sig))`; Lean's
+  `warmRefineVec` ranks by Cantor-paired `sigKey`.  The two agree on the PARTITION but need not
+  agree on the ID ORDER, and `chooseIdK` picks the lowest id.  So which cell counts as "selected",
+  and which cell each deepening level individualizes, may differ from the Lean object.  A POSITIVE
+  result here is still a fact about the graph (the certificates are verified) but must be
+  cross-checked by Lean `#eval` (§8.3) before it is claimed of the built object.
+
+Run detached and read the log (§9 — do not pipe through `tail`):
+    cd /workspace/scratchpad && python3 -u probe_route_a.py > probe_route_a.out 2>&1
+
+budget: 2700s wall
+
+cubic base m=8 seed=19: [(0, 1), (0, 5), (0, 7), (1, 3), (1, 6), (2, 4), (2, 5), (2, 7), (3, 4), (3, 6), (4, 6), (5, 7)]
+
+=== CFI cubic m=8 TWISTED   n=56
+    root:  cells(non-singleton) = [(0, 32), (1, 24)]
+        id=0    |C|=32   gens=480  ✗ not certified   <-- SELECTED (chooseIdK)
+        id=1    |C|=24   gens=264  ✗ not certified
+        ⟹ NO cell certifies — route (A)'s resolver-level variant does NOT help here
+    root/id0:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 8), (9, 4), (10, 2), (12, 2), (14, 2), (15, 4), (16, 4), (17, 2), (18, 2), (19, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=8    gens=56   ✓ CERTIFIED
+        id=9    |C|=4    gens=4    ✗ not certified
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=4    gens=12   ✓ CERTIFIED
+        id=16   |C|=4    gens=12   ✓ CERTIFIED
+        id=17   |C|=2    gens=0    ✗ not certified
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1:  cells(non-singleton) = [(0, 4), (1, 4), (2, 16), (3, 8), (5, 8), (7, 4), (8, 8), (9, 2)]
+        id=0    |C|=4    gens=12   ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=4    gens=12   ✓ CERTIFIED
+        id=2    |C|=16   gens=240  ✓ CERTIFIED
+        id=3    |C|=8    gens=24   ✗ not certified
+        id=5    |C|=8    gens=56   ✓ CERTIFIED
+        id=7    |C|=4    gens=12   ✓ CERTIFIED
+        id=8    |C|=8    gens=56   ✓ CERTIFIED
+        id=9    |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id1:  cells(non-singleton) = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=8    gens=56   ✓ CERTIFIED
+        id=12   |C|=4    gens=4    ✗ not certified
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        id=23   |C|=2    gens=0    ✗ not certified
+        id=24   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id3:  cells(non-singleton) = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=8    gens=56   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=33   |C|=4    gens=12   ✓ CERTIFIED
+        id=36   |C|=2    gens=2    ✓ CERTIFIED
+        id=37   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id4:  cells(non-singleton) = [(1, 2), (3, 4), (6, 4), (7, 2), (8, 4), (9, 4), (10, 4), (11, 4), (12, 2), (14, 2), (16, 2), (17, 4), (18, 2), (19, 2), (20, 2), (21, 2), (22, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=4    gens=12   ✓ CERTIFIED
+        id=10   |C|=4    gens=12   ✓ CERTIFIED
+        id=11   |C|=4    gens=4    ✗ not certified
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=0    ✗ not certified
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id5:  cells(non-singleton) = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=8    gens=56   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=33   |C|=4    gens=12   ✓ CERTIFIED
+        id=36   |C|=2    gens=2    ✓ CERTIFIED
+        id=37   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id6:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (8, 4), (9, 4), (10, 4), (11, 4), (12, 2), (14, 2), (16, 2), (17, 4), (18, 2), (19, 2), (20, 2), (21, 2), (22, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=4    gens=12   ✓ CERTIFIED
+        id=10   |C|=4    gens=12   ✓ CERTIFIED
+        id=11   |C|=4    gens=4    ✗ not certified
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=0    ✗ not certified
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id7:  cells(non-singleton) = [(1, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (10, 2), (12, 8), (13, 2), (14, 2), (15, 2), (17, 2), (21, 2), (22, 2), (23, 4), (26, 2), (27, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=8    gens=56   ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=2    gens=2    ✓ CERTIFIED
+        id=23   |C|=4    gens=12   ✓ CERTIFIED
+        id=26   |C|=2    gens=2    ✓ CERTIFIED
+        id=27   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id8:  cells(non-singleton) = [(1, 2), (3, 4), (6, 4), (9, 2), (10, 2), (23, 2), (25, 2), (27, 2), (28, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=23   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=2    gens=2    ✓ CERTIFIED
+        id=27   |C|=2    gens=2    ✓ CERTIFIED
+        id=28   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id9:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 2), (8, 2), (9, 4), (10, 4), (13, 2), (14, 2), (16, 2), (18, 2), (19, 4), (20, 4), (23, 2), (24, 2), (25, 2)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=4    gens=12   ✓ CERTIFIED
+        id=10   |C|=4    gens=12   ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=4    gens=12   ✓ CERTIFIED
+        id=20   |C|=4    gens=12   ✓ CERTIFIED
+        id=23   |C|=2    gens=2    ✓ CERTIFIED
+        id=24   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=2    gens=2    ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id10:  cells(non-singleton) = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=8    gens=56   ✓ CERTIFIED
+        id=12   |C|=4    gens=4    ✗ not certified
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        id=23   |C|=2    gens=0    ✗ not certified
+        id=24   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id12:  cells(non-singleton) = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=8    gens=56   ✓ CERTIFIED
+        id=12   |C|=4    gens=4    ✗ not certified
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        id=23   |C|=2    gens=0    ✗ not certified
+        id=24   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id14:  cells(non-singleton) = [(1, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (10, 2), (12, 8), (13, 2), (14, 2), (15, 2), (17, 2), (21, 2), (22, 2), (23, 4), (26, 2), (27, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=8    gens=56   ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=2    gens=2    ✓ CERTIFIED
+        id=23   |C|=4    gens=12   ✓ CERTIFIED
+        id=26   |C|=2    gens=2    ✓ CERTIFIED
+        id=27   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id15:  cells(non-singleton) = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=8    gens=56   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=33   |C|=4    gens=12   ✓ CERTIFIED
+        id=36   |C|=2    gens=2    ✓ CERTIFIED
+        id=37   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id16:  cells(non-singleton) = [(1, 2), (3, 4), (6, 4), (9, 4), (10, 2), (11, 2), (12, 2), (13, 2), (14, 4), (15, 2), (17, 2), (19, 2), (20, 4), (25, 2), (26, 2), (27, 2), (28, 2)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=9    |C|=4    gens=4    ✗ not certified
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=4    gens=4    ✗ not certified
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=4    gens=12   ✓ CERTIFIED
+        id=25   |C|=2    gens=0    ✗ not certified
+        id=26   |C|=2    gens=2    ✓ CERTIFIED
+        id=27   |C|=2    gens=2    ✓ CERTIFIED
+        id=28   |C|=2    gens=2    ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id17:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 2), (8, 2), (9, 8), (10, 2), (11, 2), (12, 2), (14, 2), (16, 2), (17, 4), (18, 4), (21, 2), (22, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=8    gens=56   ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id18:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 4), (9, 4), (10, 4), (11, 2), (13, 2), (15, 2), (16, 4), (17, 4), (18, 2), (21, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=4    gens=12   ✓ CERTIFIED
+        id=9    |C|=4    gens=12   ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=4    gens=12   ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=2    gens=0    ✗ not certified
+        id=21   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id19:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 2), (9, 2), (10, 4), (11, 2), (12, 2), (13, 2), (15, 2), (17, 2), (18, 4), (19, 2), (20, 2), (21, 2), (22, 2), (24, 2)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=2    gens=0    ✗ not certified
+        id=12   |C|=2    gens=0    ✗ not certified
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=0    ✗ not certified
+        id=22   |C|=2    gens=2    ✓ CERTIFIED
+        id=24   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id0:  cells(non-singleton) = [(2, 2), (3, 2), (4, 2), (5, 4), (6, 4), (7, 8), (8, 4), (9, 4), (11, 2), (12, 2), (13, 4), (15, 2), (16, 2), (17, 4), (18, 4), (19, 2)]
+        id=2    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=7    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=4    gens=4    ✗ not certified
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=4    gens=12   ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=19   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id1:  cells(non-singleton) = [(0, 2), (1, 2), (4, 2), (5, 4), (6, 4), (7, 8), (8, 4), (9, 4), (11, 2), (12, 2), (13, 4), (15, 2), (16, 2), (17, 4), (18, 4), (19, 2)]
+        id=0    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=7    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=4    gens=4    ✗ not certified
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=4    gens=12   ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=19   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id2:  cells(non-singleton) = [(2, 2), (5, 2), (14, 8), (19, 2), (20, 2), (26, 4), (30, 2), (35, 4)]
+        id=2    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=8    gens=56   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=26   |C|=4    gens=12   ✓ CERTIFIED
+        id=30   |C|=2    gens=2    ✓ CERTIFIED
+        id=35   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id3:  cells(non-singleton) = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 4), (5, 4), (6, 8), (8, 2), (10, 2), (11, 2), (13, 4), (14, 4), (16, 2), (17, 2), (18, 2), (19, 2), (20, 4)]
+        id=0    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=2    gens=2    ✓ CERTIFIED
+        id=2    |C|=2    gens=2    ✓ CERTIFIED
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=4    gens=12   ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=4    gens=12   ✓ CERTIFIED
+        id=14   |C|=4    gens=12   ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id5:  cells(non-singleton) = [(2, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 8), (11, 4), (12, 4), (18, 4), (20, 2), (21, 2), (22, 2), (23, 2), (24, 4), (25, 2)]
+        id=2    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=8    gens=56   ✓ CERTIFIED
+        id=11   |C|=4    gens=4    ✗ not certified
+        id=12   |C|=4    gens=4    ✗ not certified
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=2    gens=2    ✓ CERTIFIED
+        id=23   |C|=2    gens=2    ✓ CERTIFIED
+        id=24   |C|=4    gens=12   ✓ CERTIFIED
+        id=25   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id7:  cells(non-singleton) = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 4), (5, 4), (6, 8), (7, 4), (8, 4), (10, 4), (11, 4), (15, 2), (16, 4), (17, 4), (18, 2)]
+        id=0    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=2    gens=2    ✓ CERTIFIED
+        id=2    |C|=2    gens=2    ✓ CERTIFIED
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=4    gens=12   ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=8    gens=56   ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=10   |C|=4    gens=12   ✓ CERTIFIED
+        id=11   |C|=4    gens=12   ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=4    gens=12   ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id8:  cells(non-singleton) = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 4), (7, 8), (8, 2), (9, 2), (10, 4), (12, 2), (13, 2), (14, 4), (16, 2), (17, 2), (19, 2), (21, 4), (22, 2)]
+        id=0    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=2    gens=2    ✓ CERTIFIED
+        id=2    |C|=2    gens=2    ✓ CERTIFIED
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=4    gens=4    ✗ not certified
+        id=7    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=2    gens=0    ✗ not certified
+        id=9    |C|=2    gens=0    ✗ not certified
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=4    gens=12   ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=0    ✗ not certified
+        id=21   |C|=4    gens=12   ✓ CERTIFIED
+        id=22   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id9:  cells(non-singleton) = [(0, 4), (1, 4), (2, 16), (3, 4), (4, 4), (6, 8), (8, 4), (9, 8)]
+        id=0    |C|=4    gens=4    ✗ not certified   <-- SELECTED (chooseIdK)
+        id=1    |C|=4    gens=4    ✗ not certified
+        id=2    |C|=16   gens=112  ✗ not certified
+        id=3    |C|=4    gens=4    ✗ not certified
+        id=4    |C|=4    gens=4    ✗ not certified
+        id=6    |C|=8    gens=24   ✗ not certified
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=8    gens=24   ✗ not certified
+        ⟹ NO cell certifies — route (A)'s resolver-level variant does NOT help here
+  --- CFI cubic m=8 TWISTED tally: {'all-fail': 2, 'sel-ok': 25}
+
+=== CFI cubic m=8 plain   n=56
+    root:  cells(non-singleton) = [(0, 32), (1, 24)]
+        id=0    |C|=32   gens=480  ✗ not certified   <-- SELECTED (chooseIdK)
+        id=1    |C|=24   gens=264  ✗ not certified
+        ⟹ NO cell certifies — route (A)'s resolver-level variant does NOT help here
+    root/id0:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 8), (9, 4), (10, 2), (12, 2), (14, 2), (15, 4), (16, 4), (17, 2), (18, 2), (19, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=8    gens=56   ✓ CERTIFIED
+        id=9    |C|=4    gens=4    ✗ not certified
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=4    gens=12   ✓ CERTIFIED
+        id=16   |C|=4    gens=12   ✓ CERTIFIED
+        id=17   |C|=2    gens=0    ✗ not certified
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1:  cells(non-singleton) = [(0, 4), (1, 4), (2, 16), (3, 8), (5, 8), (7, 4), (8, 8), (9, 2)]
+        id=0    |C|=4    gens=12   ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=4    gens=12   ✓ CERTIFIED
+        id=2    |C|=16   gens=240  ✓ CERTIFIED
+        id=3    |C|=8    gens=24   ✗ not certified
+        id=5    |C|=8    gens=56   ✓ CERTIFIED
+        id=7    |C|=4    gens=12   ✓ CERTIFIED
+        id=8    |C|=8    gens=56   ✓ CERTIFIED
+        id=9    |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id1:  cells(non-singleton) = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=8    gens=56   ✓ CERTIFIED
+        id=12   |C|=4    gens=4    ✗ not certified
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        id=23   |C|=2    gens=0    ✗ not certified
+        id=24   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id3:  cells(non-singleton) = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=8    gens=56   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=33   |C|=4    gens=12   ✓ CERTIFIED
+        id=36   |C|=2    gens=2    ✓ CERTIFIED
+        id=37   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id4:  cells(non-singleton) = [(1, 2), (3, 4), (6, 4), (7, 2), (8, 4), (9, 4), (10, 4), (11, 4), (12, 2), (14, 2), (16, 2), (17, 4), (18, 2), (19, 2), (20, 2), (21, 2), (22, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=4    gens=12   ✓ CERTIFIED
+        id=10   |C|=4    gens=12   ✓ CERTIFIED
+        id=11   |C|=4    gens=4    ✗ not certified
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=0    ✗ not certified
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id5:  cells(non-singleton) = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=8    gens=56   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=33   |C|=4    gens=12   ✓ CERTIFIED
+        id=36   |C|=2    gens=2    ✓ CERTIFIED
+        id=37   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id6:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (8, 4), (9, 4), (10, 4), (11, 4), (12, 2), (14, 2), (16, 2), (17, 4), (18, 2), (19, 2), (20, 2), (21, 2), (22, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=4    gens=12   ✓ CERTIFIED
+        id=10   |C|=4    gens=12   ✓ CERTIFIED
+        id=11   |C|=4    gens=4    ✗ not certified
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=0    ✗ not certified
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id7:  cells(non-singleton) = [(1, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (10, 2), (12, 8), (13, 2), (14, 2), (15, 2), (17, 2), (21, 2), (22, 2), (23, 4), (26, 2), (27, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=8    gens=56   ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=2    gens=2    ✓ CERTIFIED
+        id=23   |C|=4    gens=12   ✓ CERTIFIED
+        id=26   |C|=2    gens=2    ✓ CERTIFIED
+        id=27   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id8:  cells(non-singleton) = [(1, 2), (3, 4), (6, 4), (9, 2), (10, 2), (23, 2), (25, 2), (27, 2), (28, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=23   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=2    gens=2    ✓ CERTIFIED
+        id=27   |C|=2    gens=2    ✓ CERTIFIED
+        id=28   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id9:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 2), (8, 2), (9, 4), (10, 4), (13, 2), (14, 2), (16, 2), (18, 2), (19, 4), (20, 4), (23, 2), (24, 2), (25, 2)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=4    gens=12   ✓ CERTIFIED
+        id=10   |C|=4    gens=12   ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=4    gens=12   ✓ CERTIFIED
+        id=20   |C|=4    gens=12   ✓ CERTIFIED
+        id=23   |C|=2    gens=2    ✓ CERTIFIED
+        id=24   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=2    gens=2    ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id10:  cells(non-singleton) = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=8    gens=56   ✓ CERTIFIED
+        id=12   |C|=4    gens=4    ✗ not certified
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        id=23   |C|=2    gens=0    ✗ not certified
+        id=24   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id12:  cells(non-singleton) = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=8    gens=56   ✓ CERTIFIED
+        id=12   |C|=4    gens=4    ✗ not certified
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        id=23   |C|=2    gens=0    ✗ not certified
+        id=24   |C|=2    gens=2    ✓ CERTIFIED
+        id=25   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id14:  cells(non-singleton) = [(1, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (10, 2), (12, 8), (13, 2), (14, 2), (15, 2), (17, 2), (21, 2), (22, 2), (23, 4), (26, 2), (27, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=8    gens=56   ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=2    gens=2    ✓ CERTIFIED
+        id=23   |C|=4    gens=12   ✓ CERTIFIED
+        id=26   |C|=2    gens=2    ✓ CERTIFIED
+        id=27   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id15:  cells(non-singleton) = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=8    gens=56   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=33   |C|=4    gens=12   ✓ CERTIFIED
+        id=36   |C|=2    gens=2    ✓ CERTIFIED
+        id=37   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id16:  cells(non-singleton) = [(1, 2), (3, 4), (6, 4), (9, 4), (10, 2), (11, 2), (12, 2), (13, 2), (14, 4), (15, 2), (17, 2), (19, 2), (20, 4), (25, 2), (26, 2), (27, 2), (28, 2)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=9    |C|=4    gens=4    ✗ not certified
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=4    gens=4    ✗ not certified
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=4    gens=12   ✓ CERTIFIED
+        id=25   |C|=2    gens=0    ✗ not certified
+        id=26   |C|=2    gens=2    ✓ CERTIFIED
+        id=27   |C|=2    gens=2    ✓ CERTIFIED
+        id=28   |C|=2    gens=2    ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id17:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 2), (8, 2), (9, 8), (10, 2), (11, 2), (12, 2), (14, 2), (16, 2), (17, 4), (18, 4), (21, 2), (22, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=8    gens=56   ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id18:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 4), (9, 4), (10, 4), (11, 2), (13, 2), (15, 2), (16, 4), (17, 4), (18, 2), (21, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=4    gens=12   ✓ CERTIFIED
+        id=9    |C|=4    gens=12   ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=4    gens=12   ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=2    gens=0    ✗ not certified
+        id=21   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id19:  cells(non-singleton) = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 2), (9, 2), (10, 4), (11, 2), (12, 2), (13, 2), (15, 2), (17, 2), (18, 4), (19, 2), (20, 2), (21, 2), (22, 2), (24, 2)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=11   |C|=2    gens=0    ✗ not certified
+        id=12   |C|=2    gens=0    ✗ not certified
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=0    ✗ not certified
+        id=22   |C|=2    gens=2    ✓ CERTIFIED
+        id=24   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id0:  cells(non-singleton) = [(2, 2), (3, 2), (4, 2), (5, 4), (6, 4), (7, 8), (8, 4), (9, 4), (11, 2), (12, 2), (13, 4), (15, 2), (16, 2), (17, 4), (18, 4), (19, 2)]
+        id=2    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=7    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=4    gens=4    ✗ not certified
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=4    gens=12   ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=19   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id1:  cells(non-singleton) = [(0, 2), (1, 2), (4, 2), (5, 4), (6, 4), (7, 8), (8, 4), (9, 4), (11, 2), (12, 2), (13, 4), (15, 2), (16, 2), (17, 4), (18, 4), (19, 2)]
+        id=0    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=4    gens=12   ✓ CERTIFIED
+        id=7    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=9    |C|=4    gens=4    ✗ not certified
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=4    gens=12   ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=19   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id2:  cells(non-singleton) = [(2, 2), (5, 2), (14, 8), (19, 2), (20, 2), (26, 4), (30, 2), (35, 4)]
+        id=2    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=8    gens=56   ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=26   |C|=4    gens=12   ✓ CERTIFIED
+        id=30   |C|=2    gens=2    ✓ CERTIFIED
+        id=35   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id3:  cells(non-singleton) = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 4), (5, 4), (6, 8), (8, 2), (10, 2), (11, 2), (13, 4), (14, 4), (16, 2), (17, 2), (18, 2), (19, 2), (20, 4)]
+        id=0    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=2    gens=2    ✓ CERTIFIED
+        id=2    |C|=2    gens=2    ✓ CERTIFIED
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=4    gens=12   ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=2    gens=2    ✓ CERTIFIED
+        id=11   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=4    gens=12   ✓ CERTIFIED
+        id=14   |C|=4    gens=12   ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=18   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=2    ✓ CERTIFIED
+        id=20   |C|=4    gens=12   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id5:  cells(non-singleton) = [(2, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 8), (11, 4), (12, 4), (18, 4), (20, 2), (21, 2), (22, 2), (23, 2), (24, 4), (25, 2)]
+        id=2    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=2    gens=2    ✓ CERTIFIED
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        id=9    |C|=2    gens=2    ✓ CERTIFIED
+        id=10   |C|=8    gens=56   ✓ CERTIFIED
+        id=11   |C|=4    gens=4    ✗ not certified
+        id=12   |C|=4    gens=4    ✗ not certified
+        id=18   |C|=4    gens=12   ✓ CERTIFIED
+        id=20   |C|=2    gens=2    ✓ CERTIFIED
+        id=21   |C|=2    gens=2    ✓ CERTIFIED
+        id=22   |C|=2    gens=2    ✓ CERTIFIED
+        id=23   |C|=2    gens=2    ✓ CERTIFIED
+        id=24   |C|=4    gens=12   ✓ CERTIFIED
+        id=25   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id7:  cells(non-singleton) = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 4), (5, 4), (6, 8), (7, 4), (8, 4), (10, 4), (11, 4), (15, 2), (16, 4), (17, 4), (18, 2)]
+        id=0    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=2    gens=2    ✓ CERTIFIED
+        id=2    |C|=2    gens=2    ✓ CERTIFIED
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=4    gens=12   ✓ CERTIFIED
+        id=5    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=8    gens=56   ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=4    gens=4    ✗ not certified
+        id=10   |C|=4    gens=12   ✓ CERTIFIED
+        id=11   |C|=4    gens=12   ✓ CERTIFIED
+        id=15   |C|=2    gens=2    ✓ CERTIFIED
+        id=16   |C|=4    gens=12   ✓ CERTIFIED
+        id=17   |C|=4    gens=12   ✓ CERTIFIED
+        id=18   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id8:  cells(non-singleton) = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 4), (7, 8), (8, 2), (9, 2), (10, 4), (12, 2), (13, 2), (14, 4), (16, 2), (17, 2), (19, 2), (21, 4), (22, 2)]
+        id=0    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=2    gens=2    ✓ CERTIFIED
+        id=2    |C|=2    gens=2    ✓ CERTIFIED
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=4    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=6    |C|=4    gens=4    ✗ not certified
+        id=7    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=2    gens=0    ✗ not certified
+        id=9    |C|=2    gens=0    ✗ not certified
+        id=10   |C|=4    gens=4    ✗ not certified
+        id=12   |C|=2    gens=2    ✓ CERTIFIED
+        id=13   |C|=2    gens=2    ✓ CERTIFIED
+        id=14   |C|=4    gens=12   ✓ CERTIFIED
+        id=16   |C|=2    gens=2    ✓ CERTIFIED
+        id=17   |C|=2    gens=2    ✓ CERTIFIED
+        id=19   |C|=2    gens=0    ✗ not certified
+        id=21   |C|=4    gens=12   ✓ CERTIFIED
+        id=22   |C|=2    gens=0    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id1/id9:  cells(non-singleton) = [(0, 4), (1, 4), (2, 16), (3, 4), (4, 4), (6, 8), (8, 4), (9, 8)]
+        id=0    |C|=4    gens=12   ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=1    |C|=4    gens=12   ✓ CERTIFIED
+        id=2    |C|=16   gens=240  ✓ CERTIFIED
+        id=3    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=4    gens=12   ✓ CERTIFIED
+        id=6    |C|=8    gens=56   ✓ CERTIFIED
+        id=8    |C|=4    gens=12   ✓ CERTIFIED
+        id=9    |C|=8    gens=56   ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+  --- CFI cubic m=8 plain tally: {'all-fail': 1, 'sel-ok': 26}
+
+=== Shrikhande (1-WL CAO witness)   n=16
+    root:  cells(non-singleton) = [(0, 16)]
+        id=0    |C|=16   gens=240  ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0:  cells(non-singleton) = [(1, 6), (2, 9)]
+        id=1    |C|=6    gens=30   ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=2    |C|=9    gens=36   ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id1:  cells(non-singleton) = [(2, 2), (3, 2), (5, 2), (7, 4), (8, 2)]
+        id=2    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=3    |C|=2    gens=2    ✓ CERTIFIED
+        id=5    |C|=2    gens=2    ✓ CERTIFIED
+        id=7    |C|=4    gens=4    ✗ not certified
+        id=8    |C|=2    gens=2    ✓ CERTIFIED
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+    root/id0/id2:  cells(non-singleton) = [(1, 2), (2, 4), (4, 4), (5, 4)]
+        id=1    |C|=2    gens=2    ✓ CERTIFIED   <-- SELECTED (chooseIdK)
+        id=2    |C|=4    gens=12   ✓ CERTIFIED
+        id=4    |C|=4    gens=12   ✓ CERTIFIED
+        id=5    |C|=4    gens=4    ✗ not certified
+        ⟹ selected cell resolves; route (A) has nothing to add HERE
+  --- Shrikhande (1-WL CAO witness) tally: {'sel-ok': 4}
+
+============================================================
+no items skipped: full coverage of the nodes enumerated above
+wall: 8.7s
