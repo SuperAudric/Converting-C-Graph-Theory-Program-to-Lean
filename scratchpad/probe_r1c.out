@@ -1,0 +1,128 @@
+probe_r1c.py — R1c / M1 / §10 item 2: the E1/E2 descent instrumentation over the FULL sharp
+Cayley population (2026-07-31).
+
+docs/chain-descent-cao-propagation.md §10 item 2, §12.5a R1c, §12.6 M1.
+
+============================================================================================
+WHAT WAS WRONG, AND WHAT THIS FIXES
+============================================================================================
+`probe_2wl_sring.py` sweeps the whole population (66,888 connection sets over 38 verified groups of
+orders 8–32) and reports **729 NON-SCHURIAN S-rings, 0 two-WL counterexamples** — but it only tests
+**depth 1** (individualize the identity, one 2-WL closure).
+
+`probe_cao_induction.py` has the instrument that tests the induction the way a proof needs it — E1/E2,
+fibre- and full-schurity at **every node of a descent to discreteness** — but its sharp-Cayley
+section iterates **8 groups of order 16 only** and `break`s at `hits > 3` per group, so it exercises
+**≤ ~24 inputs, not 729** (§10 item 2 records this).
+
+**This file runs the E1/E2 instrument over the full population.**  Nothing is capped silently: every
+group sampled rather than enumerated, and every input whose automorphism search blows its budget, is
+counted and printed at the end (§9).
+
+E1 — the induction step on the real input class: check at EVERY node, not just depth 1.  A depth-2
+     failure *is* a counterexample to the theorem as stated, with an input no plain-graph sweep can
+     produce.
+E2 — which hypothesis does the work: record fibre-schurity (diagonal classes == Aut_χ-orbits) AND
+     full schurity (pair classes == Aut_χ-ORBITALS) at every node.  If full schurity is ever lost
+     while fibre-schurity survives, the target cannot be proved via the stronger "extensions preserve
+     schurity" — the fibre hypothesis is load-bearing.
+
+============================================================================================
+WHY THIS POPULATION, AND WHY ITS ENTRY TICKET IS GENUINELY PAID
+============================================================================================
+§7.2: a 2-WL failure REQUIRES a non-schurian one-point extension.  For a Cayley graph the root 2-WL
+closure is the Schur ring ⟨S⟩, and its basic sets are exactly the diagonal classes of the one-point
+extension at the identity; so **"S-ring non-schurian" IS "the one-point extension at e is
+non-schurian"** — the ticket, literally.  If the S-ring is schurian the extension recovers the
+`Aut_e`-orbits and no failure is possible.
+
+⚠ Contrast with the CFI population measured earlier today (`probe_step2.py --ticket`): there the ROOT
+was non-schurian but every one-point extension was schurian, so the ticket was **UNPAID** and the
+2-WL result was worthless.  Here the ticket is paid by construction.  Do not conflate the two.
+
+SOUNDNESS: orbits come from `all_isos` (the validated complete enumeration, §8.1) or from
+`iso_exists` (early-exit search, §8.1) — never from `probe_orbit_oracle` (§8.2, PROVEN BROKEN).
+`iso_exists` returns None on budget exhaustion; only `is True` is treated as same-orbit.
+
+    cd /workspace/scratchpad && python3 -u probe_r1c.py > probe_r1c.out 2>&1     # run detached (§9)
+    python3 -u probe_r1c.py --smoke                                             # one group, timing
+
+groups = 38, CAP_SETS = 4000, node budget/input = 400, wall deadline = 3300s
+  Z8           (order  8): 15/15 sets, 0 sharp, 0s
+  Z2^3         (order  8): 127/127 sets, 0 sharp, 0s
+  Z4xZ2        (order  8): 31/31 sets, 0 sharp, 0s
+  D8           (order  8): 63/63 sets, 0 sharp, 0s
+  Q8           (order  8): 15/15 sets, 0 sharp, 0s
+  Z9           (order  9): 15/15 sets, 0 sharp, 0s
+  Z3^2         (order  9): 15/15 sets, 0 sharp, 0s
+  Z12          (order 12): 63/63 sets, 0 sharp, 0s
+  D12          (order 12): 511/511 sets, 0 sharp, 1s
+  Dic3         (order 12): 63/63 sets, 0 sharp, 0s
+  Z6xZ2        (order 12): 127/127 sets, 0 sharp, 0s
+  A4           (order 12): 127/127 sets, 0 sharp, 0s
+  Z16          (order 16): 255/255 sets, 0 sharp, 1s
+  Z2^4         (order 16): 4000/4000 sets, 0 sharp, 18s
+  ... 50 sharp inputs instrumented, 1430 nodes, 27s
+  Z4^2         (order 16): 511/511 sets, 64 sharp, 9s
+  Z8xZ2        (order 16): 511/511 sets, 0 sharp, 2s
+  Z4xZ2^2      (order 16): 2047/2047 sets, 0 sharp, 10s
+  D16          (order 16): 4000/4000 sets, 0 sharp, 9s
+  ... 100 sharp inputs instrumented, 3010 nodes, 55s
+  SD16         (order 16): 1023/1023 sets, 64 sharp, 11s
+  ... 150 sharp inputs instrumented, 4650 nodes, 64s
+  M16          (order 16): 511/511 sets, 32 sharp, 6s
+  Q16          (order 16): 255/255 sets, 0 sharp, 1s
+  ... 200 sharp inputs instrumented, 6065 nodes, 80s
+  D8xZ2        (order 16): 4000/4000 sets, 52 sharp, 17s
+  Q8xZ2        (order 16): 511/511 sets, 0 sharp, 3s
+  Z18          (order 18): 511/511 sets, 0 sharp, 2s
+  Z3xZ6        (order 18): 511/511 sets, 0 sharp, 3s
+  Z20          (order 20): 1023/1023 sets, 0 sharp, 5s
+  Z2^2xZ5      (order 20): 2047/2047 sets, 0 sharp, 11s
+  Z24          (order 24): 4000/4000 sets, 0 sharp, 29s
+  Z2^3xZ3      (order 24): 4000/4000 sets, 0 sharp, 52s
+  Z4xZ6        (order 24): 4000/4000 sets, 0 sharp, 41s
+  SL(2,3)      (order 24): 4000/4000 sets, 0 sharp, 57s
+  Z27          (order 27): 4000/4000 sets, 0 sharp, 30s
+  Z3^3         (order 27): 4000/4000 sets, 0 sharp, 102s
+  Z9xZ3        (order 27): 4000/4000 sets, 0 sharp, 43s
+  Z2^5         (order 32): 4000/4000 sets, 0 sharp, 58s
+  ... 250 sharp inputs instrumented, 14916 nodes, 744s
+  ... 300 sharp inputs instrumented, 24617 nodes, 1000s
+  ... 350 sharp inputs instrumented, 33413 nodes, 1258s
+  ... 400 sharp inputs instrumented, 43447 nodes, 2440s
+  ... 450 sharp inputs instrumented, 53632 nodes, 3216s
+  Z4^2xZ2      (order 32): 2126/4000 sets, 253 sharp, 2780s   ⚠ INCOMPLETE (deadline)
+
+============================================================================================
+connection sets tried        : 57014
+S-ring NON-discrete          : 52378
+S-ring NON-SCHURIAN (= §7.2's entry ticket, PAID) : 465
+  of those, E1/E2 instrumented : 462   (Aut budget blown: 3)
+descent nodes visited        : 56811   max depth 8
+  inputs whose descent hit the 400-node budget (partial coverage): 77
+
+★ E1 — FIBRE-schurity failures at ANY node (= a 2-WL CAO counterexample): 0
+★ E2 — FULL-schurity failures: 462;  nodes where FIBRE holds but FULL fails: 477
+    (if the second number is > 0, the target cannot be proved via the stronger 'extensions preserve schurity' — the fibre hypothesis is load-bearing)
+
+⚠ SKIPPED / SAMPLED — 18 items (a silent cap reads as full coverage, §9):
+    - Z2^4: 15 inverse-classes, 32768 sets, SAMPLED 4000
+    - D16: 12 inverse-classes, 4096 sets, SAMPLED 4000
+    - D8xZ2: 13 inverse-classes, 8192 sets, SAMPLED 4000
+    - Z24: 12 inverse-classes, 4096 sets, SAMPLED 4000
+    - Z2^3xZ3: 15 inverse-classes, 32768 sets, SAMPLED 4000
+    - Z4xZ6: 13 inverse-classes, 8192 sets, SAMPLED 4000
+    - SL(2,3): 12 inverse-classes, 4096 sets, SAMPLED 4000
+    - Z27: 13 inverse-classes, 8192 sets, SAMPLED 4000
+    - Z3^3: 13 inverse-classes, 8192 sets, SAMPLED 4000
+    - Z9xZ3: 13 inverse-classes, 8192 sets, SAMPLED 4000
+    - Z2^5: 31 inverse-classes, 2147483648 sets, SAMPLED 4000
+    - Z4^2xZ2: 19 inverse-classes, 524288 sets, SAMPLED 4000
+    - Z4^2xZ2 n=32 |S|=16 S=[2, 4, 5, 6, 8, 9, 11, 14, 19, 20, 21, 23, 24, 25, 26, 31]: Aut budget blown
+    - Z4^2xZ2 n=32 |S|=17 S=[1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 20, 21, 28, 29, 30, 31]: Aut budget blown
+    - Z4^2xZ2 n=32 |S|=19 S=[1, 4, 5, 8, 9, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]: Aut budget blown
+    - Z4^2xZ2 (order 32): wall deadline hit after 2126/4000 connection sets
+    - GROUP NOT REACHED (wall deadline): Z8xZ4 (order 32)
+    - GROUP NOT REACHED (wall deadline): Z16xZ2 (order 32)
+wall: 3300.1s

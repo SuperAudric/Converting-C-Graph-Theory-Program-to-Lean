@@ -1,0 +1,50 @@
+probe_r1c.py — R1c / M1 / §10 item 2: the E1/E2 descent instrumentation over the FULL sharp
+Cayley population (2026-07-31).
+
+docs/chain-descent-cao-propagation.md §10 item 2, §12.5a R1c, §12.6 M1.
+
+============================================================================================
+WHAT WAS WRONG, AND WHAT THIS FIXES
+============================================================================================
+`probe_2wl_sring.py` sweeps the whole population (66,888 connection sets over 38 verified groups of
+orders 8–32) and reports **729 NON-SCHURIAN S-rings, 0 two-WL counterexamples** — but it only tests
+**depth 1** (individualize the identity, one 2-WL closure).
+
+`probe_cao_induction.py` has the instrument that tests the induction the way a proof needs it — E1/E2,
+fibre- and full-schurity at **every node of a descent to discreteness** — but its sharp-Cayley
+section iterates **8 groups of order 16 only** and `break`s at `hits > 3` per group, so it exercises
+**≤ ~24 inputs, not 729** (§10 item 2 records this).
+
+**This file runs the E1/E2 instrument over the full population.**  Nothing is capped silently: every
+group sampled rather than enumerated, and every input whose automorphism search blows its budget, is
+counted and printed at the end (§9).
+
+E1 — the induction step on the real input class: check at EVERY node, not just depth 1.  A depth-2
+     failure *is* a counterexample to the theorem as stated, with an input no plain-graph sweep can
+     produce.
+E2 — which hypothesis does the work: record fibre-schurity (diagonal classes == Aut_χ-orbits) AND
+     full schurity (pair classes == Aut_χ-ORBITALS) at every node.  If full schurity is ever lost
+     while fibre-schurity survives, the target cannot be proved via the stronger "extensions preserve
+     schurity" — the fibre hypothesis is load-bearing.
+
+============================================================================================
+WHY THIS POPULATION, AND WHY ITS ENTRY TICKET IS GENUINELY PAID
+============================================================================================
+§7.2: a 2-WL failure REQUIRES a non-schurian one-point extension.  For a Cayley graph the root 2-WL
+closure is the Schur ring ⟨S⟩, and its basic sets are exactly the diagonal classes of the one-point
+extension at the identity; so **"S-ring non-schurian" IS "the one-point extension at e is
+non-schurian"** — the ticket, literally.  If the S-ring is schurian the extension recovers the
+`Aut_e`-orbits and no failure is possible.
+
+⚠ Contrast with the CFI population measured earlier today (`probe_step2.py --ticket`): there the ROOT
+was non-schurian but every one-point extension was schurian, so the ticket was **UNPAID** and the
+2-WL result was worthless.  Here the ticket is paid by construction.  Do not conflate the two.
+
+SOUNDNESS: orbits come from `all_isos` (the validated complete enumeration, §8.1) or from
+`iso_exists` (early-exit search, §8.1) — never from `probe_orbit_oracle` (§8.2, PROVEN BROKEN).
+`iso_exists` returns None on budget exhaustion; only `is True` is treated as same-orbit.
+
+    cd /workspace/scratchpad && python3 -u probe_r1c.py > probe_r1c.out 2>&1     # run detached (§9)
+    python3 -u probe_r1c.py --smoke                                             # one group, timing
+
+groups = 1, CAP_SETS = 4000, node budget/input = 400, wall deadline = 2400s

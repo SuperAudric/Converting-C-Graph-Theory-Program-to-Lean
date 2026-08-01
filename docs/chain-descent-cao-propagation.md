@@ -102,6 +102,28 @@ X(x,b)=k}`, the first quantity **coherence does not determine**. ⟹ the crux is
 §12.3/§12.6 (the barriers and what M3 measured). Then §4/§5 before proposing anything, and §7 before
 investing in anything.
 
+> ### ▶▶▶ WHERE THE LAST SESSION STOPPED (2026-07-31) — pick up here
+> Four things landed, in this order, and each has its own section:
+> 1. **Two statement-level defects fixed** — the `triCount` pin is **sufficient, not equivalent**
+>    (§0's box), and `Injective enc` is **not** the rank renumbering (§12.5a **R1g**).
+> 2. **Route (A)'s cheap form measured DEAD** (§10.5) — and its two failing nodes turned out to be
+>    **all-mixed = force's domain**, so the harvest was right to fail (§13.6b).
+> 3. **The conversion gap scoped, then INVERTED by measurement** (§13, then **§13.6**): swapping
+>    `Deepen.step` alone buys nothing; the **descent's refiner** is what recovers the orbit partition
+>    exactly. §5's "CFI over any base" row is **narrowed** (a random cubic base breaks it at 1-WL),
+>    and the matching 2-WL result is **worthless** — §7.2's ticket is unpaid there.
+> 4. **R1c RAN — §12.5b.** The E1/E2 descent instrument now covers the sharp Cayley population
+>    (`probe_r1c.py`, replacing a ≤ ~24-input cap): **465 of the recorded 729 sharp inputs, 462
+>    instrumented, 56,811 descent nodes to depth 8.**
+>    **★ E2 ANSWERED — 477 nodes where fibre-schurity holds but FULL schurity fails ⟹ the fibre
+>    hypothesis is LOAD-BEARING**, so unrestricted "extensions preserve schurity" cannot prove the
+>    target (this *measures* §4.5). **★ E1: 0 failures — no 2-WL CAO counterexample**, at every node
+>    of a descent rather than depth 1 only. ⚠ **64% coverage, not a population result** — see §12.5b's
+>    four named gaps.
+>
+> **▶ The single next action: close R1c's coverage gaps — §12.5b's "To close R1c properly".** It is
+> the only step that can end the track, and it is now bounded work, not open research.
+
 **First actions — ▶▶ §13 (THE CONVERSION GAP) FIRST, then §12.5a.** Revised 2026-07-31: **nothing in
 this track can reach the built object until the `Deepen.step` swap is scoped and decided** (§13), so
 that scoping gates the value of every crux row. Only then §12.5a: **R1a** coordinate-level ablation of
@@ -413,6 +435,8 @@ too. Every "shrink the group" design dies on this.
 | **2-WL recovers the `Aut_v`-orbits EXACTLY on the named VT witness** `Cay(Z₁₂⋊₅Z₂)` (n=24, \|Aut\|=48, \|Aut_v\|=2): `same_partition(2-WL diag, Aut_v-orbits) = True`, while 1-WL = `False` with **all 6** non-singleton cells mixed (2026-07-30, `probe_stall4.py`) | **strong, and sharp.** The input class is known-capable — this is the graph that refutes `VT ⟹ Tinhofer` at 1-WL — so the §7.2 entry ticket is paid, unlike the worthless 21-object sweep |
 | VT voltage covers (`Z₂`/`Z₃`/`Z₄` over 9 VT bases): 122 covers, 0 failures | moderate — imprimitive, blocks of size 2–4, not circulant-dominated |
 | Descent instrumentation: 11 objects, **16,048 nodes**, fibre-schurian everywhere | ⚠ **DISCOUNT HEAVILY** — only **364** of those nodes still have a cell of size ≥ 3; the rest are near-discrete where schurity is trivial. **The honest figure is 364, not 16k** |
+| **★ E1/E2 descent sweep over the sharp Cayley population (2026-07-31, `probe_r1c.py`)**: **465** non-schurian S-rings reached of the recorded 729, **462** instrumented, **56,811 descent nodes to depth 8**, **0 fibre-schurity failures at any node** | **strong, and it upgrades the row above** — that one tested **depth 1 only**; this tests the induction step at **every node of a descent**, which is what a proof needs (E1). ⚠ **Discount for coverage:** 64% of the sharp population (three order-32 groups short), 77 descents truncated at a 400-node budget, 3 inputs' Aut search blown, and 12 groups **sampled** at `CAP_SETS = 4000` (`Z2^5`: 4000 of 2.1×10⁹). **Not yet a population result** — §12.5b lists what closes it |
+| **★★ E2 from the same sweep: 477 nodes where fibre-schurity HOLDS but FULL schurity FAILS** | **decisive, and it is a measurement of §4.5** (previously an assertion): the **fibre hypothesis is load-bearing**, so unrestricted *"extensions preserve schurity"* cannot prove the target. ⚠ Does **not** touch §12.4's per-family **R2** |
 | The original 2-WL sweep (21 objects) | ⛔ **WORTHLESS** — 0/21 had a non-schurian one-point extension, so it could not possibly have found a counterexample. The recorded vacuity failure |
 | **CFI cubic m=8, node sweep (2026-07-31)**: 58 nodes, ~800 propagation tests, **1-WL fails 5× (all at depth 0), 2-WL fails 0×** | ⛔ **THE 2-WL HALF IS WORTHLESS — same failure as the row above**, and I checked it on myself: `--ticket` shows the roots are non-schurian but **all 5 one-point extensions are schurian**, so 2-WL could not have failed. ✅ **The 1-WL half is real and new** — it narrows §5's "CFI over any base" row (which sampled only symmetric named bases) |
 | The old 498 + 313 VT pins | ⛔ **UNSOUND** — produced by the broken oracle (§8.2), which errs by *merging* ⟹ false "ok"s |
@@ -505,6 +529,18 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
   and nothing at all if it is killed. Write to a log file.
 - **Wrap `all_isos` budget exceptions.** An unguarded `RuntimeError` killed a sweep at its last stage.
 - Connection-set / voltage enumerations blow up combinatorially. Cap, and **log what you skipped**.
+- **⚠⚠ A FIXED-SEED SAMPLE MAKES A RESTART A NO-OP (2026-07-31, cost a full run).** `probe_r1c.sets_for`
+  / `probe_2wl_sring.main` sample capped groups with `random.Random(12345)`, so the sets come out in
+  the *same order every time*. Re-running a group that was cut off re-covers its **prefix** and adds
+  **zero** coverage — it looks like progress and is not. Offset the sample (`probe_r1c.py --skip=N`).
+- **⚠⚠ CHECK A WALL DEADLINE IN THE INNERMOST LOOP (2026-07-31, cost two runs).** A deadline tested
+  only *between groups* let one order-32 group overrun it by hours; both runs were then killed by the
+  shell timeout with **no summary at all** (EXIT 124), so hours of compute produced nothing quotable.
+  Test it in the item loop, and always print a summary on the way out.
+- **A wall-clock "elapsed" figure is not compute time.** A suspended machine turned a 65-minute budget
+  into a `wall: 33873s` line. Trust per-checkpoint timings, not the total.
+- **Check the exit code, not the completion notice.** A background task reporting "completed" may have
+  been *killed* by its timeout — `EXIT 124`. Two partial sweeps were briefly read as finished results.
 
 ---
 
@@ -525,14 +561,17 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
    `ChainDescent/CoherentConfig.lean` already carry `Separable` / `SeparablePointed` /
    `ExtensionSeparable` — R2's vocabulary — and `CoherentConfig` also carries `IsPointExtension`, the
    *construction* `pointExtension`, and `Theorem41Statement` (§12.6 M5).
-2. **Not yet run, and the cheapest remaining measurement:** the `E1/E2` descent instrumentation over
-   the **sharp Cayley inputs** (= §12.5a R1c = §12.6 M1). ⚠⚠ **The probe does NOT currently do what
-   this item says.** `probe_cao_induction.py`'s sharp-Cayley section iterates **8 groups of order 16
-   only** and `break`s at `hits > 3` per group ⟹ **≤ ~24 inputs, not 729** (the 729 came from 38
-   groups of orders 8–32). **Remove the cap, extend to the full population, and log what is skipped**
-   (§9) before quoting any number from it. ★ Why this population and no other: a Cayley root over a
-   **transitive** group satisfies CAO *automatically* (one fibre = one orbit), so these are exactly
-   the inputs that pay §7.2's entry ticket.
+2. ✅ **RAN 2026-07-31 — E2 ANSWERED, E1 clean at 64% coverage. FULL RECORD = §12.5b.** The `E1/E2`
+   descent instrumentation over the **sharp Cayley inputs** (= §12.5a R1c = §12.6 M1). The ≤ ~24-input
+   cap is fixed: **`scratchpad/probe_r1c.py`** runs the instrument over the 38-group population with
+   every sample/skip/truncation logged (§9). **465** of the recorded **729** sharp inputs reached,
+   **462** instrumented, **56,811 descent nodes to depth 8** — **E1: 0 fibre-schurity failures;
+   E2: 477 nodes where fibre-schurity holds but FULL schurity fails ⟹ the fibre hypothesis is
+   load-bearing.** ⚠ Four named coverage gaps remain (three order-32 groups, 77 truncated descents,
+   3 blown Aut searches, 12 sampled groups) — §12.5b lists exactly what closes them. ★ Why this
+   population and no other: a Cayley root over a **transitive** group satisfies CAO *automatically*,
+   and — unlike the CFI population measured the same day — it **genuinely pays §7.2's entry ticket**
+   (§12.5b explains why the two differ).
 3. **The coupling construction (§2, §3).** Nobody has yet tried to *build* an object with the
    group-change and the deficiency at the same cell pair. That is the falsifier design, and it is the
    only one not already excluded by §5.
@@ -631,6 +670,13 @@ the diameter-2 confound) ·
 `Aut_v`-orbits; depth 1 = `lookaheadKey`'s own non-discrete branch. `probe_stall4.py` is the named VT
 witness `Cay(Z₁₂⋊₅Z₂)` — ⚠ its connection-set search is slow (~2048 masks × `all_isos` at n = 24), so
 run it detached per §9; **result recorded at `probe_stall4.out`**).
+**★★★ `probe_r1c.py`** (§12.5b = R1c/M1/§10 item 2 — the **E1/E2 descent instrument over the sharp
+Cayley population**, replacing `probe_cao_induction.py`'s ≤ ~24-input cap. **Main run
+`probe_r1c.out`**: 465/729 sharp inputs, 462 instrumented, 56,811 nodes to depth 8 — **E1 0 failures,
+E2 477 fibre-ok/full-fail**. Flags: `--smoke` · `--groups=A,B` · `--wall=SECS` · **`--skip=N`**
+(⚠ mandatory when resuming a cut-off group — the sample is fixed-seed, so a plain restart re-covers
+the prefix; §9). Tail runs: `probe_r1c_tail.out` (`Z4^2xZ2` prefix re-run — **no added coverage**),
+`probe_r1c_z8xz4.out`. **Read §12.5b before quoting any of it.**) ·
 **★★★ `probe_step2.py`** — four modes, and **run `--ticket` before quoting any 2-WL number from it**
 (`--calibrate` · `--nodes` · **`--propagate`** = §5's correction: the propagation test run at every
 reached descent node, from that node's CAO start, 1-WL vs 2-WL, output `probe_step2_prop.out` ·
@@ -825,7 +871,7 @@ target is that it is *injective on `K_v`-orbits within an `X`-class*.
 |---|---|---|---|
 | **R1a** | **Coordinate-level ablation of `N`.** Which *projection* of the triple count does the work — the full `N`, or a marginal (e.g. fixing `j`, the relation to `v`)? | hours | §12.6's ablation was at *class* granularity and came back "over-determined"; at **coordinate** granularity it can still be sharp, and it names the smallest object a proof must control |
 | **R1b** | **Base-point uniformity.** CAO makes `D` a single `K`-orbit, so the invariant transports across base points. Measure whether separating power is uniform over `v ∈ D` | hours | decides whether the theorem is *"for all `v`"* or only *"for some `v`"* — materially different statements, and §7.4/§7.5 show selector-dependence is a real hazard here |
-| **R1c** | **The falsifier, in the one place it can live** (= M1, sharpened). A Cayley root over a **transitive** group satisfies CAO *automatically* (one fibre = one orbit), so the **729 non-schurian S-rings are exactly the sharp inputs.** Fix the probe cap and run them | hours | **can end the track.** This is also why M1 is the falsifier and the evidence at once |
+| **R1c** ✅ **RAN 2026-07-31 — see §12.5b** | **The falsifier, in the one place it can live** (= M1, sharpened). A Cayley root over a **transitive** group satisfies CAO *automatically* (one fibre = one orbit), so the **729 non-schurian S-rings are exactly the sharp inputs.** Fix the probe cap and run them | ~1 h/run, several runs | **did not end the track — E1 found 0 counterexamples** over 465/729 sharp inputs and 56,811 descent nodes to depth 8. ★ **E2 answered: the fibre hypothesis is load-bearing.** ⚠ 64% coverage; four named gaps in §12.5b |
 | **R1d** | **Literature check.** *"Point extensions of schurian CCs need not be schurian"* is standard ⟹ **the CAO hypothesis must be doing essential work**, and any known non-schurian point extension whose root is *fibre*-schurian is an immediate counterexample | hours | far cheaper than §10.3's build-one-from-scratch, and it tests the same thing |
 | **R1e** ✅ **LANDED** (`CaoRound.lean` §6) | **Lean: name the invariant.** **`round3_separates_iff_triCount_ne`** — round 3 separates **iff** some triangle type of the round-2 colouring has a different `triCount` at `(v,u)` vs `(v,w)`. Everything **up to round 3** is discharged | done | the R2/R3 per-family pin is a *deliverable*: pin it to `triCount`. R1a still sharpens *which projection* of the count to pin. ⚠⚠ **SUFFICIENT, NOT EQUIVALENT** — see §0's box: `triCount` agreement at round 3 does **not** refute the crux (round 4+ can still separate), so this target is strictly stronger than the crux |
 | **R1f** | **The aggregate/rank attempt.** Informed by R1a/R1b | open | the actual proof. ⚠ Expect a sharper statement, not a proof. ⚠ And note it would be aimed at the *strengthened* statement (R1e's caveat) — if that resists, the fallback target is the crux itself (separation at the fixpoint), which no current instrument addresses |
@@ -840,6 +886,92 @@ every row here. Then **R1c + R1d** in parallel (either can end the track; ⚠ R1
 not a new falsifier hunt — §0.0). **R1g** is a cheap statement-level repair, do it alongside any §6
 work. **R1a + R1b** only if the track survives that, and **R1f** last — and as a per-family
 certificate program (§12.4 R2/R3 + §12.6 M5), not a general proof attempt.
+
+### 12.5b ▶▶ R1c / M1 / §10 item 2 — RAN 2026-07-31: E2 ANSWERED, E1 clean on 64% of the population
+
+**Read this before running or quoting anything from `probe_r1c.py`.**
+
+**What was wrong, and what is now built.** `probe_2wl_sring.py` sweeps the whole population (66,888
+connection sets, 38 verified groups of orders 8–32 → 62,147 non-discrete S-rings → **729
+non-schurian**) but tests **depth 1 only**. `probe_cao_induction.py` has the instrument a proof needs
+— **E1/E2**, fibre- *and* full-schurity at **every node of a descent to discreteness** — but its
+sharp-Cayley section iterates 8 groups of order 16 and `break`s at `hits > 3`, so it exercises
+**≤ ~24 inputs**. ✅ **`scratchpad/probe_r1c.py` runs the E1/E2 instrument over the full population**,
+with the cap removed and every sample/skip/truncation logged (§9).
+
+**★ The entry ticket here is genuinely PAID — and that is not automatic.** For a Cayley graph the root
+2-WL closure is the Schur ring `⟨S⟩`, whose basic sets are exactly the diagonal classes of the
+one-point extension at the identity. So *"S-ring non-schurian"* **is** *"the one-point extension at
+`e` is non-schurian"* — §7.2's ticket, literally; a schurian S-ring makes failure impossible.
+⚠ **Contrast the CFI population measured the same day** (§5's correction block): there the **root** was
+non-schurian but every one-point **extension** was schurian, so the ticket was **UNPAID** and the 2-WL
+result was worthless. Two different populations, opposite verdicts — do not conflate them.
+
+**★ THE RESULT (2026-07-31, `probe_r1c.out`, wall 3300 s, summary printed — EXIT 0).**
+
+| | measured | recorded population |
+|---|---|---|
+| connection sets tried | **57,014** | 66,888 |
+| S-ring non-discrete | **52,378** | 62,147 |
+| **S-ring NON-SCHURIAN** (= §7.2's ticket, PAID) | **465** | **729** |
+| of those, E1/E2 instrumented | **462** (3 Aut-budget blown, each logged) | — |
+| descent nodes visited | **56,811**, max depth **8** | — |
+| **★ E1 — fibre-schurity failures at ANY node** | **0** | — |
+| **★ E2 — nodes where fibre holds but FULL schurity fails** | **477** (462 inputs with a full-schurity failure) | — |
+
+**▶ E2 IS ANSWERED, and it is a real finding.** Fibre-schurity survives at 477 nodes where **full**
+schurity fails. ⟹ **the fibre hypothesis is load-bearing**, so the unrestricted *"extensions preserve
+schurity"* is **not** a route to the target. This **measures** §4.5, which had only asserted it.
+⚠ It does **not** touch §12.4's **R2** (per-family *separability*), which stays live.
+
+**▶ E1 — no counterexample, on 64% of the population, at every node.** This is a real strengthening of
+§6's row (which was **depth 1 only**): 462 sharp inputs, 56,811 descent nodes, to depth 8. **But it is
+not the whole population** and must not be quoted as if it were:
+
+- **465 of the recorded 729 sharp inputs (64%).** The shortfall is entirely three order-32 groups:
+  `Z4^2xZ2` stopped at **2126/4000** sampled sets, and `Z8xZ4` / `Z16xZ2` were **not reached** before
+  the 55-min deadline. Follow-ups:
+  · ✅ **`Z16xZ2` completes in 61 s with 0 sharp inputs** — it contributes nothing to the 729.
+  · ⛔ **The `Z4^2xZ2` re-run (`probe_r1c_tail.out`) added NO coverage** — see the process trap below.
+  · `Z8xZ4` — run separately (`probe_r1c_z8xz4.out`).
+
+> **⚠⚠ PROCESS TRAP — it cost a whole run, and it is not obvious (2026-07-31).** `sets_for` samples
+> the capped groups with a **fixed seed** (`random.Random(12345)`), so the 4000 sets are the *same
+> sequence in the same order* on every invocation. **Restarting a cut-off group therefore re-covers
+> its PREFIX and adds nothing.** The `Z4^2xZ2` re-run processed 575 sets — a strict prefix of the
+> main run's 2126 — reporting 78 sharp inputs, 16,308 nodes, **0 E1 failures, 83 E2 nodes**: all of it
+> already inside the main run's coverage, and none of it additive. (It is a clean *consistency*
+> re-run — same verdicts on the same inputs — and nothing more.) ⟹ **to extend a cut-off group you
+> must OFFSET the sample**: `--skip=N` now does that (`--groups=Z4^2xZ2 --skip=2126`).
+> ⚠ Its `wall: 33873s` line is also not compute time — the machine suspended mid-run and the
+> wall-clock deadline fired on resume. Read the per-checkpoint timings, not the total.
+- **77 of the 462 descents hit the 400-node budget**, so those inputs are covered only partially.
+- **3 inputs were never instrumented** (automorphism search blew its `2e6` budget), all in `Z4^2xZ2`,
+  each printed with its connection set.
+- **12 groups are SAMPLED, not enumerated** (`CAP_SETS = 4000`) — `Z2^5` has 2¹⁴⁷ᐟ… (2,147,483,648)
+  sets and is sampled at 4000, i.e. ~0.0002%. That cap predates this work (it is
+  `probe_2wl_sring.CAP_SETS`) and it bounds *every* number ever quoted from this population,
+  including the recorded 729.
+
+**Why it costs what it costs — structural, not a bad constant.** `descend` recurses on one rep of
+**every** cell, so the tree branches multiplicatively (node counts went 6k → 48k between checkpoints
+once order ≥ 18 groups appeared). The other cost is stage 2 (`iso_exists` per basic-set pair) at
+n = 24–32, run on every non-discrete S-ring. Two earlier attempts died on shell timeouts with **no
+summary** (EXIT 124) because the wall deadline was checked only *between* groups; it is now checked
+inside the connection-set loop, which is what made this run reportable.
+
+**▶ To close R1c properly — four bounded steps, no research in any of them.**
+1. **Finish `Z4^2xZ2` from its offset** — `python3 -u probe_r1c.py --groups=Z4^2xZ2 --skip=2126
+   --wall=3000`. ⚠ **Without `--skip` this re-covers the prefix and adds nothing** (trap above).
+2. **Finish `Z8xZ4`** — `--groups=Z8xZ4` (in flight as `probe_r1c_z8xz4.out`; `Z16xZ2` is already
+   done and contributes 0).
+3. **Re-run the 77 truncated descents** with a larger `node_budget` (they are partial coverage
+   *within* an input, which the summary counts but does not identify — printing their connection sets
+   would make this step targetable).
+4. **Decide the sampling.** Either raise `CAP_SETS` on the 12 sampled groups or state the sampling as
+   a permanent bound. ⚠ It bounds the recorded **729** just as much as it bounds this sweep.
+
+Only after 1–4 does an E1 row belong in §6's ledger as a **population** result.
 
 ### 12.4 Candidate resolutions, ranked
 

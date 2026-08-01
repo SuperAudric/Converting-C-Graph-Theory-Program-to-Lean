@@ -302,6 +302,13 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > orbit at all** (`|Aut_χ| = 512`/`64` against the exact group) ⟹ the harvest's `✗` is *correct* and
 > those are **force-domain** nodes. ⚠ "supply incompleteness" was my first write-up of this and is
 > retracted (that doc §13.6b).
+> ▶▶ **R1c/M1 RAN 2026-07-31 — that doc §12.5b.** The E1/E2 descent instrument now covers the
+> 38-group sharp-Cayley population (`scratchpad/probe_r1c.py`, replacing a ≤ ~24-input cap):
+> **465 of the recorded 729 sharp inputs, 462 instrumented, 56,811 descent nodes to depth 8.**
+> **★ E2 ANSWERED — 477 nodes where fibre-schurity holds but FULL schurity fails ⟹ the fibre
+> hypothesis is LOAD-BEARING** (unrestricted "extensions preserve schurity" cannot prove the target;
+> per-family separability, §12.4 R2, is untouched). **★ E1: 0 failures** — no 2-WL CAO counterexample,
+> at every node rather than depth 1. ⚠ **64% coverage, four named gaps** — not yet a population result.
 > ★★ **AND THE 2-WL A/B ON THOSE NODES INVERTED THE SCOPING (that doc §13.6):** swapping
 > `Deepen.step` alone buys **nothing** (identical harvest, identical partitions at every level), while
 > the **2-WL closure of the node colouring IS the exact orbit partition** at both (2 cells/2 mixed →

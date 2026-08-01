@@ -1015,6 +1015,20 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   **correct**, these are **force-domain** nodes, and there was nothing for a selector to find.
   ⟹ "try other cells" is not the lever. ⚠ *(My first write-up called this "supply incompleteness" —
   retracted; and these are not DUAL §2.1's node, which does have a single-orbit `|C| = 16` cell.)*
+  ▶▶ **R1c/M1 RAN 2026-07-31 — that doc §12.5b is the record.** The ≤ ~24-input cap on the E1/E2
+  descent instrument is fixed (`scratchpad/probe_r1c.py`, 38-group population, every sample/skip/
+  truncation logged): **465 of the recorded 729 sharp inputs reached, 462 instrumented, 56,811
+  descent nodes to depth 8.**
+  **★ E2 ANSWERED — 477 nodes where fibre-schurity HOLDS but FULL schurity FAILS ⟹ the fibre
+  hypothesis is LOAD-BEARING**, so unrestricted "extensions preserve schurity" cannot prove the
+  target. This *measures* that doc §4.5 (previously an assertion); it does **not** touch §12.4's
+  per-family R2, which stays live.
+  **★ E1 — 0 fibre-schurity failures**, at *every node of a descent* rather than the depth-1 test the
+  ledger's older row used. ⚠ **64% coverage, not a population result:** three order-32 groups short,
+  77 descents truncated at a 400-node budget, 3 Aut searches blown, and 12 groups **sampled** at
+  `CAP_SETS = 4000` (a pre-existing bound on *every* number from this population, the 729 included).
+  ★ This population genuinely pays §7.2's entry ticket (S-ring non-schurian **is** "the one-point
+  extension at `e` is non-schurian"), unlike the CFI population below.
   ★★ **AND THE 2-WL A/B ON THE SAME NODES INVERTED THE SCOPING (that doc §13.6):** swapping
   `Deepen.step` alone changes **nothing** (identical harvest, identical partitions at every level),
   but the **2-WL closure of the node colouring equals the exact orbit partition at both nodes**
