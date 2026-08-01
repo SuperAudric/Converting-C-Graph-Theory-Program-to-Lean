@@ -1,5 +1,11 @@
 # Chain descent — the W2 solvability route: is the rigid gauge forced solvable?
 
+> ## ⛔ SUSPENDED 2026-08-01 — research phase closed
+> The carried obligation **L4** and the solvable corner are **suspended**. See
+> [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §1: the extraction reduces to per-layer
+> linear systems, which is Luks territory — §3a's own Luks sharpening makes it citable rather than novel.
+> The 7 built `Gauge*` modules are axiom-clean and stay in the gate. This doc is a record, not a plan.
+
 ## ▶ STATUS (2026-07-24)
 
 > ## ▶▶ HANDOFF — FRESH READER START HERE

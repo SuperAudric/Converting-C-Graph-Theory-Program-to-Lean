@@ -1,5 +1,16 @@
 # CAO propagation — does refinement preserve `CellsAreOrbits` under individualization?
 
+> ## ⛔ CLOSED 2026-08-01 — and closed on the mathematics, not on time
+> The 2-WL target is essentially *"a one-point extension of a schurian coherent configuration is
+> schurian"*, which is **not true in general** — the literature's positive results are confined to special
+> classes (e.g. point extensions of cyclotomic schemes). This doc's own §4.3 had already concluded the
+> statement could only ever be per-family; the external check confirms it. Combined with the four 1-WL
+> refutations already recorded here, this route does not reach a general theorem.
+> **Suspended: §12.5a (mechanism), §13 (the conversion gap), the `triCount` pin, the 2-WL refiner swap.**
+> See [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §1.
+> ★ The landed Lean (`CaoFibring`, `CaoRound` — incl. the unconditional round-1/round-2 barriers) is
+> axiom-clean and is an **extraction candidate**, wind-down item W3.
+
 > ⚠ **NOT the same doc as [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md).**
 > That one is the *demoted* forms-graph bounded-WL-dimension route. **This** doc owns the question
 > *"start from the orbit partition, individualize one vertex, refine — are the cells still orbits?"*,

@@ -1,5 +1,20 @@
 # START HERE — chain-descent graph canonizer
 
+> # ▶ PROJECT STATUS (2026-08-01): RESEARCH PHASE CLOSED — WINDING DOWN
+>
+> **Read [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) before anything else.**
+> It carries the closing assessment (why each research track was closed), the finish list
+> (the only live work), and the suspended-items table.
+>
+> **This document, and every other `chain-descent-*.md`, is now a RECORD, not a plan.** The
+> design content and the refutation record below are accurate and worth reading; the
+> forward-looking sections — "where the project is now", the frontier blocks, the next-step
+> arrows — are void. Do not pick up a thread from them.
+>
+> The verified artifact is real and is being finished for write-up: four theorems in
+> `Publication.lean`, proved against the executable canonizer, axiom-clean. See the
+> [repository README](../README.md) for the outside-facing summary.
+
 The single entry point for the project. Read this first; it gives the idea, the
 current state, and a curated reading order. It replaces the old "simplified
 overview" as the onramp (that file is now archived).

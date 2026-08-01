@@ -1,5 +1,20 @@
 # Remaining work — the living tracker (the complete-canonizer plan)
 
+> # ⛔⛔⛔ SUPERSEDED 2026-08-01 — THE RESEARCH PHASE IS CLOSED
+>
+> **This file is no longer a plan. It is a record.** The forward-looking content below —
+> §0's complete-canonizer target, §1C/1F/1W/1T's gap enumeration, §2's queue — is **SUSPENDED**.
+> Do not pick up an item from it.
+>
+> **▶ The authoritative remaining work is [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §2:**
+> Tinhofer `Handled` · CFI `Handled` · extraction candidates (Schreier–Sims) · write-up decision · archive.
+> That doc's §1 records **why** each track was closed (in short: the consume side lands in a known-easy
+> class; 2-WL CAO propagation is false in the generality required; the force side's residual difficulty
+> is machine-checked to be the known hard core). §3 lists every suspended item.
+>
+> Everything below remains **accurate about what was built and what was refuted** — the ⛔ do-not-re-derive
+> blocks, the falsifiers, and the measured results are still the record. Only the *plan* is void.
+
 > **What this file is.** The single forward-looking tracker: the target, the full gap enumeration, and the
 > ordered plan. It carries **no history** — the pre-2026-07-18 blow-by-blow (seal-era modulo set, citation
 > tables, node-4 layers, RRU retirement, the 2026-07-13/14 canonizer updates) is archived at

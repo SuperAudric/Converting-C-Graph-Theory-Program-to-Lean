@@ -1,5 +1,13 @@
 # Chain descent — the rigid seal (Algorithm R): the complete working doc
 
+> ## ⛔ SUSPENDED 2026-08-01 — research phase closed
+> Track R's frontier (**P2** the recover-core read, **P3** `AggFaithful`, **P3-ring**, **P4**) is
+> **suspended, not blocked**. See [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §1 for why
+> and §2 for the finish list that replaced it.
+> ⚠ **One item here stays live:** §9.1 (the per-family `Tinhofer` discharge) is the scoping risk on
+> wind-down item **W1** — read it before starting W1, then stop.
+> Everything below is an accurate record of what was built and the three do-not-re-derive traps. It is not a plan.
+
 > **What this doc is.** The self-contained working home for the **rigid seal** — Algorithm R, the force/rigid side
 > of the mixed canonizer. It covers *everything the rigid work must now do* (canonize a rigid residue or honestly
 > flag, iso-invariantly) and *everything needed to do it* (the handoff it receives from consume, the solver it must
