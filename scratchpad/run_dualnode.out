@@ -1,0 +1,44 @@
+
+=== CFI cubic m=8 TWISTED  n=56
+  root: cells [(0, 32), (1, 24)]; branch cell id=0 |C|=32  -> force key keeps 16/32
+  child node (one force-key refinement below root): |Aut_chi| = 32, non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 8), (9, 4), (10, 2), (12, 2), (14, 2), (15, 4), (16, 4), (17, 2), (18, 2), (19, 4)]
+    id=1   |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=3   |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+    id=4   |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=5   |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+    id=6   |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=7   |C|=4   truth[2 orbit(s) [2, 2] MIXED]  harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ ties=16/16]
+    id=8   |C|=8   truth[1 orbit(s) [8] SINGLE]  harvest[56  ✓] read[56  ✓] read-FORCED[56  ✓ ties=16/16]
+    id=9   |C|=4   truth[2 orbit(s) [2, 2] MIXED]  harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ ties=16/16]
+    id=10  |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=12  |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=14  |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=15  |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+    id=16  |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+    id=17  |C|=2   truth[2 orbit(s) [1, 1] MIXED]  harvest[0   ✗] read[0   ✗] read-FORCED[0   ✗ ties=10/10]
+    id=18  |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=19  |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+  wall 0.9s
+
+=== CFI cubic m=8 plain  n=56
+  root: cells [(0, 32), (1, 24)]; branch cell id=0 |C|=32  -> force key keeps 16/32
+  child node (one force-key refinement below root): |Aut_chi| = 32, non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 8), (9, 4), (10, 2), (12, 2), (14, 2), (15, 4), (16, 4), (17, 2), (18, 2), (19, 4)]
+    id=1   |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=3   |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+    id=4   |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=5   |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+    id=6   |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=7   |C|=4   truth[2 orbit(s) [2, 2] MIXED]  harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ ties=16/16]
+    id=8   |C|=8   truth[1 orbit(s) [8] SINGLE]  harvest[56  ✓] read[56  ✓] read-FORCED[56  ✓ ties=16/16]
+    id=9   |C|=4   truth[2 orbit(s) [2, 2] MIXED]  harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ ties=16/16]
+    id=10  |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=12  |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=14  |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=15  |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+    id=16  |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+    id=17  |C|=2   truth[2 orbit(s) [1, 1] MIXED]  harvest[0   ✗] read[0   ✗] read-FORCED[0   ✗ ties=10/10]
+    id=18  |C|=2   truth[1 orbit(s) [2] SINGLE]  harvest[2   ✓] read[2   ✓] read-FORCED[2   ✓ ties=8/8]
+    id=19  |C|=4   truth[1 orbit(s) [4] SINGLE]  harvest[12  ✓] read[12  ✓] read-FORCED[12  ✓ ties=12/12]
+  wall 0.7s
+
+self-check (read-equal pairs failing IsColAut): 0

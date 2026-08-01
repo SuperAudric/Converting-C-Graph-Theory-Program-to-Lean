@@ -98,7 +98,9 @@ X(x,b)=k}`, the first quantity **coherence does not determine**. ⟹ the crux is
 
 **Read in this order.** **§0.0 (why this question exists, and why it is a PROBE — non-optional)** →
 § STATUS → **§13 (the conversion gap — what this track would cost to cash)** → §1 (the reduction) →
-§2 (the target) → §3 (the mechanism; the conceptual core) → **§12.5a (the crux work plan)** →
+§2 (the target) → §3 (the mechanism; the conceptual core) → **§14 (that mechanism exhibited on the
+smallest witness, plus the arity ladder and the falsifier filter it yields)** →
+**§12.5a (the crux work plan)** →
 §12.3/§12.6 (the barriers and what M3 measured). Then §4/§5 before proposing anything, and §7 before
 investing in anything.
 
@@ -123,6 +125,22 @@ investing in anything.
 >
 > **▶ The single next action: close R1c's coverage gaps — §12.5b's "To close R1c properly".** It is
 > the only step that can end the track, and it is now bounded work, not open research.
+
+> ### ▶▶ ADDED 2026-08-01 — §14, the anatomy and the ARITY LADDER
+> Prompted by a reader question about *why* 1-WL fails; it produced three things worth having.
+> 1. **§14.1 — the failure, dissected.** The far cell's split is the **pullback of the exposed local
+>    shape's PAIR-orbits**; Shrikhande vs rook 4×4 (same `SRG(16,6,2,2)`, one fails, one propagates)
+>    isolates the 1-WL blind spot to one sentence: *a 2-regular graph on 6 vertices is a hexagon or two
+>    triangles, and counting neighbours cannot tell which.*
+> 2. **§14.2 — a plausible proof route killed cheaply.** *"Mixed cells must chain back to `v`, which is
+>    a pure singleton"*: the **premise is measured TRUE** (14/14 mixed cells have mixed support) and the
+>    **inference is unsound** — the support is **circular** (self-adjacent in Shrikhande; a closed
+>    2-cycle in bipartite `net(Z₄)`), so no chain reaches `v`. **Do not re-derive this.**
+> 3. **§14.4 — a NEW FALSIFIER FILTER for §10 item 3**, orthogonal to R1c's coverage work and cheap:
+>    hunt for a VT graph whose **point stabilizer acts 2-transitively but not symmetrically on a cell**
+>    (= a **not-2-closed** local group). Also records the obstruction that makes rung 2 hard — a
+>    2-transitive group's 2-closure is `Sym`, so **no binary structure on a cell can expose one**
+>    (brute-forced: 0 of all 32,768 graphs on 6 vertices).
 
 **First actions — ▶▶ §13 (THE CONVERSION GAP) FIRST, then §12.5a.** Revised 2026-07-31: **nothing in
 this track can reach the built object until the `Deepen.step` swap is scoped and decided** (§13), so
@@ -348,6 +366,10 @@ This one principle explains every negative result on record (all measured, `prob
 `net(Z₄)` four classes `[3,6] [3,6] [4,8] [1,2]` (ratio 1:2 = the `Z₄` order-2-vs-order-4 signature);
 Chang-2 two classes `[4,4]`. ⟹ **fusions occur at both equal and unequal valency, so no valency
 argument can shortcut this.**
+
+**▶ §14.1 exhibits this principle constructively on the smallest witness** — the far cell's split is
+the *pullback of the exposed local shape's pair-orbits*, and Shrikhande vs rook 4×4 (identical
+`SRG(16,6,2,2)` parameters, opposite verdicts) shows the coupling as a single fact. Read it with §3.
 
 **Why 2-WL is different in kind from 1-WL (not merely stronger).** The gap to close is the orbital
 structure on `D × C` — a *pair-level* object. 1-WL is a vertex-level tool aimed at a pair-level gap: a
@@ -575,6 +597,14 @@ only `#eval` settles it. (Irrelevant if you aim for T2 — another reason to.)
 3. **The coupling construction (§2, §3).** Nobody has yet tried to *build* an object with the
    group-change and the deficiency at the same cell pair. That is the falsifier design, and it is the
    only one not already excluded by §5.
+   **★ §14.4 (2026-08-01) gives it a CRITERION instead of a blank page:** the 1-WL failure is the
+   pullback of a local group that is transitive on points but not pairs (§14.1), so the 2-WL analogue
+   needs one transitive on pairs but not triples — i.e. a **not-2-closed** point stabilizer, which by
+   the 2-closure obstruction **cannot be exposed by any binary structure on the cell** and must be
+   carried by far vertices attaching to **triples** (designs, not graphs). ⟹ **the filter: hunt a VT
+   graph whose point stabilizer acts 2-transitively but not symmetrically on some cell.** Cheap on any
+   family with computable stabilizers; ⚠ read §14.4's scope caveats before treating a hit as a
+   counterexample.
 4. **Per-family route.** The project's hard families (forms graphs, Cameron) have known classical
    groups, so their orbitals are computable and schurity is provable *per family* — no general theorem
    needed. Related but distinct: the node-4 families reportedly shatter under ≤ 4 individualizations.
@@ -693,6 +723,15 @@ the record's deepen harvest run on the `chooseIdK`-selected cell *and on every o
 whether any cell certifies where the selected one fails. **Answer: 0 of 58 nodes, on all three
 witnesses.** Faithful port of `DeepenSupply.lean`; every verdict is a re-verified certificate and **no
 orbit oracle is used**; skips are logged per §9. Result recorded at **`probe_route_a.out`**, ~9 s).
+**★★ `probe_cao_anatomy.py`** (**§14**, output **`probe_cao_anatomy.out`**, ~22 s; `--closure` adds the
+32,768-graph brute force — several minutes, run detached per §9; its verdict is already in the `.out`).
+Four measurements: **(A)** the exposed local shape and the far
+cell's split as a **pullback of its pair-orbits** — Shrikhande vs rook 4×4, the two `SRG(16,6,2,2)`
+graphs; **(B)** the **support structure of mixed cells** at depth ≤ 2 over every deficient root — 14
+mixed cells, **0 without mixed support**, and the support is **circular** (§14.2's steer); **(C)** the
+concrete distinguisher (*are `v`'s two common neighbours with `u` adjacent?* — 9/9); **(D)** the arity
+lift — `A₅` on 6 points is transitive on pairs, `[10,10]` on triples, and the **2-closure obstruction**
+(0 of 32,768 graphs on 6 vertices have a 2-transitive-but-not-`S₆` group).
 Shared machinery lives in `probe_cao_cleanroom.py` (§8.1); most files import it, so they are
 `__main__`-guarded — keep them that way (§9).
 
@@ -1370,3 +1409,142 @@ orbit"* (consume's domain, where the harvest's re-relating induction is exactly 
    from a CAO start*, where CFI propagates even at 1-WL. This is about **reaching** a CAO start at
    all. Two different statements about the same graphs — worth keeping straight, because §0.0's
    motivating exhibit (m=8) lives in §5's "dead" habitat and nobody had connected them.
+
+---
+
+## 14. ★★ THE ANATOMY OF A FAILURE, AND THE ARITY LADDER ABOVE IT (added 2026-08-01)
+
+**What this section is for.** §3 states the coupling principle abstractly; this section exhibits it
+**constructively at the smallest witness**, which turns out to (i) kill a natural-looking proof route
+before anyone spends a session on it (§14.2), and (ii) yield a **falsifier filter** for §10 item 3 that
+is cheaper than sweeping more families (§14.4). Everything below is measured by
+**`scratchpad/probe_cao_anatomy.py`** (clean-room machinery of §8.1, ~22 s; output
+`probe_cao_anatomy.out`).
+
+### 14.1 ★ The far cell's split is a PULLBACK of the exposed shape's PAIR-orbits
+
+Put the two `SRG(16,6,2,2)` graphs side by side. **1-WL cannot tell them apart at any parameter**, and
+both give cells `[1, 6, 9]` after individualizing — one splits, one does not.
+
+| | Shrikhande — **CAO fails** | rook 4×4 — **CAO propagates** |
+|---|---|---|
+| shape induced on `N(v)` | **one hexagon** | **two triangles** |
+| degrees inside `N(v)` | 2,2,2,2,2,2 | 2,2,2,2,2,2 |
+| `\|Aut_v\|` | **12** = `D₆` | **72** = `S₃≀S₂` |
+| `Aut_v` transitive on `N(v)` | yes | yes |
+| `Aut_v` orbits on **pairs** in `N(v)` | **6 edge + 6 + 3** | **6 edge + 9** |
+| the 9 far vertices attach to | 6 edge-pairs **and** 3 antipodal | all 9 across-triangle pairs |
+| far cell | 1-WL `[9]`, orbits **`[3,6]`** | 1-WL `[9]`, orbits **`[9]`** |
+
+**The mechanism.** Individualizing `v` injects no new fact; it **exposes a shape** — the graph induced
+on `N(v)` — which `Aut_v` must now preserve. Here `Aut_v` *is* that shape's symmetry group: it embeds
+(measured: the attachment map far-vertex ↦ its pair of common neighbours with `v` is a **bijection**,
+so fixing `N(v)` pointwise fixes everything) and the orders match, 12 = `|D₆|`, 72 = `|S₃≀S₂|`.
+Since `µ = 2`, every far vertex **is the address of a pair** inside `N(v)`. Therefore
+
+> **the far cell's orbit partition is the pullback, along the attachment map, of `Aut_v`'s orbits on
+> the pairs of the exposed shape.** The group is transitive on the shape's *points* and not on its
+> *pairs* — that gap is the whole failure.
+
+The numbers are the shape's: a hexagon has exactly **3** antipodal pairs and **6** edges. In the rook
+all 9 attachments land in one pair-orbit, so there is nothing to split.
+
+> ### ⟹ THE 1-WL BLIND SPOT IN ONE LINE
+> **A 2-regular graph on 6 vertices is either a hexagon or two triangles, and no counting of
+> neighbours can tell which.** `λ = 2` tells 1-WL that `N(v)` is 2-regular and nothing further.
+
+This is §3's coupling principle made concrete: the group-change and the deficiency are here the *same
+fact about the same cell pair*, which is why the witness is so small.
+
+### 14.2 ⛔ STEER — "mixed must touch mixed, so the chain leads back to `v`" — premise TRUE, inference UNSOUND
+
+A natural route (a reader reconstructed it independently): *a cell can only be mixed if it touches a
+mixed cell, or 1-WL would split it; a chain of mixed cells not involving `v` would already apply
+before individualization, contradicting the CAO start; so the chain must reach `v` — whose cell is a
+singleton, hence pure. Contradiction.*
+
+**⚠ Do not attack the premise — it is measured TRUE.** Over Shrikhande / Chang-2 / `net(Z₄)` at depth
+≤ 2 (rook 4×4 and `T8` have no mixed cell at all): **14 mixed cells, 0 with no mixed support.**
+
+**The inference fails on well-foundedness: the support is CIRCULAR.**
+- **Shrikhande**: the mixed cell is **self-adjacent** — it is its own support.
+- **`net(Z₄)`**: bipartite, so no cell is self-adjacent — and its **two mixed cells support each
+  other**. A closed 2-cycle. `v`'s singleton is pure and is never needed.
+
+⟹ **the mixed set is closed under "is supported by", so no chain ever bottoms out at `v`.** Any
+argument of the form *"trace the mixedness back to the individualized vertex"* dies here.
+
+⚠ The local twin fails too: *"if `u, w` have all their neighbours in single-orbit cells they are
+interchangeable"* is inapplicable, because where the failure lives the shared cell is **itself** mixed.
+Measured in Shrikhande — by **orbit** the two are genuinely different (3-piece: 4 nbrs in the 6-piece,
+0 in its own; 6-piece: 2 and 2), while by **cell** they are identical (`{N(v): 2, own cell: 4}`).
+The distinction is real and invisible, and what hides it is the very cell you would need already split.
+
+### 14.3 The distinguisher is a RELATION, not a property
+
+Measured, 9/9 and no shared value: **"are `v`'s two common neighbours with `u` adjacent to each
+other?"** — 0 edges for the 3-orbit, 1 edge for the 6-orbit.
+
+- It **exists at the root but says nothing there**: by vertex-transitivity every vertex has 3
+  non-neighbours of one type and 6 of the other. **Individualization converts a uniform fact into a
+  partition** — which is the precise sense in which "the reason leads back to `v`".
+- It is **invisible to 1-WL** because both types have 2 neighbours in the (pure) `N(v)` cell; the fact
+  lives on the **pair** `(x, y)`, and vertex colours are exactly the projection that discards it.
+
+⟹ the concrete form of §12.3's *"the marking must leave `v` and come back"* and of `witness_ne_base`:
+the information is born inside `N(v)` as a relation between two of `v`'s neighbours, and no vertex
+holds it.
+
+### 14.4 ★★ THE ARITY LADDER — the falsifier design one rung up, and the obstruction to it
+
+The mechanism is **not 2-WL-specific**; it is an arity ladder, and it names what a 2-WL counterexample
+would have to be.
+
+| | the 1-WL failure | what a 2-WL failure needs |
+|---|---|---|
+| local group transitive on | points of `N(v)` | points **and pairs** |
+| …but not on | **pairs** | **triples** |
+| far vertices addressed by | pairs (`µ = 2`) | triples (`µ = 3`) |
+| the blindness required | both shapes 2-regular | both triple-orbits share all pair statistics |
+
+**The canonical level-up object exists** — measured: `A₅ ≅ PSL(2,5)` on 6 points has orbits on pairs
+`[15]` (2-transitive) and orbits on triples **`[10, 10]`**. Exactly hexagon-vs-two-triangles one rung
+up: the points are interchangeable, *every pair* is interchangeable, the triples are not.
+
+> ### ⛔ THE OBSTRUCTION — why rung 2 is not a re-run of rung 1
+> A group is **2-closed iff it is the automorphism group of an edge-coloured graph**. A 2-transitive
+> group's only orbitals are `{diagonal, rest}`, so its **2-closure is the full symmetric group**.
+> ⟹ **no binary structure on the cell can ever expose such a group.** Brute-forced over **all 32,768
+> graphs on 6 vertices: 0** have a 2-transitive-but-not-`S₆` automorphism group (`--closure`).
+
+⟹ at 1-WL the deficiency could hide **inside** the cell — hexagon-vs-two-triangles is a plain graph on
+`N(v)` that 1-WL merely failed to read. **At 2-WL that route is closed by definition**: the
+distinguishing structure cannot live on the cell at all, and must be carried by *other* vertices
+attaching to **triples**. ⟹ **the search leaves graphs for designs / incidence structures.**
+
+⚠ **And the naive gadget dies immediately**, which is the design tension in miniature: those carriers
+are themselves vertices, so the closure colours `(carrier, point)` and `(carrier, carrier)` and reads
+the triple system back out. Measured for `A₅`'s two classes — within A `{1: 60, 2: 30}`, within B
+`{1: 60, 2: 30}`, across `{0: 10, 1: 30, 2: 60}` — **separated by `|T ∩ T'|` alone**, the crudest
+invariant a coherent closure has.
+
+> **▶ THE FILTER (for §10 item 3 — the coupling construction).**
+> **Hunt for a VT graph whose point stabilizer, restricted to a cell, acts as a 2-transitive PROPER
+> subgroup of the symmetric group.** That is precisely a **not-2-closed** local group, hence the only
+> habitat where this shape of blind spot can live. It is cheap on any family with computable
+> stabilizers, and each hit costs one 2-WL run to test. Per §5's ledger it has not been used as a
+> filter — the sweeps were by *family* (Cayley, CFI, multipede), never by this property.
+
+⚠⚠ **Scope, honestly.** Not-2-closed is necessary for **this** mechanism, **not** proved necessary for a
+2-WL CAO failure in general — §12.3's crux is the general feedback loop and other mechanisms may exist.
+And a hit is a counterexample only if the fusion survives the **global** closure, not merely the local
+group's own pair-orbits: **Shrikhande is the cautionary case** — a pair-level fact, locally hidden,
+globally recovered by 2-WL (§0.0's calibration figures).
+
+**▶ Weak evidence FOR the §2 target — ⚠ UNVERIFIED, do not cite without checking.** The ladder looks
+**short**: candidate local groups are those transitive on `k`-sets but not on `(k+1)`-sets, and by
+Livingstone–Wagner plus the CFSG classification of highly transitive groups, the `k`-homogeneous groups
+for `k ≥ 5` (with `n ≥ 2k`) are only the symmetric and alternating ones — which are 2-closed. If that
+is right, this shape of failure is **confined to low arity**. ⚠ **The citation has not been checked
+in-project**, and per this project's own steer a pinned statement nobody has tried to prove can be
+false. Treat as a lead, not a fact.

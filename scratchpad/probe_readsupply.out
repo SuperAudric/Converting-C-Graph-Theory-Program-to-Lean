@@ -1,0 +1,898 @@
+probe_readsupply.py — is the UNGUARDED deep READ a stronger CONSUME supply than the replay harvest?
+
+Context: docs/chain-descent-cao-propagation.md §0.0 competitor list ("run force at every step of the
+descent"), scratchpad/DUAL_resolver_scoping.md §2.1 (the two certified harvest falsifiers).
+
+============================================================================================
+THE QUESTION
+============================================================================================
+`Deepen.isColAut_of_readKey_eq` (ChainDescent/DeepenExact.lean:191) is UNCONDITIONAL:
+
+    readKey adj (indivOne chi u) (leafOf adj n (step adj chi u)).col
+      = readKey adj (indivOne chi w) (leafOf adj n (step adj chi w)).col
+    ==>  EXISTS rho, IsColAut adj chi rho AND rho u = w.
+
+Every use of it in the build is FORCE-side (DeepenExact / DeepenGuard / ForcePick).  Nothing
+CONSUME-side reads it — `deepenSupply` aligns two descents by REPLAYING one anchor's cell-id
+sequence at the other (`replay` + `twistOf` on the coupled component), which is a DIFFERENT
+alignment from "run each anchor's own greedy descent and compare the invariant read".
+
+So there is an unbuilt, poly, soundness-free consume supply:
+
+    readSupply adj chi = for each ordered pair (u,w) of the cell, if the two greedy leaf READS are
+                         equal, emit the leaf-colour-matching permutation (then IsColAut-verify).
+
+This probe measures whether it certifies cells the replay harvest does not — in particular the
+recorded obstruction (DUAL §2.1, second falsifier): CFI over a random cubic base, m=8, n=56, the
+|C|=16 cell one refinement below the root, which IS one true orbit and which the harvest splits 8+8.
+
+============================================================================================
+SOUNDNESS — read before quoting any number
+============================================================================================
+* Every verdict is a POSITIVE certificate: emitted permutations are re-verified (`is_aut` +
+  colour preservation), and transitivity is decided by BFS closure over the verified generator SET,
+  never per-pair (DUAL §2.2).  "certified" is a theorem about the graph; "not certified" means only
+  *this supply did not certify it*, never "different orbits".
+* No orbit oracle is used anywhere (`probe_orbit_oracle` is PROVEN BROKEN — it errs by merging).
+* The harvest half is the same port as `probe_route_a.py` (faithful to `DeepenSupply.lean`).
+  The read half ports `Deepen.leafOf` (chooseIdK = lowest non-singleton cell id over the WHOLE
+  graph, lowest-index member), `Descend.indivOne` (u = v ? 2c+1 : 2c) and `Deepen.readKey`
+  (adjacency between every ordered pair of leaf colour classes, then each class's parent colour).
+* SELF-CHECK: by the theorem above, equal reads must yield a VERIFIED automorphism.  A
+  "read-equal but is_aut FAILED" line would mean the port is wrong, not that the theorem is; the
+  probe counts those separately and shouts.
+* CONVENTION LIMIT (as in probe_route_a.py): python ranks colour ids by `sorted(set(sig))`, Lean by
+  Cantor-paired `sigKey` — same PARTITION, possibly different ID ORDER, so which cell is "selected"
+  and which cell each greedy level individualizes can differ from the Lean object.  Positive
+  results are still facts about the graph; cross-check by Lean `#eval` before claiming them of the
+  built object.
+
+Run detached:  cd /workspace/scratchpad && python3 -u probe_readsupply.py > probe_readsupply.out 2>&1
+
+budget: 2400s wall
+
+cubic base m=8 seed=19: [(0, 1), (0, 5), (0, 7), (1, 3), (1, 6), (2, 4), (2, 5), (2, 7), (3, 4), (3, 6), (4, 6), (5, 7)]
+
+=== CFI cubic m=8 TWISTED   n=56
+    root:  non-singleton cells = [(0, 32), (1, 24)]
+        id=0    |C|=32   harvest[gens=480  ✗]  read[gens=480  undef=0 ✗]   neither certifies
+        id=1    |C|=24   harvest[gens=264  ✗]  read[gens=264  undef=0 ✗]   neither certifies
+    root/id0:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 8), (9, 4), (10, 2), (12, 2), (14, 2), (15, 4), (16, 4), (17, 2), (18, 2), (19, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=9    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=16   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id1:  non-singleton cells = [(0, 4), (1, 4), (2, 16), (3, 8), (5, 8), (7, 4), (8, 8), (9, 2)]
+        id=0    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=1    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=2    |C|=16   harvest[gens=240  ✓]  read[gens=240  undef=0 ✓]   both certify
+        id=3    |C|=8    harvest[gens=24   ✗]  read[gens=24   undef=0 ✗]   neither certifies
+        id=5    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=8    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id0/id1:  non-singleton cells = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=12   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=24   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id3:  non-singleton cells = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=33   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=36   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=37   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id4:  non-singleton cells = [(1, 2), (3, 4), (6, 4), (7, 2), (8, 4), (9, 4), (10, 4), (11, 4), (12, 2), (14, 2), (16, 2), (17, 4), (18, 2), (19, 2), (20, 2), (21, 2), (22, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=11   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id5:  non-singleton cells = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=33   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=36   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=37   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id6:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (8, 4), (9, 4), (10, 4), (11, 4), (12, 2), (14, 2), (16, 2), (17, 4), (18, 2), (19, 2), (20, 2), (21, 2), (22, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=11   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id7:  non-singleton cells = [(1, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (10, 2), (12, 8), (13, 2), (14, 2), (15, 2), (17, 2), (21, 2), (22, 2), (23, 4), (26, 2), (27, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=23   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=26   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=27   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id8:  non-singleton cells = [(1, 2), (3, 4), (6, 4), (9, 2), (10, 2), (23, 2), (25, 2), (27, 2), (28, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=27   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=28   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id9:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 2), (8, 2), (9, 4), (10, 4), (13, 2), (14, 2), (16, 2), (18, 2), (19, 4), (20, 4), (23, 2), (24, 2), (25, 2)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=20   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=24   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+    root/id0/id10:  non-singleton cells = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=12   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=24   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id12:  non-singleton cells = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=12   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=24   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id14:  non-singleton cells = [(1, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (10, 2), (12, 8), (13, 2), (14, 2), (15, 2), (17, 2), (21, 2), (22, 2), (23, 4), (26, 2), (27, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=23   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=26   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=27   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id15:  non-singleton cells = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=33   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=36   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=37   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id16:  non-singleton cells = [(1, 2), (3, 4), (6, 4), (9, 4), (10, 2), (11, 2), (12, 2), (13, 2), (14, 4), (15, 2), (17, 2), (19, 2), (20, 4), (25, 2), (26, 2), (27, 2), (28, 2)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=9    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=25   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=26   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=27   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=28   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+    root/id0/id17:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 2), (8, 2), (9, 8), (10, 2), (11, 2), (12, 2), (14, 2), (16, 2), (17, 4), (18, 4), (21, 2), (22, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id18:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 4), (9, 4), (10, 4), (11, 2), (13, 2), (15, 2), (16, 4), (17, 4), (18, 2), (21, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=9    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=21   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id19:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 2), (9, 2), (10, 4), (11, 2), (12, 2), (13, 2), (15, 2), (17, 2), (18, 4), (19, 2), (20, 2), (21, 2), (22, 2), (24, 2)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=12   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=22   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=24   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id0:  non-singleton cells = [(2, 2), (3, 2), (4, 2), (5, 4), (6, 4), (7, 8), (8, 4), (9, 4), (11, 2), (12, 2), (13, 4), (15, 2), (16, 2), (17, 4), (18, 4), (19, 2)]
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=7    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id1:  non-singleton cells = [(0, 2), (1, 2), (4, 2), (5, 4), (6, 4), (7, 8), (8, 4), (9, 4), (11, 2), (12, 2), (13, 4), (15, 2), (16, 2), (17, 4), (18, 4), (19, 2)]
+        id=0    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=7    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id2:  non-singleton cells = [(2, 2), (5, 2), (14, 8), (19, 2), (20, 2), (26, 4), (30, 2), (35, 4)]
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=26   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=30   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=35   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id1/id3:  non-singleton cells = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 4), (5, 4), (6, 8), (8, 2), (10, 2), (11, 2), (13, 4), (14, 4), (16, 2), (17, 2), (18, 2), (19, 2), (20, 4)]
+        id=0    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=14   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id1/id5:  non-singleton cells = [(2, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 8), (11, 4), (12, 4), (18, 4), (20, 2), (21, 2), (22, 2), (23, 2), (24, 4), (25, 2)]
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=11   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=12   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=24   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=25   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id7:  non-singleton cells = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 4), (5, 4), (6, 8), (7, 4), (8, 4), (10, 4), (11, 4), (15, 2), (16, 4), (17, 4), (18, 2)]
+        id=0    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=10   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=11   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id8:  non-singleton cells = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 4), (7, 8), (8, 2), (9, 2), (10, 4), (12, 2), (13, 2), (14, 4), (16, 2), (17, 2), (19, 2), (21, 4), (22, 2)]
+        id=0    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=7    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=9    |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=21   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=22   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id9:  non-singleton cells = [(0, 4), (1, 4), (2, 16), (3, 4), (4, 4), (6, 8), (8, 4), (9, 8)]
+        id=0    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=1    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=2    |C|=16   harvest[gens=112  ✗]  read[gens=112  undef=0 ✗]   neither certifies
+        id=3    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=4    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=6    |C|=8    harvest[gens=24   ✗]  read[gens=24   undef=0 ✗]   neither certifies
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=8    harvest[gens=24   ✗]  read[gens=24   undef=0 ✗]   neither certifies
+  --- CFI cubic m=8 TWISTED tally (harvest, read): {'False/False': 60, 'True/True': 320}
+
+=== CFI cubic m=8 plain   n=56
+    root:  non-singleton cells = [(0, 32), (1, 24)]
+        id=0    |C|=32   harvest[gens=480  ✗]  read[gens=480  undef=0 ✗]   neither certifies
+        id=1    |C|=24   harvest[gens=264  ✗]  read[gens=264  undef=0 ✗]   neither certifies
+    root/id0:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 8), (9, 4), (10, 2), (12, 2), (14, 2), (15, 4), (16, 4), (17, 2), (18, 2), (19, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=9    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=16   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id1:  non-singleton cells = [(0, 4), (1, 4), (2, 16), (3, 8), (5, 8), (7, 4), (8, 8), (9, 2)]
+        id=0    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=1    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=2    |C|=16   harvest[gens=240  ✓]  read[gens=240  undef=0 ✓]   both certify
+        id=3    |C|=8    harvest[gens=24   ✗]  read[gens=24   undef=0 ✗]   neither certifies
+        id=5    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=8    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id0/id1:  non-singleton cells = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=12   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=24   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id3:  non-singleton cells = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=33   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=36   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=37   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id4:  non-singleton cells = [(1, 2), (3, 4), (6, 4), (7, 2), (8, 4), (9, 4), (10, 4), (11, 4), (12, 2), (14, 2), (16, 2), (17, 4), (18, 2), (19, 2), (20, 2), (21, 2), (22, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=11   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id5:  non-singleton cells = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=33   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=36   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=37   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id6:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (8, 4), (9, 4), (10, 4), (11, 4), (12, 2), (14, 2), (16, 2), (17, 4), (18, 2), (19, 2), (20, 2), (21, 2), (22, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=11   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id7:  non-singleton cells = [(1, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (10, 2), (12, 8), (13, 2), (14, 2), (15, 2), (17, 2), (21, 2), (22, 2), (23, 4), (26, 2), (27, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=23   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=26   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=27   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id8:  non-singleton cells = [(1, 2), (3, 4), (6, 4), (9, 2), (10, 2), (23, 2), (25, 2), (27, 2), (28, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=27   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=28   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id9:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 2), (8, 2), (9, 4), (10, 4), (13, 2), (14, 2), (16, 2), (18, 2), (19, 4), (20, 4), (23, 2), (24, 2), (25, 2)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=20   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=24   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+    root/id0/id10:  non-singleton cells = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=12   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=24   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id12:  non-singleton cells = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 4), (11, 8), (12, 4), (19, 2), (20, 2), (21, 2), (22, 4), (23, 2), (24, 2), (25, 4)]
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=12   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=24   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=25   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id14:  non-singleton cells = [(1, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (10, 2), (12, 8), (13, 2), (14, 2), (15, 2), (17, 2), (21, 2), (22, 2), (23, 4), (26, 2), (27, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=23   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=26   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=27   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id15:  non-singleton cells = [(8, 2), (13, 2), (18, 8), (19, 2), (20, 2), (33, 4), (36, 2), (37, 4)]
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=33   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=36   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=37   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id16:  non-singleton cells = [(1, 2), (3, 4), (6, 4), (9, 4), (10, 2), (11, 2), (12, 2), (13, 2), (14, 4), (15, 2), (17, 2), (19, 2), (20, 4), (25, 2), (26, 2), (27, 2), (28, 2)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=9    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=25   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=26   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=27   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=28   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+    root/id0/id17:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 2), (8, 2), (9, 8), (10, 2), (11, 2), (12, 2), (14, 2), (16, 2), (17, 4), (18, 4), (21, 2), (22, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id18:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 4), (9, 4), (10, 4), (11, 2), (13, 2), (15, 2), (16, 4), (17, 4), (18, 2), (21, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=9    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=21   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id0/id19:  non-singleton cells = [(1, 2), (3, 4), (4, 2), (5, 4), (6, 2), (7, 4), (8, 2), (9, 2), (10, 4), (11, 2), (12, 2), (13, 2), (15, 2), (17, 2), (18, 4), (19, 2), (20, 2), (21, 2), (22, 2), (24, 2)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=12   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=22   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=24   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id0:  non-singleton cells = [(2, 2), (3, 2), (4, 2), (5, 4), (6, 4), (7, 8), (8, 4), (9, 4), (11, 2), (12, 2), (13, 4), (15, 2), (16, 2), (17, 4), (18, 4), (19, 2)]
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=7    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id1:  non-singleton cells = [(0, 2), (1, 2), (4, 2), (5, 4), (6, 4), (7, 8), (8, 4), (9, 4), (11, 2), (12, 2), (13, 4), (15, 2), (16, 2), (17, 4), (18, 4), (19, 2)]
+        id=0    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=7    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=9    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id2:  non-singleton cells = [(2, 2), (5, 2), (14, 8), (19, 2), (20, 2), (26, 4), (30, 2), (35, 4)]
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=26   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=30   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=35   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id1/id3:  non-singleton cells = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 4), (5, 4), (6, 8), (8, 2), (10, 2), (11, 2), (13, 4), (14, 4), (16, 2), (17, 2), (18, 2), (19, 2), (20, 4)]
+        id=0    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=11   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=14   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=20   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+    root/id1/id5:  non-singleton cells = [(2, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 8), (11, 4), (12, 4), (18, 4), (20, 2), (21, 2), (22, 2), (23, 2), (24, 4), (25, 2)]
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=9    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=10   |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=11   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=12   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=18   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=20   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=21   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=22   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=23   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=24   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=25   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id7:  non-singleton cells = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 4), (5, 4), (6, 8), (7, 4), (8, 4), (10, 4), (11, 4), (15, 2), (16, 4), (17, 4), (18, 2)]
+        id=0    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=10   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=11   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=15   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=16   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=17   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=18   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id8:  non-singleton cells = [(0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 4), (7, 8), (8, 2), (9, 2), (10, 4), (12, 2), (13, 2), (14, 4), (16, 2), (17, 2), (19, 2), (21, 4), (22, 2)]
+        id=0    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=4    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=6    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=7    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=9    |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=10   |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=12   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=13   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=14   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=16   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=17   |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=19   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+        id=21   |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=22   |C|=2    harvest[gens=0    ✗]  read[gens=0    undef=0 ✗]   neither certifies
+    root/id1/id9:  non-singleton cells = [(0, 4), (1, 4), (2, 16), (3, 4), (4, 4), (6, 8), (8, 4), (9, 8)]
+        id=0    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=1    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=2    |C|=16   harvest[gens=240  ✓]  read[gens=240  undef=0 ✓]   both certify
+        id=3    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=6    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+        id=8    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=9    |C|=8    harvest[gens=56   ✓]  read[gens=56   undef=0 ✓]   both certify
+  --- CFI cubic m=8 plain tally (harvest, read): {'False/False': 52, 'True/True': 328}
+
+=== Shrikhande (1-WL CAO witness)   n=16
+    root:  non-singleton cells = [(0, 16)]
+        id=0    |C|=16   harvest[gens=240  ✓]  read[gens=240  undef=0 ✓]   both certify
+    root/id0:  non-singleton cells = [(1, 6), (2, 9)]
+        id=1    |C|=6    harvest[gens=30   ✓]  read[gens=30   undef=0 ✓]   both certify
+        id=2    |C|=9    harvest[gens=36   ✗]  read[gens=36   undef=0 ✗]   neither certifies
+    root/id0/id1:  non-singleton cells = [(2, 2), (3, 2), (5, 2), (7, 4), (8, 2)]
+        id=2    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=3    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=5    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=7    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+        id=8    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+    root/id0/id2:  non-singleton cells = [(1, 2), (2, 4), (4, 4), (5, 4)]
+        id=1    |C|=2    harvest[gens=2    ✓]  read[gens=2    undef=0 ✓]   both certify
+        id=2    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=4    |C|=4    harvest[gens=12   ✓]  read[gens=12   undef=0 ✓]   both certify
+        id=5    |C|=4    harvest[gens=4    ✗]  read[gens=4    undef=0 ✗]   neither certifies
+  --- Shrikhande (1-WL CAO witness) tally (harvest, read): {'True/True': 9, 'False/False': 3}
+
+============================================================
+self-check ✓ every read-equal pair yielded a VERIFIED automorphism (as isColAut_of_readKey_eq requires)
+no items skipped: full coverage of the nodes enumerated above
+wall: 9.8s

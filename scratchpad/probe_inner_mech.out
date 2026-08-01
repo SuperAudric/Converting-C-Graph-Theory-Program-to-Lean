@@ -1,0 +1,14 @@
+
+=== CFI cubic m=8 pl  n=56: node cell |C|=16, true-orbits=1  (outer force FORBIDDEN)
+  greedy   harvest: 112 verified gens, transitive=False
+  inner@K1-lookahead  : 112 verified gens, transitive=False  [1s]
+  inner@K2-1WLsig     : 240 verified gens, transitive=True  [1s]
+  inner@K3-2WL        : 112 verified gens, transitive=False  [568s]
+    pair (24,25): first mixed cell -> ('mixed-cell', 3, (4, 2), ['K2-1WLsig'])
+
+=== CFI cubic m=8 tw  n=56: node cell |C|=16, true-orbits=1  (outer force FORBIDDEN)
+  greedy   harvest: 112 verified gens, transitive=True
+  inner@K1-lookahead  : 112 verified gens, transitive=True  [1s]
+  inner@K2-1WLsig     : 240 verified gens, transitive=True  [1s]
+  inner@K3-2WL        : 112 verified gens, transitive=True  [544s]
+    pair (24,25): first mixed cell -> ('mixed-cell', 3, (4, 2), ['K2-1WLsig'])

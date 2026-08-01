@@ -1,0 +1,57 @@
+=== A. the exposed local shape, and the split as a pullback of its pair-orbits ===
+
+--- Shrikhande  (CAO FAILS at 1-WL) ---
+|Aut| = 192   |Aut_v| = 12
+shape induced on N(v): 6 vertices, degrees [2, 2, 2, 2, 2, 2], 1 component(s) sizes [6]
+Aut_v transitive on N(v): True   orbits on PAIRS inside N(v): [('non-edge', 3), ('non-edge', 6), ('edge', 6)]
+far cell: 9 vertices, 1-WL cells [9], Aut_v orbits [3, 6]
+   pair-orbit (size 3, non-adjacent) carries: {1: 3}
+   pair-orbit (size 6, non-adjacent) carries: NO far vertex
+   pair-orbit (size 6, ADJACENT) carries: {2: 6}
+
+--- rook 4x4    (CAO propagates) ---
+|Aut| = 1152   |Aut_v| = 72
+shape induced on N(v): 6 vertices, degrees [2, 2, 2, 2, 2, 2], 2 component(s) sizes [3, 3]
+Aut_v transitive on N(v): True   orbits on PAIRS inside N(v): [('edge', 6), ('non-edge', 9)]
+far cell: 9 vertices, 1-WL cells [9], Aut_v orbits [9]
+   pair-orbit (size 6, ADJACENT) carries: NO far vertex
+   pair-orbit (size 9, non-adjacent) carries: {2: 9}
+
+=== B. is the 'mixed touches mixed' chain well-founded? ===
+  Shrikhande pinned=[0]: mixed cell 9 -> pieces [3, 6] | self-adjacent=True | other mixed cells touching=[]
+  Shrikhande pinned=[0, 1]: mixed cell 4 -> pieces [2, 2] | self-adjacent=True | other mixed cells touching=[]
+  Shrikhande pinned=[0, 2]: mixed cell 4 -> pieces [2, 2] | self-adjacent=True | other mixed cells touching=[]
+  Chang-2 pinned=[0]: mixed cell 8 -> pieces [4, 4] | self-adjacent=True | other mixed cells touching=[4]
+  Chang-2 pinned=[0]: mixed cell 8 -> pieces [4, 4] | self-adjacent=True | other mixed cells touching=[6]
+  Chang-2 pinned=[0, 17]: mixed cell 4 -> pieces [2, 2] | self-adjacent=True | other mixed cells touching=[5, 9, 10]
+  Chang-2 pinned=[0, 17]: mixed cell 4 -> pieces [2, 2] | self-adjacent=True | other mixed cells touching=[6, 8, 10]
+  Chang-2 pinned=[0, 17]: mixed cell 4 -> pieces [2, 2] | self-adjacent=True | other mixed cells touching=[5, 6, 8, 9]
+  Chang-2 pinned=[0, 17]: mixed cell 4 -> pieces [2, 2] | self-adjacent=True | other mixed cells touching=[5, 9, 10]
+  Chang-2 pinned=[0, 17]: mixed cell 4 -> pieces [2, 2] | self-adjacent=True | other mixed cells touching=[6, 8, 10]
+  rook4x4: no mixed cell at depth <= 2
+  T8: no mixed cell at depth <= 2
+  net(Z4) pinned=[0]: mixed cell 9 -> pieces [3, 6] | self-adjacent=False | other mixed cells touching=[4]
+  net(Z4) pinned=[0]: mixed cell 9 -> pieces [3, 6] | self-adjacent=False | other mixed cells touching=[1]
+  net(Z4) pinned=[16]: mixed cell 12 -> pieces [4, 8] | self-adjacent=False | other mixed cells touching=[4]
+  net(Z4) pinned=[16]: mixed cell 3 -> pieces [1, 2] | self-adjacent=False | other mixed cells touching=[1]
+
+  mixed cells found: 14;  with NO mixed support: 0 []
+
+=== C. what actually distinguishes the two orbits (Shrikhande) ===
+  Aut_v-orbit 1 (size 3): edges among v's common nbrs with u = [0]
+  Aut_v-orbit 2 (size 6): edges among v's common nbrs with u = [1]
+  separates the orbits: True and no value is shared: True
+
+=== D. the arity ladder: transitive on pairs, not on triples ===
+|G| = 60  (PSL(2,5) = A5 on 6 points)
+  orbits on PAIRS   : [15]   transitive: True
+  orbits on TRIPLES : [10, 10]   transitive: False
+  |T n T'| within A : {1: 60, 2: 30}
+  |T n T'| within B : {1: 60, 2: 30}
+  |T n T'| A x B    : {0: 10, 1: 30, 2: 60}
+  => already separated by the crudest pair invariant a coherent closure has
+
+  2-closure obstruction: a 2-transitive group has only the two orbitals
+  {diagonal, rest}, so its 2-closure is the FULL symmetric group.  Hence no
+  edge-coloured graph on the cell can have such a group as its automorphisms.
+  brute force over all 32768 graphs on 6 vertices: 2-transitive-but-not-S6 automorphism groups found = 0

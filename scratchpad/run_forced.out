@@ -1,0 +1,10 @@
+node root/id1/id9  non-singleton cells = [(0, 4), (1, 4), (2, 16), (3, 4), (4, 4), (6, 8), (8, 4), (9, 8)]
+  id=0   |C|=4   harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ leaves=4/4 levels-with-ties=20/20]
+  id=1   |C|=4   harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ leaves=4/4 levels-with-ties=20/20]
+  id=2   |C|=16  harvest[112 ✗] read[112 ✗] read-FORCED[112 ✗ leaves=16/16 levels-with-ties=48/48]
+  id=3   |C|=4   harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ leaves=4/4 levels-with-ties=20/20]
+  id=4   |C|=4   harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ leaves=4/4 levels-with-ties=20/20]
+  id=6   |C|=8   harvest[24  ✗] read[24  ✗] read-FORCED[24  ✗ leaves=8/8 levels-with-ties=32/32]
+  id=8   |C|=4   harvest[4   ✗] read[4   ✗] read-FORCED[4   ✗ leaves=4/4 levels-with-ties=20/20]
+  id=9   |C|=8   harvest[24  ✗] read[24  ✗] read-FORCED[24  ✗ leaves=8/8 levels-with-ties=32/32]
+bad self-check: 0   wall 0.9s

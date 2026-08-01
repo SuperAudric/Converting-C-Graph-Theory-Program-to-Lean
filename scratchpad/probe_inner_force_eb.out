@@ -1,0 +1,107 @@
+
+=== [E-B] CFI cubic m=8 pl  n=56
+  depth 1: |C|=16  no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 4: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 6: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 7: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] CFI cubic m=8 tw  n=56
+  depth 1: |C|=16  no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 4: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 6: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 7: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] CFI cubic m=10 pl  n=70
+  depth 1: |C|=8   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 4: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 5: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] CFI cubic m=10 tw  n=70
+  depth 1: |C|=8   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 4: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 5: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] CFI cubic m=12 pl  n=84
+  depth 1: |C|=8   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=4   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 4: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 5: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] CFI cubic m=12 tw  n=84
+  depth 1: |C|=8   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=4   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 4: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 5: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] CFI cubic m=14 pl  n=98
+  depth 1: |C|=4   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=4   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 4: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 5: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 6: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] CFI cubic m=14 tw  n=98
+  depth 1: |C|=4   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=4   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 4: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 5: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 6: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] rand multipede V=6 W=5  n=34
+  depth 1: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] rand multipede V=8 W=6  n=44
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] rand multipede V=10 W=7  n=54
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] rand multipede V=12 W=8  n=64
+  depth 0: |C|=4   no key fires, true-orbits=4   <<<< MIXED CELL, WHOLE KEY LADDER TIES IT [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] rand multipede V=14 W=9  n=74
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] rand multipede V=16 W=10  n=84
+  depth 0: |C|=2   no key fires, true-orbits=2   <<<< MIXED CELL, WHOLE KEY LADDER TIES IT [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] mp7 Fano multipede  n=42
+  depth 0: |C|=28  no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 1: |C|=12  no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=4   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] MIXED multipede  n=30
+  depth 1: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 2: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  depth 3: |C|=2   no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+=== [E-B] circ(5) multipede  n=30
+  depth 1: |C|=10  no key fires, cell is a SINGLE ORBIT -> consume's job [0s]
+  DISCRETE — no mixed-cell-without-key node on this path
+
+[94.0s]

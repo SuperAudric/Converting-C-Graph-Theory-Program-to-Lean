@@ -1,0 +1,9 @@
+|Aut_chi| = 64   wall 0.3s
+  id=0   |C|=4   orbits inside = 2  profile=[2, 2]  MIXED
+  id=1   |C|=4   orbits inside = 2  profile=[2, 2]  MIXED
+  id=2   |C|=16  orbits inside = 2  profile=[8, 8]  MIXED
+  id=3   |C|=4   orbits inside = 2  profile=[2, 2]  MIXED
+  id=4   |C|=4   orbits inside = 2  profile=[2, 2]  MIXED
+  id=6   |C|=8   orbits inside = 2  profile=[4, 4]  MIXED
+  id=8   |C|=4   orbits inside = 2  profile=[2, 2]  MIXED
+  id=9   |C|=8   orbits inside = 2  profile=[4, 4]  MIXED

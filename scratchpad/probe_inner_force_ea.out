@@ -1,0 +1,27 @@
+
+=== CFI cubic m=8 pl  n=56   key-in-descent=K2-1WLsig
+  depth 0: |C|=32  => FORCE            key=K1-lookahead
+  depth 0: |C|=16  true-orbits=1  no key fires, greedy consume FAILS  -- SINGLE-ORBIT: force is FORBIDDEN here, only the proposal can act
+      inner-force harvest @ K1-lookahead   -> still fails [1s]
+      inner-force harvest @ K2-1WLsig      -> REPAIRED  <<<< [1s]
+      inner-force harvest @ K3-2WL         -> still fails [577s]
+  depth 1: |C|=2   => CONSUME (greedy) [0s]
+  depth 2: |C|=2   => CONSUME (greedy) [0s]
+  depth 3: |C|=2   => CONSUME (greedy) [0s]
+  depth 4: |C|=4   => FORCE            key=K2-1WLsig
+  depth 4: |C|=2   => CONSUME (greedy) [0s]
+  depth 5: |C|=2   => CONSUME (greedy) [0s]
+  depth 6: DISCRETE — done
+
+=== CFI cubic m=8 tw  n=56   key-in-descent=K2-1WLsig
+  depth 0: |C|=32  => FORCE            key=K1-lookahead
+  depth 0: |C|=16  => CONSUME (greedy) [0s]
+  depth 1: |C|=2   => CONSUME (greedy) [0s]
+  depth 2: |C|=2   => CONSUME (greedy) [0s]
+  depth 3: |C|=2   => CONSUME (greedy) [0s]
+  depth 4: |C|=4   => FORCE            key=K2-1WLsig
+  depth 4: |C|=2   => CONSUME (greedy) [0s]
+  depth 5: |C|=2   => CONSUME (greedy) [0s]
+  depth 6: DISCRETE — done
+
+[590.3s]
