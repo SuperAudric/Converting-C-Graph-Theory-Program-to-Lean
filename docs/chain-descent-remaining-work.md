@@ -14,6 +14,11 @@
 >
 > Everything below remains **accurate about what was built and what was refuted** — the ⛔ do-not-re-derive
 > blocks, the falsifiers, and the measured results are still the record. Only the *plan* is void.
+>
+> **Post-closure addendum (2026-08-02):** the "lift the 1-WL divergence verdict up the descent" design is
+> probed and written up in [`chain-descent-divergence-lift.md`](./chain-descent-divergence-lift.md) —
+> refuted as proposed (one mixed-cell pick flips the verdict, Chang-2 n=28), but with a sound
+> consume-certified core (§5) and a vacuity record (§6) worth reading before any similar probe.
 
 > **What this file is.** The single forward-looking tracker: the target, the full gap enumeration, and the
 > ordered plan. It carries **no history** — the pre-2026-07-18 blow-by-blow (seal-era modulo set, citation

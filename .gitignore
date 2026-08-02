@@ -9,3 +9,8 @@ obj/
 .claude/scheduled_tasks.lock
 GraphCanonizationProofs/__pycache__/route_c_halfspin_probe.cpython-311.pyc
 GraphCanonizationProofs/.lake/config/
+
+# Committed paper extracts: full text of third-party papers is not ours to
+# redistribute. Kept locally for offline grepping; re-fetch per docs/papers/README.md.
+docs/papers/*
+!docs/papers/README.md

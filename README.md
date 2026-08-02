@@ -22,7 +22,7 @@ Two graphs that are the same if you were to rearrange their vertices (consider 3
 ## Core design
 
 This canonizer works by trying to slowly restrict the order that it outputs the vertices in, until it's just left with a single one. (A reordering that is identical for all isomorphic graphs)
-The way it does this is with a partial order over the vertices: it starts off by saying every vertex could come either before or after every other vertex, and then as it learns more about the graph it adds constraints in the form "Vertex 1 must come before Vertex 29 in my answer" (usually applied in batches by cell for equivariance reasons mentioned later). As each entry is filled in the partial order, entry by entry, this forms something known as a stablizer chain, which is the 'chain' in the algorithm's 'chain descent' name. The answer is in the form of something called an adjacency matrix, which is a table of which vertices are connected to each other. Two answers are identical if the tables are identical. <!-- Weak adj matrix explanation, maybe wrong place? -->
+The way it does this is with a partial order over the vertices: it starts off by saying every vertex could come either before or after every other vertex, and then as it learns more about the graph it adds constraints in the form "Vertex 1 must come before Vertex 29 in my answer" (usually applied in batches by cell for equivariance reasons mentioned later). Back when it only filled constraints for symmetries, this became the generating set for selecting between automorphisms, known as a stabilizer chain. This was the 'chain' from 'chain descent', but now it's mixed with constraints over which answer to choose for answers that differ, despite this I still think of the constraints as a stabilizer. The answer is in the form of something called an adjacency matrix, which is a table of which vertices are connected to each other. Two answers are identical if the tables are identical. <!-- Weak adj matrix explanation, maybe wrong place? -->
 
 There's 2 main ways a decision is made, either it's a symmetry, or it's a real decision that impacts the output.
 - If there are two possible answers that produce the same result, then this is an automorphism, just like how a graph like K3 (a triangle △) is the same no matter which order you say its vertices in, the adjacency matrix will always be the same. If these two vertices are identical under the current stabilizer, then the decision doesn't matter and you can choose either.
@@ -30,7 +30,7 @@ There's 2 main ways a decision is made, either it's a symmetry, or it's a real d
 
 There's also another way a 'decision' can be made, which is transitive closure. If a\<b and b\<c, then it must be that a\<c.
 
-Now, if we could perfectly determine either one of these, we'd have something called an orbit oracle which is GI complete, solving the entire problem. Instead we have to assume whatever we build might make mistakes so we have to verify it's answer to make sure it's only incomplete, never wrong (which would ruin the answer). It also has to do this within polynomial time, otherwise it's just too slow. These are passed to the consume resolver and force resolver in turn.
+Now, if we could perfectly determine either one of these, we'd have something called an orbit oracle which is GI complete, solving the entire problem. Instead we have to assume whatever we build might make mistakes so we have to verify its answer to make sure it's only incomplete, never wrong (which would ruin the answer). It also has to do this within polynomial time, otherwise it's just too slow. These are passed to the consume resolver and force resolver in turn.
 - The consume resolver checks if two vertices are contained in a symmetry by trying to find two answers (adj matrices) that are identical but swap the position of these two vertices. If it succeeds then that's a verified automorphism, but it can fail on non-Tinhofer graphs. Basically, it tries to pick same-orbit (contains an automorphism under the current stabilizer) vertices in a greedy descent mirrored between both test vertices. If it individualizes everything while only grabbing same orbit vertices, then it succeeds and verifies, but if it ever reaches for same-orbit and misses (grabbing a pair of mixed orbit vertices between the two descents), then it fails and it can't verify. Tinhofer is a type of graph where you're able to grab the correct orbits each time, which is why this is where it can't fail. This can be refined further by having better ways to determine the orbits during the descent.
 - The force resolver handles the real decisions, splitting a cell whose vertices genuinely differ. (1-WL, a.k.a. colour refinement, does a first pass and separates the easy cases into colour cells, but it isn't perfect and some cells still contain structurally different vertices.) It works through a key: a function that gives every vertex in a cell a value, and you keep the smallest. For that to be a canonizer the key needs three properties at once — it has to actually separate the vertices, it has to be equivariant (same answer regardless of how the input happened to be labelled, or two copies of the same graph produce different output), and it has to be polynomial. Any two of the three are easy: try every answer and keep the best (non-poly), hand it back in the exact order you're given (non-equivariant), or say every vertex is the same (non-separating). The open problem is getting all three at once.
 
@@ -188,21 +188,3 @@ in a form that is *false*, and `payne_thas` needs narrowing because there is no 
 "classical GQ recognition" theorem to point at. Elsewhere in the library the same discipline
 applies without axioms - a cited result is carried as a named hypothesis on the theorem that
 needs it, so it is visible in the statement instead of hidden in the trusted base.
-
----
-
-## License
-
-Copyright (C) 2026 Audric Paris.
-
-GPL-3.0-or-later. The full text is in [`LICENSE`](LICENSE); the "or later" part means you can
-also comply with any future GPL version the FSF publishes, so fixes to the licence itself reach
-this project without me touching it.
-
-Use it, change it, sell it - the one condition is that anything you build on it stays open under
-the same terms.
-
-The theorems formalized here that come from published papers are attributed in the References
-above and named after their authors in the source. That is attribution, not licensing: theorems
-and proof methods are not copyrightable, so formalizing a published result creates new work
-rather than a derivative of the paper.
