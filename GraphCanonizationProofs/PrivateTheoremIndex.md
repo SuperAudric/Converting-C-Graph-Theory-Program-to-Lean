@@ -446,3 +446,10 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `CaoRound.sig_ext0_split` | 359-372 | The `ext0` signature splits the same way; off the base point both flags are determined. General form of `sig_ext0_row`. | — |
 | `CaoRound.flag_left` | 374-377 | The base-point flag `decide (a = v)` is recoverable from `zAug`'s second coordinate (diagonal axiom). | — |
 | `CaoRound.flag_right` | 379-382 | The base-point flag `decide (b = v)` is recoverable from `zAug`'s third coordinate (diagonal axiom). | — |
+## ChainDescent/TwinFamily.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `TwinFamily.swap_val` | 71-78 | — | — |
+| `TwinFamily.indivOne_splits` | 106-117 | — | — |
+| `TwinFamily.card_split` | 288-295 | — | — |

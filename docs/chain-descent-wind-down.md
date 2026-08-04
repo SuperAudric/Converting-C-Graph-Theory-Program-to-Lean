@@ -33,11 +33,46 @@ with a clean axiom footprint, and no comparable machine-checked canonization *al
 Ordered. Each is bounded; if one exceeds its box, drop it and move on rather than
 reopening the research.
 
-### W1 — Tinhofer family `Handled` *(box: 2 weeks)*
+### W1 — Tinhofer family `Handled` — ✅ **LANDED 2026-08-04** *(box was 2 weeks; took one session)*
 Turn [`KeyComplete.handledS_of_reached_tinhofer`](../GraphCanonizationProofs/ChainDescent/KeyComplete.lean#L325)
 from a hypothesis-defined class into a **named family**. Today the only `Handled`
 populations are that one and `handled_emptyAdj`; everything else
 (`handledS_recordSupply`, `handled_of_seal*`) is a transfer or a reduction lemma.
+
+> ## ✅ DELIVERED — [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean), in `build.sh`, axiom-clean, 0 `sorry`
+>
+> **The family:** complete multipartite graphs with **pairwise distinct part sizes**
+> (`IsCompleteMultipartite` + `DistinctPartSizes`), with `mpAdj` as a constructor so it is visibly
+> inhabited at every `n`.
+>
+> | theorem | statement |
+> |---|---|
+> | `handledS_of_multipartite` | the family is `Select.HandledS orbKey deepenSupply` — **W1's target** |
+> | `answersS_of_multipartite` | the fused descent **answers**, never flags, on the whole family |
+> | `handledS_of_rootTwins` | the generic socket: `Simple ∧ RootTwins ⟹ HandledS`, family-agnostic |
+> | `isColAut_swap_of_twin` | a same-coloured twin transposition is a colour-preserving automorphism |
+> | `twinCells_step` | ★ the invariant is **inherited** — the whole obligation collapses to the root |
+> | `rootCol_eq_of_twin` | ★ **non-vacuity**: a twin pair survives refinement ⟹ root not discrete |
+> | `handledS_part123` / `not_discrete_part123` / `answersS_part123` | concrete `K₁,₂,₃` witness, both halves |
+>
+> **★ The structural finding that made it cheap.** `Deepen.step = refineV encodeFreeFast ∘ indivOne`
+> and *both halves only split cells*, so `TwinCells` ("every merged pair is a twin pair") is inherited
+> by every descendant with **no graph-specific reasoning**. The per-family obligation therefore
+> collapses to a **single root-level condition** — everything below the root is free. All the graph
+> content lives in one degree computation (`degSum_eq_of_rootCol_eq` + `degSum_multipartite`).
+>
+> **⚠⚠ WHAT IS NOT CLAIMED — do not quote this as "canonized".** The claim is *answers, never flags*.
+> The canonical-form half `①` needs `NodeTransport`, hence `SupplyEquivariant` on the supply;
+> `foldSupply`/`deckSupply`/`deck2Supply` carry it, **`deepenSupply` does not** — which is precisely
+> why it is held out of `Publication.canonForm?`'s record object. That boundary is **pre-existing and
+> untouched**: `handledS_of_reached_tinhofer`, the socket W1 names, is stated at
+> `(orbKey, deepenSupply)`. Closing it means either `SupplyEquivariant deepenSupply` or re-basing the
+> family onto the record supply via `OrbitPrune.SameOrbits` + `Select.handledS_of_sameOrbits` — the
+> second is the live route and is **not** in W1's box.
+>
+> **⚠ Value, restated.** This family is canonizable by sorting degrees. It is an honest *first*
+> population of the predicate and it makes W4's go/no-go formally satisfiable; it is **not** the
+> "polynomial where IR solvers are exponential" claim, which remains W2.
 
 ~~⚠ **Scoping risk, flagged before starting:** `chain-descent-rigid-seal.md` §9.1 states the
 per-family `Tinhofer` discharge is the *same work* as the rigid seal on that family. Scope

@@ -5052,10 +5052,53 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `CaoRound.roundBy_ext0_congr` | 403-414 | The whole round-1 **colour** (not just its signature) is determined by `zAug`. | — |
 | `CaoRound.exists_factor_roundBy_ext0` | 416-430 | ★★ **`hg` DISCHARGED** — the round-1 colour of the individualized configuration is genuinely a *function* of the `v`-augmented colouring. | — |
 | `CaoRound.round2_barrier_real` | 432-440 | ★★★ **THE ROUND-2 BARRIER, UNCONDITIONAL.** No factorization hypothesis: from `{Coherent, Transposable, DiagSep}` — literally the CC axioms — two rounds of the individualized configuration do not separate `v`'s row. With `round1_barrier`: **separation cannot occur before round 3**, explaining the uniform depth M3 measured 11/11. | — |
-| `CaoRound.triCount` | 459-462 | The **triangle count** — how many intermediate points realize the triangle type `q` at `(a,b)`. This is the object doc §12.5a's sharpened R1 is about, and what the crux reduces to. | Definition |
-| `CaoRound.triCount_eq_card` | 464-469 | `triCount` as a `Finset` cardinality — the count in the form the measurements compute. | — |
-| `CaoRound.roundBy_eq_of_sig_eq` | 471-476 | A round cannot separate what the signature does not (no hypothesis on the re-encoding). | — |
-| `CaoRound.roundBy_ne_iff_sig_ne` | 478-488 | ★ **THE CONDITIONAL CONVERSE.** For a faithful (injective) re-encoding, a round separates two pairs of equal colour **exactly when** their signatures differ. | — |
-| `CaoRound.sig_ne_iff_exists_triCount_ne` | 490-501 | Signatures differ **iff** some triangle type has a different count — the concrete inequality form. | — |
-| `CaoRound.round2_row_colour_eq` | 503-513 | The colour-level form of the barriers: through round 2 the row colours themselves agree, not merely their signatures. | — |
-| `CaoRound.round3_separates_iff_triCount_ne` | 515-530 | ★★★ **THE CRUX, REDUCED TO ONE INEQUALITY.** Round 3 separates `v`'s row **iff** some triangle type of the round-2 colouring has a different count at `(v,u)` than at `(v,w)`. Rounds, the row and the closure are discharged; what remains is one inequality between finite explicit counts. ⚠ The *unconditional* 'separation must occur at round 3' is strictly stronger than the crux and cannot follow from the barriers (doc §12.3). | — |
+| `CaoRound.triCount` | 478-481 | The **triangle count** — how many intermediate points realize the triangle type `q` at `(a,b)`. This is the object doc §12.5a's sharpened R1 is about, and what the crux reduces to. | Definition |
+| `CaoRound.triCount_eq_card` | 483-488 | `triCount` as a `Finset` cardinality — the count in the form the measurements compute. | — |
+| `CaoRound.roundBy_eq_of_sig_eq` | 490-495 | A round cannot separate what the signature does not (no hypothesis on the re-encoding). | — |
+| `CaoRound.roundBy_ne_iff_sig_ne` | 497-507 | ★ **THE CONDITIONAL CONVERSE.** For a faithful (injective) re-encoding, a round separates two pairs of equal colour **exactly when** their signatures differ. | — |
+| `CaoRound.sig_ne_iff_exists_triCount_ne` | 509-520 | Signatures differ **iff** some triangle type has a different count — the concrete inequality form. | — |
+| `CaoRound.round2_row_colour_eq` | 522-532 | The colour-level form of the barriers: through round 2 the row colours themselves agree, not merely their signatures. | — |
+| `CaoRound.round3_separates_iff_triCount_ne` | 534-552 | ★★★ **THE CRUX, REDUCED TO ONE INEQUALITY.** Round 3 separates `v`'s row **iff** some triangle type of the round-2 colouring has a different count at `(v,u)` than at `(v,w)`. Rounds, the row and the closure are discharged; what remains is one inequality between finite explicit counts. ⚠ The *unconditional* 'separation must occur at round 3' is strictly stronger than the crux and cannot follow from the barriers (doc §12.3). | — |
+## ChainDescent/TwinFamily.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `TwinFamily.Simple` | 58-62 | The simple-graph setting: `adj` symmetric and loopless. Both are consumed by `isColAut_swap_of_twin` — symmetry to move the twin condition to the other coordinate, looplessness for the diagonal. | Definition |
+| `TwinFamily.Twin` | 64-69 | **Modular twins**: identical adjacency to every *other* vertex. Constrains neither `adj u w` nor the diagonal, so it covers false twins (`N(u)=N(w)`) and true twins (`N[u]=N[w]`) alike. | Definition |
+| `TwinFamily.isColAut_swap_of_twin` | 80-96 | ★ **THE WITNESS.** Transposing a same-coloured twin pair is a colour-preserving automorphism. Adjacency half reuses `isAut_swap_of_twin`; the colouring half is new (the transposition moves only two vertices, which already share a colour). | — |
+| `TwinFamily.TwinCells` | 102-104 | The invariant: every pair the colouring merges is a modular twin pair. This is the whole content of the family. | Definition |
+| `TwinFamily.twinCells_step` | 119-128 | ★ **THE INVARIANT IS INHERITED — no graph-specific reasoning.** `Deepen.step = refineV encodeFreeFast ∘ indivOne` and both halves only split, so a pair merged downstream was already merged upstream. This is what collapses the per-family obligation to the root. | — |
+| `TwinFamily.cellSingleOrbit_of_twinCells` | 130-137 | Under the invariant EVERY cell is a single orbit — the selector-independent statement the step-0 probe measured, strictly stronger than what `TinhoferPath` asks. | — |
+| `TwinFamily.tinhoferPath_of_twinCells` | 141-160 | `TinhoferPath` at every fuel, by induction: the level`s `CellSingleOrbit` from the invariant, the recursive call still under the invariant by `twinCells_step`. | — |
+| `TwinFamily.tinhofer_of_twinCells` | 162-166 | `Deepen.Tinhofer` from the invariant — each anchor`s first step lands under the invariant. | — |
+| `TwinFamily.rootCol` | 170-172 | The descent`s root colouring, `refineV encodeFreeFast adj (fun _ => 0)`. | Definition |
+| `TwinFamily.RootTwins` | 174-177 | **The per-family obligation, stated once**: every pair the ROOT colouring merges is a twin pair. Everything below the root is free. | Definition |
+| `TwinFamily.twinCells_of_reaches` | 179-187 | Every reached colouring inherits the invariant from the root — the descent`s steps only split. | — |
+| `TwinFamily.handledS_of_rootTwins` | 189-195 | ★★★ **THE GENERIC SOCKET.** `Simple ∧ RootTwins ⟹ Select.HandledS orbKey deepenSupply`. Family-agnostic: any family that earns the root condition plugs in here with no re-proof. | — |
+| `TwinFamily.IsCompleteMultipartite` | 215-217 | The complete multipartite graph induced by a part assignment: adjacent iff in different parts. | Definition |
+| `TwinFamily.psize` | 219-221 | The number of vertices in a given part. | Definition |
+| `TwinFamily.DistinctPartSizes` | 223-226 | **The family`s defining hypothesis**: distinct parts have distinct sizes. Stated through vertices, so it only constrains inhabited parts. | Definition |
+| `TwinFamily.simple_of_multipartite` | 228-236 | A complete multipartite graph is symmetric and loopless. | — |
+| `TwinFamily.degSum_eq_of_rootCol_eq` | 240-267 | Equal root colour ⟹ equal degree. Peels the warm round to a single round (`Refine.iterate_splits`), whose fibres are the `sigKey` fibres; at the constant colouring the signature carries exactly the multiset of incident edge-values. | — |
+| `TwinFamily.degSum_multipartite` | 271-286 | In a complete multipartite graph a vertex is adjacent to exactly the vertices outside its part. | — |
+| `TwinFamily.rootTwins_of_multipartite` | 299-313 | ★★ **THE FAMILY INSTANCE.** With pairwise distinct part sizes, equal root colour forces equal degree, hence equal part size, hence the *same part* — and same-part vertices are modular twins. | — |
+| `TwinFamily.handledS_of_multipartite` | 315-319 | ★★★ **W1`s TARGET: a NAMED family, not a hypothesis.** Complete multipartite graphs with distinct part sizes are `Select.HandledS`. | — |
+| `TwinFamily.mpAdj` | 328-331 | Constructor for the complete multipartite graph on a part assignment — makes the family visibly inhabited at every `n`. | Definition |
+| `TwinFamily.isCompleteMultipartite_mpAdj` | 333-334 | `mpAdj part` is complete multipartite on `part`, by `rfl`. | — |
+| `TwinFamily.rootCol_eq_of_twin` | 336-357 | ★★ **THE NON-VACUITY LEMMA.** A twin pair survives refinement: the transposition is an automorphism fixing the constant colouring and the refiner is equivariant (①b), so an equivariant refiner cannot separate a pair some automorphism swaps. | — |
+| `TwinFamily.not_discrete_rootCol_mpAdj` | 359-368 | A complete multipartite graph with a part of size ≥ 2 has a NON-discrete root — so the family lies outside `Residue.handled_of_root_discrete``s free ring. | — |
+| `TwinFamily.part123` | 377-378 | Parts of sizes 1, 2, 3 on six vertices — the concrete witness `K₁,₂,₃`. | Definition |
+| `TwinFamily.distinctPartSizes_part123` | 380-382 | The sizes 1, 2, 3 are pairwise distinct (`decide`). | — |
+| `TwinFamily.handledS_part123` | 384-387 | ★ **THE CONCRETE INSTANCE** — a specific 6-vertex graph that is `HandledS`. | — |
+| `TwinFamily.not_discrete_part123` | 389-391 | … and whose root is not discrete, so the witness is genuinely non-vacuous. Probe-measured at 30 reached nodes / 18 non-discrete / 3 levels / `spans = 0`. | — |
+| `TwinFamily.answersS_of_multipartite` | 408-414 | ★★★ **THE FAMILY ANSWERS** — the fused descent terminates with an answer, never flags, on the whole family. ⚠ NOT "canonized": the canonical-form half `①` needs `SupplyEquivariant`, which `deepenSupply` lacks (pre-existing boundary, see the module doc-block §7). | — |
+| `TwinFamily.answersS_part123` | 416-422 | The concrete 6-vertex witness answers. | — |
+
+## Examples.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `canonForm?` | 25-31 | — | Definition |
+| `ofEdges` | 33-35 | — | Definition |
+| `rows?` | 37-40 | — | Definition |
+| `sameGraph?` | 68-74 | — | Definition |
