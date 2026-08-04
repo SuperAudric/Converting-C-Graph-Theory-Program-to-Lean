@@ -411,5 +411,142 @@ theorem canonizes_on_tinhofer_holKeyFast :
           (ForcePick.forceThenPick (Hol.holKeyFast (n := n))) adj ≠ none) :=
   canonizes_on_tinhofer Hol.keyEquivariant_holKeyFast
 
+/-! ## 7. THE CLASS IS **PROPER** — a concrete non-Tinhofer witness
+
+§6's capstone is only worth its statement if `TinhoferGraph` excludes something; and the residue
+obligation `Publication.unhandledResidue_nonvacuous` needs *both* halves — a graph in the class and a
+graph outside it. The first is `TwinFamily.tinhoferGraph_of_multipartite`. This section supplies the
+second, which the project has wanted since the residue was first stated ("a real unhandled instance"
+— `Publication.lean`'s STATUS block).
+
+**The witness is `K₃ ⊔ C₄`** (`probe_w1_cographs.py`'s minimal cograph falsifier, re-used): it is
+2-regular, so 1-WL leaves one 7-vertex cell, while `Aut = S₃ × D₄` has **two** orbits.
+
+Two lemmas make it a *theorem* rather than a measurement:
+
+* **§7.1** a *signature-regular* graph refines to a **constant** colouring, so the root cell really is
+  everything. ⚠ This is needed because `rootCol` does **not** kernel-reduce — `decide` on
+  `rootCol kc 0 = rootCol kc 3` gets stuck (trap #3: reduce the descent objects only through their
+  equation lemmas). The regularity route sidesteps evaluation entirely.
+* **§7.2** the **triangle count at a vertex** is an `Aut`-invariant, and it is `2` at a `K₃` vertex and
+  `0` at a `C₄` vertex — both by `decide`, which *is* cheap here (no descent object appears).
+-/
+
+/-! ### 7.1 A signature-regular graph refines to a constant colouring -/
+
+/-- **Signature-regular**: the multiset of incident values is the same at every vertex. For a `0/1`
+matrix this is ordinary regularity, and it is stated as the multiset directly because that is exactly
+what the refiner's `signature` reads — which also makes it `decide`-able on a concrete graph. -/
+def SigRegular (adj : AdjMatrix n) : Prop :=
+  ∀ u w : Fin n,
+    ((Finset.univ.filter (· ≠ u)).val.map (fun s => adj.adj u s))
+      = ((Finset.univ.filter (· ≠ w)).val.map (fun s => adj.adj w s))
+
+/-- One refinement round keeps a constant colouring constant. The signature at `v` is the incident-value
+multiset pushed through `x ↦ (k, x, unknown)`, so regularity is precisely what is needed. -/
+theorem refineRound_const_of_sigRegular {adj : AdjMatrix n} (hR : SigRegular adj)
+    {χ : Colouring n} (hχ : ∀ a b : Fin n, χ a = χ b) (u w : Fin n) :
+    Refine.refineRound adj χ u = Refine.refineRound adj χ w := by
+  rw [Refine.refineRound_eq_iff]
+  refine (sigKey_eq_iff adj (Refine.constP n) χ u w).mpr ⟨hχ u w, ?_⟩
+  show ((Finset.univ.filter (· ≠ u)).val.map
+      (fun s => (χ s, adj.adj u s, Refine.constP n u s)))
+    = ((Finset.univ.filter (· ≠ w)).val.map
+      (fun s => (χ s, adj.adj w s, Refine.constP n w s)))
+  -- both sides are the incident-value multiset pushed through `y ↦ (χ u, y, unknown)`
+  have hcomp : ∀ x : Fin n,
+      ((Finset.univ.filter (· ≠ x)).val.map (fun s => (χ s, adj.adj x s, Refine.constP n x s)))
+        = ((Finset.univ.filter (· ≠ x)).val.map (fun s => adj.adj x s)).map
+            (fun y => (χ u, y, POE.unknown)) := by
+    intro x
+    rw [Multiset.map_map]
+    exact Multiset.map_congr rfl (fun s _ => by rw [hχ s u]; rfl)
+  rw [hcomp u, hcomp w, hR u w]
+
+/-- **★ THE ROOT CELL IS EVERYTHING** on a signature-regular graph. Induction on the refinement rounds:
+"pairwise equal" is preserved by a round, and `rootCol` is `n` of them. (Stated pairwise rather than as
+`∃ k, ∀ v, χ v = k` so that it does not need `Fin n` to be inhabited.) -/
+theorem rootCol_const_of_sigRegular {adj : AdjMatrix n} (hR : SigRegular adj) (u w : Fin n) :
+    TwinFamily.rootCol adj u = TwinFamily.rootCol adj w := by
+  have hiter : ∀ (j : Nat) (a b : Fin n),
+      ((Refine.refineRound adj)^[j] (fun _ => 0)) a
+        = ((Refine.refineRound adj)^[j] (fun _ => 0)) b := by
+    intro j
+    induction j with
+    | zero => intro a b; rfl
+    | succ j ih =>
+        intro a b
+        rw [Function.iterate_succ_apply']
+        exact refineRound_const_of_sigRegular hR ih a b
+  have hroot : TwinFamily.rootCol adj = (Refine.refineRound adj)^[n] (fun _ => 0) := by
+    show Descend.refineV (Refine.encodeFreeFast (n := n)) adj (fun _ => 0) = _
+    rw [Refine.refineV_encodeFreeFast]
+    rfl
+  rw [hroot]
+  exact hiter n u w
+
+/-! ### 7.2 The triangle count at a vertex is an `Aut`-invariant -/
+
+/-- Ordered pairs of neighbours of `v` that are themselves adjacent — i.e. `2 ×` the number of triangles
+through `v`, but the constant does not matter: only invariance and two computed values do. -/
+def triAt (adj : AdjMatrix n) (v : Fin n) : Nat :=
+  (Finset.univ.filter
+    (fun p : Fin n × Fin n => adj.adj v p.1 = 1 ∧ adj.adj v p.2 = 1 ∧ adj.adj p.1 p.2 = 1)).card
+
+/-- **★ `triAt` IS `Aut`-INVARIANT** — the bijection is `σ` on both coordinates. -/
+theorem triAt_of_relabel_eq {adj : AdjMatrix n} {σ : Equiv.Perm (Fin n)}
+    (hσ : relabelAdj σ adj = adj) (v : Fin n) : triAt adj (σ v) = triAt adj v := by
+  have hadj : ∀ i j : Fin n, adj.adj (σ i) (σ j) = adj.adj i j := by
+    intro i j
+    have h := congrArg (fun A => A.adj (σ i) (σ j)) hσ
+    simpa using h.symm
+  refine (Finset.card_equiv (Equiv.prodCongr σ σ) (fun p => ?_)).symm
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, Equiv.prodCongr_apply,
+    Prod.map_fst, Prod.map_snd]
+  rw [hadj, hadj, hadj]
+
+/-! ### 7.3 `K₃ ⊔ C₄` — 2-regular, two orbits -/
+
+/-- Edge list of `K₃ ⊔ C₄`: the triangle `0-1-2` and the 4-cycle `3-4-5-6-3`. -/
+def kcEdges : List (Nat × Nat) := [(0, 1), (0, 2), (1, 2), (3, 4), (4, 5), (5, 6), (6, 3)]
+
+/-- **The witness graph.** -/
+def kcAdj : AdjMatrix 7 :=
+  ⟨fun a b => if kcEdges.contains (a.val, b.val) || kcEdges.contains (b.val, a.val) then 1 else 0⟩
+
+theorem sigRegular_kcAdj : SigRegular kcAdj := by
+  unfold SigRegular
+  decide
+
+theorem triAt_kcAdj_zero : triAt kcAdj 0 = 2 := by decide
+
+theorem triAt_kcAdj_three : triAt kcAdj 3 = 0 := by decide
+
+/-- **★★★ THE CLASS IS PROPER — `K₃ ⊔ C₄` IS NOT TINHOFER.** The graph is 2-regular, so the refined root
+is one cell containing both `0` and `3` (§7.1); but `0` lies on a triangle and `3` does not, so no
+automorphism carries one to the other (§7.2). Hence the root already fails `SchurianAt`, and the root is
+individualization-reachable by definition. -/
+theorem not_tinhoferGraph_kcAdj : ¬ TwinFamily.TinhoferGraph kcAdj := by
+  intro h
+  have hS := h _ TwinFamily.IndivReach.root
+  have hcol : TwinFamily.rootCol kcAdj 0 = TwinFamily.rootCol kcAdj 3 :=
+    rootCol_const_of_sigRegular sigRegular_kcAdj 0 3
+  obtain ⟨σ, hσ, hσ0⟩ := hS (TwinFamily.rootCol kcAdj 0) 0 3 rfl hcol.symm
+  have hinv := triAt_of_relabel_eq hσ.relabel 0
+  rw [hσ0, triAt_kcAdj_zero, triAt_kcAdj_three] at hinv
+  exact absurd hinv (by decide)
+
+/-- **★★★ BOTH HALVES OF NON-VACUITY** — the shape `Publication.unhandledResidue_nonvacuous` asks for,
+against the *structural* residue predicate `¬ TinhoferGraph` (a property of the graph, never "the
+algorithm flagged"): the class is **inhabited** and it is **proper**. -/
+theorem tinhoferGraph_nonvacuous :
+    (∃ (m : Nat) (G : AdjMatrix m), TwinFamily.TinhoferGraph G)
+    ∧ (∃ (m : Nat) (G : AdjMatrix m), ¬ TwinFamily.TinhoferGraph G) :=
+  ⟨⟨6, TwinFamily.mpAdj TwinFamily.part123,
+     TwinFamily.tinhoferGraph_of_multipartite
+       (TwinFamily.isCompleteMultipartite_mpAdj TwinFamily.part123)
+       TwinFamily.distinctPartSizes_part123⟩,
+   ⟨7, kcAdj, not_tinhoferGraph_kcAdj⟩⟩
+
 end RestrictedTransport
 end ChainDescent

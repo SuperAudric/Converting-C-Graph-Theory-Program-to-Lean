@@ -456,6 +456,50 @@ only, `None` ≠ `False`, the orbit-reduction licence) is recorded there.
    refutation wording does not. **Not archived** (user).
 3. **W2's target is progress, not completion** — see its scope-correction block.
 
+### ▶▶ PUBLICATION REWIRING — SCOPED 2026-08-04, and it is BLOCKED ON ONE DECISION
+
+**What the two `sorry`s need.** Both are blocked on the *same* thing first: `UnhandledResidue` is
+`residueNonSchurian ∨ residueHiddenJohnson ∨ residueRigidObstruction`, and all three are
+`opaque … : Prop`. An opaque `Prop` with no definition can be neither proved nor refuted, so **both**
+`residue_if_flag` and `unhandledResidue_nonvacuous` are unprovable *in principle* as written (the file's
+own STATUS says this). Step 1 of any wiring is therefore: **define the atoms.**
+
+W1 supplies a real definition for exactly one of them:
+**`residueRigidObstruction n G := ¬ TwinFamily.TinhoferGraph G`** — which unfolds, via
+`schurianAt_iff_no_rigidObstruction`, to *"some individualization-reachable colouring carries a rigid
+obstruction"*. Structural, iso-invariant, algorithm-independent: it passes the firewall. (D0 the file
+already calls a modelling gap whose end shape is to drop it; D1 is Route C / Cameron territory, §3
+suspended — neither can be defined honestly now.)
+
+**✅ `unhandledResidue_nonvacuous` is now UNBLOCKED** — `RestrictedTransport` §7's
+**`tinhoferGraph_nonvacuous`** is exactly its shape at the structural predicate:
+
+| theorem | statement |
+|---|---|
+| `rootCol_const_of_sigRegular` | a signature-regular graph refines to **one cell**. ⚠ Needed because `rootCol` does **not** kernel-reduce — `decide` on `rootCol kc 0 = rootCol kc 3` gets stuck (trap #3); regularity sidesteps evaluation entirely |
+| `triAt_of_relabel_eq` | the triangle count at a vertex is an `Aut`-invariant |
+| **`not_tinhoferGraph_kcAdj`** | ★★★ **`K₃ ⊔ C₄` IS NOT TINHOFER** — 2-regular so the root is one cell holding `0` and `3`; `0` lies on a triangle and `3` does not ⟹ no automorphism links them |
+| **`tinhoferGraph_nonvacuous`** | ★★★ the class is **inhabited** (multipartite) **and proper** (`K₃ ⊔ C₄`) |
+
+★ This is the *"real unhandled instance"* the `Publication` STATUS block has wanted since the residue was
+first stated. The graph is `probe_w1_cographs.py`'s minimal cograph falsifier, now a **theorem**.
+
+**⛔ `residue_if_flag` IS BLOCKED — an OBJECT mismatch, and it needs a decision.**
+It asks for *flag ⟹ `UnhandledResidue`* at **`Publication.canonForm?` = `recordKey @ recordSupplyFast`**.
+"Flag ⟹ ¬Tinhofer" is proved only at `holKeyFast @ deepenSupply`. Getting it at the record object needs
+*"Tinhofer ⟹ the record answers"*, i.e. the record supply certifies Tinhofer cells — **not proved, and
+it is the consume-completeness question.** Three ways out:
+
+| | change | gains | costs |
+|---|---|---|---|
+| **A** | point `canonForm?` at `guard (forceThenConsume holKeyFast deepenSupply)` | `residue_if_flag` real + structural; `②` real | `canon_complete` / `flag_iso_invariant` drop from **unconditional** to **conditional on Tinhofer** — a downgrade of the artifact's strongest claim |
+| **B** | point it at `forceThenPick holKeyFast` | `①` on the class | ⛔ **`residue_if_flag` becomes VACUOUS** — that object never flags; and off the class it *answers* with a possibly non-canonical form, trading the honest flag for a silently wrong one. **Do not do this.** |
+| **C** | keep `canonForm?` = record; showcase a **second** named object for coverage | nothing weakened; `③` graded exactly as the file's own STATUS prescribes — ③a `flag ⟹ ¬HandledS(record)` (already proved, `Select.not_handledS_if_flagS`) at the record, ③b `flag ⟹ ¬TinhoferGraph` (structural) at the deepen object; non-vacuity ✅ | the paper showcases two objects and must say so plainly |
+
+▶ **RECOMMENDED: C.** It is what `Publication.lean`'s STATUS already prescribes ("target the graded
+pair"), it keeps `①`/`②` unconditional, and W1 supplies the first genuine ③b. **User's call — not
+started.**
+
 ### ▶ Live decisions, none started
 * **`Publication.lean` wiring** — its showcased theorems still use `recordKey @ recordSupplyFast`.
   Pointing them at this class changes the published object. **User's call.** ★ Mechanically this is
