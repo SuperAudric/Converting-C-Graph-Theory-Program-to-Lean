@@ -2,15 +2,30 @@ import ChainDescent.KeyComplete
 import ChainDescent.CascadeOracle
 
 /-!
-# The TWIN family — the first NAMED family populating `Select.HandledS`
+# NO RIGID OBSTRUCTION — the capability socket, and the first NAMED family through it
 
 ## What this file is for
 
 `KeyComplete.handledS_of_reached_tinhofer` turns *"`Deepen.Tinhofer` holds at every reached
 non-discrete node"* into `Select.HandledS`, but it is **hypothesis-defined**: the wind-down's W1
 records that the only populations of the capability predicate are that hypothesis and
-`HandledBridge.handled_emptyAdj`. This file supplies a **named family** and the generic machinery
-that lifts any such family into the socket.
+`HandledBridge.handled_emptyAdj`. This file supplies (a) the **general socket**, stated on *"the
+descent meets no rigid obstruction"*, (b) a **named family** through it, and (c) a route to the full
+canonical-form claim, not merely termination.
+
+## The three layers, in the order they matter
+
+1. **§3–§4 — the socket.** `handledS_of_noRigidObstruction`: any **step-closed** class of colourings
+   carrying **no rigid obstruction** (`SchurianAt`, proved equivalent to `¬ RigidObstructionAt` in
+   `schurianAt_iff_no_rigidObstruction`) that holds at the root gives `Select.HandledS`. *To enlarge
+   the handled region, supply a wider class — nothing below changes.* The step-closure hypothesis is
+   the formal content of "peeling a layer leaves you in the class", which is why this shape is
+   tractable per-family at all.
+2. **§1–§2, §5 — one way to feed it.** Modular twins discharge Schurianity by transposition, and
+   complete multipartite graphs with distinct part sizes discharge the root condition. This is the
+   *narrowest* mechanism, not the boundary of the socket.
+3. **§8 — answers → canonized.** A computable, equivariant **twin supply** replaces
+   `(orbKey, deepenSupply)`, yielding the blind `Residue.Handled` and the full `①`.
 
 ## The mechanism, in one line
 
@@ -43,6 +58,10 @@ concrete family has to earn the root condition.
   degree↔orbit coupling. **Do not attempt to widen this file to cographs.**
 * ⚠ This family is canonizable by sorting degrees. It is an honest *first* population of the
   predicate; it is **not** the "polynomial where IR solvers are exponential" claim, which is W2 (CFI).
+  ★ The **socket** (§3–§4) is what carries forward; the family is a non-vacuity witness for it.
+* ⚠ **The socket cannot be widened for free.** `SchurianAt` is *not* preserved by `Deepen.step` in
+  general — that is exactly CAO propagation, refuted at 1-WL (`chain-descent-cao-propagation.md`).
+  This is why `StepClosed` is a hypothesis and not a lemma: a wider class must prove its own closure.
 -/
 
 namespace ChainDescent
@@ -136,12 +155,46 @@ theorem cellSingleOrbit_of_twinCells {adj : AdjMatrix n} (hs : Simple adj)
   have hcol : χ u = χ w := hu.trans hw.symm
   exact ⟨Equiv.swap u w, isColAut_swap_of_twin hs (h u w hcol) hcol, Equiv.swap_apply_left u w⟩
 
-/-! ## 3. `TinhoferPath` and `Tinhofer` from the invariant -/
+/-! ## 3. THE GENERAL PREDICATE — no rigid obstruction, on a step-closed class
 
-/-- **`TinhoferPath` at every fuel.** Induction on fuel: the level's `CellSingleOrbit` comes from §2,
-and the recursive call is at `step adj χc w`, where the invariant still holds by `twinCells_step`. -/
-theorem tinhoferPath_of_twinCells {adj : AdjMatrix n} (hs : Simple adj) (χp : Colouring n) :
-    ∀ (fuel : Nat) (cur : Refine.ColData n), TwinCells adj cur.col →
+⚠ **This is the socket; the twin story of §1–§2 is only one way to feed it.** The hypothesis a family
+actually has to meet is *"the descent never meets a rigid obstruction"* — nothing about twins. Twins
+are one mechanism for discharging it, and the narrowest one. -/
+
+/-- **`SchurianAt`** — every cell of `χ` is a single orbit of the colour-stabilizer. This is
+"`χ` is Schurian": 1-WL's partition at `χ` *is* the orbit partition. -/
+def SchurianAt (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ cid : Nat, Deepen.CellSingleOrbit adj χ cid
+
+/-- **★ `SchurianAt` IS the absence of rigid obstructions** — de Morgan on
+`Deepen.rigidObstruction_of_not_cellSingleOrbit`, both directions. This is the reading to quote: the
+class is *"contains no rigid obstruction"*, and it is the exact complement of the rigid resolver's
+domain, which is what lets it later be weakened to *"no rigid obstruction the rigid resolver does not
+already handle"* without touching anything below. -/
+theorem schurianAt_iff_no_rigidObstruction (adj : AdjMatrix n) (χ : Colouring n) :
+    SchurianAt adj χ ↔ ∀ cid : Nat, ¬ Deepen.RigidObstructionAt adj χ cid := by
+  constructor
+  · rintro h cid ⟨u, w, hu, hw, hno⟩
+    obtain ⟨σ, hσ, hσu⟩ := h cid u w hu hw
+    exact hno σ hσ hσu
+  · intro h cid
+    by_contra hc
+    exact h cid (Deepen.rigidObstruction_of_not_cellSingleOrbit adj χ cid hc)
+
+/-- **A class of colourings closed under the descent's own step** — *peeling a layer keeps you in the
+class*. This is the structural property that makes a per-family discharge finite: without it the
+obligation would have to be re-earned at every node. (It is exactly why the `Tinhofer` reading is
+tractable and the CFI reading is not: peeling a Tinhofer layer leaves a Tinhofer graph, whereas
+peeling the CFI layer exposes whatever the CFI construction was built over.) -/
+def StepClosed (P : Colouring n → Prop) (adj : AdjMatrix n) : Prop :=
+  ∀ χ, P χ → ∀ v : Fin n, P (Deepen.step adj χ v).col
+
+/-- **`TinhoferPath` at every fuel, for ANY step-closed obstruction-free class.** Induction on fuel:
+the level's `CellSingleOrbit` is the class's Schurianity, and the recursive call stays in the class by
+step-closure. -/
+theorem tinhoferPath_of_stepClosed {adj : AdjMatrix n} {P : Colouring n → Prop}
+    (hcl : StepClosed P adj) (hS : ∀ χ, P χ → SchurianAt adj χ) (χp : Colouring n) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n), P cur.col →
       Deepen.TinhoferPath adj χp fuel cur := by
   intro fuel
   induction fuel with
@@ -154,16 +207,16 @@ theorem tinhoferPath_of_twinCells {adj : AdjMatrix n} (hs : Simple adj) (χp : C
       cases hch : Deepen.chooseIdK (List.finRange n) cur.col with
       | none => trivial
       | some cid =>
-          refine ⟨cellSingleOrbit_of_twinCells hs hcur cid, ?_⟩
+          refine ⟨hS _ hcur cid, ?_⟩
           cases hf : (List.finRange n).filter (fun v => cur.col v == cid) with
           | nil => trivial
-          | cons w _ => exact ih _ (twinCells_step hcur w)
+          | cons w _ => exact ih _ (hcl _ hcur w)
 
-/-- **`Tinhofer` from the invariant.** Each anchor's first step lands in a colouring that still
-satisfies the invariant, and §3 covers the rest of the path. -/
-theorem tinhofer_of_twinCells {adj : AdjMatrix n} (hs : Simple adj)
-    {χ : Colouring n} (h : TwinCells adj χ) : Deepen.Tinhofer adj χ :=
-  fun r _ => tinhoferPath_of_twinCells hs χ n _ (twinCells_step h r)
+/-- `Deepen.Tinhofer` for any colouring in the class. -/
+theorem tinhofer_of_stepClosed {adj : AdjMatrix n} {P : Colouring n → Prop}
+    (hcl : StepClosed P adj) (hS : ∀ χ, P χ → SchurianAt adj χ)
+    {χ : Colouring n} (h : P χ) : Deepen.Tinhofer adj χ :=
+  fun r _ => tinhoferPath_of_stepClosed hcl hS χ n _ (hcl χ h r)
 
 /-! ## 4. The root condition — the ONLY thing a family has to earn -/
 
@@ -171,28 +224,56 @@ theorem tinhofer_of_twinCells {adj : AdjMatrix n} (hs : Simple adj)
 def rootCol (adj : AdjMatrix n) : Colouring n :=
   Descend.refineV (Refine.encodeFreeFast (n := n)) adj (fun _ => 0)
 
-/-- **The per-family obligation, stated once**: every pair the ROOT colouring merges is a twin pair.
-Everything below the root is free (§2). -/
-def RootTwins (adj : AdjMatrix n) : Prop :=
-  ∀ u w : Fin n, rootCol adj u = rootCol adj w → Twin adj u w
-
-/-- Every reached colouring refines the root — the descent's steps only split. -/
-theorem twinCells_of_reaches {adj : AdjMatrix n} (hR : RootTwins adj) {χ : Colouring n}
-    (hr : Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ) : TwinCells adj χ := by
+/-- A step-closed class that holds at the root holds at **every reached node** — because
+`Descend.Reaches`'s step and `Deepen.step` are the same operation
+(`KeyComplete.step_col_eq_refineV`). So a family only ever has to earn the root. -/
+theorem mem_of_reaches {adj : AdjMatrix n} {P : Colouring n → Prop}
+    (hcl : StepClosed P adj) (hroot : P (rootCol adj)) {χ : Colouring n}
+    (hr : Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ) : P χ := by
   induction hr with
-  | root => intro u w h; exact hR u w h
+  | root => exact hroot
   | step _ _ _ ih =>
-      intro x y hxy
-      have hind := Refine.refineSplits_encodeFreeFast (n := n) adj (Descend.indivOne _ _) x y hxy
-      exact ih x y (indivOne_splits _ _ x y hind)
+      rw [← KeyComplete.step_col_eq_refineV]
+      exact hcl _ ih _
 
-/-- **★★★ THE SOCKET.** A simple graph whose root colouring merges only twin pairs is `HandledS`:
-every reached non-discrete node has a resolvable cell, so the fused resolver never stalls there.
-This is the generic half — §5 supplies a family that satisfies the hypothesis. -/
-theorem handledS_of_rootTwins {adj : AdjMatrix n} (hs : Simple adj) (hR : RootTwins adj) :
+/-- **★★★ THE SOCKET — stated on "no rigid obstruction", not on twins.** A step-closed class that
+holds at the root and carries no rigid obstruction gives `Select.HandledS`: every reached non-discrete
+node has a resolvable cell, so the fused resolver never stalls there.
+
+▶ **How to extend the handled region**: supply a *wider* `P`. Nothing below this theorem changes —
+which is the point of stating it here rather than at the twin layer. -/
+theorem handledS_of_noRigidObstruction {adj : AdjMatrix n} {P : Colouring n → Prop}
+    (hcl : StepClosed P adj) (hroot : P (rootCol adj))
+    (hS : ∀ χ, P χ → SchurianAt adj χ) :
     Select.HandledS Deepen.orbKey Deepen.deepenSupply adj :=
   KeyComplete.handledS_of_reached_tinhofer
-    (fun _ hr _ => tinhofer_of_twinCells hs (twinCells_of_reaches hR hr))
+    (fun _ hr _ => tinhofer_of_stepClosed hcl hS (mem_of_reaches hcl hroot hr))
+
+/-! ### 4.1 The twin class is one instance of the socket -/
+
+/-- Twin-merging is step-closed (§2). -/
+theorem stepClosed_twinCells (adj : AdjMatrix n) : StepClosed (TwinCells adj) adj :=
+  fun _ h v => twinCells_step h v
+
+/-- A twin-merging colouring is Schurian (§2). -/
+theorem schurianAt_of_twinCells {adj : AdjMatrix n} (hs : Simple adj) :
+    ∀ χ : Colouring n, TwinCells adj χ → SchurianAt adj χ :=
+  fun _ h cid => cellSingleOrbit_of_twinCells hs h cid
+
+/-- **The per-family obligation for the twin route**: every pair the ROOT colouring merges is a twin
+pair. Definitionally `TwinCells adj (rootCol adj)`. -/
+def RootTwins (adj : AdjMatrix n) : Prop :=
+  TwinCells adj (rootCol adj)
+
+/-- Every reached colouring merges only twin pairs. -/
+theorem twinCells_of_reaches {adj : AdjMatrix n} (hR : RootTwins adj) {χ : Colouring n}
+    (hr : Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ) : TwinCells adj χ :=
+  mem_of_reaches (stepClosed_twinCells adj) hR hr
+
+/-- The twin route into the socket. -/
+theorem handledS_of_rootTwins {adj : AdjMatrix n} (hs : Simple adj) (hR : RootTwins adj) :
+    Select.HandledS Deepen.orbKey Deepen.deepenSupply adj :=
+  handledS_of_noRigidObstruction (stepClosed_twinCells adj) hR (schurianAt_of_twinCells hs)
 
 /-! ## 5. A NAMED FAMILY — complete multipartite graphs with distinct part sizes
 
@@ -394,16 +475,14 @@ theorem not_discrete_part123 : ¬ Discrete (rootCol (mpAdj part123)) :=
 
 `Select.answersS_of_handledS` needs only `HandledS`, so this is free.
 
-⚠⚠ **What is NOT claimed here, and why — read before quoting this as "canonized".** The canonical-form
-half (`①`, `Select.isCanonicalFormOptS_canonFormS?`) additionally needs `NodeTransport`, hence
-`SupplyTransport.SupplyEquivariant` on the supply. `foldSupply`, `deckSupply` and `deck2Supply` carry
-it; **`deepenSupply` does not** — which is exactly why `deepenSupply` is deliberately held out of
-`Publication.canonForm?`'s record object. That boundary is **pre-existing and untouched by this
-family**: `handledS_of_reached_tinhofer`, the socket W1 names, is stated at
-`(orbKey, deepenSupply)`. So the honest claim is *"the fused descent terminates with an answer on this
-family, and never flags"*, **not** *"the record canonizer canonizes it"*. Closing the gap means either
-`SupplyEquivariant deepenSupply` or re-basing the family onto the record supply — neither is in W1's
-box, and the second is the live route (`OrbitPrune.SameOrbits` + `Select.handledS_of_sameOrbits`). -/
+⚠ **Scope of THIS section — `①` is not available at this key/supply pair.** The canonical-form half
+(`Select.isCanonicalFormOptS_canonFormS?`) needs `NodeTransport`, hence
+`SupplyTransport.SupplyEquivariant`; `deepenSupply` is not known to carry it, and `orbKey` is
+`noncomputable` besides. That is a pre-existing boundary of the `(orbKey, deepenSupply)` pair — it is
+why `deepenSupply` is held out of `Publication.canonForm?`'s record object — **not** a limitation of
+the family. ▶ **§8 crosses it** by dropping both objects: under `TwinCells` the orbits are generated
+by transpositions, so a computable twin supply certifies the cell directly and carries
+`SupplyEquivariant` outright. Read §8 before quoting this section's weaker claim. -/
 
 /-- **★★★ THE FAMILY ANSWERS.** No flag on any complete multipartite graph with distinct part sizes. -/
 theorem answersS_of_multipartite {adj : AdjMatrix n} {part : Fin n → Nat}
@@ -420,6 +499,157 @@ theorem answersS_part123 :
         (mpAdj part123)
       ≠ none :=
   answersS_of_multipartite (isCompleteMultipartite_mpAdj part123) distinctPartSizes_part123
+
+/-! ## 8. CROSSING THE ANSWERS → CANONIZED WALL — a COMPUTABLE twin supply
+
+§7's gap is that `handledS_of_reached_tinhofer` is stated at `(orbKey, deepenSupply)`: `orbKey` is
+`noncomputable` (its `TinhoferPath` guard is an `n!` search) and `deepenSupply` is not known
+equivariant. Neither is needed. Under `TwinCells` the orbits are generated by **transpositions**, so a
+supply that simply emits the twin transpositions of the branch cell certifies the cell **in one
+`WordReach` step** — and it is computable, cheap, and a structural function of `(adj, χ)`.
+
+That buys the strictly stronger **blind** predicate `Residue.Handled` (which demands the LEAST cell
+resolve, and implies `Select.HandledS` by `Select.handledS_of_handled`), at a key of the caller's
+choice — so the equivariant computable `HolKey.holKeyFast` can be used instead of `orbKey`. -/
+
+instance decidableTwin (adj : AdjMatrix n) (u w : Fin n) : Decidable (Twin adj u w) := by
+  unfold Twin; infer_instance
+
+/-- **The twin supply**: every transposition of a twin pair inside the branch cell. Cost is the honest
+enumeration bill (`|B|²` pairs, each an `n²` twin test). -/
+def twinSupply : Consume.Supply n := fun adj χ =>
+  let B := Descend.branches χ
+  (B.flatMap (fun u => B.filterMap (fun w => if Twin adj u w then some (Equiv.swap u w) else none)),
+   B.length * B.length * (n * n))
+
+theorem mem_gens_twinSupply_iff {adj : AdjMatrix n} {χ : Colouring n} {g : Equiv.Perm (Fin n)} :
+    g ∈ Consume.gens (twinSupply (n := n)) adj χ ↔
+      ∃ u ∈ Descend.branches χ, ∃ w ∈ Descend.branches χ, Twin adj u w ∧ g = Equiv.swap u w := by
+  constructor
+  · intro hg
+    obtain ⟨u, hu, hmem⟩ := List.mem_flatMap.mp hg
+    obtain ⟨w, hw, hfm⟩ := List.mem_filterMap.mp hmem
+    by_cases htw : Twin adj u w
+    · rw [if_pos htw] at hfm
+      exact ⟨u, hu, w, hw, htw, (Option.some.inj hfm).symm⟩
+    · rw [if_neg htw] at hfm; exact absurd hfm (by simp)
+  · rintro ⟨u, hu, w, hw, htw, rfl⟩
+    exact List.mem_flatMap.mpr ⟨u, hu,
+      List.mem_filterMap.mpr ⟨w, hw, by rw [if_pos htw]⟩⟩
+
+/-- **★★ THE FIRING THEOREM FOR THE TWIN SUPPLY.** Under `TwinCells` the branch cell is a single orbit
+of the *verified* twin transpositions — reached in ONE step, since the connecting permutation is itself
+a generator. -/
+theorem cellIsOrbit_twinSupply {adj : AdjMatrix n} (hs : Simple adj) {χ : Colouring n}
+    (h : TwinCells adj χ) : Consume.CellIsOrbit (twinSupply (n := n)) adj χ := by
+  intro u hu w hw
+  by_cases huw : u = w
+  · subst huw; exact Consume.WordReach.refl u
+  obtain ⟨c, hc, huc⟩ := Consume.exists_targetColour_of_mem hu
+  have hwc : χ w = c := (Descend.mem_branches_iff hc w).mp hw
+  have hcol : χ u = χ w := by rw [huc, hwc]
+  have htw : Twin adj u w := h u w hcol
+  have hg : Equiv.swap u w ∈ Consume.verified (twinSupply (n := n)) adj χ :=
+    List.mem_filter.mpr ⟨mem_gens_twinSupply_iff.mpr ⟨u, hu, w, hw, htw, rfl⟩,
+      decide_eq_true (isColAut_swap_of_twin hs htw hcol)⟩
+  have hstep := Consume.WordReach.step (Consume.WordReach.refl u) hg
+  rwa [Equiv.swap_apply_left] at hstep
+
+/-- **★★★ THE BLIND `Handled` PREDICATE — for EVERY key.** Strictly stronger than §7's `HandledS`
+(`Select.handledS_of_handled`), and with no `orbKey`/`deepenSupply` anywhere. -/
+theorem handled_of_rootTwins {adj : AdjMatrix n} (hs : Simple adj) (hR : RootTwins adj)
+    (key : Force.Key n) : Residue.Handled key (twinSupply (n := n)) adj :=
+  fun _ hr _ => Or.inl (cellIsOrbit_twinSupply hs (twinCells_of_reaches hR hr))
+
+/-- The named family, at the blind predicate. -/
+theorem handled_of_multipartite {adj : AdjMatrix n} {part : Fin n → Nat}
+    (hM : IsCompleteMultipartite adj part) (hD : DistinctPartSizes part) (key : Force.Key n) :
+    Residue.Handled key (twinSupply (n := n)) adj :=
+  handled_of_rootTwins (simple_of_multipartite hM) (rootTwins_of_multipartite hM hD) key
+
+/-- **★★★ THE GUARDED CANONIZER ANSWERS ON THE FAMILY** — the `②` half at a *computable* key and
+supply. `Residue.answers_of_handled` needs only `Handled`, no equivariance. -/
+theorem answers_of_multipartite {adj : AdjMatrix n} {part : Fin n → Nat}
+    (hM : IsCompleteMultipartite adj part) (hD : DistinctPartSizes part) (key : Force.Key n) :
+    Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume key (twinSupply (n := n)))) adj ≠ none :=
+  Residue.answers_of_handled (handled_of_multipartite hM hD key)
+
+/-! ### 8.1 The twin supply is EQUIVARIANT — and that closes `①`
+
+`Residue.guarded_mixed_canonizer` carries `KeyEquivariant` + `StallEquivariant`, and
+`SupplyTransport.stallEquivariant_forceThenConsume` discharges the second from `SupplyEquivariant`.
+The twin supply is a **structural function of `(adj, χ)`** — the case `SupplyTransport`'s own
+doc-block calls free — so its generators σ-conjugate, and the conjugate of a transposition is the
+transposition of the images. -/
+
+/-- `Twin` transports: on the relabelled graph the twin pairs are exactly the `σ`-images. -/
+theorem twin_relabel {adj : AdjMatrix n} (σ : Equiv.Perm (Fin n)) (u w : Fin n) :
+    Twin (relabelAdj σ adj) (σ u) (σ w) ↔ Twin adj u w := by
+  constructor
+  · intro h s hsu hsw
+    have hs' := h (σ s) (fun hc => hsu (σ.injective hc)) (fun hc => hsw (σ.injective hc))
+    simpa using hs'
+  · intro h s hsu hsw
+    have hs' := h (σ.symm s)
+      (fun hc => hsu (by rw [← hc]; simp)) (fun hc => hsw (by rw [← hc]; simp))
+    simpa using hs'
+
+theorem gensEquivariant_twinSupply :
+    SupplyTransport.GensEquivariant (twinSupply (n := n)) := by
+  intro σ adj χ g
+  have hbr : ∀ x, x ∈ Descend.branches (transportColouring σ χ) ↔
+      ∃ y ∈ Descend.branches χ, σ y = x := by
+    intro x
+    rw [(Descend.branches_transport_perm σ χ).mem_iff, List.mem_map]
+  simp only [mem_gens_twinSupply_iff]
+  constructor
+  · rintro ⟨a, ha, b, hb, htw, rfl⟩
+    obtain ⟨u, hu, rfl⟩ := (hbr a).mp ha
+    obtain ⟨w, hw, rfl⟩ := (hbr b).mp hb
+    exact ⟨Equiv.swap u w, ⟨u, hu, w, hw, (twin_relabel σ u w).mp htw, rfl⟩,
+      Equiv.swap_apply_apply σ u w⟩
+  · rintro ⟨h, ⟨u, hu, w, hw, htw, rfl⟩, rfl⟩
+    exact ⟨σ u, (hbr _).mpr ⟨u, hu, rfl⟩, σ w, (hbr _).mpr ⟨w, hw, rfl⟩,
+      (twin_relabel σ u w).mpr htw, (Equiv.swap_apply_apply σ u w).symm⟩
+
+theorem supplyEquivariant_twinSupply :
+    SupplyTransport.SupplyEquivariant (twinSupply (n := n)) :=
+  SupplyTransport.supplyEquivariant_of_gensEquivariant gensEquivariant_twinSupply
+
+/-- **★★★ `①` FOR THE TWIN-SUPPLY CANONIZER** — sound and iso-invariant, hence (with
+`Descend.canonForm?_complete`) complete. Note this is a statement about the *function*, independent of
+any family: the family enters only through `answers_of_multipartite`, which says it never flags. -/
+theorem canonizer_twinSupply :
+    CanonSpec.IsCanonicalFormOpt
+      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := n))
+          (twinSupply (n := n))))) :=
+  Residue.guarded_mixed_canonizer Hol.keyEquivariant_holKeyFast
+    (SupplyTransport.stallEquivariant_forceThenConsume Hol.keyEquivariant_holKeyFast
+      supplyEquivariant_twinSupply)
+
+/-- **★★★ THE FAMILY IS CANONIZED — the publication-shaped statement, both halves.**
+`①` (sound + iso-invariant + complete) from `canonizer_twinSupply`, and *it answers* — never flags —
+on every complete multipartite graph with distinct part sizes. Both at a **computable** key and
+supply, with the guard in place, so the descent is also single-path. -/
+theorem canonized_of_multipartite {adj : AdjMatrix n} {part : Fin n → Nat}
+    (hM : IsCompleteMultipartite adj part) (hD : DistinctPartSizes part) :
+    CanonSpec.IsCanonicalFormOpt
+      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := n))
+          (twinSupply (n := n)))))
+    ∧ Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := n))
+          (twinSupply (n := n)))) adj ≠ none :=
+  ⟨canonizer_twinSupply, answers_of_multipartite hM hD _⟩
+
+/-- The concrete `K₁,₂,₃` witness, canonized. -/
+theorem canonized_part123 :
+    Descend.canonForm? (Refine.encodeFreeFast (n := 6))
+      (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := 6))
+        (twinSupply (n := 6)))) (mpAdj part123) ≠ none :=
+  answers_of_multipartite (isCompleteMultipartite_mpAdj part123) distinctPartSizes_part123 _
 
 end TwinFamily
 end ChainDescent
