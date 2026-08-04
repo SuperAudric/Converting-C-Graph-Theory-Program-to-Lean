@@ -1,0 +1,57 @@
+================================================================================================
+W1 step 0c — COGRAPHS (P4-free), n <= 9: every cell at every reached node an orbit?
+same statement / soundness / orbit reduction as probe_w1_multipartite (see its header)
+================================================================================================
+
+--- n = 2  (2 cographs up to isomorphism) ---
+  n=2: 2 graphs, failures=0, unknown=0, levels>=2 in 0, max levels=1
+
+--- n = 3  (4 cographs up to isomorphism) ---
+  n=3: 4 graphs, failures=0, unknown=0, levels>=2 in 2, max levels=2
+
+--- n = 4  (10 cographs up to isomorphism) ---
+  n=4: 10 graphs, failures=0, unknown=0, levels>=2 in 8, max levels=3
+
+--- n = 5  (24 cographs up to isomorphism) ---
+  n=5: 24 graphs, failures=0, unknown=0, levels>=2 in 22, max levels=4
+
+--- n = 6  (66 cographs up to isomorphism) ---
+  n=6: 66 graphs, failures=0, unknown=0, levels>=2 in 64, max levels=5
+
+--- n = 7  (180 cographs up to isomorphism) ---
+  ⛔ FAIL U(J(x,x,x),J(U(x,x),U(x,x)))  (1 bad nodes) first=[0, 0, 0, 0, 0, 0, 0]
+  ⛔ FAIL J(U(x,x,x),U(J(x,x),J(x,x)))  (1 bad nodes) first=[0, 0, 0, 0, 0, 0, 0]
+  n=7: 180 graphs, failures=2, unknown=0, levels>=2 in 178, max levels=6
+
+--- n = 8  (522 cographs up to isomorphism) ---
+  ⛔ FAIL U(x,J(x,x,x),J(U(x,x),U(x,x)))  (1 bad nodes) first=[0, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL U(x,J(U(x,x,x),U(J(x,x),J(x,x))))  (1 bad nodes) first=[0, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL J(x,U(x,x,x),U(J(x,x),J(x,x)))  (1 bad nodes) first=[1, 0, 0, 0, 0, 0, 0, 0]
+  ⛔ FAIL J(x,U(J(x,x,x),J(U(x,x),U(x,x))))  (1 bad nodes) first=[1, 0, 0, 0, 0, 0, 0, 0]
+  n=8: 522 graphs, failures=4, unknown=0, levels>=2 in 520, max levels=7
+
+--- n = 9  (1532 cographs up to isomorphism) ---
+  ⛔ FAIL U(x,x,J(x,x,x),J(U(x,x),U(x,x)))  (3 bad nodes) first=[0, 0, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL U(x,x,J(U(x,x,x),U(J(x,x),J(x,x))))  (3 bad nodes) first=[0, 0, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL U(x,J(x,U(J(x,x,x),J(U(x,x),U(x,x)))))  (1 bad nodes) first=[0, 2, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL U(x,J(x,U(x,x,x),U(J(x,x),J(x,x))))  (1 bad nodes) first=[0, 2, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL U(J(x,x),J(x,x,x),J(U(x,x),U(x,x)))  (3 bad nodes) first=[0, 0, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL U(J(x,x),J(U(x,x,x),U(J(x,x),J(x,x))))  (3 bad nodes) first=[0, 0, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL J(x,x,U(x,x,x),U(J(x,x),J(x,x)))  (3 bad nodes) first=[1, 1, 0, 0, 0, 0, 0, 0, 0]
+  ⛔ FAIL J(x,x,U(J(x,x,x),J(U(x,x),U(x,x))))  (3 bad nodes) first=[1, 1, 0, 0, 0, 0, 0, 0, 0]
+  ⛔ FAIL J(x,U(x,J(U(x,x,x),U(J(x,x),J(x,x)))))  (1 bad nodes) first=[2, 0, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL J(x,U(x,J(x,x,x),J(U(x,x),U(x,x))))  (1 bad nodes) first=[2, 0, 1, 1, 1, 1, 1, 1, 1]
+  ⛔ FAIL J(U(x,x),U(x,x,x),U(J(x,x),J(x,x)))  (3 bad nodes) first=[1, 1, 0, 0, 0, 0, 0, 0, 0]
+  ⛔ FAIL J(U(x,x),U(J(x,x,x),J(U(x,x),U(x,x))))  (3 bad nodes) first=[1, 1, 0, 0, 0, 0, 0, 0, 0]
+  n=9: 1532 graphs, failures=12, unknown=0, levels>=2 in 1530, max levels=8
+
+================================================================================================
+cographs run        : 2340
+FAILURES            : 0 unless listed above
+graphs with UNKNOWN : 0
+max levels          : 8
+non-vacuity levels>=2: 2324 of 2340
+cells in one module : 37950
+cells spanning >=2  : 5094
+truncated           : 0
+SKIPPED (logged)    : []

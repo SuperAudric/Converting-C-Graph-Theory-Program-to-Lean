@@ -91,6 +91,34 @@ vertices; `DescentReach.cons`'s side condition (`∃ u ≠ v, χ u = χ v`) is t
 Colour→structure needs no new lever either: `sigKey_eq_iff` + `Refine.refineRound_eq_iff` already give
 *equal colour ⟺ equal old colour ∧ equal signature multiset*.
 
+#### ⛔ STEP 0c — COGRAPHS ARE REFUTED (2026-08-04). The family boundary is narrower than "modules".
+
+`scratchpad/probe_w1_cographs.py` → `probe_w1_cographs.out`. Generator validated against the known
+cograph counts (1, 2, 4, 10, 24, 66, 180, 522, 1532; P₄ correctly absent). **2340 cographs, n ≤ 9,
+0 unknowns, 0 truncations — and 18 FAILURES** (2 at n = 7, 4 at n = 8, 12 at n = 9), every one **at
+the ROOT**.
+
+**★ Minimal witness: `K₃ ⊔ C₄` (n = 7)** — cotree `U(J(x,x,x),J(U(x,x),U(x,x)))`, plus its complement.
+The graph is **2-regular**, so 1-WL gives a single 7-vertex cell, while `Aut = S₃ × D₄` has **two**
+orbits `{0,1,2} | {3,4,5,6}`. Cell ≠ orbit at depth 0. (This is the textbook `C₃ ⊔ C₄` vs `C₇`
+colour-refinement blind spot arriving inside the cograph class.)
+
+**★★ And 2-WL fixes it exactly — measured, both witnesses:**
+
+| | 1-WL root | **2-WL root** | exact `Aut` orbits |
+|---|---|---|---|
+| `K₃ ⊔ C₄` | 1 cell `{0..6}` | **`{0,1,2} \| {3,4,5,6}`** | `{0,1,2} \| {3,4,5,6}` |
+| its complement | 1 cell `{0..6}` | **`{0,1,2} \| {3,4,5,6}`** | `{0,1,2} \| {3,4,5,6}` |
+
+⟹ a **third and fourth** independent witness for cao-propagation §13.6(c)'s pattern: the failure is
+**refiner strength at the BASE case**, not propagation. Same diagnosis §13.6(2) gave for the CFI nodes.
+
+**▶ Why complete multipartite survives and cographs do not.** The obstruction is 1-WL merging two
+*components/modules of equal degree but different shape*. In a complete multipartite graph a vertex's
+degree is `n − |part|`, so **equal degree ⟹ equal part size ⟹ conjugate** — the merge cannot happen.
+Cographs have no such coupling. ⟹ **the passing family stays multipartite/cluster; cographs are out**,
+and any wider candidate must supply its own degree↔orbit coupling.
+
 ⚠⚠ **THE OPEN QUESTION IS VALUE, NOT VIABILITY.** Complete multipartite / cluster graphs are
 canonizable by sorting degrees; as W4's headline this invites *"you proved it on a class where the
 trivial algorithm works."* W1 is now clearly **in box** — but on its own it probably does **not**
