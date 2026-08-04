@@ -190,9 +190,11 @@ transfer). "Complete" = the flag provably never fires.
 > `consume_fail_force_fires` ends in *strict* narrowing, which **nothing downstream consumes** — the
 > predicate `②`/`③` read is `Select.NodeResolved` (`cellNarrow … ≤ 1`). That gap is now closed at every
 > `Tinhofer` node: **`nodeResolved_of_tinhofer`** + **`handledS_of_reached_tinhofer`** (the all-`Tinhofer` reached CLASS
-> — ⚠ not yet a named family; the per-family `Tinhofer` discharge is rigid-seal §9.1's work), assembled
+> — ⚠ ~~not yet a named family; the per-family `Tinhofer` discharge is rigid-seal §9.1's work~~ **⛔ BOTH
+> FALSE, corrected 2026-08-04: `TwinFamily.lean` is the named family + literature bridge, and §9.1's
+> coupling cannot bite a pure-consume socket — see §1T**), assembled
 > from `forcedSet_single_orbit` (D2) and the **already-landed** `deepen_branch_orbit_iff_aut` (2026-07-23).
-> ⚠ §1T's "zero families populated" is the bottleneck this starts on. ⚠ Note it is **NOT** reachable via
+> ⚠ ~~§1T's "zero families populated" is the bottleneck this starts on.~~ **✅ CLEARED 2026-08-04 (§1T).** ⚠ Note it is **NOT** reachable via
 > `Cost.CellResolved` — at a mixed node (≥2 orbits, key ties inside each) NEITHER disjunct holds while
 > the composite still resolves; route to `NodeResolved` directly.
 > Also landed: **`KeySeparatesAt`** — the reduction absorbing consume's `Tinhofer` into force's
@@ -1010,9 +1012,19 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   imports via P2b/P2c). This is ③'s content and each leg's totality brick.
   **⚠ "Zero families populated" is no longer accurate (2026-07-27):** `KeyComplete.nodeResolved_of_tinhofer`
   + **`handledS_of_reached_tinhofer`** populate `Select.HandledS` on the **all-`Tinhofer` reached class**
-  — a *class*, not yet a named family. What T1 still needs is the per-family discharge of `Tinhofer`
+  — a *class*, not yet a named family. ~~What T1 still needs is the per-family discharge of `Tinhofer`
   itself, which rigid-seal §9.1 says is the SAME work as the rigid seal on that family. So the first real
-  family still costs a rigid-side discharge; the wiring above it is now built.
+  family still costs a rigid-side discharge; the wiring above it is now built.~~
+  **✅⛔ SUPERSEDED 2026-08-04 — T1 IS DISCHARGED, and the struck sentence was WRONG.**
+  [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean) (in
+  `build.sh`, axiom-clean, 0 `sorry`) supplies: the **socket** `handledS_of_noRigidObstruction`
+  (step-closed class + no rigid obstruction ⟹ `HandledS`), the **literature bridge**
+  `handledS_of_tinhoferGraph` (⟹ every family known Tinhofer is covered by citation of membership —
+  trees, cycles, complete graphs, `mK₂`, compact/Godsil/amenable), a **named family** proved natively
+  (complete multipartite with distinct part sizes), and the showcase `not_tinhoferGraph_of_flagS`
+  (*flag ⟹ provably not Tinhofer*). ⛔ **The rigid-seal coupling never applied here**: the socket is
+  pure-consume, so a family with a `RigidObstructionAt` fails the hypothesis rather than needing rigid
+  work — see rigid-seal §9.1's correction header. **It cost zero rigid-side work.**
   **▶ EVIDENCE BASE + PROOF PLAN: [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)**
   — **read its §0.0 FIRST, then §0.** `CellsAreOrbits` propagation is **REFUTED at 1-WL** (4 witnesses)
   and **open at 2-WL**.

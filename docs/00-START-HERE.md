@@ -14,6 +14,20 @@
 > The verified artifact is real and is being finished for write-up: four theorems in
 > `Publication.lean`, proved against the executable canonizer, axiom-clean. See the
 > [repository README](../README.md) for the outside-facing summary.
+>
+> ## ✅ W1 LANDED (2026-08-04) — [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean)
+>
+> The finish list's first item is **done**, and it changed two things this document still asserts
+> below. Read wind-down §2 W1 for the full record; the corrections a reader needs are:
+>
+> * **`HandledS` now has a NAMED family, and a literature bridge.** `handledS_of_noRigidObstruction`
+>   is the socket (step-closed class + no rigid obstruction ⟹ `HandledS`); `handledS_of_tinhoferGraph`
+>   feeds it the **literature's Tinhofer class**; `not_tinhoferGraph_of_flagS` is the showcase —
+>   *if the canonizer flags, the input is provably not Tinhofer*.
+> * **⛔ The claim below that "the per-family `Tinhofer` discharge is the rigid-side work of
+>   rigid-seal §9.1" is WRONG** — see the correction at that line, and rigid-seal §9.1's own header.
+> * The **answers → canonized** wall is crossed for the twin sub-case via a computable, equivariant
+>   `twinSupply` (`canonized_of_multipartite`).
 
 The single entry point for the project. Read this first; it gives the idea, the
 current state, and a curated reading order. It replaces the old "simplified
@@ -199,8 +213,13 @@ close it — is set out in
 > `HandledS` POPULATION.** `consume_fail_force_fires` ends in *strict* narrowing, which nothing downstream
 > consumes; **`nodeResolved_of_tinhofer`** now gives `≤ 1` — `Select.NodeResolved` — at every `Tinhofer`
 > node, and `handledS_of_reached_tinhofer` populates `HandledS` on the all-`Tinhofer` reached CLASS
-(remaining-work §1T had **zero**; ⚠ a class, not yet a named family — the per-family `Tinhofer`
-discharge is still the rigid-side work of rigid-seal §9.1).
+(remaining-work §1T had **zero**; ~~⚠ a class, not yet a named family — the per-family `Tinhofer`
+discharge is still the rigid-side work of rigid-seal §9.1~~ — **⛔ BOTH HALVES FALSE, corrected
+2026-08-04:** `TwinFamily.lean` supplies a named family *and* the literature-Tinhofer bridge; and the
+rigid-seal coupling **cannot bite this socket at all**, because `handledS_of_reached_tinhofer` demands
+pure-consume Schurianity at every reached node — a family carrying a `RigidObstructionAt` anywhere
+*fails the hypothesis outright* rather than needing rigid work. §9.1's "same work" applies to the
+**disjunctive** obligation (consume-or-force), which is W2's route, not W1's).
 > Plus **`KeySeparatesAt`**, absorbing consume's `Tinhofer` into force's separation obligation — **a
 > unification, not a weakening**, and the *repaired* form of the retired `assume-VT` prune (⚠ two
 > obituaries, only one transfers). **Authoritative: `scratchpad/DUAL_resolver_scoping.md` §10.**
@@ -335,9 +354,14 @@ discharge is still the rigid-side work of rigid-seal §9.1).
 > be SPENT* — a "spend only on the cheap steps" wording was retracted the same day: **a clear answer
 > that takes a while beats abandoning a viable route and stalling the project.**
 > **`deepenSupply` stays out of `Publication.canonForm?` until
-> `Tinhofer`/`CellsAreOrbits` totality is populated per family (T1); THE ACTIVE TRACK IS NOW THE RIGID SEAL**
-> ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), which discharges `Tinhofer`
-> per family AND is the other seal. **✅ THE ALGORITHM-R SCAFFOLD + THE FULL `gen`-REDUCTION CHAIN (A)–(D) LANDED
+> `Tinhofer`/`CellsAreOrbits` totality is populated per family (T1); ~~THE ACTIVE TRACK IS NOW THE RIGID SEAL~~**
+> ([`chain-descent-rigid-seal.md`](./chain-descent-rigid-seal.md) — READ ITS STATUS), ~~which discharges `Tinhofer`
+> per family AND is the other seal.~~
+> **⛔ VOID 2026-08-04 — two corrections.** (i) The rigid seal is **SUSPENDED** (wind-down §3), not the
+> active track. (ii) It does **not** discharge `Tinhofer` per family: that socket is pure-consume, so a
+> family carrying a rigid obstruction *fails its hypothesis* rather than needing rigid work — see
+> rigid-seal §9.1's correction header. **T1 is discharged by `ChainDescent/TwinFamily.lean` with zero
+> rigid-side work.** ⚠ The `deepenSupply`-out-of-`Publication` clause above is still accurate. **✅ THE ALGORITHM-R SCAFFOLD + THE FULL `gen`-REDUCTION CHAIN (A)–(D) LANDED
 > (2026-07-24, axiom-clean, gate green ~97 modules — authoritative detail = rigid-seal STATUS/§8.2/§10):** the force
 > key `leafColKey` + composite `compKey` (`RigidSeal.lean`); **P1** (`ForcingCircuits`), **P3-I**
 > (`RigidSolverInterface`), **P3-Sound** (`RigidSolverSound`, soundness FREE ⟹ `①` = one canonical labelling `gen`),

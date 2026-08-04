@@ -944,6 +944,26 @@ atom actually is. When R0a/R0b/P4 land, the swap becomes mechanical and non-vacu
 
 ### 9.1 The `Tinhofer` coupling — this is ALSO how consume's ①c closes
 
+> ## ⛔⛔ CORRECTION (2026-08-04) — THIS SECTION WAS READ AS BLOCKING W1, AND THAT READING IS WRONG
+>
+> This section's *"discharge `Tinhofer` on family `F`" is not a separate obligation from the rigid
+> work* was carried into the wind-down as W1's scoping risk. **It cannot bite the socket W1 names.**
+>
+> `KeyComplete.handledS_of_reached_tinhofer` demands `Deepen.Tinhofer` at **every** reached
+> non-discrete node — pure consume, **no disjunction**. A `CellSingleOrbit` failure **is** a
+> `RigidObstructionAt` (`rigidObstruction_of_not_cellSingleOrbit`, definitional), so a family carrying
+> one anywhere on the descent does not "need the rigid seal": it **fails the hypothesis outright and is
+> not a candidate**. Measured agreement — on rigid multipedes `descend_cert` levels are `[0,0,0,…]`,
+> i.e. `TinhoferPath` holds only *vacuously* (DUAL §8.4, the AKRV rigid collapse).
+>
+> **What this section is actually about** is the *disjunctive* obligation below — every visited cell is
+> **either** a single Stab-orbit **or** carries a `RigidObstructionAt` that force peels first. That is
+> `NodeResolved`/`Handled`-shaped (consume **or** force), and it is **W2's** route, not W1's.
+>
+> ✅ W1 landed 2026-08-04 with no rigid-side work whatsoever:
+> [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean).
+> ⟹ Read the paragraph below as scoping **W2**, and do not re-derive the W1 blocker from it.
+
 The rigid seal is not merely a parallel second seal; it is **what discharges the consume side's last domain
 hypothesis.** `deepenSupply`'s ①c is closed modulo **`{Tinhofer}` alone** (`deepenSupply_guarded_canonizer_direct`,
 `DeepenTinhofer.lean`; the track-A whole-graph-discretize redesign made `[DISC]`/gate/termination structural and

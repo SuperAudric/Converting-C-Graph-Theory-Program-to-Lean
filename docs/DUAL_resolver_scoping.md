@@ -1005,7 +1005,11 @@ Strict narrowing does not imply it, so the landed chain terminated one step shor
 
 ⟹ **`forceThenConsume_singleton_of_tinhofer`**: the composite narrows an `Tinhofer` node's branch cell
 to **exactly one** branch ⟹ **`nodeResolved_of_tinhofer`** ⟹ **`handledS_of_reached_tinhofer`**, the
-first population of `HandledS` (remaining-work §1T records zero families).
+first population of `HandledS` (remaining-work §1T records zero families). **✅ SUPERSEDED 2026-08-04:**
+`ChainDescent/TwinFamily.lean` supplies the socket (`handledS_of_noRigidObstruction`), the literature
+bridge (`handledS_of_tinhoferGraph`, with `not_tinhoferGraph_of_flagS` as the showcase) and a named
+family; §1T is discharged. ⛔ The "rigid-seal §9.1 is the same work" reading is **wrong** — that socket
+is pure-consume, so a rigid obstruction *fails* its hypothesis rather than needing rigid work.
 
 ⚠ **This is NOT reachable through `Cost.CellResolved`,** and that is a trap worth recording. Its
 disjunction is `CellIsOrbit S ∨ (key separates the whole cell)`. At a **mixed** node — cell has ≥ 2
