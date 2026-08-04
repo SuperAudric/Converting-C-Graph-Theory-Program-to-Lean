@@ -651,5 +651,126 @@ theorem canonized_part123 :
         (twinSupply (n := 6)))) (mpAdj part123) ≠ none :=
   answers_of_multipartite (isCompleteMultipartite_mpAdj part123) distinctPartSizes_part123 _
 
+/-! ## 9. ★★★ THE LITERATURE BRIDGE — Tinhofer graphs PROGRESS
+
+The point of §3's socket is that it is fed by a *class*, and the widest class worth naming is the
+literature's own. This section supplies it, and it costs almost nothing, because the class is
+**step-closed by construction** — no CAO-propagation obligation appears anywhere.
+
+**Why this is the leverage.** One theorem here covers every family known to be Tinhofer, by citation
+of membership rather than by new Lean: trees and cycles (compact — Tinhofer 1986), complete graphs
+(Birkhoff), matchings `mK₂`, complete multipartite (§5, proved natively here), and everything in
+`Discrete ⊂ Amenable ⊂ Compact ⊂ Godsil ⊂ Tinhofer` (Arvind–Köbler–Rattan–Verbitsky), which is closed
+under complement and under `G ↦ mG`. Per-family Lean proofs do not pay for themselves against that.
+
+**⚠ The hypothesis is deliberately NOT computable, and that is correct.** `TinhoferGraph` is a
+*classifier*, not part of the algorithm: deciding it is at least as hard as GI on vertex-transitive
+graphs (AKRV Thm 22). What the artifact needs — and what is proved here — is the implication
+*"if it IS Tinhofer, the descent progresses"*, whose contrapositive
+(`not_tinhoferGraph_of_flagS`) is the showcase statement: **if the canonizer flags, the input is
+provably not Tinhofer.** That is `③`'s shape against a *named literature class* instead of opaque
+structural atoms.
+
+**⚠ Naming, stated precisely.** `IndivReach` ranges over exactly the colourings AKRV write `P_F` (the
+1-WL-stable colouring after individualizing a sequence `F`), and `SchurianAt` says each of its cells
+is one orbit of `IsColAut adj P_F`, the colour-stabilizer. The identification of that stabilizer with
+AKRV's pointwise stabilizer `Aut_F` is standard (individualized vertices carry unique colours, and
+1-WL is isomorphism-invariant) but is **prose here, not a Lean theorem** — the paper must say so.
+Contrast §7's `Deepen.Tinhofer`, which is the strictly weaker *path-local* predicate. -/
+
+/-- **The individualization closure** — every colouring reachable from the refined root by
+individualizing a vertex and refining, under **any** sequence of choices. Step-closure is definitional,
+which is exactly why this class costs nothing to feed to §4's socket. -/
+inductive IndivReach (adj : AdjMatrix n) : Colouring n → Prop
+  | root : IndivReach adj (rootCol adj)
+  | step {χ : Colouring n} (h : IndivReach adj χ) (v : Fin n) :
+      IndivReach adj (Deepen.step adj χ v).col
+
+theorem stepClosed_indivReach (adj : AdjMatrix n) : StepClosed (IndivReach adj) adj :=
+  fun _ h v => IndivReach.step h v
+
+/-- **`TinhoferGraph`** — the literature's Tinhofer condition in the project's vocabulary: at every
+individualization-reachable colouring, every cell is a single orbit, i.e. **no rigid obstruction
+anywhere, under any selector**. -/
+def TinhoferGraph (adj : AdjMatrix n) : Prop :=
+  ∀ χ : Colouring n, IndivReach adj χ → SchurianAt adj χ
+
+/-- **★★★ THE BRIDGE.** A Tinhofer graph is `HandledS`: every reached non-discrete node has a
+resolvable cell, so the descent progresses at every step. -/
+theorem handledS_of_tinhoferGraph {adj : AdjMatrix n} (h : TinhoferGraph adj) :
+    Select.HandledS Deepen.orbKey Deepen.deepenSupply adj :=
+  handledS_of_noRigidObstruction (stepClosed_indivReach adj) IndivReach.root h
+
+/-- **★★ A Tinhofer graph ANSWERS** — the fused descent never flags on it. -/
+theorem answersS_of_tinhoferGraph {adj : AdjMatrix n} (h : TinhoferGraph adj) :
+    Select.canonFormS? (Refine.encodeFreeFast (n := n))
+        (Select.selNode (Refine.encodeFreeFast (n := n)) Deepen.orbKey Deepen.deepenSupply) adj
+      ≠ none :=
+  Select.answersS_of_handledS (handledS_of_tinhoferGraph h)
+
+/-- **★★★ THE SHOWCASE STATEMENT — the flag is evidence about the INPUT.** If the canonizer flags,
+the graph is provably **not Tinhofer**. This is `③`'s shape against a named literature class rather
+than an opaque structural atom, and it is the contrapositive the classifier's non-computability makes
+the *useful* direction. -/
+theorem not_tinhoferGraph_of_flagS {adj : AdjMatrix n}
+    (hflag : Select.canonFormS? (Refine.encodeFreeFast (n := n))
+      (Select.selNode (Refine.encodeFreeFast (n := n)) Deepen.orbKey Deepen.deepenSupply) adj
+        = none) :
+    ¬ TinhoferGraph adj :=
+  fun h => answersS_of_tinhoferGraph h hflag
+
+/-! ### 9.1 The class is inhabited — two independent witnesses
+
+⚠ Non-vacuity is load-bearing here for the same reason as everywhere else in this file: a bridge whose
+hypothesis nothing satisfies proves nothing. -/
+
+/-- Every individualization-reachable colouring of a root-twin graph merges only twin pairs. -/
+theorem twinCells_of_indivReach {adj : AdjMatrix n} (hR : RootTwins adj) {χ : Colouring n}
+    (h : IndivReach adj χ) : TwinCells adj χ := by
+  induction h with
+  | root => exact hR
+  | step _ v ih => exact twinCells_step ih v
+
+/-- **Witness 1 — the twin/multipartite family is Tinhofer.** -/
+theorem tinhoferGraph_of_rootTwins {adj : AdjMatrix n} (hs : Simple adj) (hR : RootTwins adj) :
+    TinhoferGraph adj :=
+  fun _ h => schurianAt_of_twinCells hs _ (twinCells_of_indivReach hR h)
+
+theorem tinhoferGraph_of_multipartite {adj : AdjMatrix n} {part : Fin n → Nat}
+    (hM : IsCompleteMultipartite adj part) (hD : DistinctPartSizes part) : TinhoferGraph adj :=
+  tinhoferGraph_of_rootTwins (simple_of_multipartite hM) (rootTwins_of_multipartite hM hD)
+
+/-- Individualization-reachable colourings of a 1-WL-discretizing graph stay discrete. -/
+theorem discrete_of_indivReach {adj : AdjMatrix n} (hd : Discrete (rootCol adj)) {χ : Colouring n}
+    (h : IndivReach adj χ) : Discrete χ := by
+  induction h with
+  | root => exact hd
+  | step _ v ih =>
+      intro x y hxy
+      rw [KeyComplete.step_col_eq_refineV] at hxy
+      have hind := Refine.refineSplits_encodeFreeFast (n := n) adj (Descend.indivOne _ v) x y hxy
+      exact ih x y (indivOne_splits _ v x y hind)
+
+/-- **★★ Witness 2 — every 1-WL-discretizing graph is Tinhofer.** A discrete colouring has only
+singleton cells, so `SchurianAt` is witnessed by the identity.
+
+★ **This is the largest coverage statement the artifact has**: by Babai–Erdős–Selkow, 1-WL discretizes
+a random graph with high probability, so *almost all graphs* land in this ring — and hence, through
+the bridge, progress. (The measure claim is the citation; the implication is this theorem.)
+
+⚠⚠ **BUT DO NOT OVERSELL IT — the resolvers do no work here.** On a root-discrete graph `HandledS`
+holds **vacuously**: there is no reached non-discrete node, refinement alone finishes, and neither
+consume nor force is ever consulted (`Residue.handled_of_root_discrete` says exactly this). So this
+witness demonstrates *breadth of the answering claim*, *not* that the resolver architecture does
+anything. The witness that exercises the resolvers is the twin/multipartite one — which is why
+`not_discrete_part123` is proved alongside it. A write-up that quotes the measure claim without this
+caveat is claiming credit refinement earned. -/
+theorem tinhoferGraph_of_root_discrete {adj : AdjMatrix n} (hd : Discrete (rootCol adj)) :
+    TinhoferGraph adj := by
+  intro χ h cid u w hu hw
+  have hdχ : Discrete χ := discrete_of_indivReach hd h
+  have : u = w := hdχ u w (hu.trans hw.symm)
+  exact ⟨1, Consume.IsColAut.one adj χ, by simpa using this⟩
+
 end TwinFamily
 end ChainDescent
