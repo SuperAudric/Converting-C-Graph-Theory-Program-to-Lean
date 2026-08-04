@@ -143,6 +143,7 @@ MODULES=(
   ChainDescent.DeepenTransport        # C3b: pipeline transports except the vertex pick (chooseIdK_transport)
   ChainDescent.DeepenCrux             # C3b: crux decomposed + soundness half (deepenGens_sound)
   ChainDescent.DeepenTinhofer         # C3b track A: ①c modulo {Tinhofer}; rigid handoff lemmas
+  ChainDescent.DeepenComplete         # R1 scoping: GoodAnchor / OrbitComplete ⟹ transport ⟹ ①c (raw supply)
   ChainDescent.DeepenCertified        # C3b: Tinhofer as a RUN-TIME CERTIFICATE (Certified ⟹ Tinhofer)
   ChainDescent.DeepenLocated          # C3b: consume failure LOCATED at a reachable Tinhofer+obstructed node
   ChainDescent.DeepenKey              # C3b: orbKey — the equivariant force key (KeyEquivariant, no hypothesis)

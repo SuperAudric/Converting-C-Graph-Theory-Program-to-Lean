@@ -601,6 +601,68 @@ first stated. The graph is `probe_w1_cographs.py`'s minimal cograph falsifier, n
 > which for this project is a real cost and must be stated, not buried. **iii** re-opens suspended
 > research. **ii** is the status quo.
 >
+> ### ▶ OPTION **iv** ADDED (2026-08-04, later) — append a proved-covering equivariant supply to the record
+> | | object for `canonForm?` | `①` | `②` | `③` | executable |
+> |---|---|---|---|---|---|
+> | **iv** | `recordSupplyFast ++ twinSupply` | ✅ unconditional | recompute numerals | `¬(Simple ∧ RootTwins)` | ✅ |
+> | **v** | `guard (forceThenConsume holKeyFast deepenSupply)` | `①a` uncond.; `①b`/`①c` **on the class** | ✅ | `¬TinhoferGraph` | ✅ |
+>
+> **iv keeps `①`/`②` unconditional and closes `Publication.lean` to zero `sorry` with no new mathematics.**
+> Every piece is built: `twinSupply` is computable + `GensEquivariant` + cost-bounded;
+> `KernelRef.sameOrbits_appendSupply` has exactly the shared-prefix shape needed (nest twin as
+> `… deck2 ++ (twin ++ kernel)` against `… deck2 ++ (twin ++ kernelRef)`); `cellIsOrbit_append_*` lifts
+> coverage; `SelectNode.handledS_of_handled` + `answersS_of_handledS` land `handled_of_rootTwins` at
+> `canonForm?`. ⚠ Price, to be stated not buried: `RootTwins ⊊ Tinhofer`, so the flag characterization is
+> much weaker than `¬Tinhofer`. **v** is the old option A, now *provable* rather than merely costed —
+> `RestrictedTransport`'s relativized spine discharges it — at the cost of `canon_complete` dropping from
+> unconditional to class-conditional.
+>
+> ⚠ **Measured 2026-08-04** (`scratchpad/ProbeN2`-style `#eval`, materialised colourings): the record
+> object **answers** on `C₅ C₆ P₅ K₅ 3K₂ K₁,₂,₃ K₃⊔C₄` (7/7), and the record supply narrows the root cell
+> to 1 on the cycles where `twinSupply` fires not at all. So **no falsifier of `③` at the record object was
+> found** — option **ii** is genuinely open, not dead — and `twinSupply` buys the only *proved* coverage,
+> not the widest measured coverage.
+
+### ⛔ `R1` — SCOPED AND PINNED TO ONE PREDICATE (2026-08-04). `ChainDescent/DeepenComplete.lean`, gate green (112 modules, 292 s)
+
+An additive scoping module: no new mathematics, it **re-plumbs** what `DeepenTinhofer` proves so the open
+question is a theorem statement rather than a step inside a proof.
+
+| theorem | statement |
+|---|---|
+| `Deepen.GoodAnchor` | the **per-anchor** condition `TinhoferPath adj χ n (step adj χ x)` — what `exec_recovers_cell_orbits` actually consumes |
+| `tinhofer_iff_forall_goodAnchor` | `Tinhofer` **is** "every anchor is good", by `Iff.rfl` |
+| `exec_recovers_refgen_at` | ★★ a good anchor recovers its **whole orbit** — `exec_recovers_refgen_on_cell` with the global hypothesis removed. Free: the wrapper only ever used `hAmen x hx` |
+| **`Deepen.OrbitComplete`** | ★ **THE TARGET** — *"deepen succeeds whenever success is possible"*: its verified generators realise the whole `IsColAut`-orbit relation on the branch cell |
+| `orbitComplete_of_tinhofer` | `Tinhofer ⟹ OrbitComplete` — ⚠ the **only** sufficient condition this route gives |
+| `branchOrbit_transport_of_orbitComplete` | the relation transports under global `OrbitComplete` |
+| **`deepenSupply_canonizer_of_orbitComplete`** | ★★★ **`①c` for the RAW `deepenSupply` from `OrbitComplete` alone** — no guard, no reference supply, nothing `noncomputable`. Proving `OrbitComplete` closes `R1` outright |
+
+**What the scoping settles.** The failsafe half is unconditional on every input
+(`wordReach_imp_isColAut`), and every firing fact in deepen's pipeline is structural
+(`deepen_succeeds` / `deepen_discrete` / `gate_of_discrete`). Because the leaf is discrete,
+`K = coupled χ leaf` is exactly the union of the **non-singleton `χ`-cells**, so every `IsColAut adj χ`
+is automatically the identity off `K` — the twist's support is not a side condition. ⟹ the entire gap is
+one sentence: *at some level of the anchor's deepening the chosen sub-cell is not a single
+stabilizer-orbit, and then deepen's lowest-index pick can diverge from every automorphism's image of the
+anchor's pick.*
+
+**⛔ And this route cannot go below `Tinhofer`**: `OrbitComplete` at `u` needs `GoodAnchor u`, and the whole
+relation needs it at every cell member — which is `Tinhofer` definitionally.
+
+**⚠ But the measured evidence says the truth extends beyond `Tinhofer`.** `G8` is a *partially* firing
+witness (so some cell on its descent is not a single orbit ⟹ not `Tinhofer`), yet the **all-anchors**
+relation there was measured stable across five relabellings (`[2,2,2,2,4,4,4,4]`) where the single-anchor
+relation was measured unstable. The repair all-anchors performs is invisible to a per-anchor induction.
+
+**▶ THE PROBE THIS HANDS OVER (the one decisive measurement):** *is deepen's all-anchors branch-cell
+partition equal to the exact `Aut`-orbit partition at partially-firing, non-`Tinhofer` nodes?* Witnesses:
+`G8`/`t3`/`wcyc9`/`ut` plus the VT non-`Tinhofer` ones (`Cay(Z₁₂⋊₅Z₂)`, Shrikhande). **Yes** ⟹
+`OrbitComplete` is true beyond `Tinhofer` and wants a union argument, not a per-anchor induction. **No** ⟹
+the target is not `OrbitComplete` at all but invariance of a strictly *partial* relation — a different and
+harder theorem. ⚠ Use an exact group computation for the reference partition: `probe_orbit_oracle` is
+recorded **wrong** (it errs by merging).
+>
 > ### ▶ (SUPERSEDED) the step as originally scoped — a COMPUTABLE GUARD, believed *not* R1
 > `DeepenCertified` §7 names this as "the theorem this track is aiming at": guard on
 > **`Deepen.CertifiedG Deepen.deepenSupply`** — an orbit BFS over deepen's own verified generators, hence

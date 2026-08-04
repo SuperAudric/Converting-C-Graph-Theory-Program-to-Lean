@@ -5072,31 +5072,31 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `TwinFamily.cellSingleOrbit_of_twinCells` | 157-164 | Under the invariant EVERY cell is a single orbit — the selector-independent statement the step-0 probe measured, strictly stronger than what `TinhoferPath` asks. | — |
 | `TwinFamily.tinhoferPath_of_twinCells` | 141-160 | `TinhoferPath` at every fuel, by induction: the level`s `CellSingleOrbit` from the invariant, the recursive call still under the invariant by `twinCells_step`. | — |
 | `TwinFamily.tinhofer_of_twinCells` | 162-166 | `Deepen.Tinhofer` from the invariant — each anchor`s first step lands under the invariant. | — |
-| `TwinFamily.SchurianAt` | 172-175 | 164-167 | Definition |
-| `TwinFamily.schurianAt_iff_no_rigidObstruction` | 177-190 | 169-182 | — |
-| `TwinFamily.StepClosed` | 192-198 | 184-190 | Definition |
+| `TwinFamily.SchurianAt` | 172-175 | **`SchurianAt`** — every cell of `χ` is a single orbit of the colour-stabilizer, i.e. 1-WL's partition at `χ` *is* the orbit partition. | Definition |
+| `TwinFamily.schurianAt_iff_no_rigidObstruction` | 177-190 | ★ **`SchurianAt` IS the absence of rigid obstructions** (de Morgan, both directions). The reading to quote: the class is *"contains no rigid obstruction"* — the exact complement of the rigid resolver's domain, which is what lets it later be weakened to *"no rigid obstruction the rigid resolver does not already handle"* with nothing below re-proved. | — |
+| `TwinFamily.StepClosed` | 192-198 | **A class of colourings closed under the descent's own step** — *peeling a layer keeps you in the class*. The structural property that makes a per-family discharge finite; it is exactly why the Tinhofer reading is tractable and the CFI reading is not. | Definition |
 | `TwinFamily.tinhoferPath_of_stepClosed` | 200-221 | `TinhoferPath` at every fuel for ANY step-closed obstruction-free class: the level`s `CellSingleOrbit` is the class`s Schurianity, the recursive call stays in the class by step-closure. | — |
 | `TwinFamily.tinhofer_of_stepClosed` | 223-227 | `Deepen.Tinhofer` for any colouring in a step-closed obstruction-free class. | — |
-| `TwinFamily.rootCol` | 231-233 | 170-172 | Definition |
+| `TwinFamily.rootCol` | 231-233 | The descent's root colouring — `refineV encodeFreeFast` applied to the constant colouring. | Definition |
 | `TwinFamily.mem_of_reaches` | 235-245 | A step-closed class holding at the root holds at EVERY reached node — `Descend.Reaches`?s step and `Deepen.step` are the same operation. So a family only ever has to earn the root. | — |
 | `TwinFamily.handledS_of_noRigidObstruction` | 247-258 | ★★★ **THE SOCKET, stated on "no rigid obstruction" rather than on twins.** Step-closed + holds at root + carries no rigid obstruction ⟹ `Select.HandledS`. ▶ To enlarge the handled region, supply a wider class — nothing below this theorem changes. | — |
 | `TwinFamily.stepClosed_twinCells` | 262-264 | Twin-merging is step-closed. | — |
 | `TwinFamily.schurianAt_of_twinCells` | 266-269 | A twin-merging colouring is Schurian. | — |
 | `TwinFamily.RootTwins` | 271-274 | **The per-family obligation, stated once**: every pair the ROOT colouring merges is a twin pair. Everything below the root is free. | Definition |
-| `TwinFamily.twinCells_of_reaches` | 276-279 | 179-187 | — |
+| `TwinFamily.twinCells_of_reaches` | 276-279 | Every reached colouring merges only twin pairs — `RootTwins` propagated along `Reaches` by the step-closure of `TwinCells`. | — |
 | `TwinFamily.handledS_of_rootTwins` | 281-284 | ★★★ **THE GENERIC SOCKET.** `Simple ∧ RootTwins ⟹ Select.HandledS orbKey deepenSupply`. Family-agnostic: any family that earns the root condition plugs in here with no re-proof. | — |
 | `TwinFamily.IsCompleteMultipartite` | 304-306 | The complete multipartite graph induced by a part assignment: adjacent iff in different parts. | Definition |
 | `TwinFamily.psize` | 308-310 | The number of vertices in a given part. | Definition |
-| `TwinFamily.DistinctPartSizes` | 312-315 | 223-226 | Definition |
+| `TwinFamily.DistinctPartSizes` | 312-315 | **The family's defining hypothesis**: distinct parts have distinct sizes. Stated through vertices, so it only ever constrains *inhabited* parts. | Definition |
 | `TwinFamily.simple_of_multipartite` | 317-325 | A complete multipartite graph is symmetric and loopless. | — |
 | `TwinFamily.degSum_eq_of_rootCol_eq` | 329-356 | Equal root colour ⟹ equal degree. Peels the warm round to a single round (`Refine.iterate_splits`), whose fibres are the `sigKey` fibres; at the constant colouring the signature carries exactly the multiset of incident edge-values. | — |
 | `TwinFamily.degSum_multipartite` | 360-375 | In a complete multipartite graph a vertex is adjacent to exactly the vertices outside its part. | — |
 | `TwinFamily.rootTwins_of_multipartite` | 388-402 | ★★ **THE FAMILY INSTANCE.** With pairwise distinct part sizes, equal root colour forces equal degree, hence equal part size, hence the *same part* — and same-part vertices are modular twins. | — |
-| `TwinFamily.handledS_of_multipartite` | 404-408 | 315-319 | — |
+| `TwinFamily.handledS_of_multipartite` | 404-408 | ★★★ **THE NAMED FAMILY IS `HandledS`** — the wind-down's W1 target: a family, not a hypothesis. Routed through `handledS_of_rootTwins`, so the multipartite content is only `simple_of_multipartite` + `rootTwins_of_multipartite`. | — |
 | `TwinFamily.mpAdj` | 417-420 | Constructor for the complete multipartite graph on a part assignment — makes the family visibly inhabited at every `n`. | Definition |
 | `TwinFamily.isCompleteMultipartite_mpAdj` | 422-423 | `mpAdj part` is complete multipartite on `part`, by `rfl`. | — |
 | `TwinFamily.rootCol_eq_of_twin` | 425-446 | ★★ **THE NON-VACUITY LEMMA.** A twin pair survives refinement: the transposition is an automorphism fixing the constant colouring and the refiner is equivariant (①b), so an equivariant refiner cannot separate a pair some automorphism swaps. | — |
-| `TwinFamily.not_discrete_rootCol_mpAdj` | 448-457 | 359-368 | — |
+| `TwinFamily.not_discrete_rootCol_mpAdj` | 448-457 | A complete multipartite graph with a part of size ≥ 2 has a **non-discrete** root — the non-vacuity gate, so the family is not the `handled_of_root_discrete` ring in disguise. | — |
 | `TwinFamily.part123` | 466-467 | Parts of sizes 1, 2, 3 on six vertices — the concrete witness `K₁,₂,₃`. | Definition |
 | `TwinFamily.distinctPartSizes_part123` | 469-471 | The sizes 1, 2, 3 are pairwise distinct (`decide`). | — |
 | `TwinFamily.handledS_part123` | 473-476 | ★ **THE CONCRETE INSTANCE** — a specific 6-vertex graph that is `HandledS`. | — |
@@ -5106,13 +5106,13 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | `TwinFamily.decidableTwin` | 523-524 | `Twin` is decidable (a finite check), so the twin supply is computable. | Instance |
 | `TwinFamily.twinSupply` | 526-531 | **The twin supply**: every transposition of a twin pair inside the branch cell. Computable, and a structural function of `(adj, χ)`. Cost is the honest enumeration bill. | Definition |
-| `TwinFamily.mem_gens_twinSupply_iff` | 533-546 | 525-538 | — |
+| `TwinFamily.mem_gens_twinSupply_iff` | 533-546 | Membership characterization of the twin supply's candidate list: exactly the transpositions `Equiv.swap u w` of twin pairs drawn from the branch cell. | — |
 | `TwinFamily.cellIsOrbit_twinSupply` | 548-564 | ★★ **THE FIRING THEOREM.** Under `TwinCells` the branch cell is a single orbit of the *verified* twin transpositions — reached in ONE `WordReach` step, since the connecting permutation is itself a generator. | — |
 | `TwinFamily.handled_of_rootTwins` | 566-570 | ★★★ The **blind** `Residue.Handled` predicate, **for every key** — strictly stronger than `Select.HandledS`, and with no `orbKey`/`deepenSupply` anywhere. | — |
 | `TwinFamily.handled_of_multipartite` | 572-576 | The named family at the blind `Residue.Handled` predicate. | — |
 | `TwinFamily.answers_of_multipartite` | 578-584 | ★★★ The **guarded** canonizer ANSWERS on the family at a *computable* key and supply. `Residue.answers_of_handled` needs only `Handled`, no equivariance. | — |
 | `TwinFamily.twin_relabel` | 594-604 | `Twin` transports: on the relabelled graph the twin pairs are exactly the σ-images. | — |
-| `TwinFamily.gensEquivariant_twinSupply` | 606-622 | 598-614 | — |
+| `TwinFamily.gensEquivariant_twinSupply` | 606-622 | `GensEquivariant` for the twin supply — branch-cell membership and `Twin` both transport (`twin_relabel`, `branches_transport_perm`), so the emitted generator set conjugates. This is what discharges `StallEquivariant`, hence `①`. | — |
 | `TwinFamily.supplyEquivariant_twinSupply` | 624-626 | `SupplyEquivariant` for the twin supply, via `supplyEquivariant_of_gensEquivariant`. This is what discharges `StallEquivariant`, hence `①`. | — |
 | `TwinFamily.canonizer_twinSupply` | 628-638 | ★★★ **`①` FOR THE TWIN-SUPPLY CANONIZER** — `IsCanonicalFormOpt`: sound + iso-invariant, hence complete. A statement about the *function*, independent of any family. | — |
 | `TwinFamily.canonized_of_multipartite` | 640-653 | ★★★ **THE PUBLICATION-SHAPED STATEMENT, BOTH HALVES**: `①` (sound + iso-invariant + complete) AND *answers, never flags*, on every complete multipartite graph with distinct part sizes — at `Hol.holKeyFast` + `twinSupply`, guard in place, so single-path too. | — |
@@ -5125,7 +5125,7 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `TwinFamily.TinhoferGraph` | 738-742 | **The literature`s Tinhofer condition in the project`s vocabulary**: at every individualization-reachable colouring every cell is a single orbit — i.e. no rigid obstruction anywhere, under any selector. ⚠ Deliberately NOT computable: a classifier, not part of the algorithm (deciding it is ≥ GI on vertex-transitive graphs, AKRV Thm 22). | Definition |
 | `TwinFamily.handledS_of_tinhoferGraph` | 744-748 | ★★★ **THE BRIDGE.** A Tinhofer graph is `Select.HandledS` — the descent progresses at every step. One theorem covering every family known to be Tinhofer, by citation of membership rather than per-family Lean. | — |
 | `TwinFamily.answersS_of_tinhoferGraph` | 750-755 | ★★ A Tinhofer graph ANSWERS — the fused descent never flags on it. | — |
-| `TwinFamily.not_tinhoferGraph_of_flagS` | 757-766 | 711-720 | — |
+| `TwinFamily.not_tinhoferGraph_of_flagS` | 757-766 | ★★★ **THE SHOWCASE STATEMENT — the flag is evidence about the INPUT.** If the canonizer flags, the graph is provably not Tinhofer: `③`'s shape against a named literature class rather than an opaque atom, and the contrapositive that the classifier's non-computability makes the useful direction. ⛔ Stated at the `noncomputable` `orbKey`; `not_tinhoferGraph_of_flag` (§10) is the executable form. | — |
 | `TwinFamily.twinCells_of_indivReach` | 773-778 | Every individualization-reachable colouring of a root-twin graph merges only twin pairs. | — |
 | `TwinFamily.tinhoferGraph_of_rootTwins` | 780-783 | **Witness 1** — the twin family is Tinhofer. This is the witness that actually exercises the resolvers. | — |
 | `TwinFamily.tinhoferGraph_of_multipartite` | 785-787 | The complete multipartite family (distinct part sizes) is Tinhofer. | — |
@@ -5190,3 +5190,16 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RestrictedTransport.tinhoferGraph_nonvacuous` | 539-549 | ★★★ **BOTH HALVES OF NON-VACUITY** — the shape `Publication.unhandledResidue_nonvacuous` asks for, against the **structural** residue predicate `¬ TinhoferGraph` (a property of the graph, never "the algorithm flagged"): the class is **inhabited** (multipartite) and **proper** (`K₃ ⊔ C₄`). | — |
 | `RestrictedTransport.certPath_deepenSupply_of_tinhoferGraph` | 573-593 | On a Tinhofer graph, deepen certifies its own canonical path from every individualization-reachable colouring. ⚠⚠ The hypothesis is `TinhoferGraph` (the **closure** class) and **cannot be weakened to path-local `Deepen.Tinhofer`**: each `CertPath` level demands `CellIsOrbit deepenSupply` — every pair of the cell — while `exec_recovers_refgen_on_cell` supplies one pair per anchor path, so the level needs `Tinhofer` at *that* colouring, which a single path does not give. | — |
 | `RestrictedTransport.certifiedG_deepenSupply_of_tinhoferGraph` | 595-599 | ★★ **THE COMPUTABLE CERTIFICATE FIRES EVERYWHERE ON A TINHOFER GRAPH** — `Deepen.CertifiedG Deepen.deepenSupply` (an orbit BFS over deepen's own verified generators) is open at every reachable node. This is the **firing** half of a computable-guard supply. ⚠ It does **not** give `①`: that needs the converse — the guard being open at `(σ adj, σ χ)` whenever open at `(adj, χ)` — which is R1's content. | — |
+## ChainDescent/DeepenComplete.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.GoodAnchor` | 87-91 | **The per-anchor condition** — `x`'s own canonical deepening individualizes only single-orbit cells. This is the hypothesis `exec_recovers_cell_orbits` actually consumes; the global `Tinhofer` is only its universal closure over the branch cell. | Definition |
+| `Deepen.tinhofer_iff_forall_goodAnchor` | 93-96 | `Tinhofer` **is** "every branch-cell anchor is good", by `Iff.rfl` — recorded so the per-anchor form below is visibly the same statement weakened, not a different one. | — |
+| `Deepen.exec_recovers_refgen_at` | 103-123 | ★★ **A GOOD ANCHOR RECOVERS ITS WHOLE ORBIT.** `exec_recovers_refgen_on_cell` with the global `Tinhofer adj χ` replaced by `GoodAnchor adj χ x`: deepen connects `x` to `ρ x` for **every** colour-automorphism `ρ`, with no condition on any other anchor. Free — the wrapper only ever used `hAmen x hx`. | — |
+| `Deepen.branch_orbit_iff_aut_at` | 125-131 | The branch-orbit characterization **at one good anchor**: soundness (`wordReach_imp_isColAut`) is unconditional; completeness at `u` needs only `u`'s own deepening path. | — |
+| `Deepen.OrbitComplete` | 139-144 | ★ **THE TARGET** — *"deepen succeeds whenever success is possible"*: its verified generators realise the whole `IsColAut`-orbit relation on the branch cell. The open half of `deepen_branch_orbit_iff_aut`; the failsafe half holds on every input already. | Definition |
+| `Deepen.orbitComplete_of_tinhofer` | 146-150 | `Tinhofer ⟹ OrbitComplete`. ⚠ The **only** sufficient condition this route supplies, and not a weakening — recovering the whole relation needs a good anchor at every cell member, which is `Tinhofer` definitionally. | — |
+| `Deepen.branch_orbit_iff_aut_of_orbitComplete` | 152-158 | Under `OrbitComplete` the relation **is** the `IsColAut`-orbit relation — the hypothesis-free form of `deepen_branch_orbit_iff_aut`. | — |
+| `Deepen.branchOrbit_transport_of_orbitComplete` | 166-188 | deepen's branch-orbit relation **transports** under global `OrbitComplete`: both sides equal the orbit relation, which conjugates (`isColAut_conj_iff`). Mirrors `deepen_branchOrbit_transport` with `Tinhofer` swapped out. | — |
+| `Deepen.deepenSupply_canonizer_of_orbitComplete` | 190-201 | ★★★ **`①c` FOR THE RAW `deepenSupply` FROM `OrbitComplete` ALONE** — no guard, no reference supply, nothing `noncomputable`. This is the shape `R1` was asking for, with the whole obligation concentrated in one predicate. | — |
