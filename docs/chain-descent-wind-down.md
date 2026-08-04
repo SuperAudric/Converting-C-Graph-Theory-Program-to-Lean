@@ -484,7 +484,59 @@ suspended — neither can be defined honestly now.)
 ★ This is the *"real unhandled instance"* the `Publication` STATUS block has wanted since the residue was
 first stated. The graph is `probe_w1_cographs.py`'s minimal cograph falsifier, now a **theorem**.
 
-**⛔ `residue_if_flag` IS BLOCKED — an OBJECT mismatch, and it needs a decision.**
+> ## ⛔⛔ RETRACTED (2026-08-04) — THE TWO-OBJECT SPLIT WAS WRONG, AND IS REVERTED
+>
+> An earlier pass here discharged `residue_if_flag` by moving it onto a **second** object
+> (`canonFormCover?`). **That is not a valid publication shape and has been reverted** (user, 2026-08-04):
+>
+> > `canonForm?` is not a meaningful object unless `①a` sound, `①b` complete, `①c` iso-invariant, `②`
+> > poly-or-flag and `③` flag-only-on-the-residue are all properties of **the same** object. An exhaustive
+> > solver and a random solver each carry half of this and together prove nothing.
+>
+> ⛔ **Standing steer: never discharge a `Publication` obligation by relocating it to another object.**
+>
+> **⛔ AND THE CLAIM THAT FORCED THAT DESIGN WAS FALSE.** It read *"no single object has unconditional `①`
+> and proved Tinhofer coverage."* The truth is narrower: **no single *executable* one does yet.**
+> `Deepen.deepenSupplyGuarded` (deepen's generators where `Tinhofer` holds, deferring elsewhere) already
+> has **`①` with no hypothesis at all** — `Deepen.deepenSupplyGuarded_canonizer`, via the *unconditional*
+> `Deepen.deepen_branchOrbit_transport_guarded` — fires exactly on Tinhofer nodes, and bills a flat `n⁶`
+> either way. So a single object with `①` + `②` + `③` **already exists**; it is only `noncomputable`,
+> because its guard is the `Tinhofer` predicate itself.
+>
+> ### ▶ THE ONE REMAINING STEP — a COMPUTABLE GUARD (already scoped, and it is *not* R1)
+> `DeepenCertified` §7 names this as "the theorem this track is aiming at": guard on
+> **`Deepen.CertifiedG Deepen.deepenSupply`** — an orbit BFS over deepen's own verified generators, hence
+> computable — instead of on `Tinhofer`. Two directions:
+> 1. `CertifiedG deepenSupply adj χ → Tinhofer adj χ` — `Deepen.tinhoferPath_of_certPath`. The two
+>    predicates walk the **same** `chooseIdK`/`finRange`-head path, differing only in the per-level test
+>    (`CellIsOrbit S` vs `CellSingleOrbit`), so this direction is close to immediate.
+> 2. `Tinhofer adj χ → CertifiedG deepenSupply adj χ` — deepen certifies its own canonical path at a
+>    Tinhofer node, level by level from `deepen_branch_orbit_iff_aut`. **This is the real content.**
+>
+> With both, the computable guard is *equivalent* to `Tinhofer`, `deepenSupplyGuarded_canonizer`'s `①`
+> proof transfers verbatim, and `canonForm?` can be repointed at a **single executable object carrying
+> `①`+`②`+`③` with Tinhofer coverage** — the intended statement.
+>
+> ### ✅ What survived the revert (all still proved, all object-independent)
+> * `residueRigidObstruction G := ¬ TwinFamily.TinhoferGraph G` — a **definition** replacing three
+>   `opaque` atoms, which had made *both* ③ obligations unprovable in principle. D0/D1 **dropped**, not
+>   kept: an opaque disjunct re-breaks non-vacuity's handled half. ⚠ Do **not** add
+>   `∨ NonLinearRigidObstruction` until W2 gives it content.
+> * **`unhandledResidue_nonvacuous` — DISCHARGED**, axiom-clean, from `tinhoferGraph_nonvacuous`.
+>   Independent of the object question, so the revert does not touch it. `Publication` is at **1** live
+>   `sorry` (was 2).
+> * `canonizer`'s cost conjunct is now **unconditional** — `canon_poly_or_flag` is proved on its LEFT
+>   disjunct, so the residue escape was never needed and carrying it invited the reading that the cost
+>   claim depends on the residue.
+> * **No citation axiom is consumed by any theorem in the file.** The 8 are retained for W2/Route C; the
+>   paper must say that rather than present them as the trusted base of what is proved.
+>
+> ⚠ **The residue is an OVER-APPROXIMATION.** A CFI graph is not Tinhofer, yet its obstruction is linear
+> and belongs to the rigid resolver. `residue_if_flag` stays true (a superset on the right of an
+> implication only makes it easier); **W2's job is to NARROW it, not enlarge it.**
+
+**⛔ `residue_if_flag` IS STILL OPEN at `canonForm?` — the object analysis below is retained as the record
+of how the wrong turn was taken; the correct resolution is the computable guard above, not option C.**
 It asks for *flag ⟹ `UnhandledResidue`* at **`Publication.canonForm?` = `recordKey @ recordSupplyFast`**.
 "Flag ⟹ ¬Tinhofer" is proved only at `holKeyFast @ deepenSupply`. Getting it at the record object needs
 *"Tinhofer ⟹ the record answers"*, i.e. the record supply certifies Tinhofer cells — **not proved, and

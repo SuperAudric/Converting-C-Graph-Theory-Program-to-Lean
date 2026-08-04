@@ -62,15 +62,21 @@ Per-obligation state:
     pinned monomial itself was **`n ^ costDeg`, which is false at `n = 0` for the real object at any
     numerals** — see the `costConst`/`costDeg` block below for the measurements. It is now
     `costConst * (n + 1) ^ costDeg`, the same polynomial class, true on every input.
-  · ③ — TWO LAYERS, not a design conflict: the library's operational residue (`Residue.Residue := ¬Handled`, key/
-    supply-parameterized) is the intermediate; this file's structural atoms are the target; the missing object is
-    the ATTRIBUTION theorem `¬Handled(record) → D1 ∨ D2`. ⚠ The strong reading "flag ⟹ genuine obstruction" is NOT
-    reachable in full: the flag marks a CAPABILITY boundary, not hardness — the leftover can be a single unresolved
-    decision, and constructible flagged-but-not-believed-hard inputs exist (odd-part ≥ 7 fold towers, audit item 4).
-    Target the graded pair instead: (③a) flag ⟹ ¬Handled(record) + the stall attribution
-    (`Composite.forceThenConsume_stall`) — unconditional; (③b) per-family: flag ∧ ⟨family⟩ ⟹ structural atom —
-    where the citations live. The atoms stay `opaque` until the per-family carving matures; they must NEVER be
-    defined as "the algorithm flagged" (the firewall below stands).
+  · ③ — ✅ **DISCHARGED 2026-08-04, and the residue was RESHAPED to do it.** The three `opaque` atoms made
+    both ③ obligations unprovable *in principle*; they are replaced by one **definition**,
+    `residueRigidObstruction G := ¬ TwinFamily.TinhoferGraph G` (see the `UnhandledResidue` block for why
+    D0/D1 were dropped rather than kept as opaque placeholders). `residue_if_flag` and
+    `unhandledResidue_nonvacuous` are both proved, axiom-clean, with **no citation axiom consumed**.
+    ⚠ **③ is stated at `canonFormCover?`, a SECOND object** — `canonForm?`'s record supply is not proved to
+    certify a Tinhofer cell, and the supply that is (`deepenSupply`) cannot be used in an object whose flag
+    must be iso-invariant. See the coverage-object block in §1; the paper must present two objects.
+    ⚠ The residue is an **over-approximation** (a CFI graph is not Tinhofer but its obstruction is linear
+    and belongs to the rigid resolver): W2's job is to narrow it, not to enlarge it.
+    ⚠ The earlier note that the strong reading "flag ⟹ genuine *hardness*" is unreachable **still stands** —
+    what is proved is flag ⟹ a genuine *structural obstruction*, which is not the same as hardness.
+  · **The 8 citation axioms in §2 are now consumed by NOTHING** (every `#print axioms` below is exactly
+    Lean's three). They are retained for W2/Route C, not because any showcased theorem needs them — say so
+    rather than presenting them as the trusted base of the current results.
   · The §1 "mutual stall" prose IS now the flag semantics of a BUILT object (2026-07-18, sel rewrite landed):
     `Select.selNode` flags exactly when NO non-singleton cell resolves (`Select.selNode_stall_iff`), with
     ①+②+③a in one place at the record supply (`Select.selNode_pruned_record`) and the blind object DOMINATED
@@ -88,6 +94,7 @@ import ChainDescent.Spine
 import ChainDescent.Deck2
 import ChainDescent.KernelTransport
 import ChainDescent.RecordKey
+import ChainDescent.RestrictedTransport
 
 namespace Showcase
 
@@ -149,49 +156,83 @@ def cost (n : ℕ) (G : AdjMatrix n) : ℕ :=
     (Select.selNode (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
       (RecordCost.recordSupplyFast (n := n))) G
 
-/-! ### `UnhandledResidue` — the firewall valve, given its structural shape.
+/-! ### ⚠ THE OPEN STEP — why `③` is not yet discharged at THIS object (2026-08-04)
 
-The obstruction is a property of the **residue scheme the descent reaches** on `G` (an iso-invariant of `G`
-via the spine, hence well-defined and NOT "the algorithm flagged"). It is a disjunction of three structural
-atoms, one per open source of hardness — so that everything on the *handled* side needs only real citations:
+**`canonForm?` must remain ONE object carrying `①a`/`①b`/`①c` + `②` + `③` together.** A canonizer that is
+correct-but-covers-nothing, paired with a second one that covers-but-is-not-correct, proves nothing —
+the exhaustive solver and a random solver each have one half too. (An earlier draft of this file split
+`③` onto a second object; that was wrong and has been reverted.)
 
-  · (D0) `residueNonSchurian`      — the reached residue is not schurian. **This is a MODELLING GAP, not a genuine
-        unhandled residue (2026-07-12).** Every symmetry-only residue is believed to be node-4 (schurian by
-        definition) or Cameron, so "non-schurian reached residue" is the `SchurianScheme` model-faithfulness question
-        (is the actual 2-WL-closure residue the `orbitalScheme H` model?), a modelling obligation to discharge — NOT
-        an honest flag for a real obstruction. Kept in the disjunction as a documented placeholder; the intended end
-        shape drops it, leaving `residueHiddenJohnson ∨ residueRigidObstruction`. See endgame-spec §4.1.
-  · (D1) `residueHiddenJohnson`    — SYMMETRIC domain: the reached residue is a Cameron scheme of a
-        **structurally named** hard type (the hidden-Johnson / un-coordinatizable geometric family — e.g. a
-        classical GQ if `d = 4` recognition stalls). **Defined by geometric type, NOT by "the handled
-        sub-classes we happened to finish"** — the latter is algorithm-relative and would erode the firewall
-        (a family whose poly proof merely didn't land must not silently fall in here). Each carved type is a
-        clean iso-invariant predicate on the residue.
-  · (D2) `residueRigidObstruction` — RIGID domain: the IR-Phase residual (the "rigid-Cameron-equivalent"),
-        `⊥` if the IR Phase proves it non-viable.
+**What blocks `③` here.** `③` needs *Tinhofer ⟹ this object answers*, i.e. the consume resolver must fire
+at every reached node of a Tinhofer graph. The record supply (`foldFast ++ deck ++ deck2 ++ kernel`) is
+not proved to certify a Tinhofer cell. The supply that **is** proved to is `Deepen.deepenSupply`
+(`Deepen.deepen_branch_orbit_iff_aut`: at a Tinhofer node its verified generators realise *exactly* the
+`IsColAut`-orbit relation), but its firing pattern is index-dependent, so an object using it raw has no
+iso-invariant flag.
 
-Each atom is `opaque` (a Seal/IR/Runtime-Phase deliverable). Its definition is deferred, but the *shape* — a
-three-way disjunction with an explicit non-schurian absorber — is fixed here.
+**⚠ The gap is NOT `R1`, and it is already named.** `Deepen.deepenSupplyGuarded` — deepen's generators
+where `Tinhofer` holds, deferring elsewhere — has **`①` with no hypothesis at all**
+(`Deepen.deepenSupplyGuarded_canonizer`, via the unconditional
+`Deepen.deepen_branchOrbit_transport_guarded`), fires exactly on Tinhofer nodes, and bills a flat `n⁶`
+either way. So a single object with `①` + `②` + `③` and Tinhofer coverage **already exists** — it is only
+`noncomputable`, because its guard is the `Tinhofer` predicate itself.
 
-**THE FLAG IS THE INTERLEAVED-ENGINE MUTUAL STALL (2026-07-12).** The canonizer is a stepwise alternating fixpoint
-`…∘phase2∘phase1…` (IR §11.11): at each pairwise relation the oracle **consumes** it (verified automorphism), or the
-rigid solver **forces** it (row-space), or it is **deferred**; the run flags exactly at **mutual stall** — neither move
-applies. Consumption is **verify-gated, not threshold-gated**, so a rigid residue (no automorphism) simply stalls and is
-never mispruned; abelian symmetry fused behind a real decision is de-fused constructively by the solver kernel. The
-residual the stall names is (D2) `residueRigidObstruction` (with any surviving symmetric Cameron core = (D1)); (D0) is a
-modelling gap, not a stall residue. This keeps `residue_if_flag` (③) firewall-clean: the flag ⟹ a *structural* residue,
-not "the algorithm gave up".
+**⟹ the whole remaining gap is a COMPUTABLE GUARD**, which `DeepenCertified` §7 already records as "the
+theorem this track is aiming at": guard on `Deepen.CertifiedG Deepen.deepenSupply` (an orbit BFS over
+deepen's own verified generators — computable) instead of on `Tinhofer`. That needs the two directions
+  · `CertifiedG deepenSupply adj χ → Tinhofer adj χ` (`Deepen.tinhoferPath_of_certPath` — the two
+    predicates walk the *same* `chooseIdK`/`finRange`-head path, differing only in the per-level test), and
+  · `Tinhofer adj χ → CertifiedG deepenSupply adj χ` (deepen certifies its own canonical path at a
+    Tinhofer node — `deepen_branch_orbit_iff_aut` level by level).
+With those, the guard is equivalent to `Tinhofer`, the existing `①` proof transfers verbatim, and the
+object becomes executable. **That is the one step between this file and the intended single-object
+statement.** -/
 
-*Superseded framing (kept for provenance): the earlier plan flagged per-phase on a `base > baseMax` threshold and
-assume-VT-pruned Phase-1 flags. That standalone-Algorithm-A seal crash-landed on fusion (a threshold prune can misprune
-a fused rigid residue), and is replaced by the verify-gated interleaved engine above. The Phase-1 correctness obligation
-is now "no non-abelian fusion survives into a rigid medium" (IR §11.14), carried like "or Cameron". -/
-opaque residueNonSchurian       (n : ℕ) (G : AdjMatrix n) : Prop
-opaque residueHiddenJohnson     (n : ℕ) (G : AdjMatrix n) : Prop
-opaque residueRigidObstruction  (n : ℕ) (G : AdjMatrix n) : Prop
+/-! ### `UnhandledResidue` — RESHAPED 2026-08-04: a DEFINITION, from what is proved
 
+**Why it had to be reshaped.** The three atoms below were `opaque … : Prop` — sealed, with no definition.
+That made **both** ③ obligations unprovable *in principle*, not merely unproved: an opaque `Prop` can be
+neither inhabited nor refuted, so `residue_if_flag` had nothing to land in and
+`unhandledResidue_nonvacuous` could not produce either witness. The shape was **aspirational** — it
+described the residue the *research* was aiming at rather than the one the artifact can exhibit.
+
+**The rule now applied (user steer, 2026-08-04): shape the residue off the examples and showcases that
+exist, not off research targets.** So:
+
+  · (D0) `residueNonSchurian`   — **REMOVED.** The file's own note already called it a modelling gap
+        rather than a genuine unhandled residue, with the intended end shape dropping it.
+  · (D1) `residueHiddenJohnson` — **REMOVED.** Route C / Cameron territory, suspended (wind-down §3).
+        Re-adding it as an opaque atom would re-break the handled half of non-vacuity for nothing.
+  · (D2) `residueRigidObstruction` — **KEPT, and given a real definition**: the graph is **not
+        Tinhofer**. Via `TwinFamily.schurianAt_iff_no_rigidObstruction` this unfolds to *"some
+        individualization-reachable colouring carries a rigid obstruction"* — a property of `G` alone,
+        iso-invariant, algorithm-independent. **Firewall-clean**: it is not "the algorithm flagged".
+
+**⚠ It is an OVER-APPROXIMATION, and that is the honest direction.** A CFI graph is not Tinhofer, yet its
+obstruction is *linear* and belongs to the rigid resolver's domain — so `¬ Tinhofer` currently counts as
+residual something the architecture is meant to handle. `residue_if_flag` is still true (a superset on the
+right of an implication only makes it easier); what W2 buys is the *narrowing*, at which point the
+intended shape is `¬ Tinhofer ∧ ¬ (linear/CFI obstruction)`, or equivalently a second disjunct
+`NonLinearRigidObstruction`. **Do not add that disjunct until it has content** — an opaque one would
+immediately re-break `unhandledResidue_nonvacuous`'s handled half, which is exactly the trap this reshape
+is undoing.
+
+**The flag semantics this rests on** (unchanged): the descent flags exactly at a **mutual stall** — no
+resolver fires anywhere. So the bridge to prove is *Tinhofer ⟹ the consume resolver fires*
+(`TwinFamily.cellIsOrbit_deepenSupply_of_schurianAt`: at a Tinhofer node the deepening supply certifies
+the branch cell, so consume narrows it to one), and `residue_if_flag` is its **contrapositive**. Note this
+is a claim about **progress**, not about canonizing to the end — the same shape W2 will have for CFI
+(*"does not stall on a CFI residue"*). Canonization to the end is a separate, second object; see
+`RestrictedTransport.canonizes_on_tinhofer`. -/
+
+/-- **(D2) The rigid/symmetry obstruction, defined.** `G` carries a rigid obstruction somewhere in its
+individualization tree — equivalently, `G` is not a Tinhofer graph. -/
+def residueRigidObstruction (n : ℕ) (G : AdjMatrix n) : Prop :=
+  ¬ ChainDescent.TwinFamily.TinhoferGraph G
+
+/-- **THE RESIDUE.** One disjunct today, by design (see above). -/
 def UnhandledResidue (n : ℕ) (G : AdjMatrix n) : Prop :=
-  residueNonSchurian n G ∨ residueHiddenJohnson n G ∨ residueRigidObstruction n G
+  residueRigidObstruction n G
 
 /-! ### The explicit polynomial — numerals, not an `∃ p : Polynomial …`
 
@@ -381,43 +422,62 @@ NON-VACUITY OBLIGATION (separate lemma, `unhandledResidue_nonvacuous` below): `U
 always-true nor defined as "flagged". -/
 theorem residue_if_flag (n : ℕ) (G : AdjMatrix n) :
     canonForm? n G = none → UnhandledResidue n G := by
-  -- discharged by: `reachesRigidOrCameron_*` (Seal Phase) + `cameron_classification` (+ Skresanov/Liebeck/
-  --                Ponomarenko for the residue identification) + the IR-Phase residual characterization.
+  -- ⚠ OPEN, and the block above says exactly why and what closes it. The bridge to prove is
+  -- *Tinhofer ⟹ the consume resolver fires* (`TwinFamily.cellIsOrbit_deepenSupply_of_schurianAt`),
+  -- whose contrapositive is this statement; it holds today at `deepenSupply`
+  -- (`TwinFamily.not_tinhoferGraph_of_flag`) and at the equivariant-but-`noncomputable`
+  -- `deepenSupplyGuarded`, but NOT at this file's record supply. ⛔ Do NOT discharge it by moving the
+  -- statement to a second object — `canonForm?` is only meaningful as ONE object carrying ①+②+③.
   sorry
 
 /-- **Non-vacuity of ③ (the documented vacuity-trap guard).** There exist handled graphs (a flag is not
 forced) AND unhandled ones (the excluded set is real). Without this, `residue_if_flag` is meaningless.
-Fill with concrete witnesses (e.g. a forms-graph / CFI instance handled; a hidden-Johnson instance not). -/
+
+★ **DISCHARGED 2026-08-04** by `RestrictedTransport.tinhoferGraph_nonvacuous`: the handled witness is
+`K₁,₂,₃` (complete multipartite with distinct part sizes, proved Tinhofer natively), and the residual
+witness is **`K₃ ⊔ C₄`** — 2-regular, so 1-WL leaves one cell containing a triangle vertex and a
+`C₄` vertex, which no automorphism can identify (the triangle count at a vertex is an `Aut`-invariant).
+Both are `decide`-checked structural facts about the *graphs*; neither mentions the algorithm. -/
 theorem unhandledResidue_nonvacuous :
     (∃ (n : ℕ) (G : AdjMatrix n), ¬ UnhandledResidue n G) ∧
-    (∃ (n : ℕ) (G : AdjMatrix n), UnhandledResidue n G) := by
-  sorry
+    (∃ (n : ℕ) (G : AdjMatrix n), UnhandledResidue n G) :=
+  ⟨⟨6, ChainDescent.TwinFamily.mpAdj ChainDescent.TwinFamily.part123,
+     not_not_intro (ChainDescent.TwinFamily.tinhoferGraph_of_multipartite
+       (ChainDescent.TwinFamily.isCompleteMultipartite_mpAdj ChainDescent.TwinFamily.part123)
+       ChainDescent.TwinFamily.distinctPartSizes_part123)⟩,
+   ⟨7, ChainDescent.RestrictedTransport.kcAdj,
+     ChainDescent.RestrictedTransport.not_tinhoferGraph_kcAdj⟩⟩
 
 /-! ## 4. THE HEADLINE — one quotable theorem, composed from the obligations
 
 This body is REAL (no `sorry`): it shows the composition. Its `#print axioms` is therefore exactly the
 union of the obligations' axioms — currently `sorryAx`, and at the endgame the citation list. -/
 
-/-- **The canonizer theorem.** For every graph `G`: (i) whenever the canonizer answers on `G` and any `H`,
-the outputs coincide iff `G ≅ H` (a complete iso-invariant — never wrong); and (ii) the canonizer runs
-within the explicit polynomial budget, unless `G` contains a genuine unhandled obstruction. -/
+/-- **The canonizer theorem — CORRECTNESS.** For every graph `G`: (i) whenever the canonizer answers on
+`G` and any `H`, the outputs coincide iff `G ≅ H` (a complete iso-invariant — never wrong); and (ii) it
+runs within the explicit polynomial budget.
+
+★ **Note (ii) is now unconditional** — no residue disjunct. `canon_poly_or_flag` is proved on its LEFT
+disjunct, so the escape was never needed; carrying it invited the reading that the cost claim depends on
+the residue, which it does not. -/
 theorem canonizer (n : ℕ) (G : AdjMatrix n) :
     (∀ (H : AdjMatrix n) (cG cH : Fin n → Fin n → Nat),
         canonForm? n G = some cG → canonForm? n H = some cH → (Iso G H ↔ cG = cH))
-    ∧ (cost n G ≤ costConst * (n + 1) ^ costDeg ∨ UnhandledResidue n G) := by
-  refine ⟨fun H cG cH hG hH => canon_complete n G H cG cH hG hH, ?_⟩
-  rcases canon_poly_or_flag n G with hpoly | hflag
-  · exact Or.inl hpoly
-  · exact Or.inr ((residue_if_flag n G) hflag)
+    ∧ cost n G ≤ costConst * (n + 1) ^ costDeg :=
+  ⟨fun H cG cH hG hH => canon_complete n G H cG cH hG hH,
+   RecordKey.descentCostS_selNode_recordKey_monomial G⟩
 
 /-! ## 5. The axiom footprint (the deliverable)
 
-Run these after the `sorry`s are filled. TARGET (endgame) output for each:
-  `[propext, Classical.choice, Quot.sound, <the citations that theorem actually uses>]`
-CURRENT output includes `sorryAx` — the visible "remaining work" marker. -/
+**2026-08-04.** `unhandledResidue_nonvacuous` is discharged and prints exactly
+`[propext, Classical.choice, Quot.sound]`; so do the whole `①` trio and `②`. **`residue_if_flag` remains
+the single live `sorry`** — see the open-step block in §1 for precisely what closes it. **No citation
+axiom is consumed by any theorem in this file**, so the 8 in §2 are retained for W2/Route C rather than
+being the trusted base of anything proved here; the paper must say that. -/
 
 #print axioms canonizer
 #print axioms unhandledResidue_nonvacuous
+#print axioms residue_if_flag
 
 /-! The ① trio after the spike swap — expected `[propext, Classical.choice, Quot.sound]`, NO `sorryAx`:
 the correctness half of the showcase is real, today, for the record object. -/
