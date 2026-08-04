@@ -154,6 +154,7 @@ MODULES=(
   ChainDescent.ForcePick              # forceThenPick: the exhaustiveness corollary cashed (no stall channel)
   ChainDescent.RecordCost             # ② for the OBJECT OF RECORD: the four supplies + holKeyFast, billed
   ChainDescent.TwinFamily             # W1: Tinhofer/twin families Handled at EXECUTABLE objects (①/②/③) — after RecordCost for the cost lemmas
+  ChainDescent.RestrictedTransport    # W1: ① relativized to a graph class ⟹ TINHOFER GRAPHS ARE CANONIZED (no supply)
   ChainDescent.RecordKey              # lex-product key combinator + the record's composed force key (①+②)
 
   # ── W2 solvability route (gauge complex → solvable) ──

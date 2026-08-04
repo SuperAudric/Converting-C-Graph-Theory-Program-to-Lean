@@ -5116,7 +5116,7 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `TwinFamily.canonizer_twinSupply` | 628-638 | ★★★ **`①` FOR THE TWIN-SUPPLY CANONIZER** — `IsCanonicalFormOpt`: sound + iso-invariant, hence complete. A statement about the *function*, independent of any family. | — |
 | `TwinFamily.canonized_of_multipartite` | 640-653 | ★★★ **THE PUBLICATION-SHAPED STATEMENT, BOTH HALVES**: `①` (sound + iso-invariant + complete) AND *answers, never flags*, on every complete multipartite graph with distinct part sizes — at `Hol.holKeyFast` + `twinSupply`, guard in place, so single-path too. | — |
 | `TwinFamily.canonized_part123` | 655-660 | The concrete `K₁,₂,₃` witness, canonized. | — |
-| `TwinFamily.supplyCost_twinSupply_le` | 669-673 | The twin supply's work bill: `\|B\|² · n² ≤ n⁴`, by replacing `(branches χ).length` with `n`. | — |
+| `TwinFamily.supplyCost_twinSupply_le` | 669-673 | The twin supply's work bill: `|B|² · n² ≤ n⁴`, by replacing `(branches χ).length` with `n`. | — |
 | `TwinFamily.gens_twinSupply_length_le` | 675-680 | The twin supply's candidate count: `≤ n²` (a `flatMap` of `filterMap`s over the branch cell). | — |
 | `TwinFamily.answers_poly_of_multipartite` | 682-698 | ★★★ **`②` FOR THE TWIN OBJECT** — the family *answers* AND its `descentCost` is bounded by an explicit polynomial, at `Hol.holKeyFast` + `twinSupply`. With `canonizer_twinSupply` (`①`) this is the **only place in the project where `①`, `②` and *answers* hold together on a named family**. | — |
 | `TwinFamily.IndivReach` | 727-733 | **The individualization closure** — every colouring reachable from the refined root by individualizing a vertex and refining, under ANY sequence of choices. ★ Step-closure is definitional, so feeding it to the socket costs nothing and raises no CAO-propagation obligation. | Inductive |
@@ -5148,3 +5148,30 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `ofEdges` | 33-35 | — | Definition |
 | `rows?` | 37-40 | — | Definition |
 | `sameGraph?` | 68-74 | — | Definition |
+## ChainDescent/RestrictedTransport.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RestrictedTransport.reaches_transport` | 75-94 | The reached set of the relabelled graph is the transported reached set. Needed because the covering argument is applied at **both** `adj` and `relabelAdj σ adj`. | — |
+| `RestrictedTransport.RelabelClosed` | 98-101 | A class of graphs closed under relabelling — the minimum for "iso-invariant **on** the class" to mean anything. | Definition |
+| `RestrictedTransport.TransportOn` | 103-107 | ★ `Descend.TransportAt` relativized on **both** axes: graphs in `C`, and the colourings the descent actually reaches. ⚠ The colouring axis is load-bearing — at an unreachable `χ` a cell need not be an orbit even in a Tinhofer graph. | Definition |
+| `RestrictedTransport.NarrowTransportOn` | 109-118 | `Descend.NarrowTransport` relativized the same way — the per-node obligation on the class. | Definition |
+| `RestrictedTransport.descend_transport_on` | 120-141 | ★★ **THE RELATIVIZED TRANSPORT INDUCTION** — the mirror of `Descend.descend_transport`. The recursion never leaves `adj`, so the graph axis threads through untouched and only the reached-colouring side condition is new. | — |
+| `RestrictedTransport.isoInvariantOn` | 143-155 | ★★ **ISO-INVARIANCE ON THE CLASS** — the relativized `Descend.isoInvariantOpt_canonForm?`. The root colouring is `Reaches.root`, so no side condition escapes to the caller. | — |
+| `RestrictedTransport.eq_of_graphIso_on` | 159-167 | Isomorphic inputs get the same answer — `CanonSpec.eq_of_graphIso` on the class. Only the **left** input need be in `C`. | — |
+| `RestrictedTransport.complete_on` | 169-184 | ★★★ **COMPLETENESS ON THE CLASS (`①b`)** — equal outputs ⟺ isomorphic. Soundness is unconditional, so only the `→` direction consumes the restricted invariance. | — |
+| `RestrictedTransport.flag_iso_invariant_on` | 186-191 | `①c` on the class — flagging is a property of the isomorphism class. | — |
+| `RestrictedTransport.branchVal_transport_on` | 198-209 | `Descend.branchVal_transport` with the relativized IH; the reached-child side condition is `Reaches.step`, discharged from `v` sitting in the branch cell. | — |
+| `RestrictedTransport.branchVal_eq_of_isColAut_on` | 211-221 | `Consume.branchVal_eq_of_isColAut` with the relativized IH: an automorphism makes two branches value-equal. | — |
+| `RestrictedTransport.coveringOfAt_forceThenPick_on` | 223-263 | `ForcePick.coveringOfAt_forceThenPick` relativized — the singleton pick covers the forced set, because under `KeySeparatesAt` every survivor is automorphic to the one kept. | — |
+| `RestrictedTransport.narrowTransportOn_forceThenPick` | 265-283 | ★★★ **THE CONTRACT ON THE CLASS.** `KeyEquivariant` makes the forced set an equivariant intermediate; relativized separation makes the singleton pick cover it — at `adj` *and* at `relabelAdj σ adj`, which is where `RelabelClosed` and `reaches_transport` are consumed. | — |
+| `RestrictedTransport.keySeparatesAt_of_schurianAt` | 291-299 | ★ **THE "NO WRONG STEP TO TAKE" LEMMA.** At a Schurian node every branch pair *is* linked by an automorphism, so `KeySeparatesAt`'s antecedent is false and it holds **vacuously, for every key**. ⚠⚠ This is **not** the vacuity `ForcePick`'s header bans: there it is satisfied because a guarded key *deferred* while genuine separation was still required; here there is nothing to separate, so the singleton pick discards only automorphic duplicates. Same syntax, opposite semantics. | — |
+| `RestrictedTransport.indivReach_transport` | 307-321 | `IndivReach` transports along a relabelling — root by refiner equivariance, step by `Deepen.step_transport`. | — |
+| `RestrictedTransport.schurianAt_transport` | 323-326 | `SchurianAt` transports, via the cross-graph `Deepen.cellSingleOrbit_transport_iso`. | — |
+| `RestrictedTransport.relabelClosed_tinhoferGraph` | 328-336 | `TwinFamily.TinhoferGraph` is closed under relabelling — pull the colouring back along `σ⁻¹`, apply the hypothesis, push forward. | — |
+| `RestrictedTransport.indivReach_of_reaches` | 338-342 | The bridge from `Descend.Reaches` (what the spine quantifies over) to `TwinFamily.IndivReach` (what `TinhoferGraph` speaks about). | — |
+| `RestrictedTransport.narrowTransportOn_tinhofer` | 346-352 | The contract at `TinhoferGraph`, for **any** equivariant key. | — |
+| `RestrictedTransport.isoInvariant_on_tinhofer` | 354-360 | ★★★ **`①` ON THE TINHOFER CLASS** — iso-invariance, hence (with unconditional soundness) a complete isomorphism invariant, for any computable equivariant key. | — |
+| `RestrictedTransport.canonizes_on_tinhofer` | 362-387 | ★★★ **THE HEADLINE — A TINHOFER GRAPH IS CANONIZED**: sound (unconditional) ∧ complete on the class ∧ **never flags** (no hypothesis — `forceThenPick` has no stall channel). Upgrades `TwinFamily.answers_of_tinhoferGraph` from *answers* to *canonizes*, using **no supply**: `deepenSupply` and its declared flat `n⁶` charge are gone. | — |
+| `RestrictedTransport.descentCost_on_tinhofer` | 389-396 | ★★★ **`②`** — explicit polynomial `descentCost` on **every** input, no hypotheses. Only the key is billed, since there is no supply. | — |
+| `RestrictedTransport.canonizes_on_tinhofer_holKeyFast` | 398-412 | The whole package at a **computable, equivariant** key (`Hol.holKeyFast`) — the publication statement. | — |

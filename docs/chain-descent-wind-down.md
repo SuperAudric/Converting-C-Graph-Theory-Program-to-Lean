@@ -109,13 +109,50 @@ populations are that one and `handled_emptyAdj`; everything else
 > **Measured:** `#eval` of §10's object on `mpAdj part123` returns `true` (it answers). All seven
 > capstones `[propext, Classical.choice, Quot.sound]`.
 >
-> ⚠⚠ **THE ONE REMAINING GAP, and it is now the ONLY one:** `①` at §10's object needs
-> `SupplyTransport.SupplyEquivariant Deepen.deepenSupply` (via `StallEquivariant`), which is **not**
-> proved — `deepen`'s greedy descent picks by vertex index, so the honest route is
-> `OrbitPrune.SameOrbits` against an equivariant reference = the parked **R1** crux. Pre-existing, not
-> introduced here. ⟹ **the claim to publish is *"answers, within an explicit polynomial budget, on
-> every Tinhofer graph; and if it flags the input is provably not Tinhofer"* — NOT "canonizes".**
-> All four hold together only on the twin/multipartite family (§8).
+> ## ✅✅ AND `①` IS NOW CLOSED TOO — `ChainDescent/RestrictedTransport.lean`
+>
+> ~~`①` at §10's object needs `SupplyEquivariant Deepen.deepenSupply` = the parked R1 crux~~ — **not the
+> route taken, and R1 is not needed.** (User steer 2026-08-04: don't chase a global R1; the descent's
+> invariance on a Tinhofer graph follows from it never taking a wrong step.) That reading is right, and
+> the mathematics was **already proved** — it is `Deepen.deepen_branch_orbit_iff_aut`, whose RHS *is* the
+> true automorphism-orbit relation. What was missing was **plumbing**: `CanonSpec.IsoInvariantOpt` and its
+> spine (`Descend.TransportAt` / `NarrowTransport`) are `∀ adj σ χ`, while the Tinhofer facts hold only on
+> (Tinhofer graphs) × (**reachable** colourings). ⚠ The second axis is the one that is easy to miss —
+> at an unreachable `χ` a cell need not be an orbit even in a Tinhofer graph.
+>
+> **`RestrictedTransport.lean` relativizes the spine on both axes, additively — `Descend.lean` is not
+> touched and no existing theorem changes.** `TransportOn C` / `NarrowTransportOn C` /
+> `descend_transport_on` / `isoInvariantOn` / `complete_on` / `flag_iso_invariant_on`.
+>
+> ★★ **And the discharge needs NO SUPPLY.** `KeySeparatesAt key adj χ` demands that branch pairs *no
+> automorphism links* get different keys; at a `SchurianAt` node every branch pair **is** linked, so the
+> predicate is vacuous **for every key** (`keySeparatesAt_of_schurianAt`, six lines). So
+> `ForcePick.forceThenPick` — force, keep one, no supply, no verification, **no stall channel** — is
+> sound there. `deepenSupply` drops out, and with it the declared flat `n⁶` charge; `②` is the key's cost
+> alone.
+>
+> | theorem | statement |
+> |---|---|
+> | `descend_transport_on` | the transport induction over (class of graphs) × (reached colourings) |
+> | `keySeparatesAt_of_schurianAt` | ★ **"no wrong step to take"** — separation is vacuous at a Schurian node, for every key |
+> | `relabelClosed_tinhoferGraph` | `TinhoferGraph` is closed under relabelling (via `cellSingleOrbit_transport_iso`) |
+> | **`canonizes_on_tinhofer`** | ★★★ **sound (unconditional) ∧ complete on the class ∧ never flags** |
+> | `descentCost_on_tinhofer` | ★★★ **`②`** — explicit polynomial, every input, no hypotheses |
+> | `canonizes_on_tinhofer_holKeyFast` | the package at a computable equivariant key |
+>
+> ⚠⚠ **DO NOT file this as the banned route.** `ForcePick`'s header says *"do not instantiate
+> `forceThenPick` at `orbKey`/`orbKeyG` and read the result as a canonizer"* — that warns about
+> `KeySeparatesAt` holding for the **wrong** reason (a guarded key returns a constant off its guard while
+> genuine separation is still required, so the pick discards genuinely different branches). Here it holds
+> for the **right** reason: the cell has no non-automorphic pairs, so there is nothing to separate and
+> nothing unsound to discard. Same syntax, opposite semantics.
+>
+> ⟹ **the claim to publish is now *"Tinhofer graphs are CANONIZED — sound, complete, never flagged,
+> within an explicit polynomial budget"*.** The class hypothesis stays the non-computable
+> `TinhoferGraph`, which is correct (it is a classifier, not part of the algorithm).
+> ▶ **To widen it, supply a wider `C`**: all that is asked is `RelabelClosed C` plus *"every reached
+> non-discrete colouring is Schurian"*. A resolver that removes some rigid obstruction enlarges the
+> second clause with nothing here re-proved.
 > ⚠ `deepenSupply`'s `②` rides a **declared flat `n⁶`** charge (an honest over-estimate of `≤ n` reps ×
 > `≤ n` levels × a warm refinement `n³`, plus `≤ n` verifications at `n²`) — *declared*, not derived,
 > the same caveat already owed for `holKeyFast`'s flat `n⁵`.
@@ -334,9 +371,13 @@ not enough.
 > class, and the flag is evidence about the input* (`not_tinhoferGraph_of_flagS`).
 >
 > **Add to the "must state, not bury" list above (items 4–7), all of them load-bearing:**
-> 4. **Coverage is `answers`, not `canonizes`, outside the twin sub-case.** Full `①` needs a
->    *certifying equivariant* supply; `twinSupply` provides it only where orbits are generated by
->    transpositions. For general Tinhofer graphs the theorem is `HandledS` ⟹ no flag.
+> 4. ~~**Coverage is `answers`, not `canonizes`, outside the twin sub-case.**~~ **SUPERSEDED
+>    2026-08-04 by `RestrictedTransport.lean`: Tinhofer graphs are CANONIZED** (sound ∧ complete on the
+>    class ∧ never flags ∧ explicit polynomial), via `forceThenPick` with no supply at all. What must
+>    still be stated is the *shape* of that `①`: iso-invariance is proved **on the class**
+>    (`isoInvariantOn`), not as the global `CanonSpec.IsoInvariantOpt` — the paper must say that
+>    completeness is claimed for pairs whose left input is Tinhofer, and why (the spine is relativized
+>    on two axes: Tinhofer graphs, and *reachable* colourings).
 > 5. **The `almost all graphs` claim is refinement's, not the resolvers'.** On a root-discrete graph
 >    `HandledS` is vacuous — no reached non-discrete node — so Babai–Erdős–Selkow buys breadth of the
 >    *answering* claim and nothing about the architecture.
@@ -345,15 +386,18 @@ not enough.
 >    nothing in Lean depends on it; the English does.
 > 7. **None of this is new mathematics** and the framing must not imply otherwise — the class is
 >    known-easy (§1). The contribution is the *verified artifact and its formal coverage*.
-> 8. **(added 2026-08-04, later) Say which object each claim is about.** The project has three:
->    `recordKey @ recordSupplyFast` (`Publication.lean` — has `①`+`②`, covers nothing named),
->    `holKeyFast @ twinSupply` (`①`+`②`+ answers on complete multipartite), and
->    `holKeyFast @ deepenSupply` (`②` + answers on **every Tinhofer graph**, `①` open). A referee will
->    check that coverage and correctness are claimed for the *same* canonizer. **`orbKey` must not
->    appear in any published statement — it is `noncomputable`.**
-> 9. **Both `②`s here ride declared flat charges** (`holKeyFast` `n⁵`, `deepenSupply` `n⁶`). They are
->    argued over-estimates, not derived bounds; item 1 above already owes this for the cost model
->    generally, but it should be said at the point the coverage theorems are stated.
+> 8. **(added 2026-08-04, later) Say which object each claim is about.** See the object table in §2a —
+>    the headline coverage claim is at **`forceThenPick holKeyFast`**, which is *not* `Publication.lean`'s
+>    object. A referee will check that coverage and correctness are claimed for the same canonizer, so
+>    either point `Publication` here or state plainly that the coverage theorem is about a second,
+>    simpler object. **`orbKey` must not appear in any published statement — it is `noncomputable`.**
+> 9. **`②` rides a declared flat charge** (`holKeyFast`'s `n⁵`) — an argued over-estimate, not a derived
+>    bound. Item 1 already owes this for the cost model generally; say it where the coverage theorem is
+>    stated. (The `forceThenPick` route dropped `deepenSupply`'s flat `n⁶`, so this is now the only one.)
+> 10. **The `forceThenPick` soundness argument turns on a vacuity, and the file next door warns against a
+>    vacuity.** `KeySeparatesAt` is satisfied at a Schurian node because there is nothing to separate;
+>    `ForcePick`'s header warns about it being satisfied because a guarded key *deferred*. The paper
+>    should draw that distinction explicitly rather than leave a referee to find the warning.
 >
 > ⚠ `Publication.lean` still showcases `recordKey @ recordSupplyFast`, **not** this class. Pointing its
 > theorems here means adding `twinSupply` to the record supply or proving the record supply certifies
@@ -381,15 +425,21 @@ outside `Publication.lean` (which still has its 2 by design), no `native_decide`
 | socket | §3–§4 | `handledS_of_noRigidObstruction` — step-closed class + no rigid obstruction ⟹ `HandledS`. **Widening the handled region = supplying a wider `P`; nothing below re-proves.** |
 | bridge | §9 | `handledS_of_tinhoferGraph` + `not_tinhoferGraph_of_flagS`. `IndivReach` is step-closed **by construction**, which is why this cost ~15 lines and raised no CAO obligation. ⛔ **stated at `noncomputable` `orbKey` — superseded for publication by §10.** |
 | wall | §8 | `twinSupply` (computable, `SupplyEquivariant`) ⟹ `canonized_of_multipartite` = `①` ∧ answers; **`answers_poly_of_multipartite` = `②`** (2026-08-04, later). All three at one object. |
-| **publishable bridge** | **§10** | **`not_tinhoferGraph_of_flag` + `answers_poly_of_tinhoferGraph` — the bridge at an EXECUTABLE object, with `②`, for every key. Force drops out; `deepen_branch_orbit_iff_aut` does the work. `①` open (= R1).** |
+| **publishable bridge** | **§10** | **`not_tinhoferGraph_of_flag` + `answers_poly_of_tinhoferGraph` — the bridge at an EXECUTABLE object, with `②`, for every key. Force drops out; `deepen_branch_orbit_iff_aut` does the work. `①` open there.** |
+| **`①` on the class** | **`RestrictedTransport.lean`** | **`canonizes_on_tinhofer` + `descentCost_on_tinhofer` — the transport spine relativized to (graph class) × (reached colourings), discharged at `forceThenPick` with NO supply. Tinhofer graphs are CANONIZED. Additive: `Descend.lean` untouched.** |
 
 ### ⚠ THREE OBJECTS — do not mix them up when writing
 | object | executable | `①` | `②` | named coverage |
 |---|---|---|---|---|
 | `recordKey @ recordSupplyFast` (`Publication.lean`) | ✅ | ✅ | ✅ | **none** |
-| `holKeyFast @ twinSupply` (§8) | ✅ | ✅ | ✅ | complete multipartite, distinct part sizes |
-| `holKeyFast @ deepenSupply` (§10) | ✅ | ❌ R1 | ✅ | **every Tinhofer graph** |
-| `orbKey @ deepenSupply` (§9) | ❌ | ❌ | ❌ | every Tinhofer graph |
+| `holKeyFast @ twinSupply` (`TwinFamily` §8) | ✅ | ✅ | ✅ | complete multipartite, distinct part sizes |
+| **`forceThenPick holKeyFast`** (`RestrictedTransport`) | ✅ | ✅ **on the class** | ✅ | ★★★ **every Tinhofer graph — CANONIZED** |
+| `holKeyFast @ deepenSupply` (`TwinFamily` §10) | ✅ | ❌ | ✅ | every Tinhofer graph (*answers* only) |
+| `orbKey @ deepenSupply` (`TwinFamily` §9) | ❌ | ❌ | ❌ | every Tinhofer graph |
+
+⚠ Row 3 supersedes rows 4–5 for the write-up. Rows 4–5 stay as the record of how it got there (and row 4
+is still the strongest *blind* `Residue.Handled` statement — it holds for every key, which row 3 does not
+need but which a different resolver might want).
 
 ### Measured evidence (all committed, all reproducible)
 `scratchpad/probe_w1_multipartite.py` → `probe_w1_unreduced_n10.out` (238 graphs, capped) and
@@ -412,10 +462,10 @@ only, `None` ≠ `False`, the orbit-reduction licence) is recorded there.
   cheaper than it looks: `Deck.appendSupply` + `cellIsOrbit_append_left` / `gensEquivariant_appendSupply`
   / `certPath_append_left` already carry firing, equivariance *and* the guard through an append. The
   real cost is that `costConst`/`costDeg` (53 / 13) must be recomputed.
-* **`①` at §10 (`SupplyEquivariant deepenSupply`)** — the single remaining gap on the Tinhofer claim,
-  and the reason it reads *answers* rather than *canonizes*. Route = `OrbitPrune.SameOrbits` against an
-  equivariant reference (the pattern `kernelSupply` uses). This **is** R1, which §3 lists as suspended —
-  so closing it is a research decision, not a finish-list item.
+~~* **`①` at §10 (`SupplyEquivariant deepenSupply`)** — the single remaining gap on the Tinhofer claim.~~
+✅ **CLOSED 2026-08-04 by `RestrictedTransport.lean`, and R1 was NOT needed** — see the correction block
+in §2 W1. The route was to relativize `①` to the class rather than to strengthen the supply, and then
+`forceThenPick` removes the supply entirely.
 * **Force-before-descent extension** — a *local* edit: weaken `hS : ∀ χ, P χ → SchurianAt adj χ` to
   `SchurianAt ∨ ForceResolves`. Nothing below the socket changes. This is the natural next widening.
 * **W2 (CFI)**, **W3 (extraction)**, **W5 (archive)** — unchanged.
