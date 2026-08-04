@@ -574,6 +574,30 @@ and defers when it fails. `CertifiedOrbit` is checkable (finitely many verified 
 "either the certificate held all the way down — and `①c` holds — or the check failed at a named level,
 which is a `RigidObstructionAt` there (`rigidObstruction_of_not_cellSingleOrbit`) and is handed to
 force". That is the theorem this track is aiming at.
+
+⛔⛔ **CORRECTION 2026-08-04 — THAT TARGET REDUCES TO `R1`. DO NOT RE-SCOPE IT AS A SMALL STEP.**
+It was attempted (`ChainDescent/RestrictedTransport.lean` §8; wind-down §2 W1 carries the full record).
+
+* ✅ The **firing** half lands: `RestrictedTransport.certifiedG_deepenSupply_of_tinhoferGraph` — on a
+  Tinhofer *graph* the computable certificate `CertifiedG deepenSupply` is open at every
+  individualization-reachable node, so such a supply defers nowhere there.
+* ⛔ The **equivalence** does not. `CertPath` walks **one** `chooseIdK`/`finRange`-head path, but each of
+  its levels demands `CellIsOrbit deepenSupply adj ψ` — deepen connecting *every pair* of ψ's branch
+  cell. `exec_recovers_refgen_on_cell` supplies one pair from `hAmen x hx`, i.e. **one anchor's path**,
+  so a level needs `TinhoferPath` from **every** anchor of ψ = the full `Tinhofer adj ψ`. Path-local
+  `Tinhofer adj χ` says nothing about a *deeper* ψ's other anchors ⟹
+  **`Tinhofer adj χ → CertifiedG deepenSupply adj χ` is not available**, the computable guard is not
+  provably equivalent to the `Tinhofer` guard, and `deepenSupplyGuarded_canonizer`'s `①` does **not**
+  transfer to it. (§8's implication closes only at the *closure* hypothesis `TinhoferGraph`, which the
+  guard does not have.)
+* ⛔ Consequently `①`'s mixed case still needs *"the guard is open at `(σ adj, σ χ)` whenever it is open
+  at `(adj, χ)`"* — i.e. **deepen's ability to certify is relabelling-invariant**, which is `R1`'s
+  content. Every computable candidate guard is defined from deepen's own output and inherits its
+  index-dependence; the guards that *are* invariant (`Tinhofer`, `SchurianAt`) are exactly the
+  noncomputable ones.
+
+⟹ **`deepenSupplyGuarded` (below) remains the only object with `①` + `②` + Tinhofer coverage, and it is
+`noncomputable` by construction.** Making it executable is `R1`, not a wiring step.
 -/
 
 end Deepen

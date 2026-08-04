@@ -6,11 +6,22 @@
 > and what was refuted; they are no longer a plan.
 >
 > ### ▶▶ PICKING THIS UP FRESH? GO TO [§2a HANDOFF](#2a--handoff--where-a-fresh-reader-picks-up-2026-08-04).
-> It carries the reading order, the gate command and its current numbers, the measured evidence,
-> the **three corrections you will otherwise inherit from other docs**, and the open decisions.
+> It carries the reading order, the gate command and its current numbers, the **`Publication.lean` state
+> table**, the measured evidence, the **six corrections you will otherwise inherit from other docs**, and
+> the one open decision.
 >
-> **W1 is ✅ LANDED (2026-08-04)** — `ChainDescent/TwinFamily.lean`. W4's go/no-go is therefore **MET**.
-> Remaining: W2 (CFI), W3 (extraction), W4 (write-up), W5 (archive).
+> **W1 is ✅ LANDED (2026-08-04)** — `ChainDescent/TwinFamily.lean` + `ChainDescent/RestrictedTransport.lean`.
+> W4's go/no-go is **MET**. Gate **111 modules, ~226 s, exit 0**.
+> **Tinhofer graphs are CANONIZED** (`canonizes_on_tinhofer`), the class is **inhabited and proper**
+> (`tinhoferGraph_nonvacuous`), and `Publication.unhandledResidue_nonvacuous` is **discharged**.
+>
+> ⛔ **ONE OPEN DECISION, and it is the only thing between here and a finished `Publication.lean`:**
+> which object `canonForm?` should be, i.e. how to close its single remaining `sorry`
+> (`residue_if_flag`). Three candidates, all costed, in §2 W1's *"THE OPTIONS THAT REMAIN"* block.
+> ⛔⛔ **Do not close it by moving the statement to a second object** — tried and reverted; `canonForm?`
+> is meaningful only if `①`+`②`+`③` hold of the **same** object.
+>
+> Remaining after that: W2 (CFI), W3 (extraction), W4 (write-up), W5 (archive).
 
 ---
 
@@ -410,14 +421,42 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 
 ## 2a. ▶▶ HANDOFF — where a fresh reader picks up (2026-08-04)
 
-**Gate is green**: `bash /workspace/scripts/build.sh` → **110 modules, ~214 s, exit 0**. 0 `sorry`
-outside `Publication.lean` (which still has its 2 by design), no `native_decide`, no new axioms.
+**Gate is green**: `bash /workspace/scripts/build.sh` → **111 modules, ~226 s, exit 0** (measured
+2026-08-04). No `sorry`, `native_decide` or new axiom anywhere in the gated library.
+**`Publication.lean` is NOT gated** (compile it standalone: `cd GraphCanonizationProofs && lake env lean
+Publication.lean`); it has **exactly one** live `sorry`, `residue_if_flag`.
+
+### ▶▶ STATE OF `Publication.lean` (2026-08-04) — read this before touching it
+| obligation | state |
+|---|---|
+| `canon_sound` / `canon_complete` / `flag_iso_invariant` (`①`) | ✅ axiom-clean, unconditional |
+| `canon_poly_or_flag` (`②`) | ✅ axiom-clean, on the **LEFT** disjunct |
+| `canonizer` | ✅ axiom-clean; its cost conjunct is now **unconditional** (the residue escape was never needed) |
+| `unhandledResidue_nonvacuous` | ✅ **DISCHARGED** axiom-clean (`RestrictedTransport.tinhoferGraph_nonvacuous`) |
+| **`residue_if_flag` (`③`)** | ⚠ **THE ONE LIVE `sorry`** — see the boxed W1 correction in §2 for exactly what closes it |
+| the 8 citation axioms | ⚠ **consumed by NOTHING**; retained for W2/Route C only — the paper must say so |
+
+`UnhandledResidue` is now a **definition** (`residueRigidObstruction G := ¬ TinhoferGraph G`), not three
+`opaque` atoms. ⛔ **Do not re-add an opaque disjunct** (e.g. `NonLinearRigidObstruction`) until it has
+content: an opaque `Prop` makes the *handled* half of `unhandledResidue_nonvacuous` unprovable in
+principle, which is the trap the reshape undid.
+
+⛔⛔ **STANDING STEER (user, 2026-08-04): never discharge a `Publication` obligation by relocating it to a
+second object.** `canonForm?` is meaningful only if `①a`+`①b`+`①c`+`②`+`③` are properties of **the same**
+object — an exhaustive solver and a random solver each carry half and together prove nothing. A
+two-object split was tried this session and reverted.
 
 ### Read in this order
-1. **This document**, §1 (why closed) → §2 W1 (what landed) → §2 W4 (the go/no-go, now met).
-2. [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean) — the
-   module doc-block is written to be read first; §3 is the socket, §9 the literature bridge.
-3. `PublicTheoremIndex.md` for what is proved (all `TwinFamily` rows are described).
+1. **This document**, §1 (why closed) → §2 W1 (what landed, and the two boxed corrections) → §2 W4.
+2. [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean) — module
+   doc-block first; §3 the socket, §8 the twin object, §9 the bridge (⛔ `noncomputable`), §10 the
+   repaired executable bridge.
+3. [`ChainDescent/RestrictedTransport.lean`](../GraphCanonizationProofs/ChainDescent/RestrictedTransport.lean)
+   — §1–§6 `①` on a class (Tinhofer graphs are canonized), §7 the non-Tinhofer witness, §8 the
+   computable certificate and why it stops short.
+4. `Publication.lean`'s STATUS block, then the table above.
+5. `PublicTheoremIndex.md` for what is proved (all `TwinFamily` / `RestrictedTransport` rows described;
+   14 `Showcase` rows are pre-existing gaps).
 
 ### The things that landed, in dependency order
 | | where | what |
@@ -428,7 +467,7 @@ outside `Publication.lean` (which still has its 2 by design), no `native_decide`
 | **publishable bridge** | **§10** | **`not_tinhoferGraph_of_flag` + `answers_poly_of_tinhoferGraph` — the bridge at an EXECUTABLE object, with `②`, for every key. Force drops out; `deepen_branch_orbit_iff_aut` does the work. `①` open there.** |
 | **`①` on the class** | **`RestrictedTransport.lean`** | **`canonizes_on_tinhofer` + `descentCost_on_tinhofer` — the transport spine relativized to (graph class) × (reached colourings), discharged at `forceThenPick` with NO supply. Tinhofer graphs are CANONIZED. Additive: `Descend.lean` untouched.** |
 
-### ⚠ THREE OBJECTS — do not mix them up when writing
+### ⚠ FIVE OBJECTS — do not mix them up when writing
 | object | executable | `①` | `②` | named coverage |
 |---|---|---|---|---|
 | `recordKey @ recordSupplyFast` (`Publication.lean`) | ✅ | ✅ | ✅ | **none** |
@@ -449,16 +488,40 @@ need but which a different resolver might want).
 ⚠ Read each probe's header before quoting a number — the soundness discipline (positive certificates
 only, `None` ≠ `False`, the orbit-reduction licence) is recorded there.
 
-### ⛔ Three corrections a fresh reader will otherwise inherit
+### ⛔ SIX corrections a fresh reader will otherwise inherit
 1. **rigid-seal §9.1 does NOT block W1** — corrected at source, at `00-START-HERE.md`'s W1 line, and
    at `remaining-work.md` §1T. The socket is pure-consume; a rigid obstruction *fails* its hypothesis.
 2. **CAO "known false" is not a located citation** — `cao-propagation.md` §0.0a. Closure stands; the
    refutation wording does not. **Not archived** (user).
 3. **W2's target is progress, not completion** — see its scope-correction block.
+4. **`Deepen.orbKey` is `noncomputable`** (an `n!` guard, `instDecidableTinhoferPath = Classical.dec`),
+   so `TwinFamily` §9's bridge is about a canonizer that **cannot be run**. §10 is the repaired form.
+   ⚠ Distinguish this from the *hypothesis* `TinhoferGraph` being non-computable, which is correct and
+   fine — a classifier need not be decidable.
+5. **⛔⛔ `DeepenCertified` §7's "the theorem this track is aiming at" (the computable guard) REDUCES TO
+   R1** — corrected at source. See the boxed block in §2 W1 for the quantifier asymmetry that does it.
+   **Do not re-scope it as a small step.**
+6. **⛔⛔ Never discharge a `Publication` obligation by moving it to a second object** — tried and
+   reverted this session; see the `Publication.lean` state block in §2a.
 
-### ▶▶ PUBLICATION REWIRING — SCOPED 2026-08-04, and it is BLOCKED ON ONE DECISION
+### ⚠ WHAT IS *NOT* RECORDED ANYWHERE ELSE — read before re-deriving
+* `rootCol` does **not** kernel-reduce: `decide` on `rootCol kc 0 = rootCol kc 3` gets **stuck** (trap
+  #3). The way round it is `RestrictedTransport.SigRegular` — state regularity as the *multiset of
+  incident values*, which is `decide`-able because no descent object appears in it.
+* `②` was **not** blocked at `deepenSupply`: it bills a **declared flat `n⁶`**, so `supplyCost … ≤ …` is
+  `le_rfl`. The old memory note calling it a "T2 debt, prose only" was wrong.
+* Appending a supply to the record is mechanically supported (`cellIsOrbit_append_left`,
+  `gensEquivariant_appendSupply`, `certPath_append_left`); the real cost is recomputing
+  `costConst`/`costDeg` (53 / 13).
 
-**What the two `sorry`s need.** Both are blocked on the *same* thing first: `UnhandledResidue` is
+### ▶▶ PUBLICATION REWIRING — the record of how it was scoped (read the boxed RETRACTION below first)
+
+> ⚠ **This subsection is PROVENANCE.** Its conclusion ("option C: showcase a second object") was **acted
+> on and then reverted** — see the boxed retraction further down, and the `Publication.lean` state table
+> at the top of §2a for where things actually stand. The *scoping* below is still accurate and is why
+> the residue had to be reshaped; only its recommendation is void.
+
+**What the two `sorry`s needed (both were open at the time).** Both are blocked on the *same* thing first: `UnhandledResidue` is
 `residueNonSchurian ∨ residueHiddenJohnson ∨ residueRigidObstruction`, and all three are
 `opaque … : Prop`. An opaque `Prop` with no definition can be neither proved nor refuted, so **both**
 `residue_if_flag` and `unhandledResidue_nonvacuous` are unprovable *in principle* as written (the file's
@@ -588,15 +651,17 @@ pair"), it keeps `①`/`②` unconditional, and W1 supplies the first genuine �
 started.**
 
 ### ▶ Live decisions, none started
-* **`Publication.lean` wiring** — its showcased theorems still use `recordKey @ recordSupplyFast`.
-  Pointing them at this class changes the published object. **User's call.** ★ Mechanically this is
-  cheaper than it looks: `Deck.appendSupply` + `cellIsOrbit_append_left` / `gensEquivariant_appendSupply`
-  / `certPath_append_left` already carry firing, equivariance *and* the guard through an append. The
-  real cost is that `costConst`/`costDeg` (53 / 13) must be recomputed.
-~~* **`①` at §10 (`SupplyEquivariant deepenSupply`)** — the single remaining gap on the Tinhofer claim.~~
-✅ **CLOSED 2026-08-04 by `RestrictedTransport.lean`, and R1 was NOT needed** — see the correction block
-in §2 W1. The route was to relativize `①` to the class rather than to strengthen the supply, and then
-`forceThenPick` removes the supply entirely.
+* **⛔ THE ONE OPEN DECISION — which object `Publication.canonForm?` should be**, i.e. how to close
+  `residue_if_flag`. The three candidates and their trade-offs are the table in §2 W1's
+  *"THE OPTIONS THAT REMAIN"* block: **(i)** `deepenSupplyGuarded` — all five properties on one object
+  today, ~30 lines, but **noncomputable**; **(ii)** keep the record object, `③` stays open (status quo);
+  **(iii)** `R1`, then the computable guard — re-opens suspended research. **User's call; nothing
+  started.** ★ If a supply is ever appended to the record instead, that is mechanically supported
+  (`cellIsOrbit_append_left` / `gensEquivariant_appendSupply` / `certPath_append_left`); the real cost is
+  recomputing `costConst`/`costDeg` (53 / 13).
+* ~~`①` at §10 (`SupplyEquivariant deepenSupply`)~~ ✅ **CLOSED** — `RestrictedTransport.lean` relativizes
+  `①` to the class instead of strengthening the supply, and `forceThenPick` then removes the supply
+  entirely. **`R1` was not needed for THAT.** ⚠ It *is* needed for the computable guard (correction 5).
 * **Force-before-descent extension** — a *local* edit: weaken `hS : ∀ χ, P χ → SchurianAt adj χ` to
   `SchurianAt ∨ ForceResolves`. Nothing below the socket changes. This is the natural next widening.
 * **W2 (CFI)**, **W3 (extraction)**, **W5 (archive)** — unchanged.
@@ -618,7 +683,8 @@ stay in place as the record of what was learned.
 | CAO propagation at 2-WL: §12.5a mechanism, §13 conversion gap, the `triCount` pin | `chain-descent-cao-propagation.md` |
 | The 2-WL refiner swap (`n²` → `n³` per round) | same, §13.6 |
 | T3 citation discharge (all 8 axioms) | `chain-descent-citation-discharge.md` |
-| T5 totality assembly / `Publication`'s remaining 2 `sorry`s | `chain-descent-remaining-work.md` §1T |
+| T5 totality assembly / `Publication`'s remaining `sorry` (now **1**: `residue_if_flag`) | `chain-descent-remaining-work.md` §1T |
+| **`R1`** — *deepen's ability to certify is relabelling-invariant*. ⚠ **Now known to be what the computable guard needs** (`DeepenCertified` §7 correction), so it also gates `residue_if_flag` at an executable object | `chain-descent-deepen-supply.md`, `DeepenCertified` §7 |
 | F1 Smith/CRT module-level coset ordering | `chain-descent-remaining-work.md` §1F |
 | W1 forms-graph poly program, Route C re-base | `chain-descent-route-c-plan.md` |
 | `deepenSupply` cost bound (T2 debt, prose only) | `chain-descent-remaining-work.md` §1T |

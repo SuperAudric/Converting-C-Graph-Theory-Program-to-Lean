@@ -15,19 +15,27 @@
 > `Publication.lean`, proved against the executable canonizer, axiom-clean. See the
 > [repository README](../README.md) for the outside-facing summary.
 >
-> ## ✅ W1 LANDED (2026-08-04) — [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean)
+> ## ✅ W1 LANDED (2026-08-04) — `TwinFamily.lean` + `RestrictedTransport.lean`
 >
-> The finish list's first item is **done**, and it changed two things this document still asserts
-> below. Read wind-down §2 W1 for the full record; the corrections a reader needs are:
+> Build.sh without issues, no `sorry`/`native_decide`/new axiom in the gated library.
+> `Publication.lean` (ungated, standalone) is at **one** live `sorry`.
+> **▶ The authoritative record is [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §2 W1 and
+> its §2a HANDOFF block — read those, not this summary.** What a reader needs up front:
 >
-> * **`HandledS` now has a NAMED family, and a literature bridge.** `handledS_of_noRigidObstruction`
->   is the socket (step-closed class + no rigid obstruction ⟹ `HandledS`); `handledS_of_tinhoferGraph`
->   feeds it the **literature's Tinhofer class**; `not_tinhoferGraph_of_flagS` is the showcase —
->   *if the canonizer flags, the input is provably not Tinhofer*.
-> * **⛔ The claim below that "the per-family `Tinhofer` discharge is the rigid-side work of
->   rigid-seal §9.1" is WRONG** — see the correction at that line, and rigid-seal §9.1's own header.
-> * The **answers → canonized** wall is crossed for the twin sub-case via a computable, equivariant
->   `twinSupply` (`canonized_of_multipartite`).
+> * **The socket**: `handledS_of_noRigidObstruction` — step-closed class + no rigid obstruction ⟹
+>   `HandledS`. Widening the handled region = supplying a wider class; nothing below re-proves.
+> * **Tinhofer graphs are CANONIZED** — `RestrictedTransport.canonizes_on_tinhofer`: sound
+>   (unconditional) ∧ complete **on the class** ∧ never flags, plus an explicit polynomial. Proved by
+>   relativizing the transport spine to (graph class) × (**reachable** colourings), additively — nothing
+>   in `Descend.lean` changed. The discharge uses **no supply**: at a Schurian node `KeySeparatesAt` is
+>   vacuous for every key, so `forceThenPick` is sound there.
+> * **The class is inhabited *and* proper**: `K₁,₂,₃` is Tinhofer, `K₃ ⊔ C₄` provably is not
+>   (`tinhoferGraph_nonvacuous`) — this discharges `Publication.unhandledResidue_nonvacuous`.
+> * **⛔ Four corrections to what is written below.** (i) the claim that the per-family `Tinhofer`
+>   discharge is rigid-seal §9.1's work is **WRONG**; (ii) **`Deepen.orbKey` is `noncomputable`**, so any
+>   statement at it is about a canonizer that cannot be run; (iii) **`DeepenCertified` §7's computable
+>   guard reduces to `R1`** (corrected at source); (iv) **never discharge a `Publication` obligation by
+>   moving it to a second object** — `canonForm?` is meaningful only as one object carrying ①+②+③.
 
 The single entry point for the project. Read this first; it gives the idea, the
 current state, and a curated reading order. It replaces the old "simplified
