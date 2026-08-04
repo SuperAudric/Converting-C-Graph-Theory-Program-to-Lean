@@ -548,5 +548,55 @@ theorem tinhoferGraph_nonvacuous :
        TwinFamily.distinctPartSizes_part123⟩,
    ⟨7, kcAdj, not_tinhoferGraph_kcAdj⟩⟩
 
+/-! ## 8. THE COMPUTABLE CERTIFICATE IS OPEN ON A TINHOFER GRAPH
+
+`Deepen.CertifiedG Deepen.deepenSupply` is the **computable** analogue of `Deepen.Tinhofer` — an orbit
+BFS over deepen's own verified generators, walking the same `chooseIdK`/`finRange`-head path and
+differing only in the per-level test (`CellIsOrbit S`, checkable, in place of `CellSingleOrbit`, not).
+`Deepen.tinhoferPath_of_certPath` gives one direction outright. This section gives the other, **at the
+closure hypothesis**: on a Tinhofer graph the certificate is open at every individualization-reachable
+node.
+
+⚠⚠ **READ THE HYPOTHESIS — it is `TinhoferGraph`, and it CANNOT be weakened to `Deepen.Tinhofer`.** Each
+level of `CertPath` demands `CellIsOrbit deepenSupply adj ψ`, i.e. deepen connects *every pair* of ψ's
+branch cell; `exec_recovers_refgen_on_cell` supplies one pair from `hAmen x hx`, the path of the anchor
+`x` — so the level needs `TinhoferPath` from **every** anchor of ψ, which is exactly `Deepen.Tinhofer adj
+ψ`. Path-local `Tinhofer adj χ` says nothing about a *deeper* ψ's other anchors, so it cannot feed this.
+`TinhoferGraph` can, because it is closed: `tinhofer_of_stepClosed` re-derives `Tinhofer` at every
+reachable colouring.
+
+▶ **What this does and does not buy.** It buys the *firing* half of a computable-guard supply: such a
+supply defers nowhere on a Tinhofer graph, so it answers there. It does **not** buy `①`, because the
+missing direction is the converse — *"the guard is open at `(σ adj, σ χ)` whenever it is open at
+`(adj, χ)`"* — and the same asymmetry blocks it. See the wind-down for why that residue is R1-shaped. -/
+
+theorem certPath_deepenSupply_of_tinhoferGraph {adj : AdjMatrix n}
+    (h : TwinFamily.TinhoferGraph adj) :
+    ∀ (fuel : Nat) (cur : Refine.ColData n), TwinFamily.IndivReach adj cur.col →
+      Deepen.CertPath Deepen.deepenSupply adj fuel cur := by
+  intro fuel
+  induction fuel with
+  | zero => intro _ _; trivial
+  | succ fuel ih =>
+      intro cur hcur
+      cases hco : Deepen.chooseIdK (List.finRange n) cur.col with
+      | none => exact (Deepen.certPath_none hco).mpr trivial
+      | some cid =>
+          have hcell : Consume.CellIsOrbit Deepen.deepenSupply adj cur.col :=
+            TwinFamily.cellIsOrbit_deepenSupply_of_schurianAt
+              (TwinFamily.tinhofer_of_stepClosed (TwinFamily.stepClosed_indivReach adj) h hcur)
+              (h _ hcur)
+          cases hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
+          | nil => exact (Deepen.certPath_nil hco hfl).mpr ⟨hcell, trivial⟩
+          | cons w _ =>
+              exact (Deepen.certPath_cons hco hfl).mpr
+                ⟨hcell, ih _ (TwinFamily.IndivReach.step hcur w)⟩
+
+/-- **★★ THE COMPUTABLE CERTIFICATE FIRES EVERYWHERE ON A TINHOFER GRAPH.** -/
+theorem certifiedG_deepenSupply_of_tinhoferGraph {adj : AdjMatrix n}
+    (h : TwinFamily.TinhoferGraph adj) {χ : Colouring n} (hχ : TwinFamily.IndivReach adj χ) :
+    Deepen.CertifiedG Deepen.deepenSupply adj χ :=
+  fun r _ => certPath_deepenSupply_of_tinhoferGraph h n _ (TwinFamily.IndivReach.step hχ r)
+
 end RestrictedTransport
 end ChainDescent

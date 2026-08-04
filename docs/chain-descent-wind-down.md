@@ -503,7 +503,42 @@ first stated. The graph is `probe_w1_cographs.py`'s minimal cograph falsifier, n
 > either way. So a single object with `①` + `②` + `③` **already exists**; it is only `noncomputable`,
 > because its guard is the `Tinhofer` predicate itself.
 >
-> ### ▶ THE ONE REMAINING STEP — a COMPUTABLE GUARD (already scoped, and it is *not* R1)
+> ### ⛔⛔ THE COMPUTABLE GUARD WAS ATTEMPTED (2026-08-04) — HALF LANDS, AND THE OTHER HALF **IS** R1
+>
+> **✅ What landed** (`RestrictedTransport` §8, axiom-clean): **`certifiedG_deepenSupply_of_tinhoferGraph`**
+> — on a Tinhofer graph the *computable* certificate `Deepen.CertifiedG Deepen.deepenSupply` is open at
+> **every** individualization-reachable node. That is the **firing** half: a computable-guard supply defers
+> nowhere on a Tinhofer graph, so it answers there.
+>
+> **⛔ What does NOT land, and why — a quantifier asymmetry.** `CertPath` walks **one**
+> `chooseIdK`/`finRange`-head path, but each of its levels demands `CellIsOrbit deepenSupply adj ψ`, i.e.
+> deepen connects **every pair** of ψ's branch cell. `exec_recovers_refgen_on_cell` supplies one pair from
+> `hAmen x hx` — the path of the anchor `x` — so a level needs `TinhoferPath` from **every** anchor of ψ,
+> which is exactly `Deepen.Tinhofer adj ψ`. Path-local `Tinhofer adj χ` says nothing about a *deeper* ψ's
+> other anchors. ⟹ **`Deepen.Tinhofer adj χ → CertifiedG deepenSupply adj χ` does not hold**, so the
+> computable guard is **not** provably equivalent to the `Tinhofer` guard, and `deepenSupplyGuarded`'s `①`
+> proof does not transfer. §8 above closes the implication only at the **closure** hypothesis
+> `TinhoferGraph`, which is not what the guard has available.
+>
+> **⛔⛔ AND `DeepenCertified` §7's framing is corrected**: it presents the computable guard as a bounded
+> next step, but on inspection it reduces to **R1**. `①`'s mixed case needs *"the guard is open at
+> `(σ adj, σ χ)` whenever it is open at `(adj, χ)`"* — i.e. **deepen's ability to certify is
+> relabelling-invariant**, which is R1's content. Every computable candidate guard is defined from deepen's
+> own output and so inherits its index-dependence; the guards that *are* invariant (`Tinhofer`,
+> `SchurianAt`) are precisely the noncomputable ones. **Do not re-scope this as "small".**
+>
+> ### ▶ THE OPTIONS THAT REMAIN (user's call)
+> | | object for `canonForm?` | `①` | `②` | `③` | executable |
+> |---|---|---|---|---|---|
+> | **i** | `guard (forceThenConsume holKeyFast deepenSupplyGuarded)` | ✅ hypothesis-free | ✅ flat `n⁶` | ✅ Tinhofer coverage | ❌ guard is the `Tinhofer` predicate |
+> | **ii** | keep the record object | ✅ | ✅ | ❌ open | ✅ |
+> | **iii** | R1 (`SameOrbits deepenSupply Ref`), then the computable guard | ✅ | ✅ | ✅ | ✅ |
+>
+> **i** is ~30 lines and gives all five properties on one object *today*, at the cost of executability —
+> which for this project is a real cost and must be stated, not buried. **iii** re-opens suspended
+> research. **ii** is the status quo.
+>
+> ### ▶ (SUPERSEDED) the step as originally scoped — a COMPUTABLE GUARD, believed *not* R1
 > `DeepenCertified` §7 names this as "the theorem this track is aiming at": guard on
 > **`Deepen.CertifiedG Deepen.deepenSupply`** — an orbit BFS over deepen's own verified generators, hence
 > computable — instead of on `Tinhofer`. Two directions:

@@ -2694,28 +2694,29 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Showcase.Iso` | 98-101 | — | Definition |
-| `Showcase.canonForm?` | 118-136 | **The showcase canonizer, REAL and at the composed force key (2026-07-28)** — encode-free refiner; force = `RecordKey.recordKey`; consume = `RecordCost.recordSupplyFast`. The key swap is a totality gain: `G8` flags at the previous pin and answers here (`Regression` §19). | Definition |
-| `Showcase.canonForm?_record` | 138-142 | The record object satisfies the full canonical-form spec — `RecordKey.recordKey_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
-| `Showcase.cost` | 144-150 | The canonizer's operation count — no longer an `opaque` stub: the `CostM` cost projection of the very definition `canonForm?` is the value projection of, so `②` is a theorem about the object `①` is about. | Definition |
-| `Showcase.UnhandledResidue` | 193-194 | — | Definition |
-| `Showcase.costConst` | 215-216 | The pinned cost constant `= RecordKey.costConst = 53` — the coefficient sum of the `②` bound polynomial, `ring`-checked rather than asserted. | Definition |
-| `Showcase.costDeg` | 218-219 | The pinned cost degree `= RecordKey.costDeg = 13`. ⚠ The bound is `costConst * (n+1) ^ costDeg`: the `n`-form is false at `n = 0`, where the object costs 1 and answers. | Definition |
-| `Showcase.cameron_classification` | 240-245 | — | axiom |
-| `Showcase.skresanov_two_closure` | 246-249 | — | axiom |
-| `Showcase.liebeck_rank3` | 250-253 | — | axiom |
-| `Showcase.ponomarenko_2sep` | 254-262 | — | axiom |
-| `Showcase.ftpg` | 263-269 | — | axiom |
-| `Showcase.buekenhout_shult` | 270-277 | — | axiom |
-| `Showcase.payne_thas` | 278-286 | — | axiom |
-| `Showcase.witt_flag_transitivity` | 287 | — | axiom |
-| `Showcase.canon_sound` | 295-302 | — | — |
-| `Showcase.canon_complete` | 304-329 | — | — |
-| `Showcase.flag_iso_invariant` | 331-337 | — | — |
-| `Showcase.canon_poly_or_flag` | 339-349 | — | — |
-| `Showcase.residue_if_flag` | 377-386 | — | — |
-| `Showcase.unhandledResidue_nonvacuous` | 388-394 | — | — |
-| `Showcase.canonizer` | 401-411 | — | — |
+| `Showcase.Iso` | 105-108 | — | Definition |
+| `Showcase.canonForm?` | 125-143 | **The showcase canonizer, REAL and at the composed force key (2026-07-28)** — encode-free refiner; force = `RecordKey.recordKey`; consume = `RecordCost.recordSupplyFast`. The key swap is a totality gain: `G8` flags at the previous pin and answers here (`Regression` §19). | Definition |
+| `Showcase.canonForm?_record` | 145-149 | The record object satisfies the full canonical-form spec — `RecordKey.recordKey_canonizer` through the definitional bridge `canonFormFastS?_eq` (a direct term: everything is defeq). | — |
+| `Showcase.cost` | 151-157 | The canonizer's operation count — no longer an `opaque` stub: the `CostM` cost projection of the very definition `canonForm?` is the value projection of, so `②` is a theorem about the object `①` is about. | Definition |
+| `Showcase.residueRigidObstruction` | 228-231 | **(D2) the rigid/symmetry obstruction, DEFINED** as `¬ TwinFamily.TinhoferGraph G` — via `schurianAt_iff_no_rigidObstruction` this is *"some individualization-reachable colouring of `G` carries a rigid obstruction"*: structural, iso-invariant, algorithm-independent, so it clears the firewall. Replaces three `opaque` atoms that had made **both** ③ obligations unprovable in principle. ⚠ An **over-approximation** — a CFI graph is not Tinhofer although its obstruction is linear; W2's job is to narrow it. | Definition |
+| `Showcase.UnhandledResidue` | 233-235 | **THE RESIDUE** — one disjunct today, by design: `residueRigidObstruction` (= `¬ TinhoferGraph`). D0 `residueNonSchurian` and D1 `residueHiddenJohnson` were **dropped, not kept as opaque placeholders**: an opaque disjunct makes the handled half of `unhandledResidue_nonvacuous` unprovable in principle. ⚠ Add `∨ NonLinearRigidObstruction` only once W2 gives it content. | Definition |
+| `Showcase.costConst` | 256-257 | The pinned cost constant `= RecordKey.costConst = 53` — the coefficient sum of the `②` bound polynomial, `ring`-checked rather than asserted. | Definition |
+| `Showcase.costDeg` | 259-260 | The pinned cost degree `= RecordKey.costDeg = 13`. ⚠ The bound is `costConst * (n+1) ^ costDeg`: the `n`-form is false at `n = 0`, where the object costs 1 and answers. | Definition |
+| `Showcase.cameron_classification` | 281-286 | — | axiom |
+| `Showcase.skresanov_two_closure` | 287-290 | — | axiom |
+| `Showcase.liebeck_rank3` | 291-294 | — | axiom |
+| `Showcase.ponomarenko_2sep` | 295-303 | — | axiom |
+| `Showcase.ftpg` | 304-310 | — | axiom |
+| `Showcase.buekenhout_shult` | 311-318 | — | axiom |
+| `Showcase.payne_thas` | 319-327 | — | axiom |
+| `Showcase.witt_flag_transitivity` | 328 | — | axiom |
+| `Showcase.canon_sound` | 336-343 | — | — |
+| `Showcase.canon_complete` | 345-370 | — | — |
+| `Showcase.flag_iso_invariant` | 372-378 | — | — |
+| `Showcase.canon_poly_or_flag` | 380-390 | — | — |
+| `Showcase.residue_if_flag` | 418-431 | ⚠ **THE ONE LIVE `sorry` IN THE FILE.** Needs *Tinhofer ⟹ the consume resolver fires* at **this** object; it holds at `deepenSupply` (`TwinFamily.not_tinhoferGraph_of_flag`) and at the `noncomputable` `deepenSupplyGuarded`, but not at the record supply. ⛔ **Do NOT discharge it by relocating the statement to a second object** — `canonForm?` is meaningful only as ONE object carrying ①+②+③. | — |
+| `Showcase.unhandledResidue_nonvacuous` | 433-449 | ★★ **DISCHARGED 2026-08-04**, axiom-clean, from `RestrictedTransport.tinhoferGraph_nonvacuous`: handled witness `K₁,₂,₃`, residual witness `K₃ ⊔ C₄`. Both are structural facts about the *graphs*; neither mentions the algorithm. | — |
+| `Showcase.canonizer` | 456-468 | — | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -5187,3 +5188,5 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RestrictedTransport.triAt_kcAdj_three` | 523 | Vertex `3` (in the `C₄`) lies on none: `triAt = 0`. | — |
 | `RestrictedTransport.not_tinhoferGraph_kcAdj` | 525-537 | ★★★ **THE CLASS IS PROPER — `K₃ ⊔ C₄` IS NOT TINHOFER.** 2-regular ⟹ the refined root is one cell containing `0` and `3`; but `0` lies on a triangle and `3` does not, so no automorphism carries one to the other. The root already fails `SchurianAt`, and is individualization-reachable by definition. | — |
 | `RestrictedTransport.tinhoferGraph_nonvacuous` | 539-549 | ★★★ **BOTH HALVES OF NON-VACUITY** — the shape `Publication.unhandledResidue_nonvacuous` asks for, against the **structural** residue predicate `¬ TinhoferGraph` (a property of the graph, never "the algorithm flagged"): the class is **inhabited** (multipartite) and **proper** (`K₃ ⊔ C₄`). | — |
+| `RestrictedTransport.certPath_deepenSupply_of_tinhoferGraph` | 573-593 | On a Tinhofer graph, deepen certifies its own canonical path from every individualization-reachable colouring. ⚠⚠ The hypothesis is `TinhoferGraph` (the **closure** class) and **cannot be weakened to path-local `Deepen.Tinhofer`**: each `CertPath` level demands `CellIsOrbit deepenSupply` — every pair of the cell — while `exec_recovers_refgen_on_cell` supplies one pair per anchor path, so the level needs `Tinhofer` at *that* colouring, which a single path does not give. | — |
+| `RestrictedTransport.certifiedG_deepenSupply_of_tinhoferGraph` | 595-599 | ★★ **THE COMPUTABLE CERTIFICATE FIRES EVERYWHERE ON A TINHOFER GRAPH** — `Deepen.CertifiedG Deepen.deepenSupply` (an orbit BFS over deepen's own verified generators) is open at every reachable node. This is the **firing** half of a computable-guard supply. ⚠ It does **not** give `①`: that needs the converse — the guard being open at `(σ adj, σ χ)` whenever open at `(adj, χ)` — which is R1's content. | — |
