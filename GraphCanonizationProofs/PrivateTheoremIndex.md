@@ -450,6 +450,6 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `TwinFamily.swap_val` | 90-97 | — | — |
-| `TwinFamily.indivOne_splits` | 125-136 | — | — |
-| `TwinFamily.card_split` | 369-376 | — | — |
+| `TwinFamily.swap_val` | 98-105 | — | — |
+| `TwinFamily.indivOne_splits` | 133-144 | — | — |
+| `TwinFamily.card_split` | 377-384 | — | — |

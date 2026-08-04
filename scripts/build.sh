@@ -151,9 +151,9 @@ MODULES=(
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.KeyComplete            # KeySeparates: consume's guard absorbed into force's separation obligation
-  ChainDescent.TwinFamily             # W1: the twin/complete-multipartite NAMED family populating HandledS
   ChainDescent.ForcePick              # forceThenPick: the exhaustiveness corollary cashed (no stall channel)
   ChainDescent.RecordCost             # ② for the OBJECT OF RECORD: the four supplies + holKeyFast, billed
+  ChainDescent.TwinFamily             # W1: Tinhofer/twin families Handled at EXECUTABLE objects (①/②/③) — after RecordCost for the cost lemmas
   ChainDescent.RecordKey              # lex-product key combinator + the record's composed force key (①+②)
 
   # ── W2 solvability route (gauge complex → solvable) ──

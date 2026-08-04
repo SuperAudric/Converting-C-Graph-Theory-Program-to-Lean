@@ -75,6 +75,51 @@ populations are that one and `handled_emptyAdj`; everything else
 > | `twinCells_step` | ★ the invariant is **inherited** — the obligation collapses to the root |
 > | `rootCol_eq_of_twin` | ★ **non-vacuity**: a twin pair survives refinement ⟹ root not discrete |
 >
+> ## ⛔⛔ CORRECTION (2026-08-04, later) — §9's BRIDGE IS STATED AT A **NON-EXECUTABLE** OBJECT
+>
+> The bridge table below is true and axiom-clean, but it is stated at `(Deepen.orbKey,
+> Deepen.deepenSupply)` and **`Deepen.orbKey` is `noncomputable`** — its guard is an `n!` decidability
+> instance (`Deepen.instDecidableTinhoferPath = Classical.dec`). Verified by compiler error:
+> `#eval` on that canonizer fails with *"depends on `Deepen.orbKey`, which is `noncomputable`"*.
+> So §9 alone cannot support the sentence "our verified canonizer answers on every Tinhofer graph" —
+> the coverage would come from a different object than `①`/`②` do.
+>
+> ⚠ **Distinguish two things that were being conflated.** The *hypothesis* `TinhoferGraph` is
+> deliberately non-computable and that is **fine** (a classifier need not be decidable to be a useful
+> antecedent — cf. defining `residueHiddenJohnson` rather than constructing one). The defect is in the
+> **object**: `orbKey` is part of the algorithm.
+>
+> ## ✅ REPAIRED — `TwinFamily.lean` §10, the publishable form
+>
+> The force key **drops out entirely**. What resolves a Tinhofer node is consume, and
+> `Deepen.deepen_branch_orbit_iff_aut` (landed 2026-07-23, previously unused here) already proves
+> `deepenSupply` is a *complete* orbit oracle there. Feeding `SchurianAt`'s automorphism to its `mpr`
+> gives `Consume.CellIsOrbit`, hence the **blind** `Residue.Handled` for **every** key — strictly
+> stronger than §9's `HandledS`, with nothing `noncomputable` anywhere.
+>
+> | theorem | statement |
+> |---|---|
+> | `cellIsOrbit_deepenSupply_of_schurianAt` | the firing lemma: Schurian + `Tinhofer` ⟹ `deepenSupply` certifies the branch cell |
+> | **`noStall_of_schurianAt`** | ★★★ **the NODE-LOCAL form — *a Tinhofer residue does not stall*.** Speaks about one reached node, so a resolver that peels a layer and lands here inherits it. This is the shape W2's scope correction asks for. |
+> | **`handled_of_tinhoferGraph`** | the blind `Residue.Handled`, for **every** key |
+> | **`answers_of_tinhoferGraph`** / **`not_tinhoferGraph_of_flag`** | ★★★ answers; and **if it flags, the input is provably not Tinhofer** — at an object that RUNS |
+> | **`answers_poly_of_tinhoferGraph`** | ★★★ **`②` too** — answers *and* `descentCost ≤` an explicit polynomial |
+> | `answers_poly_part123` | the concrete non-root-discrete witness, so §10 is non-vacuous |
+>
+> **Measured:** `#eval` of §10's object on `mpAdj part123` returns `true` (it answers). All seven
+> capstones `[propext, Classical.choice, Quot.sound]`.
+>
+> ⚠⚠ **THE ONE REMAINING GAP, and it is now the ONLY one:** `①` at §10's object needs
+> `SupplyTransport.SupplyEquivariant Deepen.deepenSupply` (via `StallEquivariant`), which is **not**
+> proved — `deepen`'s greedy descent picks by vertex index, so the honest route is
+> `OrbitPrune.SameOrbits` against an equivariant reference = the parked **R1** crux. Pre-existing, not
+> introduced here. ⟹ **the claim to publish is *"answers, within an explicit polynomial budget, on
+> every Tinhofer graph; and if it flags the input is provably not Tinhofer"* — NOT "canonizes".**
+> All four hold together only on the twin/multipartite family (§8).
+> ⚠ `deepenSupply`'s `②` rides a **declared flat `n⁶`** charge (an honest over-estimate of `≤ n` reps ×
+> `≤ n` levels × a warm refinement `n³`, plus `≤ n` verifications at `n²`) — *declared*, not derived,
+> the same caveat already owed for `holKeyFast`'s flat `n⁵`.
+>
 > **★★★ THE LITERATURE BRIDGE (§9) — one theorem imports the whole hierarchy.**
 > `IndivReach` (individualization closure — **step-closed by construction**, so no CAO-propagation
 > obligation appears) + `TinhoferGraph` = *"no rigid obstruction at any individualization-reachable
@@ -117,6 +162,7 @@ populations are that one and `handled_emptyAdj`; everything else
 > | **`canonizer_twinSupply`** | ★★★ **`①`**: `IsCanonicalFormOpt` — sound + iso-invariant, hence complete |
 > | **`canonized_of_multipartite`** | ★★★ **both halves**: `①` **and** *answers, never flags*, at `holKeyFast` + `twinSupply`, guard in place (so single-path too) |
 > | `canonized_part123` | the concrete `K₁,₂,₃` witness, canonized |
+> | **`answers_poly_of_multipartite`** | ★★★ **`②` (added 2026-08-04, later)** — answers **and** `descentCost ≤` an explicit polynomial, via `SupplyCost.handled_answers_poly` + the two new bills `supplyCost_twinSupply_le` / `gens_twinSupply_length_le`. **With `canonizer_twinSupply` this family now has `①` ∧ `②` ∧ answers at ONE object** — the only place in the project where all three meet on a named family. |
 >
 > **★ The structural finding that made it cheap.** `Deepen.step = refineV encodeFreeFast ∘ indivOne`
 > and *both halves only split cells*, so `TwinCells` ("every merged pair is a twin pair") is inherited
@@ -299,6 +345,15 @@ not enough.
 >    nothing in Lean depends on it; the English does.
 > 7. **None of this is new mathematics** and the framing must not imply otherwise — the class is
 >    known-easy (§1). The contribution is the *verified artifact and its formal coverage*.
+> 8. **(added 2026-08-04, later) Say which object each claim is about.** The project has three:
+>    `recordKey @ recordSupplyFast` (`Publication.lean` — has `①`+`②`, covers nothing named),
+>    `holKeyFast @ twinSupply` (`①`+`②`+ answers on complete multipartite), and
+>    `holKeyFast @ deepenSupply` (`②` + answers on **every Tinhofer graph**, `①` open). A referee will
+>    check that coverage and correctness are claimed for the *same* canonizer. **`orbKey` must not
+>    appear in any published statement — it is `noncomputable`.**
+> 9. **Both `②`s here ride declared flat charges** (`holKeyFast` `n⁵`, `deepenSupply` `n⁶`). They are
+>    argued over-estimates, not derived bounds; item 1 above already owes this for the cost model
+>    generally, but it should be said at the point the coverage theorems are stated.
 >
 > ⚠ `Publication.lean` still showcases `recordKey @ recordSupplyFast`, **not** this class. Pointing its
 > theorems here means adding `twinSupply` to the record supply or proving the record supply certifies
@@ -320,12 +375,21 @@ outside `Publication.lean` (which still has its 2 by design), no `native_decide`
    module doc-block is written to be read first; §3 is the socket, §9 the literature bridge.
 3. `PublicTheoremIndex.md` for what is proved (all `TwinFamily` rows are described).
 
-### The three things that landed, in dependency order
+### The things that landed, in dependency order
 | | where | what |
 |---|---|---|
 | socket | §3–§4 | `handledS_of_noRigidObstruction` — step-closed class + no rigid obstruction ⟹ `HandledS`. **Widening the handled region = supplying a wider `P`; nothing below re-proves.** |
-| bridge | §9 | `handledS_of_tinhoferGraph` + `not_tinhoferGraph_of_flagS`. `IndivReach` is step-closed **by construction**, which is why this cost ~15 lines and raised no CAO obligation. |
-| wall | §8 | `twinSupply` (computable, `SupplyEquivariant`) ⟹ `canonized_of_multipartite` = `①` ∧ answers. |
+| bridge | §9 | `handledS_of_tinhoferGraph` + `not_tinhoferGraph_of_flagS`. `IndivReach` is step-closed **by construction**, which is why this cost ~15 lines and raised no CAO obligation. ⛔ **stated at `noncomputable` `orbKey` — superseded for publication by §10.** |
+| wall | §8 | `twinSupply` (computable, `SupplyEquivariant`) ⟹ `canonized_of_multipartite` = `①` ∧ answers; **`answers_poly_of_multipartite` = `②`** (2026-08-04, later). All three at one object. |
+| **publishable bridge** | **§10** | **`not_tinhoferGraph_of_flag` + `answers_poly_of_tinhoferGraph` — the bridge at an EXECUTABLE object, with `②`, for every key. Force drops out; `deepen_branch_orbit_iff_aut` does the work. `①` open (= R1).** |
+
+### ⚠ THREE OBJECTS — do not mix them up when writing
+| object | executable | `①` | `②` | named coverage |
+|---|---|---|---|---|
+| `recordKey @ recordSupplyFast` (`Publication.lean`) | ✅ | ✅ | ✅ | **none** |
+| `holKeyFast @ twinSupply` (§8) | ✅ | ✅ | ✅ | complete multipartite, distinct part sizes |
+| `holKeyFast @ deepenSupply` (§10) | ✅ | ❌ R1 | ✅ | **every Tinhofer graph** |
+| `orbKey @ deepenSupply` (§9) | ❌ | ❌ | ❌ | every Tinhofer graph |
 
 ### Measured evidence (all committed, all reproducible)
 `scratchpad/probe_w1_multipartite.py` → `probe_w1_unreduced_n10.out` (238 graphs, capped) and
@@ -344,7 +408,14 @@ only, `None` ≠ `False`, the orbit-reduction licence) is recorded there.
 
 ### ▶ Live decisions, none started
 * **`Publication.lean` wiring** — its showcased theorems still use `recordKey @ recordSupplyFast`.
-  Pointing them at this class changes the published object. **User's call.**
+  Pointing them at this class changes the published object. **User's call.** ★ Mechanically this is
+  cheaper than it looks: `Deck.appendSupply` + `cellIsOrbit_append_left` / `gensEquivariant_appendSupply`
+  / `certPath_append_left` already carry firing, equivariance *and* the guard through an append. The
+  real cost is that `costConst`/`costDeg` (53 / 13) must be recomputed.
+* **`①` at §10 (`SupplyEquivariant deepenSupply`)** — the single remaining gap on the Tinhofer claim,
+  and the reason it reads *answers* rather than *canonizes*. Route = `OrbitPrune.SameOrbits` against an
+  equivariant reference (the pattern `kernelSupply` uses). This **is** R1, which §3 lists as suspended —
+  so closing it is a research decision, not a finish-list item.
 * **Force-before-descent extension** — a *local* edit: weaken `hS : ∀ χ, P χ → SchurianAt adj χ` to
   `SchurianAt ∨ ForceResolves`. Nothing below the socket changes. This is the natural next widening.
 * **W2 (CFI)**, **W3 (extraction)**, **W5 (archive)** — unchanged.

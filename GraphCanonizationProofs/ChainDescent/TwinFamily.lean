@@ -1,5 +1,6 @@
 import ChainDescent.KeyComplete
 import ChainDescent.CascadeOracle
+import ChainDescent.RecordCost
 
 /-!
 # NO RIGID OBSTRUCTION — the capability socket, and the first NAMED family through it
@@ -25,7 +26,14 @@ canonical-form claim, not merely termination.
    complete multipartite graphs with distinct part sizes discharge the root condition. This is the
    *narrowest* mechanism, not the boundary of the socket.
 3. **§8 — answers → canonized.** A computable, equivariant **twin supply** replaces
-   `(orbKey, deepenSupply)`, yielding the blind `Residue.Handled` and the full `①`.
+   `(orbKey, deepenSupply)`, yielding the blind `Residue.Handled`, the full `①` (§8.1) and an explicit
+   polynomial `②` (§8.2). This is the only place all of `①`, `②` and *answers* hold together.
+4. **§9–§10 — the literature bridge.** §9 states it at `(orbKey, deepenSupply)`; **§10 restates it at an
+   EXECUTABLE object and is the publishable form.** ⚠ `Deepen.orbKey` is `noncomputable` (an `n!`
+   guard), so §9's canonizer cannot be run — read §10's table before quoting either. §10 needs no force
+   key at all: `Deepen.deepen_branch_orbit_iff_aut` makes `deepenSupply` a *complete* orbit oracle at a
+   Tinhofer node, which gives the blind `Residue.Handled` for **every** key, plus `②`. `①` there is the
+   one open item (`SupplyEquivariant deepenSupply` = the parked R1 crux).
 
 ## The mechanism, in one line
 
@@ -651,6 +659,44 @@ theorem canonized_part123 :
         (twinSupply (n := 6)))) (mpAdj part123) ≠ none :=
   answers_of_multipartite (isCompleteMultipartite_mpAdj part123) distinctPartSizes_part123 _
 
+/-! ### 8.2 `②` FOR THE TWIN OBJECT — so the family is published-shaped (`①` ∧ `②` ∧ answers)
+
+§8.1 gives `①` and `answers_of_multipartite` gives *never flags*; without a cost bound the family is
+still not stated in the shape `Publication.lean` publishes in. `twinSupply` bills a closed form by
+construction, so this is just the two `SupplyCost` obligations plus `RecordCost`'s bill for the
+holonomy key. -/
+
+theorem supplyCost_twinSupply_le (adj : AdjMatrix n) (χ : Colouring n) :
+    Consume.supplyCost (twinSupply (n := n)) adj χ ≤ n * n * (n * n) := by
+  show (Descend.branches χ).length * (Descend.branches χ).length * (n * n) ≤ n * n * (n * n)
+  exact Nat.mul_le_mul_right _
+    (Nat.mul_le_mul (SupplyCost.branches_length_le χ) (SupplyCost.branches_length_le χ))
+
+theorem gens_twinSupply_length_le (adj : AdjMatrix n) (χ : Colouring n) :
+    (Consume.gens (twinSupply (n := n)) adj χ).length ≤ n * n := by
+  show ((Descend.branches χ).flatMap _).length ≤ n * n
+  refine le_trans (RecordCost.length_flatMap_le _ _ n ?_) ?_
+  · exact fun _ _ => le_trans (List.length_filterMap_le ..) (SupplyCost.branches_length_le χ)
+  · exact Nat.mul_le_mul_right n (SupplyCost.branches_length_le χ)
+
+/-- **★★★ THE TWIN FAMILY, IN PUBLICATION SHAPE** — it **answers** and its `descentCost` is bounded by
+an **explicit polynomial**, on a computable key and supply, with `①` supplied separately by
+`canonizer_twinSupply`. Together with `canonized_of_multipartite` this is `①` ∧ `②` ∧ `③`-vacuous for a
+named family at one object. -/
+theorem answers_poly_of_multipartite {adj : AdjMatrix n} {part : Fin n → Nat}
+    (hM : IsCompleteMultipartite adj part) (hD : DistinctPartSizes part) :
+    Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := n))
+          (twinSupply (n := n)))) adj ≠ none
+    ∧ Descend.descentCost (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := n))
+          (twinSupply (n := n)))) adj
+        ≤ SupplyCost.pathBound n (n * (n * n * n * n * n) + n * n
+            + SupplyCost.consumeNodeBound n (n * n * (n * n)) (n * n)) :=
+  SupplyCost.handled_answers_poly (handled_of_multipartite hM hD _)
+    (fun χ v => RecordCost.keyCost_holKeyFast_le adj χ v)
+    (supplyCost_twinSupply_le adj) (gens_twinSupply_length_le adj)
+
 /-! ## 9. ★★★ THE LITERATURE BRIDGE — Tinhofer graphs PROGRESS
 
 The point of §3's socket is that it is fed by a *class*, and the widest class worth naming is the
@@ -771,6 +817,141 @@ theorem tinhoferGraph_of_root_discrete {adj : AdjMatrix n} (hd : Discrete (rootC
   have hdχ : Discrete χ := discrete_of_indivReach hd h
   have : u = w := hdχ u w (hu.trans hw.symm)
   exact ⟨1, Consume.IsColAut.one adj χ, by simpa using this⟩
+
+/-! ## 10. ★★★ THE BRIDGE AT AN **EXECUTABLE** OBJECT — the publication form
+
+⚠ **Why §9 is not the publishable statement.** `handledS_of_tinhoferGraph` and
+`not_tinhoferGraph_of_flagS` are stated at `(Deepen.orbKey, Deepen.deepenSupply)`, and
+**`Deepen.orbKey` is `noncomputable`** — its guard is an `n!` decidability instance
+(`Deepen.instDecidableTinhoferPath` is `Classical.dec`). So §9's canonizer *cannot be run*, and a
+sentence of the form "our verified canonizer answers on every Tinhofer graph" would be about a
+different object from the one carrying `①`/`②`. That is an **object** defect, not a specification
+defect: the *hypothesis* `TinhoferGraph` is deliberately non-computable (§9's doc-block) and that is
+fine — a classifier need not be decidable to be a useful antecedent.
+
+This section removes the defect. The force key drops out **entirely**: what resolves a Tinhofer node is
+consume, and `Deepen.deepen_branch_orbit_iff_aut` already proves `deepenSupply` is a *complete* orbit
+oracle there — `WordReach (verified deepenSupply) u w ↔ ∃ automorphism`. Feeding `SchurianAt`'s
+automorphism to its `mpr` gives `Consume.CellIsOrbit`, i.e. the **left disjunct of
+`Cost.CellResolved`**, hence the **blind** `Residue.Handled` **for every key** — strictly stronger than
+§9's `HandledS`, and with nothing `noncomputable` anywhere.
+
+**What this object has, and what it still lacks — stated so the paper cannot overclaim:**
+
+| | status |
+|---|---|
+| executable | ✅ `deepenSupply` is a plain `def`; instantiate `key := Hol.holKeyFast` and it runs |
+| answers on Tinhofer | ✅ `answers_of_tinhoferGraph`, for **every** key |
+| `③` (flag ⟹ not Tinhofer) | ✅ `not_tinhoferGraph_of_flag` |
+| `②` explicit polynomial | ✅ `answers_poly_of_tinhoferGraph` — ⚠ `deepenSupply` bills a **declared flat `n⁶`** (`DeepenSupply.lean`: `≤ n` reps × `≤ n` levels × a warm refinement `n³`, plus `≤ n` verifications at `n²`). It is an honest over-estimate of a genuinely bounded computation, but it is *declared*, not derived — the same caveat the paper already owes for `holKeyFast`'s flat `n⁵`. |
+| `①` canonical form | ❌ **OPEN.** `Residue.guarded_mixed_canonizer` needs `StallEquivariant`, hence `SupplyTransport.SupplyEquivariant Deepen.deepenSupply`, which is **not** proved — `deepen`'s greedy descent picks by vertex index, so the honest route is `OrbitPrune.SameOrbits` against an equivariant reference, i.e. the parked **R1** crux. This is the one remaining gap, and it is pre-existing. |
+
+⟹ the claim to publish is *"answers, within an explicit polynomial budget, on every Tinhofer graph;
+and if it flags, the input is provably not Tinhofer"* — **not** "canonizes". The twin/multipartite
+family (§8) is where all four hold at once. -/
+
+/-- **★★ THE FIRING LEMMA.** At a node that is Schurian *and* `Deepen.Tinhofer`, the deepening supply
+certifies the whole branch cell. The automorphism comes from `SchurianAt` (it exists); the *certificate*
+comes from `deepen_branch_orbit_iff_aut` (deepen finds it). -/
+theorem cellIsOrbit_deepenSupply_of_schurianAt {adj : AdjMatrix n} {χ : Colouring n}
+    (hT : Deepen.Tinhofer adj χ) (hS : SchurianAt adj χ) :
+    Consume.CellIsOrbit Deepen.deepenSupply adj χ := by
+  intro u hu w hw
+  obtain ⟨c, hc, huc⟩ := Consume.exists_targetColour_of_mem hu
+  have hwc : χ w = c := (Descend.mem_branches_iff hc w).mp hw
+  obtain ⟨σ, hσ, hσu⟩ := hS c u w huc hwc
+  exact (Deepen.deepen_branch_orbit_iff_aut adj χ hT hu).mpr ⟨σ, hσ, hσu⟩
+
+/-- **★★★ THE NODE-LOCAL STATEMENT — *a Tinhofer residue does not stall*.** This is the composable form:
+it speaks about **one reached node**, not about the graph from the root, so a resolver that peels a layer
+and lands here inherits it directly. (W2's scope correction asks for exactly this shape — a one-layer
+progress lemma rather than a class membership.) Holds for **every** key: force is not consulted. -/
+theorem noStall_of_schurianAt {adj : AdjMatrix n} {χ : Colouring n} (hd : ¬ Discrete χ)
+    (hT : Deepen.Tinhofer adj χ) (hS : SchurianAt adj χ) (key : Force.Key n) :
+    (Descend.narrow (Composite.forceThenConsume key Deepen.deepenSupply) adj χ).length = 1 :=
+  Composite.forceThenConsume_singleton_of_cellIsOrbit hd
+    (cellIsOrbit_deepenSupply_of_schurianAt hT hS)
+
+/-- The socket again, now landing on the **blind** predicate at the deepening supply. -/
+theorem handled_deepenSupply_of_noRigidObstruction {adj : AdjMatrix n} {P : Colouring n → Prop}
+    (hcl : StepClosed P adj) (hroot : P (rootCol adj))
+    (hS : ∀ χ, P χ → SchurianAt adj χ) (key : Force.Key n) :
+    Residue.Handled key Deepen.deepenSupply adj := by
+  intro χ hr _
+  have hP := mem_of_reaches hcl hroot hr
+  exact Or.inl (cellIsOrbit_deepenSupply_of_schurianAt
+    (tinhofer_of_stepClosed hcl hS hP) (hS χ hP))
+
+/-- **★★★ A TINHOFER GRAPH IS `Handled` — the blind predicate, for EVERY key.** -/
+theorem handled_of_tinhoferGraph {adj : AdjMatrix n} (h : TinhoferGraph adj) (key : Force.Key n) :
+    Residue.Handled key Deepen.deepenSupply adj :=
+  handled_deepenSupply_of_noRigidObstruction (stepClosed_indivReach adj) IndivReach.root h key
+
+/-- **★★★ A TINHOFER GRAPH IS ANSWERED, AT AN EXECUTABLE OBJECT.** -/
+theorem answers_of_tinhoferGraph {adj : AdjMatrix n} (h : TinhoferGraph adj) (key : Force.Key n) :
+    Descend.canonForm? (Refine.encodeFreeFast (n := n))
+      (Stall.guard (Composite.forceThenConsume key Deepen.deepenSupply)) adj ≠ none :=
+  Residue.answers_of_handled (handled_of_tinhoferGraph h key)
+
+/-- **★★★ THE SHOWCASE, REPAIRED — the flag is evidence about the input, at an object that RUNS.**
+Contrast `not_tinhoferGraph_of_flagS` (§9), which says the same thing about a `noncomputable` object. -/
+theorem not_tinhoferGraph_of_flag {adj : AdjMatrix n} {key : Force.Key n}
+    (hflag : Descend.canonForm? (Refine.encodeFreeFast (n := n))
+      (Stall.guard (Composite.forceThenConsume key Deepen.deepenSupply)) adj = none) :
+    ¬ TinhoferGraph adj :=
+  fun h => answers_of_tinhoferGraph h key hflag
+
+/-! ### 10.1 `②` at the deepening supply
+
+`deepenSupply` bills a **flat `n⁶`** (declared — see the table above), so `supplyCost` is `le_rfl`; the
+candidate count is the same `flatMap`-of-`filterMap` shape as the four record supplies. -/
+
+theorem supplyCost_deepenSupply_le (adj : AdjMatrix n) (χ : Colouring n) :
+    Consume.supplyCost (Deepen.deepenSupply (n := n)) adj χ ≤ n * n * n * n * n * n := le_rfl
+
+theorem gens_deepenSupply_length_le (adj : AdjMatrix n) (χ : Colouring n) :
+    (Consume.gens (Deepen.deepenSupply (n := n)) adj χ).length ≤ n * n := by
+  show (Deepen.deepenGens adj χ).length ≤ n * n
+  have hfirsts : ((Descend.branches χ).map
+      (fun r => (r, Deepen.step adj χ r))).length ≤ n := by
+    rw [List.length_map]; exact SupplyCost.branches_length_le χ
+  refine le_trans (RecordCost.length_flatMap_le _ _ n ?_) (Nat.mul_le_mul_right n hfirsts)
+  intro p1 _
+  dsimp only
+  split
+  · simp
+  · split
+    · simp
+    · exact le_trans (List.length_filterMap_le ..) hfirsts
+
+/-- **★★★ ANSWERS *AND* AN EXPLICIT POLYNOMIAL BUDGET ON EVERY TINHOFER GRAPH.** The `②` half of the
+publication claim, at the executable object. (`①` remains open — see the table above.) -/
+theorem answers_poly_of_tinhoferGraph {adj : AdjMatrix n} (h : TinhoferGraph adj) :
+    Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := n))
+          (Deepen.deepenSupply (n := n)))) adj ≠ none
+    ∧ Descend.descentCost (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := n))
+          (Deepen.deepenSupply (n := n)))) adj
+        ≤ SupplyCost.pathBound n (n * (n * n * n * n * n) + n * n
+            + SupplyCost.consumeNodeBound n (n * n * n * n * n * n) (n * n)) :=
+  SupplyCost.handled_answers_poly (handled_of_tinhoferGraph h _)
+    (fun χ v => RecordCost.keyCost_holKeyFast_le adj χ v)
+    (supplyCost_deepenSupply_le adj) (gens_deepenSupply_length_le adj)
+
+/-- The multipartite family through the repaired bridge — a witness that §10 is non-vacuous at a graph
+whose root is **not** discrete, so the resolvers genuinely run (`not_discrete_part123`). -/
+theorem answers_poly_part123 :
+    Descend.canonForm? (Refine.encodeFreeFast (n := 6))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := 6))
+          (Deepen.deepenSupply (n := 6)))) (mpAdj part123) ≠ none
+    ∧ Descend.descentCost (Refine.encodeFreeFast (n := 6))
+        (Stall.guard (Composite.forceThenConsume (Hol.holKeyFast (n := 6))
+          (Deepen.deepenSupply (n := 6)))) (mpAdj part123)
+        ≤ SupplyCost.pathBound 6 (6 * (6 * 6 * 6 * 6 * 6) + 6 * 6
+            + SupplyCost.consumeNodeBound 6 (6 * 6 * 6 * 6 * 6 * 6) (6 * 6)) :=
+  answers_poly_of_tinhoferGraph
+    (tinhoferGraph_of_multipartite (isCompleteMultipartite_mpAdj part123) distinctPartSizes_part123)
 
 end TwinFamily
 end ChainDescent
