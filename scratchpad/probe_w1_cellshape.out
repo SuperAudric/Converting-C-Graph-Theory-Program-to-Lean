@@ -1,0 +1,10 @@
+================================================================================================
+W1 step 0b — CLAIM S (cell shape) on complete multipartite graphs, n <= 12
+================================================================================================
+
+graphs                 : 248
+cells inside one part  : 8025      -> Equiv.swap of twins
+cells = union of parts : 3189      -> explicit part-swap perm
+VIOLATIONS             : 0
+
+CLAIM S: HOLDS — the two-case Lean proof is the right decomposition

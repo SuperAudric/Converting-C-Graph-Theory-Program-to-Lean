@@ -16,7 +16,7 @@ found to be either **already known**, **known false in the generality needed**, 
 | Track | Assessment |
 |---|---|
 | **Consume / symmetry side** | Reaches Tinhofer graphs, which sit inside the known-easy hierarchy Discrete ⊂ Amenable ⊂ Compact ⊂ Godsil ⊂ Tinhofer ⊂ Refinable (Arvind–Köbler–Rattan–Verbitsky). Landing there is not new ground. |
-| **CAO propagation at 2-WL** (`chain-descent-cao-propagation.md`) | The target is essentially *"the one-point extension of a schurian coherent configuration is schurian."* This is **not true in general** — the positive results in the literature are confined to special classes (e.g. point extensions of cyclotomic schemes). The doc's own §4.3 had independently concluded it could only ever be a per-family statement. Refuted at 1-WL by four witnesses; the 2-WL version is not a route to a general theorem. |
+| **CAO propagation at 2-WL** (`chain-descent-cao-propagation.md`) | The target is essentially *"the one-point extension of a schurian coherent configuration is schurian."* ⚠ **Softened 2026-08-04 — see that doc's §0.0a for the citations.** The identification is exact (Muzychuk–Ponomarenko arXiv:1010.4450 §2.4 defines `Xα`, and states `Aut(X)α = Aut(Xα)`), and the literature proves schurity of one-point extensions **only per-class**, never generally. But **"known false in general" is not a located citation** — the supporting instance (Wielandt's non-schurian S-ring) refutes the target only if its base CC is schurian, which nobody has checked. The doc's own §4.3 had independently concluded it could only ever be a per-family statement, and §12.5b measures 477 nodes where the unrestricted form fails. Refuted at 1-WL by four witnesses. **Closure stands** (no route to a general theorem); the refutation wording does not. |
 | **Force / asymmetry side** | `keySeparatesAll_rawKey` shows separation alone is cheap; the hard object is separation ∧ equivariance, and `forcePick_open_clause_is_poly` pins the entire remaining difficulty to the poly clause. `KEY_scoping.md` §3's tie-group ladder terminates at non-solvable = the wall. The project has machine-checked that its residual difficulty *is* the known hard core. |
 | **Linear core extraction (L1–L4, `Gauge*`)** | The solvable corner reduces to per-layer linear systems — which is Luks territory, and the doc's own §3a concedes the Luks sharpening makes it citable rather than novel. |
 | **W2 / non-solvable wall** | Untouched. This is the open problem. |
@@ -39,9 +39,71 @@ from a hypothesis-defined class into a **named family**. Today the only `Handled
 populations are that one and `handled_emptyAdj`; everything else
 (`handledS_recordSupply`, `handled_of_seal*`) is a transfer or a reduction lemma.
 
-⚠ **Scoping risk, flagged before starting:** `chain-descent-rigid-seal.md` §9.1 states the
+~~⚠ **Scoping risk, flagged before starting:** `chain-descent-rigid-seal.md` §9.1 states the
 per-family `Tinhofer` discharge is the *same work* as the rigid seal on that family. Scope
-this first. If it pulls in the rigid seal, it is out of box — take W2 instead.
+this first. If it pulls in the rigid seal, it is out of box — take W2 instead.~~
+
+✅ **SCOPED 2026-08-04 — the risk was pointed at the wrong route, and cannot bite this socket.**
+`handledS_of_reached_tinhofer` demands `Deepen.Tinhofer` at **every** reached non-discrete node —
+pure consume, no disjunction. A `CellSingleOrbit` failure **is** a `RigidObstructionAt`
+(`rigidObstruction_of_not_cellSingleOrbit`, definitional), so a family carrying one anywhere on the
+descent does not "need the rigid seal": it **fails the hypothesis outright and is not a candidate**.
+Measured agreement — on rigid multipedes `descend_cert` levels are `[0,0,0,…]`, i.e. `TinhoferPath`
+holds only *vacuously* (DUAL §8.4, the AKRV rigid collapse). Rigid-seal §9.1's "same work" applies to
+the **disjunctive** obligation (`NodeResolved` via consume *or* force; `Handled` via
+`handled_of_seal`), which is W2's route, not W1's.
+
+⟹ **W1's real constraint is the opposite one:** the family must be *rigid-obstruction-free along the
+descent* (every selected cell a genuine `Aut`-orbit). ⚠ That makes **vacuity**, not the seal, the live
+risk — a family whose root refines to discrete satisfies `HandledS` for free and proves nothing
+(`Residue.handled_of_root_discrete` is already that ring). **Gate step 0 on it:** the probe must show
+non-vacuous descents (≥ 2 certified levels) before any Lean is written.
+
+#### ★★ STEP 0 MEASURED (2026-08-04) — the family passes, and the proof's decomposition is pinned
+
+`scratchpad/probe_w1_multipartite.py` (+ `probe_w1_cellshape.py`), logs
+`probe_w1_unreduced_n10.out` / `probe_w1_reduced_n16.out` / `probe_w1_cellshape.out`.
+
+| run | graphs | failures | unknown | budget skips | max levels | verdict |
+|---|---|---|---|---|---|---|
+| unreduced baseline, n ≤ 10 | 238 | **0** | 0 | 0 | 7 | pass (capped: `TRUNC` rows logged) |
+| orbit-reduced, n ≤ 16 | **1766** | **0** | 0 | 0 | **14** | **pass, zero truncations** |
+
+★ What was measured is the **selector-independent** statement — *every* cell at *every* reached node
+is a single orbit — which is **strictly stronger** than `Deepen.Tinhofer` and therefore implies it
+under **any** selector. ⟹ this **dodges the standing colour-id-order convention limit** (cao-propagation
+§7.4/§8.3): nothing reads an id order, and 1-WL's output *partition* is a function of the input
+partition alone. **No Lean `#eval` cross-check is owed here** — but it *is* owed the moment anyone
+weakens the probe to the selected-cell-only form.
+
+★ **Non-vacuity gate passed**: 1764 of 1766 graphs have ≥ 2 reached non-discrete nodes, max descent
+14 levels — so this is *not* the `handled_of_root_discrete` ring in disguise.
+
+★ **CLAIM S — the two-case decomposition is CORRECT** (`probe_w1_cellshape.py`, 248 graphs, **0
+violations**): every cell is either (i) inside one part → `Equiv.swap` of twins (cheap: `IsColAut`
+is two conjuncts), or (ii) a disjoint union of ≥ 2 **complete, equal-sized** parts → one explicit
+part-swap permutation. Counts: 8025 case-(i) cells, 3189 case-(ii). ⚠ Case (ii)'s *complete* and
+*equal-sized* clauses are what make the permutation exist — they are the load-bearing part.
+
+★ **The chain to the socket closes with existing lemmas**: `Descend.branches χ` is the target cell's
+vertices; `DescentReach.cons`'s side condition (`∃ u ≠ v, χ u = χ v`) is the probe's branch rule; and
+`KeyComplete.reaches_of_descentReach` carries every `TinhoferPath` level back into `Descend.Reaches`.
+Colour→structure needs no new lever either: `sigKey_eq_iff` + `Refine.refineRound_eq_iff` already give
+*equal colour ⟺ equal old colour ∧ equal signature multiset*.
+
+⚠⚠ **THE OPEN QUESTION IS VALUE, NOT VIABILITY.** Complete multipartite / cluster graphs are
+canonizable by sorting degrees; as W4's headline this invites *"you proved it on a class where the
+trivial algorithm works."* W1 is now clearly **in box** — but on its own it probably does **not**
+satisfy W4's go/no-go, which is why the wind-down calls W2 the higher-value item. Decide before
+spending the two weeks.
+
+⚠ **Naming (2026-08-04).** `Deepen.Tinhofer` is **not** the literature's Tinhofer — it differs on
+*four* quantifiers (which cell: `chooseIdK`'s vs all; which vertex in it: the `finRange` head vs all;
+what must hold: the selected cell is one orbit vs the whole partition `P_F` equals the orbit partition;
+which `F`: one descent path vs all). All four weaken it, so **literature-Tinhofer ⟹ project-Tinhofer**
+and the covered class is a *superset*. Do **not** change the design to match (it would break
+`TinhoferPath`'s single-path recursion, hence `②`). Call it **path-local Tinhofer** and land the
+bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implication is machine-checked.
 
 ### W2 — CFI family `Handled` *(box: 2 weeks)*
 The higher-value of the two, because it is the claim that distinguishes the artifact:
@@ -84,7 +146,7 @@ the claim is "correct and never exponential, answers on nothing in particular" �
 not enough.
 
 ### W5 — archive
-Freeze the repo, final README pass, retire the memory index to a single pointer.
+Freeze the repo, final README pass, presentability pass on secondary documents.
 
 ---
 

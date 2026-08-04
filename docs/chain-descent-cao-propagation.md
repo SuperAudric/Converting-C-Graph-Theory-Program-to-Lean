@@ -10,6 +10,51 @@
 > See [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §1.
 > ★ The landed Lean (`CaoFibring`, `CaoRound` — incl. the unconditional round-1/round-2 barriers) is
 > axiom-clean and is an **extraction candidate**, wind-down item W3.
+> ⚠ **NOT ARCHIVED (user, 2026-08-04).** The closure is weaker than the banner above claims — read
+> §0.0a before quoting it.
+
+### 0.0a ▶ LITERATURE VERIFICATION OF THE CLOSURE (2026-08-04) — and the one step nobody has checked
+
+The closure above was taken on an external check whose citations were never written down. They are
+recorded here. **Two of the three legs verify; the third is weaker than stated.**
+
+**✅ The object is the literature's, exactly.** Muzychuk–Ponomarenko, *On quasi-thin association
+schemes* ([arXiv:1010.4450](https://arxiv.org/abs/1010.4450)) §2.4 defines, verbatim: *"The coherent
+configuration `Xα = (Ω, Sα)` is called the **α-extension** (or a **one point extension**) of the
+coherent configuration `X`"* — `Sα` = the basic relations of the smallest CC on `Ω` with `1α ∈ Sα`
+refining `S`, i.e. **the 2-WL closure with one point individualized**. Same paper, §2: *"given `α ∈ Ω`
+we have `Aut(X)α = Aut(Xα)`."* ⟹ this doc's target ("after individualizing `v`, are the cells still
+orbits of the stabilizer?") **is** the statement *`Xα` is schurian*. The identification in wind-down §1
+is correct and is not a loose analogy.
+
+**✅ The literature only ever proves it per-class.** Schurity of one-point extensions appears as a
+*sufficient condition* on a restricted class, never as a general theorem: M–P Thm 6.5 (quasi-thin with
+≥ 2 orthogonals, *given* that every algebraic isomorphism has a one-point extension) + Thm 8.1
+(non-Kleinian, degree ≥ 9) — and the same paper constructs **infinitely many non-schurian** Kleinian
+quasi-thin schemes. Evdokimov–Ponomarenko's *schurity number* `t(X)`
+([EJC 7 (2000) R31](https://www.combinatorics.org/ojs/index.php/eljc/article/view/v7i1r31)) exists
+precisely to measure how many extensions schurity costs — machinery that would be vacuous if extension
+preserved it. So §4.3's own "per-family only" conclusion is the literature's position too.
+
+**⚠ The "known false in general" leg is NOT a located citation.** No paper was found stating *"the
+one-point extension of a schurian coherent configuration need not be schurian"* in those words. What
+supports it:
+
+* the closest published instance of the right shape — **Wielandt's non-schurian Schur ring** over the
+  elementary abelian group of order `p²`, `p > 3` (recorded in
+  [arXiv:2109.01385](https://arxiv.org/abs/2109.01385), *On a huge family of non-schurian Schur rings*);
+* this project's own identification, `remaining-work.md` §1T: *"S-ring non-schurian **is** 'the
+  one-point extension at `e` is non-schurian'"*;
+* this project's own measurement, §12.5b: **477 nodes where fibre-schurity holds but full schurity
+  fails** ⟹ unrestricted "extensions preserve schurity" cannot prove the target.
+
+⚠⚠ **The unchecked step.** Wielandt's example refutes the target *only if* the base CC in the S-ring
+correspondence is itself **schurian** — otherwise it is a non-schurian object with a non-schurian
+extension, which proves nothing about propagation. Nobody has checked that. Until someone does, the
+honest statement of the closure is **"no route to a general theorem — the literature proves it only
+per-class, and the project's own measurement shows the unrestricted form fails"**, *not* "known false".
+The distinction does not reopen the track (per-class is what §4.3 already concluded), but it must not
+be quoted as a refutation in the W4 write-up.
 
 > ⚠ **NOT the same doc as [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md).**
 > That one is the *demoted* forms-graph bounded-WL-dimension route. **This** doc owns the question

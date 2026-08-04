@@ -1,0 +1,260 @@
+================================================================================================
+W1 step 0 — complete multipartite / cluster: is every cell at every reached node an orbit?
+positive verdicts are verified certificates; None = UNKNOWN, never a pass (doc §8.1)
+================================================================================================
+
+--- multipartite ---
+  multipartite(1, 2)                 n=  3 nodes=    3 non-disc=    1 levels= 1 cells[in-part=   1 spans=   0] unknown=  0 pass
+  multipartite(1, 3)                 n=  4 nodes=   10 non-disc=    4 levels= 2 cells[in-part=   4 spans=   0] unknown=  0 pass
+  multipartite(2, 2)                 n=  4 nodes=   13 non-disc=    5 levels= 2 cells[in-part=   4 spans=   1] unknown=  0 pass
+  multipartite(1, 1, 2)              n=  4 nodes=    9 non-disc=    5 levels= 2 cells[in-part=   3 spans=   3] unknown=  0 pass
+  multipartite(1, 4)                 n=  5 nodes=   41 non-disc=   17 levels= 3 cells[in-part=  17 spans=   0] unknown=  0 pass
+  multipartite(2, 3)                 n=  5 nodes=   30 non-disc=   18 levels= 3 cells[in-part=  22 spans=   0] unknown=  0 pass
+  multipartite(1, 1, 3)              n=  5 nodes=   30 non-disc=   18 levels= 3 cells[in-part=  12 spans=  10] unknown=  0 pass
+  multipartite(1, 2, 2)              n=  5 nodes=   13 non-disc=    5 levels= 2 cells[in-part=   4 spans=   1] unknown=  0 pass
+  multipartite(1, 1, 1, 2)           n=  5 nodes=   30 non-disc=   18 levels= 3 cells[in-part=  10 spans=  12] unknown=  0 pass
+  multipartite(1, 5)                 n=  6 nodes=  206 non-disc=   86 levels= 4 cells[in-part=  86 spans=   0] unknown=  0 pass
+  multipartite(2, 4)                 n=  6 nodes=  123 non-disc=   75 levels= 4 cells[in-part=  92 spans=   0] unknown=  0 pass
+  multipartite(3, 3)                 n=  6 nodes=  181 non-disc=  109 levels= 4 cells[in-part= 132 spans=   1] unknown=  0 pass
+  multipartite(1, 1, 4)              n=  6 nodes=  123 non-disc=   75 levels= 4 cells[in-part=  51 spans=  41] unknown=  0 pass
+  multipartite(1, 2, 3)              n=  6 nodes=   30 non-disc=   18 levels= 3 cells[in-part=  22 spans=   0] unknown=  0 pass
+  multipartite(2, 2, 2)              n=  6 nodes=   79 non-disc=   31 levels= 3 cells[in-part=  24 spans=   7] unknown=  0 pass
+  multipartite(1, 1, 1, 3)           n=  6 nodes=  100 non-disc=   64 levels= 4 cells[in-part=  40 spans=  40] unknown=  0 pass
+  multipartite(1, 1, 2, 2)           n=  6 nodes=   39 non-disc=   23 levels= 3 cells[in-part=  12 spans=  16] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 2)        n=  6 nodes=  123 non-disc=   75 levels= 4 cells[in-part=  41 spans=  51] unknown=  0 pass
+  multipartite(1, 6)                 n=  7 nodes= 1237 non-disc=  517 levels= 5 cells[in-part= 517 spans=   0] unknown=  0 pass
+  multipartite(2, 5)                 n=  7 nodes=  618 non-disc=  378 levels= 5 cells[in-part= 464 spans=   0] unknown=  0 pass
+  multipartite(3, 4)                 n=  7 nodes=  410 non-disc=  266 levels= 5 cells[in-part= 334 spans=   0] unknown=  0 pass
+  multipartite(1, 1, 5)              n=  7 nodes=  618 non-disc=  378 levels= 5 cells[in-part= 258 spans= 206] unknown=  0 pass
+  multipartite(1, 2, 4)              n=  7 nodes=  123 non-disc=   75 levels= 4 cells[in-part=  92 spans=   0] unknown=  0 pass
+  multipartite(1, 3, 3)              n=  7 nodes=  181 non-disc=  109 levels= 4 cells[in-part= 132 spans=   1] unknown=  0 pass
+  multipartite(2, 2, 3)              n=  7 nodes=  130 non-disc=   82 levels= 4 cells[in-part=  92 spans=  10] unknown=  0 pass
+  multipartite(1, 1, 1, 4)           n=  7 nodes=  410 non-disc=  266 levels= 5 cells[in-part= 170 spans= 164] unknown=  0 pass
+  multipartite(1, 1, 2, 3)           n=  7 nodes=   90 non-disc=   66 levels= 4 cells[in-part=  66 spans=  30] unknown=  0 pass
+  multipartite(1, 2, 2, 2)           n=  7 nodes=   79 non-disc=   31 levels= 3 cells[in-part=  24 spans=   7] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 3)        n=  7 nodes=  410 non-disc=  266 levels= 5 cells[in-part= 164 spans= 170] unknown=  0 pass
+  multipartite(1, 1, 1, 2, 2)        n=  7 nodes=  130 non-disc=   82 levels= 4 cells[in-part=  40 spans=  62] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 1, 2)     n=  7 nodes=  618 non-disc=  378 levels= 5 cells[in-part= 206 spans= 258] unknown=  0 pass
+  multipartite(1, 7)                 n=  8 nodes= 4000 non-disc= 3620 levels= 6 cells[in-part=3620 spans=   0] unknown=  0 TRUNC pass
+  multipartite(2, 6)                 n=  8 nodes= 3711 non-disc= 2271 levels= 6 cells[in-part=2788 spans=   0] unknown=  0 pass
+  multipartite(3, 5)                 n=  8 nodes= 2060 non-disc= 1340 levels= 6 cells[in-part=1684 spans=   0] unknown=  0 pass
+  multipartite(4, 4)                 n=  8 nodes= 3281 non-disc= 2129 levels= 6 cells[in-part=2672 spans=   1] unknown=  0 pass
+  multipartite(1, 1, 6)              n=  8 nodes= 3711 non-disc= 2271 levels= 6 cells[in-part=1551 spans=1237] unknown=  0 pass
+  multipartite(1, 2, 5)              n=  8 nodes=  618 non-disc=  378 levels= 5 cells[in-part= 464 spans=   0] unknown=  0 pass
+  multipartite(1, 3, 4)              n=  8 nodes=  410 non-disc=  266 levels= 5 cells[in-part= 334 spans=   0] unknown=  0 pass
+  multipartite(2, 2, 4)              n=  8 nodes=  533 non-disc=  341 levels= 5 cells[in-part= 385 spans=  41] unknown=  0 pass
+  multipartite(2, 3, 3)              n=  8 nodes=  543 non-disc=  399 levels= 5 cells[in-part= 577 spans=   3] unknown=  0 pass
+  multipartite(1, 1, 1, 5)           n=  8 nodes= 2060 non-disc= 1340 levels= 6 cells[in-part= 860 spans= 824] unknown=  0 pass
+  multipartite(1, 1, 2, 4)           n=  8 nodes=  369 non-disc=  273 levels= 5 cells[in-part= 276 spans= 123] unknown=  0 pass
+  multipartite(1, 1, 3, 3)           n=  8 nodes=  543 non-disc=  399 levels= 5 cells[in-part= 396 spans= 184] unknown=  0 pass
+  multipartite(1, 2, 2, 3)           n=  8 nodes=  130 non-disc=   82 levels= 4 cells[in-part=  92 spans=  10] unknown=  0 pass
+  multipartite(2, 2, 2, 2)           n=  8 nodes=  633 non-disc=  249 levels= 4 cells[in-part= 192 spans=  57] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 4)        n=  8 nodes= 1681 non-disc= 1105 levels= 6 cells[in-part= 697 spans= 697] unknown=  0 pass
+  multipartite(1, 1, 1, 2, 3)        n=  8 nodes=  300 non-disc=  228 levels= 5 cells[in-part= 220 spans= 120] unknown=  0 pass
+  multipartite(1, 1, 2, 2, 2)        n=  8 nodes=  237 non-disc=  141 levels= 4 cells[in-part=  72 spans= 100] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 1, 3)     n=  8 nodes= 2060 non-disc= 1340 levels= 6 cells[in-part= 824 spans= 860] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 2, 2)     n=  8 nodes=  533 non-disc=  341 levels= 5 cells[in-part= 164 spans= 262] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 1, 1, 2)  n=  8 nodes= 3711 non-disc= 2271 levels= 6 cells[in-part=1237 spans=1551] unknown=  0 pass
+  multipartite(1, 8)                 n=  9 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=   0] unknown=  0 TRUNC pass
+  multipartite(2, 7)                 n=  9 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=5800 spans=   0] unknown=  0 TRUNC pass
+  multipartite(3, 6)                 n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=6068 spans=   0] unknown=  0 TRUNC pass
+  multipartite(4, 5)                 n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=5462 spans=   0] unknown=  0 TRUNC pass
+  multipartite(1, 1, 7)              n=  9 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=1800] unknown=  0 TRUNC pass
+  multipartite(1, 2, 6)              n=  9 nodes= 3711 non-disc= 2271 levels= 6 cells[in-part=2788 spans=   0] unknown=  0 pass
+  multipartite(1, 3, 5)              n=  9 nodes= 2060 non-disc= 1340 levels= 6 cells[in-part=1684 spans=   0] unknown=  0 pass
+  multipartite(1, 4, 4)              n=  9 nodes= 3281 non-disc= 2129 levels= 6 cells[in-part=2672 spans=   1] unknown=  0 pass
+  multipartite(2, 2, 5)              n=  9 nodes= 2678 non-disc= 1718 levels= 6 cells[in-part=1942 spans= 206] unknown=  0 pass
+  multipartite(2, 3, 4)              n=  9 nodes= 1230 non-disc=  942 levels= 6 cells[in-part=1412 spans=   0] unknown=  0 pass
+  multipartite(3, 3, 3)              n=  9 nodes= 4000 non-disc= 3592 levels= 6 cells[in-part=5193 spans=  28] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 6)           n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=3280 spans=2788] unknown=  0 TRUNC pass
+  multipartite(1, 1, 2, 5)           n=  9 nodes= 1854 non-disc= 1374 levels= 6 cells[in-part=1392 spans= 618] unknown=  0 pass
+  multipartite(1, 1, 3, 4)           n=  9 nodes= 1230 non-disc=  942 levels= 6 cells[in-part=1002 spans= 410] unknown=  0 pass
+  multipartite(1, 2, 2, 4)           n=  9 nodes=  533 non-disc=  341 levels= 5 cells[in-part= 385 spans=  41] unknown=  0 pass
+  multipartite(1, 2, 3, 3)           n=  9 nodes=  543 non-disc=  399 levels= 5 cells[in-part= 577 spans=   3] unknown=  0 pass
+  multipartite(2, 2, 2, 3)           n=  9 nodes=  790 non-disc=  502 levels= 5 cells[in-part= 556 spans=  70] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 5)        n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=2800 spans=2662] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 2, 4)        n=  9 nodes= 1230 non-disc=  942 levels= 6 cells[in-part= 920 spans= 492] unknown=  0 pass
+  multipartite(1, 1, 1, 3, 3)        n=  9 nodes= 1810 non-disc= 1378 levels= 6 cells[in-part=1320 spans= 734] unknown=  0 pass
+  multipartite(1, 1, 2, 2, 3)        n=  9 nodes=  390 non-disc=  294 levels= 5 cells[in-part= 276 spans= 160] unknown=  0 pass
+  multipartite(1, 2, 2, 2, 2)        n=  9 nodes=  633 non-disc=  249 levels= 4 cells[in-part= 192 spans=  57] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 1, 4)     n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=2728 spans=2734] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 2, 3)     n=  9 nodes= 1230 non-disc=  942 levels= 6 cells[in-part= 902 spans= 510] unknown=  0 pass
+  multipartite(1, 1, 1, 2, 2, 2)     n=  9 nodes=  790 non-disc=  502 levels= 5 cells[in-part= 240 spans= 386] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 1, 1, 3)  n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=2926 spans=3142] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 1, 2, 2)  n=  9 nodes= 2678 non-disc= 1718 levels= 6 cells[in-part= 824 spans=1324] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 1, 1, 1, 2) n=  9 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=2528 spans=4000] unknown=  0 TRUNC pass
+  multipartite(1, 9)                 n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=   0] unknown=  0 TRUNC pass
+  multipartite(2, 8)                 n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=6081 spans=   0] unknown=  0 TRUNC pass
+  multipartite(3, 7)                 n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=6860 spans=   0] unknown=  0 TRUNC pass
+  multipartite(4, 6)                 n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=7292 spans=   0] unknown=  0 TRUNC pass
+  multipartite(5, 5)                 n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=7428 spans=   1] unknown=  0 TRUNC pass
+  multipartite(1, 1, 8)              n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=2081] unknown=  0 TRUNC pass
+  multipartite(1, 2, 7)              n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=5800 spans=   0] unknown=  0 TRUNC pass
+  multipartite(1, 3, 6)              n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=6068 spans=   0] unknown=  0 TRUNC pass
+  multipartite(1, 4, 5)              n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=5462 spans=   0] unknown=  0 TRUNC pass
+  multipartite(2, 2, 6)              n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=5909 spans= 676] unknown=  0 TRUNC pass
+  multipartite(2, 3, 5)              n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=6372 spans=   0] unknown=  0 TRUNC pass
+  multipartite(2, 4, 4)              n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=7675 spans=   3] unknown=  0 TRUNC pass
+  multipartite(3, 3, 4)              n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=6796 spans=  41] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 7)           n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=2860] unknown=  0 TRUNC pass
+  multipartite(1, 1, 2, 6)           n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=5551 spans=2271] unknown=  0 TRUNC pass
+  multipartite(1, 1, 3, 5)           n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=5032 spans=1340] unknown=  0 TRUNC pass
+  multipartite(1, 1, 4, 4)           n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=5629 spans=2049] unknown=  0 TRUNC pass
+  multipartite(1, 2, 2, 5)           n= 10 nodes= 2678 non-disc= 1718 levels= 6 cells[in-part=1942 spans= 206] unknown=  0 pass
+  multipartite(1, 2, 3, 4)           n= 10 nodes= 1230 non-disc=  942 levels= 6 cells[in-part=1412 spans=   0] unknown=  0 pass
+  multipartite(1, 3, 3, 3)           n= 10 nodes= 4000 non-disc= 3592 levels= 6 cells[in-part=5193 spans=  28] unknown=  0 TRUNC pass
+  multipartite(2, 2, 2, 4)           n= 10 nodes= 3239 non-disc= 2087 levels= 6 cells[in-part=2327 spans= 287] unknown=  0 pass
+  multipartite(2, 2, 3, 3)           n= 10 nodes= 2353 non-disc= 1777 levels= 6 cells[in-part=2440 spans= 194] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 6)        n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=3292] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 2, 5)        n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=4160 spans=2212] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 3, 4)        n= 10 nodes= 4000 non-disc= 3236 levels= 7 cells[in-part=3340 spans=1640] unknown=  0 TRUNC pass
+  multipartite(1, 1, 2, 2, 4)        n= 10 nodes= 1599 non-disc= 1215 levels= 6 cells[in-part=1155 spans= 656] unknown=  0 pass
+  multipartite(1, 1, 2, 3, 3)        n= 10 nodes= 1629 non-disc= 1341 levels= 6 cells[in-part=1731 spans= 552] unknown=  0 pass
+  multipartite(1, 2, 2, 2, 3)        n= 10 nodes=  790 non-disc=  502 levels= 5 cells[in-part= 556 spans=  70] unknown=  0 pass
+  multipartite(2, 2, 2, 2, 2)        n= 10 nodes= 4000 non-disc= 2491 levels= 5 cells[in-part=1920 spans= 571] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 1, 5)     n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=3520 spans=3470] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 2, 4)     n= 10 nodes= 4000 non-disc= 3891 levels= 7 cells[in-part=3772 spans=2091] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 3, 3)     n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=4295 spans=2542] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 2, 2, 3)     n= 10 nodes= 1300 non-disc= 1012 levels= 6 cells[in-part= 920 spans= 620] unknown=  0 pass
+  multipartite(1, 1, 2, 2, 2, 2)     n= 10 nodes= 1899 non-disc= 1131 levels= 5 cells[in-part= 576 spans= 804] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 1, 1, 4)  n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=3472 spans=3622] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 1, 2, 3)  n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=4044 spans=2328] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 2, 2, 2)  n= 10 nodes= 3239 non-disc= 2087 levels= 6 cells[in-part= 984 spans=1630] unknown=  0 pass
+  multipartite(1, 1, 1, 1, 1, 1, 1, 3) n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=3340 spans=4000] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 1, 1, 2, 2) n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=1811 spans=4517] unknown=  0 TRUNC pass
+  multipartite(1, 1, 1, 1, 1, 1, 1, 1, 2) n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=2826 spans=4000] unknown=  0 TRUNC pass
+
+--- cluster ---
+  cluster(1, 2)                      n=  3 nodes=    3 non-disc=    1 levels= 1 cells[in-part=   1 spans=   0] unknown=  0 pass
+  cluster(1, 3)                      n=  4 nodes=   10 non-disc=    4 levels= 2 cells[in-part=   4 spans=   0] unknown=  0 pass
+  cluster(2, 2)                      n=  4 nodes=   13 non-disc=    5 levels= 2 cells[in-part=   4 spans=   1] unknown=  0 pass
+  cluster(1, 1, 2)                   n=  4 nodes=    9 non-disc=    5 levels= 2 cells[in-part=   3 spans=   3] unknown=  0 pass
+  cluster(1, 4)                      n=  5 nodes=   41 non-disc=   17 levels= 3 cells[in-part=  17 spans=   0] unknown=  0 pass
+  cluster(2, 3)                      n=  5 nodes=   30 non-disc=   18 levels= 3 cells[in-part=  22 spans=   0] unknown=  0 pass
+  cluster(1, 1, 3)                   n=  5 nodes=   30 non-disc=   18 levels= 3 cells[in-part=  12 spans=  10] unknown=  0 pass
+  cluster(1, 2, 2)                   n=  5 nodes=   13 non-disc=    5 levels= 2 cells[in-part=   4 spans=   1] unknown=  0 pass
+  cluster(1, 1, 1, 2)                n=  5 nodes=   30 non-disc=   18 levels= 3 cells[in-part=  10 spans=  12] unknown=  0 pass
+  cluster(1, 5)                      n=  6 nodes=  206 non-disc=   86 levels= 4 cells[in-part=  86 spans=   0] unknown=  0 pass
+  cluster(2, 4)                      n=  6 nodes=  123 non-disc=   75 levels= 4 cells[in-part=  92 spans=   0] unknown=  0 pass
+  cluster(3, 3)                      n=  6 nodes=  181 non-disc=  109 levels= 4 cells[in-part= 132 spans=   1] unknown=  0 pass
+  cluster(1, 1, 4)                   n=  6 nodes=  123 non-disc=   75 levels= 4 cells[in-part=  51 spans=  41] unknown=  0 pass
+  cluster(1, 2, 3)                   n=  6 nodes=   30 non-disc=   18 levels= 3 cells[in-part=  22 spans=   0] unknown=  0 pass
+  cluster(2, 2, 2)                   n=  6 nodes=   79 non-disc=   31 levels= 3 cells[in-part=  24 spans=   7] unknown=  0 pass
+  cluster(1, 1, 1, 3)                n=  6 nodes=  100 non-disc=   64 levels= 4 cells[in-part=  40 spans=  40] unknown=  0 pass
+  cluster(1, 1, 2, 2)                n=  6 nodes=   39 non-disc=   23 levels= 3 cells[in-part=  12 spans=  16] unknown=  0 pass
+  cluster(1, 1, 1, 1, 2)             n=  6 nodes=  123 non-disc=   75 levels= 4 cells[in-part=  41 spans=  51] unknown=  0 pass
+  cluster(1, 6)                      n=  7 nodes= 1237 non-disc=  517 levels= 5 cells[in-part= 517 spans=   0] unknown=  0 pass
+  cluster(2, 5)                      n=  7 nodes=  618 non-disc=  378 levels= 5 cells[in-part= 464 spans=   0] unknown=  0 pass
+  cluster(3, 4)                      n=  7 nodes=  410 non-disc=  266 levels= 5 cells[in-part= 334 spans=   0] unknown=  0 pass
+  cluster(1, 1, 5)                   n=  7 nodes=  618 non-disc=  378 levels= 5 cells[in-part= 258 spans= 206] unknown=  0 pass
+  cluster(1, 2, 4)                   n=  7 nodes=  123 non-disc=   75 levels= 4 cells[in-part=  92 spans=   0] unknown=  0 pass
+  cluster(1, 3, 3)                   n=  7 nodes=  181 non-disc=  109 levels= 4 cells[in-part= 132 spans=   1] unknown=  0 pass
+  cluster(2, 2, 3)                   n=  7 nodes=  130 non-disc=   82 levels= 4 cells[in-part=  92 spans=  10] unknown=  0 pass
+  cluster(1, 1, 1, 4)                n=  7 nodes=  410 non-disc=  266 levels= 5 cells[in-part= 170 spans= 164] unknown=  0 pass
+  cluster(1, 1, 2, 3)                n=  7 nodes=   90 non-disc=   66 levels= 4 cells[in-part=  66 spans=  30] unknown=  0 pass
+  cluster(1, 2, 2, 2)                n=  7 nodes=   79 non-disc=   31 levels= 3 cells[in-part=  24 spans=   7] unknown=  0 pass
+  cluster(1, 1, 1, 1, 3)             n=  7 nodes=  410 non-disc=  266 levels= 5 cells[in-part= 164 spans= 170] unknown=  0 pass
+  cluster(1, 1, 1, 2, 2)             n=  7 nodes=  130 non-disc=   82 levels= 4 cells[in-part=  40 spans=  62] unknown=  0 pass
+  cluster(1, 1, 1, 1, 1, 2)          n=  7 nodes=  618 non-disc=  378 levels= 5 cells[in-part= 206 spans= 258] unknown=  0 pass
+  cluster(1, 7)                      n=  8 nodes= 4000 non-disc= 3620 levels= 6 cells[in-part=3620 spans=   0] unknown=  0 TRUNC pass
+  cluster(2, 6)                      n=  8 nodes= 3711 non-disc= 2271 levels= 6 cells[in-part=2788 spans=   0] unknown=  0 pass
+  cluster(3, 5)                      n=  8 nodes= 2060 non-disc= 1340 levels= 6 cells[in-part=1684 spans=   0] unknown=  0 pass
+  cluster(4, 4)                      n=  8 nodes= 3281 non-disc= 2129 levels= 6 cells[in-part=2672 spans=   1] unknown=  0 pass
+  cluster(1, 1, 6)                   n=  8 nodes= 3711 non-disc= 2271 levels= 6 cells[in-part=1551 spans=1237] unknown=  0 pass
+  cluster(1, 2, 5)                   n=  8 nodes=  618 non-disc=  378 levels= 5 cells[in-part= 464 spans=   0] unknown=  0 pass
+  cluster(1, 3, 4)                   n=  8 nodes=  410 non-disc=  266 levels= 5 cells[in-part= 334 spans=   0] unknown=  0 pass
+  cluster(2, 2, 4)                   n=  8 nodes=  533 non-disc=  341 levels= 5 cells[in-part= 385 spans=  41] unknown=  0 pass
+  cluster(2, 3, 3)                   n=  8 nodes=  543 non-disc=  399 levels= 5 cells[in-part= 577 spans=   3] unknown=  0 pass
+  cluster(1, 1, 1, 5)                n=  8 nodes= 2060 non-disc= 1340 levels= 6 cells[in-part= 860 spans= 824] unknown=  0 pass
+  cluster(1, 1, 2, 4)                n=  8 nodes=  369 non-disc=  273 levels= 5 cells[in-part= 276 spans= 123] unknown=  0 pass
+  cluster(1, 1, 3, 3)                n=  8 nodes=  543 non-disc=  399 levels= 5 cells[in-part= 396 spans= 184] unknown=  0 pass
+  cluster(1, 2, 2, 3)                n=  8 nodes=  130 non-disc=   82 levels= 4 cells[in-part=  92 spans=  10] unknown=  0 pass
+  cluster(2, 2, 2, 2)                n=  8 nodes=  633 non-disc=  249 levels= 4 cells[in-part= 192 spans=  57] unknown=  0 pass
+  cluster(1, 1, 1, 1, 4)             n=  8 nodes= 1681 non-disc= 1105 levels= 6 cells[in-part= 697 spans= 697] unknown=  0 pass
+  cluster(1, 1, 1, 2, 3)             n=  8 nodes=  300 non-disc=  228 levels= 5 cells[in-part= 220 spans= 120] unknown=  0 pass
+  cluster(1, 1, 2, 2, 2)             n=  8 nodes=  237 non-disc=  141 levels= 4 cells[in-part=  72 spans= 100] unknown=  0 pass
+  cluster(1, 1, 1, 1, 1, 3)          n=  8 nodes= 2060 non-disc= 1340 levels= 6 cells[in-part= 824 spans= 860] unknown=  0 pass
+  cluster(1, 1, 1, 1, 2, 2)          n=  8 nodes=  533 non-disc=  341 levels= 5 cells[in-part= 164 spans= 262] unknown=  0 pass
+  cluster(1, 1, 1, 1, 1, 1, 2)       n=  8 nodes= 3711 non-disc= 2271 levels= 6 cells[in-part=1237 spans=1551] unknown=  0 pass
+  cluster(1, 8)                      n=  9 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=   0] unknown=  0 TRUNC pass
+  cluster(2, 7)                      n=  9 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=5800 spans=   0] unknown=  0 TRUNC pass
+  cluster(3, 6)                      n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=6068 spans=   0] unknown=  0 TRUNC pass
+  cluster(4, 5)                      n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=5462 spans=   0] unknown=  0 TRUNC pass
+  cluster(1, 1, 7)                   n=  9 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=1800] unknown=  0 TRUNC pass
+  cluster(1, 2, 6)                   n=  9 nodes= 3711 non-disc= 2271 levels= 6 cells[in-part=2788 spans=   0] unknown=  0 pass
+  cluster(1, 3, 5)                   n=  9 nodes= 2060 non-disc= 1340 levels= 6 cells[in-part=1684 spans=   0] unknown=  0 pass
+  cluster(1, 4, 4)                   n=  9 nodes= 3281 non-disc= 2129 levels= 6 cells[in-part=2672 spans=   1] unknown=  0 pass
+  cluster(2, 2, 5)                   n=  9 nodes= 2678 non-disc= 1718 levels= 6 cells[in-part=1942 spans= 206] unknown=  0 pass
+  cluster(2, 3, 4)                   n=  9 nodes= 1230 non-disc=  942 levels= 6 cells[in-part=1412 spans=   0] unknown=  0 pass
+  cluster(3, 3, 3)                   n=  9 nodes= 4000 non-disc= 3592 levels= 6 cells[in-part=5193 spans=  28] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 6)                n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=3280 spans=2788] unknown=  0 TRUNC pass
+  cluster(1, 1, 2, 5)                n=  9 nodes= 1854 non-disc= 1374 levels= 6 cells[in-part=1392 spans= 618] unknown=  0 pass
+  cluster(1, 1, 3, 4)                n=  9 nodes= 1230 non-disc=  942 levels= 6 cells[in-part=1002 spans= 410] unknown=  0 pass
+  cluster(1, 2, 2, 4)                n=  9 nodes=  533 non-disc=  341 levels= 5 cells[in-part= 385 spans=  41] unknown=  0 pass
+  cluster(1, 2, 3, 3)                n=  9 nodes=  543 non-disc=  399 levels= 5 cells[in-part= 577 spans=   3] unknown=  0 pass
+  cluster(2, 2, 2, 3)                n=  9 nodes=  790 non-disc=  502 levels= 5 cells[in-part= 556 spans=  70] unknown=  0 pass
+  cluster(1, 1, 1, 1, 5)             n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=2800 spans=2662] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 2, 4)             n=  9 nodes= 1230 non-disc=  942 levels= 6 cells[in-part= 920 spans= 492] unknown=  0 pass
+  cluster(1, 1, 1, 3, 3)             n=  9 nodes= 1810 non-disc= 1378 levels= 6 cells[in-part=1320 spans= 734] unknown=  0 pass
+  cluster(1, 1, 2, 2, 3)             n=  9 nodes=  390 non-disc=  294 levels= 5 cells[in-part= 276 spans= 160] unknown=  0 pass
+  cluster(1, 2, 2, 2, 2)             n=  9 nodes=  633 non-disc=  249 levels= 4 cells[in-part= 192 spans=  57] unknown=  0 pass
+  cluster(1, 1, 1, 1, 1, 4)          n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=2728 spans=2734] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 2, 3)          n=  9 nodes= 1230 non-disc=  942 levels= 6 cells[in-part= 902 spans= 510] unknown=  0 pass
+  cluster(1, 1, 1, 2, 2, 2)          n=  9 nodes=  790 non-disc=  502 levels= 5 cells[in-part= 240 spans= 386] unknown=  0 pass
+  cluster(1, 1, 1, 1, 1, 1, 3)       n=  9 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=2926 spans=3142] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 1, 2, 2)       n=  9 nodes= 2678 non-disc= 1718 levels= 6 cells[in-part= 824 spans=1324] unknown=  0 pass
+  cluster(1, 1, 1, 1, 1, 1, 1, 2)    n=  9 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=2528 spans=4000] unknown=  0 TRUNC pass
+  cluster(1, 9)                      n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=   0] unknown=  0 TRUNC pass
+  cluster(2, 8)                      n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=6081 spans=   0] unknown=  0 TRUNC pass
+  cluster(3, 7)                      n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=6860 spans=   0] unknown=  0 TRUNC pass
+  cluster(4, 6)                      n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=7292 spans=   0] unknown=  0 TRUNC pass
+  cluster(5, 5)                      n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=7428 spans=   1] unknown=  0 TRUNC pass
+  cluster(1, 1, 8)                   n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=2081] unknown=  0 TRUNC pass
+  cluster(1, 2, 7)                   n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=5800 spans=   0] unknown=  0 TRUNC pass
+  cluster(1, 3, 6)                   n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=6068 spans=   0] unknown=  0 TRUNC pass
+  cluster(1, 4, 5)                   n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=5462 spans=   0] unknown=  0 TRUNC pass
+  cluster(2, 2, 6)                   n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=5909 spans= 676] unknown=  0 TRUNC pass
+  cluster(2, 3, 5)                   n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=6372 spans=   0] unknown=  0 TRUNC pass
+  cluster(2, 4, 4)                   n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=7675 spans=   3] unknown=  0 TRUNC pass
+  cluster(3, 3, 4)                   n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=6796 spans=  41] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 7)                n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=2860] unknown=  0 TRUNC pass
+  cluster(1, 1, 2, 6)                n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=5551 spans=2271] unknown=  0 TRUNC pass
+  cluster(1, 1, 3, 5)                n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=5032 spans=1340] unknown=  0 TRUNC pass
+  cluster(1, 1, 4, 4)                n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=5629 spans=2049] unknown=  0 TRUNC pass
+  cluster(1, 2, 2, 5)                n= 10 nodes= 2678 non-disc= 1718 levels= 6 cells[in-part=1942 spans= 206] unknown=  0 pass
+  cluster(1, 2, 3, 4)                n= 10 nodes= 1230 non-disc=  942 levels= 6 cells[in-part=1412 spans=   0] unknown=  0 pass
+  cluster(1, 3, 3, 3)                n= 10 nodes= 4000 non-disc= 3592 levels= 6 cells[in-part=5193 spans=  28] unknown=  0 TRUNC pass
+  cluster(2, 2, 2, 4)                n= 10 nodes= 3239 non-disc= 2087 levels= 6 cells[in-part=2327 spans= 287] unknown=  0 pass
+  cluster(2, 2, 3, 3)                n= 10 nodes= 2353 non-disc= 1777 levels= 6 cells[in-part=2440 spans= 194] unknown=  0 pass
+  cluster(1, 1, 1, 1, 6)             n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=4000 spans=3292] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 2, 5)             n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=4160 spans=2212] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 3, 4)             n= 10 nodes= 4000 non-disc= 3236 levels= 7 cells[in-part=3340 spans=1640] unknown=  0 TRUNC pass
+  cluster(1, 1, 2, 2, 4)             n= 10 nodes= 1599 non-disc= 1215 levels= 6 cells[in-part=1155 spans= 656] unknown=  0 pass
+  cluster(1, 1, 2, 3, 3)             n= 10 nodes= 1629 non-disc= 1341 levels= 6 cells[in-part=1731 spans= 552] unknown=  0 pass
+  cluster(1, 2, 2, 2, 3)             n= 10 nodes=  790 non-disc=  502 levels= 5 cells[in-part= 556 spans=  70] unknown=  0 pass
+  cluster(2, 2, 2, 2, 2)             n= 10 nodes= 4000 non-disc= 2491 levels= 5 cells[in-part=1920 spans= 571] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 1, 5)          n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=3520 spans=3470] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 2, 4)          n= 10 nodes= 4000 non-disc= 3891 levels= 7 cells[in-part=3772 spans=2091] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 3, 3)          n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=4295 spans=2542] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 2, 2, 3)          n= 10 nodes= 1300 non-disc= 1012 levels= 6 cells[in-part= 920 spans= 620] unknown=  0 pass
+  cluster(1, 1, 2, 2, 2, 2)          n= 10 nodes= 1899 non-disc= 1131 levels= 5 cells[in-part= 576 spans= 804] unknown=  0 pass
+  cluster(1, 1, 1, 1, 1, 1, 4)       n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=3472 spans=3622] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 1, 2, 3)       n= 10 nodes= 4000 non-disc= 4000 levels= 7 cells[in-part=4044 spans=2328] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 2, 2, 2)       n= 10 nodes= 3239 non-disc= 2087 levels= 6 cells[in-part= 984 spans=1630] unknown=  0 pass
+  cluster(1, 1, 1, 1, 1, 1, 1, 3)    n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=3340 spans=4000] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 1, 1, 2, 2)    n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=1811 spans=4517] unknown=  0 TRUNC pass
+  cluster(1, 1, 1, 1, 1, 1, 1, 1, 2) n= 10 nodes= 4000 non-disc= 4000 levels= 6 cells[in-part=2826 spans=4000] unknown=  0 TRUNC pass
+
+================================================================================================
+graphs run          : 238
+clean pass          : 238
+FAILURES            : 0   []
+unknown (budget)    : 0   []
+NON-VACUITY levels>=2: 236 of 238   max levels = 7
+cells spanning >=2 parts seen in: 174 graphs (total 159962 cells)  <- the part-swap case
+cells inside one part          : total 491602   <- the twin-transposition case
+truncated at NODE_CAP=4000: ['multipartite(1, 7)', 'multipartite(1, 8)', 'multipartite(2, 7)', 'multipartite(3, 6)', 'multipartite(4, 5)', 'multipartite(1, 1, 7)', 'multipartite(3, 3, 3)', 'multipartite(1, 1, 1, 6)', 'multipartite(1, 1, 1, 1, 5)', 'multipartite(1, 1, 1, 1, 1, 4)', 'multipartite(1, 1, 1, 1, 1, 1, 3)', 'multipartite(1, 1, 1, 1, 1, 1, 1, 2)', 'multipartite(1, 9)', 'multipartite(2, 8)', 'multipartite(3, 7)', 'multipartite(4, 6)', 'multipartite(5, 5)', 'multipartite(1, 1, 8)', 'multipartite(1, 2, 7)', 'multipartite(1, 3, 6)', 'multipartite(1, 4, 5)', 'multipartite(2, 2, 6)', 'multipartite(2, 3, 5)', 'multipartite(2, 4, 4)', 'multipartite(3, 3, 4)', 'multipartite(1, 1, 1, 7)', 'multipartite(1, 1, 2, 6)', 'multipartite(1, 1, 3, 5)', 'multipartite(1, 1, 4, 4)', 'multipartite(1, 3, 3, 3)', 'multipartite(1, 1, 1, 1, 6)', 'multipartite(1, 1, 1, 2, 5)', 'multipartite(1, 1, 1, 3, 4)', 'multipartite(2, 2, 2, 2, 2)', 'multipartite(1, 1, 1, 1, 1, 5)', 'multipartite(1, 1, 1, 1, 2, 4)', 'multipartite(1, 1, 1, 1, 3, 3)', 'multipartite(1, 1, 1, 1, 1, 1, 4)', 'multipartite(1, 1, 1, 1, 1, 2, 3)', 'multipartite(1, 1, 1, 1, 1, 1, 1, 3)', 'multipartite(1, 1, 1, 1, 1, 1, 2, 2)', 'multipartite(1, 1, 1, 1, 1, 1, 1, 1, 2)', 'cluster(1, 7)', 'cluster(1, 8)', 'cluster(2, 7)', 'cluster(3, 6)', 'cluster(4, 5)', 'cluster(1, 1, 7)', 'cluster(3, 3, 3)', 'cluster(1, 1, 1, 6)', 'cluster(1, 1, 1, 1, 5)', 'cluster(1, 1, 1, 1, 1, 4)', 'cluster(1, 1, 1, 1, 1, 1, 3)', 'cluster(1, 1, 1, 1, 1, 1, 1, 2)', 'cluster(1, 9)', 'cluster(2, 8)', 'cluster(3, 7)', 'cluster(4, 6)', 'cluster(5, 5)', 'cluster(1, 1, 8)', 'cluster(1, 2, 7)', 'cluster(1, 3, 6)', 'cluster(1, 4, 5)', 'cluster(2, 2, 6)', 'cluster(2, 3, 5)', 'cluster(2, 4, 4)', 'cluster(3, 3, 4)', 'cluster(1, 1, 1, 7)', 'cluster(1, 1, 2, 6)', 'cluster(1, 1, 3, 5)', 'cluster(1, 1, 4, 4)', 'cluster(1, 3, 3, 3)', 'cluster(1, 1, 1, 1, 6)', 'cluster(1, 1, 1, 2, 5)', 'cluster(1, 1, 1, 3, 4)', 'cluster(2, 2, 2, 2, 2)', 'cluster(1, 1, 1, 1, 1, 5)', 'cluster(1, 1, 1, 1, 2, 4)', 'cluster(1, 1, 1, 1, 3, 3)', 'cluster(1, 1, 1, 1, 1, 1, 4)', 'cluster(1, 1, 1, 1, 1, 2, 3)', 'cluster(1, 1, 1, 1, 1, 1, 1, 3)', 'cluster(1, 1, 1, 1, 1, 1, 2, 2)', 'cluster(1, 1, 1, 1, 1, 1, 1, 1, 2)']
+SKIPPED (logged)    : []
+wall clock          : 129.5s
+
+GATE: PASS  (needs zero failures, zero unknowns, and non-vacuous descents)
