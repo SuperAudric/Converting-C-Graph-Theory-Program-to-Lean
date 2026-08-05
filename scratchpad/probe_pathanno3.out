@@ -1,0 +1,2 @@
+=== net(Z4)=CFI[K4]-tw n=28 |Aut|=192 orbitals=14 2-WL=10 (2-WL==orb? False)
+    maxlen=14  A1=  8  A2= 13   A2==orb? False  orb refines A2? True   A2 vs 2-WL: A2 refines 2WL? False  2WL refines A2? False   [42.6s]

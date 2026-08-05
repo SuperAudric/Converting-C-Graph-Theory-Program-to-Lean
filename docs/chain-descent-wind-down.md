@@ -655,13 +655,50 @@ witness (so some cell on its descent is not a single orbit ⟹ not `Tinhofer`), 
 relation there was measured stable across five relabellings (`[2,2,2,2,4,4,4,4]`) where the single-anchor
 relation was measured unstable. The repair all-anchors performs is invisible to a per-anchor induction.
 
-**▶ THE PROBE THIS HANDS OVER (the one decisive measurement):** *is deepen's all-anchors branch-cell
-partition equal to the exact `Aut`-orbit partition at partially-firing, non-`Tinhofer` nodes?* Witnesses:
-`G8`/`t3`/`wcyc9`/`ut` plus the VT non-`Tinhofer` ones (`Cay(Z₁₂⋊₅Z₂)`, Shrikhande). **Yes** ⟹
-`OrbitComplete` is true beyond `Tinhofer` and wants a union argument, not a per-anchor induction. **No** ⟹
-the target is not `OrbitComplete` at all but invariance of a strictly *partial* relation — a different and
-harder theorem. ⚠ Use an exact group computation for the reference partition: `probe_orbit_oracle` is
-recorded **wrong** (it errs by merging).
+#### ✅ THAT MEASUREMENT WAS ALREADY RUN, AND IT IS POSITIVE (found 2026-08-04 — do not re-commission it)
+
+⛔ An earlier draft of this block proposed *"is deepen's all-anchors branch-cell partition equal to the
+exact `Aut`-orbit partition at non-`Tinhofer` nodes?"* as the probe to hand over. **It exists and it
+answers yes.**
+
+| probe | result |
+|---|---|
+| `scratchpad/probe_verdict_invariance.py` | the **all-anchor** harvest partition of the branch cell **equals the true `Aut`-orbit partition, and transports**, on **17/17** structured witnesses — multipedes, CFI over cubic bases (m = 8/10/12/14, plain and twisted), rigid multipedes. ⟹ **`Deepen.OrbitComplete` is measured TRUE well beyond `Tinhofer`** |
+| `scratchpad/probe_certkey.py` | *"certified-below ⟹ the greedy cert is iso-invariant"* — **0 counterexamples**. ★ But **uncertified** reps DO produce non-invariant certs (rand multipede V=12 W=8: 2; CFI cubic m=10: 4, where the cert over-splits **7 classes vs 6 orbits**) |
+
+⟹ the per-anchor object (the cert) is **not** invariant at uncertified anchors, while the
+union-over-anchors **relation** is exact anyway. **The all-anchors repair is real and unexplained**, and
+`OrbitComplete` — not a partial-relation invariance theorem — is the right target. It wants a **union
+argument over anchors**, which is exactly what `DeepenComplete`'s per-anchor induction cannot see.
+
+#### ⛔ AND THE "MIXED ORBITS IDENTIFY EACH OTHER" MECHANISM IS *NOT* THE EXPLANATION — `scratchpad/probe_selfsep.py`
+
+User hypothesis (2026-08-04): the repaired cells are mixed orbits where *individualizing any member
+reveals and separates its own orbit-mates out*, so replay from a non-mate cannot follow the anchor's id
+sequence and yields no candidate. Measured at the root branch cell, per member `x`, with
+`child = refine(indiv(col, x))`:
+
+* **M1** — `child` separates `x`'s own orbit from the rest of the cell;
+* **M2** — `child` exposes the whole orbit structure of the cell.
+
+**The mechanism is widespread but not sufficient as an explanation.** M1 is full on `G8` (8/8, orbits 3),
+`MIXED`, rand multipede V=6 W=5, and **every CFI witness** (32/32, 40/40, 48/48) — but **`circ(5)`
+multipede has `harvest-exact=Y` with M1 only 15/20 and M2 only 10/20**, on a cell where all 20 members are
+non-vacuous. So exactness survives where the mechanism fails ⟹ **M1 does not explain the repair.**
+
+▶ **What it may still be worth:** nothing measured *refutes* M1 as a **sufficient** condition (every
+M1-full witness is exact), and M1 is poly and decidable — one `Deepen.step` per cell member — so it is a
+candidate **sound-but-incomplete guard**, strictly weaker than `Tinhofer` and strictly stronger than
+nothing. ⚠⚠ **But the sweep cannot confirm sufficiency: it contains no `exact=N` witness at all**, so
+"M1 ⟹ exact" is untested in the only direction that would discriminate. Testing it needs a witness where
+the harvest is *not* exact, and 17 + 13 witnesses have failed to produce one.
+
+⚠ **Do not read the rigid-multipede rows as evidence**: `rand multipede V=8/10/12` have `|C| = 4` with
+**4 singleton orbits**, so `non-vacuous-x = 0/4` — M1 passes there with nothing to separate.
+⚠ Reference partitions come from `Ctx`/`canon` (min-over-cell exhaustive), never `probe_orbit_oracle`
+(recorded **wrong** — it errs by merging). `probe_selfsep.py` adds a soundness cross-check the recorded
+instrument lacks (cert-classes of explored vertices must agree with the generator orbits, else the
+partition over-splits and an `exact=Y` verdict would be meaningless); no witness tripped it.
 >
 > ### ▶ (SUPERSEDED) the step as originally scoped — a COMPUTABLE GUARD, believed *not* R1
 > `DeepenCertified` §7 names this as "the theorem this track is aiming at": guard on

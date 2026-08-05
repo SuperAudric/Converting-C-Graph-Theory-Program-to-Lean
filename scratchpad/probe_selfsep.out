@@ -1,0 +1,30 @@
+probe_selfsep.py — IS THE ALL-ANCHOR REPAIR EXPLAINED BY "MIXED ORBITS THAT IDENTIFY
+EACH OTHER"?   (user hypothesis, 2026-08-04)
+
+M1 = individualizing x separates x's OWN orbit from the rest of the cell
+M2 = individualizing x exposes the WHOLE orbit structure of the cell
+(x/tot = how many of the cell's members satisfy it)
+
+### the recorded rich partially-firing witness (absent from both earlier sweeps)
+  G8 cubic non-VT                n=8     |C|=8    orbits=3   harvest-exact=Y  M1=8/8  M2=8/8  non-vacuous-x=8/8
+
+### rigid multipedes — multi-orbit root cells
+  rand multipede V=6 W=5         n=34    |C|=8    orbits=4   harvest-exact=Y  M1=8/8  M2=8/8  non-vacuous-x=8/8
+  rand multipede V=8 W=6         n=44    |C|=4    orbits=4   harvest-exact=Y  M1=4/4  M2=4/4  non-vacuous-x=0/4
+  rand multipede V=10 W=7        n=54    |C|=4    orbits=4   harvest-exact=Y  M1=4/4  M2=4/4  non-vacuous-x=0/4
+  rand multipede V=12 W=8        n=64    |C|=4    orbits=4   harvest-exact=Y  M1=4/4  M2=4/4  non-vacuous-x=0/4
+
+### mixed / gauge
+  MIXED multipede                n=30    |C|=4    orbits=2   harvest-exact=Y  M1=4/4  M2=4/4  non-vacuous-x=4/4
+  circ(5) multipede              n=30    |C|=20   orbits=3   harvest-exact=Y  M1=15/20  M2=10/20  non-vacuous-x=20/20   <<< HARVEST EXACT BUT M1 FAILS — mechanism REFUTED as the explanation
+  mp7 Fano multipede             n=42    |C|=28   orbits=1  (single-orbit cell — mechanism vacuous)   harvest-exact=Y
+
+### CFI over random cubic bases
+  CFI cubic m=8 pl               n=56    |C|=32   orbits=3   harvest-exact=Y  M1=32/32  M2=32/32  non-vacuous-x=32/32
+  CFI cubic m=8 tw               n=56    |C|=32   orbits=3   harvest-exact=Y  M1=32/32  M2=32/32  non-vacuous-x=32/32
+  CFI cubic m=10 pl              n=70    |C|=40   orbits=3   harvest-exact=Y  M1=40/40  M2=40/40  non-vacuous-x=40/40
+  CFI cubic m=10 tw              n=70    |C|=40   orbits=3   harvest-exact=Y  M1=40/40  M2=40/40  non-vacuous-x=40/40
+  CFI cubic m=12 pl              n=84    |C|=48   orbits=6   harvest-exact=Y  M1=48/48  M2=44/48  non-vacuous-x=48/48
+  CFI cubic m=12 tw              n=84    |C|=48   orbits=6   harvest-exact=Y  M1=48/48  M2=44/48  non-vacuous-x=48/48
+
+>>> no witness skipped

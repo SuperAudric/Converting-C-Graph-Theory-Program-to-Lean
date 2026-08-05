@@ -198,6 +198,25 @@ investing in anything.
 >    2-transitive group's 2-closure is `Sym`, so **no binary structure on a cell can expose one**
 >    (brute-forced: 0 of all 32,768 graphs on 6 vertices).
 
+> ### ▶▶ ADDED 2026-08-05 — §14.5, the PATH-CONDENSATION lead
+> A route proposed from outside the doc: compare vertices by the **multiset of paths between them**,
+> which under a CAO residue should collapse to a cheap object. Three things came out of measuring it.
+> 1. **§14.5a — the project's own path canonizer IS 2-WL.** `Archive/V4/CanonGraphOrdererV4.cs`'s
+>    recursion equals the 2-WL pair closure **as a partition, 7/7 objects**. ⟹ *"V4 fell to CFI
+>    because it condensed partway"* is **retired**: it condenses exactly onto 2-WL, and 2-WL fails
+>    on CFI.
+> 2. **§14.5c — path objects and 2-WL are INCOMPARABLE.** Shrikhande: the path object reaches the
+>    orbitals (4) where 2-WL cannot (3). CFI[K4] plain: 2-WL is exact (10) where the path object is
+>    not (≤ 9). `net(Z₄)`: neither refines the other. ⟹ **a result about the path closure does not
+>    transfer to 2-WL.** --User note, this is wrong. It even contradicts 14.5a
+> 3. **§14.5b — FROM vs BETWEEN**, the distinction any condensation argument turns on: *paths from a
+>    vertex agree across a cell* is true but is CAO restated; *paths between a pair are determined by
+>    `[cell, conn, cell]`* is **false at a CAO root**, with a named witness in Shrikhande.
+>
+> ★ §14.5d(i): the lead's "path type" **is** the orbital, so its own question is §12.3's crux reached
+> independently — and §14.4's rung-2 obstruction is now a **one-line proof at every degree**, not a
+> degree-6 brute force. ▶ §14.5d(ii) names the one untested statement it leaves.
+
 **First actions — ▶▶ §13 (THE CONVERSION GAP) FIRST, then §12.5a.** Revised 2026-07-31: **nothing in
 this track can reach the built object until the `Deepen.step` swap is scoped and decided** (§13), so
 that scoping gates the value of every crux row. Only then §12.5a: **R1a** coordinate-level ablation of
@@ -788,8 +807,22 @@ mixed cells, **0 without mixed support**, and the support is **circular** (§14.
 concrete distinguisher (*are `v`'s two common neighbours with `u` adjacent?* — 9/9); **(D)** the arity
 lift — `A₅` on 6 points is transitive on pairs, `[10,10]` on triples, and the **2-closure obstruction**
 (0 of 32,768 graphs on 6 vertices have a 2-transitive-but-not-`S₆` group).
+**★★ §14.5 — the PATH-CONDENSATION probe set** (2026-08-05, seconds each unless noted).
+`probe_pathcondense.py` (the five pair-objects side by side: orbitals · 2-WL · walk counts · V4's
+recursion · `[cell,adj,cell]`, at a CAO root) · `probe_pathcondense2.py` (transpose-artifact control
+via symmetrized partitions, **plus** the post-individualization half: 2-WL fibres vs `Aut_v`-orbits) ·
+**`probe_v4_vs_2wl.py`** (§14.5a — **V4's recursion == the 2-WL pair closure as a PARTITION, 7/7**) ·
+`probe_pathanno.py` (the `A0`/`A1`/`A2` ladder — walk counts, simple-path counts, annotated simple
+paths; `simple_paths_profiles` is the reusable enumerator, takes a `deadline`) ·
+`probe_pathanno2.py` (the same at **fair truncation** — ⚠ comparing `A0` at length `n` against
+`A1`/`A2` at a short `maxlen` produces a spurious "does not refine"; truncate all three alike) ·
+`probe_pathanno3.out` (longer CFI lengths; **reached length 14 only** — 16/18 were not run) ·
+**`probe_shrikhande_explain.py`** (§14.5b's named witness `v=0, u=2, w=6`, and the round trace) ·
+**`probe_arity_ladder.py`** (§14.1's pullback re-verified on Shrikhande + rook, and §14.4's rung-2
+check on `A₅ = PSL(2,5)`: point/pair/triple orbits and the 2-closure).
 Shared machinery lives in `probe_cao_cleanroom.py` (§8.1); most files import it, so they are
-`__main__`-guarded — keep them that way (§9).
+`__main__`-guarded — keep them that way (§9). ⚠ `probe_pathanno.py` and `probe_pathcondense.py` are
+**imported** by the later probes and are guarded; keep them so.
 
 **Provenance** — `probe_cao_provenance.py` (§8.1/§8.2).
 
@@ -1473,9 +1506,10 @@ orbit"* (consume's domain, where the harvest's re-relating induction is exactly 
 **What this section is for.** §3 states the coupling principle abstractly; this section exhibits it
 **constructively at the smallest witness**, which turns out to (i) kill a natural-looking proof route
 before anyone spends a session on it (§14.2), and (ii) yield a **falsifier filter** for §10 item 3 that
-is cheaper than sweeping more families (§14.4). Everything below is measured by
+is cheaper than sweeping more families (§14.4), and (iii) record the **path-condensation lead** and
+what it hands the crux (**§14.5**, added 2026-08-05). §14.1–§14.4 are measured by
 **`scratchpad/probe_cao_anatomy.py`** (clean-room machinery of §8.1, ~22 s; output
-`probe_cao_anatomy.out`).
+`probe_cao_anatomy.out`); **§14.5 has its own probe list** — see its header.
 
 ### 14.1 ★ The far cell's split is a PULLBACK of the exposed shape's PAIR-orbits
 
@@ -1572,6 +1606,15 @@ up: the points are interchangeable, *every pair* is interchangeable, the triples
 > group's only orbitals are `{diagonal, rest}`, so its **2-closure is the full symmetric group**.
 > ⟹ **no binary structure on the cell can ever expose such a group.** Brute-forced over **all 32,768
 > graphs on 6 vertices: 0** have a 2-transitive-but-not-`S₆` automorphism group (`--closure`).
+>
+> ★★ **AND IT IS A ONE-LINE PROOF AT EVERY DEGREE, not a fact about degree 6 (2026-08-05).** If
+> `Aut(G)` is 2-transitive then for any two off-diagonal pairs some automorphism carries one to the
+> other, so **all** off-diagonal pairs have the same adjacency ⟹ `G` is complete or empty ⟹
+> `Aut(G) = Sym`. Verbatim the same for edge-coloured graphs (all off-diagonal pairs get one colour).
+> ⟹ the brute force above is a **special case**, and the obstruction holds at **every cell size**.
+> Confirmed on the canonical candidate (`scratchpad/probe_arity_ladder.py`): `A₅ = PSL(2,5)` on 6
+> points, `|G| = 60`, orbits on points `[6]` / pairs `[15]` / triples `[10, 10]`, orbitals `[6, 30]`
+> — **one** non-diagonal orbital — and **2-closure = 720 = |S₆|**.
 
 ⟹ at 1-WL the deficiency could hide **inside** the cell — hexagon-vs-two-triangles is a plain graph on
 `N(v)` that 1-WL merely failed to read. **At 2-WL that route is closed by definition**: the
@@ -1604,3 +1647,126 @@ for `k ≥ 5` (with `n ≥ 2k`) are only the symmetric and alternating ones — 
 is right, this shape of failure is **confined to low arity**. ⚠ **The citation has not been checked
 in-project**, and per this project's own steer a pinned statement nobody has tried to prove can be
 false. Treat as a lead, not a fact.
+
+### 14.5 ★★ THE PATH-CONDENSATION LEAD (added 2026-08-05)
+
+**The idea.** Compare two vertices not by refining colours but by the **multiset of paths between
+them**, taken up to length `n` (the short lengths must be included or cycles alias). Uncondensed
+that object is exponential. But under a **fibre-Schurian / CAO residue** two vertices in one cell
+are Aut-conjugate, so every path statistic already agrees across a cell — which suggests the
+expensive object is recoverable from a cheap one by **single-step increments**, and if it is,
+§12.3's `hsep` follows and the target with it.
+
+Everything below is measured with the clean-room machinery of §8.1 (**no orbit oracle**;
+automorphisms from `all_isos`, complete I-R enumeration with every leaf re-verified):
+`scratchpad/probe_pathcondense.py` · `probe_pathcondense2.py` · `probe_v4_vs_2wl.py` ·
+`probe_pathanno.py` · `probe_pathanno2.py` (+ `probe_pathanno3.out`) ·
+`probe_shrikhande_explain.py` · `probe_arity_ladder.py`. Seconds each, except the long-`maxlen`
+CFI runs (~45 s at length 14; lengths 16/18 were **not** reached — do not quote them).
+
+#### 14.5a ★★ THE PROJECT'S OWN PATH CANONIZER **IS** THE 2-WL PAIR CLOSURE
+
+`GraphCanonizationProject/Archive/V4/CanonGraphOrdererV4.cs` (built, then archived on cost)
+implements a path-multiset recursion — `:70-75`, `:294-301`:
+
+```
+P_d(a,b) = {{ ( rank P_{d-1}(a,mid), adj(mid,b) ) : mid }},   keyed also by the endpoint's type
+```
+
+Ported faithfully, it is **equal as a PARTITION** — not merely in class counts — to the 2-WL pair
+closure on **7/7** objects: Shrikhande, rook 4×4, `net(Z₄)`, CFI[K4] plain + twisted, CFI[K3,3]
+plain + twisted.
+
+⟹ **the archived condensation lands *exactly* on 2-WL**, and 2-WL is what fails on CFI. Any path
+object stronger than 2-WL must come from something that recursion does not build (§14.5c says what).
+
+★ **Independent validation of the constructions used in this section:** a from-scratch `net(Z₄)`
+came out identical to `CFI[K4]`-twisted on every column measured (n = 28, `|Aut| = 192`, orbitals
+14, 2-WL 10, walk counts 8) — §5's stated identification, reproduced by accident.
+
+#### 14.5b ⚠⚠ FROM vs BETWEEN — the distinction the lead turns on
+
+Two readings of *"the path multiset condenses under CAO"*. They have **opposite** verdicts, and the
+composition step of any condensation argument needs the second one.
+
+| reading | statement | at a CAO root |
+|---|---|---|
+| **FROM** | paths **from** `u` = paths **from** `w`, for `u,w` in one cell | ✅ **TRUE** — but it is CAO restated: *every* Aut-invariant is constant on cells. It says the cheap and the expensive object are **both** constant on cells, **not** that they are equal to each other |
+| **BETWEEN** | the path multiset **between** `a,b` is determined by `[cell(a), conn, cell(b)]` | ⛔ **FALSE — measured** |
+
+**The BETWEEN witness — Shrikhande, `v = 0`** (`probe_shrikhande_explain.py`). Root CAO holds
+(vertex-transitive: one cell = one orbit). `Aut_v`-orbits are `[1, 3, 6, 6]`; take `u = 2` from the
+3-orbit and `w = 6` from the 6-orbit — both non-adjacent to `v`, both in the single root cell:
+
+| quantity at `(v,u)` vs `(v,w)` | |
+|---|---|
+| `[cell, adj, cell]` · 2-WL root class · walk counts **at every length** | **identical** |
+| the true orbital | **different** |
+| simple-path counts, len ≤ 6 | identical |
+| **simple-path counts, len ≤ 7** | **differ** |
+| **annotated paths, len ≤ 3** | **differ** |
+
+`v`'s common neighbours with `u` are `[1,3]`, **non-adjacent**; with `w` they are `[1,5]`,
+**adjacent** — §14.3's distinguisher, located on named vertices.
+
+⚠ **CAO gives cells = orbits; it does NOT give pair classes = orbitals.** Shrikhande's root is
+**non-schurian** (2-WL rank 3 vs orbital rank 4) while being **fully CAO**. That gap is exactly
+§12.5b's E2 (477 nodes), and it is why the FROM reading cannot be freely upgraded to the BETWEEN one, this is the piece that has to be shown computable from iterated single step extensions.
+
+#### 14.5c ★★★ PATH OBJECTS AND 2-WL ARE INCOMPARABLE
+
+Three nested path objects — `A0` walk counts · `A1` **simple**-path counts (repeats excluded) ·
+`A2` simple paths annotated with the full induced ordered adjacency — against 2-WL and the truth:
+
+| | Shrikhande (CAO root) | rook 4×4 | CFI[K4] plain | `net(Z₄)` (CAO root) |
+|---|---|---|---|---|
+| `A0` walk counts, any length | 3 | 3 | 8 | 8 |
+| `A1` simple paths, len ≤ 6 → best reached | 3 → **4** (len 7) | 3 | 7 (len 12) | 7 → 8 (len 14) |
+| `A2` annotated, len ≤ 3 → best reached | **4** | 3 | 7 → 9 (len 12) | 7 → 13 (len 14) |
+| **2-WL pair closure** | **3** | 3 | **10** | **10** |
+| **orbitals (truth)** | **4** | 3 | **10** | **14** |
+
+- **Shrikhande: the path object beats 2-WL** (4 vs 3), and `A1` alone does it — **repeat-tracking,
+  no annotation**, at length 7. Walk counts never do at any length: they are entries of products of
+  class-indicator matrices, hence coherence-determined, hence never finer than 2-WL.
+- **CFI[K4] plain: 2-WL beats the path object** (10 = exact, vs ≤ 9 at length 12).
+- **`net(Z₄)`: neither refines the other** — checked as a refinement relation rather than by
+  counting: `A2 refines 2-WL? False`, `2-WL refines A2? False`, at length 14.
+
+⟹ **the path object is not "consumed within 2-WL's comparison base".** Its extra strength on
+Shrikhande is real, and §14.5a locates its source precisely: the whole gain is `A0 → A1`, i.e.
+tracking **repeated vertices** — the mechanism CFI exploits. But that strength is **not available to
+2-WL**, and on CFI[K4] plain 2-WL carries strength the path object lacks. ⚠ **A result proved for
+the path closure therefore does not transfer to 2-WL** — the gap is measured open in *both*
+directions.
+
+#### 14.5d ▶ WHAT THE LEAD CONTRIBUTES, AND THE ONE UNTESTED STATEMENT
+
+**(i) "Path type" = orbital, so the lead reaches `hsep` from a new side.** *"If I am individualized,
+how would I split the orbits of other cells"* for the pair `(v,u)` **is** the Aut-orbital of
+`(v,u)` — that is `CaoFibring.exists_row_transport` + `sameOrbital_iff_sameStabOrbit_of_transport`,
+already landed. So the lead's own question — *is the path type derivable from single-step increments
+on a fibre-Schurian residue?* — **is** §12.3's crux, arrived at independently.
+★ And the barriers already answer part of it: increments 1 and 2 are **provably** blind on `v`'s row
+(`round1_barrier`, `round2_barrier_real`, unconditional, CC axioms only), so the floor is **three**
+increments, and the third one's content is the **triple count** — the first quantity coherence does
+not fix. ⟹ *"single-step increments"* and §12.5a's `triCount` are the same object from opposite ends.
+✅ Reproduced on Shrikhande from the coherent root + flags (so this is **term 2**, §12.3's convention
+box): rounds 1 and 2 separate nothing, **round 3 separates**, final fibres = `Aut_v`-orbits, 4 = 4.
+⚠ Do **not** quote round numbers from a probe that starts at the CAO colouring when that colouring
+is *not* already coherent (`net(Z₄)`) — that is the conflated term1 + term2 figure.
+
+**(ii) ▶ THE UNTESTED STATEMENT — cheap, and nobody has asked it.** `A1`, the **repeat-aware**
+simple-path count, is orbit-exact on Shrikhande at length 7 where 2-WL is one class short. The
+question *"are `A1`'s cells preserved under one-point extension?"* is a **different** statement from
+the 2-WL one, and the E1/E2 instrument (`probe_r1c.py`, §12.5b) would take it with the refiner
+swapped. ⚠ Two honest caveats before spending on it: `A1` at length `k` is **not** polynomial in
+general, and `A1` is **not** universally orbit-exact — on `net(Z₄)` it had reached only 8 of the 14
+orbitals by length 14.
+
+> ⚠⚠ **Scope.** Nothing here reopens §0.0a's closure: the §2 target remains open, proved only
+> per-class in the literature, with no counterexample anywhere in this project's data — and CAO was
+> measurably **preserved** at every representative of every object above (2-WL fibres = `Aut_v`-orbits,
+> Shrikhande 4/4, rook 3/3, `net(Z₄)` 7/7 at both reps), consistent with §12.5b's E1. The lead is
+> recorded because §14.5a and §14.5c are facts about the project's **own artefacts** that were not
+> previously on record, and because §14.5d(i) reaches `triCount` from an independent direction.
