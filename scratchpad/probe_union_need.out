@@ -1,0 +1,25 @@
+Is a UNION-OVER-ANCHORS argument needed, or do DeepenComplete §3+§5 already cover it?
+BAD-BIG = non-singleton true orbits that are ENTIRELY bad anchors (the discriminator)
+covered-by-§5 = every anchor is GOOD or Aut-RIGID  =>  orbitComplete_of_good_or_trivial
+
+### the recorded rich partially-firing witness
+  G8 cubic non-VT                n=8     |C|=8    orbits=3   singleton=0   good=8/8    orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+
+### rigid multipedes
+  rand multipede V=6 W=5         n=34    |C|=8    orbits=4   singleton=0   good=8/8    orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+  rand multipede V=8 W=6         n=44    |C|=4    orbits=4   singleton=4   good=4/4    orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+  rand multipede V=10 W=7        n=54    |C|=4    orbits=4   singleton=4   good=4/4    orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+  rand multipede V=12 W=8        n=64    |C|=4    orbits=4   singleton=4   good=0/4    orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+
+### mixed / gauge
+  MIXED multipede                n=30    |C|=4    orbits=2   singleton=0   good=4/4    orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+  circ(5) multipede              n=30    |C|=20   orbits=3   singleton=0   good=20/20   orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+  mp7 Fano multipede             n=42    |C|=28   orbits=1   singleton=0   good=28/28   orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+
+### CFI over random cubic bases
+  CFI cubic m=8 pl               n=56    |C|=32   orbits=3   singleton=0   good=32/32   orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+  CFI cubic m=8 tw               n=56    |C|=32   orbits=3   singleton=0   good=32/32   orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+  CFI cubic m=10 pl              n=70    |C|=40   orbits=3   singleton=0   good=40/40   orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+  CFI cubic m=10 tw              n=70    |C|=40   orbits=3   singleton=0   good=40/40   orbit-uniform=Y  covered-by-§5=Y  BAD-BIG=0   harvest-exact=Y
+
+>>> no witness skipped

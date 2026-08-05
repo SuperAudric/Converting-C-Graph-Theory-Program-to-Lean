@@ -647,8 +647,38 @@ one sentence: *at some level of the anchor's deepening the chosen sub-cell is no
 stabilizer-orbit, and then deepen's lowest-index pick can diverge from every automorphism's image of the
 anchor's pick.*
 
-**⛔ And this route cannot go below `Tinhofer`**: `OrbitComplete` at `u` needs `GoodAnchor u`, and the whole
-relation needs it at every cell member — which is `Tinhofer` definitionally.
+**▶ §5 (added 2026-08-04) — THE FIRST GENUINE WEAKENING, and the union argument turns out to be a phantom.**
+
+| theorem | statement |
+|---|---|
+| `OrbitTrivial adj χ u` | `u` is `Aut`-**rigid**: no colour-automorphism moves it |
+| **`orbitComplete_of_good_or_trivial`** | ★★ `OrbitComplete` from *"every anchor is good **or** rigid"* — **strictly weaker than `Tinhofer`**, since at a rigid vertex `ρ u = u` and the obligation is `refl` |
+| `orbitComplete_of_rigid_cell` | an all-rigid cell is `OrbitComplete` with **no** goodness at all |
+| **`goodAnchor_transport`** | ★ **goodness is an ORBIT property** — `tinhoferPath_transport` specialised from a relabelling to an automorphism. So the hypothesis is decided once per orbit |
+
+**✅ AND THE DISCRIMINATING MEASUREMENT IS IN — `scratchpad/probe_union_need.py`, 13 witnesses**
+(`G8`, four rigid multipedes, `MIXED`, `circ(5)`, `mp7`, CFI cubic m = 8/10 plain + twisted), root
+branch cell: **`BAD-BIG = 0`** (no non-singleton orbit of bad anchors), **`covered-by-§5 = Y`**
+everywhere, **`orbit-uniform = Y`** everywhere (an empirical confirmation of `goodAnchor_transport`).
+
+★★ **So there is no separate "all-anchors repair" to prove — `exec_recovers_refgen_at` IS the union
+argument.** A good anchor recovers *its own orbit and only its own*; one anchor collapses one orbit and
+**which** one is index-dependent (that is precisely the recorded `G8` single-anchor falsifier); quantifying
+over **all** anchors gives every orbit its own good anchor, so the union is the true orbit partition, which
+is invariant. Nothing beyond §3 + §5 does any work.
+
+⟹ **the open question is no longer "why does the union repair things" but "is every anchor good or
+rigid?"** — per-orbit Schurianity along deepen's own path. True on 13/13 including every CFI witness.
+⚠ Root branch cell only, as in the earlier sweeps; a family-level claim needs it at every *reached* node.
+⚠ `G8` is `good = 8/8` at the root with 3 orbits — **partial firing is not bad anchors**. A cell with `k`
+orbits harvests `k` blocks with every anchor good.
+
+**⛔ What still does not weaken**: the *recovery* lemma itself. `OrbitComplete` at a **moving** `u` needs
+`GoodAnchor u`; §5 only discharges the vertices that do not move.
+⚠ And `branchOrbit_transport_of_orbitComplete` still wants `OrbitComplete` **globally** (`∀ adj χ`), exactly
+as `deepen_branchOrbit_transport` wanted global `Tinhofer`. ▶ The natural next step is to relativize it to a
+relabelling-closed class × reached colourings — the move `RestrictedTransport.lean` already performed for the
+`forceThenPick` spine.
 
 **⚠ But the measured evidence says the truth extends beyond `Tinhofer`.** `G8` is a *partially* firing
 witness (so some cell on its descent is not a single orbit ⟹ not `Tinhofer`), yet the **all-anchors**

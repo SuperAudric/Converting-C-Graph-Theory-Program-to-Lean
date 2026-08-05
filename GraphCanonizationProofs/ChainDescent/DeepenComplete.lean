@@ -1,4 +1,4 @@
-import ChainDescent.DeepenTinhofer
+import ChainDescent.DeepenCertified
 
 /-!
 # Route (a), scoped — deepen's **orbit completeness**, and where `Tinhofer` is really consumed
@@ -43,11 +43,20 @@ discrete), `gate_of_discrete` (`K` non-empty + `allSingletonsK`). In particular,
 discrete, `K = coupled χ leaf` is exactly the union of the **non-singleton `χ`-cells**, so every
 `IsColAut adj χ` is automatically the identity off `K` — the twist's support is not a side condition.
 
-## ⛔ What this route CANNOT deliver, and why the gap is where it is
+## What this route delivers, and where the gap is
 
-`OrbitComplete` at `u` is delivered by `GoodAnchor u` (§3). Recovering the whole relation needs it at
-every `u`, i.e. exactly `Tinhofer` — **this induction does not weaken below `Tinhofer`.** The single
-failure mode is sharp and is worth stating in one sentence:
+`OrbitComplete` at `u` is delivered by `GoodAnchor u` (§3). Recovering the whole relation by *that*
+lemma alone needs it at every `u`, i.e. exactly `Tinhofer`.
+
+**★ But `OrbitComplete` itself is strictly weaker, and §5 gets the weakening.** At an `Aut`-rigid
+vertex `ρ u = u`, so the obligation is `refl` and the anchor need not be good at all:
+`orbitComplete_of_good_or_trivial` asks only *"every anchor is good **or** rigid"*. That is not a
+technicality — it is precisely the measured case `rand multipede V=12 W=8`, which has **no** good
+anchor and is nevertheless exact, because all four of its orbits are singletons. §5.1 then shows
+goodness is an **orbit** property (`goodAnchor_transport`), so the hypothesis is decided once per
+orbit, and §5.2 states the one case §5 still does not reach: a non-singleton orbit of *bad* anchors.
+
+The failure mode for a bad anchor is sharp and worth stating in one sentence:
 
 > at some level of the anchor's deepening the chosen sub-cell is not a single stabilizer-orbit, and
 > then `deepen`'s lowest-index pick can diverge from every automorphism's image of the anchor's pick.
@@ -62,12 +71,15 @@ anchor at a time. ⟹ the open question is not "is `Tinhofer` needed" but:
 > **is deepen's all-anchors branch-cell partition equal to the exact `Aut`-orbit partition at
 > partially-firing (non-`Tinhofer`) nodes?**
 
-If yes, `OrbitComplete` is true beyond `Tinhofer` and wants a different proof (a union argument, not
-a per-anchor induction). If no — the partition is strictly finer but still invariant — then the
-target is not `OrbitComplete` at all but the invariance of a *partial* relation, a different and
-harder theorem. That question is decidable by measurement on the four recorded partially-firing
-witnesses plus the VT non-`Tinhofer` ones, and is the probe this scoping hands over.
-⚠ Use an exact group computation for the reference partition: `probe_orbit_oracle` is recorded as
+✅ **MEASURED, and the answer is YES** — `scratchpad/probe_verdict_invariance.py`: the all-anchor
+harvest partition equals the true `Aut`-orbit partition and transports, 17/17 (multipedes, CFI over
+cubic bases m = 8–14 plain and twisted, rigid multipedes). So `OrbitComplete` is measured true beyond
+`Tinhofer`, and §5 now *proves* part of that gap. ⚠ But do not over-read the sweep: its
+rigid-multipede rows are the all-singleton case §5 covers outright, so the residual question is the
+sharper one in §5.2. `scratchpad/probe_selfsep.py` additionally refutes *"mixed orbits identify each
+other"* as the explanation (`circ(5)` multipede is exact with that mechanism holding at only 15/20
+members).
+⚠ Use an exact group computation for any reference partition: `probe_orbit_oracle` is recorded as
 **wrong** (it errs by merging).
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`,
@@ -199,6 +211,98 @@ theorem deepenSupply_canonizer_of_orbitComplete
   Residue.guarded_mixed_canonizer Force.keyEquivariant_lookahead
     (SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport
       Force.keyEquivariant_lookahead (branchOrbit_transport_of_orbitComplete hOC))
+
+/-! ## 5. ★★ THE FIRST GENUINE WEAKENING — **good OR fixed**
+
+The module doc-block says this route "cannot go below `Tinhofer`". That is true of the *recovery*
+half, and false of `OrbitComplete` itself: `OrbitComplete` asks for `WordReach u (ρ u)`, and at a
+vertex **no** colour-automorphism moves, `ρ u = u` and the obligation is `refl` — deepen has nothing
+to find, so its anchor need not be good at all.
+
+★ This is not a technicality; it is what the measurements were showing. `probe_certkey` records
+`rand multipede V=12 W=8` with **0/4 certified-below anchors** (no good anchor anywhere) and
+`probe_verdict_invariance` records the same family as `exact=YES` — because that cell's four orbits
+are all **singletons** (`probe_selfsep`: `non-vacuous-x = 0/4`). `Tinhofer` demands goodness there and
+gets nothing for it; §5 charges only the vertices that actually move. -/
+
+/-- `u` is `Aut`-**rigid** at `χ`: no colour-automorphism moves it, i.e. its orbit is `{u}`. -/
+def OrbitTrivial (adj : AdjMatrix n) (χ : Colouring n) (u : Fin n) : Prop :=
+  ∀ ρ : Equiv.Perm (Fin n), IsColAut adj χ ρ → ρ u = u
+
+/-- **★★ `OrbitComplete` FROM "EVERY ANCHOR IS GOOD **OR** RIGID".** Strictly weaker than `Tinhofer`
+(which is the `∀ u, GoodAnchor u` special case, `orbitComplete_of_tinhofer`), and the weakening is not
+vacuous — it is exactly the rigid-cell case the probes measure as `exact` with no good anchor. -/
+theorem orbitComplete_of_good_or_trivial {adj : AdjMatrix n} {χ : Colouring n}
+    (h : ∀ u ∈ Descend.branches χ, GoodAnchor adj χ u ∨ OrbitTrivial adj χ u) :
+    OrbitComplete adj χ := by
+  intro u hu ρ hρ
+  rcases h u hu with hg | ht
+  · exact exec_recovers_refgen_at adj χ hρ hu hg
+  · rw [ht ρ hρ]
+    exact Consume.WordReach.refl u
+
+/-- A branch cell every member of which is `Aut`-rigid is `OrbitComplete` **with no goodness at all** —
+deepen may fail to certify anything and still be complete, because there is nothing to certify. -/
+theorem orbitComplete_of_rigid_cell {adj : AdjMatrix n} {χ : Colouring n}
+    (h : ∀ u ∈ Descend.branches χ, OrbitTrivial adj χ u) : OrbitComplete adj χ :=
+  orbitComplete_of_good_or_trivial (fun u hu => Or.inr (h u hu))
+
+/-! ### 5.1 The hypothesis is an ORBIT property, so it is checkable one orbit at a time
+
+`GoodAnchor` is index-dependent *as a path*, but not *as a predicate*: moving the anchor by a
+colour-automorphism moves the whole deepening path to an isomorphic one, and `TinhoferPath`'s own
+per-level `CellSingleOrbit` is exactly what absorbs the lowest-index mismatch. That is
+`tinhoferPath_transport` (`DeepenCertified` §4), already proved — this is its specialisation from a relabelling `σ` (which
+moves the graph) to an automorphism `ρ` (which does not). -/
+
+/-- **★ GOODNESS IS AN ORBIT PROPERTY.** If `ρ` is a colour-automorphism and `u` is a good anchor,
+so is `ρ u`. Hence §5's hypothesis need only be decided **once per orbit**: an orbit is either
+entirely good, entirely bad, or a fixed point. -/
+theorem goodAnchor_transport {adj : AdjMatrix n} {χ : Colouring n} {ρ : Equiv.Perm (Fin n)}
+    (hρ : IsColAut adj χ ρ) {u : Fin n} (h : GoodAnchor adj χ u) : GoodAnchor adj χ (ρ u) := by
+  have hrel : (step adj χ (ρ u)).col = transportColouring ρ ((step adj χ u).col) := by
+    have hs := step_isColAut hρ χ u
+    rwa [transportColouring_isColAut hρ] at hs
+  have ht := tinhoferPath_transport adj χ χ n (step adj χ u) (step adj χ (ρ u)) ρ hrel h
+  rwa [hρ.relabel] at ht
+
+/-- Contrapositive, the form a probe reads: badness is an orbit property too. -/
+theorem not_goodAnchor_transport {adj : AdjMatrix n} {χ : Colouring n} {ρ : Equiv.Perm (Fin n)}
+    (hρ : IsColAut adj χ ρ) {u : Fin n} (h : ¬ GoodAnchor adj χ (ρ u)) : ¬ GoodAnchor adj χ u :=
+  fun hg => h (goodAnchor_transport hρ hg)
+
+/-! ### 5.2 ⛔ What §5 does NOT reach, and the measurement that decides whether more is needed
+
+§5 covers a cell whose every orbit is *either* good *or* a fixed point. It says nothing about an orbit
+of size ≥ 2 all of whose members are **bad** anchors. By `goodAnchor_transport` that is a coherent
+possibility — badness is orbit-closed, so such an orbit is bad *as a whole* — and on such an orbit
+`OrbitComplete` would have to be delivered by generators emitted from **other** anchors: the genuine
+union-over-anchors phenomenon.
+
+✅ **MEASURED (`scratchpad/probe_union_need.py`, 2026-08-04) — that case is NOT REALISED, and there is
+no union phenomenon left to prove.** Across 13 witnesses (`G8`, four rigid multipedes, `MIXED`,
+`circ(5)`, `mp7`, CFI over cubic bases m = 8/10 plain and twisted) at the root branch cell:
+
+* **`BAD-BIG = 0` everywhere** — not one non-singleton orbit consisting of bad anchors;
+* **`covered-by-§5 = Y` everywhere** — every anchor is good or `Aut`-rigid, so §3 or §5 applies;
+* **`orbit-uniform = Y` everywhere** — no orbit mixes good and bad anchors, an empirical confirmation
+  of `goodAnchor_transport`.
+
+★ **So the "all-anchors repair" was never a separate mechanism — `exec_recovers_refgen_at` IS the union
+argument.** A good anchor `u` recovers *its own orbit and only its own* (`u ~ ρ u` for all `ρ`). One
+anchor therefore collapses one orbit, and **which** orbit depends on which index the anchor happened to
+be — that is exactly the recorded `G8` single-anchor falsifier (five relabellings, two different
+profiles). Quantifying over **all** anchors gives every orbit its own good anchor, so the union is the
+true orbit partition, which is invariant. Nothing beyond §3 + §5 is doing work.
+
+⟹ **the open question is no longer "why does the union repair things" but simply "is every anchor good
+or rigid?"** — a per-orbit Schurianity along deepen's own path. It held on 13/13 witnesses including
+every CFI one, and it is what a family-level discharge should target.
+
+⚠ Scope of the measurement: **root branch cell only**, as in the earlier sweeps. A family-level claim
+needs it at every *reached* node.
+⚠ `G8` is `good = 8/8` at the root with 3 orbits — *partial firing is not bad anchors*. A cell with `k`
+orbits harvests `k` blocks with every anchor good; do not read "partially firing" as "not certified". -/
 
 end Deepen
 end ChainDescent
