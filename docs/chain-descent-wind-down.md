@@ -605,7 +605,40 @@ first stated. The graph is `probe_w1_cographs.py`'s minimal cograph falsifier, n
 > | | object for `canonForm?` | `①` | `②` | `③` | executable |
 > |---|---|---|---|---|---|
 > | **iv** | `recordSupplyFast ++ twinSupply` | ✅ unconditional | recompute numerals | `¬(Simple ∧ RootTwins)` | ✅ |
-> | **v** | `guard (forceThenConsume holKeyFast deepenSupply)` | `①a` uncond.; `①b`/`①c` **on the class** | ✅ | `¬TinhoferGraph` | ✅ |
+> | **v** | `guard (forceThenConsume holKeyFast deepenSupply)` | ✅ `①a` uncond.; `①b`/`①c` **on the class** | ✅ | `¬TinhoferGraph` | ✅ |
+>
+> ## ✅✅ OPTION **v** IS NOW FULLY BUILT — `ChainDescent/DeepenTransportOn.lean` (2026-08-04, gate **113 modules / 208 s**)
+>
+> **`DeepenTransportOn.deepen_object_package`** — one **executable** object,
+> `Stall.guard (forceThenConsume holKeyFast deepenSupply)`, carrying all four obligations:
+>
+> | | what | source |
+> |---|---|---|
+> | `①a` | sound, **unconditional** | `Descend.soundOpt_canonForm?` |
+> | `①b`/`①c` | complete + flag-invariant **on the Tinhofer class** | `canonizes_on_tinhofer_deepen` |
+> | `②` | explicit polynomial, **unconditional, every input** | `SupplyCost.descentCost_guard_mixed_le` — the guard is a single path by construction, so no hypothesis |
+> | `③` | flag ⟹ the input is **not Tinhofer** | `TwinFamily.not_tinhoferGraph_of_flag` |
+> | — | never flags on a Tinhofer graph | `TwinFamily.answers_of_tinhoferGraph` |
+>
+> **Method: the `RestrictedTransport` move, applied to the guarded mixed resolver.** Its §1–§2.1
+> (`TransportOn` / `NarrowTransportOn` / `descend_transport_on` / `isoInvariantOn` / `complete_on` /
+> `flag_iso_invariant_on`) are **resolver-generic** and were reused verbatim; what was missing was the §3
+> contract discharge for `guard (forceThenConsume …)`. Three pieces, and **only the third touches the
+> supply**: (i) the covering half is *unconditional* — `Consume` verifies every candidate, so a discard is
+> automorphic to the kept branch (`coveringOfAtOn_guarded`); (ii) the forced set transports from
+> `KeyEquivariant` alone; (iii) the **flag** must fire on both sides together
+> (`stallEquivariantOn_forceThenConsume`), and that is exactly what `OrbitComplete` buys.
+>
+> ⚠⚠ **The honest reading of `①b`/`①c`** — state it, do not bury it: completeness is proved for pairs whose
+> **left** input is Tinhofer. Off the class the object is still sound (its output is a genuine relabelling),
+> but two non-isomorphic non-Tinhofer graphs are not proved to receive different forms. **That is the whole
+> trade against option (iv)**, which keeps `①` unconditional but weakens the residue from `¬Tinhofer` to
+> `¬(Simple ∧ RootTwins)`. The decision is now a clean either/or between two objects, one of which is fully
+> built.
+>
+> ▶ **To widen (v)'s class, supply a wider `C`**: `canonizes_on_orbitComplete` asks only for
+> `RelabelClosed C` and *"`OrbitComplete` at every reached colouring"*. `DeepenComplete` §5's
+> **good-or-rigid** weakening is what a wider instance should target.
 >
 > **iv keeps `①`/`②` unconditional and closes `Publication.lean` to zero `sorry` with no new mathematics.**
 > Every piece is built: `twinSupply` is computable + `GensEquivariant` + cost-bounded;
