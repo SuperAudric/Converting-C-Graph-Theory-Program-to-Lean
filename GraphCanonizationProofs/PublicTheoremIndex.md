@@ -5228,3 +5228,25 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `DeepenTransportOn.canonizes_on_tinhofer_deepen` | 317-337 | ★★★ **`①` ON THE TINHOFER CLASS AT THE DEEPEN OBJECT** — the companion to `RestrictedTransport.canonizes_on_tinhofer`: same class, but at the object that carries the honest flag and `③`, rather than at the never-flagging `forceThenPick`. | — |
 | `DeepenTransportOn.descentCost_deepen_le` | 360-368 | `②` at the deepen object: an explicit polynomial `descentCost` on **every** input, no hypotheses — the guard makes the descent a single path by construction (`SupplyCost.descentCost_guard_mixed_le`). | — |
 | `DeepenTransportOn.deepen_object_package` | 370-397 | ★★★ **THE WHOLE PACKAGE AT ONE EXECUTABLE OBJECT** (the wind-down’s option **v**): `①a` sound unconditionally, `①b` complete **on the Tinhofer class**, `②` an explicit polynomial on every input unconditionally, `③` flag ⟹ the input is not Tinhofer. Nothing `noncomputable`. ⚠ The honest reading of `①b`/`①c`: completeness is claimed for pairs whose **left** input is Tinhofer; off the class the object is sound but two non-isomorphic non-Tinhofer graphs are not proved to get different forms. | — |
+## ChainDescent/DeepenGuardComplete.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.tinhoferPath_none` | 76-79 | `TinhoferPath` equation lemma: no cell selected ⟹ `True` | Reduce only through these (the `chooseIdK`/`foldl` recipe) |
+| `Deepen.tinhoferPath_cons` | 81-87 | `TinhoferPath` equation lemma: cell `cid`, pick `w` | — |
+| `Deepen.cidCell_ne_nil` | 89-99 | A selected cell is a cons (`chooseIdK` names only size-≥2 cells) | — |
+| `Deepen.chooseIdK_none_of_discrete` | 107-117 | `Discrete χ ⟹ chooseIdK = none` | Converse of `discrete_of_chooseIdK_none` |
+| `Deepen.tinhoferPath_fuel_lift` | 119-146 | ★ **Fuel adequacy** — once `n ≤ fuel + ncol`, `TinhoferPath` at that fuel holds at **every** fuel | The `ncol` measure; self-maintaining down a path |
+| `Deepen.tinhoferPath_spread` | 153-166 | ★★ A `TinhoferPath` **spreads across a single-orbit cell** — one member's path is every member's | `goodAnchor_transport` at general fuel; the ingredient `DeepenCertified` §7 predates |
+| `Deepen.tinhofer_of_tinhoferPath` | 170-193 | ★★★ **Path-local ⟹ all-anchors**: `TinhoferPath` at `cur` gives `Tinhofer adj cur.col` | **The step `DeepenCertified` §7 declared unavailable** |
+| `Deepen.cellIsOrbit_deepenSupply_of_tinhofer` | 197-208 | `Tinhofer` + `CellSingleOrbit` ⟹ `CellIsOrbit deepenSupply` | Via `DeepenComplete.orbitComplete_of_tinhofer` |
+| `Deepen.certPath_of_tinhoferPath` | 212-236 | ★★★ `TinhoferPath ⟹ CertPath deepenSupply` | Converse of `tinhoferPath_of_certPath` |
+| `Deepen.certifiedG_of_tinhofer` | 238-241 | ★★★ **The poly guard is COMPLETE** — open wherever `Tinhofer` holds | — |
+| `Deepen.tinhofer_iff_certifiedG` | 243-246 | ★★★ **`Tinhofer adj χ ↔ CertifiedG deepenSupply adj χ`** — the guard *is* `Tinhofer` | Headline; sound (`DeepenGuard` §3) + complete (§5) |
+| `Deepen.certifiedG_transport` | 254-257 | ★★★ The guard **transports** — with **no `SupplyEquivariant`** | Routed through `tinhofer_transport`; `deepenSupply` provably lacks equivariance |
+| `Deepen.certifiedG_transport_iff` | 259-263 | The guard's verdict is relabelling-**invariant**, both directions | — |
+| `Deepen.instDecidableCertifiedG` | 267-269 | `CertifiedG` is decidable | Instance; from `instDecidableCertPath` |
+| `Deepen.deepenSupplyCert` | 271-275 | ★★★ **The EXECUTABLE guarded deepen supply** | Definition; **computable** — `deepenSupplyGuarded` is not |
+| `Deepen.deepenSupplyCert_eq_guarded` | 277-282 | `deepenSupplyCert = deepenSupplyGuarded` | The wire; ⚠ cost field inherited, guard's own work **not** billed |
+| `Deepen.deepenSupplyCert_canonizer` | 284-293 | ★★★ **`①` at a COMPUTABLE object, NO hypothesis** | Answers `DeepenCertified` §7's "`R1`, not a wiring step" |
+| `Deepen.not_tinhofer_of_deepenSupplyCert_defers` | 295-305 | `③`-shaped: the executable supply defers ⟹ `¬ Tinhofer` | Residue non-vacuous — measured falsifier `C₃⊔C₃⊔C₄` |

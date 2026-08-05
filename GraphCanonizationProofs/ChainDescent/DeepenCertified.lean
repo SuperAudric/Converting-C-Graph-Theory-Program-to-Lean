@@ -575,7 +575,19 @@ and defers when it fails. `CertifiedOrbit` is checkable (finitely many verified 
 which is a `RigidObstructionAt` there (`rigidObstruction_of_not_cellSingleOrbit`) and is handed to
 force". That is the theorem this track is aiming at.
 
-⛔⛔ **CORRECTION 2026-08-04 — THAT TARGET REDUCES TO `R1`. DO NOT RE-SCOPE IT AS A SMALL STEP.**
+✅✅ **LANDED 2026-08-05 — `ChainDescent/DeepenGuardComplete.lean`. THE ⛔ BLOCK BELOW IS SUPERSEDED.**
+`Deepen.tinhofer_iff_certifiedG` proves `Tinhofer adj χ ↔ CertifiedG deepenSupply adj χ`, so the
+computable guard **is** the `Tinhofer` guard; `certifiedG_transport` gives its invariance with **no**
+`SupplyEquivariant`; and `deepenSupplyCert` / `deepenSupplyCert_canonizer` is this section's target
+object — computable, with `①` carrying no hypothesis. Keep the block below as provenance, but note
+precisely where it fails: it assumes "one anchor's path" is weaker than "every anchor's path" at a
+deeper `ψ`. It is not. The level *above* `ψ` asserts `CellSingleOrbit`, and goodness is an **orbit
+property** (`DeepenComplete.goodAnchor_transport`, landed after this note was written), so one member's
+path spreads to the whole cell (`DeepenGuardComplete.tinhoferPath_spread`), and the fuel is restored by
+the `ncol` measure (`tinhoferPath_fuel_lift`). Hence `tinhofer_of_tinhoferPath` — the very implication
+the third bullet calls unavailable.
+
+⛔⛔ **SUPERSEDED (2026-08-04) — kept as provenance; see the ✅ block above before quoting it.**
 It was attempted (`ChainDescent/RestrictedTransport.lean` §8; wind-down §2 W1 carries the full record).
 
 * ✅ The **firing** half lands: `RestrictedTransport.certifiedG_deepenSupply_of_tinhoferGraph` — on a
@@ -598,6 +610,11 @@ It was attempted (`ChainDescent/RestrictedTransport.lean` §8; wind-down §2 W1 
 
 ⟹ **`deepenSupplyGuarded` (below) remains the only object with `①` + `②` + Tinhofer coverage, and it is
 `noncomputable` by construction.** Making it executable is `R1`, not a wiring step.
+
+✅ **The last sentence is FALSE, as of 2026-08-05** — it *was* a wiring step, and
+`DeepenGuardComplete.deepenSupplyCert_eq_guarded` is the wire. `R1` (`OrbitComplete` globally) remains
+open and is untouched by this; what closed is the strictly weaker question of whether deepen's own poly
+certificate is *complete* for `Tinhofer`, which it is.
 -/
 
 end Deepen

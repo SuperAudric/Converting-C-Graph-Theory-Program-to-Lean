@@ -864,9 +864,51 @@ pair"), it keeps `①`/`②` unconditional, and W1 supplies the first genuine �
 started.**
 
 ### ▶ Live decisions, none started
+
+> ## ★★★ 2026-08-05 — **OPTION (vi) EXISTS AND DOMINATES (iv) AND (v). THE EITHER/OR IS OBSOLETE.**
+>
+> **`ChainDescent/DeepenGuardComplete.lean` (gate 114 modules / 230 s, all 18 decls axiom-clean).**
+>
+> **`Deepen.tinhofer_iff_certifiedG : Tinhofer adj χ ↔ CertifiedG deepenSupply adj χ`** — deepen's own
+> **poly, decidable** certificate is not merely sound (`DeepenGuard` §3) but **complete**. Hence
+> `certifiedG_transport`: the guard is relabelling-invariant **with no `SupplyEquivariant`**, routed
+> through `tinhofer_transport` instead of through the supply. Hence `deepenSupplyCert`, a
+> **computable** supply definitionally equal to `deepenSupplyGuarded` (`deepenSupplyCert_eq_guarded`),
+> and **`deepenSupplyCert_canonizer` = `①` with NO hypothesis at a COMPUTABLE object**.
+>
+> ⛔⛔ **This REFUTES `DeepenCertified` §7's recorded blocker** (*"`Tinhofer adj χ → CertifiedG
+> deepenSupply adj χ` is not available … making it executable is `R1`, not a wiring step"*). The note
+> assumed one anchor's path is weaker than every anchor's path at a deeper `ψ`. It is not: the level
+> above `ψ` asserts `CellSingleOrbit`, and goodness is an **orbit property**
+> (`DeepenComplete.goodAnchor_transport`, landed *after* §7 was written), so one member's path spreads
+> to the whole cell (`tinhoferPath_spread`) and the fuel is restored by the `ncol` measure
+> (`tinhoferPath_fuel_lift`). §7 is now marked provenance in-source.
+>
+> **What (vi) gives that (iv) and (v) do not:** `①` **unconditional** (not on a class) **and** residue
+> exactly `¬Tinhofer` (not weakened) at **one computable object**. (iv) traded residue for global `①`;
+> (v) traded global `①` for residue. (vi) pays neither.
+>
+> ★ **MEASURED 2026-08-05** — guard OPEN on `C₄ C₅ C₇ P₅ G₈ wcyc9 t3 core6 vfold2 fold4`; **SHUT** on
+> the constructed falsifier **`C₃ ⊔ C₃ ⊔ C₄`** (2-regular ⟹ 1-WL merges the root into one 10-cell;
+> after individualizing an anchor the untouched `C₃ ∪ C₄` cell has **two** stabilizer orbits). There
+> the raw supply emits **42** candidate generators and `deepenSupplyCert` correctly emits **0**, and
+> the relabelled copy agrees ⟹ **residue non-vacuous, guard non-trivial, invariance confirmed.**
+>
+> ⚠⚠ **THE ONE HONEST GAP IN (vi) IS `②`, AND IT IS REAL.** `deepenSupplyCert` inherits
+> `deepenSupplyGuarded`'s declared cost `n⁶`, which prices deepen but **bills none of the certificate**
+> (`≤ n` anchors × `≤ n` levels × one `CellIsOrbit` BFS ≈ `n⁸`). That is exactly the 2026-07-14
+> *"`Key`/`Supply` were cost-free ⟹ `②` is unfalsifiable"* finding. **Do not claim `②` for (vi) as it
+> stands.** The fix is mechanical and scoped: give `deepenSupplyCert` an honest cost, prove
+> `Consume.gens` equality (not full supply equality — `①` reads only `verified`), and re-run the
+> branch-orbit transport; `DeepenGuard.certPathCost` + `certPathCost_le` already bound the guard.
+>
+> **`R1` is untouched and still open.** What closed is the strictly weaker question of whether deepen's
+> certificate is *complete* for `Tinhofer`. Global `OrbitComplete` is still not proved.
+
 * **⛔ THE ONE OPEN DECISION — which object `Publication.canonForm?` should be**, i.e. how to close
-  `residue_if_flag`. Five candidates, table in §2 W1's *"THE OPTIONS THAT REMAIN"* block. **It is now a
-  clean either/or between two, and one of them is already built:**
+  `residue_if_flag`. Five candidates, table in §2 W1's *"THE OPTIONS THAT REMAIN"* block. **Superseded
+  by (vi) above on the mathematics; the remaining choice is whether to pay (vi)'s `②` bill.** The
+  prior either/or, for reference:
   * **(iv)** `recordSupplyFast ++ twinSupply` — `①`/`②` stay **unconditional**, residue weakens to
     `¬(Simple ∧ RootTwins)`. **NOT BUILT.** *User preference, 2026-08-04.* Every piece exists:
     `twinSupply` is computable + `GensEquivariant` + cost-bounded; nest it as
