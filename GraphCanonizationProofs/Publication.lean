@@ -62,21 +62,27 @@ Per-obligation state:
     pinned monomial itself was **`n ^ costDeg`, which is false at `n = 0` for the real object at any
     numerals** — see the `costConst`/`costDeg` block below for the measurements. It is now
     `costConst * (n + 1) ^ costDeg`, the same polynomial class, true on every input.
-  · ③ — ✅ **DISCHARGED 2026-08-04, and the residue was RESHAPED to do it.** The three `opaque` atoms made
-    both ③ obligations unprovable *in principle*; they are replaced by one **definition**,
-    `residueRigidObstruction G := ¬ TwinFamily.TinhoferGraph G` (see the `UnhandledResidue` block for why
-    D0/D1 were dropped rather than kept as opaque placeholders). `residue_if_flag` and
-    `unhandledResidue_nonvacuous` are both proved, axiom-clean, with **no citation axiom consumed**.
-    ⚠ **③ is stated at `canonFormCover?`, a SECOND object** — `canonForm?`'s record supply is not proved to
-    certify a Tinhofer cell, and the supply that is (`deepenSupply`) cannot be used in an object whose flag
-    must be iso-invariant. See the coverage-object block in §1; the paper must present two objects.
+  · ③ — ⚠ **STILL THE ONE LIVE `sorry` at THIS object.** The residue was RESHAPED (2026-08-04) to make it
+    provable *in principle*: the three `opaque` atoms made both ③ obligations undischargeable, and they are
+    replaced by one **definition**, `residueRigidObstruction G := ¬ TwinFamily.TinhoferGraph G` (see the
+    `UnhandledResidue` block for why D0/D1 were dropped rather than kept as opaque placeholders).
+    `unhandledResidue_nonvacuous` is now **proved**, axiom-clean, with no citation axiom consumed;
+    `residue_if_flag` is not — see the open-step block in §1 for exactly what closes it and at what price.
+    ⛔⛔ **An earlier draft discharged ③ at `canonFormCover?`, a SECOND object. That was WRONG and is
+    REVERTED** (user steer, 2026-08-04): `canonForm?` is meaningful only if ①a+①b+①c+②+③ are properties of
+    **the same** object — an exhaustive solver and a random solver each carry half and together prove
+    nothing. Any sentence below that still implies a two-object showcase is stale; this one governs.
     ⚠ The residue is an **over-approximation** (a CFI graph is not Tinhofer but its obstruction is linear
     and belongs to the rigid resolver): W2's job is to narrow it, not to enlarge it.
     ⚠ The earlier note that the strong reading "flag ⟹ genuine *hardness*" is unreachable **still stands** —
     what is proved is flag ⟹ a genuine *structural obstruction*, which is not the same as hardness.
-  · **The 8 citation axioms in §2 are now consumed by NOTHING** (every `#print axioms` below is exactly
-    Lean's three). They are retained for W2/Route C, not because any showcased theorem needs them — say so
-    rather than presenting them as the trusted base of the current results.
+  · **The 8 citation axioms in §2 are consumed by NOTHING, and are therefore now COMMENTED OUT**
+    (2026-08-04, user steer: *"the axioms should get commented out or moved from the file until use"*).
+    Every `#print axioms` below is exactly Lean's three, so declaring them changed nothing except to
+    invite a reviewer to read them as this file's trusted base. Each `opaque … : Prop` and its full
+    citation doc-comment are RETAINED beside the commented `axiom` line, so restoring one for W2/Route C
+    is deleting `-- ⏸ ` from a single line. **The paper must still list them as the intended trusted base
+    for the parts of the project that are not in this file.**
   · The §1 "mutual stall" prose IS now the flag semantics of a BUILT object (2026-07-18, sel rewrite landed):
     `Select.selNode` flags exactly when NO non-singleton cell resolves (`Select.selNode_stall_iff`), with
     ①+②+③a in one place at the record supply (`Select.selNode_pruned_record`) and the blind object DOMINATED
@@ -177,16 +183,31 @@ where `Tinhofer` holds, deferring elsewhere — has **`①` with no hypothesis a
 either way. So a single object with `①` + `②` + `③` and Tinhofer coverage **already exists** — it is only
 `noncomputable`, because its guard is the `Tinhofer` predicate itself.
 
-**⟹ the whole remaining gap is a COMPUTABLE GUARD**, which `DeepenCertified` §7 already records as "the
-theorem this track is aiming at": guard on `Deepen.CertifiedG Deepen.deepenSupply` (an orbit BFS over
-deepen's own verified generators — computable) instead of on `Tinhofer`. That needs the two directions
-  · `CertifiedG deepenSupply adj χ → Tinhofer adj χ` (`Deepen.tinhoferPath_of_certPath` — the two
-    predicates walk the *same* `chooseIdK`/`finRange`-head path, differing only in the per-level test), and
-  · `Tinhofer adj χ → CertifiedG deepenSupply adj χ` (deepen certifies its own canonical path at a
-    Tinhofer node — `deepen_branch_orbit_iff_aut` level by level).
-With those, the guard is equivalent to `Tinhofer`, the existing `①` proof transfers verbatim, and the
-object becomes executable. **That is the one step between this file and the intended single-object
-statement.** -/
+**⛔⛔ A COMPUTABLE GUARD IS NOT THE ANSWER — that route is CIRCULAR (corrected 2026-08-04).** An earlier
+draft of this block proposed guarding on `Deepen.CertifiedG Deepen.deepenSupply` (an orbit BFS over
+deepen's own verified generators, hence computable). One direction is free and unconditional —
+`Deepen.tinhofer_of_certifiedG : CertifiedG S adj χ → Tinhofer adj χ` — but the converse fails on a
+quantifier: each level of `CertPath` demands `CellIsOrbit deepenSupply adj ψ` (deepen connecting *every
+pair* of ψ's cell), which needs **every anchor of ψ to be good**, i.e. `Tinhofer adj ψ`; path-local
+`Tinhofer adj χ` says nothing about a deeper ψ's other anchors. So *"the cell is a single orbit"*
+transports while *"deepen certifies it"* does not — and the missing piece is exactly
+`Deepen.OrbitComplete`, which **already yields `①c` with no guard at all**
+(`Deepen.deepenSupply_canonizer_of_orbitComplete`). The guard needs the very predicate it was meant to
+avoid, and is provably invariant only on `TinhoferGraph`, which is where `①` is already proved. (Note
+`Deepen.certPath_transport`'s own hypothesis is `SupplyEquivariant`, which `deepenSupply` provably lacks.)
+
+**⟹ THE REAL CHOICE, and both options are costed in `docs/chain-descent-wind-down.md` §2 W1:**
+  · **(iv)** append `twinSupply` to the record supply — `①`/`②` stay **unconditional** and this file
+    closes to zero `sorry`; the residue weakens from `¬Tinhofer` to `¬(Simple ∧ RootTwins)`. **Not built**;
+    every ingredient exists (`KernelRef.sameOrbits_appendSupply` with `twinSupply` in the shared prefix,
+    `cellIsOrbit_append_*`, `SelectNode.handledS_of_handled` + `answersS_of_handledS`), and the real cost
+    is recomputing `costConst`/`costDeg`.
+  · **(v)** point `canonForm?` at `Stall.guard (Composite.forceThenConsume Hol.holKeyFast
+    Deepen.deepenSupply)` — the tight residue `¬TinhoferGraph`, `②` unconditional, `①a` unconditional, but
+    `①b`/`①c` **proved on the Tinhofer class rather than globally**. ✅ **ALREADY BUILT**:
+    `ChainDescent.DeepenTransportOn.deepen_object_package`.
+⚠ The trade is *not* "invariant vs non-invariant flag" — (v) **proves** flag-invariance on the class and
+claims nothing off it. It is *global `①` with a weak residue* against *class `①` with a tight residue*. -/
 
 /-! ### `UnhandledResidue` — RESHAPED 2026-08-04: a DEFINITION, from what is proved
 
@@ -278,21 +299,21 @@ policy allows to stay cited permanently. Source: Babai ITCS'14 / J.Algebra'15; K
 at quasipoly via Babai/Kivva). NEVER instantiate `hClassify` at the `confinementLargeScheme` quasi-poly threshold
 `n^{log₂ n}` — at that threshold the statement is Babai's OPEN conjecture, not a citation. -/
 opaque PrimitiveCCClassification : Prop
-axiom cameron_classification : PrimitiveCCClassification
+-- ⏸ axiom cameron_classification : PrimitiveCCClassification
 
 /-- Skresanov rank-3 affine 2-closure: the affine scheme of a classical `G₀` has no unexpected
 automorphisms (coarse-Aut pinning; underpins all four Route-C families' `|Aut|` side). Source: Skresanov
 arXiv:2007.14696 / 2202.03746. -/
 opaque AffineSchemeTwoClosed : Prop
-axiom skresanov_two_closure : AffineSchemeTwoClosed
+-- ⏸ axiom skresanov_two_closure : AffineSchemeTwoClosed
 
 /-- Liebeck affine-rank-3 classification (places the classical instances in the node-4 residue). -/
 opaque LiebeckAffineRank3 : Prop
-axiom liebeck_rank3 : LiebeckAffineRank3
+-- ⏸ axiom liebeck_rank3 : LiebeckAffineRank3
 
 /-- Ponomarenko cyclotomic 2-separability (the 1-dim cyclotomic slice). Source: arXiv:2006.13592 Thm 1.1. -/
 opaque PonomarenkoCyclotomic2Sep : Prop
-axiom ponomarenko_2sep : PonomarenkoCyclotomic2Sep
+-- ⏸ axiom ponomarenko_2sep : PonomarenkoCyclotomic2Sep
 
 /-- Fundamental theorem of projective geometry (cone-preserving collineations are semilinear); needed only
 for the `q = pᵉ`, `e > 1` field twist. Source: Artin, *Geometric Algebra*.
@@ -301,14 +322,14 @@ for the `q = pᵉ`, `e > 1` field twist. Source: Artin, *Geometric Algebra*.
 wire only the difference-cone form. (`JointVarietyDeterminesFamily` is PROVED outright — no axiom needed; it is
 deliberately absent from this list.) -/
 opaque FundamentalThmProjGeom : Prop
-axiom ftpg : FundamentalThmProjGeom
+-- ⏸ axiom ftpg : FundamentalThmProjGeom
 
 /-- Buekenhout–Shult / Veldkamp–Tits: an abstract polar space of rank ≥ 3 is CLASSICAL (embeds in `PG(d,q)`
 with its form). **CORRECTNESS/classicality only — NOT a complexity bound** (R1's poly-time is an in-project
 effective-construction obligation, route-c-plan §7a). Used only for `d ≥ 6`. Source: Buekenhout–Shult,
 Geom. Dedicata 1974; Tits, *Buildings of Spherical Type*. -/
 opaque PolarSpaceRankGe3Classical : Prop
-axiom buekenhout_shult : PolarSpaceRankGe3Classical
+-- ⏸ axiom buekenhout_shult : PolarSpaceRankGe3Classical
 
 /-- Payne–Thas: recognition/coordinatization of a CLASSICAL generalized quadrangle (the `d = 4`, rank-2 case,
 outside Buekenhout–Shult). **Correctness only.** The genuine soft spot (non-classical GQs exist), route-c-plan
@@ -316,7 +337,7 @@ outside Buekenhout–Shult). **Correctness only.** The genuine soft spot (non-cl
 ⚠ MUST BE NARROWED to a specific characterization theorem before wiring (2026-07-16 audit): there is no general
 "classical GQ recognition" theorem — as an unscoped axiom this would be citation-shaped open mathematics. -/
 opaque ClassicalGQRecognition : Prop
-axiom payne_thas : ClassicalGQRecognition
+-- ⏸ axiom payne_thas : ClassicalGQRecognition
 
 /-- Witt's theorem: over a field, `O(Q)` acts transitively on isometric isotropic subspaces / frames of a given
 type. Discharges `ConfinementP4.FrameSelectorTransitive` — the assume-VT prune (confinement-P4) is sound because
@@ -325,7 +346,7 @@ only** — a classical group-transitivity theorem (Artin, *Geometric Algebra*), 
 bounded-WL-dim wall (`JointProfileRecoversAt`). Carried as a scoped citation; a **planned in-project build** (first
 pieces done), expected to discharge before publication. -/
 opaque WittFlagTransitivity : Prop
-axiom witt_flag_transitivity : WittFlagTransitivity
+-- ⏸ axiom witt_flag_transitivity : WittFlagTransitivity
 
 /-! ## 3. THE OBLIGATIONS — the endgame theorem statements
 
@@ -472,8 +493,11 @@ theorem canonizer (n : ℕ) (G : AdjMatrix n) :
 **2026-08-04.** `unhandledResidue_nonvacuous` is discharged and prints exactly
 `[propext, Classical.choice, Quot.sound]`; so do the whole `①` trio and `②`. **`residue_if_flag` remains
 the single live `sorry`** — see the open-step block in §1 for precisely what closes it. **No citation
-axiom is consumed by any theorem in this file**, so the 8 in §2 are retained for W2/Route C rather than
-being the trusted base of anything proved here; the paper must say that. -/
+axiom is consumed by any theorem in this file**, so the 8 in §2 are now **commented out** rather than
+presented as the trusted base of anything proved here (each is one `-- ⏸ ` away from being restored when
+W2/Route C needs it). ⟹ **the only custom `axiom` in this file today is none**: the footprint below is
+Lean's three plus `sorryAx` from the single open obligation. The paper must still state the intended
+citation base for the parts of the project that do not live in this file. -/
 
 #print axioms canonizer
 #print axioms unhandledResidue_nonvacuous

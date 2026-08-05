@@ -15,10 +15,11 @@
 > `Publication.lean`, proved against the executable canonizer, axiom-clean. See the
 > [repository README](../README.md) for the outside-facing summary.
 >
-> ## ✅ W1 LANDED (2026-08-04) — `TwinFamily.lean` + `RestrictedTransport.lean`
+> ## ✅ W1 LANDED (2026-08-04) — `TwinFamily.lean` + `RestrictedTransport.lean` (+ `DeepenComplete.lean`, `DeepenTransportOn.lean`)
 >
-> Build.sh without issues, no `sorry`/`native_decide`/new axiom in the gated library.
-> `Publication.lean` (ungated, standalone) is at **one** live `sorry`.
+> Gate **113 modules, ~208–292 s, exit 0**; no `sorry`/`native_decide`/new axiom in the gated library.
+> `Publication.lean` (ungated, standalone) is at **one** live `sorry` (`residue_if_flag`) and, since
+> 2026-08-04, **zero custom axioms** — the 8 citations are commented out because nothing consumed them.
 > **▶ The authoritative record is [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §2 W1 and
 > its §2a HANDOFF block — read those, not this summary.** What a reader needs up front:
 >
@@ -31,11 +32,22 @@
 >   vacuous for every key, so `forceThenPick` is sound there.
 > * **The class is inhabited *and* proper**: `K₁,₂,₃` is Tinhofer, `K₃ ⊔ C₄` provably is not
 >   (`tinhoferGraph_nonvacuous`) — this discharges `Publication.unhandledResidue_nonvacuous`.
-> * **⛔ Four corrections to what is written below.** (i) the claim that the per-family `Tinhofer`
+> * **`①` ALSO HOLDS AT THE DEEPEN OBJECT ON THAT CLASS** — `DeepenTransportOn.deepen_object_package`:
+>   `Stall.guard (forceThenConsume holKeyFast deepenSupply)`, executable, with `①a` unconditional,
+>   `①b`/`①c` on the Tinhofer class, `②` unconditional, and `③` = *flag ⟹ not Tinhofer*. This is the
+>   wind-down's **option (v)**, and it is the object that keeps the honest flag (`forceThenPick` never
+>   flags, so its `③` is vacuous).
+> * **`R1` is now one named predicate** — `Deepen.OrbitComplete` (`DeepenComplete.lean`), with the payoff
+>   chain proved, a partial discharge (*good or `Aut`-rigid*), and a positive measurement base. Still
+>   suspended; nothing downstream waits on it.
+> * **⛔ Five corrections to what is written below.** (i) the claim that the per-family `Tinhofer`
 >   discharge is rigid-seal §9.1's work is **WRONG**; (ii) **`Deepen.orbKey` is `noncomputable`**, so any
 >   statement at it is about a canonizer that cannot be run; (iii) **`DeepenCertified` §7's computable
->   guard reduces to `R1`** (corrected at source); (iv) **never discharge a `Publication` obligation by
->   moving it to a second object** — `canonForm?` is meaningful only as one object carrying ①+②+③.
+>   guard is CIRCULAR** — it needs `OrbitComplete`, which already gives `①c` with no guard at all
+>   (corrected at source); (iv) **never discharge a `Publication` obligation by moving it to a second
+>   object** — `canonForm?` is meaningful only as one object carrying ①+②+③; (v) **§2 and §3 below route
+>   you to `chain-descent-handoff-2026-07-14.md` and `chain-descent-remaining-work.md` as "read first" /
+>   "the authoritative tracker" — both are VOID as plans.** The wind-down §2a is the entry point.
 
 The single entry point for the project. Read this first; it gives the idea, the
 current state, and a curated reading order. It replaces the old "simplified
