@@ -304,5 +304,83 @@ theorem not_tinhofer_of_deepenSupplyCert_defers {adj : AdjMatrix n} {χ : Colour
   rw [if_pos (certifiedG_of_tinhofer hT)] at h
   exact h
 
+/-! ## 8. ★★ A SECONDARY GUARD — per-anchor, strictly weaker than `Tinhofer`
+
+`CertifiedG` is a conjunction over the whole cell, so it shuts as soon as **one** level of **one**
+anchor's path meets a mixed cell. But `①` never needed `Tinhofer`: it needs `OrbitComplete`
+(`DeepenComplete.deepenSupply_canonizer_of_orbitComplete`), and `DeepenComplete` §5's *good-or-rigid*
+already implies that while being strictly weaker — a vertex no automorphism moves needs no good path.
+
+What blocked using it was decidability of the first disjunct. §5's implications are stated **per
+path**, not per graph, so they compose to a per-anchor equivalence, and goodness becomes decidable one
+anchor at a time. The second disjunct (`OrbitTrivial`) is *not* decidable — it quantifies over `Aut` —
+but any relabelling-invariant computable vertex invariant that isolates `u` inside its cell implies
+it, soundly.
+
+⚠ **The invariance bar is the real constraint on any secondary guard**, and it is why the guard is
+built from `GoodAnchor`/`OrbitTrivial` (intrinsic, transport-stable) rather than from deepen's output:
+`DeepenGuard`'s header records a measured CFI falsifier where deepen's own certificate is one orbit
+under some labellings and `8 + 8` under others. §5 escaped that only because `CertifiedG` turned out
+to *equal* the intrinsic `Tinhofer`. Anything read off `deepenGens` alone inherits the falsifier. -/
+
+/-- **★★ GOODNESS IS DECIDABLE, ONE ANCHOR AT A TIME.** The per-anchor form of §5. -/
+theorem goodAnchor_iff_certPath {adj : AdjMatrix n} {χ : Colouring n} {u : Fin n} :
+    GoodAnchor adj χ u ↔ CertPath deepenSupply adj n (step adj χ u) :=
+  ⟨fun h => certPath_of_tinhoferPath adj χ n (step adj χ u) (Nat.le_add_right n _) h,
+   fun h => tinhoferPath_of_certPath deepenSupply adj χ n _ h⟩
+
+instance instDecidableGoodAnchor (adj : AdjMatrix n) (χ : Colouring n) (u : Fin n) :
+    Decidable (GoodAnchor adj χ u) :=
+  decidable_of_iff _ goodAnchor_iff_certPath.symm
+
+/-- `u` is **isolated** by a vertex invariant `inv`: no other member of its branch cell shares its
+value. Decidable, unlike `OrbitTrivial`. -/
+def IsolatedBy (inv : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) (u : Fin n) : Prop :=
+  ∀ w ∈ Descend.branches χ, w ≠ u → inv adj χ w ≠ inv adj χ u
+
+instance instDecidableIsolatedBy (inv : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) (u : Fin n) : Decidable (IsolatedBy inv adj χ u) :=
+  inferInstanceAs (Decidable (∀ w ∈ Descend.branches χ, w ≠ u → inv adj χ w ≠ inv adj χ u))
+
+/-- An `Aut`-invariant vertex invariant that isolates `u` in its cell proves `u` is fixed by every
+colour-automorphism — the decidable stand-in for `OrbitTrivial`. -/
+theorem orbitTrivial_of_isolatedBy {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    (hinv : ∀ (adj : AdjMatrix n) (χ : Colouring n) (ρ : Equiv.Perm (Fin n)), IsColAut adj χ ρ →
+      ∀ u, inv adj χ (ρ u) = inv adj χ u)
+    {adj : AdjMatrix n} {χ : Colouring n} {u : Fin n} (hu : u ∈ Descend.branches χ)
+    (h : IsolatedBy inv adj χ u) : OrbitTrivial adj χ u := by
+  intro ρ hρ
+  by_contra hne
+  exact h (ρ u) (isColAut_mem_branches hρ hu) hne (hinv adj χ ρ hρ u)
+
+/-- **★★ THE SECONDARY GUARD.** Every anchor is either good (decidable by
+`goodAnchor_iff_certPath`) or isolated by `inv` (decidable). Strictly weaker than `CertifiedG`: it
+tolerates mixed cells wherever the mixture is visible to `inv`. -/
+def GoodOrIsolated (inv : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∀ u ∈ Descend.branches χ, GoodAnchor adj χ u ∨ IsolatedBy inv adj χ u
+
+instance instDecidableGoodOrIsolated (inv : AdjMatrix n → Colouring n → Fin n → Nat)
+    (adj : AdjMatrix n) (χ : Colouring n) : Decidable (GoodOrIsolated inv adj χ) :=
+  inferInstanceAs (Decidable (∀ u ∈ Descend.branches χ,
+    GoodAnchor adj χ u ∨ IsolatedBy inv adj χ u))
+
+/-- **★★ THE SECONDARY GUARD IS SOUND FOR `①`** — it delivers `OrbitComplete`, which is all
+`deepenSupply_canonizer_of_orbitComplete` ever asked for. -/
+theorem orbitComplete_of_goodOrIsolated {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    (hinv : ∀ (adj : AdjMatrix n) (χ : Colouring n) (ρ : Equiv.Perm (Fin n)), IsColAut adj χ ρ →
+      ∀ u, inv adj χ (ρ u) = inv adj χ u)
+    {adj : AdjMatrix n} {χ : Colouring n} (h : GoodOrIsolated inv adj χ) : OrbitComplete adj χ :=
+  orbitComplete_of_good_or_trivial
+    (fun u hu => (h u hu).imp id (orbitTrivial_of_isolatedBy hinv hu))
+
+/-- `CertifiedG` ⟹ the secondary guard, for any `inv`: the primary guard is the special case where
+every anchor takes the *left* disjunct. Records that §8 is a genuine weakening, not a variant. -/
+theorem goodOrIsolated_of_certifiedG {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    {adj : AdjMatrix n} {χ : Colouring n} (h : CertifiedG deepenSupply adj χ) :
+    GoodOrIsolated inv adj χ :=
+  fun u hu => Or.inl (tinhofer_of_certifiedG h u hu)
+
 end Deepen
 end ChainDescent
