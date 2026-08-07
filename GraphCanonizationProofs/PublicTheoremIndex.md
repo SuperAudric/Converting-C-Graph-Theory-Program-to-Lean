@@ -5232,21 +5232,60 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Deepen.tinhoferPath_none` | 76-79 | `TinhoferPath` equation lemma: no cell selected ⟹ `True` | Reduce only through these (the `chooseIdK`/`foldl` recipe) |
+| `Deepen.tinhoferPath_none` | 76-79 | `TinhoferPath` equation lemma: no cell selected ⟹ `True` | — |
 | `Deepen.tinhoferPath_cons` | 81-87 | `TinhoferPath` equation lemma: cell `cid`, pick `w` | — |
 | `Deepen.cidCell_ne_nil` | 89-99 | A selected cell is a cons (`chooseIdK` names only size-≥2 cells) | — |
-| `Deepen.chooseIdK_none_of_discrete` | 107-117 | `Discrete χ ⟹ chooseIdK = none` | Converse of `discrete_of_chooseIdK_none` |
-| `Deepen.tinhoferPath_fuel_lift` | 119-146 | ★ **Fuel adequacy** — once `n ≤ fuel + ncol`, `TinhoferPath` at that fuel holds at **every** fuel | The `ncol` measure; self-maintaining down a path |
-| `Deepen.tinhoferPath_spread` | 153-166 | ★★ A `TinhoferPath` **spreads across a single-orbit cell** — one member's path is every member's | `goodAnchor_transport` at general fuel; the ingredient `DeepenCertified` §7 predates |
-| `Deepen.tinhofer_of_tinhoferPath` | 170-193 | ★★★ **Path-local ⟹ all-anchors**: `TinhoferPath` at `cur` gives `Tinhofer adj cur.col` | **The step `DeepenCertified` §7 declared unavailable** |
-| `Deepen.cellIsOrbit_deepenSupply_of_tinhofer` | 197-208 | `Tinhofer` + `CellSingleOrbit` ⟹ `CellIsOrbit deepenSupply` | Via `DeepenComplete.orbitComplete_of_tinhofer` |
-| `Deepen.certPath_of_tinhoferPath` | 212-236 | ★★★ `TinhoferPath ⟹ CertPath deepenSupply` | Converse of `tinhoferPath_of_certPath` |
+| `Deepen.chooseIdK_none_of_discrete` | 107-117 | `Discrete χ ⟹ chooseIdK = none` | — |
+| `Deepen.tinhoferPath_fuel_lift` | 119-146 | ★ **Fuel adequacy** — once `n ≤ fuel + ncol`, `TinhoferPath` at that fuel holds at **every** fuel | — |
+| `Deepen.tinhoferPath_spread` | 153-166 | ★★ A `TinhoferPath` **spreads across a single-orbit cell** — one member's path is every member's | — |
+| `Deepen.tinhofer_of_tinhoferPath` | 170-193 | ★★★ **Path-local ⟹ all-anchors**: `TinhoferPath` at `cur` gives `Tinhofer adj cur.col` | — |
+| `Deepen.cellIsOrbit_deepenSupply_of_tinhofer` | 197-208 | `Tinhofer` + `CellSingleOrbit` ⟹ `CellIsOrbit deepenSupply` | — |
+| `Deepen.certPath_of_tinhoferPath` | 212-236 | ★★★ `TinhoferPath ⟹ CertPath deepenSupply` | — |
 | `Deepen.certifiedG_of_tinhofer` | 238-241 | ★★★ **The poly guard is COMPLETE** — open wherever `Tinhofer` holds | — |
-| `Deepen.tinhofer_iff_certifiedG` | 243-246 | ★★★ **`Tinhofer adj χ ↔ CertifiedG deepenSupply adj χ`** — the guard *is* `Tinhofer` | Headline; sound (`DeepenGuard` §3) + complete (§5) |
-| `Deepen.certifiedG_transport` | 254-257 | ★★★ The guard **transports** — with **no `SupplyEquivariant`** | Routed through `tinhofer_transport`; `deepenSupply` provably lacks equivariance |
+| `Deepen.tinhofer_iff_certifiedG` | 243-246 | ★★★ **`Tinhofer adj χ ↔ CertifiedG deepenSupply adj χ`** — the guard *is* `Tinhofer` | — |
+| `Deepen.certifiedG_transport` | 254-257 | ★★★ The guard **transports** — with **no `SupplyEquivariant`** | — |
 | `Deepen.certifiedG_transport_iff` | 259-263 | The guard's verdict is relabelling-**invariant**, both directions | — |
-| `Deepen.instDecidableCertifiedG` | 267-269 | `CertifiedG` is decidable | Instance; from `instDecidableCertPath` |
-| `Deepen.deepenSupplyCert` | 271-275 | ★★★ **The EXECUTABLE guarded deepen supply** | Definition; **computable** — `deepenSupplyGuarded` is not |
-| `Deepen.deepenSupplyCert_eq_guarded` | 277-282 | `deepenSupplyCert = deepenSupplyGuarded` | The wire; ⚠ cost field inherited, guard's own work **not** billed |
-| `Deepen.deepenSupplyCert_canonizer` | 284-293 | ★★★ **`①` at a COMPUTABLE object, NO hypothesis** | Answers `DeepenCertified` §7's "`R1`, not a wiring step" |
-| `Deepen.not_tinhofer_of_deepenSupplyCert_defers` | 295-305 | `③`-shaped: the executable supply defers ⟹ `¬ Tinhofer` | Residue non-vacuous — measured falsifier `C₃⊔C₃⊔C₄` |
+| `Deepen.instDecidableCertifiedG` | 267-269 | `CertifiedG` is decidable | Instance |
+| `Deepen.deepenSupplyCert` | 271-275 | ★★★ **The EXECUTABLE guarded deepen supply** | Definition |
+| `Deepen.deepenSupplyCert_eq_guarded` | 277-282 | `deepenSupplyCert = deepenSupplyGuarded` | — |
+| `Deepen.deepenSupplyCert_canonizer` | 284-293 | ★★★ **`①` at a COMPUTABLE object, NO hypothesis** | — |
+| `Deepen.not_tinhofer_of_deepenSupplyCert_defers` | 295-305 | `③`-shaped: the executable supply defers ⟹ `¬ Tinhofer` | — |
+| `Deepen.goodAnchor_iff_certPath` | 326-330 | — | — |
+| `Deepen.instDecidableGoodAnchor` | 332-334 | — | Instance |
+| `Deepen.IsolatedBy` | 336-340 | — | Definition |
+| `Deepen.instDecidableIsolatedBy` | 342-344 | — | Instance |
+| `Deepen.orbitTrivial_of_isolatedBy` | 346-355 | — | — |
+| `Deepen.GoodOrIsolated` | 357-362 | — | Definition |
+| `Deepen.instDecidableGoodOrIsolated` | 364-367 | — | Instance |
+| `Deepen.orbitComplete_of_goodOrIsolated` | 369-376 | — | — |
+| `Deepen.goodOrIsolated_of_certifiedG` | 378-383 | — | — |
+| `Deepen.InvEquivariant` | 434-438 | A vertex invariant is **relabelling-equivariant** | Definition; the hypothesis §8's `hinv` was missing |
+| `Deepen.autInvariant_of_invEquivariant` | 440-446 | Equivariance **implies** §8's `Aut`-invariance | So it replaces `hinv`, not adds to it |
+| `Deepen.goodAnchor_relabel` | 448-454 | ★ `GoodAnchor` transports across a relabelling — **unconditionally** | `tinhoferPath_transport` was already cross-graph |
+| `Deepen.isolatedBy_transport` | 456-465 | ★ `IsolatedBy` transports **iff `inv` does** | The whole content of §9's fix |
+| `Deepen.goodOrIsolated_transport` | 467-475 | ★★★ **The secondary guard IS relabelling-equivariant** | Settles §8's open question — YES |
+| `Deepen.goodOrIsolated_transport_iff` | 477-485 | The verdict is invariant, both directions | — |
+| `Deepen.deepenSupplyGI` | 489-492 | The secondary-guarded deepen supply | Definition; computable |
+| `Deepen.verified_GI_of_open` | 494-498 | Guard open ⟹ the supply is raw deepen | — |
+| `Deepen.verified_GI_of_shut` | 500-504 | Guard shut ⟹ no generators | — |
+| `Deepen.deepen_branchOrbit_transport_GI` | 506-537 | ★★ The branch-orbit relation transports | Open side = `IsColAut`-orbit relation; shut side = `[]` |
+| `Deepen.deepenSupplyGI_canonizer` | 539-548 | ★★★ `①` for the secondary guard, no hypothesis but `InvEquivariant inv` | ⚠ `②` unbilled, as in §7 |
+| `Deepen.stepSum` | 557-560 | Colour-rank total after individualizing `u` | Definition; computable `O(n³)` |
+| `Deepen.sum_transportColouring` | 562-565 | Transport permutes positions, not values ⟹ same sum | — |
+| `Deepen.invEquivariant_stepSum` | 567-572 | `InvEquivariant` is **inhabited** | Stops §9a being vacuously conditional |
+| `Deepen.deepenSupplyGI_stepSum_canonizer` | 574-580 | ★★★ A concrete computable canonizer at the secondary guard, **no hypothesis** | ⚠ **MEASURED to add zero coverage** — `isol=0` on 11/11; §9 is a socket, not a gain |
+## ChainDescent/RecordDeepen.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RecordDeepen.cellResolved_append_right` | 69-72 | — | — |
+| `RecordDeepen.handled_append_right` | 74-77 | — | — |
+| `RecordDeepen.tinhofer_of_reaches` | 85-89 | — | — |
+| `RecordDeepen.certifiedG_of_tinhoferGraph` | 91-95 | — | — |
+| `RecordDeepen.verified_deepenSupplyCert_of_certifiedG` | 99-104 | — | — |
+| `RecordDeepen.handled_deepenSupplyCert_of_tinhoferGraph` | 111-122 | — | — |
+| `RecordDeepen.recordSupplyDeepen` | 126-128 | — | Definition |
+| `RecordDeepen.handled_recordSupplyDeepen_of_tinhoferGraph` | 130-134 | — | — |
+| `RecordDeepen.handledS_recordSupplyDeepen_of_tinhoferGraph` | 136-140 | — | — |
+| `RecordDeepen.answersS_recordSupplyDeepen_of_tinhoferGraph` | 142-148 | — | — |
+| `RecordDeepen.not_tinhoferGraph_of_flag_recordDeepen` | 150-158 | — | — |

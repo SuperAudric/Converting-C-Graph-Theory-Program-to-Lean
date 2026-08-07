@@ -382,5 +382,202 @@ theorem goodOrIsolated_of_certifiedG {inv : AdjMatrix n → Colouring n → Fin 
     GoodOrIsolated inv adj χ :=
   fun u hu => Or.inl (tinhofer_of_certifiedG h u hu)
 
+/-! ## 9. ★★★ THE SECONDARY GUARD **IS** RELABELLING-EQUIVARIANT
+
+§8 left this open ("it hasn't been proven relabelling-equivariant yet"). It is — and the reason it
+looked doubtful is worth recording, because it is a hypothesis bug rather than a mathematical
+obstruction.
+
+**Both disjuncts transport, but for different reasons, and only one of them was hypothesised.**
+
+* `GoodAnchor` transports **outright**, with no side condition: `tinhoferPath_transport` is already
+  stated cross-graph (at `relabelAdj σ adj`), so `goodAnchor_relabel` below is a one-liner. §8's
+  `goodAnchor_transport` is the *automorphism* specialisation; the relabelling version is the more
+  general statement and was always available.
+* `IsolatedBy inv` transports **iff `inv` does**. §8 assumes only that `inv` is `Aut`-**invariant**
+  (`hinv`), which is exactly what `orbitTrivial_of_isolatedBy` needs for *soundness* and is strictly
+  too weak for *transport*: an `Aut`-invariant `inv` may take unrelated values at `(adj, χ, u)` and at
+  `(σ adj, σ χ, σ u)`, and then a vertex isolated before relabelling need not be isolated after.
+
+So the fix is to strengthen `hinv` from `Aut`-invariance to relabelling-**equivariance**
+(`InvEquivariant`). That is not a new burden: it is what any *computed* vertex invariant satisfies by
+construction, and it **implies** the `Aut`-invariance §8 already assumes
+(`autInvariant_of_invEquivariant`), so it replaces `hinv` rather than adding to it.
+
+⟹ `deepenSupplyGI`, a computable supply guarded by the **strictly weaker** §8 condition, with `①`
+carrying no hypothesis beyond `InvEquivariant inv` — which is discharged once, per invariant.
+⚠ Coverage is weakly larger than `deepenSupplyCert`'s (`goodOrIsolated_of_certifiedG`), so the
+residue is a *subset* of `¬ Tinhofer` and `③` composes unchanged. ⚠ `②` carries the same unbilled-guard
+gap as §7 — see the module notes there; nothing here bills the `IsolatedBy` scan.
+
+## ⚠⚠ MEASURED 2026-08-06 — CORRECT, EQUIVARIANT, AND WORTH **NOTHING** SO FAR
+
+`scratchpad/probe_goodorisolated.py` + `probe_isolpower.py`, 11 witnesses (4 rigid multipedes,
+`MIXED`, `circ(5)`, `mp7`, CFI over cubic bases m = 8/10 plain and twisted), root branch cell:
+
+> **`isol = 0` on 11/11, for THREE escalating equivariant invariants** — `stepSum`, the full sorted
+> colour **multiset** after individualizing `u`, and a **two-step** (individualize `u`, then each `w`)
+> refinement signature. **Strict wins (secondary guard open where the primary is shut): 0/11.**
+
+It fails precisely where it was designed to win: `rand multipede V=12 W=8` has cell 4 with **four
+singleton orbits** — every anchor is `Aut`-rigid, so `OrbitTrivial` holds for all four and
+`DeepenComplete` §5 would open — yet no refinement-computable invariant separates them, so
+`IsolatedBy` is false and the guard shuts anyway.
+
+★ **This is not a weak choice of `inv`; it is the recorded wall.** Multipedes and CFI graphs are
+*built* so that WL-computable invariants cannot separate their orbits. Making `IsolatedBy` fire on
+them is exactly the poly + equivariant + **separating** vertex-invariant problem — `KEY_scoping.md`'s
+*"rich / invariant / poly = pick two"*. So §9 should be read as **a socket, not a gain**: it is
+parametric in `inv`, costs nothing, and is ready if a separating invariant ever arrives. Do not cite
+it as coverage. -/
+
+/-- A vertex invariant is **relabelling-equivariant** when relabelling the graph carries its value
+along. This is the property `IsolatedBy` needs and the one §8's `hinv` was missing. -/
+def InvEquivariant (inv : AdjMatrix n → Colouring n → Fin n → Nat) : Prop :=
+  ∀ (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (u : Fin n),
+    inv (relabelAdj σ adj) (Descend.transportColouring σ χ) (σ u) = inv adj χ u
+
+/-- Equivariance **implies** §8's `Aut`-invariance: an automorphism fixes both the graph and the
+colouring, so the general statement collapses to the special one. -/
+theorem autInvariant_of_invEquivariant {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    (h : InvEquivariant inv) (adj : AdjMatrix n) (χ : Colouring n) (ρ : Equiv.Perm (Fin n))
+    (hρ : IsColAut adj χ ρ) (u : Fin n) : inv adj χ (ρ u) = inv adj χ u := by
+  have hg := h ρ adj χ u
+  rwa [hρ.relabel, transportColouring_isColAut hρ] at hg
+
+/-- **★ `GoodAnchor` TRANSPORTS ACROSS A RELABELLING** — unconditionally. `tinhoferPath_transport` is
+already cross-graph; this just feeds it `step_transport`. -/
+theorem goodAnchor_relabel (σ : Equiv.Perm (Fin n)) {adj : AdjMatrix n} {χ : Colouring n} {u : Fin n}
+    (h : GoodAnchor adj χ u) :
+    GoodAnchor (relabelAdj σ adj) (Descend.transportColouring σ χ) (σ u) :=
+  tinhoferPath_transport adj χ (Descend.transportColouring σ χ) n (step adj χ u)
+    (step (relabelAdj σ adj) (Descend.transportColouring σ χ) (σ u)) σ (step_transport σ adj χ u) h
+
+/-- **★ `IsolatedBy` TRANSPORTS EXACTLY WHEN `inv` DOES.** -/
+theorem isolatedBy_transport {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    (hinv : InvEquivariant inv) (σ : Equiv.Perm (Fin n)) {adj : AdjMatrix n} {χ : Colouring n}
+    {u : Fin n} (h : IsolatedBy inv adj χ u) :
+    IsolatedBy inv (relabelAdj σ adj) (Descend.transportColouring σ χ) (σ u) := by
+  intro w' hw' hne
+  obtain ⟨w, hw, rfl⟩ : ∃ w ∈ Descend.branches χ, σ w = w' := by
+    rw [(Descend.branches_transport_perm σ χ).mem_iff, List.mem_map] at hw'; exact hw'
+  rw [hinv σ adj χ w, hinv σ adj χ u]
+  exact h w hw (fun heq => hne (congrArg σ heq))
+
+/-- **★★★ THE SECONDARY GUARD TRANSPORTS.** -/
+theorem goodOrIsolated_transport {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    (hinv : InvEquivariant inv) (σ : Equiv.Perm (Fin n)) {adj : AdjMatrix n} {χ : Colouring n}
+    (h : GoodOrIsolated inv adj χ) :
+    GoodOrIsolated inv (relabelAdj σ adj) (Descend.transportColouring σ χ) := by
+  intro u' hu'
+  obtain ⟨u, hu, rfl⟩ : ∃ u ∈ Descend.branches χ, σ u = u' := by
+    rw [(Descend.branches_transport_perm σ χ).mem_iff, List.mem_map] at hu'; exact hu'
+  exact (h u hu).imp (goodAnchor_relabel σ) (isolatedBy_transport hinv σ)
+
+/-- The guard's verdict is relabelling-**invariant**, both directions. -/
+theorem goodOrIsolated_transport_iff {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    (hinv : InvEquivariant inv) (σ : Equiv.Perm (Fin n)) {adj : AdjMatrix n} {χ : Colouring n} :
+    GoodOrIsolated inv (relabelAdj σ adj) (Descend.transportColouring σ χ)
+      ↔ GoodOrIsolated inv adj χ := by
+  refine ⟨fun h => ?_, goodOrIsolated_transport hinv σ⟩
+  have h' := goodOrIsolated_transport hinv σ⁻¹ h
+  rwa [← relabelAdj_mul, transportColouring_comp, inv_mul_cancel, relabelAdj_one,
+       transportColouring_one] at h'
+
+/-! ### 9a. The supply it guards, and `①` for it -/
+
+/-- **★★ THE SECONDARY-GUARDED DEEPEN SUPPLY.** `deepenSupplyCert` with the strictly weaker §8
+guard. Computable: both disjuncts are decidable (`instDecidableGoodOrIsolated`). -/
+def deepenSupplyGI (inv : AdjMatrix n → Colouring n → Fin n → Nat) : Consume.Supply n := fun adj χ =>
+  if GoodOrIsolated inv adj χ then deepenSupply adj χ else ([], n * n * n * n * n * n)
+
+theorem verified_GI_of_open {inv : AdjMatrix n → Colouring n → Fin n → Nat} {adj : AdjMatrix n}
+    {χ : Colouring n} (h : GoodOrIsolated inv adj χ) :
+    Consume.verified (deepenSupplyGI inv) adj χ = Consume.verified deepenSupply adj χ := by
+  unfold Consume.verified Consume.gens deepenSupplyGI
+  rw [if_pos h]
+
+theorem verified_GI_of_shut {inv : AdjMatrix n → Colouring n → Fin n → Nat} {adj : AdjMatrix n}
+    {χ : Colouring n} (h : ¬ GoodOrIsolated inv adj χ) :
+    Consume.verified (deepenSupplyGI inv) adj χ = [] := by
+  unfold Consume.verified Consume.gens deepenSupplyGI
+  rw [if_neg h]; rfl
+
+/-- **★★ THE BRANCH-ORBIT RELATION TRANSPORTS.** Open side: §8's `orbitComplete_of_goodOrIsolated`
+makes the relation *equal* the `IsColAut`-orbit relation, which conjugates. Shut side: both are `[]`.
+Same two-case shape as `deepenSupplyGuarded`'s, with §9 supplying the guard's own invariance. -/
+theorem deepen_branchOrbit_transport_GI {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    (hinv : InvEquivariant inv) (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n)
+    (a b : Fin n) (ha : a ∈ Descend.branches χ) (_hb : b ∈ Descend.branches χ) :
+    Consume.WordReach
+        (Consume.verified (deepenSupplyGI inv) (relabelAdj σ adj)
+          (Descend.transportColouring σ χ)) (σ a) (σ b)
+      ↔ Consume.WordReach (Consume.verified (deepenSupplyGI inv) adj χ) a b := by
+  have hAut := autInvariant_of_invEquivariant hinv
+  by_cases hA : GoodOrIsolated inv adj χ
+  · have hA' := goodOrIsolated_transport hinv σ hA
+    rw [verified_GI_of_open hA', verified_GI_of_open hA]
+    have hσa : σ a ∈ Descend.branches (Descend.transportColouring σ χ) :=
+      (Descend.branches_transport_perm σ χ).mem_iff.mpr (List.mem_map_of_mem ha)
+    rw [branch_orbit_iff_aut_of_orbitComplete (orbitComplete_of_goodOrIsolated hAut hA') hσa,
+        branch_orbit_iff_aut_of_orbitComplete (orbitComplete_of_goodOrIsolated hAut hA) ha]
+    constructor
+    · rintro ⟨β, hβ, hβa⟩
+      refine ⟨σ⁻¹ * β * σ, ?_, ?_⟩
+      · have hc := (Consume.isColAut_conj_iff σ (adj := adj) (χ := χ) (α := σ⁻¹ * β * σ)).mp
+        rw [show σ * (σ⁻¹ * β * σ) * σ⁻¹ = β by group] at hc
+        exact hc hβ
+      · simp [Equiv.Perm.mul_apply, hβa]
+    · rintro ⟨β, hβ, hβa⟩
+      refine ⟨σ * β * σ⁻¹, (Consume.isColAut_conj_iff σ).mpr hβ, ?_⟩
+      simp [Equiv.Perm.mul_apply, hβa]
+  · have hA' : ¬ GoodOrIsolated inv (relabelAdj σ adj) (Descend.transportColouring σ χ) :=
+      fun h => hA ((goodOrIsolated_transport_iff hinv σ).mp h)
+    rw [verified_GI_of_shut hA', verified_GI_of_shut hA, wordReach_nil_iff, wordReach_nil_iff]
+    exact ⟨fun h => σ.injective h, fun h => congrArg σ h⟩
+
+/-- **★★★ `①` FOR THE SECONDARY-GUARDED SUPPLY — no hypothesis but `InvEquivariant inv`.** -/
+theorem deepenSupplyGI_canonizer {inv : AdjMatrix n → Colouring n → Fin n → Nat}
+    (hinv : InvEquivariant inv) :
+    CanonSpec.IsCanonicalFormOpt
+      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
+          (deepenSupplyGI (n := n) inv)))) :=
+  Residue.guarded_mixed_canonizer Force.keyEquivariant_lookahead
+    (SupplyTransport.stallEquivariant_forceThenConsume_of_branchOrbitTransport
+      Force.keyEquivariant_lookahead (deepen_branchOrbit_transport_GI hinv))
+
+/-! ### 9b. `InvEquivariant` is INHABITED by a computable, discriminating invariant
+
+Without this §9a would be conditional on a hypothesis nothing satisfies. `stepSum` is the total of the
+refined colour ranks after individualizing `u` — deepen's own first step, read as a number. It is
+equivariant because `step` is (`step_transport`) and because `transportColouring` **permutes positions
+without touching values**, so any symmetric aggregate of a colouring survives it. -/
+
+/-- The colour-rank total of `u`'s individualize-and-refine. Computable, `O(n³)`, and a genuine
+vertex invariant: any aggregate of the refined colouring works, this is the cheapest. -/
+def stepSum (adj : AdjMatrix n) (χ : Colouring n) (u : Fin n) : Nat :=
+  ∑ v : Fin n, (step adj χ u).col v
+
+/-- A transported colouring has the same colour **multiset**, hence the same sum. -/
+theorem sum_transportColouring (σ : Equiv.Perm (Fin n)) (ψ : Colouring n) :
+    ∑ v : Fin n, Descend.transportColouring σ ψ v = ∑ v : Fin n, ψ v :=
+  Equiv.sum_comp σ.symm ψ
+
+theorem invEquivariant_stepSum : InvEquivariant (stepSum (n := n)) := by
+  intro σ adj χ u
+  unfold stepSum
+  rw [show (step (relabelAdj σ adj) (Descend.transportColouring σ χ) (σ u)).col
+        = Descend.transportColouring σ ((step adj χ u).col) from step_transport σ adj χ u]
+  exact sum_transportColouring σ _
+
+/-- **★★★ A CONCRETE COMPUTABLE CANONIZER AT THE SECONDARY GUARD.** `①`, no hypothesis at all. -/
+theorem deepenSupplyGI_stepSum_canonizer :
+    CanonSpec.IsCanonicalFormOpt
+      (Descend.canonForm? (Refine.encodeFreeFast (n := n))
+        (Stall.guard (Composite.forceThenConsume (Force.lookaheadKey (n := n))
+          (deepenSupplyGI (n := n) stepSum)))) :=
+  deepenSupplyGI_canonizer invEquivariant_stepSum
+
 end Deepen
 end ChainDescent
