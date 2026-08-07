@@ -1,0 +1,16 @@
+The PROPOSED object: per-cell generator list + per-cell guard.
+A shut guard gives |cell| on both sides automatically, so only the VERDICT must be
+invariant — the per-cell analogue of tinhofer_iff_certifiedG.  Checked here.
+BFS depth 1, ≤2 members/node, 3 relabellings, budget 300.
+
+  CFI cubic m=8 pl         n=56   cells=28   open=26 unknown=0  GUARD-INV=Y  COUNT-INV=Y   <<< PER-CELL LIST + PER-CELL GUARD HOLDS
+  CFI cubic m=8 tw         n=56   cells=28   open=26 unknown=0  GUARD-INV=Y  COUNT-INV=Y   <<< PER-CELL LIST + PER-CELL GUARD HOLDS
+  rand multipede V=6 W=5   n=34   cells=8    open=0 unknown=0  GUARD-INV=Y  COUNT-INV=Y   (guard never opens — VACUOUS pass)
+  MIXED multipede          n=30   cells=24   open=18 unknown=0  GUARD-INV=Y  COUNT-INV=Y   <<< PER-CELL LIST + PER-CELL GUARD HOLDS
+  circ(5) multipede        n=30   cells=26   open=22 unknown=0  GUARD-INV=Y  COUNT-INV=Y   <<< PER-CELL LIST + PER-CELL GUARD HOLDS
+  mp7 Fano multipede       n=42   cells=14   open=14 unknown=0  GUARD-INV=Y  COUNT-INV=Y   <<< PER-CELL LIST + PER-CELL GUARD HOLDS
+  G8 cubic non-VT          n=8    cells=1    open=0 unknown=0  GUARD-INV=Y  COUNT-INV=Y   (guard never opens — VACUOUS pass)
+  S(K5)                    n=15   cells=10   open=10 unknown=0  GUARD-INV=Y  COUNT-INV=Y   <<< PER-CELL LIST + PER-CELL GUARD HOLDS
+  S(Petersen)              n=25   cells=14   open=14 unknown=0  GUARD-INV=Y  COUNT-INV=Y   <<< PER-CELL LIST + PER-CELL GUARD HOLDS
+
+>>> no witness skipped

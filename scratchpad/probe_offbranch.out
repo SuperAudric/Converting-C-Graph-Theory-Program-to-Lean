@@ -1,0 +1,48 @@
+Is deepen's PER-CELL orbit count relabelling-invariant OFF THE BRANCH CELL?
+`①` at the fused object reads ONLY the per-cell orbit COUNT (cellNarrow_length_transport).
+Harvest is the CURRENT branch-cell-only design; the question is its effect elsewhere.
+4 random relabellings per witness; cell matching by invariant colour value, checked.
+
+### designed multi-cell witnesses (different degrees ⟹ 1-WL keeps the parts apart)
+  C5 + K4                      n=9    cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  C6 + K4                      n=10   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  C7 + K4                      n=11   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  C5 + K5                      n=10   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  C8 + K4                      n=12   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  C9 + K5                      n=14   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  C6 + C8 (same degree)        n=14   cells=1   off-branch=0   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/0  partial=0/0   (single-cell — VACUOUS)
+
+### ★ SUBDIVISIONS — Aut acts on BOTH cells, the shape that can collapse off-branch
+  S(K4)                        n=10   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=1/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  S(K5)                        n=15   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=1/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  S(K6)                        n=21   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=1/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  S(K3,3)                      n=15   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=1/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  S(cube Q3)                   n=20   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=1/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  S(Petersen)                  n=25   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=1/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  S(C6)+K4                     n=16   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+
+### bipartite / two-family witnesses
+  K3,4                         n=7    cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+  K4,6                         n=10   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+
+### the recorded rich partially-firing witness
+  G8 cubic non-VT              n=8    cells=1   off-branch=0   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/0  partial=0/0   (single-cell — VACUOUS)
+
+### rigid multipedes
+  rand multipede V=6 W=5       n=34   cells=8   off-branch=7   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/7  partial=4/7   <<< NON-VACUOUS ROW
+  rand multipede V=8 W=6       n=44   cells=14  off-branch=13  rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/13  partial=0/13   (no partial off-branch collapse — VACUOUS pass)
+  rand multipede V=10 W=7      n=54   cells=17  off-branch=16  rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/16  partial=0/16   (no partial off-branch collapse — VACUOUS pass)
+  rand multipede V=12 W=8      n=64   cells=20  off-branch=19  rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/19  partial=0/19   (no partial off-branch collapse — VACUOUS pass)
+
+### mixed / gauge
+  MIXED multipede              n=30   cells=8   off-branch=7   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/7  partial=2/7   <<< NON-VACUOUS ROW
+  circ(5) multipede            n=30   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=1/1   <<< NON-VACUOUS ROW
+  mp7 Fano multipede           n=42   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=1/1  partial=0/1   (no partial off-branch collapse — VACUOUS pass)
+
+### CFI over random cubic bases
+  CFI cubic m=8 pl             n=56   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=1/1   <<< NON-VACUOUS ROW
+  CFI cubic m=8 tw             n=56   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=1/1   <<< NON-VACUOUS ROW
+  CFI cubic m=10 pl            n=70   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=1/1   <<< NON-VACUOUS ROW
+  CFI cubic m=10 tw            n=70   cells=2   off-branch=1   rel=4/4  branch-inv=Y  OFF-BRANCH-INV=Y  collapsed=0/1  partial=1/1   <<< NON-VACUOUS ROW
+
+>>> no witness skipped

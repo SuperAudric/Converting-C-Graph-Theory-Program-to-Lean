@@ -1,0 +1,10 @@
+At the off-branch falsifier found by probe_offbranch2, is the GUARD open?
+CertifiedG is decidable from deepen's own output — no orbit oracle is consulted.
+tinhofer_iff_certifiedG makes the guard's verdict intrinsic, so both sides must agree.
+
+  CFI cubic m=8 pl       n=56   depth=1 colour=13  (1, 1) vs (2,)   guard: OPEN / OPEN  ⟹ ⛔ GUARD OPEN — REAL falsifier for the GUARDED supply too
+  CFI cubic m=8 tw       n=56   depth=1 colour=13  (2,) vs (1, 1)   guard: OPEN / OPEN  ⟹ ⛔ GUARD OPEN — REAL falsifier for the GUARDED supply too
+  CFI cubic m=10 pl      n=70   depth=1 colour=22  (1, 1) vs (2,)   guard: OPEN / OPEN  ⟹ ⛔ GUARD OPEN — REAL falsifier for the GUARDED supply too
+  CFI cubic m=10 tw      n=70   depth=1 colour=22  (1, 1) vs (2,)   guard: OPEN / OPEN  ⟹ ⛔ GUARD OPEN — REAL falsifier for the GUARDED supply too
+  MIXED multipede        n=30   no off-branch falsifier at depth ≤ 1
+  circ(5) multipede      n=30   no off-branch falsifier at depth ≤ 1

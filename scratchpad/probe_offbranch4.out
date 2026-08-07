@@ -1,0 +1,31 @@
+Does a PER-CELL generator list repair the off-branch falsifier?
+A = cell judged by BRANCH-anchored generators (today).  B = cell judged by its OWN.
+BFS depth 2, ≤3 members/node, 4 relabellings, compared by transport.
+
+### CFI over random cubic bases — where A is refuted
+  CFI cubic m=8 pl         n=56   nodes=10  cells=131  A-INV=N  B-INV=Y  B-fires=129/131   <<< PER-CELL REPAIRS IT
+        A first fail: depth 1 colour 13 (OFF-BRANCH)  2 vs 1
+  CFI cubic m=8 tw         n=56   nodes=10  cells=131  A-INV=N  B-INV=Y  B-fires=129/131   <<< PER-CELL REPAIRS IT
+        A first fail: depth 1 colour 13 (OFF-BRANCH)  1 vs 2
+  CFI cubic m=10 pl        n=70   nodes=10  cells=209  A-INV=N  B-INV=Y  B-fires=198/209   <<< PER-CELL REPAIRS IT
+        A first fail: depth 1 colour 22 (OFF-BRANCH)  2 vs 1
+  CFI cubic m=10 tw        n=70   nodes=10  cells=209  A-INV=N  B-INV=Y  B-fires=198/209   <<< PER-CELL REPAIRS IT
+        A first fail: depth 1 colour 22 (OFF-BRANCH)  2 vs 1
+
+### mixed / gauge / multipedes
+  MIXED multipede          n=30   nodes=10  cells=62   A-INV=Y  B-INV=Y  B-fires=56/62
+  circ(5) multipede        n=30   nodes=3   cells=26   A-INV=Y  B-INV=Y  B-fires=22/26
+  mp7 Fano multipede       n=42   nodes=13  cells=137  A-INV=Y  B-INV=Y  B-fires=137/137
+  rand multipede V=6 W=5   n=34   nodes=1   cells=8    A-INV=Y  B-INV=N  B-fires=0/8   <<<< PER-CELL ALSO VARIES
+        B first fail: depth 0 colour 6 (OFF-BRANCH)  2 vs 4
+  rand multipede V=8 W=6   n=44   nodes=1   cells=14   A-INV=Y  B-INV=Y  B-fires=0/14   (B never fires — VACUOUS pass)
+
+### structured / multi-cell
+  G8 cubic non-VT          n=8    nodes=2   cells=4    A-INV=Y  B-INV=Y  B-fires=3/4
+  S(K5)                    n=15   nodes=13  cells=50   A-INV=Y  B-INV=Y  B-fires=50/50
+  S(Petersen)              n=25   nodes=13  cells=101  A-INV=Y  B-INV=Y  B-fires=101/101
+  S(cube Q3)               n=20   nodes=4   cells=20   A-INV=Y  B-INV=Y  B-fires=20/20
+  C7 + K4                  n=11   nodes=10  cells=20   A-INV=Y  B-INV=Y  B-fires=20/20
+  K4,6                     n=10   nodes=13  cells=26   A-INV=Y  B-INV=Y  B-fires=26/26
+
+>>> no witness skipped
