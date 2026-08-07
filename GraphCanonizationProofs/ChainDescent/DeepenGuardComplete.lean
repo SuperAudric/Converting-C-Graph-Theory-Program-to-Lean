@@ -410,7 +410,31 @@ carrying no hypothesis beyond `InvEquivariant inv` — which is discharged once,
 residue is a *subset* of `¬ Tinhofer` and `③` composes unchanged. ⚠ `②` carries the same unbilled-guard
 gap as §7 — see the module notes there; nothing here bills the `IsolatedBy` scan.
 
-## ⚠⚠ MEASURED 2026-08-06 — CORRECT, EQUIVARIANT, AND WORTH **NOTHING** SO FAR
+## ✅✅★★★ THE SECONDARY GUARD **STRICTLY BEATS** `CertifiedG` — CONFIRMED EXHAUSTIVELY 2026-08-06
+
+**`scratchpad/probe_strictwin.py` + `probe_strictwin_verify.py`. 2 strict wins in 60 random cubic
+graphs**, and the smallest is verified with **no orbit oracle, no `canon`, no generator harvesting** —
+`probe_strictwin_verify.py` enumerates all `10!` permutations directly.
+
+> **The `n = 10` witness.** Cubic, `|Aut(G, χ_1WL)| = 2`, 1-WL does **not** discretize (one 10-cell).
+> True orbits inside that cell: `[0,8] [1,4] [2,5] [3] [6,9] [7]`. Vertex **7** is the **only** bad
+> anchor, it is **`Aut`-rigid**, and `stepSum` **isolates** it. Hence
+> **`CertifiedG` (= `Tinhofer`) SHUT, `GoodOrIsolated` OPEN** — and every isolated vertex is genuinely
+> rigid, so `orbitTrivial_of_isolatedBy` is applied soundly.
+> `adj` rows: `0000010011 0001100001 0000000111 0100100100 0101001000 1000001100 0000110010
+> 0011010000 1010001000 1110000000`.
+
+★ **Where such witnesses live, and why the first two attempts missed them.** A strict win needs a cell
+whose **bad** anchors are all `Aut`-**rigid** and `inv`-isolable. The user's `C₃`/`C₄` witness had bad
+anchors that were *twins* (not rigid ⟹ not soundly isolable); the `C₈` witness had **no** bad anchors.
+Generic rigid-ish regular graphs supply both conditions at once, and the earlier 11-witness sweep
+contained none — it was all multipedes and CFI, which are *built* to defeat WL-computable invariants.
+
+⚠ **The earlier "worth nothing" reading of this section (isol = 0 on 11/11) was a POPULATION artefact
+and is retracted.** `IsolatedBy` is non-vacuous, `GoodOrIsolated` strictly extends the handled class
+beyond `Tinhofer`, and §9 may be cited as coverage. The superseded measurement follows.
+
+## ⚠ SUPERSEDED — the original 11-witness sweep (kept as provenance)
 
 `scratchpad/probe_goodorisolated.py` + `probe_isolpower.py`, 11 witnesses (4 rigid multipedes,
 `MIXED`, `circ(5)`, `mp7`, CFI over cubic bases m = 8/10 plain and twisted), root branch cell:
@@ -424,12 +448,12 @@ singleton orbits** — every anchor is `Aut`-rigid, so `OrbitTrivial` holds for 
 `DeepenComplete` §5 would open — yet no refinement-computable invariant separates them, so
 `IsolatedBy` is false and the guard shuts anyway.
 
-★ **This is not a weak choice of `inv`; it is the recorded wall.** Multipedes and CFI graphs are
-*built* so that WL-computable invariants cannot separate their orbits. Making `IsolatedBy` fire on
-them is exactly the poly + equivariant + **separating** vertex-invariant problem — `KEY_scoping.md`'s
-*"rich / invariant / poly = pick two"*. So §9 should be read as **a socket, not a gain**: it is
-parametric in `inv`, costs nothing, and is ready if a separating invariant ever arrives. Do not cite
-it as coverage. -/
+★ **On that population this is not a weak choice of `inv`** — multipedes and CFI graphs are *built* so
+that WL-computable invariants cannot separate their orbits, which is the `KEY_scoping.md` *"rich /
+invariant / poly = pick two"* wall. ⚠ But it does **not** generalise: those families are the hard
+core, not the typical input, and the block above exhibits ordinary cubic graphs where `IsolatedBy`
+fires and the guard strictly wins. **Read this sweep as "the wall families defeat it", not as "it buys
+nothing".** -/
 
 /-- A vertex invariant is **relabelling-equivariant** when relabelling the graph carries its value
 along. This is the property `IsolatedBy` needs and the one §8's `hinv` was missing. -/

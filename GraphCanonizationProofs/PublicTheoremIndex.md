@@ -5273,7 +5273,7 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.stepSum` | 557-560 | Colour-rank total after individualizing `u` | Definition; computable `O(n³)` |
 | `Deepen.sum_transportColouring` | 562-565 | Transport permutes positions, not values ⟹ same sum | — |
 | `Deepen.invEquivariant_stepSum` | 567-572 | `InvEquivariant` is **inhabited** | Stops §9a being vacuously conditional |
-| `Deepen.deepenSupplyGI_stepSum_canonizer` | 574-580 | ★★★ A concrete computable canonizer at the secondary guard, **no hypothesis** | ⚠ **MEASURED to add zero coverage** — `isol=0` on 11/11; §9 is a socket, not a gain |
+| `Deepen.deepenSupplyGI_stepSum_canonizer` | 574-580 | ★★★ A concrete computable canonizer at the secondary guard, **no hypothesis** | ✅ **MEASURED STRICT WIN** — 2/60 random cubic graphs beat `CertifiedG`; `n=10` witness verified exhaustively |
 ## ChainDescent/RecordDeepen.lean
 
 | Name | Line | Description | Notes |
