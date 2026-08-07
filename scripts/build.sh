@@ -156,6 +156,7 @@ MODULES=(
   ChainDescent.ForcePick              # forceThenPick: the exhaustiveness corollary cashed (no stall channel)
   ChainDescent.RecordCost             # ② for the OBJECT OF RECORD: the four supplies + holKeyFast, billed
   ChainDescent.TwinFamily             # W1: Tinhofer/twin families Handled at EXECUTABLE objects (①/②/③) — after RecordCost for the cost lemmas
+  ChainDescent.RecordDeepen           # ★ ③ WIRED INTO THE RECORD SUPPLY: recordSupplyFast ++ deepenSupplyCert is Handled on every Tinhofer graph
   ChainDescent.RestrictedTransport    # W1: ① relativized to a graph class ⟹ TINHOFER GRAPHS ARE CANONIZED (no supply)
   ChainDescent.DeepenTransportOn      # ① ON A CLASS at the DEEPEN object: OrbitComplete ⟹ NarrowTransportOn; option (v) packaged
   ChainDescent.RecordKey              # lex-product key combinator + the record's composed force key (①+②)
