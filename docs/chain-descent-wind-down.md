@@ -863,6 +863,13 @@ it is the consume-completeness question.** Three ways out:
 pair"), it keeps `①`/`②` unconditional, and W1 supplies the first genuine ③b. **User's call — not
 started.**
 
+>  ▶▶ **2026-08-06 — THE ACTIVE PLAN IS `docs/chain-descent-percell-plan.md`.** Per-cell harvest +
+>  per-cell guard, keeping `Publication.canonForm?`'s current fused object. It records (a) the core
+>  problem in plain terms, (b) a **wrong diagnosis I retracted** (that the fused object cannot carry
+>  deepen — it can; `①` never needed an equivariant reference), (c) the cost analysis showing **no new
+>  exponential and no new worst-case factor** (`Σ mᵢ² ≤ n²`), and (d) the **pair caveat**: `pairStep` is
+>  indexed by orbitals, not cells, so a per-cell guard must quantify over pairs.
+
 ### ▶ Live decisions, none started
 
 > ## ★★★ 2026-08-05 — **OPTION (vi) EXISTS AND DOMINATES (iv) AND (v). THE EITHER/OR IS OBSOLETE.**
