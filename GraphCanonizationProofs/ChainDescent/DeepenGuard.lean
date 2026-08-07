@@ -326,13 +326,24 @@ unfalsifiable" finding recurring, so the guard is billed here along its own recu
 `CellIsOrbit` test (`≤ n²` orbit closures, each `≤ n²`) **plus one call to `S`**, at the colouring the
 level actually visits. -/
 
+/-- **★ THE `step` BILL — one warm refinement.** `step = warmRefineVec ∘ indivOne` is `≤ n` rounds of
+`≤ n²` work, so `n³`. Named rather than inlined so that every place a descent pays for a refinement
+says so **in the same unit**, and so a depth-2 step (`DeepenPair.pairStep`) bills `2 * stepCost n`
+rather than silently nothing.
+
+⚠ **This closed a real hole, 2026-08-06.** `certPathCost` previously billed `n⁴ + supplyCost` per
+level and **nothing for the `step` the level performs** — the level's own recursion is on
+`step adj cur.col w`. That is the 2026-07-14 *"`Key`/`Supply` were cost-free ⟹ `②` is unfalsifiable"*
+finding recurring one level down: the guard walked a descent and charged for none of it. -/
+def stepCost (n : Nat) : Nat := n * n * n
+
 def certPathCost (S : Supply n) (adj : AdjMatrix n) : Nat → Refine.ColData n → Nat
   | 0, _ => 0
   | fuel + 1, cur =>
       match chooseIdK (List.finRange n) cur.col with
         | none => 0
         | some cid =>
-            (n * n * n * n + Consume.supplyCost S adj cur.col) +
+            (n * n * n * n + stepCost n + Consume.supplyCost S adj cur.col) +
             (match (List.finRange n).filter (fun v => cur.col v == cid) with
              | [] => 0
              | w :: _ => certPathCost S adj fuel (step adj cur.col w))
@@ -343,7 +354,7 @@ of a declared constant. -/
 theorem certPathCost_le {S : Supply n} {adj : AdjMatrix n} {c₂ : Nat}
     (hS : ∀ χ : Colouring n, Consume.supplyCost S adj χ ≤ c₂) :
     ∀ (fuel : Nat) (cur : Refine.ColData n),
-      certPathCost S adj fuel cur ≤ fuel * (n * n * n * n + c₂) := by
+      certPathCost S adj fuel cur ≤ fuel * (n * n * n * n + stepCost n + c₂) := by
   intro fuel
   induction fuel with
   | zero => intro cur; simp [certPathCost]
@@ -355,18 +366,20 @@ theorem certPathCost_le {S : Supply n} {adj : AdjMatrix n} {c₂ : Nat}
           cases hfl : (List.finRange n).filter (fun v => cur.col v == cid) with
           | nil =>
               simp only [certPathCost, hco, hfl]
-              have : n * n * n * n + Consume.supplyCost S adj cur.col
-                  ≤ n * n * n * n + c₂ := Nat.add_le_add_left (hS _) _
-              calc n * n * n * n + Consume.supplyCost S adj cur.col + 0
-                  ≤ n * n * n * n + c₂ := by omega
-                _ ≤ (fuel + 1) * (n * n * n * n + c₂) := Nat.le_mul_of_pos_left _ (by omega)
+              have : n * n * n * n + stepCost n + Consume.supplyCost S adj cur.col
+                  ≤ n * n * n * n + stepCost n + c₂ := Nat.add_le_add_left (hS _) _
+              calc n * n * n * n + stepCost n + Consume.supplyCost S adj cur.col + 0
+                  ≤ n * n * n * n + stepCost n + c₂ := by omega
+                _ ≤ (fuel + 1) * (n * n * n * n + stepCost n + c₂) :=
+                    Nat.le_mul_of_pos_left _ (by omega)
           | cons w rest =>
               simp only [certPathCost, hco, hfl]
-              have h1 : n * n * n * n + Consume.supplyCost S adj cur.col
-                  ≤ n * n * n * n + c₂ := Nat.add_le_add_left (hS _) _
+              have h1 : n * n * n * n + stepCost n + Consume.supplyCost S adj cur.col
+                  ≤ n * n * n * n + stepCost n + c₂ := Nat.add_le_add_left (hS _) _
               have h2 := ih (step adj cur.col w)
-              have : (fuel + 1) * (n * n * n * n + c₂)
-                  = (n * n * n * n + c₂) + fuel * (n * n * n * n + c₂) := by ring
+              have : (fuel + 1) * (n * n * n * n + stepCost n + c₂)
+                  = (n * n * n * n + stepCost n + c₂)
+                    + fuel * (n * n * n * n + stepCost n + c₂) := by ring
               omega
 
 /-! ## 6. `orbKeyG` — the same read, the poly guard, the billed cost -/
@@ -378,7 +391,7 @@ def orbKeyG (S : Supply n) : Force.Key n := fun adj χ v =>
   (if CertPath S adj n (step adj χ v)
      then readKey adj (Descend.indivOne χ v) (leafOf adj n (step adj χ v)).col
      else [],
-   n * n * n * n + certPathCost S adj n (step adj χ v))
+   n * n * n * n + stepCost n + certPathCost S adj n (step adj χ v))
 
 @[simp] theorem keyV_orbKeyG (S : Supply n) (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
     Force.keyV (orbKeyG S) adj χ v =
@@ -392,7 +405,8 @@ reachability test and one supply call each). Parametric in the supply's own boun
 exactly what the flat declared constant could not express. -/
 theorem keyCost_orbKeyG_le {S : Supply n} {adj : AdjMatrix n} {c₂ : Nat}
     (hS : ∀ χ : Colouring n, Consume.supplyCost S adj χ ≤ c₂) (χ : Colouring n) (v : Fin n) :
-    Force.keyCost (orbKeyG S) adj χ v ≤ n * n * n * n + n * (n * n * n * n + c₂) :=
+    Force.keyCost (orbKeyG S) adj χ v
+      ≤ n * n * n * n + stepCost n + n * (n * n * n * n + stepCost n + c₂) :=
   Nat.add_le_add_left (certPathCost_le hS n (step adj χ v)) _
 
 /-- **★★★ `①` FOR THE POLY-GUARDED KEY.** The guard transports (§4) and the value transports along the

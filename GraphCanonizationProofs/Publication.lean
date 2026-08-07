@@ -55,7 +55,7 @@ Per-obligation state:
     is proved, `#print axioms` = `[propext, Classical.choice, Quot.sound]`, **no `sorryAx`** — and on the
     LEFT disjunct, so the cost claim needs no flag escape. `cost` and `costConst`/`costDeg` are no longer
     `opaque`: `cost` is the `CostM` cost projection of the very definition `canonForm?` is the value
-    projection of, and the numerals are `RecordKey.costConst = 53` / `RecordKey.costDeg = 13`, both
+    projection of, and the numerals are `RecordKey.costConst = 57` / `RecordKey.costDeg = 13`, both
     *computed* (a `ring`-checked expansion, `RecordKey.recordKeyBound_expand`) rather than guessed.
     Provenance of why this took three shapes to get right: `SupplyCost`'s end-to-end theorems are at
     `lookaheadKey`+`prunedSupply`, which is NOT this file's object (closed by `RecordCost.lean`); and the
@@ -260,7 +260,8 @@ def UnhandledResidue (n : ℕ) (G : AdjMatrix n) : Prop :=
 Explicit ≫ existential: more honest, avoids formalizing the class P, and the reviewer reads the degree
 off the statement. **★ PINNED 2026-07-28** at the object above, from `RecordKey`'s §5 — and neither
 numeral is asserted: `RecordKey.recordKeyBound_expand` has `ring` check that the `②` bound polynomial
-has degree **13** and coefficients summing to **53**.
+has degree **13** and coefficients summing to **57** (was 53 until `Deepen.stepCost` was
+billed, 2026-08-06 — see `RecordKey.costConst`).
 
 ⚠⚠ **THE BOUND IS `costConst * (n + 1) ^ costDeg`, NOT `costConst * n ^ costDeg`** — the `n`-form (as
 this file pinned it until 2026-07-28) is **not provable for this object at any numerals**, and the flag
@@ -269,7 +270,8 @@ disjunct does not rescue it:
 * `Select.descendS` bills **1** for a leaf node, and at `n = 0` every colouring is vacuously
   `Discrete`, so the canonizer costs **1** and *answers* (`canonForm? 0 G ≠ none`, measured) — while
   `costConst * 0 ^ costDeg = 0` for every `costDeg ≥ 1`.
-* `costDeg = 0` degenerates the claim to a constant bound, false at `n = 2` (cost `1162`, measured).
+* `costDeg = 0` degenerates the claim to a constant bound, false at `n = 2` (cost `1166` on `K₂`,
+  measured 2026-08-06 at the billed key; `1162` before `stepCost` was billed).
 
 Nothing about the guarantee weakens: `(n + 1) ^ 13 ≤ 2 ^ 13 · n ^ 13` for `n ≥ 1`, so this is the same
 polynomial class, stated so that it is also true on the degenerate input. -/

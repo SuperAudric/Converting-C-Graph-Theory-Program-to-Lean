@@ -228,7 +228,9 @@ theorem supplyCost_guardSupply_le (adj : AdjMatrix n) (χ : Colouring n) :
 
 /-- The composed key's per-evaluation bill: the holonomy sweep plus the guarded read *and its guard*. -/
 def recordKeyBound (n : Nat) : Nat :=
-  n * n * n * n * n + (n * n * n * n + n * (n * n * n * n + guardSupplyBound n))
+  n * n * n * n * n
+    + (n * n * n * n + Deepen.stepCost n
+      + n * (n * n * n * n + Deepen.stepCost n + guardSupplyBound n))
 
 theorem keyCost_recordKey_le (adj : AdjMatrix n) (χ : Colouring n) (v : Fin n) :
     keyCost (recordKey (n := n)) adj χ v ≤ recordKeyBound n :=
@@ -270,9 +272,10 @@ theorem recordKey_canonizer_with_cost :
 /-! ## 5. ★ THE MONOMIAL — the exact shape `Publication.canon_poly_or_flag` pins
 
 §4a's bound is a *sum*; the publication statement pins a single monomial with numerals a reviewer can
-read off. This section supplies it, and fixes the numerals: **`costConst = 53`, `costDeg = 13`**
+read off. This section supplies it, and fixes the numerals: **`costConst = 57`, `costDeg = 13`**
 (the coefficient sum and the degree of §4a's polynomial — `ring` checks both in `recordKeyBound_expand`,
-so neither number is asserted).
+so neither number is asserted). ⚠ `costConst` was **53** until 2026-08-06; see its doc-string for why
+billing `Deepen.stepCost` moved it.
 
 ⚠⚠ **The pinned shape must be `costConst * (n + 1) ^ costDeg`, NOT `costConst * n ^ costDeg`.** The
 `n`-form is **not provable for this object at any numerals**, and the flag disjunct does not rescue it:
@@ -280,15 +283,24 @@ so neither number is asserted).
 * `Select.descendS` bills **1** for a leaf (`Select.lean`, both branches), and at `n = 0` every
   colouring is vacuously `Discrete` — so the record object costs **1** and *answers*
   (`canonFormS? … ≠ none`, measured). But `costConst * 0 ^ costDeg = 0` for every `costDeg ≥ 1`.
-* `costDeg = 0` degenerates the bound to the constant `costConst`, which fails at `n = 2` (the object
-  costs `1162` there, measured).
+* `costDeg = 0` degenerates the bound to the constant `costConst`, which fails at `n = 2` — measured
+  **2026-08-06** at the billed key: `descentCostS … = 1178` on the edgeless graph and **`1166`** on
+  `K₂`, against `costConst = 57`. (Both were lower before `stepCost` was billed; the recorded figure
+  was `1162`. The argument is unaffected — it needs only *some* `n = 2` cost above `costConst`.)
 
 `(n + 1)` is also what makes the proof uniform: every monomial `n ^ k` with `k ≤ costDeg` is
 `≤ (n + 1) ^ costDeg` by monotonicity **alone** (`pow_le_succ_pow`), with no `1 ≤ n` side condition to
 case-split on. Nothing about the guarantee weakens — `(n+1)^13 ≤ 2^13 · n^13` for `n ≥ 1`. -/
 
-/-- The pinned cost constant = the coefficient sum of §4a's bound polynomial. -/
-def costConst : Nat := 53
+/-- The pinned cost constant = the coefficient sum of §4a's bound polynomial.
+
+⚠ **Recomputed 53 → 57 on 2026-08-06**, when `Deepen.stepCost` was threaded into `certPathCost` and
+`orbKeyG` (the guard was walking a descent and charging for none of it). The extra work enters the
+expansion as `n⁵ + 2 n⁶ + n⁷`, so the `n⁵` coefficient goes `5 → 6`, `n⁶` goes `6 → 8` and `n⁷` goes
+`11 → 12`; the **degree is unchanged at 13**. `ring` checks the transcription, so this numeral is
+computed from the object rather than adjusted to fit — the first transcription I attempted (56) was
+rejected by `ring`, which is the point of expanding rather than asserting. -/
+def costConst : Nat := 57
 
 /-- The pinned cost degree = the degree of §4a's bound polynomial. -/
 def costDeg : Nat := 13
@@ -300,19 +312,19 @@ theorem pow_le_succ_pow (n : Nat) {k : Nat} (hk : k ≤ costDeg) : n ^ k ≤ (n 
     (Nat.pow_le_pow_right (Nat.succ_le_succ (Nat.zero_le n)) hk)
 
 /-- §4a's bound, expanded. `ring` checks the transcription, so `costConst`/`costDeg` are *computed*
-from the object rather than guessed: the degree is 13 and the coefficients sum to 53. -/
+from the object rather than guessed: the degree is 13 and the coefficients sum to 57. -/
 theorem recordKeyBound_expand (n : Nat) :
     n * n * n + (n + 1)
         * (1 + (Select.selProbeBound n (RecordCost.recordSupplyBound n)
             (RecordCost.recordGensBound n) (recordKeyBound n) + n * n * n))
-      = n ^ 13 + n ^ 12 + 3 * n ^ 11 + 4 * n ^ 10 + 2 * n ^ 9 + 8 * n ^ 8 + 11 * n ^ 7
-          + 6 * n ^ 6 + 5 * n ^ 5 + 6 * n ^ 4 + 4 * n ^ 3 + n + 1 := by
+      = n ^ 13 + n ^ 12 + 3 * n ^ 11 + 4 * n ^ 10 + 2 * n ^ 9 + 8 * n ^ 8 + 12 * n ^ 7
+          + 8 * n ^ 6 + 6 * n ^ 5 + 6 * n ^ 4 + 4 * n ^ 3 + n + 1 := by
   simp only [Select.selProbeBound, RecordCost.recordSupplyBound, RecordCost.recordGensBound,
-    recordKeyBound, guardSupplyBound, SupplyCost.matchSupplyBound]
+    recordKeyBound, guardSupplyBound, SupplyCost.matchSupplyBound, Deepen.stepCost]
   ring
 
 /-- **★★★ `②` IN THE PUBLICATION SHAPE** — the canonizer of record, at the composed force key, runs
-within `53 * (n + 1) ^ 13` on **every** input, with **no hypotheses and no flag disjunct**. -/
+within `57 * (n + 1) ^ 13` on **every** input, with **no hypotheses and no flag disjunct**. -/
 theorem descentCostS_selNode_recordKey_monomial (adj : AdjMatrix n) :
     Select.descentCostS (Refine.encodeFreeFast (n := n))
         (Select.selNode (Refine.encodeFreeFast (n := n)) (recordKey (n := n))
