@@ -125,10 +125,11 @@ authoritative record of what is proved is `PublicTheoremIndex.md`).**
 The cost model discharges two `Publication.lean` obligations:
 - **② `canon_poly_or_flag`** — `cost G ≤ costConst·(n+1)^costDeg ∨ canonForm? G = none`.
   ✅ **DISCHARGED 2026-07-28** (`RecordKey` §5 → `Publication`), on the LEFT disjunct, at
-  `costConst = 53`, `costDeg = 13`. ⚠⚠ **The `n^costDeg` form this doc used to quote is FALSE** for
+  `costConst = 57` (was 53 until `Deepen.stepCost` was billed, 2026-08-06), `costDeg = 13`.
+  ⚠⚠ **The `n^costDeg` form this doc used to quote is FALSE** for
   the real object at any numerals — `Select.descendS` bills 1 for a leaf and every `n = 0` colouring
   is vacuously `Discrete`, so the object costs 1 and *answers* while `c·0^d = 0`; and `costDeg = 0`
-  fails at `n = 2` (cost 1162, measured). Same polynomial class, corrected shape.
+  fails at `n = 2` (cost 1166 on `K₂` at the billed key; 1162 before `stepCost`). Same polynomial class, corrected shape.
 - **③-forward `residue_if_flag`** — `canonForm? G = none → UnhandledResidue G` (the weakened, `→`-only form:
   the `↔` was dropped because the headline never used `residue → flag`, and that backward direction is the
   prove-the-hard-case-fails direction the project struggles with).

@@ -12,7 +12,7 @@
 >
 > **W1 is ✅ LANDED (2026-08-04)** — `TwinFamily.lean` + `RestrictedTransport.lean`, extended the same day by
 > `DeepenComplete.lean` + `DeepenTransportOn.lean`. W4's go/no-go is **MET**.
-> Gate **113 modules, ~208–292 s, exit 0** (`bash /workspace/scripts/build.sh`).
+> Gate **116 modules, ~230–361 s, exit 0** (`bash /workspace/scripts/build.sh`, 2026-08-06).
 > **Tinhofer graphs are CANONIZED** (`canonizes_on_tinhofer`), the class is **inhabited and proper**
 > (`tinhoferGraph_nonvacuous`), and `Publication.unhandledResidue_nonvacuous` is **discharged**.
 >
@@ -434,11 +434,38 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 
 ---
 
-## 2a. ▶▶ HANDOFF — where a fresh reader picks up (2026-08-04)
+## 2a. ▶▶ HANDOFF — where a fresh reader picks up (updated 2026-08-06)
 
-**Gate is green**: `bash /workspace/scripts/build.sh` → **113 modules, ~208–292 s, exit 0** (measured
-2026-08-04; the spread is swap pressure, not a change in the work). ⚠ Use the **absolute** path — the
-script `cd`s via `$0`. No `sorry`, `native_decide` or new axiom anywhere in the gated library.
+> ## ★★★ START HERE — WHAT IS ACTIVE (2026-08-06)
+>
+> **▶ The active plan is [`chain-descent-percell-plan.md`](chain-descent-percell-plan.md).** Read it
+> **first**: it carries the core problem in plain terms, the plan, the cost analysis, and two traps.
+> Everything in §2's *"options table (i)–(vi)"* below is **provenance** — the question it debated
+> (*which object should `Publication.canonForm?` be*) is **settled: it keeps its current fused object**,
+> and the work is a **supply change**.
+>
+> **Landed since 2026-08-04** (all axiom-clean, all in the gate):
+> * **`Tinhofer ↔ CertifiedG deepenSupply`** (`DeepenGuardComplete` §§0–7) — deepen's poly guard is
+>   **complete**, so it transports with **no `SupplyEquivariant`**; `deepenSupplyCert` is a
+>   **computable** supply with `①` and **no hypothesis**. ⛔ This **refutes `DeepenCertified` §7**.
+> * **`GoodOrIsolated` is equivariant and STRICTLY beats `Tinhofer`** (`DeepenGuardComplete` §9) —
+>   2 strict wins in 60 random cubic graphs, the `n=10` one verified by exhaustive `10!` enumeration.
+> * **`pairStep`** (`DeepenPair`) — the depth-2 step; **is** the twin refinement (`TWIN = BOTH`);
+>   whole `step` interface inherited, blast radius **zero**.
+> * **`Deepen.stepCost` is billed** — `certPathCost` charged nothing for the `step` it walks.
+>   ⟹ **`RecordKey.costConst` 53 → 57** (degree still 13).
+> * ⛔⛔ **`BAD-BIG = 0` is FALSIFIED** (`DeepenComplete` §5.2) — the union-over-anchors question is
+>   **re-opened**. Nothing proved breaks; the *expectation* that good-or-rigid covers everything dies.
+>
+> ⛔ **Two wrong diagnoses recorded so they are not re-derived** (both mine, both retracted):
+> (a) *"the fused object cannot carry deepen"* — it can; `①` never needed an equivariant reference;
+> (b) *"§9 is a socket, not a gain"* — a population artefact of an all-multipede/CFI sweep.
+
+**Gate is green**: `bash /workspace/scripts/build.sh` → **116 modules, ~230–361 s, exit 0** (measured
+2026-08-06; the spread is swap pressure, not a change in the work). ⚠ Use the **absolute** path — the
+script `cd`s via `$0`. ⚠ `build.sh` opens with `pkill -f 'lake build'`, which kills **any** shell whose
+command line contains that string — never chain a `lake build` and the gate in one command. No `sorry`,
+`native_decide` or new axiom anywhere in the gated library.
 **`Publication.lean` is NOT gated** (compile it standalone: `cd GraphCanonizationProofs && lake env lean
 Publication.lean`); it has **exactly one** live `sorry`, `residue_if_flag`.
 
@@ -463,8 +490,10 @@ object — an exhaustive solver and a random solver each carry half and together
 two-object split was tried this session and reverted.
 
 ### Read in this order
-1. **This document**, §1 (why closed) → §2 W1 (what landed, its boxed corrections, the **options table**,
-   and the **R1 block**) → §2 W4.
+0. **[`chain-descent-percell-plan.md`](chain-descent-percell-plan.md)** — the active plan. ⚠ Read before
+   §2's options table, which it supersedes.
+1. **This document**, §1 (why closed) → §2 W1 (what landed, its boxed corrections, the **options table**
+   — now provenance — and the **R1 block**) → §2 W4.
 2. [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean) — module
    doc-block first; §3 the socket, §8 the twin object, §9 the bridge (⛔ `noncomputable`), §10 the
    repaired executable bridge.

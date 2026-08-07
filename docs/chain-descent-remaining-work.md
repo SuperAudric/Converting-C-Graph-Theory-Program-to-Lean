@@ -136,7 +136,8 @@ transfer). "Complete" = the flag provably never fires.
 >   cost projection of the same definition `①` rides on.
 > · **`canon_poly_or_flag` is proved on its LEFT disjunct** — no flag escape is used, because the
 >   fan-out bound is structural (`selNode_children_length_le_one`) and every component is billed.
->   Numerals: **`costConst = 53`, `costDeg = 13`**, and neither is asserted —
+>   Numerals: **`costConst = 57`, `costDeg = 13`** (`costConst` was 53 until `Deepen.stepCost` was
+>   billed, 2026-08-06), and neither is asserted —
 >   **`RecordKey.recordKeyBound_expand`** has `ring` check that §4a's bound polynomial has degree 13
 >   and coefficients summing to 53. New in `RecordKey` §5: `costConst`/`costDeg`/`pow_le_succ_pow`/
 >   `recordKeyBound_expand`/**`descentCostS_selNode_recordKey_monomial`**/`recordKey_canonizer_monomial`
@@ -146,7 +147,8 @@ transfer). "Complete" = the flag provably never fires.
 >   object at any numerals**: `Select.descendS` bills **1** for a leaf and at `n = 0` every colouring is
 >   vacuously `Discrete`, so the object costs `1` and *answers* (measured), while
 >   `costConst * 0 ^ costDeg = 0` for every `costDeg ≥ 1`; and `costDeg = 0` degenerates to a constant
->   bound, false at `n = 2` (cost `1162`, measured). `(n+1)` is the same polynomial class
+>   bound, false at `n = 2` (cost **`1166`** on `K₂` at the billed key; `1162` before `stepCost`).
+>   `(n+1)` is the same polynomial class
 >   (`(n+1)^13 ≤ 2^13·n^13` for `n ≥ 1`) and it also removes the `1 ≤ n` case split — every monomial
 >   `n^k`, `k ≤ 13`, is `≤ (n+1)^13` by monotonicity alone.
 > · **★ MEASURED — the key swap is a TOTALITY gain, not only a firing gain.** End-to-end on the record
@@ -1125,7 +1127,8 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   `keyCost_holKeyFast_le`, `supplyCost_appendSupply`, and the end-to-end
   **`descentCostS_selNode_record_le`** (explicit polynomial, no hypotheses). What remains of T2 is
   `deepenSupply`'s bound (still prose; pay when T1 wires it in). ▶ ✅ **The monomial reshape is DONE
-  2026-07-28** (`RecordKey` §5 → `Publication`): `costConst = 53`, `costDeg = 13`, `ring`-checked, and
+  2026-07-28** (`RecordKey` §5 → `Publication`): `costConst = 53` (**now 57**, since `stepCost` was
+billed 2026-08-06), `costDeg = 13`, `ring`-checked, and
   **the pinned shape is `costConst * (n + 1) ^ costDeg`** — the `n`-form is false at `n = 0` for the
   real object at any numerals. `canon_poly_or_flag` is discharged axiom-clean on its left disjunct.
 - **T3 — citation discharge** per policy (everything but G3; register + M1–M5 playbook in the discharge doc;
@@ -1208,7 +1211,7 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
    disjunct**, axiom-clean — `Publication` goes 3 `sorry`s → **2** (③ + non-vacuity).
    **⚠⚠ The pinned shape was FALSE and is now `costConst * (n + 1) ^ costDeg`** — `descendS` bills 1
    for a leaf and every `n = 0` colouring is vacuously `Discrete`, so the object costs 1 and
-   *answers* while `c * 0 ^ d = 0`; `costDeg = 0` fails at `n = 2` (1162). Same polynomial class.
+   *answers* while `c * 0 ^ d = 0`; `costDeg = 0` fails at `n = 2` (1166; 1162 before `stepCost`). Same polynomial class.
    **★ And the swap is a TOTALITY gain, now gated (`Regression` §19, ~32 s): `G8` FLAGS under
    `holKeyFast` and ANSWERS under `recordKey`** — the first handled/unhandled pair at the record
    resolvers. ⚠ Interpreted price: `t3` 12 s → 412 s, so no `t3`/`mp7` twin on the gate, and

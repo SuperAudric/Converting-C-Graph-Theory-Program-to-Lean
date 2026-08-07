@@ -119,3 +119,25 @@ block the plan, but a guard written per-member and *assumed* to cover pairs woul
 | per-cell guard (pair-indexed) | ⬜ not started |
 | `selColour_transport` against orbit-transport | ⬜ not started |
 | `②` recompute | ⬜ not started |
+
+## 7. Probe inventory — what has already been measured, so it is not re-run
+
+All in `scratchpad/`. Every one uses the vetted union-find-over-generators orbit reconstruction
+(`probe_certkey.true_orbit_partition`), **never** `probe_orbit_oracle` (which is proven wrong).
+
+| probe | what it settled |
+|---|---|
+| `probe_goodorisolated.py` | `GoodOrIsolated` vs `CertifiedG` on 11 multipede/CFI witnesses — **0 strict wins**, `isol = 0` |
+| `probe_isolpower.py` | the above is **not** a weak `inv`: `stepSum`, full colour multiset, and a 2-step signature all give `isol = 0` on the wall families |
+| `probe_selector_ceiling.py` | ★ **a better within-cell SELECTOR has ceiling ZERO** — exhaustive over all picks; `chooseIdK` picks the *cell* canonically, a selector only picks a vertex inside it |
+| `probe_pairrefine.py` | depth-2 (individualize both) repairs **CFI m=10 4/4**, rigid multipede **0/4** |
+| `probe_twinrefine.py` | ★ **`TWIN = BOTH`, 168/168** — the twin refinement **is** `pairStep`; no separate object needed |
+| `probe_mixedcell{,2,3}.py` | the `C₃`/`C₄` mixed-cell witness; ⛔ **falsifies `BAD-BIG = 0`** (24-orbit, `good 0/24`) |
+| `probe_whychoke.py` | why that witness's twin-hub descent fails: **level 8, a 24-vertex BLOCK cell**, `h₂`/`h₃` still merged — the descent never reaches the hub cell |
+| `probe_c8witness.py` | user's interlinked-`C₈` construction — everything good, both guards open; **first firing of `IsolatedBy`** |
+| `probe_strictwin.py` | ★★ **2 strict wins in 60 random cubic graphs** |
+| `probe_strictwin_verify.py` | ★★★ the `n=10` win **verified exhaustively** (all `10!` perms; no `canon`, no generator harvesting) |
+
+★ **The recipe the failures taught:** a strict win needs a cell whose **bad** anchors are all
+`Aut`-**rigid** and `inv`-isolable. `C₃`/`C₄` failed it (bad anchors were *twins* — not rigid, so not
+soundly isolable); `C₈` failed it (no bad anchors); **generic rigid-ish regular graphs supply both.**

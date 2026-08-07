@@ -1406,7 +1406,7 @@ to 2**, and `#print axioms canon_poly_or_flag` = `[propext, Classical.choice, Qu
 |---|---|
 | the object | `canonForm? = Select.canonFormFastS? RecordKey.recordKey RecordCost.recordSupplyFast`; `canonForm?_record` = `recordKey_canonizer` (still zero glue — `canonFormFastS?_eq` is `rfl`) |
 | `cost` | no longer `opaque`: `Select.descentCostS` at that object = the `CostM` cost projection of the definition `①` rides on |
-| the numerals | `costConst = 53`, `costDeg = 13`, **computed not guessed** — `recordKeyBound_expand` has `ring` check the degree and the coefficient sum |
+| the numerals | `costConst = 57` (53 before `stepCost` was billed, 2026-08-06), `costDeg = 13`, **computed not guessed** — `recordKeyBound_expand` has `ring` check the degree and the coefficient sum |
 | `②` | `canon_poly_or_flag`, proved on the **left** disjunct (no flag escape: fan-out `≤ 1` is structural and every component is billed) |
 
 #### ⚠⚠ THE PINNED MONOMIAL WAS WRONG — `n ^ costDeg` → `(n + 1) ^ costDeg`. Do not restore it.

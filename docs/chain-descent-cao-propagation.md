@@ -1428,7 +1428,7 @@ flat `n⁴`** covering `readKey ∘ leafOf`, where `leafOf` runs an entire `n`-l
 consequences, and they point opposite ways:
 
 - **For the swap: no current cost theorem changes.** `certPathCost_le`, `keyCost_orbKeyG_le`,
-  `descentCostS_selNode_recordKey_le`, `costConst = 53` / `costDeg = 13` are all statements about
+  `descentCostS_selNode_recordKey_le`, `costConst = 57` (53 pre-`stepCost`) / `costDeg = 13` are all statements about
   *declared* costs that never mention `step`. A 2-WL step would leave every one of them true and
   every proof unchanged.
 - **⚠ Which is exactly the problem.** That is the project's own recorded failure mode — *"the key

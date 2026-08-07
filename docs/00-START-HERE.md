@@ -3,6 +3,9 @@
 > # ▶ PROJECT STATUS (2026-08-01): RESEARCH PHASE CLOSED — WINDING DOWN
 >
 > **Read [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) before anything else.**
+> **▶▶ 2026-08-06 — then [`chain-descent-percell-plan.md`](./chain-descent-percell-plan.md), the ACTIVE
+> plan.** It supersedes the wind-down's options table (i)–(vi): `Publication.canonForm?` **keeps its
+> current fused object** and the work is a **supply change**. Option (v) references below are provenance.
 > It carries the closing assessment (why each research track was closed), the finish list
 > (the only live work), and the suspended-items table.
 >
@@ -17,7 +20,9 @@
 >
 > ## ✅ W1 LANDED (2026-08-04) — `TwinFamily.lean` + `RestrictedTransport.lean` (+ `DeepenComplete.lean`, `DeepenTransportOn.lean`)
 >
-> Gate **113 modules, ~208–292 s, exit 0**; no `sorry`/`native_decide`/new axiom in the gated library.
+> Gate **116 modules, ~230–361 s, exit 0** (2026-08-06); no `sorry`/`native_decide`/new axiom in the
+> gated library. ⚠ `build.sh` opens with `pkill -f 'lake build'` — never chain a `lake build` and the
+> gate in one command.
 > `Publication.lean` (ungated, standalone) is at **one** live `sorry` (`residue_if_flag`) and, since
 > 2026-08-04, **zero custom axioms** — the 8 citations are commented out because nothing consumed them.
 > **▶ The authoritative record is [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §2 W1 and
@@ -296,13 +301,15 @@ pure-consume Schurianity at every reached node — a family carrying a `RigidObs
 > *forbidden*.
 > **▶▶ AND (2026-07-28, last) — THE `Publication` SWAP IS DONE AND `②` IS DISCHARGED.**
 > `Publication.canonForm?` is now `RecordKey.recordKey` at the record supply, `cost`/`costConst`/
-> `costDeg` are real definitions (**53** and **13**, both `ring`-checked by
+> `costDeg` are real definitions (**57** and **13** — `costConst` was 53 until `Deepen.stepCost` was
+> billed on 2026-08-06; both `ring`-checked by
 > `RecordKey.recordKeyBound_expand`, not guessed), and **`canon_poly_or_flag` is proved axiom-clean on
 > its LEFT disjunct** — 3 `sorry`s → **2** (③ + non-vacuity). `RecordKey` §5 carries the monomial.
 > **⚠⚠ The pinned shape had to change and must not be "restored": `costConst * n ^ costDeg` is FALSE
 > at `n = 0`** for the real object at any numerals (`descendS` bills 1 for a leaf, every `n = 0`
 > colouring is vacuously `Discrete`, so the object costs 1 and *answers*, while `c * 0 ^ d = 0`;
-> `costDeg = 0` fails at `n = 2`, cost 1162). It is now **`costConst * (n + 1) ^ costDeg`** — same
+> `costDeg = 0` fails at `n = 2`, cost **1166** on `K₂` at the billed key — 1162 before `stepCost`).
+> It is now **`costConst * (n + 1) ^ costDeg`** — same
 > polynomial class, true on every input, and it removes the `1 ≤ n` case split from the proof.
 > **★ And the swap is a TOTALITY gain, measured end-to-end: `G8` FLAGS under `holKeyFast` and ANSWERS
 > under `recordKey`** — the first handled/unhandled pair at the record resolvers. ⚠ Price:

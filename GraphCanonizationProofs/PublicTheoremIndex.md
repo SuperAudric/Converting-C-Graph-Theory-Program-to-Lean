@@ -2700,8 +2700,8 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 | `Showcase.cost` | 157-163 | The canonizer's operation count — no longer an `opaque` stub: the `CostM` cost projection of the very definition `canonForm?` is the value projection of, so `②` is a theorem about the object `①` is about. | Definition |
 | `Showcase.residueRigidObstruction` | 249-252 | **(D2) the rigid/symmetry obstruction, DEFINED** as `¬ TwinFamily.TinhoferGraph G` — via `schurianAt_iff_no_rigidObstruction` this is *"some individualization-reachable colouring of `G` carries a rigid obstruction"*: structural, iso-invariant, algorithm-independent, so it clears the firewall. Replaces three `opaque` atoms that had made **both** ③ obligations unprovable in principle. ⚠ An **over-approximation** — a CFI graph is not Tinhofer although its obstruction is linear; W2's job is to narrow it. | Definition |
 | `Showcase.UnhandledResidue` | 254-256 | **THE RESIDUE** — one disjunct today, by design: `residueRigidObstruction` (= `¬ TinhoferGraph`). D0 `residueNonSchurian` and D1 `residueHiddenJohnson` were **dropped, not kept as opaque placeholders**: an opaque disjunct makes the handled half of `unhandledResidue_nonvacuous` unprovable in principle. ⚠ Add `∨ NonLinearRigidObstruction` only once W2 gives it content. | Definition |
-| `Showcase.costConst` | 277-278 | The pinned cost constant `= RecordKey.costConst = 53` — the coefficient sum of the `②` bound polynomial, `ring`-checked rather than asserted. | Definition |
-| `Showcase.costDeg` | 280-281 | The pinned cost degree `= RecordKey.costDeg = 13`. ⚠ The bound is `costConst * (n+1) ^ costDeg`: the `n`-form is false at `n = 0`, where the object costs 1 and answers. | Definition |
+| `Showcase.costConst` | 279-280 | The pinned cost constant `= RecordKey.costConst = 57` (53 before `Deepen.stepCost` was billed, 2026-08-06) — the coefficient sum of the `②` bound polynomial, `ring`-checked rather than asserted. | Definition |
+| `Showcase.costDeg` | 282-283 | The pinned cost degree `= RecordKey.costDeg = 13`. ⚠ The bound is `costConst * (n+1) ^ costDeg`: the `n`-form is false at `n = 0`, where the object costs 1 and answers. | Definition |
 | `Showcase.cameron_classification` | 281-286 | ⏸ **INACTIVE — the `axiom` line is COMMENTED OUT** (2026-08-04): it was consumed by nothing, so declaring it only invited a reviewer to read it as this file’s trusted base. The `opaque … : Prop` and its citation doc-comment are retained; restoring it for W2/Route C is deleting `-- ⏸ ` from one line. Citation: G3 — the primitive-CC / Cameron classification (CFSG). ⚠ The citable threshold is Sun–Wilmes `exp(Õ(n^{1/3}))`; **never** instantiate at the quasi-poly `n^{log₂ n}`, where the statement is Babai’s OPEN conjecture. | ⏸ axiom (commented out) |
 | `Showcase.skresanov_two_closure` | 287-290 | ⏸ **INACTIVE — the `axiom` line is COMMENTED OUT** (2026-08-04): it was consumed by nothing, so declaring it only invited a reviewer to read it as this file’s trusted base. The `opaque … : Prop` and its citation doc-comment are retained; restoring it for W2/Route C is deleting `-- ⏸ ` from one line. Citation: Skresanov rank-3 affine 2-closure (underpins all four Route-C families’ `|Aut|` side). | ⏸ axiom (commented out) |
 | `Showcase.liebeck_rank3` | 291-294 | ⏸ **INACTIVE — the `axiom` line is COMMENTED OUT** (2026-08-04): it was consumed by nothing, so declaring it only invited a reviewer to read it as this file’s trusted base. The `opaque … : Prop` and its citation doc-comment are retained; restoring it for W2/Route C is deleting `-- ⏸ ` from one line. Citation: Liebeck affine-rank-3 classification. | ⏸ axiom (commented out) |
@@ -2710,13 +2710,13 @@ The **Phase-1 → Phase-2 seam** (`docs/chain-descent-remaining-work.md` item 6)
 | `Showcase.buekenhout_shult` | 311-318 | ⏸ **INACTIVE — the `axiom` line is COMMENTED OUT** (2026-08-04): it was consumed by nothing, so declaring it only invited a reviewer to read it as this file’s trusted base. The `opaque … : Prop` and its citation doc-comment are retained; restoring it for W2/Route C is deleting `-- ⏸ ` from one line. Citation: Buekenhout–Shult / Veldkamp–Tits, polar space of rank ≥ 3 is classical. **Correctness only, not a complexity bound.** | ⏸ axiom (commented out) |
 | `Showcase.payne_thas` | 319-327 | ⏸ **INACTIVE — the `axiom` line is COMMENTED OUT** (2026-08-04): it was consumed by nothing, so declaring it only invited a reviewer to read it as this file’s trusted base. The `opaque … : Prop` and its citation doc-comment are retained; restoring it for W2/Route C is deleting `-- ⏸ ` from one line. Citation: Payne–Thas classical-GQ recognition. ⚠ **Must be narrowed** to a specific characterization before wiring — there is no general “classical GQ recognition” theorem, and unscoped it would be citation-shaped open mathematics. | ⏸ axiom (commented out) |
 | `Showcase.witt_flag_transitivity` | 328 | ⏸ **INACTIVE — the `axiom` line is COMMENTED OUT** (2026-08-04): it was consumed by nothing, so declaring it only invited a reviewer to read it as this file’s trusted base. The `opaque … : Prop` and its citation doc-comment are retained; restoring it for W2/Route C is deleting `-- ⏸ ` from one line. Citation: Witt’s theorem (transitivity on isometric isotropic frames). **Correctness only**; a planned in-project build. | ⏸ axiom (commented out) |
-| `Showcase.canon_sound` | 357-364 | **`①a` SOUNDNESS, UNCONDITIONAL** — when the canonizer answers, its output is a genuine relabelling of the input. Axiom-clean; the record’s `SoundOpt` half applied directly (`Labelled n` is definitionally the matrix type, so no glue). | — |
-| `Showcase.canon_complete` | 366-391 | **`①b` COMPLETENESS, UNCONDITIONAL** — whenever it answers on both inputs, equal forms ⟺ isomorphic. Axiom-clean. **Free**: `CanonSpec.complete_of_isCanonicalFormOpt` says sound ∧ iso-invariant ⟹ complete. ⛔ Do **not** restate the resolver contract as the single unconditional `Covering` — a covering resolver is provably value-invisible, which pins the object to the retired `canonMin` anchor. | — |
-| `Showcase.flag_iso_invariant` | 393-399 | **`①c` THE FLAG IS ISO-INVARIANT, UNCONDITIONAL** — flagging is a property of the isomorphism class. Axiom-clean; free from the record’s `IsoInvariantOpt` half, since one equation on `Option`s carries the answer **and** the flag. | — |
-| `Showcase.canon_poly_or_flag` | 401-411 | **`②` POLY-OR-FLAG** — proved axiom-clean **on the LEFT disjunct**, so the cost claim needs no flag escape at all. The record object is a single path of ≤ `n+1` nodes by construction and every component is billed. ⚠ The bound is `costConst * (n+1) ^ costDeg`, **not** `costConst * n ^ costDeg`, which is false at `n = 0` for the real object at any numerals. | — |
-| `Showcase.residue_if_flag` | 439-452 | ⚠ **THE ONE LIVE `sorry` IN THE FILE.** Needs *Tinhofer ⟹ the consume resolver fires* at **this** object; it holds at `deepenSupply` (`TwinFamily.not_tinhoferGraph_of_flag`) and at the `noncomputable` `deepenSupplyGuarded`, but not at the record supply. ⛔ **Do NOT discharge it by relocating the statement to a second object** — `canonForm?` is meaningful only as ONE object carrying ①+②+③. | — |
-| `Showcase.unhandledResidue_nonvacuous` | 454-470 | ★★ **DISCHARGED 2026-08-04**, axiom-clean, from `RestrictedTransport.tinhoferGraph_nonvacuous`: handled witness `K₁,₂,₃`, residual witness `K₃ ⊔ C₄`. Both are structural facts about the *graphs*; neither mentions the algorithm. | — |
-| `Showcase.canonizer` | 477-489 | **THE HEADLINE** — a complete iso-invariant (never wrong) **and** within the explicit polynomial budget, composed from the obligations. Axiom-clean. ★ Note the cost conjunct is **unconditional**: carrying a residue disjunct invited the reading that the cost claim depends on the residue, which it does not. | — |
+| `Showcase.canon_sound` | 359-366 | **`①a` SOUNDNESS, UNCONDITIONAL** — when the canonizer answers, its output is a genuine relabelling of the input. Axiom-clean; the record’s `SoundOpt` half applied directly (`Labelled n` is definitionally the matrix type, so no glue). | — |
+| `Showcase.canon_complete` | 368-393 | **`①b` COMPLETENESS, UNCONDITIONAL** — whenever it answers on both inputs, equal forms ⟺ isomorphic. Axiom-clean. **Free**: `CanonSpec.complete_of_isCanonicalFormOpt` says sound ∧ iso-invariant ⟹ complete. ⛔ Do **not** restate the resolver contract as the single unconditional `Covering` — a covering resolver is provably value-invisible, which pins the object to the retired `canonMin` anchor. | — |
+| `Showcase.flag_iso_invariant` | 395-401 | **`①c` THE FLAG IS ISO-INVARIANT, UNCONDITIONAL** — flagging is a property of the isomorphism class. Axiom-clean; free from the record’s `IsoInvariantOpt` half, since one equation on `Option`s carries the answer **and** the flag. | — |
+| `Showcase.canon_poly_or_flag` | 403-413 | **`②` POLY-OR-FLAG** — proved axiom-clean **on the LEFT disjunct**, so the cost claim needs no flag escape at all. The record object is a single path of ≤ `n+1` nodes by construction and every component is billed. ⚠ The bound is `costConst * (n+1) ^ costDeg`, **not** `costConst * n ^ costDeg`, which is false at `n = 0` for the real object at any numerals. | — |
+| `Showcase.residue_if_flag` | 441-454 | ⚠ **THE ONE LIVE `sorry` IN THE FILE.** Needs *Tinhofer ⟹ the consume resolver fires* at **this** object; it holds at `deepenSupply` (`TwinFamily.not_tinhoferGraph_of_flag`) and at the `noncomputable` `deepenSupplyGuarded`, but not at the record supply. ⛔ **Do NOT discharge it by relocating the statement to a second object** — `canonForm?` is meaningful only as ONE object carrying ①+②+③. | — |
+| `Showcase.unhandledResidue_nonvacuous` | 456-472 | ★★ **DISCHARGED 2026-08-04**, axiom-clean, from `RestrictedTransport.tinhoferGraph_nonvacuous`: handled witness `K₁,₂,₃`, residual witness `K₃ ⊔ C₄`. Both are structural facts about the *graphs*; neither mentions the algorithm. | — |
+| `Showcase.canonizer` | 479-491 | **THE HEADLINE** — a complete iso-invariant (never wrong) **and** within the explicit polynomial budget, composed from the obligations. Axiom-clean. ★ Note the cost conjunct is **unconditional**: carrying a residue disjunct invited the reading that the cost claim depends on the residue, which it does not. | — |
 ## ChainDescent/CanonicalForm.lean
 
 **Mixed-composition Stage 0a — the canonical-form correctness framework** (`docs/chain-descent-mixed-composition.md`).
@@ -4800,42 +4800,43 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.certPath_nil` | 284-288 | `CertPath` equation lemma (chosen cell empty). | — |
 | `Deepen.certPath_cons` | 290-296 | `CertPath` equation lemma (chosen cell non-empty) — the recursive case that feeds the decidability instance. | — |
 | `Deepen.instDecidableCertPath` | 298-319 | ★★ `CertPath` IS DECIDABLE — structural recursion on the fuel, each level one `Consume.decidableCellIsOrbit` test (the orbit BFS), no search over `Equiv.Perm (Fin n)`. This REPLACED the `Classical.dec` placeholder and is what makes `orbKeyG` computable. ⚠ `orbKey` is not repairable this way: its `TinhoferPath` guard is the automorphism-partition problem (GI-complete). | Instance |
-| `Deepen.certPathCost` | 329-338 | The guard's OWN cost, billed along its own recursion: per level one `CellIsOrbit` reachability test plus **one call to `S`**, at the colouring that level actually visits. The key previously declared a flat `n⁴` that priced the read and nothing of the guard. | Definition |
-| `Deepen.certPathCost_le` | 340-370 | The guard costs `fuel` levels of (reachability + one supply call), parametric in the supply's own bound `c₂` — the `SupplyCost` pattern, so a real bound rather than a restatement of a declared constant. | — |
-| `Deepen.orbKeyG` | 374-381 | ★★★ THE POLY-GUARDED KEY. Identical to `orbKey` except the `if` tests the OBSERVABLE `CertPath S`. | Definition |
-| `Deepen.keyV_orbKeyG` | 383-387 | The guarded key's value projection, unfolded. | `@[simp]` |
-| `Deepen.keyCost_orbKeyG_le` | 389-396 | ★★ THE KEY'S BILL: `keyCost (orbKeyG S) ≤ n⁴ + n·(n⁴ + c₂)`. Parametric in the supply's cost bound, so an exponential `supplyCost` now yields an exponential `keyCost` — `②` at this key is falsifiable, which the flat constant could not express. | — |
-| `Deepen.keyEquivariant_orbKeyG` | 398-413 | ★★★ `①` FOR THE POLY-GUARDED KEY, from `SupplyEquivariant S` alone. ⚠ Note `CertPath S ⟹ TinhoferPath` and never the converse, so `orbKeyG S` DEFERS more often than `orbKey` — a firing loss, not a soundness loss. | — |
-| `Deepen.orbKeyG_ne_of_no_aut` | 420-433 | The guarded key separates a non-automorphic pair (`isColAut_of_readKey_eq` is guard-agnostic, so this transferred verbatim). | — |
-| `Deepen.forceBy_orbKeyG_narrows` | 435-446 | ★★★ FORCE FIRES UNDER THE POLY GUARD. Same as `forceBy_orbKey_narrows` with `CertifiedG S` (poly, observable) in place of `Tinhofer` (an `n!` search). | — |
-| `Deepen.consume_fail_force_fires_guarded` | 448-465 | ★★ The poly-guarded hook. The LOCALIZATION half is unchanged (it never depended on a guard); what the poly guard costs is that FIRING needs the guard open, hence `CertifiedG S ψ` as a hypothesis. The unconditional statement stays `consume_fail_force_fires`, over `orbKey`. | — |
-| `Deepen.orbKeyG_eq_orbKey_of_certPath` | 467-472 | Wherever the poly guard is open the two keys are EQUAL — `orbKeyG S` is a restriction of `orbKey`, not a different function. | — |
-| `Deepen.keyEquivariant_orbKeyG_deck2` | 480-482 | Non-vacuity: the parametric design instantiated at `deck2Supply`. | — |
-| `Deepen.keyEquivariant_orbKeyG_deck` | 484-486 | Non-vacuity: instantiated at `deckSupply`. | — |
-| `Deepen.force_canonizer_orbKeyG_deck2` | 488-498 | ★★★ THE POLY-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` plus totality for the `deck2`-guarded key, with NO hypothesis at all. | — |
+| `Deepen.stepCost` | 329-338 | ★ **The `step` bill** — one warm refinement, `n³` | Definition. Closed a real hole 2026-08-06: `certPathCost` billed **nothing** for the `step` its own recursion performs ⟹ `costConst` 53 → 57 |
+| `Deepen.certPathCost` | 340-349 | The guard's OWN cost, billed along its own recursion: per level one `CellIsOrbit` reachability test plus **one call to `S`**, at the colouring that level actually visits. The key previously declared a flat `n⁴` that priced the read and nothing of the guard. | Definition |
+| `Deepen.certPathCost_le` | 351-383 | The guard costs `fuel` levels of (reachability + one supply call), parametric in the supply's own bound `c₂` — the `SupplyCost` pattern, so a real bound rather than a restatement of a declared constant. | — |
+| `Deepen.orbKeyG` | 387-394 | ★★★ THE POLY-GUARDED KEY. Identical to `orbKey` except the `if` tests the OBSERVABLE `CertPath S`. | Definition |
+| `Deepen.keyV_orbKeyG` | 396-400 | The guarded key's value projection, unfolded. | `@[simp]` |
+| `Deepen.keyCost_orbKeyG_le` | 402-410 | ★★ THE KEY'S BILL: `keyCost (orbKeyG S) ≤ n⁴ + n·(n⁴ + c₂)`. Parametric in the supply's cost bound, so an exponential `supplyCost` now yields an exponential `keyCost` — `②` at this key is falsifiable, which the flat constant could not express. | — |
+| `Deepen.keyEquivariant_orbKeyG` | 412-427 | ★★★ `①` FOR THE POLY-GUARDED KEY, from `SupplyEquivariant S` alone. ⚠ Note `CertPath S ⟹ TinhoferPath` and never the converse, so `orbKeyG S` DEFERS more often than `orbKey` — a firing loss, not a soundness loss. | — |
+| `Deepen.orbKeyG_ne_of_no_aut` | 434-447 | The guarded key separates a non-automorphic pair (`isColAut_of_readKey_eq` is guard-agnostic, so this transferred verbatim). | — |
+| `Deepen.forceBy_orbKeyG_narrows` | 449-460 | ★★★ FORCE FIRES UNDER THE POLY GUARD. Same as `forceBy_orbKey_narrows` with `CertifiedG S` (poly, observable) in place of `Tinhofer` (an `n!` search). | — |
+| `Deepen.consume_fail_force_fires_guarded` | 462-479 | ★★ The poly-guarded hook. The LOCALIZATION half is unchanged (it never depended on a guard); what the poly guard costs is that FIRING needs the guard open, hence `CertifiedG S ψ` as a hypothesis. The unconditional statement stays `consume_fail_force_fires`, over `orbKey`. | — |
+| `Deepen.orbKeyG_eq_orbKey_of_certPath` | 481-486 | Wherever the poly guard is open the two keys are EQUAL — `orbKeyG S` is a restriction of `orbKey`, not a different function. | — |
+| `Deepen.keyEquivariant_orbKeyG_deck2` | 494-496 | Non-vacuity: the parametric design instantiated at `deck2Supply`. | — |
+| `Deepen.keyEquivariant_orbKeyG_deck` | 498-500 | Non-vacuity: instantiated at `deckSupply`. | — |
+| `Deepen.force_canonizer_orbKeyG_deck2` | 502-512 | ★★★ THE POLY-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` plus totality for the `deck2`-guarded key, with NO hypothesis at all. | — |
 
-| `Deepen.mem_verified_appendSupply_left` | 523-527 | A verified generator of `S₁` is a verified generator of `S₁ ++ S₂`. | — |
-| `Deepen.mem_verified_appendSupply_right` | 529-533 | A verified generator of `S₂` is a verified generator of `S₁ ++ S₂`. | — |
-| `Deepen.cellIsOrbit_append_left` | 535-537 | `CellIsOrbit` grows under `appendSupply` (left). | — |
-| `Deepen.cellIsOrbit_append_right` | 539-541 | `CellIsOrbit` grows under `appendSupply` (right). | — |
-| `Deepen.certPath_append_left` | 543-562 | ★ THE GUARD ONLY GROWS: anything `S₁` certifies, `S₁ ++ S₂` certifies. Proved through the §5 equation lemmas, never by unfolding `CertPath` in place. ⚠ Monotonicity, NOT strictness — that the union is *strictly* stronger is measured (`PerformanceTest` §18), not proved. | — |
-| `Deepen.certPath_append_right` | 564-581 | The same, from the right summand. | — |
-| `Deepen.certifiedG_append_left` | 583-585 | `CertifiedG` grows under `appendSupply` (left) — the node-level form. | — |
-| `Deepen.certifiedG_append_right` | 587-589 | `CertifiedG` grows under `appendSupply` (right). | — |
-| `Deepen.guardSupply` | 597-600 | ★★ THE UNION GUARD: `foldSupplyFast ++ deckSupply ++ deck2Supply ++ matchSupply`. ⚠ `kernelSupply` is deliberately EXCLUDED — it is provably not `GensEquivariant` (pivot-order-dependent basis, trap #7), so it cannot sit in a guard whose job is keeping the `if` relabelling-stable; it remains available to FIRE, which needs no invariance. | Definition |
-| `Deepen.gensEquivariant_guardSupply` | 602-607 | The union is `GensEquivariant`, from the existing `Deck.gensEquivariant_appendSupply` closure. | — |
-| `Deepen.supplyEquivariant_guardSupply` | 609-610 | Hence `SupplyEquivariant` — the only thing `keyEquivariant_orbKeyG` asks for. | — |
-| `Deepen.keyEquivariant_orbKeyG_guard` | 612-615 | ★★★ `①` FOR THE UNION-GUARDED KEY — no hypothesis, exactly as for the single-supply guards. | — |
-| `Deepen.force_canonizer_orbKeyG_guard` | 617-625 | ★★★ THE UNION-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` + totality, no hypothesis. The strongest executable force key in the record: poly guard, poly read, billed cost. | — |
-| `Deepen.certifiedG_guard_of_foldFast` | 629-631 | Firing dominance: whatever `foldSupplyFast` certifies, the union certifies. | — |
-| `Deepen.certifiedG_guard_of_deck` | 633-635 | Firing dominance over `deckSupply`. | — |
-| `Deepen.certifiedG_guard_of_deck2` | 637-639 | Firing dominance over `deck2Supply`. | — |
-| `Deepen.certifiedG_guard_of_match` | 641-643 | Firing dominance over `Consume.matchSupply`. | — |
-| `Deepen.cellIsOrbit_congr` | 666-670 | §9 Orbit-equal supplies certify the same cells — `CellIsOrbit` reads its supply only through `WordReach` on `verified`, which is exactly what `SameOrbits` equates. | — |
-| `Deepen.certPath_congr` | 672-691 | ★★ §9 **The guard is a function of the supply's ORBITS, not of its generators.** The path's shape (`chooseIdK`, the cell filter, `step`) never mentions `S`, so the whole recursion is congruent. Proved through the §5 equation lemmas, never by unfolding `CertPath` in place. | — |
-| `Deepen.certifiedG_congr` | 693-696 | §9 The node-level form: orbit-equal supplies certify the same nodes. | — |
-| `Deepen.keyV_orbKeyG_congr` | 698-704 | §9 Orbit-equal supplies give the same key VALUE. Only the cost differs (`certPathCost` calls `S` itself), which carries no `①` obligation. | — |
-| `Deepen.keyEquivariant_orbKeyG_of_sameOrbits` | 706-713 | ★★★ §9 `①` FOR A NON-EQUIVARIANT GUARD SUPPLY — the `SameOrbits` reduction at the key, mirroring `OrbitPrune`'s at the resolver. ⚠⚠ The generic half only: the sole supply worth admitting this way is `deepenSupply`, and `SameOrbits deepenSupply Ref` IS **R1**, the crux the parked `DeepenRef`/`DeepenR1` apparatus was built for. The lever is not independent of that retired route. | — |
+| `Deepen.mem_verified_appendSupply_left` | 537-541 | A verified generator of `S₁` is a verified generator of `S₁ ++ S₂`. | — |
+| `Deepen.mem_verified_appendSupply_right` | 543-547 | A verified generator of `S₂` is a verified generator of `S₁ ++ S₂`. | — |
+| `Deepen.cellIsOrbit_append_left` | 549-551 | `CellIsOrbit` grows under `appendSupply` (left). | — |
+| `Deepen.cellIsOrbit_append_right` | 553-555 | `CellIsOrbit` grows under `appendSupply` (right). | — |
+| `Deepen.certPath_append_left` | 557-576 | ★ THE GUARD ONLY GROWS: anything `S₁` certifies, `S₁ ++ S₂` certifies. Proved through the §5 equation lemmas, never by unfolding `CertPath` in place. ⚠ Monotonicity, NOT strictness — that the union is *strictly* stronger is measured (`PerformanceTest` §18), not proved. | — |
+| `Deepen.certPath_append_right` | 578-595 | The same, from the right summand. | — |
+| `Deepen.certifiedG_append_left` | 597-599 | `CertifiedG` grows under `appendSupply` (left) — the node-level form. | — |
+| `Deepen.certifiedG_append_right` | 601-603 | `CertifiedG` grows under `appendSupply` (right). | — |
+| `Deepen.guardSupply` | 611-614 | ★★ THE UNION GUARD: `foldSupplyFast ++ deckSupply ++ deck2Supply ++ matchSupply`. ⚠ `kernelSupply` is deliberately EXCLUDED — it is provably not `GensEquivariant` (pivot-order-dependent basis, trap #7), so it cannot sit in a guard whose job is keeping the `if` relabelling-stable; it remains available to FIRE, which needs no invariance. | Definition |
+| `Deepen.gensEquivariant_guardSupply` | 616-621 | The union is `GensEquivariant`, from the existing `Deck.gensEquivariant_appendSupply` closure. | — |
+| `Deepen.supplyEquivariant_guardSupply` | 623-624 | Hence `SupplyEquivariant` — the only thing `keyEquivariant_orbKeyG` asks for. | — |
+| `Deepen.keyEquivariant_orbKeyG_guard` | 626-629 | ★★★ `①` FOR THE UNION-GUARDED KEY — no hypothesis, exactly as for the single-supply guards. | — |
+| `Deepen.force_canonizer_orbKeyG_guard` | 631-639 | ★★★ THE UNION-GUARDED FORCE CANONIZER — `①a`/`①b`/`①c` + totality, no hypothesis. The strongest executable force key in the record: poly guard, poly read, billed cost. | — |
+| `Deepen.certifiedG_guard_of_foldFast` | 643-645 | Firing dominance: whatever `foldSupplyFast` certifies, the union certifies. | — |
+| `Deepen.certifiedG_guard_of_deck` | 647-649 | Firing dominance over `deckSupply`. | — |
+| `Deepen.certifiedG_guard_of_deck2` | 651-653 | Firing dominance over `deck2Supply`. | — |
+| `Deepen.certifiedG_guard_of_match` | 655-657 | Firing dominance over `Consume.matchSupply`. | — |
+| `Deepen.cellIsOrbit_congr` | 680-684 | §9 Orbit-equal supplies certify the same cells — `CellIsOrbit` reads its supply only through `WordReach` on `verified`, which is exactly what `SameOrbits` equates. | — |
+| `Deepen.certPath_congr` | 686-705 | ★★ §9 **The guard is a function of the supply's ORBITS, not of its generators.** The path's shape (`chooseIdK`, the cell filter, `step`) never mentions `S`, so the whole recursion is congruent. Proved through the §5 equation lemmas, never by unfolding `CertPath` in place. | — |
+| `Deepen.certifiedG_congr` | 707-710 | §9 The node-level form: orbit-equal supplies certify the same nodes. | — |
+| `Deepen.keyV_orbKeyG_congr` | 712-718 | §9 Orbit-equal supplies give the same key VALUE. Only the cost differs (`certPathCost` calls `S` itself), which carries no `①` obligation. | — |
+| `Deepen.keyEquivariant_orbKeyG_of_sameOrbits` | 720-727 | ★★★ §9 `①` FOR A NON-EQUIVARIANT GUARD SUPPLY — the `SameOrbits` reduction at the key, mirroring `OrbitPrune`'s at the resolver. ⚠⚠ The generic half only: the sole supply worth admitting this way is `deepenSupply`, and `SameOrbits deepenSupply Ref` IS **R1**, the crux the parked `DeepenRef`/`DeepenR1` apparatus was built for. The lever is not independent of that retired route. | — |
 ## ChainDescent/DeepenKey.lean
 
 | Name | Line | Description | Notes |
@@ -4990,16 +4991,16 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RecordKey.recordKey_canonizer` | 191-207 | ★★★ `①` FOR THE RECORD OBJECT AT THE COMPOSED KEY. Same supply, same refiner, same capstone: `Select.selNode_canonizer_of_sameOrbits` is KEY-GENERIC, so the swap costs exactly the `KeyEquivariant` proof above. | — |
 | `RecordKey.guardSupplyBound` | 216-219 | §4a `guardSupply`'s work budget — three members bounded in `RecordCost`, `matchSupply` in `SupplyCost`. | Definition |
 | `RecordKey.supplyCost_guardSupply_le` | 221-227 | §4a The union guard's own `supplyCost` bound. Needed because `orbKeyG`'s bill is parametric in its guard supply's (`keyCost_orbKeyG_le`). | — |
-| `RecordKey.recordKeyBound` | 229-231 | §4a The composed key's per-evaluation bill: the holonomy sweep plus the guarded read AND its guard. | Definition |
-| `RecordKey.keyCost_recordKey_le` | 233-236 | §4a The composed key's cost bound. | — |
-| `RecordKey.descentCostS_selNode_recordKey_le` | 238-252 | ★★★ §4a `②` END-TO-END AT THE COMPOSED KEY — the same explicit-polynomial shape as `RecordCost.descentCostS_selNode_record_le`, with the key bound now carrying the guard's own work. No hypotheses. | — |
-| `RecordKey.recordKey_canonizer_with_cost` | 254-268 | ★★★ THE UPGRADED RECORD CAPSTONE — `①` + `②` at the composed key. This is the object `Publication.canonForm?` should name; the remaining step there is reshaping the `②` bound into the `costConst * n ^ costDeg` monomial its statement pins. | — |
-| `RecordKey.costConst` | 290-291 | The pinned cost constant **53** — the coefficient sum of §4a's `②` bound polynomial, computed (`recordKeyBound_expand`), not guessed. `Publication.costConst` is this. | Definition |
-| `RecordKey.costDeg` | 293-294 | The pinned cost degree **13** — the degree of §4a's `②` bound polynomial. `Publication.costDeg` is this. | Definition |
-| `RecordKey.pow_le_succ_pow` | 296-300 | §5 Every monomial below the pinned degree is dominated by the pinned one, `n ^ k ≤ (n+1) ^ costDeg` for `k ≤ costDeg` — by monotonicity alone, with no `1 ≤ n` side condition. This is why the published bound is pinned at `n + 1`. | — |
-| `RecordKey.recordKeyBound_expand` | 302-312 | §5 §4a's `②` bound, expanded to `n^13 + n^12 + 3n^11 + … + n + 1` and checked by `ring` — which is what makes `costConst = 53` / `costDeg = 13` computed facts about the object rather than chosen numerals. | — |
-| `RecordKey.descentCostS_selNode_recordKey_monomial` | 314-333 | ★★★ §5 **`②` in the publication shape:** the canonizer of record, at the composed force key, runs within `costConst * (n+1) ^ costDeg` on **every** input — no hypotheses, no flag disjunct. Discharges `Showcase.canon_poly_or_flag` on its left disjunct. ⚠ `(n+1)`, not `n`: `descendS` bills 1 for a leaf, so at `n = 0` the object costs 1 and answers while `c * 0 ^ d = 0`. | — |
-| `RecordKey.recordKey_canonizer_monomial` | 335-347 | §5 **The publication capstone:** `①` (`recordKey_canonizer`) and `②`-as-a-monomial together, at exactly the object `Publication.canonForm?` names. | — |
+| `RecordKey.recordKeyBound` | 229-233 | §4a The composed key's per-evaluation bill: the holonomy sweep plus the guarded read AND its guard. | Definition |
+| `RecordKey.keyCost_recordKey_le` | 235-238 | §4a The composed key's cost bound. | — |
+| `RecordKey.descentCostS_selNode_recordKey_le` | 240-254 | ★★★ §4a `②` END-TO-END AT THE COMPOSED KEY — the same explicit-polynomial shape as `RecordCost.descentCostS_selNode_record_le`, with the key bound now carrying the guard's own work. No hypotheses. | — |
+| `RecordKey.recordKey_canonizer_with_cost` | 256-270 | ★★★ THE UPGRADED RECORD CAPSTONE — `①` + `②` at the composed key. This is the object `Publication.canonForm?` should name; the remaining step there is reshaping the `②` bound into the `costConst * n ^ costDeg` monomial its statement pins. | — |
+| `RecordKey.costConst` | 295-303 | The pinned cost constant **53** — the coefficient sum of §4a's `②` bound polynomial, computed (`recordKeyBound_expand`), not guessed. `Publication.costConst` is this. | Definition |
+| `RecordKey.costDeg` | 305-306 | The pinned cost degree **13** — the degree of §4a's `②` bound polynomial. `Publication.costDeg` is this. | Definition |
+| `RecordKey.pow_le_succ_pow` | 308-312 | §5 Every monomial below the pinned degree is dominated by the pinned one, `n ^ k ≤ (n+1) ^ costDeg` for `k ≤ costDeg` — by monotonicity alone, with no `1 ≤ n` side condition. This is why the published bound is pinned at `n + 1`. | — |
+| `RecordKey.recordKeyBound_expand` | 314-324 | §5 §4a's `②` bound, expanded to `n^13 + n^12 + 3n^11 + … + n + 1` and checked by `ring` — which is what makes `costConst = 57` / `costDeg = 13` computed facts about the object rather than chosen numerals. ⚠ 53 → 57 on 2026-08-06 when `Deepen.stepCost` entered the bill (`+n⁵ + 2n⁶ + n⁷`). | — |
+| `RecordKey.descentCostS_selNode_recordKey_monomial` | 326-345 | ★★★ §5 **`②` in the publication shape:** the canonizer of record, at the composed force key, runs within `costConst * (n+1) ^ costDeg` on **every** input — no hypotheses, no flag disjunct. Discharges `Showcase.canon_poly_or_flag` on its left disjunct. ⚠ `(n+1)`, not `n`: `descendS` bills 1 for a leaf, so at `n = 0` the object costs 1 and answers while `c * 0 ^ d = 0`. | — |
+| `RecordKey.recordKey_canonizer_monomial` | 347-359 | §5 **The publication capstone:** `①` (`recordKey_canonizer`) and `②`-as-a-monomial together, at exactly the object `Publication.canonForm?` names. | — |
 ## ChainDescent/CaoFibring.lean
 
 | Name | Line | Description | Notes |
@@ -5259,21 +5260,21 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.instDecidableGoodOrIsolated` | 364-367 | — | Instance |
 | `Deepen.orbitComplete_of_goodOrIsolated` | 369-376 | — | — |
 | `Deepen.goodOrIsolated_of_certifiedG` | 378-383 | — | — |
-| `Deepen.InvEquivariant` | 434-438 | A vertex invariant is **relabelling-equivariant** | Definition; the hypothesis §8's `hinv` was missing |
-| `Deepen.autInvariant_of_invEquivariant` | 440-446 | Equivariance **implies** §8's `Aut`-invariance | So it replaces `hinv`, not adds to it |
-| `Deepen.goodAnchor_relabel` | 448-454 | ★ `GoodAnchor` transports across a relabelling — **unconditionally** | `tinhoferPath_transport` was already cross-graph |
-| `Deepen.isolatedBy_transport` | 456-465 | ★ `IsolatedBy` transports **iff `inv` does** | The whole content of §9's fix |
-| `Deepen.goodOrIsolated_transport` | 467-475 | ★★★ **The secondary guard IS relabelling-equivariant** | Settles §8's open question — YES |
-| `Deepen.goodOrIsolated_transport_iff` | 477-485 | The verdict is invariant, both directions | — |
-| `Deepen.deepenSupplyGI` | 489-492 | The secondary-guarded deepen supply | Definition; computable |
-| `Deepen.verified_GI_of_open` | 494-498 | Guard open ⟹ the supply is raw deepen | — |
-| `Deepen.verified_GI_of_shut` | 500-504 | Guard shut ⟹ no generators | — |
-| `Deepen.deepen_branchOrbit_transport_GI` | 506-537 | ★★ The branch-orbit relation transports | Open side = `IsColAut`-orbit relation; shut side = `[]` |
-| `Deepen.deepenSupplyGI_canonizer` | 539-548 | ★★★ `①` for the secondary guard, no hypothesis but `InvEquivariant inv` | ⚠ `②` unbilled, as in §7 |
-| `Deepen.stepSum` | 557-560 | Colour-rank total after individualizing `u` | Definition; computable `O(n³)` |
-| `Deepen.sum_transportColouring` | 562-565 | Transport permutes positions, not values ⟹ same sum | — |
-| `Deepen.invEquivariant_stepSum` | 567-572 | `InvEquivariant` is **inhabited** | Stops §9a being vacuously conditional |
-| `Deepen.deepenSupplyGI_stepSum_canonizer` | 574-580 | ★★★ A concrete computable canonizer at the secondary guard, **no hypothesis** | ✅ **MEASURED STRICT WIN** — 2/60 random cubic graphs beat `CertifiedG`; `n=10` witness verified exhaustively |
+| `Deepen.InvEquivariant` | 458-462 | A vertex invariant is **relabelling-equivariant** | Definition |
+| `Deepen.autInvariant_of_invEquivariant` | 464-470 | Equivariance **implies** §8's `Aut`-invariance | — |
+| `Deepen.goodAnchor_relabel` | 472-478 | ★ `GoodAnchor` transports across a relabelling — **unconditionally** | — |
+| `Deepen.isolatedBy_transport` | 480-489 | ★ `IsolatedBy` transports **iff `inv` does** | — |
+| `Deepen.goodOrIsolated_transport` | 491-499 | ★★★ **The secondary guard IS relabelling-equivariant** | — |
+| `Deepen.goodOrIsolated_transport_iff` | 501-509 | The verdict is invariant, both directions | — |
+| `Deepen.deepenSupplyGI` | 513-516 | The secondary-guarded deepen supply | Definition |
+| `Deepen.verified_GI_of_open` | 518-522 | Guard open ⟹ the supply is raw deepen | — |
+| `Deepen.verified_GI_of_shut` | 524-528 | Guard shut ⟹ no generators | — |
+| `Deepen.deepen_branchOrbit_transport_GI` | 530-561 | ★★ The branch-orbit relation transports | — |
+| `Deepen.deepenSupplyGI_canonizer` | 563-572 | ★★★ `①` for the secondary guard, no hypothesis but `InvEquivariant inv` | — |
+| `Deepen.stepSum` | 581-584 | Colour-rank total after individualizing `u` | Definition |
+| `Deepen.sum_transportColouring` | 586-589 | Transport permutes positions, not values ⟹ same sum | — |
+| `Deepen.invEquivariant_stepSum` | 591-596 | `InvEquivariant` is **inhabited** | — |
+| `Deepen.deepenSupplyGI_stepSum_canonizer` | 598-604 | ★★★ A concrete computable canonizer at the secondary guard, **no hypothesis** | — |
 ## ChainDescent/RecordDeepen.lean
 
 | Name | Line | Description | Notes |
@@ -5289,3 +5290,13 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RecordDeepen.handledS_recordSupplyDeepen_of_tinhoferGraph` | 136-140 | — | — |
 | `RecordDeepen.answersS_recordSupplyDeepen_of_tinhoferGraph` | 142-148 | — | — |
 | `RecordDeepen.not_tinhoferGraph_of_flag_recordDeepen` | 150-158 | — | — |
+## ChainDescent/DeepenPair.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.pairStep` | 106-109 | ★ **The depth-2 step** = `step ∘ step`; **IS** the user's twin refinement (`TWIN = BOTH`, proved both ways + 168/168 measured) | Definition; deliberately two `step`s so the whole interface is inherited |
+| `Deepen.pairStep_transport` | 113-121 | ★ Equivariance — `step_transport`, twice | Blast radius **zero**; contrast the 13-module interface swap a 2-WL step needs |
+| `Deepen.pairStep_isColAut` | 123-128 | ★ `Aut`-stability, for spreading arguments | — |
+| `Deepen.ncol_lt_pairStep_of_partners` | 130-142 | ★ Progress: `ncol` rises **twice** per pair step | ⟹ fuel adequacy gets *easier*, not harder |
+| `Deepen.pairStep_refines` | 144-149 | Monotonicity — a `pairStep` cell is a subset of the `step` cell | The point of the proposal: finer cells ⟹ `CellSingleOrbit` easier |
+| `Deepen.pairStep_refines_step` | 151-155 | The second individualization never coarsens | — |
