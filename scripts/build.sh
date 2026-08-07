@@ -152,6 +152,7 @@ MODULES=(
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object
+  ChainDescent.DeepenPair             # Q2 foundation: pairStep = step∘step, whole step interface INHERITED (finer cells, no blast radius)
   ChainDescent.KeyComplete            # KeySeparates: consume's guard absorbed into force's separation obligation
   ChainDescent.ForcePick              # forceThenPick: the exhaustiveness corollary cashed (no stall channel)
   ChainDescent.RecordCost             # ② for the OBJECT OF RECORD: the four supplies + holKeyFast, billed
