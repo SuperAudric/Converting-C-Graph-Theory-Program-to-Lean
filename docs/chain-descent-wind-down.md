@@ -456,6 +456,12 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >   ⟹ **`RecordKey.costConst` 53 → 57** (degree still 13).
 > * ⛔⛔ **`BAD-BIG = 0` is FALSIFIED** (`DeepenComplete` §5.2) — the union-over-anchors question is
 >   **re-opened**. Nothing proved breaks; the *expectation* that good-or-rigid covers everything dies.
+> * ★★★ **`RecordDeepen.lean`** (in `build.sh`, axiom-clean) — **`③` AT THE FUSED OBJECT, FOR EVERY
+>   KEY**: `not_tinhoferGraph_of_flag_recordDeepen` at `recordSupplyFast ++ deepenSupplyCert`, via
+>   supply monotonicity (`handled_append_right`) plus `certifiedG_of_tinhofer`. `canonFormFastS?_eq`
+>   is `rfl`, so this **is** `Publication.residue_if_flag`'s statement once `canonForm?` names that
+>   supply. ⚠ It landed without doc propagation and was referenced in **no** doc, plan or memory
+>   before 2026-08-07. ⟹ **`③` is NOT on the critical path; `①`+`②` are.**
 >
 > ⛔ **Two wrong diagnoses recorded so they are not re-derived** (both mine, both retracted):
 > (a) *"the fused object cannot carry deepen"* — it can; `①` never needed an equivariant reference;
@@ -892,12 +898,23 @@ it is the consume-completeness question.** Three ways out:
 pair"), it keeps `①`/`②` unconditional, and W1 supplies the first genuine ③b. **User's call — not
 started.**
 
->  ▶▶ **2026-08-06 — THE ACTIVE PLAN IS `docs/chain-descent-percell-plan.md`.** Per-cell harvest +
->  per-cell guard, keeping `Publication.canonForm?`'s current fused object. It records (a) the core
->  problem in plain terms, (b) a **wrong diagnosis I retracted** (that the fused object cannot carry
->  deepen — it can; `①` never needed an equivariant reference), (c) the cost analysis showing **no new
->  exponential and no new worst-case factor** (`Σ mᵢ² ≤ n²`), and (d) the **pair caveat**: `pairStep` is
->  indexed by orbitals, not cells, so a per-cell guard must quantify over pairs.
+>  ▶▶ **2026-08-07 — THE ACTIVE PLAN IS `docs/chain-descent-percell-plan.md`, REWRITTEN.** Keeps
+>  `Publication.canonForm?`'s fused object. **Diagnosis, sharpened and measured:** `deepenSupply` is
+>  the only **pair-anchored** supply, but `SelectNode.cellNarrow` reads a single **node-global**
+>  `verified` list and probes every cell against it — so a cell with no descent of its own is judged
+>  by automorphisms harvested elsewhere, and **that verdict is not relabelling-invariant**
+>  (`scratchpad/probe_offbranch2.py`: CFI m=8/10, depth 1, off-branch count `(1,1)` vs `(2,)`, with the
+>  **guard OPEN on both sides** — `probe_offbranch3.py`). Fix = make consume **cell-indexed and lazy**,
+>  which is the architecture's own description. Measured to hold: `probe_offbranch5.py` 9/9
+>  GUARD-INV ∧ COUNT-INV, 7 rows non-vacuous; and restriction costs **nothing** (`A-only = 0` over
+>  **646** cells, user probe). ⛔ **RETRACTED from the 2026-08-06 version: the "all-cells conjunction
+>  guard"** — that followed only from keeping the node-global list. ⛔ Also retracted as evidence:
+>  `probe_offbranch.py`'s root-only 30/30 pass (the falsifier is at depth 1; every earlier sweep,
+>  17/17 and 13/13 included, shares that root-only scoping). ★ The structural point: a shut guard emits
+>  `[]`, so the count is `|cell|` on both sides automatically ⟹ **only the guard's VERDICT must be
+>  invariant**, never the harvest — no completeness of deepen-as-an-orbit-oracle is needed anywhere.
+>  The **pair caveat** is retained but **demoted to `pairStep`'s own scoping** (plan §9): `pairStep`
+>  builds no supply and is decoupled from the critical path.
 
 ### ▶ Live decisions, none started
 
