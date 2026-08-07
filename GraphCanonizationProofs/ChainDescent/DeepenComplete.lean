@@ -299,6 +299,30 @@ true orbit partition, which is invariant. Nothing beyond §3 + §5 is doing work
 or rigid?"** — a per-orbit Schurianity along deepen's own path. It held on 13/13 witnesses including
 every CFI one, and it is what a family-level discharge should target.
 
+⛔⛔ **FALSIFIED 2026-08-06 — `BAD-BIG = 0` IS NOT A LAW, AND THE UNION QUESTION IS RE-OPENED.**
+`scratchpad/probe_mixedcell.py` (user construction): three hubs, two joined to 4 disjoint `C₃`s and one
+to 3 disjoint `C₄`s. Degrees match by construction (`4·3 = 3·4 = 12`) and every block vertex has degree
+3, so **1-WL is stable with two cells** and cannot separate `C₃`-blocks from `C₄`-blocks.
+
+At the **root branch cell** (the 36 block vertices, which is what `targetColour` picks) the orbits are
+`24 + 12`, and
+
+> **the 24-orbit is `good 0/24` — a non-singleton orbit consisting entirely of BAD anchors.**
+
+That is exactly the case §5.2 above says is "NOT REALISED", stated at the same cell and measured the
+same way. So *"there is no union phenomenon left to prove"* is **false in general**; it was a property
+of the 13-witness population (multipedes and CFI), whose cells are uniformly rigid or uniformly
+symmetric. **Nothing proved here breaks** — `orbitComplete_of_good_or_trivial` simply does not apply at
+such a node, the guard shuts, and the object flags into the residue, soundly. What is lost is the
+*expectation* that good-or-rigid covers everything reachable.
+
+⚠ Also measured on this witness, against §8/§9's `IsolatedBy`: at the mixed **hub** cell (orbits
+`{h₁,h₂}` and `{h₃}`) the rigid `h₃` is the **only** good anchor, and `stepSum`, the full colour
+multiset, **and `triAt` all fail to isolate it** — the construction equalises triangle counts too
+(`triAt = 12` at all three hubs). The twins are neither good nor isolable (isolating a genuine 2-orbit
+would be unsound), so `GoodOrIsolated` shuts here for **every** `inv`. ⟹ this witness does not separate
+the two guards; it defeats both.
+
 ⚠ Scope of the measurement: **root branch cell only**, as in the earlier sweeps. A family-level claim
 needs it at every *reached* node.
 ⚠ `G8` is `good = 8/8` at the root with 3 orbits — *partial firing is not bad anchors*. A cell with `k`
