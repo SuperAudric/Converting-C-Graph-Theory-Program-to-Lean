@@ -40,7 +40,60 @@ does not settle, and the recorded measurements bear on it hard:
 So depth-2 is measured to buy something 2-WL-in-the-step did not. What it costs is that a good *pair*
 descent computes the pair **stabilizer**, while the twist construction needs a map `a ↦ b` — the
 wiring is the open design question, not the refinement.
--/
+
+## ★★★ THE "TWIN REFINEMENT" IS `pairStep` — the fork is closed (2026-08-06)
+
+The user's mechanism is a modification of the **1-WL**, not of the selector: two branches are two
+colourings of the same vertex set, a vertex's *twin* is the vertex of the same index in the other
+branch, and whether a vertex's twin followed it into a new cell is a structural signal that — unlike
+intersecting two *stable* colourings — **propagates** to neighbours. Write
+
+* `TWIN` = 1-WL run on the joint colouring `v ↦ (χ_a v, χ_b v)` (the mechanism),
+* `BOTH` = refine after individualizing `a` **and** `b` (i.e. `pairStep`).
+
+**They are the same partition.** Both inclusions hold:
+* `BOTH` refines `TWIN` — `BOTH`'s initial colouring refines `χ_a` and `χ_b`, hence determines the
+  joint colour, and refinement is monotone in its initial colouring.
+* `TWIN` refines `BOTH` — the joint colouring already refines `χ_a` and already gives `b` a unique
+  colour, hence refines `indiv (χ_a) b`.
+
+✅ **Measured 168/168** (`scratchpad/probe_twinrefine.py`): `TWIN == BOTH` on every (bad anchor,
+partner) pair of `rand multipede V=12 W=8` (12/12) and `CFI cubic m=10` (156/156); **zero** cases of
+`TWIN < BOTH`.
+
+⟹ **No separate joint-colouring object is needed: `pairStep` below IS the twin refinement**, and its
+power is therefore fully characterised by `probe_pairrefine`'s numbers — CFI cubic m=10 repaired
+**4/4** (confirmed here by `TWIN` alone), rigid multipede `V=12 W=8` **0/4**.
+
+### ★ `C₆` — the mechanism at its smallest, run against this file's own `pairStep`
+
+`C₆` is 2-regular, so 1-WL merges the root into a single 6-cell. Then (measured, `#eval`):
+
+| object | colouring | verdict |
+|---|---|---|
+| root `warmRefineVec` | `[0,0,0,0,0,0]` | one 6-cell — 1-WL sees nothing |
+| `step C₆ · 0` | `[5,0,3,2,3,0]` | cells `{1,5}`, `{2,4}` — `chooseIdK = some 0`, **a decision is pending** |
+| `pairStep C₆ · 0 2` | `[5,0,4,2,3,1]` | all six distinct — `chooseIdK = none`, **DISCRETE, zero decisions** |
+| `pairStep C₆ · 0 1` | `[5,1,3,2,4,0]` | likewise discrete |
+
+★ **So `pairStep` is strictly stronger than `step` here**, and by the largest possible margin: the
+descent from a single anchor must branch, the pair descent has *no* decision to make.
+
+★ The shared-cell reading checks out exactly: `χ₀`'s cell at `1` is `{1,5}`, `χ₁`'s cell at `0` is
+`{0,2}`, `χ₂`'s cell at `1` is `{1,3}`. Adjacent roots `0,1` **share nothing** (`{1,5} ∩ {0,2} = ∅`);
+distance-2 roots `0,2` **share exactly the vertex between them** (`{1,5} ∩ {1,3} = {1}`), which
+individualizes a third vertex and discretizes after propagation.
+⚠ But note the adjacent pair discretizes **too**, with an empty intersection — so the discretizing
+power is the *joint colouring*, and "a shared vertex" is one visible symptom of it rather than the
+mechanism itself.
+
+⚠⚠ **The sense in which this is "stronger than 1-WL" is individualization DEPTH, not WL DIMENSION.**
+It is 1-WL with one more individualization, so nothing that defeats bounded-individualization-plus-1-WL
+falls to it — which is exactly why the rigid multipede stays at `0/4` while CFI m=10 goes to `4/4`.
+⚠ The `|cell|²` figure is a *naive* schedule, not intrinsic: the twin lookup is `O(1)` per vertex on a
+precomputed cell table, and only vertices that changed cell need re-examination. The real cost
+question is that **`step` is not billed at all** (`certPathCost` prices `n⁴ + supplyCost` per level and
+nothing for `step`) — that is the gap to close, and it is pre-existing rather than introduced here. -/
 
 namespace ChainDescent
 namespace Deepen
