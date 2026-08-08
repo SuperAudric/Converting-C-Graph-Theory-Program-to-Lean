@@ -14,6 +14,14 @@
 > ▶ **The one thing still open here is a MEASUREMENT, not a proof**: the lazy walk's win was measured
 > at 1–2 non-singleton cells only. `probe_offbranch5`'s depth-1 CFI nodes carry 28/28/24/26/14/10/14
 > cells, where the ceiling should be far higher. Worth having before W4 quotes a performance number.
+>
+> ⛔ **AND ONE THING THAT IS OPEN AFTER ALL — `W-j` (2026-08-08, measured).** *"Nothing outstanding"*
+> was true of this plan's scope and **false as a statement about the object's runtime**:
+> `probeWalk` still evaluates the record key **three times per vertex per probed cell** (once for the
+> bill via `keyCost`, twice inside `Force.keepMin`) and re-harvests the **cell-independent** left
+> factor `recordSupplyFast` once per probed cell. A shared-key + hoisted variant measures
+> **1.34× (C₅) / 1.48× (K₁,₂,₃) faster at an identical billed cost**. Full entry + the proof shape:
+> `chain-descent-wind-down.md` §2a's `W-j` block, and §5's `W-j` entry below.
 
 **Rewritten 2026-08-07** after five probes and a user coverage probe; **extended later the next day**
 with the *witness-vs-relation* diagnosis (§3a) and a **second candidate design `C`** that keeps the
@@ -577,6 +585,49 @@ measured** — two cells is the largest case run.
 `RecordDeepenCell.canonFormFast`/`costFast`, which now *are* the lazy object. Still zero `sorry`,
 zero custom axioms.
 
+### W-j. Share the key, hoist the left factor — ▶ **NEXT (2026-08-08, measured, not started)**
+
+⛔ **Why W-e under-delivered.** Laziness reduced *how many* cells are probed; it did not touch what
+each probed cell costs, and two recomputations live there:
+
+1. **The key is evaluated three times per vertex.** `probeWalk` bills
+   `((cellList χ c).map (keyCost key adj χ)).sum`, and `cellNarrowV → Force.keepMin` evaluates
+   `keyV` twice more (`kmin?` over `B.map keyV`, then `B.filter (keyV · = m)`). `keyCost` and `keyV`
+   are `.2` and `.1` of the **same strict pair**, so each is a full `recordKey` computation —
+   `holKeyFast` plus `orbKeyG guardSupply`'s orbit BFS — and Lean shares nothing across them.
+2. **The cell-independent left factor is re-harvested per probed cell.** `S c = recordSupplyFast ++
+   deepenCellSupply c` is evaluated whole, so `foldSupplyFast`/`deckSupply`/`deck2Supply`/
+   `kernelSupply` and their `IsColAut` filter re-run once per cell. §6's item 2 named this defect but
+   assigned it to W-i/W-e as *mitigations*; neither **removes** it — W-i cut 3 evaluations to 1 per
+   cell, W-e cut the number of cells, and the duplication of a node-level quantity survived both.
+
+⚠ Both are equally present in the node-global `selNode`/`selNodeFast` (over *every* cell), so this is
+**not** a cost of the per-cell design and the recorded per-cell-vs-node-global comparisons both pay it.
+
+**Measured** — `scratchpad/ProbeShareWalk.lean` / `ProbeShareWalk6.lean`, a variant with a
+`(vertex, keyValue, keyCost)` table per cell and the left factor harvested (and `IsColAut`-filtered)
+once per node, bill left byte-identical:
+
+| graph | ns-cells | built `selNodeLazyC` | shared-key + hoisted | billed cost |
+|---|---|---|---|---|
+| `C₅` (n=5) | 1 | 27.6 s | **20.7 s** (1.34×) | 5 212 728 — **identical** |
+| `K₁,₂,₃` (n=6) | 2 | 74.4 s | **50.2 s** (1.48×) | 20 321 716 — **identical** |
+
+At one cell the win is entirely key-sharing (the hoist has nothing to save); it grows with the number
+of cells **probed**, which is what makes the unmeasured 28-cell CFI case the one to run afterwards.
+
+★ **Proof shape — the cheapest in the family.** Children unchanged ⟹ `①` is free from the existing
+`Select.descendS_val_congr` (lemma B). The bill is **equal**, not merely `≤` ⟹ `②` is `le_of_eq`
+into `descentCostS_selNodeLazyC_le` — **no `ring`, no new numerals**. The rewrites are `List.map_map`
+(table ↦ `keyCost`/`keyV` maps) and `List.filter_append` (`verified` of an append splits).
+
+★★ **Take the honest-billing variant with it.** Charging `recordSupplyFast` **once per node** rather
+than once per cell removes one of the four over-billings named in §6 (`selProbeBoundC` charging every
+cell the maximum `sB`), taking the record term from `n^10` to `n^9`. That should return most of the
+`+8` that moved `costConst` 57 → 69, `costDeg` unchanged — tightening `②` and speeding the object up
+in one edit. ⚠ That variant *does* change the bill, so it needs the `ring` recompute
+(`recordDeepenBound_expand`) and re-measurement.
+
 ---
 
 ## 6. ⛔ COST — THIS SECTION'S NEUTRALITY CLAIM IS FALSE AS BUILT (corrected 2026-08-08)
@@ -604,6 +655,11 @@ zero custom axioms.
 >    record supply** — exactly the `Σ_c Σ_{c'}` blow-up the original `cellNarrow` note warned about.
 >    ▶ This is what makes **W-i** (the runnable twin, cache `verified (S c)` per cell) and **W-e**
 >    (stop at the first firing cell) load-bearing rather than cosmetic.
+>    ⛔ **AND NEITHER OF THEM REMOVES IT (2026-08-08).** W-i cut the *three* evaluations per cell to
+>    one; W-e cut the *number* of cells. The duplication of a **node-level** quantity across cells
+>    survived both, and so did a second one this section never named — `Force.keepMin` evaluates the
+>    key twice more per vertex, on top of the bill's `keyCost`. Removing them is **`W-j`** (§5), and
+>    it is measured worth 1.34×/1.48× at an identical billed cost.
 
 ### ⚠⚠ AND WHAT THE DEGREE DOES NOT CERTIFY (user, 2026-08-08)
 
@@ -647,7 +703,8 @@ it must be measured, not assumed.
 | **W-i — `SelectCell` §6** | ✅ **LANDED** — `cellData`/`selNodeFastC`/`canonFormFastSC?`; superseded for the endgame by `W-e`'s lazy form, kept as the eager reference |
 | **W-g — repoint `Publication`** | ✅ **LANDED** — `canonForm?`/`cost` are `RecordDeepenCell.canonFormFast`/`costFast`, numerals 69/13, `residue_if_flag` discharged. **Zero `sorry`, zero custom axioms.** |
 | **W-e — `SelectCell` §7 + `RecordDeepenCell` §5** | ✅ **LANDED** — lazy **billing** (`probeWalk`/`selNodeLazyC`/`canonFormLazySC?`) + lemmas A/B/C. Measured 2.4× faster than eager, 1.7× faster than node-global |
-| — | **nothing outstanding in this plan** |
+| **W-j — share the key, hoist the left factor** | ▶ **NEXT, not started** (2026-08-08). Measured 1.34×/1.48× available at an **identical** billed cost; `①` free from `descendS_val_congr`, `②` by `le_of_eq`. See §5's `W-j` entry |
+| — | ~~nothing outstanding in this plan~~ — `W-j` is, and §6's item 2 is the reason |
 
 > ## ⛔ CORRECTION (2026-08-08) — *"`③` is not on the critical path"* WAS WRONG
 >

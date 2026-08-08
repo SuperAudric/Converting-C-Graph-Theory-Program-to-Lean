@@ -382,7 +382,58 @@ The higher-value of the two, because it is the claim that distinguishes the arti
 (Neuen–Schweitzer, STOC 2018). `kernelSupply` already consumes the whole gauge in one call
 on `mp7` (Fano multipede, n = 42, measured, `PerformanceTest` §13) — the mechanism works;
 what is missing is the theorem that it *always* certifies the branch cell on the family.
-Route: `theorem_1_HOR_cfi_oddDeg` → `CascadeOracle` → `handled_of_seal`.
+
+> ## ⛔⛔ SCOPE CORRECTION #2 (2026-08-08) — **THE RECORDED ROUTE POINTS AT THE WRONG OBJECT**
+>
+> ~~Route: `theorem_1_HOR_cfi_oddDeg` → `CascadeOracle` → `handled_of_seal`.~~ **Do not start there.**
+> That route was written before the published object existed and it lands at a *different* canonizer,
+> which the standing steer forbids:
+>
+> | | recorded route | the published object |
+> |---|---|---|
+> | supply | `deepMatchSupply k` | `RecordDeepenCell.recordSupplyDeepenC` = `fun c => recordSupplyFast ++ deepenCellSupply c` |
+> | resolver | blind `Descend` | `Select.selNodeLazyC` (cell-indexed, lazily billed) |
+> | predicate | `Residue.Handled` | **`Select.HandledSC`** |
+>
+> `HandledBridge.handled_of_seal` yields `Residue.Handled key (deepMatchSupply k)`, and
+> **`deepMatchSupply` is not a factor of `recordSupplyFast`** (which is
+> `foldSupplyFast ++ deckSupply ++ deck2Supply ++ kernelSupply`). So the conclusion cannot be
+> rewritten onto `canonForm?`, and W2 done that way would be a **second-object discharge** — the
+> thing this project reverted once already.
+>
+> ⚠ **This is the same trap that cost `③` ~150 lines** (§2a's general rule: *a new `NodeRes` inherits
+> everything `Select.lean` proves generically and nothing `SelectNode.lean` proves specifically*).
+> `HandledSC` is a **third** layer on top of that: it is `SelectCell`-specific, so neither
+> `Residue.Handled` nor `Select.HandledS` rewrites onto it. Check which layer a theorem is on before
+> calling it reusable.
+>
+> ### ▶ THE ROUTE THAT DOES LAND AT THE PUBLISHED OBJECT
+>
+> **Use `kernelSupply` — it is already the fourth factor of `recordSupplyFast`**, and it is the
+> component actually *measured* to consume the CFI gauge (`mp7`, one call). The target shape mirrors
+> `RecordDeepenCell.handledSC_of_tinhoferGraph` exactly, one lemma per step:
+>
+> 1. `CellIsOrbit (Kernel.kernelSupply) adj χ` at a reached CFI node — **the open mathematics**, and
+>    the only genuinely new step. This is where `theorem_1_HOR_cfi_oddDeg` should be *consumed*,
+>    rather than routed through `CascadeOracle`.
+> 2. `Deepen.cellIsOrbit_append_left` / `append_right` lift it to `recordSupplyDeepenC c` — already
+>    proved, both directions, used verbatim by `cellIsOrbit_recordSupplyDeepenC_of_schurianAt`.
+> 3. `Select.cellNarrow_targetColour` + `Composite.forceThenConsume_singleton_of_cellIsOrbit` ⟹
+>    `Select.HandledSC` — already proved.
+> 4. `Select.answersSC_of_handledSC` ⟹ never flags; contrapositive ⟹ the residue narrows.
+>
+> Steps 2–4 are a copy of `handledSC_of_tinhoferGraph`'s body. **The whole box is step 1.**
+>
+> ### ⚠ AND RESTATE THE PAYOFF BEFORE SPENDING THE BOX
+>
+> `②` is **already unconditional on CFI graphs** — `descentCostSC_recordDeepen_monomial` has no
+> hypothesis and no flag disjunct, so "no exponential blow-up on CFI" is *already a theorem*. What W2
+> buys is that the object **answers** there, i.e. it narrows `③`. And because a CFI graph is already
+> `¬ TinhoferGraph`, today's `③` is **vacuously true** on it — so W2 is not an added `Handled`
+> population, it is a **strengthening of the residue predicate**:
+> `¬ TinhoferGraph` → `¬ TinhoferGraph ∧ ¬ (CFI-handled)`. ⛔ Do **not** add that second conjunct as
+> an `opaque` atom (§2a: an opaque disjunct re-breaks `unhandledResidue_nonvacuous`'s handled half);
+> it must be a definition backed by step 1.
 
 ### W3 — extraction candidates *(box: 1 week, survey then decide)*
 Material that stands alone, independent of the canonizer's fate. Assess each for whether it
@@ -410,7 +461,18 @@ algorithm — that gap is real.
 1. the cost bound is over a **declared operation count** ([`CostModel.lean`](../GraphCanonizationProofs/ChainDescent/CostModel.lean)),
    with no theorem linking it to Lean's evaluation;
 2. the 8 citation axioms in `Publication.lean`;
-3. the residue is non-empty and the canonizer flags on most interesting inputs.
+3. ⛔ ~~the residue is non-empty and **the canonizer flags on most interesting inputs**.~~
+   **CORRECTED 2026-08-08 (user) — the struck wording is FALSE and must not be published.**
+   The residue *predicate* is non-empty (`unhandledResidue_nonvacuous`), but the object does **not**
+   flag on the interesting inputs: measured, `canonForm?` **answers** on `K₂`, `C₅`, `K₁,₂,₃` and on
+   `K₃ ⊔ C₄` — the residual witness itself — and the recorded 7/7 sweep found no flag either. The
+   accurate sentence is ***"the canonizer has not yet been proven on most interesting inputs."***
+   ★ **This is by design, not a defect: the design is free to be stronger than what is proved, and
+   proving that it is strong is the entire point of `③`.** A flag is a statement about the *proof's*
+   reach, never about the input's hardness.
+   ⚠ Known flagging witness (user, 2026-08-08, not yet reproduced in Lean): a **multipede the rigid
+   handler cannot peel**, which therefore fails **at the root**. Worth landing as a `#eval` witness
+   before W4 quotes the flag semantics, so the flag branch is exhibited and not merely defined.
 
 Go/no-go: **the paper needs at least one of W1/W2 to have landed.** Without a named family,
 the claim is "correct and never exponential, answers on nothing in particular" — true, and
@@ -501,11 +563,50 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >    The claim is *"a flag means a real structural obstruction"*, never *"a flag means hardness"*.
 >
 > ### ▶ What is left
-> **W2** (CFI `Handled` — progress, not completion) · **W3** (extraction) · **W4** (write-up) ·
-> **W5** (archive). Nothing from the per-cell plan is outstanding.
+> **W-j** (below, next) · **W2** (CFI `Handled` — progress, not completion; ⛔ **re-scoped
+> 2026-08-08, its recorded route points at the wrong object** — read the correction block in §2 W2
+> before starting) · **W3** (extraction) · **W4** (write-up) · **W5** (archive).
+>
+> ### ▶▶ `W-j` — the two recomputations still inside every probed cell (2026-08-08, MEASURED)
+> The per-cell plan's *"nothing outstanding"* was right about its own scope and wrong as a statement
+> about the object's runtime. `Select.probeWalk` is correct and the laziness works, but per **probed
+> cell** it still:
+> * evaluates the record key **three times per vertex** — once for the bill
+>   (`(cellList χ c).map (keyCost key adj χ)`) and twice inside `Force.keepMin` (`kmin?` over
+>   `B.map keyV`, then `B.filter (keyV · = m)`). `keyCost`/`keyV` are `.2`/`.1` of the *same* strict
+>   pair, so each is a full key computation and Lean shares nothing across them;
+> * re-harvests the **cell-independent** left factor `RecordCost.recordSupplyFast` and re-runs its
+>   `IsColAut` filter, because `S c = recordSupplyFast ++ deepenCellSupply c` is evaluated whole.
+>
+> ⚠ The **same** double-evaluation is in the node-global `selNode`/`selNodeFast`, over *every* cell —
+> so this is not a cost of the per-cell design, and the recorded per-cell-vs-node-global comparisons
+> are both paying it.
+>
+> **Measured** (`scratchpad/ProbeShareWalk.lean` / `ProbeShareWalk6.lean`): a variant that evaluates
+> the key **once** into a `(vertex, value, cost)` table and hoists the left factor, with the bill left
+> byte-identical:
+>
+> | graph | ns-cells | built `selNodeLazyC` | shared-key + hoisted | billed cost |
+> |---|---|---|---|---|
+> | `C₅` (n=5) | 1 | 27.6 s | **20.7 s** (1.34×) | 5 212 728 — **identical** |
+> | `K₁,₂,₃` (n=6) | 2 | 74.4 s | **50.2 s** (1.48×) | 20 321 716 — **identical** |
+>
+> At one cell the gain is entirely key-sharing; the supply hoist only starts paying from two cells and
+> scales with the number of cells **probed**.
+> ★ **The proof shape is the easiest in the family**: children unchanged ⟹ `①` free via the existing
+> `Select.descendS_val_congr`; the bill is *equal*, not merely `≤` ⟹ `②` is `le_of_eq` into
+> `descentCostS_selNodeLazyC_le`, **no `ring`, no numeral change**. The rewrites needed are
+> `List.map_map` and `List.filter_append`.
+> ★★ **And the honest-billing variant is worth taking with it**: charging the record harvest **once
+> per node** instead of once per cell removes one of the four named over-billings (`selProbeBoundC`
+> charging every cell the maximum `sB`), dropping the record term from `n^10` to `n^9`. That should
+> give back most of the `+8` that took `costConst` 57 → 69, with `costDeg` unchanged — i.e. it
+> tightens `②` and speeds the object up in the same edit. That variant *does* need a `ring` recompute.
+>
 > ★ One **open measurement**, worth having before W4 quotes any performance number: the lazy walk's
 > win was measured only at 1–2 non-singleton cells. `probe_offbranch5`'s depth-1 CFI nodes carry
-> **28/28/24/26/14/10/14** cells, where the ceiling should be far higher — unverified.
+> **28/28/24/26/14/10/14** cells, where the ceiling should be far higher — unverified. `W-j`'s hoist
+> is the part that scales with that number, so measure after it lands, not before.
 >
 > ### Reading order for a fresh pickup
 > 1. This block, then §2a's `Publication.lean` state table and the **eight corrections** below.

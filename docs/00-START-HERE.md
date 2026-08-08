@@ -15,6 +15,13 @@
 > pays no premium.**
 > ⚠ `②`'s degree is a bound from declared flat charges, not a measurement of the algorithm's true
 > degree — see `Publication.lean`'s `costConst`/`costDeg` block.
+> ⛔ **2026-08-08, two corrections to the line above.** (i) *"the whole plan is done"* holds of the
+> plan's scope, not of the object's runtime: **`W-j`** is open and measured — `probeWalk` evaluates
+> the record key **three times per vertex per probed cell** and re-harvests the cell-independent
+> `recordSupplyFast` once per probed cell; removing both is worth **1.34× / 1.48×** at an identical
+> billed cost (per-cell plan §5 `W-j`). (ii) **W2's recorded route points at the wrong object** and
+> must be re-scoped onto `kernelSupply` → `HandledSC` before it is started — wind-down §2 W2's
+> *SCOPE CORRECTION #2*.
 > It supersedes the wind-down's options table (i)–(vi), now **provenance**:
 > `Publication.canonForm?` **keeps its current fused object** and the work is a **supply change**
 > (cell-indexed). Option (iv)/(v) references below are provenance.

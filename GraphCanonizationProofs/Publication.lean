@@ -155,7 +155,8 @@ PROVISIONAL by design — strengthening the record later is this one definition 
 below; nothing downstream changes shape.
 
 **★★★ THE SUPPLY SWAP (`W-g`, 2026-08-08): the supply is now CELL-INDEXED** —
-`fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`, read by `Select.selNodeFastC`. Same fused
+`fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`, read by **`Select.selNodeLazyC`** (`W-e`,
+the same day — the eager `selNodeFastC` remains in the library as the reference twin). Same fused
 descent, same record key; each cell is judged by the generators of descents anchored *in that cell*,
 gated by that cell's own guard. This is what makes `③` provable **at the object `①` and `②` are
 about** — see the block below §1 for why the node-global form provably cannot carry `①`. The
@@ -226,10 +227,17 @@ node-global append `recordSupplyFast ++ deepenSupplyCert` — which does carry `
 (`RecordDeepen.not_tinhoferGraph_of_flag_recordDeepen`) — provably cannot carry `①`, and is not a
 candidate. `Select.CellOrbitTransport` replaces `SupplyEquivariant` and the defect goes away.
 
-**And it RUNS.** `canonFormFast`/`costFast` go through `Select.selNodeFastC`, which evaluates each
-cell's supply once per node and builds children through `Refine.ColData` — so `canonForm?` is
-`#eval`-able, not merely definable. Measured: answers on `K₂`, `C₅` and `K₁,₂,₃`; on `C₅` the
-runnable form is 41 s against 216 s for the reasoning-side one, with an identical cost value.
+**And it RUNS.** `canonFormFast`/`costFast` go through **`Select.selNodeLazyC`**, which walks the
+non-singleton cells in increasing colour order, evaluates and bills each on demand, and stops at the
+first that narrows to `≤ 1` — building children through `Refine.ColData`, so `canonForm?` is
+`#eval`-able, not merely definable. Measured: answers on `K₂`, `C₅`, `K₁,₂,₃` and `K₃ ⊔ C₄`; `C₅`
+costs 5 212 728 and `K₁,₂,₃` 20 321 716, against a budget of `69·6^13` and `69·7^13 ≈ 6.7 × 10¹²`.
+
+⚠ **Two recomputations remain inside each probed cell** and are the next scheduled work (`W-j`),
+not a soundness issue: the key is evaluated three times per vertex (once for the bill via `keyCost`,
+twice inside `Force.keepMin`), and the *cell-independent* left factor `recordSupplyFast` is
+re-harvested once per probed cell. Measured cost of that: 1.34× on `C₅` and 1.48× on `K₁,₂,₃` of
+avoidable wall-clock, at an identical billed cost.
 
 ⚠ **The residue is unchanged and is still an OVER-approximation** — a CFI graph is not Tinhofer, yet
 its obstruction is linear and belongs to the rigid resolver. Narrowing it is W2, not this. **This is
@@ -627,9 +635,16 @@ the project that do **not** live in this file.
     residual although their obstruction is linear and belongs to the rigid resolver. Narrowing it is
     W2. The claim is *"a flag means a real structural obstruction"*, never *"a flag means hardness"*.
 
-★ Measured (2026-08-08), so the object is not merely definable: `canonForm? 2 K₂` and
-`canonForm? 6 K₁,₂,₃` both **answer**; `cost` = 1606 and 38 212 276 against a budget of
-`69 · 3^13` and `69 · 7^13 ≈ 6.7 × 10¹²`. -/
+★ Measured (2026-08-08, re-measured at the **lazy** object after `W-e`), so it is not merely
+definable: `canonForm? 2 K₂` and `canonForm? 6 K₁,₂,₃` both **answer**; `cost` = **1606** and
+**20 321 716** against a budget of `69 · 3^13` and `69 · 7^13 ≈ 6.7 × 10¹²`. ⚠ The figure
+38 212 276 that stood here is the **eager** `selNodeFastC` cost and no longer describes this object.
+
+★ It also answers on `C₅` and on **`K₃ ⊔ C₄`** — the `unhandledResidue_nonvacuous` residual witness.
+That is expected and is the point of `③`: the design is free to be stronger than what is proved, and
+`③` is the instrument that measures how much of that strength has been *established*. ⚠ So the
+paper must not write *"the canonizer flags on most interesting inputs"* — the accurate sentence is
+***"the canonizer has not yet been proven on most interesting inputs."*** -/
 
 #print axioms canonizer
 #print axioms unhandledResidue_nonvacuous
