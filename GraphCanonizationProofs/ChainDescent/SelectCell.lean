@@ -937,5 +937,169 @@ theorem not_handledSC_if_flag_lazy {key : Key n} {S : CellSupply n} {adj : AdjMa
   rw [canonFormS?_selNodeLazyC_eq] at hflag
   exact not_handledSC_if_flagSC hflag
 
+/-! ## 8. `W-j` — SHARE THE KEY, HOIST THE NODE-LEVEL SUPPLY FACTOR
+
+⚠ **`W-e` reduced *how many* cells are probed; it did not touch what each probed cell costs.** Two
+recomputations survive inside `probeWalk`, both instances of standing trap #2, and both measured:
+
+1. **The key is evaluated three times per vertex.** The bill maps `keyCost key adj χ` over
+   `cellList χ c`, and `cellNarrowV → Force.keepMin` evaluates `Force.keyV` twice more (`kmin?` over
+   `B.map keyV`, then `B.filter (keyV · = m)`). `keyCost` and `keyV` are `.2` and `.1` of the **same
+   strict pair**, so each of the three is a full key computation and nothing is shared.
+2. **A node-level supply factor is re-harvested per probed cell.** The endgame supply is
+   `fun c => recordSupplyFast ++ deepenCellSupply c`; only the right factor depends on `c`, yet
+   `S c adj χ` evaluates both, and the `IsColAut` filter re-runs over the left factor's generators
+   as well.
+
+★ Neither is specific to the cell-indexed design — `selNode`/`selNodeFast` do (1) over **every**
+cell. This section fixes both **without changing the bill**, so `②` is not an inequality but an
+equation: `probeWalkH_eq` says the hoisted walk *is* `probeWalk` at the composed supply.
+
+★★ Consequently every capstone transfers by `rw`, exactly as with `selNodeFastC_eq` — `①` through
+`canonFormS?_selNodeLazyC_eq`, `②` through `descentCostS_selNodeLazyC_le`, `③` through
+`not_handledSC_if_flagSC`. **No new numerals; `costConst`/`costDeg` do not move.**
+
+**Measured** (`scratchpad/ProbeShareWalk.lean`, `ProbeShareWalk6.lean`, identical billed cost):
+`C₅` 27.6 s → **20.7 s** (1.34×), `K₁,₂,₃` 74.4 s → **50.2 s** (1.48×). At one cell the win is
+entirely (1); (2) starts paying from two cells and scales with the number of cells *probed*. -/
+
+/-- **The key evaluated ONCE per vertex** — value and cost kept together, so the bill and the argmin
+read the same computation instead of re-running it. -/
+def keyTable (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) (B : List (Fin n)) :
+    List (Fin n × List Nat × Nat) :=
+  B.map (fun v => (v, key adj χ v))
+
+/-- `Force.keepMin` read off the table: no further key evaluation. -/
+def keepMinT (t : List (Fin n × List Nat × Nat)) : List (Fin n) :=
+  match Force.kmin? (t.map (fun p => p.2.1)) with
+  | none => t.map (fun p => p.1)
+  | some m => (t.filter (fun p => decide (p.2.1 = m))).map (fun p => p.1)
+
+/-- Filtering a table of `(v, f v)` pairs on the second component and projecting back is filtering
+the original list — the one induction this section needs. -/
+private theorem map_fst_pair {α : Type} (f : Fin n → α) :
+    ∀ B : List (Fin n), (B.map (fun v => (v, f v))).map (fun q => q.1) = B := by
+  intro B; induction B with
+  | nil => rfl
+  | cons a t ih => simp only [List.map_cons, ih]
+
+private theorem map_filter_pair {α : Type} (f : Fin n → α) (p : α → Bool) :
+    ∀ B : List (Fin n),
+      ((B.map (fun v => (v, f v))).filter (fun q => p q.2)).map (fun q => q.1)
+        = B.filter (fun v => p (f v)) := by
+  intro B
+  induction B with
+  | nil => rfl
+  | cons a t ih => by_cases h : p (f a) = true <;> simp [h, ih]
+
+/-- **The table computes `keepMin`.** -/
+theorem keepMinT_keyTable (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) (B : List (Fin n)) :
+    keepMinT (keyTable key adj χ B) = keepMin key adj χ B := by
+  have hmap : (keyTable key adj χ B).map (fun p => p.2.1) = B.map (Force.keyV key adj χ) := by
+    simp only [keyTable, List.map_map]; rfl
+  unfold keepMinT keepMin
+  rw [hmap]
+  cases Force.kmin? (B.map (Force.keyV key adj χ)) with
+  | none =>
+      show (keyTable key adj χ B).map (fun p => p.1) = B
+      exact map_fst_pair (fun v => key adj χ v) B
+  | some m =>
+      show ((keyTable key adj χ B).filter (fun p => decide (p.2.1 = m))).map (fun p => p.1) = _
+      exact map_filter_pair (fun v => key adj χ v) (fun a => decide (a.1 = m)) B
+
+/-- …and the table's cost column is the bill's key term. -/
+theorem keyTable_cost (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) (B : List (Fin n)) :
+    ((keyTable key adj χ B).map (fun p => p.2.2)).sum = (B.map (keyCost key adj χ)).sum := by
+  simp only [keyTable, List.map_map]; rfl
+
+/-- **The supply splits into a node-level factor and a cell-level one.** Stated as a property rather
+than as `Deck.appendSupply` so this file needs no new import; the endgame instance is `rfl`. -/
+def SplitSupply (S : CellSupply n) (L : Supply n) (T : CellSupply n) : Prop :=
+  ∀ (c : Nat) (adj : AdjMatrix n) (χ : Colouring n),
+    S c adj χ = ((L adj χ).1 ++ (T c adj χ).1, (L adj χ).2 + (T c adj χ).2)
+
+/-- **★★ THE HOISTED LAZY PROBE.** `Lc`/`Lgn`/`VL` are the node-level factor's cost, candidate count
+and **verified** list, evaluated once per node by `selNodeLazyHC` and reused by every probed cell;
+`keyTable` evaluates the key once per vertex. Same walk, same stopping rule, same bill. -/
+def probeWalkH (key : Key n) (Lc Lgn : Nat) (VL : List (Equiv.Perm (Fin n)))
+    (T : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) :
+    List Nat → Option (Nat × List (Fin n)) × Nat
+  | [] => (none, 0)
+  | c :: cs =>
+      let tv := T c adj χ
+      let V := VL ++ tv.1.filter (fun g => decide (Consume.IsColAut adj χ g))
+      let kt := keyTable key adj χ (cellList χ c)
+      let kept := ((keepMinT kt).map (rep V)).dedup
+      let bill := (Lc + tv.2) + (Lgn + tv.1.length) * (n * n)
+        + (kt.map (fun p => p.2.2)).sum + n * n
+        + (cellList χ c).length * (V.length * (n * n) + n * n)
+      if kept.length ≤ 1 then (some (c, kept), bill)
+      else
+        let r := probeWalkH key Lc Lgn VL T adj χ cs
+        (r.1, bill + r.2)
+
+/-- **★★★ THE HOISTED WALK *IS* THE WALK** — both components, at the composed supply. Everything in
+§7 therefore transfers by rewriting, with no inequality anywhere. -/
+theorem probeWalkH_eq {S : CellSupply n} {L : Supply n} {T : CellSupply n} (hS : SplitSupply S L T)
+    (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) :
+    ∀ l : List Nat,
+      probeWalkH key (Consume.supplyCost L adj χ) (gens L adj χ).length (verified L adj χ)
+          T adj χ l
+        = probeWalk key S adj χ l := by
+  intro l
+  induction l with
+  | nil => rfl
+  | cons c cs ih =>
+      have hV : verified L adj χ ++ (T c adj χ).1.filter (fun g => decide (Consume.IsColAut adj χ g))
+          = (S c adj χ).1.filter (fun g => decide (Consume.IsColAut adj χ g)) := by
+        rw [hS c adj χ]
+        exact (List.filter_append _ _).symm
+      have hlen : (gens L adj χ).length + (T c adj χ).1.length = (S c adj χ).1.length := by
+        rw [hS c adj χ]; exact List.length_append.symm
+      have hcost : Consume.supplyCost L adj χ + (T c adj χ).2 = (S c adj χ).2 := by
+        rw [hS c adj χ]; rfl
+      simp only [probeWalkH, probeWalk, cellNarrowV, keepMinT_keyTable, keyTable_cost,
+        hV, hlen, hcost, ih]
+
+/-- **★★ THE HOISTED LAZY RESOLVER.** The node-level supply factor is harvested and verified **once
+per node**; each probed cell adds only its own generators and one key pass. -/
+def selNodeLazyHC (key : Key n) (L : Supply n) (T : CellSupply n) : NodeRes n := fun adj χ =>
+  let lv := L adj χ
+  let VL := lv.1.filter (fun g => decide (Consume.IsColAut adj χ g))
+  match probeWalkH key lv.2 lv.1.length VL T adj χ ((nonSingletonColours χ).sort (· ≤ ·)) with
+  | (none, pc) => ([], pc)
+  | (some (_, kept), pc) =>
+      (kept.map (fun v => (v, (Refine.warmRefineVec adj (indivOne χ v)).col)),
+       pc + (kept.map (fun _ => CostModel.WarmRefine.warmRefineCost n)).sum)
+
+theorem selNodeLazyHC_eq {S : CellSupply n} {L : Supply n} {T : CellSupply n}
+    (hS : SplitSupply S L T) (key : Key n) : selNodeLazyHC key L T = selNodeLazyC key S := by
+  funext adj χ
+  show (match probeWalkH key (Consume.supplyCost L adj χ) (gens L adj χ).length
+          (verified L adj χ) T adj χ ((nonSingletonColours χ).sort (· ≤ ·)) with
+        | (none, pc) => ([], pc)
+        | (some (_, kept), pc) => _) = _
+  rw [probeWalkH_eq hS key adj χ]
+  rfl
+
+/-- **The runnable top-level hoisted object.** -/
+def canonFormLazyHSC? (key : Key n) (L : Supply n) (T : CellSupply n) (adj : AdjMatrix n) :
+    Option (CanonSpec.Labelled n) :=
+  (descendS (selNodeLazyHC key L T) adj n ((Refine.warmRefineVec adj (fun _ => 0)).col)).1
+
+theorem canonFormLazyHSC?_eq {S : CellSupply n} {L : Supply n} {T : CellSupply n}
+    (hS : SplitSupply S L T) (key : Key n) :
+    canonFormLazyHSC? key L T = canonFormLazySC? key S := by
+  funext adj
+  unfold canonFormLazyHSC? canonFormLazySC?
+  rw [selNodeLazyHC_eq hS key]
+
+/-- …and the cost, likewise an equation: `②`'s numerals do not move. -/
+theorem descentCostS_selNodeLazyHC_eq {S : CellSupply n} {L : Supply n} {T : CellSupply n}
+    (hS : SplitSupply S L T) (key : Key n) (adj : AdjMatrix n) :
+    descentCostS (Refine.encodeFreeFast (n := n)) (selNodeLazyHC key L T) adj
+      = descentCostS (Refine.encodeFreeFast (n := n)) (selNodeLazyC key S) adj := by
+  rw [selNodeLazyHC_eq hS key]
+
 end Select
 end ChainDescent

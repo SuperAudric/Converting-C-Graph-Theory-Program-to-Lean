@@ -15,13 +15,14 @@
 > at 1–2 non-singleton cells only. `probe_offbranch5`'s depth-1 CFI nodes carry 28/28/24/26/14/10/14
 > cells, where the ceiling should be far higher. Worth having before W4 quotes a performance number.
 >
-> ⛔ **AND ONE THING THAT IS OPEN AFTER ALL — `W-j` (2026-08-08, measured).** *"Nothing outstanding"*
+> ✅ **AND ONE THING THAT WAS OPEN AFTER ALL — `W-j`, LANDED 2026-08-08.** *"Nothing outstanding"*
 > was true of this plan's scope and **false as a statement about the object's runtime**:
-> `probeWalk` still evaluates the record key **three times per vertex per probed cell** (once for the
-> bill via `keyCost`, twice inside `Force.keepMin`) and re-harvests the **cell-independent** left
-> factor `recordSupplyFast` once per probed cell. A shared-key + hoisted variant measures
-> **1.34× (C₅) / 1.48× (K₁,₂,₃) faster at an identical billed cost**. Full entry + the proof shape:
-> `chain-descent-wind-down.md` §2a's `W-j` block, and §5's `W-j` entry below.
+> `probeWalk` evaluated the record key **three times per vertex per probed cell** (once for the bill
+> via `keyCost`, twice inside `Force.keepMin`) and re-harvested the **cell-independent** left factor
+> `recordSupplyFast` once per probed cell. `SelectCell` §8 fixes both, with an **unchanged bill** so
+> no numeral moves: measured **1.33× (C₅) / 1.48× (K₁,₂,₃)** at identical billed costs. §5's `W-j`
+> entry has the detail — **including that `W-j`'s own proposed follow-up, and three of §6's four
+> other tightening levers, are computed to change NEITHER `costConst` NOR `costDeg`.**
 
 **Rewritten 2026-08-07** after five probes and a user coverage probe; **extended later the next day**
 with the *witness-vs-relation* diagnosis (§3a) and a **second candidate design `C`** that keeps the
@@ -585,10 +586,10 @@ measured** — two cells is the largest case run.
 `RecordDeepenCell.canonFormFast`/`costFast`, which now *are* the lazy object. Still zero `sorry`,
 zero custom axioms.
 
-### W-j. Share the key, hoist the left factor — ▶ **NEXT (2026-08-08, measured, not started)**
+### W-j. Share the key, hoist the left factor — ✅ **LANDED 2026-08-08, `SelectCell` §8 + `RecordDeepenCell` §5**
 
 ⛔ **Why W-e under-delivered.** Laziness reduced *how many* cells are probed; it did not touch what
-each probed cell costs, and two recomputations live there:
+each probed cell costs, and two recomputations lived there:
 
 1. **The key is evaluated three times per vertex.** `probeWalk` bills
    `((cellList χ c).map (keyCost key adj χ)).sum`, and `cellNarrowV → Force.keepMin` evaluates
@@ -608,25 +609,45 @@ each probed cell costs, and two recomputations live there:
 `(vertex, keyValue, keyCost)` table per cell and the left factor harvested (and `IsColAut`-filtered)
 once per node, bill left byte-identical:
 
-| graph | ns-cells | built `selNodeLazyC` | shared-key + hoisted | billed cost |
+| graph | ns-cells | before `W-j` | after `W-j` | billed cost |
 |---|---|---|---|---|
-| `C₅` (n=5) | 1 | 27.6 s | **20.7 s** (1.34×) | 5 212 728 — **identical** |
-| `K₁,₂,₃` (n=6) | 2 | 74.4 s | **50.2 s** (1.48×) | 20 321 716 — **identical** |
+| `C₅` (n=5) | 1 | 27.6 s | **20.8 s** (1.33×) | 5 212 728 — **identical** |
+| `K₁,₂,₃` (n=6) | 2 | 74.4 s | **50.4 s** (1.48×) | 20 321 716 — **identical** |
 
 At one cell the win is entirely key-sharing (the hoist has nothing to save); it grows with the number
-of cells **probed**, which is what makes the unmeasured 28-cell CFI case the one to run afterwards.
+of cells **probed**, which is what makes the unmeasured 28-cell CFI case worth running now.
 
-★ **Proof shape — the cheapest in the family.** Children unchanged ⟹ `①` is free from the existing
-`Select.descendS_val_congr` (lemma B). The bill is **equal**, not merely `≤` ⟹ `②` is `le_of_eq`
-into `descentCostS_selNodeLazyC_le` — **no `ring`, no new numerals**. The rewrites are `List.map_map`
-(table ↦ `keyCost`/`keyV` maps) and `List.filter_append` (`verified` of an append splits).
+**What was built.** `SelectCell` §8: `keyTable` · `keepMinT` · `keepMinT_keyTable` · `keyTable_cost` ·
+`SplitSupply` · **`probeWalkH`** · **`probeWalkH_eq`** · `selNodeLazyHC` (+`_eq`) ·
+`canonFormLazyHSC?` (+`_eq`) · `descentCostS_selNodeLazyHC_eq`. `RecordDeepenCell` §5:
+`splitSupply_recordSupplyDeepenC` (`rfl`) · `canonFormFast` · `costFast` · **`costFast_eq`** ·
+`canonFormFast_eq`. `SelectNode.lean` untouched again — `selNode` keeps the same defect, which is the
+proof that this was never a per-cell cost.
 
-★★ **Take the honest-billing variant with it.** Charging `recordSupplyFast` **once per node** rather
-than once per cell removes one of the four over-billings named in §6 (`selProbeBoundC` charging every
-cell the maximum `sB`), taking the record term from `n^10` to `n^9`. That should return most of the
-`+8` that moved `costConst` 57 → 69, `costDeg` unchanged — tightening `②` and speeding the object up
-in one edit. ⚠ That variant *does* change the bill, so it needs the `ring` recompute
-(`recordDeepenBound_expand`) and re-measurement.
+★ **Proof shape — the cheapest in the family, as predicted.** Children unchanged and the bill
+unchanged, so `probeWalkH_eq` is an **equation in both components**: `①`, `②` and `③` transfer by
+`rw` and **no numeral moves**. Gate exit 0 / 228 s / 119 modules; all new declarations axiom-clean.
+
+### ⛔⛔ …AND THE FOLLOW-UP THIS ENTRY PROPOSED IS DEAD (computed 2026-08-08)
+
+~~"Take the honest-billing variant with it: charging `recordSupplyFast` once per node removes one of
+§6's over-billings and returns most of the `+8` that moved `costConst` 57 → 69."~~ **FALSE.**
+Evaluated against `recordDeepenBound_expand`'s own polynomial it gives **13 / 69 — no change** — and
+so do three of the other four levers §6 names:
+
+| change | `(costDeg, costConst)` |
+|---|---|
+| harvest billed `\|cell\|² · n⁴` instead of flat `n⁶` | **13 / 69 — no change** |
+| `goodCellCost`'s nested flat `n⁶` → `n⁴` | **13 / 69 — no change** |
+| `holKeyFast` flat `n⁵` → `n⁴` | **13 / 69 — no change** |
+| record supply billed once per node | **13 / 69 — no change** |
+| **`Deck2.deck2Supply`'s declared `n²(1+n²)·n⁵` → `n⁷`** | ★ **11 / 65** |
+
+**Why**, and this prunes the whole search: `costConst` **is the bound polynomial evaluated at `n = 1`**
+(the coefficient sum), so moving a factor of `n` in or out cannot touch it; and `costDeg` is set by
+the single term `(n+1)·n·(n·kc)` with `kc = recordKeyBound` — set `kc := 0` and the bound is degree
+**11**. ⟹ only the *key's* declared cost can move the degree, and its degree comes from
+`deck2Supply` through `guardSupplyBound`. Recorded at source in `Publication.lean`.
 
 ---
 
@@ -658,8 +679,8 @@ in one edit. ⚠ That variant *does* change the bill, so it needs the `ring` rec
 >    ⛔ **AND NEITHER OF THEM REMOVES IT (2026-08-08).** W-i cut the *three* evaluations per cell to
 >    one; W-e cut the *number* of cells. The duplication of a **node-level** quantity across cells
 >    survived both, and so did a second one this section never named — `Force.keepMin` evaluates the
->    key twice more per vertex, on top of the bill's `keyCost`. Removing them is **`W-j`** (§5), and
->    it is measured worth 1.34×/1.48× at an identical billed cost.
+>    key twice more per vertex, on top of the bill's `keyCost`. Removing them was **`W-j`** (§5),
+>    ✅ landed the same day, worth a measured 1.33×/1.48× at an identical billed cost.
 
 ### ⚠⚠ AND WHAT THE DEGREE DOES NOT CERTIFY (user, 2026-08-08)
 
@@ -674,9 +695,11 @@ that carries the flat `n⁶` inside it.
 degree.** Both numbers are upper bounds from the same loose accounting and can be loose by different
 amounts. What is established is (1) an unconditional polynomial ceiling with explicit numerals on
 every input — no exponential is possible — and (2) that the per-cell change did not push *that
-ceiling* up a degree. Tightening starts with billing the harvest as `|cell|² · n⁴` and proving
-`Σ_{c ∈ nsColours χ} |cellList χ c|² ≤ n²`; that is a separate exercise, needed before anyone reads
-`13` as the algorithm's degree, and **not** needed for (1). Recorded at source in `Publication.lean`'s
+ceiling* up a degree. ⛔ ~~Tightening starts with billing the harvest as `|cell|² · n⁴` and proving
+`Σ_{c ∈ nsColours χ} |cellList χ c|² ≤ n²`.~~ **That advice is WRONG and was computed to be wrong on
+2026-08-08 — it changes neither numeral.** The only lever is `Deck2.deck2Supply`'s declared charge;
+see §5's `W-j` block for the table and the reason (`costConst` is the polynomial at `n = 1`;
+`costDeg` is set by the key term alone). Recorded at source in `Publication.lean`'s
 `costConst`/`costDeg` block.
 
 ⚠ The other `②` debt is re-measuring any `Regression` number that pins a selected colour — more
@@ -703,8 +726,8 @@ it must be measured, not assumed.
 | **W-i — `SelectCell` §6** | ✅ **LANDED** — `cellData`/`selNodeFastC`/`canonFormFastSC?`; superseded for the endgame by `W-e`'s lazy form, kept as the eager reference |
 | **W-g — repoint `Publication`** | ✅ **LANDED** — `canonForm?`/`cost` are `RecordDeepenCell.canonFormFast`/`costFast`, numerals 69/13, `residue_if_flag` discharged. **Zero `sorry`, zero custom axioms.** |
 | **W-e — `SelectCell` §7 + `RecordDeepenCell` §5** | ✅ **LANDED** — lazy **billing** (`probeWalk`/`selNodeLazyC`/`canonFormLazySC?`) + lemmas A/B/C. Measured 2.4× faster than eager, 1.7× faster than node-global |
-| **W-j — share the key, hoist the left factor** | ▶ **NEXT, not started** (2026-08-08). Measured 1.34×/1.48× available at an **identical** billed cost; `①` free from `descendS_val_congr`, `②` by `le_of_eq`. See §5's `W-j` entry |
-| — | ~~nothing outstanding in this plan~~ — `W-j` is, and §6's item 2 is the reason |
+| **W-j — `SelectCell` §8 + `RecordDeepenCell` §5** | ✅ **LANDED 2026-08-08**, axiom-clean, gate 119 modules / 228 s — `keyTable`/`keepMinT` (key evaluated **once** per vertex) · `SplitSupply`/**`probeWalkH`**/**`probeWalkH_eq`** (left factor hoisted to once per node) · `selNodeLazyHC`/`canonFormLazyHSC?`/`costFast_eq`. **Bill unchanged ⟹ no numeral moves.** 1.33×/1.48× measured |
+| — | **nothing outstanding in this plan.** ⛔ And `W-j2` (honest per-node billing) is **DEAD** — computed to change neither `costConst` nor `costDeg`; see §5 |
 
 > ## ⛔ CORRECTION (2026-08-08) — *"`③` is not on the critical path"* WAS WRONG
 >

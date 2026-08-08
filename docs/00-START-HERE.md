@@ -15,13 +15,16 @@
 > pays no premium.**
 > ⚠ `②`'s degree is a bound from declared flat charges, not a measurement of the algorithm's true
 > degree — see `Publication.lean`'s `costConst`/`costDeg` block.
-> ⛔ **2026-08-08, two corrections to the line above.** (i) *"the whole plan is done"* holds of the
-> plan's scope, not of the object's runtime: **`W-j`** is open and measured — `probeWalk` evaluates
-> the record key **three times per vertex per probed cell** and re-harvests the cell-independent
-> `recordSupplyFast` once per probed cell; removing both is worth **1.34× / 1.48×** at an identical
-> billed cost (per-cell plan §5 `W-j`). (ii) **W2's recorded route points at the wrong object** and
-> must be re-scoped onto `kernelSupply` → `HandledSC` before it is started — wind-down §2 W2's
-> *SCOPE CORRECTION #2*.
+> ✅ **2026-08-08 — `W-j` LANDED** (`SelectCell` §8): `probeWalk` had been evaluating the record key
+> **three times per vertex per probed cell** and re-harvesting the cell-independent
+> `recordSupplyFast` once per probed cell. `probeWalkH`/`selNodeLazyHC` remove both with an
+> **unchanged bill**, so no numeral moves: `C₅` 27.6 s → **20.8 s**, `K₁,₂,₃` 74.4 s → **50.4 s**,
+> identical billed costs. Gate exit 0 / 228 s / 119 modules.
+> ⛔ **Two corrections to carry.** (i) **W2's recorded route points at the wrong object** and must be
+> re-scoped onto `kernelSupply` → `HandledSC` before it is started — wind-down §2 W2's *SCOPE
+> CORRECTION #2*. (ii) **The recorded `②`-tightening advice is wrong**: of the five obvious levers,
+> four change neither `costConst` nor `costDeg`; the only one that does is `Deck2.deck2Supply`'s
+> declared charge (→ 11 / 65). See the `W-j` block in wind-down §2a.
 > It supersedes the wind-down's options table (i)–(vi), now **provenance**:
 > `Publication.canonForm?` **keeps its current fused object** and the work is a **supply change**
 > (cell-indexed). Option (iv)/(v) references below are provenance.

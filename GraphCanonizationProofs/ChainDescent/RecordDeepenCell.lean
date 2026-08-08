@@ -360,28 +360,59 @@ Two runnable forms exist and the endgame uses the second.
 alone would have saved nothing (`SelectCell` §7). The lazy resolver therefore returns a **smaller
 cost** — which is why `②` goes through `probeWalk_bill_le` into the *existing* `selProbeCostC_le`
 rather than needing new numerals, and why `①` goes through `descendS_val_congr` (the children are
-unchanged; `NodeTransport` reads only `.1`). -/
+unchanged; `NodeTransport` reads only `.1`).
 
-/-- **The runnable endgame canonizer** — lazily billed. -/
+## `W-j` — the two recomputations inside each probed cell (2026-08-08)
+
+`probeWalk` evaluated the record key **three times per vertex per probed cell** (once for the bill
+via `keyCost`, twice inside `Force.keepMin` — `keyCost` and `keyV` are `.2` and `.1` of the *same*
+strict pair) and re-harvested the **cell-independent** left factor `recordSupplyFast`, re-running
+its `IsColAut` filter, once per probed cell. `Select.probeWalkH` removes both: the key goes into a
+`keyTable` read by the bill *and* the argmin, and the left factor's cost, candidate count and
+**verified** list are computed once per node by `Select.selNodeLazyHC`.
+
+★ **The bill is unchanged**, so `Select.probeWalkH_eq` is an *equation*, not an inequality: `①`, `②`
+and `③` all transfer by rewriting and **`costConst`/`costDeg` do not move**. Measured 1.34× (`C₅`) /
+1.48× (`K₁,₂,₃`) with identical billed costs. -/
+
+/-- The endgame supply's split: `recordSupplyFast` is the node-level factor, the cell-anchored
+harvest is the cell-level one. `Deck.appendSupply` is definitionally the `SplitSupply` shape. -/
+theorem splitSupply_recordSupplyDeepenC :
+    Select.SplitSupply (recordSupplyDeepenC (n := n)) (RecordCost.recordSupplyFast (n := n))
+      (Deepen.deepenCellSupply (n := n)) := fun _ _ _ => rfl
+
+/-- **The runnable endgame canonizer** — lazily billed, key shared, left factor hoisted. -/
 def canonFormFast (adj : AdjMatrix n) : Option (CanonSpec.Labelled n) :=
-  Select.canonFormLazySC? (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n)) adj
+  Select.canonFormLazyHSC? (RecordKey.recordKey (n := n)) (RecordCost.recordSupplyFast (n := n))
+    (Deepen.deepenCellSupply (n := n)) adj
 
 /-- …and its cost. -/
 def costFast (adj : AdjMatrix n) : Nat :=
   Select.descentCostS (Refine.encodeFreeFast (n := n))
-    (Select.selNodeLazyC (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n))) adj
+    (Select.selNodeLazyHC (RecordKey.recordKey (n := n)) (RecordCost.recordSupplyFast (n := n))
+      (Deepen.deepenCellSupply (n := n))) adj
 
 theorem canonFormFast_eq :
     canonFormFast (n := n)
       = Select.canonFormS? (Refine.encodeFreeFast (n := n))
           (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
-            (recordSupplyDeepenC (n := n))) :=
-  -- `canonFormFast = canonFormLazySC? … = canonFormS? … (selNodeLazyC …)` is all `rfl`; the one
-  -- real step is `canonFormS?_selNodeLazyC_eq`, i.e. lemma B.
-  Select.canonFormS?_selNodeLazyC_eq _ _
+            (recordSupplyDeepenC (n := n))) := by
+  -- `W-j`: the hoisted walk *is* the walk (`probeWalkH_eq`); then lemma B (`W-e`).
+  funext adj
+  show Select.canonFormLazyHSC? _ _ _ adj = _
+  rw [Select.canonFormLazyHSC?_eq splitSupply_recordSupplyDeepenC]
+  exact congrFun (Select.canonFormS?_selNodeLazyC_eq _ _) adj
 
-/-- **★★★ `①` ∧ `②` ∧ `③` AT THE RUNNABLE, LAZILY-BILLED OBJECT.** `①` and `③` transport along
-`canonFormFast_eq`; `②` is re-derived at the lazy bill and lands on the **same** monomial. -/
+/-- The runnable cost is the reasoned-about cost — an **equation**, because `W-j` left the bill
+alone: `probeWalkH` shares work, it does not charge differently. -/
+theorem costFast_eq (adj : AdjMatrix n) :
+    costFast adj
+      = Select.descentCostS (Refine.encodeFreeFast (n := n))
+          (Select.selNodeLazyC (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n))) adj :=
+  Select.descentCostS_selNodeLazyHC_eq splitSupply_recordSupplyDeepenC _ adj
+
+/-- **★★★ `①` ∧ `②` ∧ `③` AT THE RUNNABLE OBJECT.** `①` and `③` transport along `canonFormFast_eq`;
+`②` rides `costFast_eq` into the lazy bill and lands on the **same** monomial. -/
 theorem recordDeepenCell_full_fast :
     CanonSpec.IsCanonicalFormOpt (canonFormFast (n := n))
     ∧ (∀ adj : AdjMatrix n, costFast adj ≤ costConst * (n + 1) ^ costDeg)
@@ -389,6 +420,7 @@ theorem recordDeepenCell_full_fast :
   obtain ⟨h1, _h2, h3⟩ := recordDeepenCell_full (n := n)
   refine ⟨by rw [canonFormFast_eq]; exact h1, fun adj => ?_,
     fun adj hf => h3 adj (by rw [canonFormFast_eq] at hf; exact hf)⟩
+  rw [costFast_eq]
   exact le_trans (Select.descentCostS_selNodeLazyC_le
     (fun c χ => supplyCost_recordSupplyDeepenC_le adj χ c)
     (fun c χ => gens_recordSupplyDeepenC_length_le adj χ c)

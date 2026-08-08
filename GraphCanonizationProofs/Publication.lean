@@ -56,7 +56,8 @@ Per-obligation state:
     are discharged now and the file has **zero** `sorry` — and the object moved again on 2026-08-08,
     to the cell-indexed supply (see the ▶▶ block at the top of §1). The `canonFormFastS?_eq`-is-`rfl`
     remark describes that earlier object; the current one bridges by
-    `Select.canonFormS?_selNodeLazyC_eq`, a **proved** equation.
+    `Select.canonFormLazyHSC?_eq` (`W-j`) then `Select.canonFormS?_selNodeLazyC_eq` (`W-e`), both
+    **proved** equations rather than `rfl`.
   · ② — ✅ **SWAPPED AND DISCHARGED 2026-07-28, in one pass with the key swap above.** `canon_poly_or_flag`
     is proved, `#print axioms` = `[propext, Classical.choice, Quot.sound]`, **no `sorryAx`** — and on the
     LEFT disjunct, so the cost claim needs no flag escape. `cost` and `costConst`/`costDeg` are no longer
@@ -155,8 +156,9 @@ PROVISIONAL by design — strengthening the record later is this one definition 
 below; nothing downstream changes shape.
 
 **★★★ THE SUPPLY SWAP (`W-g`, 2026-08-08): the supply is now CELL-INDEXED** —
-`fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`, read by **`Select.selNodeLazyC`** (`W-e`,
-the same day — the eager `selNodeFastC` remains in the library as the reference twin). Same fused
+`fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`, read by **`Select.selNodeLazyHC`** (`W-e`
+then `W-j`, the same day — the eager `selNodeFastC` and the un-hoisted `selNodeLazyC` remain in the
+library as the reference twins). Same fused
 descent, same record key; each cell is judged by the generators of descents anchored *in that cell*,
 gated by that cell's own guard. This is what makes `③` provable **at the object `①` and `②` are
 about** — see the block below §1 for why the node-global form provably cannot carry `①`. The
@@ -227,17 +229,20 @@ node-global append `recordSupplyFast ++ deepenSupplyCert` — which does carry `
 (`RecordDeepen.not_tinhoferGraph_of_flag_recordDeepen`) — provably cannot carry `①`, and is not a
 candidate. `Select.CellOrbitTransport` replaces `SupplyEquivariant` and the defect goes away.
 
-**And it RUNS.** `canonFormFast`/`costFast` go through **`Select.selNodeLazyC`**, which walks the
+**And it RUNS.** `canonFormFast`/`costFast` go through **`Select.selNodeLazyHC`**, which walks the
 non-singleton cells in increasing colour order, evaluates and bills each on demand, and stops at the
 first that narrows to `≤ 1` — building children through `Refine.ColData`, so `canonForm?` is
 `#eval`-able, not merely definable. Measured: answers on `K₂`, `C₅`, `K₁,₂,₃` and `K₃ ⊔ C₄`; `C₅`
 costs 5 212 728 and `K₁,₂,₃` 20 321 716, against a budget of `69·6^13` and `69·7^13 ≈ 6.7 × 10¹²`.
 
-⚠ **Two recomputations remain inside each probed cell** and are the next scheduled work (`W-j`),
-not a soundness issue: the key is evaluated three times per vertex (once for the bill via `keyCost`,
-twice inside `Force.keepMin`), and the *cell-independent* left factor `recordSupplyFast` is
-re-harvested once per probed cell. Measured cost of that: 1.34× on `C₅` and 1.48× on `K₁,₂,₃` of
-avoidable wall-clock, at an identical billed cost.
+★★ **`W-j` (2026-08-08) removed the two recomputations that survived inside each probed cell**: the
+key had been evaluated three times per vertex (once for the bill via `keyCost`, twice inside
+`Force.keepMin` — `keyCost` and `keyV` are `.2` and `.1` of the *same* strict pair), and the
+*cell-independent* left factor `recordSupplyFast` was re-harvested, and re-verified, once per probed
+cell. `Select.probeWalkH`/`selNodeLazyHC` share the key through a table and hoist the left factor to
+once per node. The **bill is unchanged** — `Select.probeWalkH_eq` is an equation — so `②`'s numerals
+did not move. Measured: `C₅` 27.6 s → **20.8 s**, `K₁,₂,₃` 74.4 s → **50.4 s**, both at identical
+billed costs (5 212 728 / 20 321 716).
 
 ⚠ **The residue is unchanged and is still an OVER-approximation** — a CFI graph is not Tinhofer, yet
 its obstruction is linear and belongs to the rigid resolver. Narrowing it is W2, not this. **This is
@@ -394,9 +399,39 @@ established is exactly two things, and they are what the paper may claim:
      alike — no exponential blow-up is possible; and
   2. that the per-cell supply change did not push *that ceiling* up a degree.
 
-Tightening this means replacing declared charges with derived ones (the first would be billing the
-harvest as `|cell|² · n⁴` and proving `Σ_{c ∈ nsColours χ} |cellList χ c|² ≤ n²`). That is a separate
-exercise and is **not** required for the claim above; it is required before anyone reads `13` as the
+### ⛔⛔ AND WHERE TIGHTENING WOULD HAVE TO HAPPEN — FOUR OF THE FIVE OBVIOUS LEVERS DO NOTHING
+
+⛔ An earlier version of this block advised *"tightening starts with billing the harvest as
+`|cell|² · n⁴` and proving `Σ_c |cellList χ c|² ≤ n²`."* **That is the wrong lever — computed
+2026-08-08 against `recordDeepenBound_expand`'s own polynomial, it changes neither numeral.**
+
+Two structural facts explain it, and they are worth stating because they prune the search:
+
+  · **`costConst` is the bound polynomial evaluated at `n = 1`** (it is the coefficient sum). So any
+    change that merely moves a factor of `n` in or out — e.g. billing a node-level supply once per
+    node instead of once per cell — **cannot** change it, however much it improves the polynomial
+    for `n ≥ 2`.
+  · **`costDeg` is set by a single term**, `(n + 1) · n · (n · kc)` where `kc = RecordKey.recordKeyBound`.
+    Setting `kc := 0` drops the whole bound to degree **11**, so *no* consume-side or guard-side
+    charge can move the degree.
+
+Measured effect on `(costDeg, costConst)` of each candidate:
+
+| change | result |
+|---|---|
+| harvest billed `|cell|² · n⁴` instead of flat `n⁶` | **13 / 69 — no change** |
+| `goodCellCost`'s nested flat `n⁶` → `n⁴` | **13 / 69 — no change** |
+| `Hol.holKeyFast` flat `n⁵` → `n⁴` | **13 / 69 — no change** |
+| billing the record supply once per node (`W-j`'s honest-billing variant) | **13 / 69 — no change** |
+| **`Deck2.deck2Supply`'s declared charge `n²(1+n²)·n⁵` → `n⁷`** | ★ **11 / 65** |
+
+⟹ **the single lever is `Deck2.deck2Supply`'s declared per-node charge**, and it reaches the degree
+through one chain: `deck2` `n⁹` → `RecordKey.guardSupplyBound` `n⁹` → `recordKeyBound = … + n ·
+guardSupplyBound` `n¹⁰` → `Select.selProbeBoundC`'s `n · (n · kc)` `n¹²` → `(n+1) ·` → **`n¹³`**.
+The charge is `|branches|² · (1 + n²) · n⁵` bounded at `|branches| ≤ n`; tightening it means carrying
+the branch-cell size `m` instead of `n`, which is a real derivation, not a re-bracketing.
+
+None of this is required for the two claims above; it is required before anyone reads `13` as the
 algorithm's degree. -/
 
 /-- `RecordDeepenCell.costConst = 69` — the coefficient sum of the `②` bound polynomial. -/

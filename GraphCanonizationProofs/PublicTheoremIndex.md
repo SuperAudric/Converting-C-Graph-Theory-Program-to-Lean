@@ -5412,6 +5412,18 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Select.canonFormLazySC?` | 923-927 | **The runnable top-level lazy object** (root colouring materialised once too). | Definition |
 | `Select.canonFormLazySC?_eq` | 929-931 | …and it is the reasoned-about one. | — |
 | `Select.not_handledSC_if_flag_lazy` | 933-938 | The residue statement at the lazy object, unchanged. | — |
+| `Select.keyTable` | 966-970 | ★ **The key evaluated ONCE per vertex** (`W-j`) — value and cost kept together, so the bill and the argmin read the same computation. Before this, `keyCost` (the bill) and `Force.keepMin`'s two `keyV` passes were three full key computations per vertex per probed cell. | Definition |
+| `Select.keepMinT` | 972-978 | `Force.keepMin` read off the table: no further key evaluation. | Definition |
+| `Select.keepMinT_keyTable` | 994-1009 | **The table computes `keepMin`** — so sharing the key changes nothing the resolver sees. | — |
+| `Select.keyTable_cost` | 1011-1014 | …and the table's cost column is the bill's key term, so the bill is unchanged too. | — |
+| `Select.SplitSupply` | 1016-1022 | **The supply splits into a node-level factor and a cell-level one.** Stated as a property rather than as `Deck.appendSupply` so this file needs no new import; the endgame instance is `rfl`. | Definition |
+| `Select.probeWalkH` | 1024-1041 | ★★ **THE HOISTED LAZY PROBE** (`W-j`) — the node-level factor's cost, candidate count and **verified** list are computed once per node and reused by every probed cell, and the key is evaluated once per vertex. Same walk, same stopping rule, **same bill**. | Definition |
+| `Select.probeWalkH_eq` | 1043-1064 | ★★★ **THE HOISTED WALK *IS* THE WALK** — both components, at the composed supply. Everything in §7 therefore transfers by rewriting, with no inequality anywhere and no numeral change. | The `W-j` capstone |
+| `Select.selNodeLazyHC` | 1066-1073 | ★★ **THE HOISTED LAZY RESOLVER** — the node-level supply factor is harvested and verified **once per node**; each probed cell adds only its own generators and one key pass. | Definition |
+| `Select.selNodeLazyHC_eq` | 1075-1083 | …and it is `selNodeLazyC` at the composed supply. | — |
+| `Select.canonFormLazyHSC?` | 1085-1088 | **The runnable top-level hoisted object** — what `RecordDeepenCell.canonFormFast` is. | Definition |
+| `Select.canonFormLazyHSC?_eq` | 1090-1096 | …and it is the reasoned-about one. | — |
+| `Select.descentCostS_selNodeLazyHC_eq` | 1098-1104 | The cost, likewise an **equation**: `W-j` shares work, it does not charge differently, so `②`'s numerals do not move. | — |
 ## ChainDescent/RecordDeepenCell.lean
 
 | Name | Line | Description | Notes |
@@ -5439,8 +5451,10 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RecordDeepenCell.bound_le_monomial` | 297-316 | §4's sum bound is dominated by the pinned monomial `69 * (n+1)^13` — shared by the eager and the lazy object, so both `②`s land on the same numerals. | — |
 | `RecordDeepenCell.descentCostSC_recordDeepen_monomial` | 318-324 | ★★★ **`②` IN THE PUBLICATION SHAPE** — the endgame object runs within `69 * (n + 1) ^ 13` on **every** input, no hypotheses, no flag disjunct. | ⚠ The `(n+1)` shape is required: the `n`-form is false at `n = 0` |
 | `RecordDeepenCell.recordDeepenCell_full` | 326-346 | ★★★ **`①` ∧ `②` ∧ `③` AT ONE OBJECT** (the **eager** `selNodeC` form) — every obligation `Publication.lean` states, all properties of the *same* canonizer, all axiom-clean, `①` and `②` unconditional and `③` at the tight residue `¬ TinhoferGraph`. | The reasoning-side object; `Publication` is pointed at the `_fast` form below |
-| `RecordDeepenCell.canonFormFast` | 365-367 | **The runnable endgame canonizer** — `Publication.canonForm?` **is** this (`W-g`, landed). Lazily billed since `W-e`: it is `Select.canonFormLazySC?`, not `canonFormFastSC?`. | Definition |
-| `RecordDeepenCell.costFast` | 369-372 | …and its cost — `Publication.cost` **is** this, at `Select.selNodeLazyC`. | Definition |
-| `RecordDeepenCell.canonFormFast_eq` | 374-381 | The runnable canonizer is the reasoned-about one — the one real step is `Select.canonFormS?_selNodeLazyC_eq` (lemma B); everything else is `rfl`. | — |
-| `RecordDeepenCell.recordDeepenCell_full_fast` | 383-395 | ★★★ **`①` ∧ `②` ∧ `③` AT THE RUNNABLE OBJECT** — the exact triple `Publication.canonForm?`/`cost` are defined as. `①` and `③` transport along `canonFormFast_eq`; **`②` is re-derived at the lazy bill** (`Select.descentCostS_selNodeLazyC_le` → `bound_le_monomial`) — there is no `costFast_eq` and none is needed, since the lazy bill is *smaller*, not equal. | ⚠ `②`'s degree is a bound from declared flat charges, not a measurement — see `Publication.lean`'s `costConst`/`costDeg` block |
+| `RecordDeepenCell.splitSupply_recordSupplyDeepenC` | 378-382 | The endgame supply's split: `recordSupplyFast` is the node-level factor, the cell-anchored harvest the cell-level one. `Deck.appendSupply` is definitionally `Select.SplitSupply`'s shape, so this is `rfl`. | — |
+| `RecordDeepenCell.canonFormFast` | 384-387 | **The runnable endgame canonizer** — `Publication.canonForm?` **is** this (`W-g`, landed). Lazily billed (`W-e`), key shared and node-level supply factor hoisted (`W-j`): it is `Select.canonFormLazyHSC?`. | Definition |
+| `RecordDeepenCell.costFast` | 389-393 | …and its cost — `Publication.cost` **is** this, at `Select.selNodeLazyHC`. | Definition |
+| `RecordDeepenCell.canonFormFast_eq` | 395-406 | The runnable canonizer is the reasoned-about one: `Select.canonFormLazyHSC?_eq` (`W-j`) then `canonFormS?_selNodeLazyC_eq` (`W-e`'s lemma B). | — |
+| `RecordDeepenCell.costFast_eq` | 408-414 | The runnable cost is the reasoned-about cost — an **equation**, because `W-j` left the bill alone: `probeWalkH` shares work, it does not charge differently. | — |
+| `RecordDeepenCell.recordDeepenCell_full_fast` | 416-428 | ★★★ **`①` ∧ `②` ∧ `③` AT THE RUNNABLE OBJECT** — the exact triple `Publication.canonForm?`/`cost` are defined as. `①` and `③` transport along `canonFormFast_eq`; `②` rides `costFast_eq` into `Select.descentCostS_selNodeLazyC_le` → `bound_le_monomial`. | ⚠ `②`'s degree is a bound from declared flat charges, not a measurement — see `Publication.lean`'s `costConst`/`costDeg` block |
 | `RecordDeepenCell.recordDeepenCell_record` | 397-408 | ★★★ **`①` ∧ `③` AT ONE OBJECT**, at the record key — the first time both hold of the same object with `①` **unconditional**. Superseded by `recordDeepenCell_full`, which adds `②`. | ⛔ Not a second-object split: this is `canonForm?`'s own object |

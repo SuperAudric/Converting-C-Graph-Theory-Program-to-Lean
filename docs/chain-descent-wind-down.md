@@ -392,7 +392,7 @@ what is missing is the theorem that it *always* certifies the branch cell on the
 > | | recorded route | the published object |
 > |---|---|---|
 > | supply | `deepMatchSupply k` | `RecordDeepenCell.recordSupplyDeepenC` = `fun c => recordSupplyFast ++ deepenCellSupply c` |
-> | resolver | blind `Descend` | `Select.selNodeLazyC` (cell-indexed, lazily billed) |
+> | resolver | blind `Descend` | `Select.selNodeLazyHC` (cell-indexed, lazily billed, key shared) |
 > | predicate | `Residue.Handled` | **`Select.HandledSC`** |
 >
 > `HandledBridge.handled_of_seal` yields `Residue.Handled key (deepMatchSupply k)`, and
@@ -535,14 +535,16 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > ### The object
 > ```
 > canonForm? = RecordDeepenCell.canonFormFast
->            = Select.canonFormLazySC? recordKey (fun c => recordSupplyFast ++ deepenCellSupply c)
-> cost       = RecordDeepenCell.costFast
+>            = Select.canonFormLazyHSC? recordKey recordSupplyFast deepenCellSupply
+>              -- i.e. the cell-indexed supply  fun c => recordSupplyFast ++ deepenCellSupply c
+> cost       = RecordDeepenCell.costFast          -- at Select.selNodeLazyHC
 > ```
 > The fused resolver-aware descent, encode-free refiner, `RecordKey.recordKey` as the force key, and
 > the consume supply **cell-indexed**: each cell is judged by generators harvested from descents
-> anchored *in that cell*, gated by that cell's own guard. Run by `Select.selNodeLazyC`, which walks
-> cells in increasing colour order, evaluates and bills each on demand, and stops at the first that
-> fires. The single capstone is **`RecordDeepenCell.recordDeepenCell_full_fast`**.
+> anchored *in that cell*, gated by that cell's own guard. Run by **`Select.selNodeLazyHC`**, which
+> walks cells in increasing colour order, evaluates and bills each on demand, and stops at the first
+> that fires — with the key evaluated **once** per vertex and the node-level supply factor harvested
+> **once** per node (`W-j`). The single capstone is **`RecordDeepenCell.recordDeepenCell_full_fast`**.
 >
 > | | |
 > |---|---|
@@ -550,7 +552,7 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > | `②` | ✅ `cost ≤ 69 * (n+1)^13`, every input, **no flag disjunct** |
 > | `③` | ✅ flag ⟹ `¬ TinhoferGraph`, **for every key** (`not_tinhoferGraph_of_flag`) |
 > | non-vacuity | ✅ `K₁,₂,₃` handled, `K₃ ⊔ C₄` residual |
-> | runs | ✅ `#eval` answers on `K₂`, `C₅`, `K₁,₂,₃` (34 s / 87 s) |
+> | runs | ✅ `#eval` answers on `K₂`, `C₅`, `K₁,₂,₃` (20.8 s / 50.4 s after `W-j`) and on `K₃ ⊔ C₄` |
 >
 > ### ⚠⚠ The two things that must travel with any quotation of it
 > 1. **`②`'s degree is a bound, not a measurement.** Several components bill *declared flat* charges
@@ -558,55 +560,91 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >    flat `n⁵`; `selProbeBoundC` charging every cell the *maximum*; `goodCellCost`'s nested flat
 >    `n⁶`). It rules out exponentials; it does **not** establish 13 as the algorithm's true degree.
 >    Stated at source in `Publication.lean`'s `costConst`/`costDeg` block.
+>    ⛔ **But do NOT infer "so tighten those four" — computed 2026-08-08, none of them moves either
+>    numeral.** `costConst` is the bound polynomial at `n = 1`, and `costDeg` is set by the single
+>    term `(n+1)·n·(n·kc)`. The **only** lever is `Deck2.deck2Supply`'s declared charge (→ 11 / 65).
+>    See the `W-j` block below.
 > 2. **`③`'s residue is an over-approximation.** `¬ TinhoferGraph` counts CFI graphs as residual
 >    although their obstruction is *linear* and belongs to the rigid resolver. Narrowing it is W2.
 >    The claim is *"a flag means a real structural obstruction"*, never *"a flag means hardness"*.
 >
 > ### ▶ What is left
-> **W-j** (below, next) · **W2** (CFI `Handled` — progress, not completion; ⛔ **re-scoped
-> 2026-08-08, its recorded route points at the wrong object** — read the correction block in §2 W2
-> before starting) · **W3** (extraction) · **W4** (write-up) · **W5** (archive).
+> **W2** (CFI `Handled` — progress, not completion; ⛔ **re-scoped 2026-08-08, its recorded route
+> points at the wrong object** — read the correction block in §2 W2 before starting) · **W3**
+> (extraction) · **W4** (write-up) · **W5** (archive). **`W-j` is ✅ LANDED** (below).
 >
-> ### ▶▶ `W-j` — the two recomputations still inside every probed cell (2026-08-08, MEASURED)
+> ### ✅ `W-j` — LANDED 2026-08-08, `SelectCell.lean` §8 + `RecordDeepenCell.lean` §5
 > The per-cell plan's *"nothing outstanding"* was right about its own scope and wrong as a statement
-> about the object's runtime. `Select.probeWalk` is correct and the laziness works, but per **probed
-> cell** it still:
-> * evaluates the record key **three times per vertex** — once for the bill
+> about the object's runtime. `Select.probeWalk` was correct and the laziness worked, but per
+> **probed cell** it still:
+> * evaluated the record key **three times per vertex** — once for the bill
 >   (`(cellList χ c).map (keyCost key adj χ)`) and twice inside `Force.keepMin` (`kmin?` over
 >   `B.map keyV`, then `B.filter (keyV · = m)`). `keyCost`/`keyV` are `.2`/`.1` of the *same* strict
->   pair, so each is a full key computation and Lean shares nothing across them;
-> * re-harvests the **cell-independent** left factor `RecordCost.recordSupplyFast` and re-runs its
+>   pair, so each was a full key computation and Lean shares nothing across them;
+> * re-harvested the **cell-independent** left factor `RecordCost.recordSupplyFast` and re-ran its
 >   `IsColAut` filter, because `S c = recordSupplyFast ++ deepenCellSupply c` is evaluated whole.
 >
 > ⚠ The **same** double-evaluation is in the node-global `selNode`/`selNodeFast`, over *every* cell —
-> so this is not a cost of the per-cell design, and the recorded per-cell-vs-node-global comparisons
-> are both paying it.
+> so this was never a cost of the per-cell design, and the recorded per-cell-vs-node-global
+> comparisons are both paying it. (`selNode` is **not** changed by `W-j`; only the cell-indexed
+> object was repointed.)
 >
-> **Measured** (`scratchpad/ProbeShareWalk.lean` / `ProbeShareWalk6.lean`): a variant that evaluates
-> the key **once** into a `(vertex, value, cost)` table and hoists the left factor, with the bill left
-> byte-identical:
+> | built | where | what |
+> |---|---|---|
+> | `Select.keyTable` / `keepMinT` / `keepMinT_keyTable` / `keyTable_cost` | `SelectCell` §8 | the key evaluated **once** per vertex, read by the bill *and* the argmin |
+> | `Select.SplitSupply` | ” | the supply's node-level / cell-level split, stated as a property so the file needs no new import; the endgame instance is `rfl` |
+> | **`Select.probeWalkH`** + **`probeWalkH_eq`** | ” | the hoisted walk, and the proof that it **is** `probeWalk` at the composed supply — both components |
+> | `Select.selNodeLazyHC` / `canonFormLazyHSC?` / their `_eq`s | ” | the resolver and top level |
+> | `RecordDeepenCell.splitSupply_recordSupplyDeepenC` (`rfl`) · `canonFormFast` · `costFast` · **`costFast_eq`** | `RecordDeepenCell` §5 | the endgame object repointed |
 >
-> | graph | ns-cells | built `selNodeLazyC` | shared-key + hoisted | billed cost |
+> ★ **Because the bill is unchanged, `probeWalkH_eq` is an equation, not an inequality** — `①`, `②`
+> and `③` all transfer by `rw` and **`costConst`/`costDeg` do not move** (69 / 13).
+> Gate **exit 0, 228 s, 119 modules**; `Publication.lean` unchanged in substance and still zero
+> `sorry` / zero custom axioms; all new declarations axiom-clean.
+>
+> | graph | ns-cells | before `W-j` | after `W-j` | billed cost |
 > |---|---|---|---|---|
-> | `C₅` (n=5) | 1 | 27.6 s | **20.7 s** (1.34×) | 5 212 728 — **identical** |
-> | `K₁,₂,₃` (n=6) | 2 | 74.4 s | **50.2 s** (1.48×) | 20 321 716 — **identical** |
+> | `C₅` (n=5) | 1 | 27.6 s | **20.8 s** (1.33×) | 5 212 728 — **identical** |
+> | `K₁,₂,₃` (n=6) | 2 | 74.4 s | **50.4 s** (1.48×) | 20 321 716 — **identical** |
 >
 > At one cell the gain is entirely key-sharing; the supply hoist only starts paying from two cells and
 > scales with the number of cells **probed**.
-> ★ **The proof shape is the easiest in the family**: children unchanged ⟹ `①` free via the existing
-> `Select.descendS_val_congr`; the bill is *equal*, not merely `≤` ⟹ `②` is `le_of_eq` into
-> `descentCostS_selNodeLazyC_le`, **no `ring`, no numeral change**. The rewrites needed are
-> `List.map_map` and `List.filter_append`.
-> ★★ **And the honest-billing variant is worth taking with it**: charging the record harvest **once
-> per node** instead of once per cell removes one of the four named over-billings (`selProbeBoundC`
-> charging every cell the maximum `sB`), dropping the record term from `n^10` to `n^9`. That should
-> give back most of the `+8` that took `costConst` 57 → 69, with `costDeg` unchanged — i.e. it
-> tightens `②` and speeds the object up in the same edit. That variant *does* need a `ring` recompute.
 >
-> ★ One **open measurement**, worth having before W4 quotes any performance number: the lazy walk's
-> win was measured only at 1–2 non-singleton cells. `probe_offbranch5`'s depth-1 CFI nodes carry
+> ### ⛔⛔ AND `W-j` KILLED ITS OWN FOLLOW-UP — THE `②`-TIGHTENING ADVICE ON RECORD IS WRONG
+> ~~"the honest-billing variant (charge the record harvest once per **node**) tightens `②`, giving
+> back most of the `+8` that took `costConst` 57 → 69"~~ — **FALSE, computed against
+> `recordDeepenBound_expand`'s own polynomial.** So is the older advice in §2a's caveat 1 and in
+> `Publication.lean`, *"tightening starts with billing the harvest as `|cell|²·n⁴`."*
+>
+> Two structural facts, and they prune the whole search:
+> * **`costConst` is the bound polynomial at `n = 1`** (it *is* the coefficient sum). Moving a factor
+>   of `n` in or out — which is exactly what per-node vs per-cell billing does — **cannot change it**,
+>   however much the polynomial improves for `n ≥ 2`.
+> * **`costDeg` is set by one term**, `(n+1) · n · (n · kc)` with `kc = RecordKey.recordKeyBound`.
+>   Set `kc := 0` and the whole bound is degree **11** — so no consume-side or guard-side charge can
+>   move the degree at all.
+>
+> Measured effect on `(costDeg, costConst)`:
+>
+> | change | result |
+> |---|---|
+> | harvest billed `\|cell\|² · n⁴` instead of flat `n⁶` | **13 / 69 — no change** |
+> | `goodCellCost`'s nested flat `n⁶` → `n⁴` | **13 / 69 — no change** |
+> | `holKeyFast` flat `n⁵` → `n⁴` | **13 / 69 — no change** |
+> | record supply billed once per node (`W-j2`) | **13 / 69 — no change** |
+> | **`Deck2.deck2Supply`'s declared `n²(1+n²)·n⁵` → `n⁷`** | ★ **11 / 65** |
+>
+> ⟹ **the single lever is `Deck2.deck2Supply`'s declared per-node charge.** Chain: `deck2` `n⁹` →
+> `RecordKey.guardSupplyBound` `n⁹` → `recordKeyBound = … + n·guardSupplyBound` `n¹⁰` →
+> `selProbeBoundC`'s `n·(n·kc)` `n¹²` → `(n+1)·` → **`n¹³`**. The charge is
+> `|branches|² · (1 + n²) · n⁵` at `|branches| ≤ n`; tightening it means carrying the branch-cell
+> size `m`, which is a real derivation, not a re-bracketing. **Recorded at source in
+> `Publication.lean`'s `costConst`/`costDeg` block. `W-j2` is DEAD — do not build it.**
+>
+> ★ One **open measurement**, worth having before W4 quotes any performance number: the walk's win
+> was measured only at 1–2 non-singleton cells. `probe_offbranch5`'s depth-1 CFI nodes carry
 > **28/28/24/26/14/10/14** cells, where the ceiling should be far higher — unverified. `W-j`'s hoist
-> is the part that scales with that number, so measure after it lands, not before.
+> is the part that scales with that number, so it is now worth measuring.
 >
 > ### Reading order for a fresh pickup
 > 1. This block, then §2a's `Publication.lean` state table and the **eight corrections** below.
@@ -763,14 +801,14 @@ supersedes items 0–1 here.
 | **`①` on the class (force)** | `RestrictedTransport.lean` | **`canonizes_on_tinhofer` + `descentCost_on_tinhofer` — the transport spine relativized to (graph class) × (reached colourings), discharged at `forceThenPick` with NO supply. Additive: `Descend.lean` untouched.** |
 | **R1, scoped** | `DeepenComplete.lean` | `GoodAnchor` (the per-anchor condition actually consumed) · **`OrbitComplete`** (the target) · `deepenSupply_canonizer_of_orbitComplete` (`①c` for the raw supply from it alone) · **§5 `orbitComplete_of_good_or_trivial`** + `goodAnchor_transport` |
 | **`①` on the class (deepen)** | `DeepenTransportOn.lean` | **`canonizes_on_orbitComplete` — the same relativization at the guarded mixed resolver; §7 `deepen_object_package` = option (v), all four obligations at ONE executable object** |
-| **the cell-indexed spine** | `SelectCell.lean` | `CellSupply`/`selNodeC`/**`CellOrbitTransport`** (replaces `SupplyEquivariant`) · §4 the stall/`HandledSC`/answers mirror · §5 `②`'s per-node bill · §6 the eager runnable twin · §7 **lazy billing** (`probeWalk`/`selNodeLazyC`) + lemmas A (`find?_sort_eq_min`) and B (`descendS_val_congr`) |
+| **the cell-indexed spine** | `SelectCell.lean` | `CellSupply`/`selNodeC`/**`CellOrbitTransport`** (replaces `SupplyEquivariant`) · §4 the stall/`HandledSC`/answers mirror · §5 `②`'s per-node bill · §6 the eager runnable twin · §7 **lazy billing** (`probeWalk`/`selNodeLazyC`) + lemmas A (`find?_sort_eq_min`) and B (`descendS_val_congr`) · §8 **`W-j`** (`keyTable`/`probeWalkH`/**`selNodeLazyHC`** — the published resolver; key evaluated once per vertex, node-level supply factor once per node, bill unchanged) |
 | **the cell-anchored harvest** | `DeepenCell.lean` | `deepenGensOn` · **`GoodCell`** (decidable, *unconditionally* invariant) · §7a **`goodCellCost_bounds_guard`** — the guard is billed, not declared |
 | **★ THE PUBLISHED OBJECT** | `RecordDeepenCell.lean` | **`recordDeepenCell_full_fast` = `①` ∧ `②` ∧ `③` at one runnable object.** `W-d′` rides `Kernel.sameOrbits_recordSupply`; `③` rides `goodCell_of_tinhofer` |
 
 ### ⚠ EIGHT OBJECTS — do not mix them up when writing
 | object | executable | `①` | `②` | `③` | named coverage |
 |---|---|---|---|---|---|
-| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeLazyC`** (`RecordDeepenCell`) | ✅ **runnable and measured** — `canonFormFast`/`costFast`; `C₅` 34 s, `K₁,₂,₃` 87 s | ✅ **global, no hypothesis** | ✅ **`69·(n+1)^13`**, every input, no flag disjunct ⚠ see the accounting caveat | ✅ **every key** | ★★★ every Tinhofer graph — **THE OBJECT `Publication.canonForm?` IS**, all three at once (`recordDeepenCell_full_fast`) |
+| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeLazyHC`** (`RecordDeepenCell`) | ✅ **runnable and measured** — `canonFormFast`/`costFast`; `C₅` **20.8 s**, `K₁,₂,₃` **50.4 s** (after `W-j`) | ✅ **global, no hypothesis** | ✅ **`69·(n+1)^13`**, every input, no flag disjunct ⚠ see the accounting caveat | ✅ **every key** | ★★★ every Tinhofer graph — **THE OBJECT `Publication.canonForm?` IS**, all three at once (`recordDeepenCell_full_fast`) |
 | `recordKey @ recordSupplyFast` (`Publication.lean` today) | ✅ | ✅ global | ✅ | ❌ open | **none** |
 | `key @ recordSupplyFast ++ deepenSupplyCert` at `selNode` (`RecordDeepen`) | ✅ | ⛔ **measured false** (`probe_offbranch2/3`) | — | ✅ every key | every Tinhofer graph — ⚠ **`③` only; not publishable, `①` cannot be had here** |
 | `holKeyFast @ twinSupply` (`TwinFamily` §8) | ✅ | ✅ global | ✅ | — | complete multipartite, distinct part sizes |
@@ -796,8 +834,9 @@ statement (every key), rows 6–7 are `noncomputable` and **must not appear in a
 | `probe_selfsep.py` → `probe_selfsep.out` | ⛔ *"mixed orbits identify each other"* **refuted as the explanation** — `circ(5)` is exact with M1 15/20, M2 10/20. ⚠ rigid-multipede rows are **vacuous** passes (`non-vacuous-x = 0/4`) |
 | `probe_union_need.py` → `probe_union_need.out` | ★★ **BAD-BIG = 0, covered-by-§5 = Y, orbit-uniform = Y on 13/13** ⟹ **no union phenomenon to prove**; and an empirical confirmation of `goodAnchor_transport` |
 | Lean `#eval` (2026-08-04) | the **record object answers** on `C₅ C₆ P₅ K₅ 3K₂ K₁,₂,₃ K₃⊔C₄` (7/7) ⟹ no falsifier of `③` at the record object; option (ii) is open, not dead |
-| Lean `#eval` (2026-08-08) — **the published object** | `RecordDeepenCell.canonFormFast` answers on `K₂`, `C₅`, `K₁,₂,₃`; `costFast` = **1606 / 5 212 728 / 20 321 716**, wall **— / 34 s / 87 s**. Reproduce with a two-line file: `import ChainDescent.RecordDeepenCell` then `#eval (RecordDeepenCell.canonFormFast (n := 6) (TwinFamily.mpAdj TwinFamily.part123)).isSome` and the same at `costFast`; run `lake env lean <file>` from `GraphCanonizationProofs/`. ⚠ At the `Showcase` names instead, copy `Publication.lean` and append the `#eval`s — it is not a library module, so `import Publication` fails |
-| lazy vs eager vs node-global (2026-08-08) | `K₁,₂,₃`: lazy **20 321 716 / 87 s** · eager cell-indexed 38 212 276 / 210 s · node-global `selNodeFast` 25 346 020 / 148 s ⟹ **2.4× / 1.7× faster**, 20 % less billed than node-global. ⚠ Only 1–2 non-singleton cells exercised; the 28-cell CFI case is **unmeasured** |
+| Lean `#eval` (2026-08-08) — **the published object** | `RecordDeepenCell.canonFormFast` answers on `K₂`, `C₅`, `K₁,₂,₃`; `costFast` = **1606 / 5 212 728 / 20 321 716**, wall **— / 20.8 s / 50.4 s** (after `W-j`; 34 s / 87 s before it — the *billed* values are unchanged by `W-j`). It also answers on **`K₃ ⊔ C₄`**, the residual witness, which is expected: `③` bounds what is *proved*, not what the object can do. Reproduce with a two-line file: `import ChainDescent.RecordDeepenCell` then `#eval (RecordDeepenCell.canonFormFast (n := 6) (TwinFamily.mpAdj TwinFamily.part123)).isSome` and the same at `costFast`; run `lake env lean <file>` from `GraphCanonizationProofs/`. ⚠ At the `Showcase` names instead, copy `Publication.lean` and append the `#eval`s — it is not a library module, so `import Publication` fails |
+| lazy vs eager vs node-global (2026-08-08) | `K₁,₂,₃`: lazy **20 321 716 / 87 s** · eager cell-indexed 38 212 276 / 210 s · node-global `selNodeFast` 25 346 020 / 148 s ⟹ **2.4× / 1.7× faster**, 20 % less billed than node-global. ⚠ Only 1–2 non-singleton cells exercised |
+| `W-j` — key shared + left factor hoisted (2026-08-08) | `scratchpad/ProbeShareWalk*.lean` predicted it, `ProbeWjMeasure.lean` confirms it at the shipped definitions: `C₅` 27.6 s → **20.8 s** (1.33×), `K₁,₂,₃` 74.4 s → **50.4 s** (1.48×), **billed costs byte-identical** (5 212 728 / 20 321 716). ⚠ The *hoist* half only pays where several cells are probed, i.e. where early cells fail to fire; no small library witness has that shape |
 
 ⚠ Read each probe's header before quoting a number — the soundness discipline (positive certificates
 only, `None` ≠ `False`, the orbit-reduction licence, ⛔ never `probe_orbit_oracle`) is recorded there.
