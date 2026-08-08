@@ -136,6 +136,9 @@ transfer). "Complete" = the flag provably never fires.
 >   cost projection of the same definition `①` rides on.
 > · **`canon_poly_or_flag` is proved on its LEFT disjunct** — no flag escape is used, because the
 >   fan-out bound is structural (`selNode_children_length_le_one`) and every component is billed.
+>   ⛔ **SUPERSEDED 2026-08-08** — `Publication` now pins `RecordDeepenCell.costConst = 69` /
+>   `costDeg = 13` at the cell-indexed object; the degree did not move. The line below describes
+>   `RecordKey`'s object, which is no longer the published one.
 >   Numerals: **`costConst = 57`, `costDeg = 13`** (`costConst` was 53 until `Deepen.stepCost` was
 >   billed, 2026-08-06), and neither is asserted —
 >   **`RecordKey.recordKeyBound_expand`** has `ring` check that §4a's bound polynomial has degree 13

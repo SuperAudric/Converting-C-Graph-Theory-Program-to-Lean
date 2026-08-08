@@ -294,14 +294,14 @@ theorem recordDeepenBound_expand (n : Nat) :
     Deepen.goodCellCost, Deepen.stepCost]
   ring
 
-/-- **★★★ `②` IN THE PUBLICATION SHAPE** — the endgame object runs within `69 * (n + 1) ^ 13` on
-**every** input, with no hypotheses and no flag disjunct. -/
-theorem descentCostSC_recordDeepen_monomial (adj : AdjMatrix n) :
-    Select.descentCostS (Refine.encodeFreeFast (n := n))
-        (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
-          (recordSupplyDeepenC (n := n))) adj
+/-- §4's sum bound is dominated by the pinned monomial — shared by the eager and the lazy object.
+⟹ **the endgame object runs within `69 * (n + 1) ^ 13` on every input**, no hypotheses, no flag
+disjunct. -/
+theorem bound_le_monomial (n : Nat) :
+    n * n * n + (n + 1)
+        * (1 + (Select.selProbeBoundC n (recordDeepenSupplyBound n) (recordDeepenGensBound n)
+            (RecordKey.recordKeyBound n) + n * n * n))
       ≤ costConst * (n + 1) ^ costDeg := by
-  refine le_trans (descentCostSC_recordDeepen_le adj) ?_
   rw [recordDeepenBound_expand n]
   simp only [costConst, costDeg]
   have H : ∀ k : Nat, k ≤ 13 → n ^ k ≤ (n + 1) ^ 13 := fun k hk =>
@@ -314,6 +314,14 @@ theorem descentCostSC_recordDeepen_monomial (adj : AdjMatrix n) :
   have e1 : n ≤ (n + 1) ^ 13 := by simpa using H 1 (by omega)
   have e0 : 1 ≤ (n + 1) ^ 13 := by simpa using H 0 (by omega)
   omega
+
+/-- **★★★ `②` IN THE PUBLICATION SHAPE**, at the eager object. -/
+theorem descentCostSC_recordDeepen_monomial (adj : AdjMatrix n) :
+    Select.descentCostS (Refine.encodeFreeFast (n := n))
+        (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+          (recordSupplyDeepenC (n := n))) adj
+      ≤ costConst * (n + 1) ^ costDeg :=
+  le_trans (descentCostSC_recordDeepen_le adj) (bound_le_monomial n)
 
 /-- **★★★ `①` ∧ `②` ∧ `③` AT ONE OBJECT** — every obligation `Publication.lean` states, all of them
 properties of the *same* canonizer, all axiom-clean, `①` and `②` unconditional and `③` at the tight
@@ -337,48 +345,54 @@ theorem recordDeepenCell_full :
   ⟨recordDeepenCell_canonizer, descentCostSC_recordDeepen_monomial,
    fun _ hflag => not_tinhoferGraph_of_flag hflag⟩
 
-/-! ## 5. `W-i` — THE RUNNABLE FORM
+/-! ## 5. `W-i` + `W-e` — THE RUNNABLE, LAZILY-BILLED FORM
 
-`Select.selNodeFastC` evaluates each cell's supply **once** per node (the shared `cellData` table)
-and builds the children through `Refine.ColData`, curing traps #2 and #1 respectively. It is
-`Select.selNodeFastC_eq`-equal to `selNodeC`, so every capstone above transfers by rewriting —
-⚠ a **proved** equation, not `rfl` (the table returns `[]` off `nsColours χ`; see `SelectCell` §6). -/
+Two runnable forms exist and the endgame uses the second.
 
-/-- **The runnable endgame canonizer.** -/
+* **`W-i`, `Select.selNodeFastC`** — one shared `cellData` table, so each cell's supply is evaluated
+  once per node, and children built through `Refine.ColData` (traps #2 and #1).
+* **`W-e`, `Select.selNodeLazyC`** — strictly better: it walks the cells in **increasing colour
+  order**, evaluating and billing each on demand, and **stops at the first that fires**, returning
+  that cell's narrowing so the committed cell is never re-probed. On a node whose least colour fires
+  it touches **one** cell instead of all of them.
+
+⚠ Laziness had to reach the **billing**: `selProbeCostC` sums over every cell, so a lazy *selector*
+alone would have saved nothing (`SelectCell` §7). The lazy resolver therefore returns a **smaller
+cost** — which is why `②` goes through `probeWalk_bill_le` into the *existing* `selProbeCostC_le`
+rather than needing new numerals, and why `①` goes through `descendS_val_congr` (the children are
+unchanged; `NodeTransport` reads only `.1`). -/
+
+/-- **The runnable endgame canonizer** — lazily billed. -/
 def canonFormFast (adj : AdjMatrix n) : Option (CanonSpec.Labelled n) :=
-  Select.canonFormFastSC? (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n)) adj
+  Select.canonFormLazySC? (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n)) adj
 
 /-- …and its cost. -/
 def costFast (adj : AdjMatrix n) : Nat :=
   Select.descentCostS (Refine.encodeFreeFast (n := n))
-    (Select.selNodeFastC (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n))) adj
+    (Select.selNodeLazyC (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n))) adj
 
 theorem canonFormFast_eq :
     canonFormFast (n := n)
       = Select.canonFormS? (Refine.encodeFreeFast (n := n))
           (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
             (recordSupplyDeepenC (n := n))) :=
-  Select.canonFormFastSC?_eq _ _
+  -- `canonFormFast = canonFormLazySC? … = canonFormS? … (selNodeLazyC …)` is all `rfl`; the one
+  -- real step is `canonFormS?_selNodeLazyC_eq`, i.e. lemma B.
+  Select.canonFormS?_selNodeLazyC_eq _ _
 
-theorem costFast_eq (adj : AdjMatrix n) :
-    costFast adj
-      = Select.descentCostS (Refine.encodeFreeFast (n := n))
-          (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
-            (recordSupplyDeepenC (n := n))) adj :=
-  Select.descentCostSC_fast_eq _ _ adj
-
-/-- **★★★ `①` ∧ `②` ∧ `③` AT THE RUNNABLE OBJECT.** `recordDeepenCell_full` transported along
-`canonFormFast_eq` / `costFast_eq` — same object, stated at the definitions that actually execute.
-This is the exact triple `Publication.canonForm?` / `Publication.cost` are to be repointed at. -/
+/-- **★★★ `①` ∧ `②` ∧ `③` AT THE RUNNABLE, LAZILY-BILLED OBJECT.** `①` and `③` transport along
+`canonFormFast_eq`; `②` is re-derived at the lazy bill and lands on the **same** monomial. -/
 theorem recordDeepenCell_full_fast :
     CanonSpec.IsCanonicalFormOpt (canonFormFast (n := n))
     ∧ (∀ adj : AdjMatrix n, costFast adj ≤ costConst * (n + 1) ^ costDeg)
     ∧ (∀ adj : AdjMatrix n, canonFormFast adj = none → ¬ TwinFamily.TinhoferGraph adj) := by
-  obtain ⟨h1, h2, h3⟩ := recordDeepenCell_full (n := n)
-  refine ⟨?_, ?_, ?_⟩
-  · rw [canonFormFast_eq]; exact h1
-  · intro adj; rw [costFast_eq]; exact h2 adj
-  · intro adj; rw [canonFormFast_eq]; exact h3 adj
+  obtain ⟨h1, _h2, h3⟩ := recordDeepenCell_full (n := n)
+  refine ⟨by rw [canonFormFast_eq]; exact h1, fun adj => ?_,
+    fun adj hf => h3 adj (by rw [canonFormFast_eq] at hf; exact hf)⟩
+  exact le_trans (Select.descentCostS_selNodeLazyC_le
+    (fun c χ => supplyCost_recordSupplyDeepenC_le adj χ c)
+    (fun c χ => gens_recordSupplyDeepenC_length_le adj χ c)
+    (fun χ v => RecordKey.keyCost_recordKey_le adj χ v)) (bound_le_monomial n)
 
 /-- **★★★ `①` ∧ `③` AT ONE OBJECT**, at the record key. -/
 theorem recordDeepenCell_record :

@@ -1,11 +1,19 @@
-# PER-CELL CONSUME — the plan for closing `Publication.residue_if_flag`
+# PER-CELL CONSUME — how `Publication.residue_if_flag` was closed
 
-> # ✅✅✅ CLOSED 2026-08-08 — `Publication.lean` HAS ZERO `sorry` AND ZERO CUSTOM AXIOMS
+> # ✅✅✅ COMPLETE 2026-08-08 — this is now a DESIGN RECORD, not a plan
+> **Every item (W-a … W-i) is done and `Publication.lean` has zero `sorry` and zero custom axioms.**
 > `canonForm?` = `RecordDeepenCell.canonFormFast`, `cost` = `costFast`, `costConst`/`costDeg` = 69/13,
-> and `residue_if_flag` = `recordDeepenCell_full_fast.2.2`. All seven headline theorems print exactly
+> `residue_if_flag` = `recordDeepenCell_full_fast.2.2`. All seven headline theorems print exactly
 > `[propext, Classical.choice, Quot.sound]`, all of them properties of **one** object, and that object
-> `#eval`s (answers on `K₂` and `K₁,₂,₃`; `cost` 1606 and 38 212 276).
-> **Only `W-e` (lazy `selColourC`) remains from this plan, and it is a runtime nicety.**
+> `#eval`s: answers on `K₂`, `C₅` and `K₁,₂,₃`, with `cost` **1606** / **5 212 728** / **20 321 716**.
+>
+> ▶ **Read it for *why the supply had to be cell-indexed*** — §1 (the defect), §3 (the CFI falsifier),
+> §3a (witness vs relation). §2, §6, §7 and §10 carry the **retractions**, which is the other reason
+> to keep it. The ordered work list in §5 is a record of what was built and in what order.
+>
+> ▶ **The one thing still open here is a MEASUREMENT, not a proof**: the lazy walk's win was measured
+> at 1–2 non-singleton cells only. `probe_offbranch5`'s depth-1 CFI nodes carry 28/28/24/26/14/10/14
+> cells, where the ceiling should be far higher. Worth having before W4 quotes a performance number.
 
 **Rewritten 2026-08-07** after five probes and a user coverage probe; **extended later the next day**
 with the *witness-vs-relation* diagnosis (§3a) and a **second candidate design `C`** that keeps the
@@ -42,8 +50,9 @@ harvest half survives, **the all-cells guard is RETRACTED** (§2).
 > ★★★ **ALL THREE OBLIGATIONS NOW HOLD OF THE SAME OBJECT, with `①` and `②` unconditional and `③`
 > at the tight residue `¬TinhoferGraph`** — the combination wind-down option (v) could not have (its
 > `①b`/`①c` are class-only) and option (iv) could not have (its residue is not `¬Tinhofer`).
-> **Nothing mathematical is left**: what remains is the runnable `rfl`-twin (**W-i**), the repoint
-> (**W-g**) and laziness (**W-e**). See §5.
+> ✅ **And all of `W-i`, `W-g` and `W-e` landed the same day** — the object is runnable and lazily
+> billed, and `Publication.canonForm?`/`cost` **are** it. **Nothing in this plan is outstanding.**
+> See §5.
 >
 > ⛔ **Four claims in this plan were wrong and are corrected in place** — §6's cost neutrality
 > (the supply terms gain a factor `n`, `le_rfl` fails, *and* trap #2 does bite after all), §7's
@@ -313,8 +322,8 @@ obligation. W-a, W-e, W-f, W-g are common to both.
 
 > ### ▶▶ ORDER, REVISED 2026-08-08 (and the two items that were missing)
 >
-> **Done:** W-b ✅ · W-c ✅ · W-d ✅ · **W-d′ ✅** · **③ mirror ✅** · **W-h + W-a + W-f ✅** ·
-> **W-i ✅** · **W-g ✅**. **Remaining: W-e only** (lazy `selColourC`), a runtime nicety.
+> **Done — the whole list:** W-b ✅ · W-c ✅ · W-d ✅ · **W-d′ ✅** · **③ mirror ✅** ·
+> **W-h + W-a + W-f ✅** · **W-i ✅** · **W-g ✅** · **W-e ✅**.
 >
 > ⛔ **W-a is no longer "do this first".** Its stated reason — *"before `②` becomes a claim that has
 > to be walked back"* — does not apply: the **current** `Publication.canon_poly_or_flag` is at a
@@ -461,7 +470,11 @@ per-cell supply billing and **+4** from the guard.
 ★ It also confirms `GoodCell`'s decidability is genuinely **computable**: nothing `noncomputable`
 entered with the guard.
 
-### W-i. The runnable twin — ✅ **LANDED 2026-08-08, `SelectCell.lean` §6 + `RecordDeepenCell.lean` §5**
+### W-i. The runnable twin — ✅ **LANDED 2026-08-08, `SelectCell.lean` §6**
+> ⚠ **Superseded for the published object by `W-e`'s `selNodeLazyC`** (next entry), which is strictly
+> better: it does everything `selNodeFastC` does *and* stops at the first firing cell.
+> `selNodeFastC`/`canonFormFastSC?` remain in the library as the eager reference, and the numbers
+> below are the baseline `W-e` is measured against.
 `selNodeC` was the **slow** shape, with both standing traps live: it stored a generic
 `refineV rf …` (trap #1 — re-runs the refinement on every colour lookup, ≈30 ms at `n = 14`,
 `SelectNode.lean:387-392`) and it evaluated `S c adj χ` **three** times per cell (trap #2 — once in
@@ -516,41 +529,53 @@ consumed them.
 degree is a **bound from declared flat charges, not a measurement** (§6), and `③`'s residue is an
 **over-approximation** (CFI graphs are counted residual though their obstruction is linear).
 
-### W-e. Lazy evaluation — ⏸ **SET ASIDE 2026-08-08, and RE-SCOPED: it is not what this entry said**
+### W-e. Lazy **billing** — ✅ **LANDED 2026-08-08, `SelectCell.lean` §7 + `RecordDeepenCell.lean` §5**
 
-⛔⛔ **The proposal was wrong twice over, and the second error is the one that matters.**
+⛔⛔ **The entry that stood here was wrong twice over, and the second error was the load-bearing one.**
 
-1. *(recorded earlier)* `nsColours χ` is `((List.finRange n).map χ).dedup.filter …` — **first-occurrence
-   order, not sorted** — so `List.find?` over it returns the first *encountered* firing colour, not the
-   minimum, and the `= selColourC` lemma is **false**. ✅ Cheap fix: iterate
-   `Finset.sort (· ≤ ·) (nonSingletonColours χ)` instead, which brings `Finset.sort_sorted` /
-   `sort_nodup` / `mem_sort` for free and removes all `mergeSort` API risk.
+1. `nsColours χ` is `((List.finRange n).map χ).dedup.filter …` — first-occurrence order, **not
+   sorted** — so `List.find?` over it returns the first *encountered* firing colour, not the least,
+   and the `= selColourC` lemma is **false**. ✅ Fixed by walking
+   `Finset.sort (· ≤ ·) (nonSingletonColours χ)`, which brings `Finset.pairwise_sort` /
+   `sort_nodup` / `mem_sort` and removes all `mergeSort` API risk.
+2. ⛔⛔ **A lazy *selector* buys NOTHING** — verified in source. `selProbeCostC` sums over **all** of
+   `nsColours χ`, and `selNodeFastC` builds the whole `cellData` table and its bill *before*
+   `selColourT` runs, so the returned **cost** already forces every cell's supply. Laziness had to
+   reach the **billing**.
 
-2. ⛔⛔ **A lazy *selector* buys NOTHING.** Verified in the source, not argued: the returned **cost**
-   already forces every cell. `Select.selProbeCostC` sums `supplyCost (S c) + |gens (S c)|·n² + … +
-   |cell|·(|verified (S c)|·n² + …)` over **all** of `nsColours χ`, and `selNodeFastC` builds the whole
-   `cellData` table and `pc` from it **before** `selColourT` is ever called. Short-circuiting the
-   selector after that point saves nothing at all.
+**What was built.** `Select.probeWalk` walks the cells in increasing colour order, evaluates and
+bills each on demand, and stops at the first that narrows to `≤ 1` — returning that cell's narrowing,
+so the committed cell is never re-probed. `Select.selNodeLazyC` is the resolver;
+`canonFormLazySC?` the runnable top level.
 
-⟹ **The real W-e is a lazy-BILLING resolver**, which is a different and much larger piece:
-
-| piece | size / risk |
+| lemma | what it does |
 |---|---|
-| `probeWalk` over `Finset.sort (· ≤ ·) (nonSingletonColours χ)` — evaluate each cell's supply **on demand**, accumulate its bill, stop at the first cell that narrows to `≤ 1` | new recursive def |
-| **A.** walk-result `= selColourC` — for a sorted nodup list whose members are `s`, `find? p = (s.filter p).min` (via `List.find?_eq_some_iff_append` + `List.sorted_append` + `Finset.min_le`/`le_min`) | ~40 lines, the one real lemma |
-| **B.** `descendS`'s **value** projection depends only on the resolver's `.1` | ~15 lines, induction. ★ Needed to inherit `①` for free — `Select.NodeTransport`/`NodeTransportAt` are stated **purely on `.1`** (checked), so a resolver with the same children and a smaller bill keeps `①` unchanged |
-| **C.** walked bill `≤ selProbeCostC` — a prefix-sublist of a permutation of `nsColours χ`, all terms in `ℕ` | ~20 lines; then `②` reuses `selProbeCostC_le` with one `le_trans`, **no new numerals** |
-| repoint `Publication.canonForm?`/`cost` again + re-measure | mechanical, but it moves the deliverable a second time |
+| **A** `find?_sort_eq_min` | over a **sorted** list of a finset's elements, `List.find?` **is** `Finset.min` of the filter — this is what licenses stopping early |
+| **B** `descendS_val_congr` | `descendS`'s **value** depends on the resolver only through its `.1` ⟹ `①` transfers for free, because `NodeTransport`/`NodeTransportAt` read only `.1` |
+| **C** `probeWalk_bill_le` | the walked bill is a sub-sum ⟹ `②` rides the **existing** `selProbeCostC_le`, **no new numerals** — `costConst`/`costDeg` stay 69 / 13 |
+| | `probeWalk_choice` ties A to `selColourC`; `sort_nonSingletonColours_perm` is the perm that makes C's sums line up |
 
-★ **Payoff, from the project's own measurements.** `probe_offbranch5`'s depth-1 CFI nodes have
-**28, 28, 24, 26, 14, 10, 14** non-singleton cells; laziness stops at the first firing colour, so the
-ceiling is roughly that count — **up to ~10–28× wall clock on exactly the inputs the artifact wants to
-demo**. On the small witnesses it is 1–2× (`C₅` has 1 non-singleton cell, `K₁,₂,₃` has 2), which is why
-the numbers measured in W-i do **not** show it.
+★★★ **MEASURED — and it beats the node-global object it was supposed to cost more than.** Clean,
+separate runs; `#eval` of `descentCostS`.
 
-▶ **Deferred as a performance item, not an obligation.** `①`/`②`/`③` are closed and unaffected; `②`'s
-bound already charges for every cell, so lazy billing can only make the true cost *smaller* than the
-proved ceiling. Pick it up with lemma **A** first — if that goes, the rest is mechanical.
+| graph | ns-cells | object | billed cost | wall |
+|---|---|---|---|---|
+| `C₅` (n=5) | 1 | `selNodeFastC` (eager) | 5 999 428 | 41 s |
+| `C₅` | 1 | **`selNodeLazyC`** | **5 212 728** | **34 s** |
+| `K₁,₂,₃` (n=6) | 2 | `selNodeFastC` (eager) | 38 212 276 | 210 s |
+| `K₁,₂,₃` | 2 | `selNodeFast` (node-global) | 25 346 020 | 148 s |
+| `K₁,₂,₃` | 2 | **`selNodeLazyC`** | **20 321 716** | **87 s** |
+
+★ On `K₁,₂,₃`: **2.4× faster than the eager cell-indexed object and 1.7× faster than the node-global
+one**, billing 20 % less than node-global. The per-cell design is no longer paying a premium at all.
+★ Even at **one** cell (`C₅`) it wins, because the walk returns the committed cell's narrowing
+instead of recomputing it — a duplication `selNodeFastC` inherited from `selNodeFast`.
+⚠ The ceiling estimated when this was deferred (~10–28× on CFI nodes with 28/24/26 cells) is **not
+measured** — two cells is the largest case run.
+
+★ `Publication.lean` needed **no change**: `canonForm?`/`cost` are defined as
+`RecordDeepenCell.canonFormFast`/`costFast`, which now *are* the lazy object. Still zero `sorry`,
+zero custom axioms.
 
 ---
 
@@ -619,7 +644,10 @@ it must be measured, not assumed.
 | **W-d′ + ③ mirror — `ChainDescent/RecordDeepenCell.lean`** | ✅ **LANDED 2026-08-08**, axiom-clean — **`recordDeepenCell_canonizer`** (`①`, global, no hypothesis, via `SameOrbits`) and **`not_tinhoferGraph_of_flag`** (`③`, every key) at **one** object; `SelectCell` §4 carries the resolver-side mirror |
 | **W-h (`②` mirror) + W-a + W-f** | ✅ **LANDED 2026-08-08**, axiom-clean — `SelectCell` §5 (`selProbeBoundC`, `selProbeCostC_le`, `descentCostS_selNodeC_le`) · `DeepenCell` §7a (**`goodCellCost_bounds_guard`** — the guard is *billed*, not declared) · `RecordDeepenCell` §4 (**`descentCostSC_recordDeepen_monomial`**, `ring`-checked: **`costConst` 69, `costDeg` 13**) · **`recordDeepenCell_full`** = `①` ∧ `②` ∧ `③` |
 | **W-i — `SelectCell` §6 + `RecordDeepenCell` §5** | ✅ **LANDED 2026-08-08**, axiom-clean — `cellData` (each cell's supply evaluated **once**) · `selNodeFastC` · `canonFormFastSC?` · **`recordDeepenCell_full_fast`** = `①` ∧ `②` ∧ `③` at the definitions that execute. ⚠ `selNodeFastC_eq` is a **proved** equation, not `rfl`. ★ `C₅` **216 s → 41 s**, cost value identical |
-| W-g (repoint) · W-e (lazy) | ⬜ not started |
+| **W-i — `SelectCell` §6** | ✅ **LANDED** — `cellData`/`selNodeFastC`/`canonFormFastSC?`; superseded for the endgame by `W-e`'s lazy form, kept as the eager reference |
+| **W-g — repoint `Publication`** | ✅ **LANDED** — `canonForm?`/`cost` are `RecordDeepenCell.canonFormFast`/`costFast`, numerals 69/13, `residue_if_flag` discharged. **Zero `sorry`, zero custom axioms.** |
+| **W-e — `SelectCell` §7 + `RecordDeepenCell` §5** | ✅ **LANDED** — lazy **billing** (`probeWalk`/`selNodeLazyC`/`canonFormLazySC?`) + lemmas A/B/C. Measured 2.4× faster than eager, 1.7× faster than node-global |
+| — | **nothing outstanding in this plan** |
 
 > ## ⛔ CORRECTION (2026-08-08) — *"`③` is not on the critical path"* WAS WRONG
 >

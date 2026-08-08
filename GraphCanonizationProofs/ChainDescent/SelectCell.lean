@@ -648,5 +648,294 @@ theorem descentCostSC_fast_eq (key : Key n) (S : CellSupply n) (adj : AdjMatrix 
           (selNodeC (Refine.encodeFreeFast (n := n)) key S) adj := by
   rw [selNodeFastC_eq]
 
+/-! ## 7. `W-e` — LAZY BILLING
+
+⛔ **A lazy *selector* buys nothing, and that is why this section exists.** `selProbeCostC` sums over
+**all** of `nsColours χ`, and `selNodeFastC` builds the whole `cellData` table and its bill *before*
+`selColourT` runs — so the returned **cost** already forces every cell's supply, and short-circuiting
+the choice afterwards saves zero. Laziness has to reach the billing.
+
+`probeWalk` walks the cells in increasing colour order, evaluating each cell's supply **on demand**,
+accumulating that cell's bill, and stopping at the first cell that narrows to `≤ 1`. It therefore
+returns a **smaller** cost than `selProbeCostC` and the **same** children.
+
+★ That split is exactly what makes it cheap to justify: `NodeTransport`/`NodeTransportAt` are stated
+purely on `.1` (`Select.lean` §3), so `descendS_val_congr` carries `①` across unchanged, and `②`
+rides `probeWalk_snd_le` into the *existing* `selProbeCostC_le` — **no new numerals**.
+
+⚠ Iteration order must be by **colour value**, because `selColourC` takes the `Finset.min`.
+`nsColours χ` is `((List.finRange n).map χ).dedup.filter …` — first-occurrence order, **not sorted** —
+so walking it would return the first *encountered* firing colour, not the least. We walk
+`Finset.sort (· ≤ ·) (nonSingletonColours χ)` instead, which brings `Finset.pairwise_sort`,
+`Finset.sort_nodup` and `Finset.mem_sort` with it. -/
+
+/-- One cell's probe bill, named so the walk and `selProbeCostC` share a single expression. -/
+def cellBill (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) :
+    Nat :=
+  Consume.supplyCost (S c) adj χ + (gens (S c) adj χ).length * (n * n)
+    + ((cellList χ c).map (keyCost key adj χ)).sum + n * n
+    + (cellList χ c).length * ((verified (S c) adj χ).length * (n * n) + n * n)
+
+theorem selProbeCostC_eq_sum (key : Key n) (S : CellSupply n) (adj : AdjMatrix n)
+    (χ : Colouring n) :
+    selProbeCostC key S adj χ = ((nsColours χ).map (cellBill key S adj χ)).sum := rfl
+
+/-- The per-cell firing test, as a `Bool` so `List.find?` can consume it. -/
+def firesAt (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) :
+    Bool :=
+  decide ((cellNarrowC key S adj χ c).length ≤ 1)
+
+/-- **★★ THE LAZY PROBE.** Walk the cells in increasing colour order; evaluate each cell's supply
+once, on demand; bill it; stop at the first that narrows to `≤ 1`, returning that cell **and its
+narrowing** so the committed cell is never re-probed. -/
+def probeWalk (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) :
+    List Nat → Option (Nat × List (Fin n)) × Nat
+  | [] => (none, 0)
+  | c :: cs =>
+      let sv := S c adj χ
+      let V := sv.1.filter (fun g => decide (Consume.IsColAut adj χ g))
+      let kept := cellNarrowV key V adj χ c
+      let bill := sv.2 + sv.1.length * (n * n)
+        + ((cellList χ c).map (keyCost key adj χ)).sum + n * n
+        + (cellList χ c).length * (V.length * (n * n) + n * n)
+      if kept.length ≤ 1 then (some (c, kept), bill)
+      else
+        let r := probeWalk key S adj χ cs
+        (r.1, bill + r.2)
+
+/-- The walk finds exactly what `List.find?` would, and carries the committed cell's narrowing. -/
+theorem probeWalk_fst (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) :
+    ∀ l : List Nat, (probeWalk key S adj χ l).1
+      = (l.find? (firesAt key S adj χ)).map (fun c => (c, cellNarrowC key S adj χ c)) := by
+  intro l
+  induction l with
+  | nil => rfl
+  | cons c cs ih =>
+      simp only [probeWalk]
+      split
+      · rename_i h
+        have hc : (cellNarrowC key S adj χ c).length ≤ 1 := h
+        rw [List.find?_cons_of_pos (by simp [firesAt, hc])]
+        rfl
+      · rename_i h
+        have hc : ¬ (cellNarrowC key S adj χ c).length ≤ 1 := h
+        rw [List.find?_cons_of_neg (by simp [firesAt, hc])]
+        exact ih
+
+/-- The walk bills a **sub-sum**: only the cells it actually probed. -/
+theorem probeWalk_snd_le (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) :
+    ∀ l : List Nat, (probeWalk key S adj χ l).2 ≤ (l.map (cellBill key S adj χ)).sum := by
+  intro l
+  induction l with
+  | nil => exact le_rfl
+  | cons c cs ih =>
+      rw [List.map_cons, List.sum_cons]
+      simp only [probeWalk]
+      split
+      · exact Nat.le_add_right _ _
+      · exact Nat.add_le_add_left ih _
+
+/-! ### 7a. The two bridges: the walk's choice is `selColourC`, its bill is `≤ selProbeCostC` -/
+
+/-- **★★ LEMMA A** — over a **sorted** list of a finset's elements, `List.find?` *is* `Finset.min` of
+the filter. This is what licenses stopping at the first firing colour. -/
+theorem find?_sort_eq_min (s : Finset Nat) (p : Nat → Bool) :
+    (s.sort (· ≤ ·)).find? p = (s.filter (fun c => p c = true)).min := by
+  cases h : (s.sort (· ≤ ·)).find? p with
+  | none =>
+      have hE : s.filter (fun c => p c = true) = ∅ := by
+        rw [Finset.filter_eq_empty_iff]
+        intro a ha
+        exact List.find?_eq_none.mp h a ((Finset.mem_sort _).mpr ha)
+      rw [hE]; rfl
+  | some c =>
+      obtain ⟨hpc, as, bs, hsplit, hbefore⟩ := List.find?_eq_some_iff_append.mp h
+      have hcs : c ∈ s := (Finset.mem_sort (· ≤ ·)).mp (by rw [hsplit]; simp)
+      have hcf : c ∈ s.filter (fun x => p x = true) := Finset.mem_filter.mpr ⟨hcs, hpc⟩
+      have hpair : (as ++ c :: bs).Pairwise (· ≤ ·) := by
+        rw [← hsplit]; exact Finset.pairwise_sort s _
+      have htail : ∀ b ∈ bs, c ≤ b :=
+        (List.pairwise_cons.mp (List.pairwise_append.mp hpair).2.1).1
+      have hle : ∀ b ∈ s.filter (fun x => p x = true), (↑c : WithTop Nat) ≤ ↑b := by
+        intro b hb
+        refine (WithTop.coe_le_coe).mpr ?_
+        obtain ⟨hbs, hpb⟩ := Finset.mem_filter.mp hb
+        have hbl : b ∈ as ++ c :: bs := by
+          rw [← hsplit]; exact (Finset.mem_sort _).mpr hbs
+        rcases List.mem_append.mp hbl with hb1 | hb2
+        · have hb' := hbefore b hb1
+          simp only [Bool.not_eq_true'] at hb'
+          rw [hb'] at hpb; exact absurd hpb (by simp)
+        · rcases List.mem_cons.mp hb2 with rfl | hb3
+          · exact le_rfl
+          · exact htail b hb3
+      show (↑c : WithTop Nat) = (s.filter (fun x => p x = true)).min
+      exact le_antisymm (Finset.le_min hle) (Finset.min_le hcf)
+
+/-- The sorted colour list is a permutation of `nsColours χ` — same members, both nodup. -/
+theorem sort_nonSingletonColours_perm (χ : Colouring n) :
+    ((nonSingletonColours χ).sort (· ≤ ·)).Perm (nsColours χ) := by
+  refine List.perm_of_nodup_nodup_toFinset_eq (Finset.sort_nodup _ _) ?_ ?_
+  · exact List.Nodup.filter _ (List.nodup_dedup _)
+  · ext c
+    simp only [List.mem_toFinset, Finset.mem_sort, mem_nsColours_iff]
+
+theorem probeWalk_choice (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) :
+    ((nonSingletonColours χ).sort (· ≤ ·)).find? (firesAt key S adj χ)
+      = selColourC key S adj χ := by
+  rw [find?_sort_eq_min]
+  unfold selColourC
+  congr 1
+  refine Finset.filter_congr (fun c _ => ?_)
+  simp [firesAt]
+
+theorem probeWalk_bill_le (key : Key n) (S : CellSupply n) (adj : AdjMatrix n)
+    (χ : Colouring n) :
+    (probeWalk key S adj χ ((nonSingletonColours χ).sort (· ≤ ·))).2
+      ≤ selProbeCostC key S adj χ := by
+  refine le_trans (probeWalk_snd_le key S adj χ _) ?_
+  rw [selProbeCostC_eq_sum]
+  exact le_of_eq ((sort_nonSingletonColours_perm χ).map (cellBill key S adj χ)).sum_eq
+
+/-! ### 7b. The lazy resolver -/
+
+/-- **★★★ THE LAZY CELL-INDEXED RESOLVER.** Same children as `selNodeC`, strictly smaller bill: only
+the cells actually probed are evaluated and charged. -/
+def selNodeLazyC (key : Key n) (S : CellSupply n) : NodeRes n := fun adj χ =>
+  match probeWalk key S adj χ ((nonSingletonColours χ).sort (· ≤ ·)) with
+  | (none, pc) => ([], pc)
+  | (some (_, kept), pc) =>
+      (kept.map (fun v => (v, (Refine.warmRefineVec adj (indivOne χ v)).col)),
+       pc + (kept.map (fun _ => CostModel.WarmRefine.warmRefineCost n)).sum)
+
+/-- **★★ THE CHILDREN ARE UNCHANGED** — which, with `descendS_val_congr`, is all `①` needs. -/
+theorem selNodeLazyC_children (key : Key n) (S : CellSupply n) (adj : AdjMatrix n)
+    (χ : Colouring n) :
+    (selNodeLazyC key S adj χ).1
+      = (selNodeC (Refine.encodeFreeFast (n := n)) key S adj χ).1 := by
+  unfold selNodeLazyC
+  rw [show probeWalk key S adj χ ((nonSingletonColours χ).sort (· ≤ ·))
+        = ((probeWalk key S adj χ ((nonSingletonColours χ).sort (· ≤ ·))).1,
+           (probeWalk key S adj χ ((nonSingletonColours χ).sort (· ≤ ·))).2) from rfl,
+    probeWalk_fst, probeWalk_choice]
+  cases hsel : selColourC key S adj χ with
+  | none => rw [selNodeC_children_none hsel]; rfl
+  | some c => rw [selNodeC_children_some hsel]; rfl
+
+/-- The lazy resolver's per-node bill: the probed cells, plus at most one child refinement. -/
+theorem selNodeLazyC_cost_le {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} {cP cr : Nat} (hp : selProbeCostC key S adj χ ≤ cP)
+    (hr : ∀ χ' : Colouring n, (Refine.encodeFreeFast (n := n) adj χ').2 ≤ cr) :
+    (selNodeLazyC key S adj χ).2 ≤ cP + cr := by
+  have hw : (probeWalk key S adj χ ((nonSingletonColours χ).sort (· ≤ ·))).2 ≤ cP :=
+    le_trans (probeWalk_bill_le key S adj χ) hp
+  have hlen : (selNodeLazyC key S adj χ).1.length ≤ 1 := by
+    rw [selNodeLazyC_children]
+    exact selNodeC_children_length_le_one _ _ _ adj χ
+  unfold selNodeLazyC at hlen ⊢
+  rcases hpw : probeWalk key S adj χ ((nonSingletonColours χ).sort (· ≤ ·)) with ⟨w1, pc⟩
+  rw [hpw] at hw
+  cases w1 with
+  | none => simpa using le_trans hw (Nat.le_add_right _ _)
+  | some ck =>
+      obtain ⟨c, kept⟩ := ck
+      rw [hpw] at hlen
+      simp only [List.length_map] at hlen
+      rcases hk : kept with _ | ⟨v, t⟩
+      · simp
+        omega
+      · subst hk
+        simp only [List.length_cons] at hlen
+        have ht : t = [] := List.eq_nil_of_length_eq_zero (by omega)
+        subst ht
+        simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+        have := hr (indivOne χ v)
+        show pc + CostModel.WarmRefine.warmRefineCost n ≤ cP + cr
+        have hwr : CostModel.WarmRefine.warmRefineCost n
+            = (Refine.encodeFreeFast (n := n) adj (indivOne χ v)).2 := rfl
+        omega
+
+/-! ### 7c. `①` and `②` for the lazy resolver
+
+**★★ LEMMA B is what makes `①` free.** `descendS`'s *value* projection reads the resolver only
+through its children (`descendS_val_succ`), and `NodeTransport`/`NodeTransportAt` are stated purely
+on that projection. So a resolver with the same `.1` and a smaller `.2` inherits the entire `①`
+capstone by rewriting — no transport argument is re-run. -/
+
+/-- **★★ LEMMA B** — `descendS`'s value depends on the resolver **only through its children**. -/
+theorem descendS_val_congr {N₁ N₂ : NodeRes n} (h : ∀ adj χ, (N₁ adj χ).1 = (N₂ adj χ).1)
+    (adj : AdjMatrix n) :
+    ∀ (fuel : Nat) (χ : Colouring n),
+      (descendS N₁ adj fuel χ).1 = (descendS N₂ adj fuel χ).1 := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro χ
+      by_cases hd : Discrete χ
+      · rw [descendS_val_leaf N₁ adj hd 0, descendS_val_leaf N₂ adj hd 0]
+      · rw [descendS_val_zero N₁ adj hd, descendS_val_zero N₂ adj hd]
+  | succ fuel ih =>
+      intro χ
+      by_cases hd : Discrete χ
+      · rw [descendS_val_leaf N₁ adj hd (fuel + 1), descendS_val_leaf N₂ adj hd (fuel + 1)]
+      · rw [descendS_val_succ N₁ adj hd fuel, descendS_val_succ N₂ adj hd fuel, h adj χ]
+        congr 1
+        exact List.map_congr_left (fun vc _ => ih vc.2)
+
+theorem canonFormS?_congr {rf : Refiner n} {N₁ N₂ : NodeRes n}
+    (h : ∀ adj χ, (N₁ adj χ).1 = (N₂ adj χ).1) : canonFormS? rf N₁ = canonFormS? rf N₂ := by
+  funext adj
+  exact descendS_val_congr h adj n _
+
+/-- The lazy object computes the **same canonical form** as the eager one — so `①` and the flag
+semantics carry across verbatim. -/
+theorem canonFormS?_selNodeLazyC_eq (key : Key n) (S : CellSupply n) :
+    canonFormS? (Refine.encodeFreeFast (n := n)) (selNodeLazyC key S)
+      = canonFormS? (Refine.encodeFreeFast (n := n))
+          (selNodeC (Refine.encodeFreeFast (n := n)) key S) :=
+  canonFormS?_congr (fun adj χ => selNodeLazyC_children key S adj χ)
+
+/-- **★★★ `①` FOR THE LAZY RESOLVER** — free from `selNodeC_canonizer`, via lemma B. -/
+theorem selNodeLazyC_canonizer {key : Key n} (hk : KeyEquivariant key) {S : CellSupply n}
+    (hS : CellOrbitTransport S) :
+    CanonSpec.IsCanonicalFormOpt
+      (canonFormS? (Refine.encodeFreeFast (n := n)) (selNodeLazyC key S)) := by
+  rw [canonFormS?_selNodeLazyC_eq]
+  exact selNodeC_canonizer hk hS
+
+/-- **★★ `②` FOR THE LAZY RESOLVER** — the *same* bound as the eager one, reached through
+`probeWalk_bill_le`, so there are **no new numerals**. The true cost is of course smaller; the point
+is that the proved ceiling does not move. -/
+theorem descentCostS_selNodeLazyC_le {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {sB gB kc : Nat} (hs : ∀ (c : Nat) (χ : Colouring n), Consume.supplyCost (S c) adj χ ≤ sB)
+    (hg : ∀ (c : Nat) (χ : Colouring n), (gens (S c) adj χ).length ≤ gB)
+    (hk : ∀ (χ : Colouring n) (v : Fin n), keyCost key adj χ v ≤ kc) :
+    descentCostS (Refine.encodeFreeFast (n := n)) (selNodeLazyC key S) adj
+      ≤ n * n * n + (n + 1) * (1 + (selProbeBoundC n sB gB kc + n * n * n)) := by
+  refine descentCostS_le_of_le_one
+    (fun χ _ => by
+      rw [selNodeLazyC_children]; exact selNodeC_children_length_le_one _ _ _ adj χ)
+    (fun χ => le_of_eq (Cost.refiner_cost adj χ)) (fun χ => ?_)
+  exact selNodeLazyC_cost_le
+    (selProbeCostC_le (fun c => hs c χ) (fun c => hg c χ) (fun v => hk χ v))
+    (fun χ' => le_of_eq (Cost.refiner_cost adj χ'))
+
+/-- **The runnable top-level lazy object** (root colouring materialised once too, as in
+`canonFormFastSC?`). -/
+def canonFormLazySC? (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) :
+    Option (CanonSpec.Labelled n) :=
+  (descendS (selNodeLazyC key S) adj n ((Refine.warmRefineVec adj (fun _ => 0)).col)).1
+
+theorem canonFormLazySC?_eq (key : Key n) (S : CellSupply n) :
+    canonFormLazySC? key S
+      = canonFormS? (Refine.encodeFreeFast (n := n)) (selNodeLazyC key S) := rfl
+
+/-- …and the residue statement, likewise unchanged. -/
+theorem not_handledSC_if_flag_lazy {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    (hflag : canonFormS? (Refine.encodeFreeFast (n := n)) (selNodeLazyC key S) adj = none) :
+    ¬ HandledSC key S adj := by
+  rw [canonFormS?_selNodeLazyC_eq] at hflag
+  exact not_handledSC_if_flagSC hflag
+
 end Select
 end ChainDescent

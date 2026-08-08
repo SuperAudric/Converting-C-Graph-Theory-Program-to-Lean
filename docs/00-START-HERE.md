@@ -8,9 +8,11 @@
 > `ChainDescent/DeepenCell.lean` + **`ChainDescent/RecordDeepenCell.lean`**, the last carrying
 > **`recordDeepenCell_full` = `①` ∧ `②` ∧ `③` at ONE object** — `①` global and unconditional,
 > `②` `cost ≤ 69·(n+1)^13` on every input with no flag disjunct, `③` at the tight residue
-> `¬TinhoferGraph`; and since W-i it is stated at the **runnable** definitions too
-> (`recordDeepenCell_full_fast`, `C₅` in 41 s). **What remains is the repoint of
-> `Publication.canonForm?` and laziness — no mathematics.**
+> `¬TinhoferGraph`; and it is stated at the **runnable, lazily-billed** definitions too
+> (`recordDeepenCell_full_fast`). **★★★ `Publication.lean` IS CLOSED — the whole plan is done**
+> (W-g repointed it; W-e added lazy billing). Measured: `C₅` 34 s, `K₁,₂,₃` 87 s — **2.4× faster than
+> the eager cell-indexed object and 1.7× faster than the node-global one**, so the per-cell design
+> pays no premium.**
 > ⚠ `②`'s degree is a bound from declared flat charges, not a measurement of the algorithm's true
 > degree — see `Publication.lean`'s `costConst`/`costDeg` block.
 > It supersedes the wind-down's options table (i)–(vi), now **provenance**:
@@ -30,7 +32,7 @@
 >
 > ## ✅ W1 LANDED (2026-08-04) — `TwinFamily.lean` + `RestrictedTransport.lean` (+ `DeepenComplete.lean`, `DeepenTransportOn.lean`)
 >
-> Gate **118 modules, ~228–361 s, exit 0** (2026-08-08); no `sorry`/`native_decide`/new axiom in the
+> Gate **119 modules, ~231–361 s, exit 0** (2026-08-08); no `sorry`/`native_decide`/new axiom in the
 > gated library. ⚠ `build.sh` opens with `pkill -f 'lake build'` — never chain a `lake build` and the
 > gate in one command.
 > **★★★ `Publication.lean` (ungated, standalone) is CLOSED since 2026-08-08: ZERO `sorry`, ZERO custom

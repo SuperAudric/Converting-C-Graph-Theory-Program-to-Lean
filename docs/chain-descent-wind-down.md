@@ -13,16 +13,20 @@
 > theorem prints `[propext, Classical.choice, Quot.sound]`, and the object `#eval`s.
 > ⚠ Two caveats travel with it: `②`'s degree is a **bound from declared flat charges, not a
 > measurement**, and `③`'s residue is an **over-approximation**. Both are stated at source.
+> ✅ **The per-cell plan is COMPLETE** — `W-e` (lazy **billing**, not a lazy selector: the returned
+> cost forced every cell, so laziness had to reach the bill) landed the same day. Measured on
+> `K₁,₂,₃`: **2.4× faster than the eager cell-indexed object and 1.7× faster than the node-global
+> one**, billing 20 % less than node-global — the per-cell design pays no premium at all now.
 > **Remaining from the finish list: W2 (CFI), W3 (extraction), W4 (write-up), W5 (archive).**
 >
 > ### ▶▶ PICKING THIS UP FRESH? GO TO [§2a HANDOFF](#2a--handoff--where-a-fresh-reader-picks-up-2026-08-04).
 > It carries the reading order, the gate command and its current numbers, the **`Publication.lean` state
-> table**, the measured evidence, the **eight corrections you will otherwise inherit from other docs**, and
-> the one open decision.
+> table**, the measured evidence, and the **eight corrections you will otherwise inherit from other
+> docs**. ⚠ There is **no open decision** any more — that block is struck through below.
 >
 > **W1 is ✅ LANDED (2026-08-04)** — `TwinFamily.lean` + `RestrictedTransport.lean`, extended the same day by
 > `DeepenComplete.lean` + `DeepenTransportOn.lean`. W4's go/no-go is **MET**.
-> Gate **118 modules, ~228–361 s, exit 0** (`bash /workspace/scripts/build.sh`, 2026-08-08).
+> Gate **119 modules, ~231–361 s, exit 0** (`bash /workspace/scripts/build.sh`, 2026-08-08).
 > **Tinhofer graphs are CANONIZED** (`canonizes_on_tinhofer`), the class is **inhabited and proper**
 > (`tinhoferGraph_nonvacuous`), and `Publication.unhandledResidue_nonvacuous` is **discharged**.
 >
@@ -32,9 +36,11 @@
 > **all three obligations at once**, axiom-clean — `①` global and unconditional
 > (`RecordDeepenCell.recordDeepenCell_canonizer`), `②` `cost ≤ 69·(n+1)^13` on every input with no
 > flag disjunct (`descentCostSC_recordDeepen_monomial`), `③` at the tight residue `¬TinhoferGraph`
-> (`not_tinhoferGraph_of_flag`); packaged as **`recordDeepenCell_full`**. That combination is exactly
-> what (iv) and (v) each miss. **No mathematics remains** — only the runnable `rfl`-twin, the repoint
-> of `Publication.canonForm?`, and laziness. The either/or below is **provenance**.
+> (`not_tinhoferGraph_of_flag`); packaged as **`recordDeepenCell_full`**, and — since `W-i`/`W-e` — at
+> the runnable, lazily-billed definitions as **`recordDeepenCell_full_fast`**. That combination is
+> exactly what (iv) and (v) each miss. ✅ **`Publication.canonForm?`/`cost` ARE that object
+> (`W-g`), and the file has zero `sorry` and zero custom axioms.** The either/or below is
+> **provenance**.
 
 > ⛔ ~~**ONE OPEN DECISION, and it is the only thing between here and a finished `Publication.lean`:**
 > which object `canonForm?` should be, i.e. how to close its single remaining `sorry`
@@ -454,17 +460,65 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 
 ---
 
-## 2a. ▶▶ HANDOFF — where a fresh reader picks up (updated 2026-08-06)
+## 2a. ▶▶ HANDOFF — where a fresh reader picks up (updated 2026-08-08)
 
-> ## ★★★ START HERE — WHAT IS ACTIVE (2026-08-06)
+> # ★★★ START HERE — THE STATE, IN ONE SCREEN (2026-08-08)
 >
-> **▶ The active plan is [`chain-descent-percell-plan.md`](chain-descent-percell-plan.md).** Read it
-> **first**: it carries the core problem in plain terms, the plan, the cost analysis, and two traps.
-> Everything in §2's *"options table (i)–(vi)"* below is **provenance** — the question it debated
-> (*which object should `Publication.canonForm?` be*) is **settled: it keeps its current fused object**,
-> and the work is a **supply change**.
+> ### The artifact is closed.
+> `Publication.lean` compiles with **zero `sorry` and zero custom axioms**. Seven theorems —
+> `canon_sound`, `canon_complete`, `flag_iso_invariant`, `canon_poly_or_flag`, `residue_if_flag`,
+> `unhandledResidue_nonvacuous`, `canonizer` — each print exactly
+> `[propext, Classical.choice, Quot.sound]`, and **all of them are properties of one object**.
 >
-> **Landed since 2026-08-04** (all axiom-clean, all in the gate):
+> ### The object
+> ```
+> canonForm? = RecordDeepenCell.canonFormFast
+>            = Select.canonFormLazySC? recordKey (fun c => recordSupplyFast ++ deepenCellSupply c)
+> cost       = RecordDeepenCell.costFast
+> ```
+> The fused resolver-aware descent, encode-free refiner, `RecordKey.recordKey` as the force key, and
+> the consume supply **cell-indexed**: each cell is judged by generators harvested from descents
+> anchored *in that cell*, gated by that cell's own guard. Run by `Select.selNodeLazyC`, which walks
+> cells in increasing colour order, evaluates and bills each on demand, and stops at the first that
+> fires. The single capstone is **`RecordDeepenCell.recordDeepenCell_full_fast`**.
+>
+> | | |
+> |---|---|
+> | `①a`/`①b`/`①c` | ✅ global, **no hypothesis** (`recordDeepenCell_canonizer`) |
+> | `②` | ✅ `cost ≤ 69 * (n+1)^13`, every input, **no flag disjunct** |
+> | `③` | ✅ flag ⟹ `¬ TinhoferGraph`, **for every key** (`not_tinhoferGraph_of_flag`) |
+> | non-vacuity | ✅ `K₁,₂,₃` handled, `K₃ ⊔ C₄` residual |
+> | runs | ✅ `#eval` answers on `K₂`, `C₅`, `K₁,₂,₃` (34 s / 87 s) |
+>
+> ### ⚠⚠ The two things that must travel with any quotation of it
+> 1. **`②`'s degree is a bound, not a measurement.** Several components bill *declared flat* charges
+>    (harvest flat `n⁶` per cell where the real work is `≈ m²n⁴` with `Σ m_c² ≤ n²`; `holKeyFast`
+>    flat `n⁵`; `selProbeBoundC` charging every cell the *maximum*; `goodCellCost`'s nested flat
+>    `n⁶`). It rules out exponentials; it does **not** establish 13 as the algorithm's true degree.
+>    Stated at source in `Publication.lean`'s `costConst`/`costDeg` block.
+> 2. **`③`'s residue is an over-approximation.** `¬ TinhoferGraph` counts CFI graphs as residual
+>    although their obstruction is *linear* and belongs to the rigid resolver. Narrowing it is W2.
+>    The claim is *"a flag means a real structural obstruction"*, never *"a flag means hardness"*.
+>
+> ### ▶ What is left
+> **W2** (CFI `Handled` — progress, not completion) · **W3** (extraction) · **W4** (write-up) ·
+> **W5** (archive). Nothing from the per-cell plan is outstanding.
+> ★ One **open measurement**, worth having before W4 quotes any performance number: the lazy walk's
+> win was measured only at 1–2 non-singleton cells. `probe_offbranch5`'s depth-1 CFI nodes carry
+> **28/28/24/26/14/10/14** cells, where the ceiling should be far higher — unverified.
+>
+> ### Reading order for a fresh pickup
+> 1. This block, then §2a's `Publication.lean` state table and the **eight corrections** below.
+> 2. [`chain-descent-percell-plan.md`](chain-descent-percell-plan.md) — **the design record of the
+>    object above** (it is no longer a plan; every item is ✅). Its §1–§3a explain *why* the supply
+>    had to be cell-indexed, and its §2/§6/§7/§10 carry the retractions.
+> 3. `Publication.lean` top-to-bottom — it is the deliverable and its prose is current.
+> 4. `RecordDeepenCell.lean` → `SelectCell.lean` → `DeepenCell.lean`, in that order.
+> 5. `PublicTheoremIndex.md` for anything else.
+>
+> ---
+>
+> **▶ How it got here — chronological, 2026-08-04 onward** (provenance; the block above governs):
 > * **`Tinhofer ↔ CertifiedG deepenSupply`** (`DeepenGuardComplete` §§0–7) — deepen's poly guard is
 >   **complete**, so it transports with **no `SupplyEquivariant`**; `deepenSupplyCert` is a
 >   **computable** supply with `①` and **no hypothesis**. ⛔ This **refutes `DeepenCertified` §7**.
@@ -485,12 +539,12 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >   **`ChainDescent/RecordDeepenCell.lean`** — the **endgame object**
 >   `selNodeC recordKey (fun c => recordSupplyFast ++ deepenCellSupply c)`, carrying
 >   **`recordDeepenCell_canonizer`** (`①`, global, no hypothesis) and
->   **`not_tinhoferGraph_of_flag`** (`③`, every key), packaged as `recordDeepenCell_record`.
+>   **`not_tinhoferGraph_of_flag`** (`③`, every key).
 >   ★ `SelectNode.lean` is **untouched**: `Select.lean`'s spine is resolver-generic, so `selNodeC` is
 >   just another `NodeRes n` and only `NodeTransport` was re-proved.
 >   ★★ **`①` and `③` now hold of the SAME object with `①` unconditional** — which neither option
->   (iv) (residue is not `¬Tinhofer`) nor option (v) (`①b`/`①c` class-only) can give. **`②` is the
->   only obligation left.**
+>   (iv) (residue is not `¬Tinhofer`) nor option (v) (`①b`/`①c` class-only) can give. *(`②` followed
+>   the same day — see below.)*
 >   ★★ The recorded W-d risk was **misdiagnosed and dissolved** — no per-cell analogue of
 >   `tinhofer_iff_certifiedG` is needed, because `GoodAnchor` is a property of the anchor's OWN path,
 >   already decidable (`goodAnchor_iff_certPath`) and **unconditionally** invariant
@@ -507,13 +561,14 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >   already reaches `n^10` and the key sets the degree.
 >   ★★★ **AND `W-i` LANDED THE SAME DAY** — `Select.cellData` (each cell's supply evaluated **once**
 >   per node) / `selNodeFastC` / `canonFormFastSC?`, and
->   **`RecordDeepenCell.recordDeepenCell_full_fast`** = `①` ∧ `②` ∧ `③` at the definitions that
->   actually execute. ⚠ `selNodeFastC_eq` is a **proved** equation, not `rfl` (the table returns `[]`
->   off `nsColours χ`) — everything transfers by rewriting with it. ★ `C₅` **216 s → 41 s**, cost
->   value identical, and now *faster than the node-global `selNode`* (111 s) because the twin also
->   cures trap #1.
->   ▶ Next: **W-g** (repoint `Publication.canonForm?`/`cost`, swap the numerals to
->   `RecordDeepenCell.costConst/costDeg`, delete the `sorry`) → **W-e** (lazy `selColourC`).
+>   the runnable eager form. ⚠ `selNodeFastC_eq` is a **proved** equation, not `rfl` (the table
+>   returns `[]` off `nsColours χ`) — everything transfers by rewriting with it. ★ `C₅`
+>   **216 s → 41 s**, cost value identical. ⚠ **Superseded for the endgame by `W-e`'s
+>   `selNodeLazyC`**, which is what `recordDeepenCell_full_fast` is now stated at; `selNodeFastC`
+>   remains as the eager reference.
+>   ✅ **W-g and W-e both landed the same day**, so nothing from the per-cell plan is outstanding:
+>   `Publication.canonForm?`/`cost` are `RecordDeepenCell.canonFormFast`/`costFast` at
+>   `costConst`/`costDeg` = 69/13, and the object is lazily billed.
 >
 >   ⚠⚠ **AND A STANDING CAVEAT ON `②`** (user, 2026-08-08): the bound is an unconditional theorem
 >   about the object's `CostM` accounting, but several components bill **declared flat** charges that
@@ -542,7 +597,7 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > (a) *"the fused object cannot carry deepen"* — it can; `①` never needed an equivariant reference;
 > (b) *"§9 is a socket, not a gain"* — a population artefact of an all-multipede/CFI sweep.
 
-**Gate is green**: `bash /workspace/scripts/build.sh` → **118 modules, ~228–361 s, exit 0** (measured
+**Gate is green**: `bash /workspace/scripts/build.sh` → **119 modules, ~231–361 s, exit 0** (measured
 2026-08-08; the spread is swap pressure, not a change in the work). ⚠ Use the **absolute** path — the
 script `cd`s via `$0`. ⚠ `build.sh` opens with `pkill -f 'lake build'`, which kills **any** shell whose
 command line contains that string — never chain a `lake build` and the gate in one command. No `sorry`,
@@ -550,7 +605,7 @@ command line contains that string — never chain a `lake build` and the gate in
 **`Publication.lean` is NOT gated** (compile it standalone: `cd GraphCanonizationProofs && lake env lean
 Publication.lean`); since 2026-08-08 it has **zero** `sorry` and **zero** custom axioms.
 
-### ▶▶ STATE OF `Publication.lean` (2026-08-04) — read this before touching it
+### ▶▶ STATE OF `Publication.lean` (2026-08-08) — **CLOSED**; read before touching it
 | obligation | state |
 |---|---|
 | `canon_sound` / `canon_complete` / `flag_iso_invariant` (`①`) | ✅ axiom-clean, unconditional |
@@ -558,7 +613,9 @@ Publication.lean`); since 2026-08-08 it has **zero** `sorry` and **zero** custom
 | `canonizer` | ✅ axiom-clean; its cost conjunct is now **unconditional** (the residue escape was never needed) |
 | `unhandledResidue_nonvacuous` | ✅ **DISCHARGED** axiom-clean (`RestrictedTransport.tinhoferGraph_nonvacuous`) |
 | **`residue_if_flag` (`③`)** | ✅ **DISCHARGED 2026-08-08** (`W-g`) — `recordDeepenCell_full_fast.2.2`, axiom-clean, at the same object as `①`/`②`. **The file now has zero `sorry`.** |
-| the 8 citation axioms | ⚠ **consumed by NOTHING**; retained for W2/Route C only — the paper must say so |
+| `costConst` / `costDeg` | ✅ **69 / 13** — `RecordDeepenCell`'s, `ring`-checked. ⚠ A bound from declared flat charges, **not** a measurement of the algorithm's degree |
+| the 8 citation axioms | ⚠ **consumed by NOTHING** and therefore **commented out**; retained for W2/Route C only — the paper must say so. Restoring one is deleting `-- ⏸ ` from a single line |
+| **the file as a whole** | ✅ **zero `sorry`, zero custom axioms**; every headline theorem prints `[propext, Classical.choice, Quot.sound]` |
 
 `UnhandledResidue` is now a **definition** (`residueRigidObstruction G := ¬ TinhoferGraph G`), not three
 `opaque` atoms. ⛔ **Do not re-add an opaque disjunct** (e.g. `NonLinearRigidObstruction`) until it has
@@ -571,8 +628,12 @@ object — an exhaustive solver and a random solver each carry half and together
 two-object split was tried this session and reverted.
 
 ### Read in this order
-0. **[`chain-descent-percell-plan.md`](chain-descent-percell-plan.md)** — the active plan. ⚠ Read before
-   §2's options table, which it supersedes.
+⚠ This list predates the close and is kept because items 2–5 are still the right background reading.
+**The current entry point is the START-HERE block at the top of this section**, whose reading order
+supersedes items 0–1 here.
+0. **[`chain-descent-percell-plan.md`](chain-descent-percell-plan.md)** — ✅ now the **design record**
+   of the published object, not a plan (every item is done). Read before §2's options table, which it
+   supersedes.
 1. **This document**, §1 (why closed) → §2 W1 (what landed, its boxed corrections, the **options table**
    — now provenance — and the **R1 block**) → §2 W4.
 2. [`ChainDescent/TwinFamily.lean`](../GraphCanonizationProofs/ChainDescent/TwinFamily.lean) — module
@@ -601,11 +662,14 @@ two-object split was tried this session and reverted.
 | **`①` on the class (force)** | `RestrictedTransport.lean` | **`canonizes_on_tinhofer` + `descentCost_on_tinhofer` — the transport spine relativized to (graph class) × (reached colourings), discharged at `forceThenPick` with NO supply. Additive: `Descend.lean` untouched.** |
 | **R1, scoped** | `DeepenComplete.lean` | `GoodAnchor` (the per-anchor condition actually consumed) · **`OrbitComplete`** (the target) · `deepenSupply_canonizer_of_orbitComplete` (`①c` for the raw supply from it alone) · **§5 `orbitComplete_of_good_or_trivial`** + `goodAnchor_transport` |
 | **`①` on the class (deepen)** | `DeepenTransportOn.lean` | **`canonizes_on_orbitComplete` — the same relativization at the guarded mixed resolver; §7 `deepen_object_package` = option (v), all four obligations at ONE executable object** |
+| **the cell-indexed spine** | `SelectCell.lean` | `CellSupply`/`selNodeC`/**`CellOrbitTransport`** (replaces `SupplyEquivariant`) · §4 the stall/`HandledSC`/answers mirror · §5 `②`'s per-node bill · §6 the eager runnable twin · §7 **lazy billing** (`probeWalk`/`selNodeLazyC`) + lemmas A (`find?_sort_eq_min`) and B (`descendS_val_congr`) |
+| **the cell-anchored harvest** | `DeepenCell.lean` | `deepenGensOn` · **`GoodCell`** (decidable, *unconditionally* invariant) · §7a **`goodCellCost_bounds_guard`** — the guard is billed, not declared |
+| **★ THE PUBLISHED OBJECT** | `RecordDeepenCell.lean` | **`recordDeepenCell_full_fast` = `①` ∧ `②` ∧ `③` at one runnable object.** `W-d′` rides `Kernel.sameOrbits_recordSupply`; `③` rides `goodCell_of_tinhofer` |
 
 ### ⚠ EIGHT OBJECTS — do not mix them up when writing
 | object | executable | `①` | `②` | `③` | named coverage |
 |---|---|---|---|---|---|
-| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeFastC`** (`RecordDeepenCell`) | ✅ **runnable and measured** — `canonFormFast`/`costFast`; `C₅` 41 s | ✅ **global, no hypothesis** | ✅ **`69·(n+1)^13`**, every input, no flag disjunct ⚠ see the accounting caveat | ✅ **every key** | ★★★ every Tinhofer graph — **THE TARGET OBJECT**, all three at once (`recordDeepenCell_full_fast`) |
+| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeLazyC`** (`RecordDeepenCell`) | ✅ **runnable and measured** — `canonFormFast`/`costFast`; `C₅` 34 s, `K₁,₂,₃` 87 s | ✅ **global, no hypothesis** | ✅ **`69·(n+1)^13`**, every input, no flag disjunct ⚠ see the accounting caveat | ✅ **every key** | ★★★ every Tinhofer graph — **THE OBJECT `Publication.canonForm?` IS**, all three at once (`recordDeepenCell_full_fast`) |
 | `recordKey @ recordSupplyFast` (`Publication.lean` today) | ✅ | ✅ global | ✅ | ❌ open | **none** |
 | `key @ recordSupplyFast ++ deepenSupplyCert` at `selNode` (`RecordDeepen`) | ✅ | ⛔ **measured false** (`probe_offbranch2/3`) | — | ✅ every key | every Tinhofer graph — ⚠ **`③` only; not publishable, `①` cannot be had here** |
 | `holKeyFast @ twinSupply` (`TwinFamily` §8) | ✅ | ✅ global | ✅ | — | complete multipartite, distinct part sizes |
@@ -631,6 +695,8 @@ statement (every key), rows 6–7 are `noncomputable` and **must not appear in a
 | `probe_selfsep.py` → `probe_selfsep.out` | ⛔ *"mixed orbits identify each other"* **refuted as the explanation** — `circ(5)` is exact with M1 15/20, M2 10/20. ⚠ rigid-multipede rows are **vacuous** passes (`non-vacuous-x = 0/4`) |
 | `probe_union_need.py` → `probe_union_need.out` | ★★ **BAD-BIG = 0, covered-by-§5 = Y, orbit-uniform = Y on 13/13** ⟹ **no union phenomenon to prove**; and an empirical confirmation of `goodAnchor_transport` |
 | Lean `#eval` (2026-08-04) | the **record object answers** on `C₅ C₆ P₅ K₅ 3K₂ K₁,₂,₃ K₃⊔C₄` (7/7) ⟹ no falsifier of `③` at the record object; option (ii) is open, not dead |
+| Lean `#eval` (2026-08-08) — **the published object** | `RecordDeepenCell.canonFormFast` answers on `K₂`, `C₅`, `K₁,₂,₃`; `costFast` = **1606 / 5 212 728 / 20 321 716**, wall **— / 34 s / 87 s**. Reproduce with a two-line file: `import ChainDescent.RecordDeepenCell` then `#eval (RecordDeepenCell.canonFormFast (n := 6) (TwinFamily.mpAdj TwinFamily.part123)).isSome` and the same at `costFast`; run `lake env lean <file>` from `GraphCanonizationProofs/`. ⚠ At the `Showcase` names instead, copy `Publication.lean` and append the `#eval`s — it is not a library module, so `import Publication` fails |
+| lazy vs eager vs node-global (2026-08-08) | `K₁,₂,₃`: lazy **20 321 716 / 87 s** · eager cell-indexed 38 212 276 / 210 s · node-global `selNodeFast` 25 346 020 / 148 s ⟹ **2.4× / 1.7× faster**, 20 % less billed than node-global. ⚠ Only 1–2 non-singleton cells exercised; the 28-cell CFI case is **unmeasured** |
 
 ⚠ Read each probe's header before quoting a number — the soundness discipline (positive certificates
 only, `None` ≠ `False`, the orbit-reduction licence, ⛔ never `probe_orbit_oracle`) is recorded there.

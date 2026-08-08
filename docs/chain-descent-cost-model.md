@@ -125,7 +125,7 @@ authoritative record of what is proved is `PublicTheoremIndex.md`).**
 The cost model discharges two `Publication.lean` obligations:
 - **② `canon_poly_or_flag`** — `cost G ≤ costConst·(n+1)^costDeg ∨ canonForm? G = none`.
   ✅ **DISCHARGED 2026-07-28** (`RecordKey` §5 → `Publication`), on the LEFT disjunct, at
-  `costConst = 57` (was 53 until `Deepen.stepCost` was billed, 2026-08-06), `costDeg = 13`.
+  `costConst = 57` (was 53 until `Deepen.stepCost` was billed, 2026-08-06), `costDeg = 13`. ⛔ **SUPERSEDED 2026-08-08**: `Publication`'s numerals are now `RecordDeepenCell.costConst = 69` / `costDeg = 13` at the cell-indexed object (degree unchanged; the constant absorbs per-cell supply billing + the newly-billed deepen guard). `RecordKey`'s 57 still describes `RecordKey`'s own object.
   ⚠⚠ **The `n^costDeg` form this doc used to quote is FALSE** for
   the real object at any numerals — `Select.descendS` bills 1 for a leaf and every `n = 0` colouring
   is vacuously `Discrete`, so the object costs 1 and *answers* while `c·0^d = 0`; and `costDeg = 0`

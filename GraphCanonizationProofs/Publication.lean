@@ -52,13 +52,20 @@ Per-obligation state:
     `canonForm?_record`, nothing downstream) — **and that is exactly what happened on 2026-07-28: the force
     key is now `RecordKey.recordKey`** (`holKeyFast` tie-broken by the union-guarded `orbKeyG`), a strict
     strengthening (`keepMin_pairKey_subset`) that cost one `KeyEquivariant` proof and **turns a flag into an
-    answer on `Regression.G8`**. Only ③ + non-vacuity remain `sorry`.
+    answer on `Regression.G8`**. ⊘ *"Only ③ + non-vacuity remain `sorry`"* was true when written; both
+    are discharged now and the file has **zero** `sorry` — and the object moved again on 2026-08-08,
+    to the cell-indexed supply (see the ▶▶ block at the top of §1). The `canonFormFastS?_eq`-is-`rfl`
+    remark describes that earlier object; the current one bridges by
+    `Select.canonFormS?_selNodeLazyC_eq`, a **proved** equation.
   · ② — ✅ **SWAPPED AND DISCHARGED 2026-07-28, in one pass with the key swap above.** `canon_poly_or_flag`
     is proved, `#print axioms` = `[propext, Classical.choice, Quot.sound]`, **no `sorryAx`** — and on the
     LEFT disjunct, so the cost claim needs no flag escape. `cost` and `costConst`/`costDeg` are no longer
     `opaque`: `cost` is the `CostM` cost projection of the very definition `canonForm?` is the value
-    projection of, and the numerals are `RecordKey.costConst = 57` / `RecordKey.costDeg = 13`, both
-    *computed* (a `ring`-checked expansion, `RecordKey.recordKeyBound_expand`) rather than guessed.
+    projection of, and the numerals are **`RecordDeepenCell.costConst = 69` /
+    `RecordDeepenCell.costDeg = 13`** (they were `RecordKey`'s 57 / 13 until the cell-indexed swap on
+    2026-08-08 — the degree did not move; the constant absorbed per-cell supply billing and the
+    newly-billed deepen guard), both *computed* (a `ring`-checked expansion,
+    `RecordDeepenCell.recordDeepenBound_expand`) rather than guessed.
     Provenance of why this took three shapes to get right: `SupplyCost`'s end-to-end theorems are at
     `lookaheadKey`+`prunedSupply`, which is NOT this file's object (closed by `RecordCost.lean`); and the
     pinned monomial itself was **`n ^ costDeg`, which is false at `n = 0` for the real object at any
@@ -197,9 +204,9 @@ carries **every obligation this file states**, axiom-clean, at that one object:
 
   · `RecordDeepenCell.recordDeepenCell_canonizer` — **`①a`/`①b`/`①c`, global, no hypothesis.**
   · `RecordDeepenCell.descentCostSC_recordDeepen_monomial` — **`②`**, `cost ≤ 69 * (n+1)^13` on
-    **every** input, no flag disjunct. ⚠ The numerals are `RecordDeepenCell.costConst`/`costDeg`,
-    not this file's current `RecordKey.costConst`/`costDeg` (57 / 13): the **degree is unchanged**
-    and the constant moves 57 → 69, `ring`-checked in `recordDeepenBound_expand`. The `+12` is
+    **every** input, no flag disjunct. The numerals are `RecordDeepenCell.costConst`/`costDeg`,
+    which this file's `costConst`/`costDeg` are now defined as: the **degree is unchanged** at 13 and
+    the constant moved 57 → 69, `ring`-checked in `recordDeepenBound_expand`. The `+12` is
     **+8** from billing the supply per cell and **+4** from finally billing the deepen guard
     (`Deepen.goodCellCost_bounds_guard` — it had been charging nothing for the `≤ n` `CertPath`
     walks it runs).

@@ -93,9 +93,9 @@ properties.
 
 ```
 GraphCanonizationProofs/          Lean 4 - the proof development, ~76k lines
-  ChainDescent/                   109 gated modules, plus scratch and parked experiments
-  Publication.lean                the four headline theorems
-  PublicTheoremIndex.md           generated index of everything proved, ~4,100 entries
+  ChainDescent/                   118 gated modules, plus scratch and parked experiments
+  Publication.lean                the headline theorems - closed: zero sorry, zero custom axioms
+  PublicTheoremIndex.md           generated index of everything proved, ~4,400 entries
 GraphCanonizationProject/         C# - prototypes, graph generators, solvers, ~17k lines
 GraphCanonizationProject.Tests/   xunit tests + measurement probes
 docs/                             design docs and the research record, 51 documents
@@ -166,11 +166,16 @@ The problems and prior results this project sits against:
 
 ### What is assumed rather than proved
 
-`Publication.lean` is the only file permitted an `axiom`, and there are exactly eight of them.
-Each carries a published theorem, never anything this project is itself trying to prove. The
-four headline theorems currently depend on **none** of these - they come out
-`[propext, Classical.choice, Quot.sound]`. The axioms are consumed by the residue obligation,
-which is still open.
+`Publication.lean` is the only file permitted an `axiom`. Eight are *drafted* below, each carrying
+a published theorem and never anything this project is itself trying to prove.
+
+**As of 2026-08-08 none of them is in force.** The file closed - zero `sorry`, zero custom axioms -
+and every theorem in it, including the residue obligation that was expected to need them, comes out
+`[propext, Classical.choice, Quot.sound]`. Because nothing consumed them, the eight are **commented
+out** in the source rather than presented as a trusted base for something proved; each is one line
+away from being restored if the CFI (W2) or Route C work needs it. The table below is therefore the
+*intended* citation base for the parts of the project that do not live in that file, not a list of
+assumptions the headline theorems rest on.
 
 | axiom | result assumed |
 |---|---|
