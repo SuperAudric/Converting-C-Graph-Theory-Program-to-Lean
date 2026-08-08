@@ -21,7 +21,7 @@
 >
 > ### ▶▶ PICKING THIS UP FRESH? GO TO [§2a HANDOFF](#2a--handoff--where-a-fresh-reader-picks-up-2026-08-04).
 > It carries the reading order, the gate command and its current numbers, the **`Publication.lean` state
-> table**, the measured evidence, and the **eight corrections you will otherwise inherit from other
+> table**, the measured evidence, and the **thirteen corrections you will otherwise inherit from other
 > docs**. ⚠ There is **no open decision** any more — that block is struck through below.
 >
 > **W1 is ✅ LANDED (2026-08-04)** — `TwinFamily.lean` + `RestrictedTransport.lean`, extended the same day by
@@ -366,7 +366,7 @@ and the covered class is a *superset*. Do **not** change the design to match (it
 `TinhoferPath`'s single-path recursion, hence `②`). Call it **path-local Tinhofer** and land the
 bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implication is machine-checked.
 
-### W2 — CFI family `Handled` *(box: 2 weeks)*
+### W2 — CFI family `Handled` *(box was 2 weeks; ✅ stages 1–2 built 2026-08-08, and stage 0 then RE-TARGETED it — read to the end of this section before starting)*
 
 > ⚠⚠ **SCOPE CORRECTION (user, 2026-08-04) — state the target as PROGRESS, not completion.**
 > W2 reaches at best ***"does not stall on a CFI residue"***. `CFI(unhandled residue)` still reaches
@@ -620,11 +620,11 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > |---|---|
 > | `①a`/`①b`/`①c` | ✅ global, **no hypothesis** (`recordDeepenCell_canonizer`) |
 > | `②` | ✅ `cost ≤ 69 * (n+1)^13`, every input, **no flag disjunct** |
-> | `③` | ✅ flag ⟹ `¬ TinhoferGraph`, **for every key** (`not_tinhoferGraph_of_flag`) |
+> | `③` | ✅ flag ⟹ `¬ TinhoferGraph`, **for every key** (`not_tinhoferGraph_of_flag`). ★ A **narrower** residue is now proved and unwired: `not_all_resolvable_of_flag` at `ResolvableCellAt` (W2 stage 2) |
 > | non-vacuity | ✅ `K₁,₂,₃` handled, `K₃ ⊔ C₄` residual |
 > | runs | ✅ `#eval` answers on `K₂`, `C₅`, `K₁,₂,₃` (20.8 s / 50.4 s after `W-j`) and on `K₃ ⊔ C₄` |
 >
-> ### ⚠⚠ The two things that must travel with any quotation of it
+> ### ⚠⚠ The three things that must travel with any quotation of it
 > 1. **`②`'s degree is a bound, not a measurement.** Several components bill *declared flat* charges
 >    (harvest flat `n⁶` per cell where the real work is `≈ m²n⁴` with `Σ m_c² ≤ n²`; `holKeyFast`
 >    flat `n⁵`; `selProbeBoundC` charging every cell the *maximum*; `goodCellCost`'s nested flat
@@ -637,6 +637,14 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > 2. **`③`'s residue is an over-approximation.** `¬ TinhoferGraph` counts CFI graphs as residual
 >    although their obstruction is *linear* and belongs to the rigid resolver. Narrowing it is W2.
 >    The claim is *"a flag means a real structural obstruction"*, never *"a flag means hardness"*.
+>    ★ A strictly narrower residue **is now proved** (`RecordDeepenCell.not_all_resolvable_of_flag`
+>    at `ResolvableCellAt`) and is **not yet wired into `Publication`** — option **A** below.
+> 3. **The object answering everywhere is BY DESIGN, not a defect** (user, 2026-08-08). It answers on
+>    `K₂`, `C₅`, `K₁,₂,₃` **and on `K₃ ⊔ C₄`** — the residual witness itself. The design is free to be
+>    stronger than what is proved; proving that it is strong is the point of `③`. ⛔ W4 must say
+>    *"the canonizer has not yet been **proven** on most interesting inputs"*, never *"it flags on
+>    most interesting inputs"* (which is false). Known flagging witness, not yet reproduced in Lean:
+>    a multipede the rigid handler cannot peel, failing at the root.
 >
 > ### ▶ What is left
 > **W2** — ✅ **stages 1–2 built 2026-08-08** (the `SomeCellOrbit` socket + the named obligation
@@ -721,14 +729,35 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > **28/28/24/26/14/10/14** cells, where the ceiling should be far higher — unverified. `W-j`'s hoist
 > is the part that scales with that number, so it is now worth measuring.
 >
+> ### ▶▶▶ WHAT TO PICK UP — the live options, in the order I would take them
+>
+> Nothing is half-finished: the gate is green, `Publication.lean` is closed, and every increment
+> below is independent of the others. Pick one.
+>
+> | | option | size | why / why not |
+> |---|---|---|---|
+> | **A** | **Wire `ResolvableCellAt` into `Publication.UnhandledResidue`** as the narrowed residue, with `RecordDeepenCell.not_all_resolvable_of_flag` as its `③` | small — **no new mathematics**; every piece is proved and gated | It is a real definition (not an `opaque` atom, so it does not re-break `unhandledResidue_nonvacuous`), it is **measured non-vacuous both ways** (`mp7` resolvable everywhere; `rand multipede V=6 W=5` and `G8` nowhere), and it strictly narrows `¬ TinhoferGraph`. ⚠ It does **not** capture CFI-over-cubic — that must be said plainly wherever it is quoted |
+> | **B** | **W2 at `mp7`** — prove the Fano-multipede family satisfies `ResolvableCellAt` at every reached node | the real W2 box | The only *measured-reachable* positive target (14/14, target cell always among them). This is the graph `kernelSupply` was built for and the one the "poly where IR solvers are exponential" claim points at. ⛔ **Not** CFI-over-cubic — its root is a force-side node, see §2 W2 |
+> | **C** | **W4 write-up** | 1 week | The go/no-go was met at W1. Read W4's must-state list first — item 3 was **corrected 2026-08-08** and items 1/9 now have the sharpened `②` story (only `deck2Supply`'s charge can move the degree) |
+> | **D** | measure `W-j`'s hoist ceiling on a many-celled node; land a `#eval` flag witness (the multipede the rigid handler cannot peel) | small each | Both are owed *before* W4 quotes a performance number or the flag semantics |
+>
+> ⛔ **Do not start**: CFI-over-cubic coverage (force-side, Track R is suspended); `W-j2`
+> per-node billing (computed to change neither numeral); anything in §3's suspended table.
+>
 > ### Reading order for a fresh pickup
-> 1. This block, then §2a's `Publication.lean` state table and the **eight corrections** below.
+> 1. This block, then §2a's `Publication.lean` state table and the **thirteen corrections** below.
 > 2. [`chain-descent-percell-plan.md`](chain-descent-percell-plan.md) — **the design record of the
 >    object above** (it is no longer a plan; every item is ✅). Its §1–§3a explain *why* the supply
 >    had to be cell-indexed, and its §2/§6/§7/§10 carry the retractions.
 > 3. `Publication.lean` top-to-bottom — it is the deliverable and its prose is current.
-> 4. `RecordDeepenCell.lean` → `SelectCell.lean` → `DeepenCell.lean`, in that order.
+> 4. `RecordDeepenCell.lean` → `SelectCell.lean` → `DeepenCell.lean`, in that order. ★ For **W2**
+>    read `SelectCell.lean` **§9** (the `SomeCellOrbit` socket) and `RecordDeepenCell.lean` **§3a**
+>    (`ResolvableCellAt`) first — they are the whole of what W2 stages 1–2 built, and §2 W2's
+>    correction blocks say why two earlier routes were wrong.
 > 5. `PublicTheoremIndex.md` for anything else.
+> 6. Measured evidence: `scratchpad/probe_w2_resolvable.out` (W2 stage 0),
+>    `scratchpad/ProbeShareWalk*.lean` + `ProbeWjMeasure.lean` (`W-j`),
+>    `scratchpad/ProbeAnswers.lean` (what the object answers on).
 >
 > ---
 >
@@ -879,6 +908,9 @@ supersedes items 0–1 here.
 | **the cell-indexed spine** | `SelectCell.lean` | `CellSupply`/`selNodeC`/**`CellOrbitTransport`** (replaces `SupplyEquivariant`) · §4 the stall/`HandledSC`/answers mirror · §5 `②`'s per-node bill · §6 the eager runnable twin · §7 **lazy billing** (`probeWalk`/`selNodeLazyC`) + lemmas A (`find?_sort_eq_min`) and B (`descendS_val_congr`) · §8 **`W-j`** (`keyTable`/`probeWalkH`/**`selNodeLazyHC`** — the published resolver; key evaluated once per vertex, node-level supply factor once per node, bill unchanged) |
 | **the cell-anchored harvest** | `DeepenCell.lean` | `deepenGensOn` · **`GoodCell`** (decidable, *unconditionally* invariant) · §7a **`goodCellCost_bounds_guard`** — the guard is billed, not declared |
 | **★ THE PUBLISHED OBJECT** | `RecordDeepenCell.lean` | **`recordDeepenCell_full_fast` = `①` ∧ `②` ∧ `③` at one runnable object.** `W-d′` rides `Kernel.sameOrbits_recordSupply`; `③` rides `goodCell_of_tinhofer` |
+| **`W-j` — the shared key + hoisted factor** | `SelectCell` §8 + `RecordDeepenCell` §5 | `keyTable`/`keepMinT` · `SplitSupply` · **`probeWalkH`** + **`probeWalkH_eq`** (an equation in BOTH components ⟹ no numeral moves) · `selNodeLazyHC` · `costFast_eq`. 1.33×/1.48× measured |
+| **`W2` stage 1 — the socket** | `SelectCell` §9 | `CellOrbitAt` · `cellNarrowC_length_le_one_of_cellOrbitAt` · `SomeCellOrbit` · **`handledSC_of_someCellOrbit`** — *one* resolvable cell per node suffices, at **any** cell, no `targetColour`. **Widening the handled region = supplying a wider hypothesis here** |
+| **`W2` stage 2 — the obligation** | `DeepenCell` §9 + `RecordDeepenCell` §3a | `Deepen.cellOrbitAt_deepenCellSupply` (`GoodCell` ∧ `CellSingleOrbit` at one cell ⟹ it fires) · **`ResolvableCellAt`** · `handledSC_of_resolvableCells` · **`not_all_resolvable_of_flag`** (a narrower `③`, **not yet wired into `Publication`**) · `resolvableCellAt_of_tinhoferGraph` (so `TinhoferGraph ⊆ resolvable-everywhere` is machine-checked) |
 
 ### ⚠ EIGHT OBJECTS — do not mix them up when writing
 | object | executable | `①` | `②` | `③` | named coverage |
@@ -911,6 +943,7 @@ statement (every key), rows 6–7 are `noncomputable` and **must not appear in a
 | Lean `#eval` (2026-08-04) | the **record object answers** on `C₅ C₆ P₅ K₅ 3K₂ K₁,₂,₃ K₃⊔C₄` (7/7) ⟹ no falsifier of `③` at the record object; option (ii) is open, not dead |
 | Lean `#eval` (2026-08-08) — **the published object** | `RecordDeepenCell.canonFormFast` answers on `K₂`, `C₅`, `K₁,₂,₃`; `costFast` = **1606 / 5 212 728 / 20 321 716**, wall **— / 20.8 s / 50.4 s** (after `W-j`; 34 s / 87 s before it — the *billed* values are unchanged by `W-j`). It also answers on **`K₃ ⊔ C₄`**, the residual witness, which is expected: `③` bounds what is *proved*, not what the object can do. Reproduce with a two-line file: `import ChainDescent.RecordDeepenCell` then `#eval (RecordDeepenCell.canonFormFast (n := 6) (TwinFamily.mpAdj TwinFamily.part123)).isSome` and the same at `costFast`; run `lake env lean <file>` from `GraphCanonizationProofs/`. ⚠ At the `Showcase` names instead, copy `Publication.lean` and append the `#eval`s — it is not a library module, so `import Publication` fails |
 | lazy vs eager vs node-global (2026-08-08) | `K₁,₂,₃`: lazy **20 321 716 / 87 s** · eager cell-indexed 38 212 276 / 210 s · node-global `selNodeFast` 25 346 020 / 148 s ⟹ **2.4× / 1.7× faster**, 20 % less billed than node-global. ⚠ Only 1–2 non-singleton cells exercised |
+| **`probe_w2_resolvable.py` → `probe_w2_resolvable.out` (W2 stage 0, 2026-08-08)** | ★ `ResolvableCellAt` at every reached node (depth 1, ≤2/node): **`mp7` 14/14 Y** · `S(K5)`/`S(Petersen)` Y · **MIXED Y but the TARGET cell shut at the root ⟹ the stage-1 widening is LOAD-BEARING** · ⛔ **CFI cubic m=8 pl/tw N at the ROOT** (both root cells guard-shut, re-verified at budget 200 000; 26/26 depth-1 cells pass) · `rand multipede V=6 W=5` 0/8, `G8` 0/1. ⚠ `GoodCell` `None` never counted as a pass; single-orbit is a **positive certificate** only (union-find over `Ctx`/`canon`'s sound gens, ⛔ never `probe_orbit_oracle`) |
 | `W-j` — key shared + left factor hoisted (2026-08-08) | `scratchpad/ProbeShareWalk*.lean` predicted it, `ProbeWjMeasure.lean` confirms it at the shipped definitions: `C₅` 27.6 s → **20.8 s** (1.33×), `K₁,₂,₃` 74.4 s → **50.4 s** (1.48×), **billed costs byte-identical** (5 212 728 / 20 321 716). ⚠ The *hoist* half only pays where several cells are probed, i.e. where early cells fail to fire; no small library witness has that shape |
 
 ⚠ Read each probe's header before quoting a number — the soundness discipline (positive certificates
@@ -920,7 +953,8 @@ only, `None` ≠ `False`, the orbit-reduction licence, ⛔ never `probe_orbit_or
 ⚠ **Probes must materialise colourings** (`Refine.warmRefineVec`): a `def … : Colouring n` probe ran
 >10 min against ~1 min for the same measurement — standing trap #1 is live in probe code too.
 
-### ⛔ EIGHT corrections a fresh reader will otherwise inherit
+### ⛔ THIRTEEN corrections a fresh reader will otherwise inherit
+*(1–8 predate 2026-08-08; 9–13 were found this session and each cost real work to catch.)*
 1. **rigid-seal §9.1 does NOT block W1** — corrected at source, at `00-START-HERE.md`'s W1 line, and
    at `remaining-work.md` §1T. The socket is pure-consume; a rigid obstruction *fails* its hypothesis.
 2. **CAO "known false" is not a located citation** — `cao-propagation.md` §0.0a. Closure stands; the
@@ -947,6 +981,24 @@ only, `None` ≠ `False`, the orbit-reduction licence, ⛔ never `probe_orbit_or
 8. **The `17/17 exact` sweep does not, on its own, evidence a union phenomenon** — 12 of its witnesses
    have all anchors good (`orbitComplete_of_tinhofer` covers them) and the rest are all-singleton-orbit
    (`orbitComplete_of_good_or_trivial` covers them). `probe_union_need.py` is what settled that.
+9. **⛔⛔ W2's route via `CascadeOracle` → `handled_of_seal` is at the WRONG OBJECT** — it lands at
+   `deepMatchSupply` + the blind `Residue.Handled`, and `deepMatchSupply` is not a factor of
+   `recordSupplyFast`. Following it produces a second-object discharge, which is forbidden.
+   `chain-descent-cascade-oracle.md` still describes that route with no warning — banner added.
+10. **⛔⛔ And `CellIsOrbit kernelSupply` at a CFI node is MEASURABLY FALSE** — the replacement route
+   I recorded on 2026-08-07 was also wrong. `KernelSupply.lean`'s own header: on `mp7` the root
+   gadget cell goes **28 → 7**; `kernelSupply` certifies the *gauge* and leaves the Z₇ translations
+   standing. It is a gauge constructor; base symmetry is `deepenSupply`'s job.
+11. **⛔⛔ `ResolvableCellAt` FAILS AT THE CFI-OVER-CUBIC ROOT** (measured, budget 200 000, `False`
+   not `None`) while 26/26 depth-1 cells pass ⟹ **the consume side cannot take that node**, and CFI
+   coverage is a **force-side** obligation (Track R, suspended). Do not plan W2 around CFI-over-cubic.
+12. **⛔⛔ The recorded `②`-tightening advice is wrong** — the harvest-`|cell|²n⁴` refinement,
+   `goodCellCost`'s inner `n⁶`, `holKeyFast`'s `n⁵` and per-node supply billing **all leave 13 / 69
+   unchanged**. `costConst` *is* the bound polynomial at `n = 1`; `costDeg` is set by one term. The
+   only lever is `Deck2.deck2Supply`'s declared charge (→ 11 / 65).
+13. **⛔ "The canonizer flags on most interesting inputs" is FALSE** — it answers on every tested
+   input including the residual witness `K₃ ⊔ C₄`. Say *"has not yet been **proven** on most
+   interesting inputs"*. This is by design; see the START-HERE block's caveat 3.
 
 ### ⚠ WHAT IS *NOT* RECORDED ANYWHERE ELSE — read before re-deriving
 * `rootCol` does **not** kernel-reduce: `decide` on `rootCol kc 0 = rootCol kc 3` gets **stuck** (trap

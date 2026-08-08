@@ -19,12 +19,29 @@
 > **three times per vertex per probed cell** and re-harvesting the cell-independent
 > `recordSupplyFast` once per probed cell. `probeWalkH`/`selNodeLazyHC` remove both with an
 > **unchanged bill**, so no numeral moves: `C₅` 27.6 s → **20.8 s**, `K₁,₂,₃` 74.4 s → **50.4 s**,
-> identical billed costs. Gate exit 0 / 228 s / 119 modules.
-> ⛔ **Two corrections to carry.** (i) **W2's recorded route points at the wrong object** and must be
-> re-scoped onto `kernelSupply` → `HandledSC` before it is started — wind-down §2 W2's *SCOPE
-> CORRECTION #2*. (ii) **The recorded `②`-tightening advice is wrong**: of the five obvious levers,
-> four change neither `costConst` nor `costDeg`; the only one that does is `Deck2.deck2Supply`'s
-> declared charge (→ 11 / 65). See the `W-j` block in wind-down §2a.
+> identical billed costs.
+>
+> ✅ **2026-08-08 — `W2` STAGES 1–2 LANDED.** `SelectCell.lean` **§9** = the socket
+> **`handledSC_of_someCellOrbit`** (*one* resolvable cell per reached node ⟹ `HandledSC`, at **any**
+> cell — the old route only ever used the *target* cell); `DeepenCell.lean` §9 + `RecordDeepenCell`
+> §3a = the named obligation **`ResolvableCellAt adj χ := ∃ c ∈ nsColours χ, GoodCell adj χ c ∧
+> CellSingleOrbit adj χ c`**, with `handledSC_of_resolvableCells`, a narrower `③`
+> (`not_all_resolvable_of_flag`, **not yet wired into `Publication`**) and
+> `resolvableCellAt_of_tinhoferGraph` so the containment is machine-checked.
+> **Gate exit 0 / 224 s / 119 modules; `Publication.lean` still zero `sorry`, zero custom axioms.**
+>
+> ⛔ **Five corrections to carry into any pickup** (full list = wind-down §2a's *thirteen
+> corrections*): (i) W2's `CascadeOracle` → `handled_of_seal` route is at the **wrong object**
+> (`deepMatchSupply`, not in `recordSupplyFast`); (ii) its replacement `CellIsOrbit kernelSupply` is
+> **measurably false** (`mp7` root cell 28 → 7 — the gauge is certified, the Z₇ translations stand);
+> (iii) **`ResolvableCellAt` fails at the CFI-over-cubic root** (guard genuinely shut, budget 200 000)
+> though 26/26 depth-1 cells pass ⟹ CFI coverage is a **force-side** obligation, and the reachable
+> target is **`mp7`**; (iv) the recorded `②`-tightening advice is wrong — four of five levers move
+> neither numeral, only `Deck2.deck2Supply`'s charge does (→ 11 / 65); (v) *"the canonizer flags on
+> most interesting inputs"* is **false** — it answers on every tested input including the residual
+> witness `K₃ ⊔ C₄`; say *"has not yet been **proven** on most interesting inputs"*.
+>
+> ▶ **What to pick up next: wind-down §2a's *WHAT TO PICK UP* table** (options A–D, with sizes).
 > It supersedes the wind-down's options table (i)–(vi), now **provenance**:
 > `Publication.canonForm?` **keeps its current fused object** and the work is a **supply change**
 > (cell-indexed). Option (iv)/(v) references below are provenance.

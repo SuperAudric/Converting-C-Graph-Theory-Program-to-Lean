@@ -1,5 +1,17 @@
 # Build plan — discharging the CFI gauge nut (`ResidualInvolutive` via P-separation)
 
+> # ⛔ STATUS 2026-08-08 — RECORD, NOT A PLAN; AND READ THE W2 MEASUREMENT FIRST
+>
+> Research phase closed 2026-08-01; **[`chain-descent-wind-down.md`](./chain-descent-wind-down.md) is
+> authoritative** for anything forward-looking.
+>
+> ⚠ Before using anything here for CFI coverage: wind-down §2 W2 records that
+> **`ResolvableCellAt` fails at the CFI-over-cubic root** — both root cells have the per-cell deepen
+> guard genuinely shut (measured, budget 200 000) — so the **consume** side cannot resolve that node
+> and CFI coverage is a **force-side** obligation (Track R, suspended). The depth-1 CFI residue *is*
+> resolvable (26/26 cells). ⛔ Also: `CellIsOrbit Kernel.kernelSupply` at a CFI node is **false** —
+> on `mp7` the root gadget cell goes 28 → 7, the gauge certified and the Z₇ translations standing.
+
 > **STATUS (2026-06-04): Lemmas A + B + capstone + harvest wiring all LANDED (axiom-clean).** The build plan
 > for the one remaining CFI obligation left after the de-classed coverage landed.
 >

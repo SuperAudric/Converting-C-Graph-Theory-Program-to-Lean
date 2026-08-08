@@ -339,6 +339,28 @@ intended shape is `¬ Tinhofer ∧ ¬ (linear/CFI obstruction)`, or equivalently
 immediately re-break `unhandledResidue_nonvacuous`'s handled half, which is exactly the trap this reshape
 is undoing.
 
+### ★ A NARROWER RESIDUE IS NOW PROVED AND **NOT YET WIRED HERE** (2026-08-08, W2 stages 1–2)
+
+`ChainDescent.RecordDeepenCell.ResolvableCellAt adj χ` — *some non-singleton cell of `χ` is both
+good-anchored (`Deepen.GoodCell`, the per-cell deepen guard opens) and a single `Aut`-orbit
+(`Deepen.CellSingleOrbit`)* — is a **definition**, not an `opaque` atom, and
+
+  · `RecordDeepenCell.handledSC_of_resolvableCells` : it holding at every reached non-discrete
+    colouring makes **this** object `HandledSC`, hence never-flagging;
+  · `RecordDeepenCell.not_all_resolvable_of_flag` : the contrapositive — `③` at that class;
+  · `RecordDeepenCell.resolvableCellAt_of_tinhoferGraph` : `TinhoferGraph` is an **instance**, so the
+    containment is machine-checked and swapping the residue cannot lose coverage.
+
+It is **strictly narrower** than `¬ TinhoferGraph` and **measured non-vacuous in both directions**
+(`scratchpad/probe_w2_resolvable.out`: `mp7` resolvable at every reached node; `rand multipede
+V=6 W=5` and `G8` at none). Wiring it in is `UnhandledResidue n G := ¬ ∀ χ reached non-discrete,
+ResolvableCellAt G χ` plus re-pointing `residue_if_flag` — **no new mathematics**.
+
+⚠⚠ **What must be said if it is wired:** it does **not** capture CFI-over-cubic. Measured, both root
+cells of a CFI graph over a cubic base have the per-cell guard **shut** (budget 200 000, `False` not
+`None`) while 26/26 depth-1 cells pass — so the *consume* side cannot resolve a CFI **root** at all,
+and CFI coverage is a **force-side** obligation, not this one. See `chain-descent-wind-down.md` §2 W2.
+
 **The flag semantics this rests on** (unchanged): the descent flags exactly at a **mutual stall** — no
 resolver fires anywhere. So the bridge to prove is *Tinhofer ⟹ the consume resolver fires*
 (`TwinFamily.cellIsOrbit_deepenSupply_of_schurianAt`: at a Tinhofer node the deepening supply certifies

@@ -1,5 +1,22 @@
 # Chain descent — the a-priori cascade oracle (spec + design)
 
+> # ⛔⛔ STATUS 2026-08-08 — THE `handled_of_seal` ROUTE IS AT THE **WRONG OBJECT**
+>
+> Research phase closed 2026-08-01; **[`chain-descent-wind-down.md`](./chain-descent-wind-down.md) is
+> authoritative**. This document is a RECORD, not a plan.
+>
+> **The specific trap here:** `HandledBridge.handled_of_seal` (fed by `CascadeOracle` /
+> `theorem_1_HOR_cfi_oddDeg`) concludes `Residue.Handled key (deepMatchSupply k)` — the **blind**
+> predicate at the **deep-match** supply. The published canonizer is `Select.selNodeLazyHC` at
+> `recordSupplyDeepenC = fun c => recordSupplyFast ++ deepenCellSupply c`, whose predicate is
+> `Select.HandledSC`, and **`deepMatchSupply` is not a factor of `recordSupplyFast`**. So this route
+> cannot be rewritten onto `Publication.canonForm?`: taking it produces a **second-object discharge**,
+> which the standing steer forbids. See wind-down §2 W2's *SCOPE CORRECTION #2*.
+>
+> ▶ What replaced it: the `Select.SomeCellOrbit` socket (`SelectCell.lean` §9) and
+> `RecordDeepenCell.ResolvableCellAt` (§3a). ⚠ And note the measured result that a CFI-over-cubic
+> **root** is not resolvable by the consume side at all.
+
 > # ▶▶ ⚠ STATUS 2026-07-14 — the oracle is WIRED IN, and **ONE STEP IS NOT ENOUGH**
 >
 > `matchOracle`'s **construct-and-check** colour match has been rebuilt over the descent's own `(adj, χ)` vocabulary

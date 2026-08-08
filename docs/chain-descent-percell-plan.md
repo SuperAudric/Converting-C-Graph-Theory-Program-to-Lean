@@ -1,5 +1,10 @@
 # PER-CELL CONSUME — how `Publication.residue_if_flag` was closed
 
+> **▶ [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) is authoritative** for what
+> remains; its §2a *WHAT TO PICK UP* table is the entry point. This file is the **design record** of
+> the object that closed, plus `W-j` (§5). ⚠ `W2`'s sockets are **not** here — they are
+> `SelectCell.lean` §9 and `RecordDeepenCell.lean` §3a; see wind-down §2 W2.
+
 > # ✅✅✅ COMPLETE 2026-08-08 — this is now a DESIGN RECORD, not a plan
 > **Every item (W-a … W-i) is done and `Publication.lean` has zero `sorry` and zero custom axioms.**
 > `canonForm?` = `RecordDeepenCell.canonFormFast`, `cost` = `costFast`, `costConst`/`costDeg` = 69/13,
@@ -533,6 +538,9 @@ consumed them.
 ★ **And the deliverable RUNS**: `#eval` at the `Showcase` names gives
 `canonForm? 2 K₂` ✓ answers, `cost 2 K₂` = 1606; `canonForm? 6 K₁,₂,₃` ✓ answers,
 `cost` = 38 212 276, against `69·7^13 ≈ 6.7 × 10¹²`.
+⚠ **That `K₁,₂,₃` figure is the EAGER (`selNodeFastC`) cost and was superseded hours later** — after
+`W-e` the object bills **20 321 716**, and `W-j` left that value unchanged while cutting the wall
+clock to 50.4 s. Quote 20 321 716.
 
 ⚠ Two things the file now states at source and that must travel with any quotation of it: `②`'s
 degree is a **bound from declared flat charges, not a measurement** (§6), and `③`'s residue is an

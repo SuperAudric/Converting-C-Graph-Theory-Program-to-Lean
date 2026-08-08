@@ -1,5 +1,14 @@
 # Chain descent — the deepen supply (`C3b`, the base-symmetry constructor)
 
+> # ▶ STATUS 2026-08-08 — RECORD, NOT A PLAN
+>
+> **[`chain-descent-wind-down.md`](./chain-descent-wind-down.md) is authoritative.** `deepenSupply`
+> now reaches the published object as the **cell-anchored, guarded** `Deepen.deepenCellSupply`
+> (`DeepenCell.lean`), inside `RecordDeepenCell.recordSupplyDeepenC`. Its firing condition at one
+> cell is `Deepen.cellOrbitAt_deepenCellSupply` (`GoodCell` ∧ `CellSingleOrbit`), and the W2
+> obligation built on it is `RecordDeepenCell.ResolvableCellAt`. ⚠ Measured: that condition **fails
+> at a CFI-over-cubic root** and holds at `mp7` everywhere — wind-down §2 W2.
+
 > **What this doc is.** The single self-contained home for `deepenSupply` (the `DeepenAnchor` /
 > `ReplayDeepening` port of the C# `HarvestTwists`). It grew its own thread — seven Lean files plus
 > scattered `remaining-work.md` §1C and topic-memory sections — so this collects the **grounding** (what it
