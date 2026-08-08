@@ -516,14 +516,41 @@ consumed them.
 degree is a **bound from declared flat charges, not a measurement** (§6), and `③`'s residue is an
 **over-approximation** (CFI graphs are counted residual though their obstruction is linear).
 
-### W-e. Lazy evaluation *(runtime only — but see the correction)*
-`selColourC` is `(nonSingletonColours χ).filter (…) |>.min`, a `Finset` operation, so **every** cell
-is probed even when the first fires. Given W-i's per-cell recomputation this is no longer cosmetic.
-⛔ **The shape proposed here was wrong**: `nsColours χ` is
-`((List.finRange n).map χ).dedup.filter …` — **first-occurrence order of colour values, not sorted**
-— so `List.find?` over it returns the first *encountered* firing colour, **not the minimum**, and the
-`= selColourC` lemma is false. Sort first (`mergeSort (· ≤ ·)`, or `List.min?` over the filtered
-list) and prove the sort agrees with `Finset.min`.
+### W-e. Lazy evaluation — ⏸ **SET ASIDE 2026-08-08, and RE-SCOPED: it is not what this entry said**
+
+⛔⛔ **The proposal was wrong twice over, and the second error is the one that matters.**
+
+1. *(recorded earlier)* `nsColours χ` is `((List.finRange n).map χ).dedup.filter …` — **first-occurrence
+   order, not sorted** — so `List.find?` over it returns the first *encountered* firing colour, not the
+   minimum, and the `= selColourC` lemma is **false**. ✅ Cheap fix: iterate
+   `Finset.sort (· ≤ ·) (nonSingletonColours χ)` instead, which brings `Finset.sort_sorted` /
+   `sort_nodup` / `mem_sort` for free and removes all `mergeSort` API risk.
+
+2. ⛔⛔ **A lazy *selector* buys NOTHING.** Verified in the source, not argued: the returned **cost**
+   already forces every cell. `Select.selProbeCostC` sums `supplyCost (S c) + |gens (S c)|·n² + … +
+   |cell|·(|verified (S c)|·n² + …)` over **all** of `nsColours χ`, and `selNodeFastC` builds the whole
+   `cellData` table and `pc` from it **before** `selColourT` is ever called. Short-circuiting the
+   selector after that point saves nothing at all.
+
+⟹ **The real W-e is a lazy-BILLING resolver**, which is a different and much larger piece:
+
+| piece | size / risk |
+|---|---|
+| `probeWalk` over `Finset.sort (· ≤ ·) (nonSingletonColours χ)` — evaluate each cell's supply **on demand**, accumulate its bill, stop at the first cell that narrows to `≤ 1` | new recursive def |
+| **A.** walk-result `= selColourC` — for a sorted nodup list whose members are `s`, `find? p = (s.filter p).min` (via `List.find?_eq_some_iff_append` + `List.sorted_append` + `Finset.min_le`/`le_min`) | ~40 lines, the one real lemma |
+| **B.** `descendS`'s **value** projection depends only on the resolver's `.1` | ~15 lines, induction. ★ Needed to inherit `①` for free — `Select.NodeTransport`/`NodeTransportAt` are stated **purely on `.1`** (checked), so a resolver with the same children and a smaller bill keeps `①` unchanged |
+| **C.** walked bill `≤ selProbeCostC` — a prefix-sublist of a permutation of `nsColours χ`, all terms in `ℕ` | ~20 lines; then `②` reuses `selProbeCostC_le` with one `le_trans`, **no new numerals** |
+| repoint `Publication.canonForm?`/`cost` again + re-measure | mechanical, but it moves the deliverable a second time |
+
+★ **Payoff, from the project's own measurements.** `probe_offbranch5`'s depth-1 CFI nodes have
+**28, 28, 24, 26, 14, 10, 14** non-singleton cells; laziness stops at the first firing colour, so the
+ceiling is roughly that count — **up to ~10–28× wall clock on exactly the inputs the artifact wants to
+demo**. On the small witnesses it is 1–2× (`C₅` has 1 non-singleton cell, `K₁,₂,₃` has 2), which is why
+the numbers measured in W-i do **not** show it.
+
+▶ **Deferred as a performance item, not an obligation.** `①`/`②`/`③` are closed and unaffected; `②`'s
+bound already charges for every cell, so lazy billing can only make the true cost *smaller* than the
+proved ceiling. Pick it up with lemma **A** first — if that goes, the rest is mechanical.
 
 ---
 
