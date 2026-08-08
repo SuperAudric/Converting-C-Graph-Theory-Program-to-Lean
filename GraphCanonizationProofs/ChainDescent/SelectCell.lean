@@ -156,6 +156,25 @@ theorem cellOrbitTransport_ofSupply {S : Supply n} (hS : SupplyEquivariant S) :
   intro σ adj χ _c _a _b _ha _hb
   exact SupplyTransport.wordReach_conj_iff (fun g => hS σ adj χ g)
 
+/-- **The `SameOrbits` route to a transporting relation** — the shape
+`Deepen.cellOrbitTransport_append` asks of its left factor, and the only route open to a supply that
+is not `GensEquivariant`. `kernelSupply` (hence the whole record supply) enters here: its Gaussian
+basis is pivot-order dependent, but its *orbits* match an equivariant set-level reference
+(`Kernel.sameOrbits_recordSupply`), and the relation is all `①` reads. -/
+theorem wordReach_transport_of_sameOrbits {Sref S : Supply n}
+    (hso : OrbitPrune.SameOrbits Sref S) (hE : SupplyEquivariant Sref)
+    (σ : Equiv.Perm (Fin n)) (adj : AdjMatrix n) (χ : Colouring n) (a b : Fin n) :
+    WordReach (verified S (relabelAdj σ adj) (transportColouring σ χ)) (σ a) (σ b)
+      ↔ WordReach (verified S adj χ) a b := by
+  rw [← hso _ _ _ _, ← hso _ _ _ _]
+  exact SupplyTransport.wordReach_conj_iff (fun g => hE σ adj χ g)
+
+/-- The cell-agnostic instance, for symmetry with `cellOrbitTransport_ofSupply`. -/
+theorem cellOrbitTransport_ofSupply_of_sameOrbits {Sref S : Supply n}
+    (hso : OrbitPrune.SameOrbits Sref S) (hE : SupplyEquivariant Sref) :
+    CellOrbitTransport (ofSupply S) :=
+  fun σ adj χ _c _a _b _ha _hb => wordReach_transport_of_sameOrbits hso hE σ adj χ _a _b
+
 /-- **★★ THE PER-CELL ORBIT COUNT TRANSPORTS** — `cellNarrow_length_transport` with
 `SupplyEquivariant` replaced by `CellOrbitTransport`. The proof is the original's; the hypothesis is
 consumed at exactly the same place, and the `keepMin` members it is applied to are inside the cell
@@ -276,6 +295,112 @@ theorem selNodeC_canonizer_ofSupply {key : Key n} (hk : KeyEquivariant key) {S :
       (canonFormS? (Refine.encodeFreeFast (n := n))
         (selNodeC (Refine.encodeFreeFast (n := n)) key (ofSupply S))) :=
   selNodeC_canonizer hk (cellOrbitTransport_ofSupply hS)
+
+/-! ## 4. ★★ THE STALL, THE RESIDUE, AND TOTALITY — `SelectNode` §9–§10 at the cell-indexed object
+
+⚠ **These are NOT inherited.** `Select.lean`'s spine is resolver-generic, so `descendS` /
+`canonFormS?` / `isCanonicalFormOptS_canonFormS?` / `descentCostS_le_of_le_one` /
+`descendS_ne_none_reaches` apply to `selNodeC` verbatim — but `HandledS`, `answersS_of_handledS`
+and `not_handledS_if_flagS` are stated at **`selNode`**, so `③` does not transfer by rewriting. This
+section is the mirror; every proof is `SelectNode`'s with `cellNarrow key S` read as
+`cellNarrowC key S` (definitionally `cellNarrow key (S c)`, so the per-cell lemmas apply as they
+stand).
+
+★ The one genuinely new thing is what `NodeResolvedC` *means*: "some cell narrows to `≤ 1` **on its
+own evidence**". At `ofSupply` it is `NodeResolved`; at a cell-anchored supply it is strictly the
+per-cell claim, which is the whole point of design `B`. -/
+
+/-- The flag fires only at a true mutual stall: NO non-singleton cell narrows to `≤ 1` on its own
+generators. -/
+theorem selColourC_none {key : Key n} {S : CellSupply n} {adj : AdjMatrix n} {χ : Colouring n}
+    (h : selColourC key S adj χ = none) :
+    ∀ c ∈ nonSingletonColours χ, ¬ (cellNarrowC key S adj χ c).length ≤ 1 := by
+  intro c hc hlen
+  have hmem : c ∈ (nonSingletonColours χ).filter
+      (fun c => (cellNarrowC key S adj χ c).length ≤ 1) :=
+    Finset.mem_filter.mpr ⟨hc, by simpa using hlen⟩
+  unfold selColourC at h
+  have hemp : (nonSingletonColours χ).filter
+      (fun c => (cellNarrowC key S adj χ c).length ≤ 1) = ∅ := Finset.min_eq_top.mp h
+  rw [hemp] at hmem
+  exact absurd hmem (Finset.notMem_empty c)
+
+/-- **Fan-out `≤ 1` by construction** — a cell is committed to only after it narrowed to `≤ 1`. This
+is what makes the descent a single path of `≤ n + 1` nodes, and it carries no hypothesis. -/
+theorem selNodeC_children_length_le_one (rf : Refiner n) (key : Key n) (S : CellSupply n)
+    (adj : AdjMatrix n) (χ : Colouring n) : (selNodeC rf key S adj χ).1.length ≤ 1 := by
+  cases h : selColourC key S adj χ with
+  | none => rw [selNodeC_children_none h]; simp
+  | some c =>
+      rw [selNodeC_children_some h, List.length_map]
+      exact (selColourC_spec h).2
+
+/-- **★ THE FLAG SEMANTICS**, as a characterization: the cell-indexed resolver emits no child **iff**
+no non-singleton cell narrows to `≤ 1` against its own generators. -/
+theorem selNodeC_stall_iff {rf : Refiner n} {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} :
+    (selNodeC rf key S adj χ).1 = []
+      ↔ ∀ c ∈ nonSingletonColours χ, 1 < (cellNarrowC key S adj χ c).length := by
+  constructor
+  · intro h c hc
+    cases hsel : selColourC key S adj χ with
+    | none => exact Nat.not_le.mp (selColourC_none hsel c hc)
+    | some c' =>
+        rw [selNodeC_children_some hsel] at h
+        exact absurd (List.map_eq_nil_iff.mp h) (cellNarrow_ne_nil (selColourC_spec hsel).1)
+  · intro hall
+    cases hsel : selColourC key S adj χ with
+    | none => exact selNodeC_children_none hsel
+    | some c' =>
+        have h1 := (selColourC_spec hsel).2
+        have h2 := hall c' (selColourC_spec hsel).1
+        omega
+
+/-- **The cell-indexed capability predicate, per node**: SOME non-singleton cell narrows to `≤ 1`
+**on the evidence of descents anchored in that cell**. -/
+def NodeResolvedC (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∃ c ∈ nonSingletonColours χ, (cellNarrowC key S adj χ c).length ≤ 1
+
+/-- The cell-indexed capability predicate: every reached non-discrete node has a resolvable cell. -/
+def HandledSC (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) : Prop :=
+  ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ → ¬ Discrete χ →
+    NodeResolvedC key S adj χ
+
+theorem nodeResolvedC_ofSupply {key : Key n} {S : Supply n} {adj : AdjMatrix n} {χ : Colouring n} :
+    NodeResolvedC key (ofSupply S) adj χ ↔ NodeResolved key S adj χ := Iff.rfl
+
+theorem handledSC_ofSupply {key : Key n} {S : Supply n} {adj : AdjMatrix n} :
+    HandledSC key (ofSupply S) adj ↔ HandledS key S adj := Iff.rfl
+
+/-- A `NodeResolvedC` node is never a stall. -/
+theorem selNodeC_ne_nil_of_nodeResolvedC {rf : Refiner n} {key : Key n} {S : CellSupply n}
+    {adj : AdjMatrix n} {χ : Colouring n} (h : NodeResolvedC key S adj χ) :
+    (selNodeC rf key S adj χ).1 ≠ [] := by
+  obtain ⟨c, hc, hres⟩ := h
+  intro hnil
+  have := selNodeC_stall_iff.mp hnil c hc
+  omega
+
+/-- **★★ THE ANSWERS THEOREM** for the cell-indexed object — no flag on a `HandledSC` graph.
+`descendS_ne_none_reaches` is resolver-generic and `nodeProper_selNodeC` was proved in §1, so the
+only new ingredient is the stall characterization above. -/
+theorem answersSC_of_handledSC {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    (h : HandledSC key S adj) :
+    canonFormS? (Refine.encodeFreeFast (n := n))
+      (selNodeC (Refine.encodeFreeFast (n := n)) key S) adj ≠ none := by
+  unfold canonFormS?
+  refine descendS_ne_none_reaches Refine.refineSplits_encodeFreeFast
+    (nodeProper_selNodeC _ _ _)
+    (fun χ hr hd => selNodeC_ne_nil_of_nodeResolvedC (h χ hr hd)) n _ Descend.Reaches.root ?_
+  have := Nat.zero_le (ncol (refineV (Refine.encodeFreeFast (n := n)) adj (fun _ => 0)))
+  omega
+
+/-- **`③`'s SHAPE for the cell-indexed object**: the flag names the cell-indexed residue. -/
+theorem not_handledSC_if_flagSC {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    (hflag : canonFormS? (Refine.encodeFreeFast (n := n))
+      (selNodeC (Refine.encodeFreeFast (n := n)) key S) adj = none) :
+    ¬ HandledSC key S adj :=
+  fun h => answersSC_of_handledSC h hflag
 
 end Select
 end ChainDescent

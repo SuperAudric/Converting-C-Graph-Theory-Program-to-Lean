@@ -20,13 +20,24 @@ harvest half survives, **the all-cells guard is RETRACTED** (§2).
 > strong-generating-set argument, which is `R1`-flavoured. **Decision: `B` on the critical path, `C`
 > as a free coverage enrichment on top. §4c carries the table.**
 >
-> ## ✅ `B` STEPS 1–2 ARE LANDED (2026-08-08) — gate **118 modules / 228 s**, axiom-clean
-> `ChainDescent/SelectCell.lean` (**`Select.selNodeC_canonizer`** — `①` at the cell-indexed fused
-> resolver, **no `SupplyEquivariant` anywhere**) and `ChainDescent/DeepenCell.lean`
-> (**`Deepen.deepenCell_canonizer`** — `①` at the guarded cell-anchored supply, no hypothesis).
-> ★ `SelectNode.lean` **untouched**, blast radius **zero**. ★★ **`B`'s plumbing cost was overestimated
-> here and its risk (§10.1) was misdiagnosed** — both corrected in W-b/W-c/W-d below, which now record
-> what was actually built. **▶ Next: W-d′, then W-a/W-e/W-f/W-g (§5).**
+> ## ✅ `B` IS LANDED THROUGH `①` **AND** `③` (2026-08-08) — gate **119 modules**, axiom-clean
+> Three modules: `ChainDescent/SelectCell.lean` (**`Select.selNodeC_canonizer`** — `①` at the
+> cell-indexed fused resolver, **no `SupplyEquivariant` anywhere**; plus §4, the stall/`HandledSC`/
+> answers mirror), `ChainDescent/DeepenCell.lean` (**`Deepen.deepenCell_canonizer`**), and
+> **`ChainDescent/RecordDeepenCell.lean`** — the **endgame object**
+> `selNodeC recordKey (fun c => recordSupplyFast ++ deepenCellSupply c)`, carrying
+> **`recordDeepenCell_canonizer` (`①`, global, no hypothesis)** and
+> **`not_tinhoferGraph_of_flag` (`③`, every key)**, packaged together as
+> `recordDeepenCell_record`. ★ `SelectNode.lean` **untouched**, blast radius **zero**.
+>
+> ★★ **`①` and `③` now hold of the SAME object, with `①` unconditional** — the thing wind-down
+> option (v) could not have (its `①b`/`①c` are class-only) and option (iv) could not have (its
+> residue is not `¬Tinhofer`). **`②` is the only obligation left**, and it is not a numeral
+> recompute: `selNodeC` needs its own cost mirror. See §5.
+>
+> ⛔ **Three claims in this plan were wrong and are corrected in place** — §6's cost neutrality
+> (`②` gains a degree *and* trap #2 does bite after all), §7's *"`③` is not on the critical path"*
+> (it was banked at a **different object**), and W-e's laziness (`nsColours` is **not sorted**).
 
 ---
 
@@ -283,12 +294,30 @@ evidence that **the guard's discarded working set is worth keeping**, whichever 
 
 ## 5. THE WORK, ORDERED
 
-Sized against the existing proofs each item mirrors. `③` is **already banked** — see §7.
+Sized against the existing proofs each item mirrors.
 ⚠ **W-b and W-c are `B`-specific** (§4c). Under `C` they collapse to a single node-global restatement
 of `cellNarrow_length_transport`'s hypothesis, and W-d is replaced by the strong-generating-set
 obligation. W-a, W-e, W-f, W-g are common to both.
 
-### W-a. Bill the guard *(small; do this first)*
+> ### ▶▶ ORDER, REVISED 2026-08-08 (and the two items that were missing)
+>
+> **Done:** W-b ✅ · W-c ✅ · W-d ✅ · **W-d′ ✅** · **③ mirror ✅** (`RecordDeepenCell`).
+> **Remaining, in this order:** **W-h (`②` mirror) + W-a + W-f, in ONE pass** → **W-i (fast twin)**
+> → **W-g (repoint)** → **W-e (lazy)**.
+>
+> ⛔ **W-a is no longer "do this first".** Its stated reason — *"before `②` becomes a claim that has
+> to be walked back"* — does not apply: the **current** `Publication.canon_poly_or_flag` is at a
+> guardless object (`recordSupplyFast`, no deepen), so nothing on record is at risk today. W-a
+> becomes owed exactly when the guarded supply enters the cost claim, i.e. **inside** W-h. Doing it
+> first means computing `costConst`/`costDeg` twice.
+>
+> ⛔ **`③` was ordered last because it was believed banked. It was not** (§7), and it is the
+> cheapest place for a surprise to surface — so it was moved to the front and is now done. Its one
+> real question (*does the per-cell guard open at a Tinhofer node?*) resolved to `Iff.rfl`:
+> `Deepen.tinhofer_iff_forall_goodAnchor` already says `Tinhofer = ∀ x ∈ branches χ, GoodAnchor x`,
+> and `Select.branches_eq_cellList` identifies `branches χ` with the target cell.
+
+### W-a. Bill the guard *(fold into W-h)*
 `deepenSupplyCert` inherits `deepenSupplyGuarded`'s declared flat `n⁶`, which prices deepen but bills
 **none** of the certificate (`≤ n` anchors × `≤ n` levels × one `CellIsOrbit` BFS ≈ `n⁸`). This is the
 one place the artifact's declared cost is not an honest over-estimate, and every route to `③` passes
@@ -370,43 +399,92 @@ the **shut** side deepen emits `[]` and the union is `R`'s own relation. Hence
 `cellOrbitTransport_append` and `deepenCell_append_canonizer` for any `SupplyEquivariant` left factor
 — covering `foldSupplyFast ++ deckSupply ++ deck2Supply`.
 
-**▶ NEXT (W-d′):** `kernelSupply` is provably not `GensEquivariant`; it enters through
-`OrbitPrune.SameOrbits` against an equivariant reference. `cellOrbitTransport_append`'s hypothesis is
-stated exactly so that route can discharge it — supply the reference's transport on the shut side.
+### W-d′. The record supply as left factor — ✅ **LANDED 2026-08-08, `ChainDescent/RecordDeepenCell.lean` §2**
+`kernelSupply` is provably not `GensEquivariant`, so the left factor entered through
+`OrbitPrune.SameOrbits` against `Kernel.recordRefSupply`, exactly as
+`cellOrbitTransport_append`'s hypothesis was shaped for. The generic step is
+`Select.wordReach_transport_of_sameOrbits` (§2 of `SelectCell`); the instance is
+`Kernel.sameOrbits_recordSupply` + `Kernel.supplyEquivariant_recordRefSupply`, with
+`Fold.foldSupplyFast_eq` bridging the `foldSupply`/`foldSupplyFast` spellings the same way
+`RecordKey.recordKey_canonizer` does. **~25 lines. `①` at the endgame object is
+`recordDeepenCell_canonizer`, global, no hypothesis.**
 
-### W-e. Lazy evaluation *(runtime only; semantics unchanged)*
-`selColour` is `(nonSingletonColours χ).filter (…) |>.min` — a `Finset` operation, not lazy. Add a
-`List.find?`-based computable variant over `nsColours χ` (which already exists as the computable
-mirror) plus a `= selColour` lemma. Value-identical; this is purely so the cost story below is real.
+### ③ mirror. — ✅ **LANDED 2026-08-08, `SelectCell.lean` §4 + `RecordDeepenCell.lean` §3**
+⚠ **This was NOT a repoint** — see §7's correction. `SelectCell` §4 mirrors the resolver side
+(`selColourC_none`, `selNodeC_stall_iff`, `selNodeC_children_length_le_one`, `NodeResolvedC`,
+`HandledSC`, `answersSC_of_handledSC`, `not_handledSC_if_flagSC`, plus `Iff.rfl` bridges at
+`ofSupply`); `RecordDeepenCell` §3 supplies the population (`goodCell_of_tinhofer`,
+`cellIsOrbit_deepenCellSupply_of_schurianAt`, `handledSC_of_tinhoferGraph`,
+**`not_tinhoferGraph_of_flag`**). `descendS_ne_none_reaches` and `nodeProper_selNodeC` were the only
+pieces that carried over free.
 
-### W-f. `②` recompute
-`supplyCost_appendSupply` is additive, so appending adds one term to `recordSupplyBound`; then
-`RecordKey.recordKeyBound_expand`'s `ring` regenerates `costConst`/`costDeg` (57 / 13 today).
-⚠ Numerals are **computed, not fitted** — the 2026-08-06 pass caught a transcription error this way.
+### W-h. `②` — the cost mirror at `selNodeC` *(NEW; was missing from this plan)*
+`RecordKey.descentCostS_selNode_recordKey_monomial` is stated at **`selNode`**. Of the chain, only
+`Select.descentCostS_le_of_le_one` is resolver-generic. What must be mirrored:
+`selNodeC_cost_none` / `selNodeC_cost_some` / `selNodeC_cost_le`, and a new `selProbeCostC_le`
+against a new `selProbeBoundC`. (`selNodeC_children_length_le_one` is already in `SelectCell` §4.)
+**Fold W-a in here** — bump `deepenSupplyAt`'s declared charge so it is an honest over-estimate of
+the guard (`DeepenGuard.certPathCost` + `certPathCost_le` bound it; `Deepen.stepCost` is the worked
+precedent) — and finish with **one** `ring` recompute (W-f).
+⚠ Expect the degree to move: `selProbeCostC` bills `supplyCost (S c)` **per cell**, so the supply
+term picks up a factor `n` (§6).
+
+### W-i. The runnable twin *(NEW; was missing, and W-g depends on it)*
+`selNodeC` is the **slow** shape. `SelectNode.lean:387-392` records why `selNodeFast` exists: a
+stored generic `refineV rf …` re-runs the refinement on every colour lookup (≈30 ms at `n = 14`,
+enough to hang the fused descent), and `selNodeFast` also computes the verified list **once** and
+shares it between `selColourV` and `cellNarrowV`. `selNodeC` does neither — it stores the generic
+`refineV`, and it recomputes `verified (S c) adj χ` for every probed cell *and again* after
+committing. Standing traps #1 and #2, both live.
+▶ Build `selNodeFastC` + `canonFormFastSC?` as `rfl`-twins (the project's existing pattern), caching
+`(nsColours χ).map (fun c => (c, verified (S c) adj χ))`. Without this the repointed object cannot be
+`#eval`'d, which costs the "it runs" half of the artifact.
 
 ### W-g. Repoint `Publication.canonForm?` and discharge `residue_if_flag`
-`canonFormFastS?_eq` is `rfl`, so `③` lands directly once the supply is in place.
+`RecordDeepenCell.not_tinhoferGraph_of_flag` **is** `residue_if_flag`'s statement once `canonForm?`
+names this object. ⚠ `canonFormFastS?_eq` is `rfl` for **`selNode`**; the cell-indexed object needs
+W-i's twin before the same sentence is true of it.
+
+### W-e. Lazy evaluation *(runtime only — but see the correction)*
+`selColourC` is `(nonSingletonColours χ).filter (…) |>.min`, a `Finset` operation, so **every** cell
+is probed even when the first fires. Given W-i's per-cell recomputation this is no longer cosmetic.
+⛔ **The shape proposed here was wrong**: `nsColours χ` is
+`((List.finRange n).map χ).dedup.filter …` — **first-occurrence order of colour values, not sorted**
+— so `List.find?` over it returns the first *encountered* firing colour, **not the minimum**, and the
+`= selColourC` lemma is false. Sort first (`mergeSort (· ≤ ·)`, or `List.min?` over the filtered
+list) and prove the sort agrees with `Finset.min`.
 
 ---
 
-## 6. ★ COST — the lazy version is cheaper than today's *plus* strictly more coverage
+## 6. ⛔ COST — THIS SECTION'S NEUTRALITY CLAIM IS FALSE AS BUILT (corrected 2026-08-08)
 
-Per cell of size `m`, deepen's harvest is `≤ m` anchors × (one `deepen` at `≤ n` levels × warm refine
-`n³`) + `≤ m` replays each `n⁴` + twists at `n²` ≈ **`m² n⁴`**.
+> **What is still true.** Per cell of size `m`, deepen's *real* harvest is `≤ m` anchors × (one
+> `deepen` at `≤ n` levels × warm refine `n³`) + `≤ m` replays each `n⁴` + twists at `n²` ≈ `m² n⁴`,
+> and `Σ_c m_c² ≤ (Σ_c m_c)² = n²`, so the whole per-cell family really is `≤ n⁶` of *actual* work.
+> The **common case is still identical to today** (the branch cell fires and no other cell is
+> harvested) and the **extra work still lands only where today's object would stall**.
+>
+> ⛔ **What is false: "the per-cell harvest costs nothing at `②`", and "trap #2 does not apply".**
+> Two things break it, both visible in the built code:
+>
+> 1. **The declared charge is flat, and it is now billed per cell.** `deepenSupplyAt c` declares a
+>    flat `n⁶` *regardless of `m_c`*, and `Select.selProbeCostC` sums `supplyCost (S c) adj χ` over
+>    `≤ n` cells — so `②` sees `n⁷`, not `n⁶`, and `supplyCost … ≤ …` is **not** `le_rfl`. The
+>    `Σ_c m_c² ≤ n²` argument above prices the *real* work, which the declared charge does not track.
+>    ▶ Either bill `deepenSupplyAt c` as `|cellList χ c|² · n⁴` and prove
+>    `Σ_{c ∈ nsColours χ} |cellList χ c|² ≤ n²` (recovers `n⁶`, needs cell-disjointness), or accept
+>    the degree bump and state it. **Recommended: accept it** — `②` asks for an explicit polynomial,
+>    not a tight one, and the disjointness sum is real work for a cosmetic gain.
+> 2. **Trap #2's 10× DOES bite, because the left factor is not cell-anchored.** The claim below was
+>    scoped to design `B` in isolation. The endgame supply is
+>    `fun c => recordSupplyFast ++ deepenCellSupply c`, so probing cell `c` re-harvests the **whole
+>    record supply** — exactly the `Σ_c Σ_{c'}` blow-up the original `cellNarrow` note warned about.
+>    ▶ This is what makes **W-i** (the runnable twin, cache `verified (S c)` per cell) and **W-e**
+>    (stop at the first firing cell) load-bearing rather than cosmetic.
 
-* **Worst case** `Σ_c m_c² ≤ (Σ_c m_c)² = n²`, so `≤ n² · n⁴ = n⁶` — **exactly the declared flat
-  charge `deepenSupply` already bills**, so `supplyCost … ≤ …` stays `le_rfl` and the per-cell harvest
-  costs *nothing* at `②`. The current design's worst case is already one cell of size `n`.
-* **Common case, identical to today** — the branch cell fires and no other cell is ever harvested.
-* **Extra work only where today's object would stall**, i.e. precisely the nodes that currently flag.
-  You pay to try cell 2 only when the alternative was giving up.
-
-⚠ Trap #2's measured 10× does **not** apply: it was re-evaluating the *whole node-global* supply once
-per probed cell (`Σ_c Σ_{c'} m_{c'}²`); here cell `c` evaluates only its own harvest.
-
-⚠ The real `②` debts are (a) **W-a**, pre-existing and unrelated to this plan, and (b) re-measuring
-any `Regression` number that pins a selected colour — more generators ⟹ `selColour` may commit to a
-different (lower) colour. That can only help branching, but it must be measured, not assumed.
+⚠ The other `②` debt is (b) re-measuring any `Regression` number that pins a selected colour — more
+generators ⟹ `selColour` may commit to a different (lower) colour. That can only help branching, but
+it must be measured, not assumed.
 
 ---
 
@@ -422,13 +500,28 @@ different (lower) colour. That can only help branching, but it must be measured,
 | `Deepen.stepCost` billed | ✅ `costConst` 53 → 57 |
 | **W-b/W-c — `ChainDescent/SelectCell.lean`** | ✅ **LANDED 2026-08-08**, axiom-clean — `CellSupply`/`selNodeC`/`CellOrbitTransport`/**`selNodeC_canonizer`**; `SelectNode` untouched, blast radius **zero** |
 | **W-d — `ChainDescent/DeepenCell.lean`** | ✅ **LANDED 2026-08-08**, axiom-clean — `deepenGensOn` · `GoodCell` (decidable, **unconditionally** invariant) · `deepenCellSupply` · **`deepenCell_canonizer`** = `①` at the cell-indexed fused object |
-| W-a (bill the guard) · W-e · W-f · W-g | ⬜ not started |
-| W-d′ — `kernelSupply` via `SameOrbits` on the shut side | ⬜ not started; `cellOrbitTransport_append`'s hypothesis is shaped for it |
+| **W-d′ + ③ mirror — `ChainDescent/RecordDeepenCell.lean`** | ✅ **LANDED 2026-08-08**, axiom-clean — **`recordDeepenCell_canonizer`** (`①`, global, no hypothesis, via `SameOrbits`) and **`not_tinhoferGraph_of_flag`** (`③`, every key) at **one** object; `SelectCell` §4 carries the resolver-side mirror |
+| W-h (`②` mirror, with W-a folded in) · W-i (runnable twin) · W-g · W-e | ⬜ not started |
 
-⟹ **`③` is not on the critical path.** `RecordDeepen` proves *Tinhofer graph ⟹ the fused object
-answers* by supply monotonicity (`handled_append_right`), and `TinhoferGraph` is an **all-cells**
-condition (`SchurianAt` at every individualization-reachable colouring), so it survives the per-cell
-strengthening unchanged. The critical path is `①` (W-b/W-c/W-d) and `②` (W-a/W-f).
+> ## ⛔ CORRECTION (2026-08-08) — *"`③` is not on the critical path"* WAS WRONG
+>
+> The claim rested on `RecordDeepen.not_tinhoferGraph_of_flag_recordDeepen`. That theorem is real and
+> its *argument* transfers — `TinhoferGraph` is an all-cells condition, so per-cell evidence is
+> available wherever node-global evidence was — but it is **stated at a different object**:
+> `Select.selNode` + the node-global `recordSupplyFast ++ deepenSupplyCert`. That is precisely the
+> object §3's CFI falsifier kills for `①`, so it can never be the published one, and the statement
+> does not rewrite onto `selNodeC`: **`Select.HandledS`, `answersS_of_handledS` and
+> `not_handledS_if_flagS` are all `selNode`-specific.** Only `descendS_ne_none_reaches` and
+> `descentCostS_le_of_le_one` are resolver-generic.
+>
+> ⟹ what was banked was the *mathematics*, not the theorem. The mirror cost ~150 lines across
+> `SelectCell` §4 and `RecordDeepenCell` §3 and is now done. **The same trap applies to `②`, which is
+> why W-h exists** — `descentCostS_selNode_recordKey_monomial` is `selNode`-specific too, and W-f's
+> "re-`ring` the numerals" was only the last step of it.
+>
+> ★ The general lesson, worth carrying: *a new `NodeRes` inherits everything `Select.lean` proves
+> generically and nothing `SelectNode.lean` proves specifically.* Check which side a theorem is on
+> before calling it banked.
 
 ---
 
@@ -473,6 +566,14 @@ unsound-by-omission.
    anchor's *own* path and is already decidable (`goodAnchor_iff_certPath`) and **unconditionally**
    relabelling-invariant (`goodAnchor_relabel`), so `chooseIdK_eq_targetColour` is never touched.
    See W-d.
+1a. **⚠⚠ `selNodeC` IS THE SLOW SHAPE — standing traps #1 and #2 are both live in it** (found
+   2026-08-08). It stores a generic `refineV rf …` (trap #1: re-runs the refinement on every colour
+   lookup, ≈30 ms at `n = 14` — `SelectNode.lean:387-392` records this hanging the fused descent) and
+   it recomputes `verified (S c) adj χ` once per probed cell *and again* after committing (trap #2),
+   where `selNodeFast` computes the list once and shares it. **The proofs are unaffected** — `selNode`
+   has the same shape and `selNodeFast` is its `rfl`-twin — but the repointed object cannot be
+   `#eval`'d until **W-i** builds the twin, and "it runs" is half of what the artifact claims.
+
 2. **Counts here are key-free.** `cellNarrow` applies `keepMin key` before counting, so a key that
    separates a small cell could mask a specific discrepancy. That is not a defence — the discrepancy
    lives in the supply — but the positive rows in §3 should be re-confirmed at `recordKey` before

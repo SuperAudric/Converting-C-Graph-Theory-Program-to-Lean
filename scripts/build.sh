@@ -163,6 +163,7 @@ MODULES=(
   ChainDescent.RestrictedTransport    # W1: ① relativized to a graph class ⟹ TINHOFER GRAPHS ARE CANONIZED (no supply)
   ChainDescent.DeepenTransportOn      # ① ON A CLASS at the DEEPEN object: OrbitComplete ⟹ NarrowTransportOn; option (v) packaged
   ChainDescent.RecordKey              # lex-product key combinator + the record's composed force key (①+②)
+  ChainDescent.RecordDeepenCell       # ★★★ THE ENDGAME OBJECT: recordSupplyFast ++ deepenCellSupply c, cell-indexed — ① (W-d′, via SameOrbits) AND ③ at ONE object
 
   # ── W2 solvability route (gauge complex → solvable) ──
   ChainDescent.GaugeComplex           # W2 Tier-A: split-vs-count localization spine

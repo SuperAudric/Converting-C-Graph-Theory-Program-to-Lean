@@ -62,7 +62,13 @@ Per-obligation state:
     pinned monomial itself was **`n ^ costDeg`, which is false at `n = 0` for the real object at any
     numerals** — see the `costConst`/`costDeg` block below for the measurements. It is now
     `costConst * (n + 1) ^ costDeg`, the same polynomial class, true on every input.
-  · ③ — ⚠ **STILL THE ONE LIVE `sorry` at THIS object.** The residue was RESHAPED (2026-08-04) to make it
+  · ③ — ⚠ **STILL THE ONE LIVE `sorry` at THIS object — but the STATEMENT IS PROVED elsewhere, at an
+    object that also has unconditional ①** (2026-08-08): `RecordDeepenCell.not_tinhoferGraph_of_flag`
+    + `RecordDeepenCell.recordDeepenCell_canonizer`, at the **cell-indexed** supply
+    `fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`. That is the object `canonForm?` is
+    becoming; what is left before the swap is `②` at `selNodeC` (plan W-h) and the runnable twin
+    (W-i). Read the ▶▶ block at the top of §1, not the 2026-08-04 provenance under it.
+    The residue was RESHAPED (2026-08-04) to make it
     provable *in principle*: the three `opaque` atoms made both ③ obligations undischargeable, and they are
     replaced by one **definition**, `residueRigidObstruction G := ¬ TwinFamily.TinhoferGraph G` (see the
     `UnhandledResidue` block for why D0/D1 were dropped rather than kept as opaque placeholders).
@@ -162,7 +168,61 @@ def cost (n : ℕ) (G : AdjMatrix n) : ℕ :=
     (Select.selNode (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
       (RecordCost.recordSupplyFast (n := n))) G
 
-/-! ### ⚠ THE OPEN STEP — why `③` is not yet discharged at THIS object (2026-08-04)
+/-! ### ▶▶ HOW `③` CLOSES — SETTLED 2026-08-08. Read this block; the 2026-08-04 one below is PROVENANCE.
+
+**`③` is proved, at an object that also has unconditional `①`. It is not this file's object yet, and
+the remaining step is `②`, not `③`.**
+
+`ChainDescent/RecordDeepenCell.lean` builds the target:
+
+```
+Select.selNodeC encodeFreeFast recordKey (fun c => recordSupplyFast ++ Deepen.deepenCellSupply c)
+```
+
+— the same fused descent and the same record key, with the supply **cell-indexed**: each cell is
+judged by the generators of descents anchored *in that cell*, gated by that cell's own guard. It
+carries, axiom-clean and at one object:
+
+  · `RecordDeepenCell.recordDeepenCell_canonizer` — **`①a`/`①b`/`①c`, global, no hypothesis.**
+  · `RecordDeepenCell.not_tinhoferGraph_of_flag` — **`③`, for every key**, at the tight residue
+    `¬ TinhoferGraph` = this file's `UnhandledResidue`.
+  · both together as `RecordDeepenCell.recordDeepenCell_record`.
+
+**Why the supply had to become cell-indexed.** `SelectNode.cellNarrow` reads one **node-global**
+verified list and probes every cell against it. That is right for `foldSupply`/`deckSupply`/
+`deck2Supply`/`kernelSupply`, which harvest from the whole graph. `deepenSupply` is the project's
+only **pair-anchored** supply — its generators come from deepening pairs of the *branch* cell — and
+each emitted twist is a full automorphism, so it moves vertices in cells no descent visited. The
+resulting off-branch verdict is **measured not relabelling-invariant** (`scratchpad/probe_offbranch2/
+3.py`: CFI cubic m = 8 and 10, depth 1, an off-branch cell of size 2 counting `(1,1)` under one
+labelling and `(2,)` under its own transport, *with the guard open on both sides*). So the
+node-global append `recordSupplyFast ++ deepenSupplyCert` — which does carry `③`
+(`RecordDeepen.not_tinhoferGraph_of_flag_recordDeepen`) — provably cannot carry `①`, and is not a
+candidate. `Select.CellOrbitTransport` replaces `SupplyEquivariant` and the defect goes away.
+
+**What is left before this file changes** (`docs/chain-descent-percell-plan.md` §5):
+  · **W-h** — `②` at `selNodeC`. `RecordKey.descentCostS_selNode_recordKey_monomial` is stated at
+    `selNode`; only `Select.descentCostS_le_of_le_one` is resolver-generic, so `selNodeC_cost_le` +
+    `selProbeCostC_le` must be mirrored, the guard's own work billed, and `costConst`/`costDeg`
+    re-`ring`ed. ⚠ Expect the degree to move: `selProbeCostC` bills the supply **per cell**.
+  · **W-i** — `selNodeFastC`/`canonFormFastSC?`, the runnable `rfl`-twin (`selNodeC` is the slow
+    shape; see `SelectNode.lean` §5's note on `selNodeFast`).
+  · **W-g** — repoint `canonForm?`/`cost` here and replace the `sorry` below.
+
+⚠ **The residue is unchanged and is still an OVER-approximation** — a CFI graph is not Tinhofer, yet
+its obstruction is linear and belongs to the rigid resolver. Narrowing it is W2, not this.
+
+---
+
+⊘ **PROVENANCE — the 2026-08-04 framing, superseded above.** Retained because it records two shapes
+that were *not* the answer (the options (iv)/(v) either/or, and the two-object split), and one claim
+that is now **REFUTED**: the block below argues at length that a computable guard is CIRCULAR. It is
+not. `Deepen.tinhofer_iff_certifiedG` (`DeepenGuardComplete` §5, 2026-08-05) proves the guard
+**complete** — `Tinhofer ↔ CertifiedG deepenSupply` — which is precisely the converse the block calls
+impossible, and it is what `RecordDeepen` and `RecordDeepenCell` are built on. Read the block for the
+history, not for the mathematics.
+
+### ⊘ THE OPEN STEP — why `③` was not yet discharged at THIS object (2026-08-04)
 
 **`canonForm?` must remain ONE object carrying `①a`/`①b`/`①c` + `②` + `③` together.** A canonizer that is
 correct-but-covers-nothing, paired with a second one that covers-but-is-not-correct, proves nothing —
@@ -183,7 +243,9 @@ where `Tinhofer` holds, deferring elsewhere — has **`①` with no hypothesis a
 either way. So a single object with `①` + `②` + `③` and Tinhofer coverage **already exists** — it is only
 `noncomputable`, because its guard is the `Tinhofer` predicate itself.
 
-**⛔⛔ A COMPUTABLE GUARD IS NOT THE ANSWER — that route is CIRCULAR (corrected 2026-08-04).** An earlier
+**⛔ REFUTED 2026-08-05 — `Deepen.tinhofer_iff_certifiedG` proves exactly the converse this paragraph
+calls impossible. Do not act on it; see the 2026-08-08 block above.** ⊘ A COMPUTABLE GUARD IS NOT THE
+ANSWER — that route is CIRCULAR (corrected 2026-08-04).** An earlier
 draft of this block proposed guarding on `Deepen.CertifiedG Deepen.deepenSupply` (an orbit BFS over
 deepen's own verified generators, hence computable). One direction is free and unconditional —
 `Deepen.tinhofer_of_certifiedG : CertifiedG S adj χ → Tinhofer adj χ` — but the converse fails on a
@@ -196,7 +258,9 @@ transports while *"deepen certifies it"* does not — and the missing piece is e
 avoid, and is provably invariant only on `TinhoferGraph`, which is where `①` is already proved. (Note
 `Deepen.certPath_transport`'s own hypothesis is `SupplyEquivariant`, which `deepenSupply` provably lacks.)
 
-**⟹ THE REAL CHOICE, and both options are costed in `docs/chain-descent-wind-down.md` §2 W1:**
+**⊘ ⟹ THE REAL CHOICE — SUPERSEDED 2026-08-08 (neither option was taken; the supply became
+cell-indexed instead, giving global `①` *and* the tight residue together).** Both options are costed
+in `docs/chain-descent-wind-down.md` §2 W1:
   · **(iv)** append `twinSupply` to the record supply — `①`/`②` stay **unconditional** and this file
     closes to zero `sorry`; the residue weakens from `¬Tinhofer` to `¬(Simple ∧ RootTwins)`. **Not built**;
     every ingredient exists (`KernelRef.sameOrbits_appendSupply` with `twinSupply` in the shared prefix,
@@ -445,12 +509,15 @@ NON-VACUITY OBLIGATION (separate lemma, `unhandledResidue_nonvacuous` below): `U
 always-true nor defined as "flagged". -/
 theorem residue_if_flag (n : ℕ) (G : AdjMatrix n) :
     canonForm? n G = none → UnhandledResidue n G := by
-  -- ⚠ OPEN, and the block above says exactly why and what closes it. The bridge to prove is
-  -- *Tinhofer ⟹ the consume resolver fires* (`TwinFamily.cellIsOrbit_deepenSupply_of_schurianAt`),
-  -- whose contrapositive is this statement; it holds today at `deepenSupply`
-  -- (`TwinFamily.not_tinhoferGraph_of_flag`) and at the equivariant-but-`noncomputable`
-  -- `deepenSupplyGuarded`, but NOT at this file's record supply. ⛔ Do NOT discharge it by moving the
-  -- statement to a second object — `canonForm?` is only meaningful as ONE object carrying ①+②+③.
+  -- ⚠ OPEN **at this file's object only**. The statement itself is PROVED, at an object that also
+  -- has unconditional `①`: `ChainDescent.RecordDeepenCell.not_tinhoferGraph_of_flag`, at
+  --   `Select.selNodeC encodeFreeFast recordKey (fun c => recordSupplyFast ++ deepenCellSupply c)`
+  -- (axiom-clean, every key), paired with `recordDeepenCell_canonizer` for `①` — see the 2026-08-08
+  -- block in §1. What is missing is `②` at `selNodeC` (plan W-h) and the runnable `rfl`-twin
+  -- (W-i); `canonForm?`/`cost` are repointed at W-g and this `sorry` goes with them.
+  -- ⛔ Do NOT discharge it by moving the statement to a second object — `canonForm?` is only
+  -- meaningful as ONE object carrying ①+②+③. (`RecordDeepenCell` is not that move: it is the object
+  -- `canonForm?` is *becoming*, carrying all of them, not a companion object carrying one.)
   sorry
 
 /-- **Non-vacuity of ③ (the documented vacuity-trap guard).** There exist handled graphs (a flag is not

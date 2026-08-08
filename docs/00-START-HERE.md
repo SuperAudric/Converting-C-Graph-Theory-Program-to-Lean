@@ -4,9 +4,13 @@
 >
 > **Read [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) before anything else.**
 > **▶▶ 2026-08-08 — then [`chain-descent-percell-plan.md`](./chain-descent-percell-plan.md), the ACTIVE
-> plan** (design `B` steps 1–2 landed: `ChainDescent/SelectCell.lean` + `ChainDescent/DeepenCell.lean`,
-> `①` at the **cell-indexed** fused object with no `SupplyEquivariant`).** It supersedes the wind-down's options table (i)–(vi): `Publication.canonForm?` **keeps its
-> current fused object** and the work is a **supply change**. Option (v) references below are provenance.
+> plan.** Design `B` is landed through **`①` AND `③`**: `ChainDescent/SelectCell.lean` +
+> `ChainDescent/DeepenCell.lean` + **`ChainDescent/RecordDeepenCell.lean`**, the last carrying
+> `recordDeepenCell_canonizer` (`①`, global, no hypothesis) **and** `not_tinhoferGraph_of_flag`
+> (`③`, residue `¬TinhoferGraph`) at **one** object — **`②` is the only obligation left.**
+> It supersedes the wind-down's options table (i)–(vi), now **provenance**:
+> `Publication.canonForm?` **keeps its current fused object** and the work is a **supply change**
+> (cell-indexed). Option (iv)/(v) references below are provenance.
 > It carries the closing assessment (why each research track was closed), the finish list
 > (the only live work), and the suspended-items table.
 >

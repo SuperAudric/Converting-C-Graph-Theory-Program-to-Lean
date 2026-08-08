@@ -16,10 +16,17 @@
 > **Tinhofer graphs are CANONIZED** (`canonizes_on_tinhofer`), the class is **inhabited and proper**
 > (`tinhoferGraph_nonvacuous`), and `Publication.unhandledResidue_nonvacuous` is **discharged**.
 >
-> ⛔ **ONE OPEN DECISION, and it is the only thing between here and a finished `Publication.lean`:**
+> ## ⛔ THE OPEN DECISION BELOW IS **SETTLED** (2026-08-08) — see §2a's START HERE block
+> Neither (iv) nor (v). `canonForm?` keeps the fused object and gains a **cell-indexed** supply:
+> `Select.selNodeC recordKey (fun c => recordSupplyFast ++ Deepen.deepenCellSupply c)`, which carries
+> `①` **globally and unconditionally** (`RecordDeepenCell.recordDeepenCell_canonizer`) **and** `③` at
+> the tight residue `¬TinhoferGraph` (`RecordDeepenCell.not_tinhoferGraph_of_flag`) — the combination
+> (iv) and (v) each miss. `②` is the only obligation left. The either/or below is **provenance**.
+
+> ⛔ ~~**ONE OPEN DECISION, and it is the only thing between here and a finished `Publication.lean`:**
 > which object `canonForm?` should be, i.e. how to close its single remaining `sorry`
 > (`residue_if_flag`). **Five candidates, all costed, in §2 W1's *"THE OPTIONS THAT REMAIN"* block —
-> and it is now a clean either/or between two of them:**
+> and it is now a clean either/or between two of them:**~~
 >
 > * **(iv)** `recordSupplyFast ++ twinSupply` — `①`/`②` stay **unconditional**, residue weakens to
 >   `¬(Simple ∧ RootTwins)`. **Not built**; every piece exists, mechanically clear. *(user preference,
@@ -456,24 +463,43 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >   ⟹ **`RecordKey.costConst` 53 → 57** (degree still 13).
 > * ⛔⛔ **`BAD-BIG = 0` is FALSIFIED** (`DeepenComplete` §5.2) — the union-over-anchors question is
 >   **re-opened**. Nothing proved breaks; the *expectation* that good-or-rigid covers everything dies.
-> * ★★★★ **DESIGN `B` STEPS 1–2 LANDED 2026-08-08** — `ChainDescent/SelectCell.lean` +
->   `ChainDescent/DeepenCell.lean`, both in `build.sh`, both axiom-clean, gate **118 modules / 228 s**.
->   **`Select.selNodeC_canonizer`** — `①` for the **cell-indexed** fused resolver from
->   `KeyEquivariant` + the new `Select.CellOrbitTransport`, **no `SupplyEquivariant` anywhere**; and
->   **`Deepen.deepenCell_canonizer`** — `①` at the guarded cell-anchored supply, no hypothesis.
+> * ★★★★★ **DESIGN `B` IS LANDED THROUGH `①` *AND* `③` (2026-08-08)** — three modules, all in
+>   `build.sh`, all axiom-clean, gate **119 modules**:
+>   `ChainDescent/SelectCell.lean` (**`Select.selNodeC_canonizer`** — `①` for the **cell-indexed**
+>   fused resolver from `KeyEquivariant` + the new `Select.CellOrbitTransport`, **no
+>   `SupplyEquivariant` anywhere**; plus §4, the stall/`HandledSC`/answers mirror),
+>   `ChainDescent/DeepenCell.lean` (**`Deepen.deepenCell_canonizer`**), and
+>   **`ChainDescent/RecordDeepenCell.lean`** — the **endgame object**
+>   `selNodeC recordKey (fun c => recordSupplyFast ++ deepenCellSupply c)`, carrying
+>   **`recordDeepenCell_canonizer`** (`①`, global, no hypothesis) and
+>   **`not_tinhoferGraph_of_flag`** (`③`, every key), packaged as `recordDeepenCell_record`.
 >   ★ `SelectNode.lean` is **untouched**: `Select.lean`'s spine is resolver-generic, so `selNodeC` is
->   just another `NodeRes n` and only `NodeTransport` was re-proved. ★★ **The recorded W-d risk was
->   misdiagnosed and is dissolved** — no per-cell analogue of `tinhofer_iff_certifiedG` is needed
->   because `GoodAnchor` is a property of the anchor's OWN path, already decidable
->   (`goodAnchor_iff_certPath`) and **unconditionally** invariant (`goodAnchor_relabel`).
->   ▶ Next: **W-d′** (`kernelSupply` via `SameOrbits` on the shut side —
->   `cellOrbitTransport_append`'s hypothesis is shaped for it), then W-a/W-e/W-f/W-g.
-> * ★★★ **`RecordDeepen.lean`** (in `build.sh`, axiom-clean) — **`③` AT THE FUSED OBJECT, FOR EVERY
->   KEY**: `not_tinhoferGraph_of_flag_recordDeepen` at `recordSupplyFast ++ deepenSupplyCert`, via
->   supply monotonicity (`handled_append_right`) plus `certifiedG_of_tinhofer`. `canonFormFastS?_eq`
->   is `rfl`, so this **is** `Publication.residue_if_flag`'s statement once `canonForm?` names that
->   supply. ⚠ It landed without doc propagation and was referenced in **no** doc, plan or memory
->   before 2026-08-07. ⟹ **`③` is NOT on the critical path; `①`+`②` are.**
+>   just another `NodeRes n` and only `NodeTransport` was re-proved.
+>   ★★ **`①` and `③` now hold of the SAME object with `①` unconditional** — which neither option
+>   (iv) (residue is not `¬Tinhofer`) nor option (v) (`①b`/`①c` class-only) can give. **`②` is the
+>   only obligation left.**
+>   ★★ The recorded W-d risk was **misdiagnosed and dissolved** — no per-cell analogue of
+>   `tinhofer_iff_certifiedG` is needed, because `GoodAnchor` is a property of the anchor's OWN path,
+>   already decidable (`goodAnchor_iff_certPath`) and **unconditionally** invariant
+>   (`goodAnchor_relabel`). W-d′ likewise: `kernelSupply`'s non-equivariance is a non-event, since
+>   `Kernel.sameOrbits_recordSupply` + `supplyEquivariant_recordRefSupply` discharge
+>   `cellOrbitTransport_append`'s hypothesis in ~25 lines.
+>   ▶ Next, in order: **W-h** (`②`'s cost mirror at `selNodeC`, with W-a folded in and one `ring`
+>   recompute) → **W-i** (`selNodeFastC`/`canonFormFastSC?`, the runnable `rfl`-twin) → **W-g**
+>   (repoint `Publication.canonForm?`) → **W-e** (lazy). See the plan's §5.
+> * ★★★ **`RecordDeepen.lean`** (in `build.sh`, axiom-clean) — **`③` at the NODE-GLOBAL object**:
+>   `not_tinhoferGraph_of_flag_recordDeepen` at `selNode` + `recordSupplyFast ++ deepenSupplyCert`,
+>   via supply monotonicity (`handled_append_right`) plus `certifiedG_of_tinhofer`. ⚠ It landed
+>   without doc propagation and was referenced in **no** doc, plan or memory before 2026-08-07.
+>   ⛔ **CORRECTION (2026-08-08): the inference *"⟹ `③` is not on the critical path"* was WRONG.**
+>   The theorem is stated at `selNode` + the node-global supply — the object §3's CFI falsifier kills
+>   for `①` — and `Select.HandledS` / `answersS_of_handledS` / `not_handledS_if_flagS` are all
+>   `selNode`-specific, so it does not rewrite onto `selNodeC`. Its *argument* transferred; the
+>   theorem needed a ~150-line mirror, now in `SelectCell` §4 + `RecordDeepenCell` §3.
+>   ★ **General rule this exposed:** a new `NodeRes` inherits everything **`Select.lean`** proves
+>   generically (`descendS`, `canonFormS?`, `isCanonicalFormOptS_canonFormS?`, `descentCostS_le_of_le_one`,
+>   `descendS_ne_none_reaches`) and **nothing `SelectNode.lean` proves specifically**. The same trap
+>   is why `②` needs W-h rather than a numeral recompute.
 >
 > ⛔ **Two wrong diagnoses recorded so they are not re-derived** (both mine, both retracted):
 > (a) *"the fused object cannot carry deepen"* — it can; `①` never needed an equivariant reference;
@@ -539,10 +565,12 @@ two-object split was tried this session and reverted.
 | **R1, scoped** | `DeepenComplete.lean` | `GoodAnchor` (the per-anchor condition actually consumed) · **`OrbitComplete`** (the target) · `deepenSupply_canonizer_of_orbitComplete` (`①c` for the raw supply from it alone) · **§5 `orbitComplete_of_good_or_trivial`** + `goodAnchor_transport` |
 | **`①` on the class (deepen)** | `DeepenTransportOn.lean` | **`canonizes_on_orbitComplete` — the same relativization at the guarded mixed resolver; §7 `deepen_object_package` = option (v), all four obligations at ONE executable object** |
 
-### ⚠ SEVEN OBJECTS — do not mix them up when writing
+### ⚠ EIGHT OBJECTS — do not mix them up when writing
 | object | executable | `①` | `②` | `③` | named coverage |
 |---|---|---|---|---|---|
-| `recordKey @ recordSupplyFast` (`Publication.lean`) | ✅ | ✅ global | ✅ | ❌ open | **none** |
+| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeC`** (`RecordDeepenCell`) | ⚠ runs, but the **slow** shape — needs W-i's `rfl`-twin | ✅ **global, no hypothesis** | ⬜ **W-h** — the only gap | ✅ **every key** | ★★★ every Tinhofer graph — **THE TARGET OBJECT** |
+| `recordKey @ recordSupplyFast` (`Publication.lean` today) | ✅ | ✅ global | ✅ | ❌ open | **none** |
+| `key @ recordSupplyFast ++ deepenSupplyCert` at `selNode` (`RecordDeepen`) | ✅ | ⛔ **measured false** (`probe_offbranch2/3`) | — | ✅ every key | every Tinhofer graph — ⚠ **`③` only; not publishable, `①` cannot be had here** |
 | `holKeyFast @ twinSupply` (`TwinFamily` §8) | ✅ | ✅ global | ✅ | — | complete multipartite, distinct part sizes |
 | **`forceThenPick holKeyFast`** (`RestrictedTransport`) | ✅ | ✅ **on the class** | ✅ | ⛔ vacuous (never flags) | ★★★ every Tinhofer graph — CANONIZED |
 | `holKeyFast @ deepenSupply`, blind (`TwinFamily` §10) | ✅ | ❌ | ✅ | ✅ | every Tinhofer graph (*answers*) |
