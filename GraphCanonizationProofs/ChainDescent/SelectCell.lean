@@ -402,5 +402,114 @@ theorem not_handledSC_if_flagSC {key : Key n} {S : CellSupply n} {adj : AdjMatri
     ¬ HandledSC key S adj :=
   fun h => answersSC_of_handledSC h hflag
 
+/-! ## 5. `②` — the per-node bill at the cell-indexed object (plan `W-h`)
+
+⚠ **Also NOT inherited.** `SelectNode` §11's chain is `selNode`-specific at every step except
+`descentCostS_le_of_le_one`, which is generic and is reused verbatim below. This section mirrors
+`selNode_cost_none/some/le` and `selProbeCost_le`.
+
+★ **The one real difference is where the supply is billed.** `selProbeCost` evaluates one node-global
+supply and charges `supplyCost S + |gens S| · n²` **once**; `selProbeCostC` charges each cell for its
+own supply, so those two terms move *inside* the per-cell sum and pick up a factor `≤ n`:
+
+```
+selProbeBound  n sB gB kc = sB + gB·n² + n·(n·kc + n² + n·(gB·n² + n²))
+selProbeBoundC n sB gB kc = n·(sB + gB·n² +  n·kc + n² + n·(gB·n² + n²))
+```
+
+That is an honest extra factor of `n` on the supply terms, not an artefact — cell `c` really does
+evaluate `S c`. ⚠ It is also why the runnable twin (plan `W-i`) matters: the *proof* is fine either
+way, but the object as written re-harvests per probed cell. -/
+
+theorem selNodeC_cost_none {rf : Refiner n} {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} (h : selColourC key S adj χ = none) :
+    (selNodeC rf key S adj χ).2 = selProbeCostC key S adj χ := by
+  unfold selNodeC; rw [h]
+
+theorem selNodeC_cost_some {rf : Refiner n} {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} {c : Nat} (h : selColourC key S adj χ = some c) :
+    (selNodeC rf key S adj χ).2
+      = selProbeCostC key S adj χ
+        + ((cellNarrowC key S adj χ c).map (fun v => (rf adj (indivOne χ v)).2)).sum := by
+  unfold selNodeC; rw [h]
+
+/-- The per-node bill: the probe, plus at most ONE child refinement (the committed cell narrowed to
+`≤ 1`, so there is at most one child to refine). -/
+theorem selNodeC_cost_le {rf : Refiner n} {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} {cP cr : Nat} (hp : selProbeCostC key S adj χ ≤ cP)
+    (hr : ∀ χ' : Colouring n, (rf adj χ').2 ≤ cr) :
+    (selNodeC rf key S adj χ).2 ≤ cP + cr := by
+  cases hsel : selColourC key S adj χ with
+  | none => rw [selNodeC_cost_none hsel]; omega
+  | some c =>
+      rw [selNodeC_cost_some hsel]
+      have hlen := (selColourC_spec hsel).2
+      rcases hk : cellNarrowC key S adj χ c with _ | ⟨v, t⟩
+      · simp only [List.map_nil, List.sum_nil]; omega
+      · rw [hk] at hlen
+        simp only [List.length_cons] at hlen
+        have ht : t = [] := List.eq_nil_of_length_eq_zero (by omega)
+        subst ht
+        simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+        have := hr (indivOne χ v)
+        omega
+
+/-- The cell-indexed probe budget: `≤ n` cells, each paying for **its own** supply evaluation
+(`sB`), its own candidate filter (`gB · n²`), one key evaluation per member and one orbit BFS per
+member. -/
+def selProbeBoundC (n sB gB kc : Nat) : Nat :=
+  n * (sB + gB * (n * n) + (n * kc + n * n + n * (gB * (n * n) + n * n)))
+
+theorem selProbeCostC_le {key : Key n} {S : CellSupply n} {adj : AdjMatrix n} {χ : Colouring n}
+    {sB gB kc : Nat} (hs : ∀ c : Nat, Consume.supplyCost (S c) adj χ ≤ sB)
+    (hg : ∀ c : Nat, (gens (S c) adj χ).length ≤ gB)
+    (hk : ∀ v : Fin n, keyCost key adj χ v ≤ kc) :
+    selProbeCostC key S adj χ ≤ selProbeBoundC n sB gB kc := by
+  unfold selProbeCostC selProbeBoundC
+  have hterm : ∀ x ∈ (nsColours χ).map (fun c =>
+      Consume.supplyCost (S c) adj χ + (gens (S c) adj χ).length * (n * n)
+        + ((cellList χ c).map (keyCost key adj χ)).sum + n * n
+        + (cellList χ c).length * ((verified (S c) adj χ).length * (n * n) + n * n)),
+      x ≤ sB + gB * (n * n) + (n * kc + n * n + n * (gB * (n * n) + n * n)) := by
+    intro x hx
+    obtain ⟨c, _, rfl⟩ := List.mem_map.mp hx
+    have hver : (verified (S c) adj χ).length ≤ gB :=
+      le_trans (List.length_filter_le _ _) (hg c)
+    have h0 : Consume.supplyCost (S c) adj χ ≤ sB := hs c
+    have hg2 : (gens (S c) adj χ).length * (n * n) ≤ gB * (n * n) :=
+      Nat.mul_le_mul_right (n * n) (hg c)
+    have h1 : ((cellList χ c).map (keyCost key adj χ)).sum ≤ n * kc := by
+      refine le_trans (List.sum_le_card_nsmul _ kc ?_) ?_
+      · intro y hy
+        obtain ⟨v, _, rfl⟩ := List.mem_map.mp hy
+        exact hk v
+      · rw [List.length_map, smul_eq_mul]
+        exact Nat.mul_le_mul_right kc (cellList_length_le χ c)
+    have h2 : (cellList χ c).length * ((verified (S c) adj χ).length * (n * n) + n * n)
+        ≤ n * (gB * (n * n) + n * n) :=
+      Nat.mul_le_mul (cellList_length_le χ c)
+        (Nat.add_le_add (Nat.mul_le_mul_right (n * n) hver) le_rfl)
+    omega
+  have hsum := List.sum_le_card_nsmul _ _ hterm
+  rw [List.length_map, smul_eq_mul] at hsum
+  exact le_trans hsum (Nat.mul_le_mul_right _ (nsColours_length_le χ))
+
+/-- **★★ `②`, PARAMETRIC, AT THE CELL-INDEXED OBJECT.** Fan-out `≤ 1` holds by construction
+(`selNodeC_children_length_le_one`), so — exactly as at `selNode` — this carries **no firing
+hypothesis**: it bounds answer and flag alike. -/
+theorem descentCostS_selNodeC_le {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {sB gB kc : Nat} (hs : ∀ (c : Nat) (χ : Colouring n), Consume.supplyCost (S c) adj χ ≤ sB)
+    (hg : ∀ (c : Nat) (χ : Colouring n), (gens (S c) adj χ).length ≤ gB)
+    (hk : ∀ (χ : Colouring n) (v : Fin n), keyCost key adj χ v ≤ kc) :
+    descentCostS (Refine.encodeFreeFast (n := n))
+        (selNodeC (Refine.encodeFreeFast (n := n)) key S) adj
+      ≤ n * n * n + (n + 1) * (1 + (selProbeBoundC n sB gB kc + n * n * n)) := by
+  refine descentCostS_le_of_le_one
+    (fun χ _ => selNodeC_children_length_le_one _ _ _ adj χ)
+    (fun χ => le_of_eq (Cost.refiner_cost adj χ)) (fun χ => ?_)
+  refine selNodeC_cost_le
+    (selProbeCostC_le (fun c => hs c χ) (fun c => hg c χ) (fun v => hk χ v)) ?_
+  exact fun χ' => le_of_eq (Cost.refiner_cost adj χ')
+
 end Select
 end ChainDescent

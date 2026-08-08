@@ -313,21 +313,79 @@ The payoff. `cellNarrow`'s only supply dependence is the number of orbits meetin
 is exactly the hypothesis `SelectNode.cellNarrow_length_transport` needs — with `SupplyEquivariant`
 (which `deepenSupply` provably lacks) replaced by a property the guard delivers. -/
 
+/-! ### 7a. `W-a` — THE GUARD'S OWN WORK, BILLED
+
+⚠ **This closed a real hole.** `deepenCellSupply` inherited `deepenSupply`'s declared flat `n⁶`, which
+prices the *harvest* and bills **nothing** for deciding `GoodCell` — and unlike the harvest's `n⁶`,
+that was not an honest over-estimate. It is the same finding as `DeepenGuard`'s 2026-08-06 one
+(`certPathCost` billed nothing for the `step` it walks), one level up: **the guard runs a `CertPath`
+per anchor and charged for none of them.**
+
+Deciding `GoodCell adj χ c` runs `≤ n` anchors, each one `GoodAnchor adj χ r` — decided, via
+`goodAnchor_iff_certPath`, as `CertPath deepenSupply adj n (step adj χ r)`, whose cost model is
+`certPathCost`. So the honest charge is `n ×` that, and `goodCellCost_bounds_guard` below
+**proves** the declared constant dominates it rather than declaring that it does. -/
+
+/-- The guard's bill: `≤ n` anchors × one `CertPath` walk of `≤ n` levels, each level a reachability
+test (`n⁴`), a `step` (`stepCost`) and one call of `deepenSupply` (flat `n⁶`). -/
+def goodCellCost (n : Nat) : Nat :=
+  n * (n * (n * n * n * n + stepCost n + n * n * n * n * n * n))
+
+/-- The cell-anchored supply's total bill: the harvest (the same declared flat `n⁶` the branch-cell
+supply bills — `≈ m² n⁴` with `Σ_c m_c² ≤ n²`) **plus** the guard. -/
+def deepenCellCost (n : Nat) : Nat := n * n * n * n * n * n + goodCellCost n
+
+/-- **★★ `W-a`: THE DECLARED GUARD CHARGE DOMINATES THE GUARD'S COST MODEL.** Not a restatement of a
+constant — `certPathCost_le` is instantiated at `deepenSupply`'s own bound (`le_rfl`, the
+flat `n⁶`), so a supply with an exponential `supplyCost` would break this, which is exactly what a
+flat declared charge could not express. -/
+theorem goodCellCost_bounds_guard (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) :
+    ((Select.cellList χ c).map
+        (fun r => certPathCost (deepenSupply (n := n)) adj n (step adj χ r))).sum
+      ≤ goodCellCost n := by
+  have hterm : ∀ x ∈ (Select.cellList χ c).map
+      (fun r => certPathCost (deepenSupply (n := n)) adj n (step adj χ r)),
+      x ≤ n * (n * n * n * n + stepCost n + n * n * n * n * n * n) := by
+    intro x hx
+    obtain ⟨r, _, rfl⟩ := List.mem_map.mp hx
+    exact certPathCost_le (fun _ => le_rfl) n (step adj χ r)
+  have hsum := List.sum_le_card_nsmul _ _ hterm
+  rw [List.length_map, smul_eq_mul] at hsum
+  exact le_trans hsum (Nat.mul_le_mul_right _ (Select.cellList_length_le χ c))
+
 /-- **The guarded cell-anchored supply**: deepen's own generators where the cell's anchors are all
-good, nothing where they are not. Computable — `GoodCell` is decidable. -/
+good, nothing where they are not. Computable — `GoodCell` is decidable. The bill is the same on both
+branches, because the guard is *run* either way (§7a). -/
 def deepenCellSupply (c : Nat) : Supply n := fun adj χ =>
-  if GoodCell adj χ c then deepenSupplyAt (n := n) c adj χ else ([], n * n * n * n * n * n)
+  if GoodCell adj χ c then (deepenGensOn adj χ (Select.cellList χ c), deepenCellCost n)
+  else ([], deepenCellCost n)
+
+/-- The bill is unconditional — the guard runs whether or not it opens. -/
+@[simp] theorem supplyCost_deepenCellSupply (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) :
+    Consume.supplyCost (deepenCellSupply (n := n) c) adj χ = deepenCellCost n := by
+  unfold Consume.supplyCost deepenCellSupply
+  split <;> rfl
+
+theorem gens_deepenCellSupply_of_open {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
+    (h : GoodCell adj χ c) :
+    gens (deepenCellSupply (n := n) c) adj χ = deepenGensOn adj χ (Select.cellList χ c) := by
+  unfold gens deepenCellSupply; rw [if_pos h]
+
+theorem gens_deepenCellSupply_of_shut {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
+    (h : ¬ GoodCell adj χ c) : gens (deepenCellSupply (n := n) c) adj χ = [] := by
+  unfold gens deepenCellSupply; rw [if_neg h]
 
 theorem verified_deepenCellSupply_of_open {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
     (h : GoodCell adj χ c) :
     verified (deepenCellSupply (n := n) c) adj χ = verified (deepenSupplyAt (n := n) c) adj χ := by
-  unfold verified gens deepenCellSupply
-  rw [if_pos h]
+  unfold verified
+  rw [gens_deepenCellSupply_of_open h]
+  rfl
 
 theorem verified_deepenCellSupply_of_shut {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
     (h : ¬ GoodCell adj χ c) : verified (deepenCellSupply (n := n) c) adj χ = [] := by
-  unfold verified gens deepenCellSupply
-  rw [if_neg h]; rfl
+  unfold verified
+  rw [gens_deepenCellSupply_of_shut h]; rfl
 
 /-- **★★★ THE PER-CELL ORBIT RELATION TRANSPORTS.** Open side: the guard makes the relation *equal*
 the `IsColAut`-orbit relation on the cell, which conjugates. Shut side: both are `[]`, and the guard

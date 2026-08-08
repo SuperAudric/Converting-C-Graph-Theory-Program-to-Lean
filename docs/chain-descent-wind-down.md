@@ -16,12 +16,15 @@
 > **Tinhofer graphs are CANONIZED** (`canonizes_on_tinhofer`), the class is **inhabited and proper**
 > (`tinhoferGraph_nonvacuous`), and `Publication.unhandledResidue_nonvacuous` is **discharged**.
 >
-> ## ⛔ THE OPEN DECISION BELOW IS **SETTLED** (2026-08-08) — see §2a's START HERE block
+> ## ⛔ THE OPEN DECISION BELOW IS **SETTLED AND DISCHARGED** (2026-08-08) — see §2a's START HERE block
 > Neither (iv) nor (v). `canonForm?` keeps the fused object and gains a **cell-indexed** supply:
 > `Select.selNodeC recordKey (fun c => recordSupplyFast ++ Deepen.deepenCellSupply c)`, which carries
-> `①` **globally and unconditionally** (`RecordDeepenCell.recordDeepenCell_canonizer`) **and** `③` at
-> the tight residue `¬TinhoferGraph` (`RecordDeepenCell.not_tinhoferGraph_of_flag`) — the combination
-> (iv) and (v) each miss. `②` is the only obligation left. The either/or below is **provenance**.
+> **all three obligations at once**, axiom-clean — `①` global and unconditional
+> (`RecordDeepenCell.recordDeepenCell_canonizer`), `②` `cost ≤ 69·(n+1)^13` on every input with no
+> flag disjunct (`descentCostSC_recordDeepen_monomial`), `③` at the tight residue `¬TinhoferGraph`
+> (`not_tinhoferGraph_of_flag`); packaged as **`recordDeepenCell_full`**. That combination is exactly
+> what (iv) and (v) each miss. **No mathematics remains** — only the runnable `rfl`-twin, the repoint
+> of `Publication.canonForm?`, and laziness. The either/or below is **provenance**.
 
 > ⛔ ~~**ONE OPEN DECISION, and it is the only thing between here and a finished `Publication.lean`:**
 > which object `canonForm?` should be, i.e. how to close its single remaining `sorry`
@@ -484,9 +487,16 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >   (`goodAnchor_relabel`). W-d′ likewise: `kernelSupply`'s non-equivariance is a non-event, since
 >   `Kernel.sameOrbits_recordSupply` + `supplyEquivariant_recordRefSupply` discharge
 >   `cellOrbitTransport_append`'s hypothesis in ~25 lines.
->   ▶ Next, in order: **W-h** (`②`'s cost mirror at `selNodeC`, with W-a folded in and one `ring`
->   recompute) → **W-i** (`selNodeFastC`/`canonFormFastSC?`, the runnable `rfl`-twin) → **W-g**
->   (repoint `Publication.canonForm?`) → **W-e** (lazy). See the plan's §5.
+>   ★★★ **AND `②` LANDED THE SAME DAY (W-h, with W-a and W-f folded in)** —
+>   `SelectCell` §5 (`selProbeBoundC` / `selProbeCostC_le` / `descentCostS_selNodeC_le`, no firing
+>   hypothesis), `DeepenCell` §7a (**`goodCellCost_bounds_guard`** — the guard's `≤ n` `CertPath`
+>   walks are now *billed*, closing the recorded `n⁶`-declared-vs-`n⁸`-real hole), and
+>   `RecordDeepenCell` §4 ending at **`recordDeepenCell_full` = `①` ∧ `②` ∧ `③` at one object**.
+>   `ring`-checked numerals: **`costDeg` 13 unchanged, `costConst` 57 → 69** (+8 per-cell supply
+>   billing, +4 guard). ⛔ The prediction that the degree would move was wrong — `recordKeyBound`
+>   already reaches `n^10` and the key sets the degree.
+>   ▶ Next, none of it mathematics: **W-i** (`selNodeFastC`/`canonFormFastSC?`, the runnable
+>   `rfl`-twin) → **W-g** (repoint `Publication.canonForm?`) → **W-e** (lazy). See the plan's §5.
 > * ★★★ **`RecordDeepen.lean`** (in `build.sh`, axiom-clean) — **`③` at the NODE-GLOBAL object**:
 >   `not_tinhoferGraph_of_flag_recordDeepen` at `selNode` + `recordSupplyFast ++ deepenSupplyCert`,
 >   via supply monotonicity (`handled_append_right`) plus `certifiedG_of_tinhofer`. ⚠ It landed
@@ -568,7 +578,7 @@ two-object split was tried this session and reverted.
 ### ⚠ EIGHT OBJECTS — do not mix them up when writing
 | object | executable | `①` | `②` | `③` | named coverage |
 |---|---|---|---|---|---|
-| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeC`** (`RecordDeepenCell`) | ⚠ runs, but the **slow** shape — needs W-i's `rfl`-twin | ✅ **global, no hypothesis** | ⬜ **W-h** — the only gap | ✅ **every key** | ★★★ every Tinhofer graph — **THE TARGET OBJECT** |
+| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeC`** (`RecordDeepenCell`) | ✅ **measured** (answers on `K₂`, `C₅`) — but the **slow** shape; W-i's `rfl`-twin is owed | ✅ **global, no hypothesis** | ✅ **`69·(n+1)^13`**, every input, no flag disjunct | ✅ **every key** | ★★★ every Tinhofer graph — **THE TARGET OBJECT**, all three at once (`recordDeepenCell_full`) |
 | `recordKey @ recordSupplyFast` (`Publication.lean` today) | ✅ | ✅ global | ✅ | ❌ open | **none** |
 | `key @ recordSupplyFast ++ deepenSupplyCert` at `selNode` (`RecordDeepen`) | ✅ | ⛔ **measured false** (`probe_offbranch2/3`) | — | ✅ every key | every Tinhofer graph — ⚠ **`③` only; not publishable, `①` cannot be had here** |
 | `holKeyFast @ twinSupply` (`TwinFamily` §8) | ✅ | ✅ global | ✅ | — | complete multipartite, distinct part sizes |

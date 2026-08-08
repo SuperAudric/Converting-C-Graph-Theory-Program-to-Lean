@@ -66,8 +66,10 @@ Per-obligation state:
     object that also has unconditional ①** (2026-08-08): `RecordDeepenCell.not_tinhoferGraph_of_flag`
     + `RecordDeepenCell.recordDeepenCell_canonizer`, at the **cell-indexed** supply
     `fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`. That is the object `canonForm?` is
-    becoming; what is left before the swap is `②` at `selNodeC` (plan W-h) and the runnable twin
-    (W-i). Read the ▶▶ block at the top of §1, not the 2026-08-04 provenance under it.
+    becoming — and since W-h it carries `②` there too (`recordDeepenCell_full`), at
+    `costConst = 69`, `costDeg = 13`. What is left before the swap is the runnable twin (W-i) and
+    the repoint (W-g), neither of them mathematics. Read the ▶▶ block at the top of §1, not the
+    2026-08-04 provenance under it.
     The residue was RESHAPED (2026-08-04) to make it
     provable *in principle*: the three `opaque` atoms made both ③ obligations undischargeable, and they are
     replaced by one **definition**, `residueRigidObstruction G := ¬ TwinFamily.TinhoferGraph G` (see the
@@ -181,12 +183,19 @@ Select.selNodeC encodeFreeFast recordKey (fun c => recordSupplyFast ++ Deepen.de
 
 — the same fused descent and the same record key, with the supply **cell-indexed**: each cell is
 judged by the generators of descents anchored *in that cell*, gated by that cell's own guard. It
-carries, axiom-clean and at one object:
+carries **every obligation this file states**, axiom-clean, at that one object:
 
   · `RecordDeepenCell.recordDeepenCell_canonizer` — **`①a`/`①b`/`①c`, global, no hypothesis.**
+  · `RecordDeepenCell.descentCostSC_recordDeepen_monomial` — **`②`**, `cost ≤ 69 * (n+1)^13` on
+    **every** input, no flag disjunct. ⚠ The numerals are `RecordDeepenCell.costConst`/`costDeg`,
+    not this file's current `RecordKey.costConst`/`costDeg` (57 / 13): the **degree is unchanged**
+    and the constant moves 57 → 69, `ring`-checked in `recordDeepenBound_expand`. The `+12` is
+    **+8** from billing the supply per cell and **+4** from finally billing the deepen guard
+    (`Deepen.goodCellCost_bounds_guard` — it had been charging nothing for the `≤ n` `CertPath`
+    walks it runs).
   · `RecordDeepenCell.not_tinhoferGraph_of_flag` — **`③`, for every key**, at the tight residue
     `¬ TinhoferGraph` = this file's `UnhandledResidue`.
-  · both together as `RecordDeepenCell.recordDeepenCell_record`.
+  · all three together as **`RecordDeepenCell.recordDeepenCell_full`**.
 
 **Why the supply had to become cell-indexed.** `SelectNode.cellNarrow` reads one **node-global**
 verified list and probes every cell against it. That is right for `foldSupply`/`deckSupply`/
@@ -200,14 +209,15 @@ node-global append `recordSupplyFast ++ deepenSupplyCert` — which does carry `
 (`RecordDeepen.not_tinhoferGraph_of_flag_recordDeepen`) — provably cannot carry `①`, and is not a
 candidate. `Select.CellOrbitTransport` replaces `SupplyEquivariant` and the defect goes away.
 
-**What is left before this file changes** (`docs/chain-descent-percell-plan.md` §5):
-  · **W-h** — `②` at `selNodeC`. `RecordKey.descentCostS_selNode_recordKey_monomial` is stated at
-    `selNode`; only `Select.descentCostS_le_of_le_one` is resolver-generic, so `selNodeC_cost_le` +
-    `selProbeCostC_le` must be mirrored, the guard's own work billed, and `costConst`/`costDeg`
-    re-`ring`ed. ⚠ Expect the degree to move: `selProbeCostC` bills the supply **per cell**.
-  · **W-i** — `selNodeFastC`/`canonFormFastSC?`, the runnable `rfl`-twin (`selNodeC` is the slow
-    shape; see `SelectNode.lean` §5's note on `selNodeFast`).
-  · **W-g** — repoint `canonForm?`/`cost` here and replace the `sorry` below.
+**What is left before this file changes is NOT mathematics** (`docs/chain-descent-percell-plan.md`
+§5):
+  · **W-i** — `selNodeFastC`/`canonFormFastSC?`, the runnable `rfl`-twin. `selNodeC` is the *slow*
+    shape: it stores a generic `refineV rf …` and recomputes `verified (S c)` once per probed cell,
+    where `selNodeFast` computes the list once (see `SelectNode.lean` §5's note). It does run and
+    answer — `#eval`-measured on `K₂` and `C₅` — but at ~2× the node-global object's wall clock on a
+    one-cell graph, and the per-cell duplication is not yet measured.
+  · **W-g** — repoint `canonForm?`/`cost` here, swap `costConst`/`costDeg` to `RecordDeepenCell`'s,
+    and replace the `sorry` below.
 
 ⚠ **The residue is unchanged and is still an OVER-approximation** — a CFI graph is not Tinhofer, yet
 its obstruction is linear and belongs to the rigid resolver. Narrowing it is W2, not this.
@@ -509,12 +519,13 @@ NON-VACUITY OBLIGATION (separate lemma, `unhandledResidue_nonvacuous` below): `U
 always-true nor defined as "flagged". -/
 theorem residue_if_flag (n : ℕ) (G : AdjMatrix n) :
     canonForm? n G = none → UnhandledResidue n G := by
-  -- ⚠ OPEN **at this file's object only**. The statement itself is PROVED, at an object that also
-  -- has unconditional `①`: `ChainDescent.RecordDeepenCell.not_tinhoferGraph_of_flag`, at
+  -- ⚠ OPEN **at this file's object only**. The statement itself is PROVED, at an object carrying
+  -- `①` and `②` as well: `ChainDescent.RecordDeepenCell.recordDeepenCell_full`, at
   --   `Select.selNodeC encodeFreeFast recordKey (fun c => recordSupplyFast ++ deepenCellSupply c)`
-  -- (axiom-clean, every key), paired with `recordDeepenCell_canonizer` for `①` — see the 2026-08-08
-  -- block in §1. What is missing is `②` at `selNodeC` (plan W-h) and the runnable `rfl`-twin
-  -- (W-i); `canonForm?`/`cost` are repointed at W-g and this `sorry` goes with them.
+  -- (axiom-clean; the `③` half holds for every key) — see the 2026-08-08 block in §1. Nothing
+  -- mathematical is missing: the runnable `rfl`-twin (plan W-i), then repointing `canonForm?`/`cost`
+  -- and the cost numerals (W-g), at which point this `sorry` becomes
+  -- `RecordDeepenCell.not_tinhoferGraph_of_flag`.
   -- ⛔ Do NOT discharge it by moving the statement to a second object — `canonForm?` is only
   -- meaningful as ONE object carrying ①+②+③. (`RecordDeepenCell` is not that move: it is the object
   -- `canonForm?` is *becoming*, carrying all of them, not a companion object carrying one.)

@@ -186,6 +186,157 @@ theorem not_tinhoferGraph_of_flag {adj : AdjMatrix n} {key : Force.Key n}
     ¬ TwinFamily.TinhoferGraph adj :=
   fun h => answersSC_of_tinhoferGraph h key hflag
 
+/-! ## 4. `②` — THE COST, AT THE SAME OBJECT (plan `W-h`, with `W-a` folded in)
+
+`RecordKey.descentCostS_selNode_recordKey_monomial` is stated at **`selNode`**; of its chain only
+`Select.descentCostS_le_of_le_one` is resolver-generic, so `SelectCell` §5 mirrored the rest. Here it
+is instantiated at the endgame supply.
+
+**Two things changed in the numerals, and neither is free:**
+
+* `Deepen.deepenCellCost` now bills the **guard** as well as the harvest (`W-a`,
+  `Deepen.goodCellCost_bounds_guard`). Before this the declared charge was `deepenSupply`'s flat `n⁶`,
+  which priced the harvest and charged nothing for the `≤ n` `CertPath` walks `GoodCell` runs.
+* `Select.selProbeBoundC` bills the supply **per cell**, so the supply terms carry a factor `≤ n`.
+
+★ **The degree does NOT move.** `RecordKey.recordKeyBound` already reaches `n^10` (the `orbKeyG` guard
+inside the record key), and `(n+1) · n · n · kc` is what sets the degree — so the supply's extra `n`
+and the guard's `n^8` both sit strictly below it. **`costDeg` stays 13; `costConst` goes 57 → 69.** -/
+
+/-- The endgame supply's per-node work bound: the record's four supplies, plus the cell-anchored
+harvest **and its guard**. -/
+def recordDeepenSupplyBound (n : Nat) : Nat :=
+  RecordCost.recordSupplyBound n + Deepen.deepenCellCost n
+
+/-- …and its candidate-count bound: the record's, plus `≤ |cell|² ≤ n²` twists. -/
+def recordDeepenGensBound (n : Nat) : Nat := RecordCost.recordGensBound n + n * n
+
+/-- The cell-anchored harvest emits `≤ |cell|²` generators — the same `flatMap`-of-`filterMap` shape
+as `TwinFamily.gens_deepenSupply_length_le`, with `cell` in place of `Descend.branches χ`. -/
+theorem gens_deepenGensOn_length_le (adj : AdjMatrix n) (χ : Colouring n) {cell : List (Fin n)}
+    (hc : cell.length ≤ n) : (Deepen.deepenGensOn adj χ cell).length ≤ n * n := by
+  have hfirsts : (cell.map (fun r => (r, Deepen.step adj χ r))).length ≤ n := by
+    rw [List.length_map]; exact hc
+  refine le_trans (RecordCost.length_flatMap_le _ _ n ?_) (Nat.mul_le_mul_right n hfirsts)
+  intro p1 _
+  dsimp only
+  split
+  · simp
+  · split
+    · simp
+    · exact le_trans (List.length_filterMap_le ..) hfirsts
+
+theorem gens_deepenCellSupply_length_le (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) :
+    (Consume.gens (Deepen.deepenCellSupply (n := n) c) adj χ).length ≤ n * n := by
+  by_cases h : Deepen.GoodCell adj χ c
+  · rw [Deepen.gens_deepenCellSupply_of_open h]
+    exact gens_deepenGensOn_length_le adj χ (Select.cellList_length_le χ c)
+  · rw [Deepen.gens_deepenCellSupply_of_shut h]; simp
+
+/-- ⚠ Rewrite the **outer** append only — `supplyCost_appendSupply` / `gens_appendSupply_length` are
+`@[simp]`, so `simp only` would keep descending into `recordSupplyFast`'s own four-way nest and lose
+the shape `RecordCost.supplyCost_record_le` is stated in. -/
+theorem supplyCost_recordSupplyDeepenC_le (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) :
+    Consume.supplyCost (recordSupplyDeepenC (n := n) c) adj χ ≤ recordDeepenSupplyBound n := by
+  show Consume.supplyCost (Deck.appendSupply (RecordCost.recordSupplyFast (n := n))
+      (Deepen.deepenCellSupply c)) adj χ
+    ≤ RecordCost.recordSupplyBound n + Deepen.deepenCellCost n
+  rw [RecordCost.supplyCost_appendSupply, Deepen.supplyCost_deepenCellSupply]
+  exact Nat.add_le_add (RecordCost.supplyCost_record_le adj χ) le_rfl
+
+theorem gens_recordSupplyDeepenC_length_le (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) :
+    (Consume.gens (recordSupplyDeepenC (n := n) c) adj χ).length ≤ recordDeepenGensBound n := by
+  show (Consume.gens (Deck.appendSupply (RecordCost.recordSupplyFast (n := n))
+      (Deepen.deepenCellSupply c)) adj χ).length ≤ RecordCost.recordGensBound n + n * n
+  rw [RecordCost.gens_appendSupply_length]
+  exact Nat.add_le_add (RecordCost.gens_record_length_le adj χ)
+    (gens_deepenCellSupply_length_le adj χ c)
+
+/-- **★★ `②` AT THE ENDGAME OBJECT, PARAMETRIC.** No hypotheses: fan-out `≤ 1` holds by construction,
+so this bounds answer and flag alike, on every input. -/
+theorem descentCostSC_recordDeepen_le (adj : AdjMatrix n) :
+    Select.descentCostS (Refine.encodeFreeFast (n := n))
+        (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+          (recordSupplyDeepenC (n := n))) adj
+      ≤ n * n * n + (n + 1)
+          * (1 + (Select.selProbeBoundC n (recordDeepenSupplyBound n) (recordDeepenGensBound n)
+              (RecordKey.recordKeyBound n) + n * n * n)) :=
+  Select.descentCostS_selNodeC_le
+    (fun c χ => supplyCost_recordSupplyDeepenC_le adj χ c)
+    (fun c χ => gens_recordSupplyDeepenC_length_le adj χ c)
+    (fun χ v => RecordKey.keyCost_recordKey_le adj χ v)
+
+/-! ### 4a. The monomial — the shape `Publication.canon_poly_or_flag` pins
+
+Same discipline as `RecordKey` §5: the numerals are **computed** by `ring` in the expansion below, not
+fitted. ⚠ The pinned shape must stay `costConst * (n + 1) ^ costDeg` — the `n`-form is false at
+`n = 0`, where every colouring is vacuously `Discrete`, the object costs 1 and *answers*. -/
+
+/-- The coefficient sum of §4's bound polynomial. **57 → 69** against
+`RecordKey.costConst`: `+ 8` from the per-cell supply billing and `+ 4` from `W-a`'s guard charge
+(`Deepen.deepenCellCost = n^8 + 2n^6 + n^5`). `ring` checks the transcription. -/
+def costConst : Nat := 69
+
+/-- The degree of §4's bound polynomial — **unchanged at 13**: `RecordKey.recordKeyBound` already
+reaches `n^10`, and the key term is what sets the degree. -/
+def costDeg : Nat := 13
+
+/-- §4's bound, expanded. `ring` checks it, so `costConst`/`costDeg` are computed from the object. -/
+theorem recordDeepenBound_expand (n : Nat) :
+    n * n * n + (n + 1)
+        * (1 + (Select.selProbeBoundC n (recordDeepenSupplyBound n) (recordDeepenGensBound n)
+            (RecordKey.recordKeyBound n) + n * n * n))
+      = n ^ 13 + n ^ 12 + 4 * n ^ 11 + 5 * n ^ 10 + 5 * n ^ 9 + 11 * n ^ 8 + 14 * n ^ 7
+          + 12 * n ^ 6 + 7 * n ^ 5 + 4 * n ^ 4 + 3 * n ^ 3 + n + 1 := by
+  simp only [Select.selProbeBoundC, recordDeepenSupplyBound, recordDeepenGensBound,
+    RecordCost.recordSupplyBound, RecordCost.recordGensBound, RecordKey.recordKeyBound,
+    RecordKey.guardSupplyBound, SupplyCost.matchSupplyBound, Deepen.deepenCellCost,
+    Deepen.goodCellCost, Deepen.stepCost]
+  ring
+
+/-- **★★★ `②` IN THE PUBLICATION SHAPE** — the endgame object runs within `69 * (n + 1) ^ 13` on
+**every** input, with no hypotheses and no flag disjunct. -/
+theorem descentCostSC_recordDeepen_monomial (adj : AdjMatrix n) :
+    Select.descentCostS (Refine.encodeFreeFast (n := n))
+        (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+          (recordSupplyDeepenC (n := n))) adj
+      ≤ costConst * (n + 1) ^ costDeg := by
+  refine le_trans (descentCostSC_recordDeepen_le adj) ?_
+  rw [recordDeepenBound_expand n]
+  simp only [costConst, costDeg]
+  have H : ∀ k : Nat, k ≤ 13 → n ^ k ≤ (n + 1) ^ 13 := fun k hk =>
+    le_trans (Nat.pow_le_pow_left (Nat.le_succ n) k)
+      (Nat.pow_le_pow_right (Nat.succ_le_succ (Nat.zero_le n)) hk)
+  have e13 := H 13 (by omega); have e12 := H 12 (by omega); have e11 := H 11 (by omega)
+  have e10 := H 10 (by omega); have e9 := H 9 (by omega); have e8 := H 8 (by omega)
+  have e7 := H 7 (by omega); have e6 := H 6 (by omega); have e5 := H 5 (by omega)
+  have e4 := H 4 (by omega); have e3 := H 3 (by omega)
+  have e1 : n ≤ (n + 1) ^ 13 := by simpa using H 1 (by omega)
+  have e0 : 1 ≤ (n + 1) ^ 13 := by simpa using H 0 (by omega)
+  omega
+
+/-- **★★★ `①` ∧ `②` ∧ `③` AT ONE OBJECT** — every obligation `Publication.lean` states, all of them
+properties of the *same* canonizer, all axiom-clean, `①` and `②` unconditional and `③` at the tight
+residue `¬ TinhoferGraph`. This is what `Publication.canonForm?` is to be repointed at (plan `W-g`),
+once the runnable `rfl`-twin exists (`W-i`). -/
+theorem recordDeepenCell_full :
+    CanonSpec.IsCanonicalFormOpt
+        (Select.canonFormS? (Refine.encodeFreeFast (n := n))
+          (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+            (recordSupplyDeepenC (n := n))))
+    ∧ (∀ adj : AdjMatrix n,
+        Select.descentCostS (Refine.encodeFreeFast (n := n))
+            (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+              (recordSupplyDeepenC (n := n))) adj
+          ≤ costConst * (n + 1) ^ costDeg)
+    ∧ (∀ adj : AdjMatrix n,
+        Select.canonFormS? (Refine.encodeFreeFast (n := n))
+            (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+              (recordSupplyDeepenC (n := n))) adj = none →
+          ¬ TwinFamily.TinhoferGraph adj) :=
+  ⟨recordDeepenCell_canonizer, descentCostSC_recordDeepen_monomial,
+   fun _ hflag => not_tinhoferGraph_of_flag hflag⟩
+
 /-- **★★★ `①` ∧ `③` AT ONE OBJECT**, at the record key. -/
 theorem recordDeepenCell_record :
     CanonSpec.IsCanonicalFormOpt

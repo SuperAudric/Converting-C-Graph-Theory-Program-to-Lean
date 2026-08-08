@@ -4,10 +4,12 @@
 >
 > **Read [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) before anything else.**
 > **▶▶ 2026-08-08 — then [`chain-descent-percell-plan.md`](./chain-descent-percell-plan.md), the ACTIVE
-> plan.** Design `B` is landed through **`①` AND `③`**: `ChainDescent/SelectCell.lean` +
+> plan.** Design `B` is **complete**: `ChainDescent/SelectCell.lean` +
 > `ChainDescent/DeepenCell.lean` + **`ChainDescent/RecordDeepenCell.lean`**, the last carrying
-> `recordDeepenCell_canonizer` (`①`, global, no hypothesis) **and** `not_tinhoferGraph_of_flag`
-> (`③`, residue `¬TinhoferGraph`) at **one** object — **`②` is the only obligation left.**
+> **`recordDeepenCell_full` = `①` ∧ `②` ∧ `③` at ONE object** — `①` global and unconditional,
+> `②` `cost ≤ 69·(n+1)^13` on every input with no flag disjunct, `③` at the tight residue
+> `¬TinhoferGraph`. **No mathematics remains**: the runnable `rfl`-twin, the repoint of
+> `Publication.canonForm?`, and laziness.
 > It supersedes the wind-down's options table (i)–(vi), now **provenance**:
 > `Publication.canonForm?` **keeps its current fused object** and the work is a **supply change**
 > (cell-indexed). Option (iv)/(v) references below are provenance.
