@@ -152,21 +152,73 @@ theorem cellIsOrbit_recordSupplyDeepenC_of_schurianAt {adj : AdjMatrix n} {χ : 
     CellIsOrbit (recordSupplyDeepenC (n := n) c) adj χ :=
   Deepen.cellIsOrbit_append_right (cellIsOrbit_deepenCellSupply_of_schurianAt htc hT hS)
 
-/-- **★★★ A TINHOFER GRAPH IS `HandledSC` — for every key.** At every reached non-discrete node the
-target cell narrows to one branch **on its own evidence**. -/
-theorem handledSC_of_tinhoferGraph {adj : AdjMatrix n} (h : TwinFamily.TinhoferGraph adj)
-    (key : Force.Key n) :
-    Select.HandledSC key (recordSupplyDeepenC (n := n)) adj := by
-  intro χ hr hd
+/-! ### 3a. `W2` STAGE 2 — THE OBLIGATION, AS ONE NAMED PREDICATE
+
+`handledSC_of_tinhoferGraph` used to reach `NodeResolvedC` through the **target** cell, fed by two
+*node-global* hypotheses: `Deepen.Tinhofer` (every anchor of `branches χ` is good) and `SchurianAt`
+(every cell is an `Aut`-orbit). `Select.SomeCellOrbit` only ever needed **one** cell, so both
+localise — and what is left is a statement about `(adj, χ)` alone, with no supply, no key and no
+resolver in it. -/
+
+/-- **★★★ THE `W2` OBLIGATION.** At this colouring, some non-singleton cell is *both* good-anchored
+(so the per-cell guard opens on it) *and* a single `Aut`-orbit (so there is something for the guard
+to complete along). **Strictly weaker than `SchurianAt` ∧ `Tinhofer`**, which demand it of *every*
+cell — and in particular it does not name the target colour.
+
+▶ **W2 is now exactly: show a CFI residue satisfies this at every reached node.** Everything from
+here to `Publication.residue_if_flag` is already proved. -/
+def ResolvableCellAt (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∃ c ∈ Descend.nonSingletonColours χ, Deepen.GoodCell adj χ c ∧ Deepen.CellSingleOrbit adj χ c
+
+theorem someCellOrbit_of_resolvableCellAt {adj : AdjMatrix n} {χ : Colouring n}
+    (h : ResolvableCellAt adj χ) : Select.SomeCellOrbit (recordSupplyDeepenC (n := n)) adj χ := by
+  obtain ⟨c, hc, hgood, horb⟩ := h
+  exact ⟨c, hc, Deepen.cellOrbitAt_append_right hgood horb⟩
+
+/-- **★★★ `W2`'s SOCKET AT THE PUBLISHED OBJECT.** One resolvable cell at every reached non-discrete
+node ⟹ the canonizer is `HandledSC`, hence never flags. **To widen the handled region, widen the
+class satisfying `ResolvableCellAt`; nothing below re-proves.** -/
+theorem handledSC_of_resolvableCells {adj : AdjMatrix n}
+    (h : ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ →
+      ¬ Discrete χ → ResolvableCellAt adj χ) (key : Force.Key n) :
+    Select.HandledSC key (recordSupplyDeepenC (n := n)) adj :=
+  Select.handledSC_of_someCellOrbit (fun χ hr hd => someCellOrbit_of_resolvableCellAt (h χ hr hd))
+
+/-- **★★ THE RESIDUE, NARROWED TO THIS CLASS** — if the object flags, then it is *not* the case that
+every reached non-discrete colouring has a resolvable cell. This is `③`'s shape at a class that
+strictly contains `TinhoferGraph`. -/
+theorem not_all_resolvable_of_flag {adj : AdjMatrix n} {key : Force.Key n}
+    (hflag : Select.canonFormS? (Refine.encodeFreeFast (n := n))
+      (Select.selNodeC (Refine.encodeFreeFast (n := n)) key (recordSupplyDeepenC (n := n))) adj
+        = none) :
+    ¬ (∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ →
+        ¬ Discrete χ → ResolvableCellAt adj χ) :=
+  fun h => Select.not_handledSC_if_flagSC hflag (handledSC_of_resolvableCells h key)
+
+/-- **The `Tinhofer` class is an instance** — it takes `c` to be the target colour and gets both
+conjuncts from its two node-global hypotheses. So nothing regresses, and the containment
+`TinhoferGraph ⊆ {resolvable at every reached node}` is machine-checked rather than asserted. -/
+theorem resolvableCellAt_of_tinhoferGraph {adj : AdjMatrix n} (h : TwinFamily.TinhoferGraph adj)
+    {χ : Colouring n} (hr : Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ)
+    (hd : ¬ Discrete χ) : ResolvableCellAt adj χ := by
   obtain ⟨c₀, hc₀⟩ := Select.exists_targetColour_of_not_discrete hd
-  refine ⟨c₀, Finset.mem_of_min hc₀, ?_⟩
   have hIR : TwinFamily.IndivReach adj χ :=
     TwinFamily.mem_of_reaches (TwinFamily.stepClosed_indivReach adj) TwinFamily.IndivReach.root hr
-  have hcell := cellIsOrbit_recordSupplyDeepenC_of_schurianAt hc₀
-    (RecordDeepen.tinhofer_of_reaches h hr) (h χ hIR)
-  show (Select.cellNarrow key (recordSupplyDeepenC (n := n) c₀) adj χ c₀).length ≤ 1
-  rw [Select.cellNarrow_targetColour hc₀]
-  exact le_of_eq (Composite.forceThenConsume_singleton_of_cellIsOrbit hd hcell)
+  exact ⟨c₀, Finset.mem_of_min hc₀,
+    goodCell_of_tinhofer hc₀ (RecordDeepen.tinhofer_of_reaches h hr), h χ hIR c₀⟩
+
+theorem someCellOrbit_of_tinhoferGraph {adj : AdjMatrix n} (h : TwinFamily.TinhoferGraph adj)
+    {χ : Colouring n} (hr : Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ)
+    (hd : ¬ Discrete χ) :
+    Select.SomeCellOrbit (recordSupplyDeepenC (n := n)) adj χ :=
+  someCellOrbit_of_resolvableCellAt (resolvableCellAt_of_tinhoferGraph h hr hd)
+
+/-- **★★★ A TINHOFER GRAPH IS `HandledSC` — for every key.** Now an instance of the `W2` socket
+rather than a direct `targetColour` argument. -/
+theorem handledSC_of_tinhoferGraph {adj : AdjMatrix n} (h : TwinFamily.TinhoferGraph adj)
+    (key : Force.Key n) :
+    Select.HandledSC key (recordSupplyDeepenC (n := n)) adj :=
+  handledSC_of_resolvableCells (fun _ hr hd => resolvableCellAt_of_tinhoferGraph h hr hd) key
 
 /-- **★★ A TINHOFER GRAPH ANSWERS** at the endgame object. -/
 theorem answersSC_of_tinhoferGraph {adj : AdjMatrix n} (h : TwinFamily.TinhoferGraph adj)

@@ -1,0 +1,22 @@
+W2 STEP 0 — does `ResolvableCellAt` hold at every reached node?
+  ALL-NODES=Y     : every reached non-discrete node has a good-anchored single-orbit cell
+  TARGET-ALWAYS=Y : the TARGET cell is always one of them (⟹ the old route would do)
+  single-orbit is a POSITIVE certificate only; 'no' may be incompleteness of the gens.
+BFS depth 1, <=2 members/node, leafcap 200000.
+
+  CFI cubic m=8 pl         n=56   nodes=3   cells=28   good=26   single=26   resolvable=26    ALL-NODES=N  TARGET-ALWAYS=N   <<<< NOT RESOLVABLE (see first-bad)
+        first unresolvable node: depth 0, cells [0, 1]
+  CFI cubic m=8 tw         n=56   nodes=3   cells=28   good=26   single=26   resolvable=26    ALL-NODES=N  TARGET-ALWAYS=N   <<<< NOT RESOLVABLE (see first-bad)
+        first unresolvable node: depth 0, cells [0, 1]
+  rand multipede V=6 W=5   n=34   nodes=1   cells=8    good=0    single=0    resolvable=0     ALL-NODES=N  TARGET-ALWAYS=N   <<<< NOT RESOLVABLE (see first-bad)
+        first unresolvable node: depth 0, cells [0, 1, 2, 3, 4, 5, 6, 7]
+  MIXED multipede          n=30   nodes=3   cells=24   good=18   single=18   resolvable=18    ALL-NODES=Y  TARGET-ALWAYS=N   <<< WIDENING LOAD-BEARING at 1 node(s)
+  circ(5) multipede        n=30   nodes=3   cells=26   good=22   single=22   resolvable=22    ALL-NODES=N  TARGET-ALWAYS=N   <<<< NOT RESOLVABLE (see first-bad)
+        first unresolvable node: depth 0, cells [0, 1]
+  mp7 Fano multipede       n=42   nodes=3   cells=14   good=14   single=14   resolvable=14    ALL-NODES=Y  TARGET-ALWAYS=Y
+  G8 cubic non-VT          n=8    nodes=1   cells=1    good=0    single=0    resolvable=0     ALL-NODES=N  TARGET-ALWAYS=N   <<<< NOT RESOLVABLE (see first-bad)
+        first unresolvable node: depth 0, cells [0]
+  S(K5)                    n=15   nodes=3   cells=10   good=10   single=10   resolvable=10    ALL-NODES=Y  TARGET-ALWAYS=Y
+  S(Petersen)              n=25   nodes=3   cells=14   good=14   single=14   resolvable=14    ALL-NODES=Y  TARGET-ALWAYS=Y
+
+>>> no witness skipped

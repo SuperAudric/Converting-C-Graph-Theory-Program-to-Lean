@@ -524,5 +524,43 @@ theorem deepenCell_append_canonizer {key : Force.Key n} (hk : Force.KeyEquivaria
           (fun c => Deck.appendSupply R (deepenCellSupply (n := n) c)))) :=
   Select.selNodeC_canonizer hk (cellOrbitTransport_append_of_supplyEquivariant hR)
 
+/-! ## 9. `W2` STAGE 2 — THE FIRING CONDITION AT AN ARBITRARY CELL
+
+`RecordDeepenCell.cellIsOrbit_deepenCellSupply_of_schurianAt` says the **target** cell is one orbit
+of its own generators, from `Tinhofer` + `SchurianAt`. Both hypotheses are *node-global*: `Tinhofer`
+quantifies over `branches χ` and `SchurianAt` over every cell.
+
+`Select.SomeCellOrbit` (the `SelectCell` §9 socket) only ever needed **one** cell, so the two
+hypotheses can be localised to that cell — `GoodCell adj χ c` (its own anchors are good) and
+`CellSingleOrbit adj χ c` (it is one `Aut`-orbit). Neither mentions the target colour, and neither
+says anything about the other cells.
+
+★ That is the shape a **CFI** residue can meet and `TinhoferGraph` cannot be weakened to: measured,
+the per-cell guard is open on 26/28, 26/28, 18/24, 22/26, 14/14, 10/10, 14/14 cells at depth-1 CFI
+nodes (`scratchpad/probe_offbranch5.py`) — most cells but not all, and not necessarily the target. -/
+
+/-- **★★ ONE CELL, TWO LOCAL HYPOTHESES, AND IT FIRES.** The body is
+`RecordDeepenCell.cellIsOrbit_deepenCellSupply_of_schurianAt`'s with the `targetColour` plumbing
+removed: `GoodCell` gives orbit-completeness at the cell (`orbitCompleteAt_of_goodCell`) and
+`CellSingleOrbit` supplies the automorphism to complete along. -/
+theorem cellOrbitAt_deepenCellSupply {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
+    (hgood : GoodCell adj χ c) (horb : CellSingleOrbit adj χ c) :
+    Select.CellOrbitAt (fun c' => deepenCellSupply (n := n) c') adj χ c := by
+  intro u hu w hw
+  show WordReach (verified (deepenCellSupply (n := n) c) adj χ) u w
+  rw [verified_deepenCellSupply_of_open hgood]
+  obtain ⟨ρ, hρ, hρu⟩ := horb u w ((Select.mem_cellList_iff u).mp hu)
+    ((Select.mem_cellList_iff w).mp hw)
+  have hreach := orbitCompleteAt_of_goodCell hgood u hu ρ hρ
+  rwa [hρu] at hreach
+
+/-- …and it survives an appended left factor — extra generators can only merge more. -/
+theorem cellOrbitAt_append_right {R : Supply n} {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
+    (hgood : GoodCell adj χ c) (horb : CellSingleOrbit adj χ c) :
+    Select.CellOrbitAt (fun c' => Deck.appendSupply R (deepenCellSupply (n := n) c')) adj χ c :=
+  fun u hu w hw =>
+    wordReach_mono (fun _ hg => mem_verified_appendSupply_right hg)
+      (cellOrbitAt_deepenCellSupply hgood horb u hu w hw)
+
 end Deepen
 end ChainDescent

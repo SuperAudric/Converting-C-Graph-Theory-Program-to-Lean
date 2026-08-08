@@ -1101,5 +1101,96 @@ theorem descentCostS_selNodeLazyHC_eq {S : CellSupply n} {L : Supply n} {T : Cel
       = descentCostS (Refine.encodeFreeFast (n := n)) (selNodeLazyC key S) adj := by
   rw [selNodeLazyHC_eq hS key]
 
+/-! ## 9. `W2` STAGE 1 — THE SOCKET: `HandledSC` FROM **ONE** CELL PER NODE
+
+The `③` population on record (`RecordDeepenCell.handledSC_of_tinhoferGraph`) reaches
+`NodeResolvedC` through the **target** cell: `Select.cellNarrow_targetColour` rewrites the per-cell
+narrowing into `Composite.narrow (forceThenConsume …)`, and `Consume.CellIsOrbit` is itself stated at
+`Descend.branches χ`. That route is what `TinhoferGraph` can feed, because `SchurianAt` says *every*
+cell is an orbit — so the target cell in particular.
+
+**A CFI residue cannot feed it.** `probe_offbranch5` measures the per-cell guard open on
+26/28, 26/28, 18/24, 22/26, 14/14, 10/10, 14/14 cells at depth-1 CFI nodes — most cells, not all, and
+nothing pins the *target* cell to the open set. But `NodeResolvedC` only ever asked for **some**
+non-singleton cell, and `selColourC` already takes the minimum over whichever cells fire. This
+section removes the target-cell restriction from the sufficient condition, so a wider class can be
+supplied without re-proving anything below.
+
+★ **Widening the handled region is now: exhibit one cell per reached node.** That is the `SelectCell`
+analogue of `TwinFamily.handledS_of_noRigidObstruction`, and it is deliberately CFI-free — no graph
+family appears here.
+
+⚠ It is a *sufficient* condition, not a characterization: a cell can also fire because the **key**
+separates it, which `cellNarrowC` applies first. `SomeCellOrbit` is the supply-side half only. -/
+
+/-- **The per-cell orbit condition, at an ARBITRARY cell.** `Consume.CellIsOrbit` is this statement
+at `Descend.branches χ` (the target cell) against a node-global supply; here `c` is any cell and the
+generators are the ones anchored **in `c`**. -/
+def CellOrbitAt (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) : Prop :=
+  ∀ u ∈ cellList χ c, ∀ w ∈ cellList χ c, WordReach (verified (S c) adj χ) u w
+
+/-- A nodup list whose elements are all equal to one value has length `≤ 1`. -/
+private theorem length_le_one_of_nodup_const {α : Type} {l : List α} {a : α} (hnd : l.Nodup)
+    (h : ∀ x ∈ l, x = a) : l.length ≤ 1 := by
+  match l with
+  | [] => simp
+  | [_] => simp
+  | x :: y :: t =>
+      exact absurd (by
+        have hx : x = a := h x (by simp)
+        have hy : y = a := h y (by simp)
+        exact List.mem_cons.mpr (Or.inl (hx.trans hy.symm)))
+        (List.nodup_cons.mp hnd).1
+
+/-- **★★ ONE CELL BEING A SINGLE ORBIT OF ITS OWN GENERATORS MAKES THAT CELL FIRE** — at **any**
+cell, with no hypothesis on the key and no reference to `targetColour`. `Consume.rep_eq_of_wordReach`
+carries no hypothesis on the supply either, so this holds for every `S`. -/
+theorem cellNarrowC_length_le_one_of_cellOrbitAt {key : Key n} {S : CellSupply n}
+    {adj : AdjMatrix n} {χ : Colouring n} {c : Nat} (h : CellOrbitAt S adj χ c) :
+    (cellNarrowC key S adj χ c).length ≤ 1 := by
+  rcases hk : keepMin key adj χ (cellList χ c) with _ | ⟨b, t⟩
+  · show (((keepMin key adj χ (cellList χ c)).map _).dedup).length ≤ 1
+    rw [hk]; simp
+  · have hbc : b ∈ cellList χ c := keepMin_subset (by rw [hk]; exact List.mem_cons_self)
+    refine length_le_one_of_nodup_const (a := rep (verified (S c) adj χ) b)
+      (List.nodup_dedup _) ?_
+    intro x hx
+    obtain ⟨y, hy, rfl⟩ := List.mem_map.mp (List.mem_dedup.mp hx)
+    exact Consume.rep_eq_of_wordReach (h y (keepMin_subset hy) b hbc)
+
+/-- **The socket's hypothesis at one node**: some non-singleton cell is a single orbit of the
+generators anchored in it. -/
+def SomeCellOrbit (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∃ c ∈ nonSingletonColours χ, CellOrbitAt S adj χ c
+
+theorem nodeResolvedC_of_someCellOrbit {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} (h : SomeCellOrbit S adj χ) : NodeResolvedC key S adj χ := by
+  obtain ⟨c, hc, horb⟩ := h
+  exact ⟨c, hc, cellNarrowC_length_le_one_of_cellOrbitAt horb⟩
+
+/-- **★★★ THE SOCKET.** *One resolvable cell at every reached non-discrete node ⟹ `HandledSC`* —
+hence (with `answersSC_of_handledSC`) the object never flags, and (contrapositive) the flag names a
+node where **no** cell is a single orbit of its own generators.
+
+▶ **To widen the handled region, supply a wider hypothesis here; nothing below re-proves.** The
+existing `TinhoferGraph` population is the instance that takes `c` to be the target colour
+(`RecordDeepenCell.handledSC_of_tinhoferGraph`, re-derived through this socket). -/
+theorem handledSC_of_someCellOrbit {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    (h : ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ → ¬ Discrete χ →
+      SomeCellOrbit S adj χ) :
+    HandledSC key S adj :=
+  fun χ hr hd => nodeResolvedC_of_someCellOrbit (h χ hr hd)
+
+/-- The target cell is the special case the `Tinhofer` population uses: `Descend.branches χ` **is**
+`cellList χ c` there (`branches_eq_cellList`), so `Consume.CellIsOrbit` at the cell's own supply is
+literally `CellOrbitAt` at that colour. -/
+theorem someCellOrbit_of_targetCellIsOrbit {S : CellSupply n} {adj : AdjMatrix n} {χ : Colouring n}
+    {c : Nat} (htc : Descend.targetColour χ = some c)
+    (h : Consume.CellIsOrbit (S c) adj χ) : SomeCellOrbit S adj χ := by
+  refine ⟨c, Finset.mem_of_min htc, ?_⟩
+  intro u hu w hw
+  rw [← branches_eq_cellList htc] at hu hw
+  exact h u hu w hw
+
 end Select
 end ChainDescent

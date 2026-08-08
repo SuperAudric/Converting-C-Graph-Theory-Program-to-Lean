@@ -5336,6 +5336,8 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.cellOrbitTransport_append` | 481-507 | ★★ **THE APPEND CARRIES `CellOrbitTransport`**, given only that the left factor's own relation transports where the guard is shut. | Hypothesis shaped for the `kernelSupply`/`SameOrbits` route (W-d′) |
 | `Deepen.cellOrbitTransport_append_of_supplyEquivariant` | 509-516 | The instance for an equivariant left factor — covers `foldSupplyFast ++ deckSupply ++ deck2Supply`. | ⚠ `kernelSupply` is provably NOT `GensEquivariant` |
 | `Deepen.deepenCell_append_canonizer` | 518-525 | ★★★ **`①` AT THE APPENDED CELL-INDEXED OBJECT.** | — |
+| `Deepen.cellOrbitAt_deepenCellSupply` | 542-555 | ★★ **ONE CELL, TWO LOCAL HYPOTHESES, AND IT FIRES** (`W2` stage 2): `GoodCell adj χ c` (its own anchors are good) + `CellSingleOrbit adj χ c` (it is one `Aut`-orbit) ⟹ `Select.CellOrbitAt`. The `targetColour` plumbing of `RecordDeepenCell.cellIsOrbit_deepenCellSupply_of_schurianAt` removed; neither hypothesis mentions another cell. | — |
+| `Deepen.cellOrbitAt_append_right` | 557-563 | …and it survives an appended left factor — extra generators can only merge more. | — |
 
 ## ChainDescent/SelectCell.lean
 
@@ -5424,6 +5426,12 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Select.canonFormLazyHSC?` | 1085-1088 | **The runnable top-level hoisted object** — what `RecordDeepenCell.canonFormFast` is. | Definition |
 | `Select.canonFormLazyHSC?_eq` | 1090-1096 | …and it is the reasoned-about one. | — |
 | `Select.descentCostS_selNodeLazyHC_eq` | 1098-1104 | The cost, likewise an **equation**: `W-j` shares work, it does not charge differently, so `②`'s numerals do not move. | — |
+| `Select.CellOrbitAt` | 1126-1130 | ★ **The per-cell orbit condition at an ARBITRARY cell** (`W2` stage 1). `Consume.CellIsOrbit` is this statement at `Descend.branches χ` against a node-global supply; here `c` is any cell and the generators are the ones anchored **in `c`**. | Definition |
+| `Select.cellNarrowC_length_le_one_of_cellOrbitAt` | 1145-1159 | ★★ **ONE CELL BEING A SINGLE ORBIT OF ITS OWN GENERATORS MAKES THAT CELL FIRE** — at **any** cell, with no hypothesis on the key and no reference to `targetColour`. `Consume.rep_eq_of_wordReach` carries no supply hypothesis, so it holds for every `S`. | — |
+| `Select.SomeCellOrbit` | 1161-1164 | The socket's hypothesis at one node: SOME non-singleton cell is a single orbit of the generators anchored in it. | Definition |
+| `Select.nodeResolvedC_of_someCellOrbit` | 1166-1169 | …which is a `NodeResolvedC` node. | — |
+| `Select.handledSC_of_someCellOrbit` | 1171-1182 | ★★★ **THE `W2` SOCKET.** One resolvable cell at every reached non-discrete node ⟹ `HandledSC`, hence never flags. **To widen the handled region, supply a wider hypothesis here; nothing below re-proves.** ⚠ Sufficient, not necessary — a cell can also fire because the *key* separates it. | The `SelectCell` analogue of `TwinFamily.handledS_of_noRigidObstruction` |
+| `Select.someCellOrbit_of_targetCellIsOrbit` | 1184-1193 | The target cell is the special case the `Tinhofer` population uses — `branches χ` **is** `cellList χ c` there, so `Consume.CellIsOrbit` at the cell's own supply is literally `CellOrbitAt`. | — |
 ## ChainDescent/RecordDeepenCell.lean
 
 | Name | Line | Description | Notes |
@@ -5435,7 +5443,13 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `RecordDeepenCell.goodCell_of_tinhofer` | 118-127 | **The per-cell guard opens at the TARGET cell**, from `Tinhofer` alone — `Deepen.tinhofer_iff_forall_goodAnchor` is `Iff.rfl` and `Select.branches_eq_cellList` identifies the branch list with the target cell. The node-global guard and the target cell's guard are the same statement. | Why the per-cell strengthening costs no coverage on the class `③` is about |
 | `RecordDeepenCell.cellIsOrbit_deepenCellSupply_of_schurianAt` | 129-145 | ★★ **THE TARGET CELL IS ONE ORBIT OF ITS OWN GENERATORS** — `RecordDeepen`'s firing lemma with the harvest restricted to the cell: `SchurianAt` supplies the automorphism, `Deepen.orbitCompleteAt_of_goodCell` turns it into a `WordReach` over generators anchored **inside** the cell. | — |
 | `RecordDeepenCell.cellIsOrbit_recordSupplyDeepenC_of_schurianAt` | 147-153 | The same at the endgame supply — extra generators can only merge more (`Deepen.cellIsOrbit_append_right`). | — |
-| `RecordDeepenCell.handledSC_of_tinhoferGraph` | 155-169 | ★★★ **A TINHOFER GRAPH IS `HandledSC` — for every key.** At every reached non-discrete node the target cell narrows to one branch **on its own evidence**. | The `③` population at the cell-indexed object |
+| `RecordDeepenCell.ResolvableCellAt` | 166-171 | ★★★ **THE `W2` OBLIGATION, as one named predicate**: some non-singleton cell is *both* good-anchored (the per-cell guard opens) *and* a single `Aut`-orbit. A statement about `(adj, χ)` alone — no supply, no key, no resolver. **Strictly weaker than `SchurianAt ∧ Tinhofer`**, which demand it of every cell, and it does not name the target colour. | Definition; ⚠ supply-side half only — a cell can also fire on the key |
+| `RecordDeepenCell.someCellOrbit_of_resolvableCellAt` | 173-176 | …feeds `Select.SomeCellOrbit` at the endgame supply, through `Deepen.cellOrbitAt_append_right`. | — |
+| `RecordDeepenCell.handledSC_of_resolvableCells` | 178-185 | ★★★ **`W2`'s SOCKET AT THE PUBLISHED OBJECT** — one resolvable cell at every reached non-discrete node ⟹ `HandledSC`, hence never flags. **To widen the handled region, widen the class satisfying `ResolvableCellAt`.** | — |
+| `RecordDeepenCell.not_all_resolvable_of_flag` | 187-196 | ★★ **THE RESIDUE, NARROWED TO THIS CLASS** — a flag means it is *not* the case that every reached non-discrete colouring has a resolvable cell. `③`'s shape at a class strictly containing `TinhoferGraph`. | Measured non-vacuous both ways (`scratchpad/probe_w2_resolvable.out`) |
+| `RecordDeepenCell.resolvableCellAt_of_tinhoferGraph` | 198-208 | **The `Tinhofer` class is an instance** — it takes `c` to be the target colour and gets both conjuncts from its two node-global hypotheses. The containment `TinhoferGraph ⊆ resolvable-everywhere` is machine-checked, not asserted. | — |
+| `RecordDeepenCell.someCellOrbit_of_tinhoferGraph` | 210-214 | The same, phrased at `Select.SomeCellOrbit`. | — |
+| `RecordDeepenCell.handledSC_of_tinhoferGraph` | 216-221 | ★★★ **A TINHOFER GRAPH IS `HandledSC` — for every key.** Now an instance of the `W2` socket rather than a direct `targetColour` argument. | The `③` population at the cell-indexed object |
 | `RecordDeepenCell.answersSC_of_tinhoferGraph` | 171-177 | ★★ **A TINHOFER GRAPH ANSWERS** at the endgame object. | — |
 | `RecordDeepenCell.not_tinhoferGraph_of_flag` | 179-187 | ★★★ **`③` AT THE ENDGAME OBJECT, FOR EVERY KEY** — if the canonizer flags, the input is provably not a Tinhofer graph. This **is** `Publication.residue_if_flag`'s statement, at the object `canonForm?` is to become. | ⚠ `RecordDeepen`'s version is at `selNode` + the node-global supply, which cannot carry `①` |
 | `RecordDeepenCell.recordDeepenSupplyBound` | 206-209 | The endgame supply's per-node work bound: the record's four supplies, plus the cell-anchored harvest **and its guard**. | Definition |

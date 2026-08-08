@@ -407,22 +407,84 @@ what is missing is the theorem that it *always* certifies the branch cell on the
 > `Residue.Handled` nor `Select.HandledS` rewrites onto it. Check which layer a theorem is on before
 > calling it reusable.
 >
-> ### ▶ THE ROUTE THAT DOES LAND AT THE PUBLISHED OBJECT
+> ### ⛔ AND THE ROUTE I FIRST RECORDED WAS ALSO WRONG — `kernelSupply` CANNOT CARRY IT
 >
-> **Use `kernelSupply` — it is already the fourth factor of `recordSupplyFast`**, and it is the
-> component actually *measured* to consume the CFI gauge (`mp7`, one call). The target shape mirrors
-> `RecordDeepenCell.handledSC_of_tinhoferGraph` exactly, one lemma per step:
+> ~~"Use `kernelSupply`, already the fourth factor of `recordSupplyFast` and the component measured to
+> consume the CFI gauge; step 1 is `CellIsOrbit Kernel.kernelSupply adj χ` at a reached CFI node."~~
+> **`CellIsOrbit kernelSupply` is measurably FALSE where it matters.** `KernelSupply.lean`'s own
+> header records the `mp7` measurement: the root gadget cell goes **28 → 7**, i.e. the gauge is fully
+> certified and **the Z₇ translations are honestly left standing** — 7 orbits, not 1. `kernelSupply`
+> is a *gauge* constructor; base symmetry is what `deepenSupply` was built for
+> (`chain-descent-deepen-supply.md`: "the constructor for base symmetry — what survives after
+> `kernelSupply` certifies the gauge"). Caught while scoping, before any CFI Lean was written.
 >
-> 1. `CellIsOrbit (Kernel.kernelSupply) adj χ` at a reached CFI node — **the open mathematics**, and
->    the only genuinely new step. This is where `theorem_1_HOR_cfi_oddDeg` should be *consumed*,
->    rather than routed through `CascadeOracle`.
-> 2. `Deepen.cellIsOrbit_append_left` / `append_right` lift it to `recordSupplyDeepenC c` — already
->    proved, both directions, used verbatim by `cellIsOrbit_recordSupplyDeepenC_of_schurianAt`.
-> 3. `Select.cellNarrow_targetColour` + `Composite.forceThenConsume_singleton_of_cellIsOrbit` ⟹
->    `Select.HandledSC` — already proved.
-> 4. `Select.answersSC_of_handledSC` ⟹ never flags; contrapositive ⟹ the residue narrows.
+> ### ✅ STAGES 1–2 ARE BUILT (2026-08-08, gate exit 0 / 224 s / 119 modules, axiom-clean)
 >
-> Steps 2–4 are a copy of `handledSC_of_tinhoferGraph`'s body. **The whole box is step 1.**
+> The route that does land goes through **`deepenCellSupply` + its per-cell guard**, and it needed
+> two sockets first, both of which are now in the gate:
+>
+> | stage | where | what |
+> |---|---|---|
+> | **1 — the resolver socket** | `SelectCell.lean` §9 | `CellOrbitAt` (the per-cell orbit condition at an **arbitrary** cell) · `cellNarrowC_length_le_one_of_cellOrbitAt` (one cell being one orbit of its own generators makes *that* cell fire — no key hypothesis, no `targetColour`) · `SomeCellOrbit` · **`handledSC_of_someCellOrbit`** · `someCellOrbit_of_targetCellIsOrbit` |
+> | **2 — the named obligation** | `DeepenCell.lean` §9 + `RecordDeepenCell.lean` §3a | `Deepen.cellOrbitAt_deepenCellSupply` / `cellOrbitAt_append_right` · **`RecordDeepenCell.ResolvableCellAt`** · `handledSC_of_resolvableCells` · `not_all_resolvable_of_flag` · `resolvableCellAt_of_tinhoferGraph` |
+>
+> **`ResolvableCellAt adj χ := ∃ c ∈ nonSingletonColours χ, GoodCell adj χ c ∧ CellSingleOrbit adj χ c`**
+> — a statement about `(adj, χ)` alone: no supply, no key, no resolver. `handledSC_of_resolvableCells`
+> turns *"that holds at every reached non-discrete node"* into `HandledSC` at the **published**
+> object, hence "never flags". ★ `handledSC_of_tinhoferGraph` is now **derived through it**
+> (`resolvableCellAt_of_tinhoferGraph`), so the containment `TinhoferGraph ⊆ resolvable-everywhere`
+> is machine-checked and nothing regressed.
+>
+> ⚠ **It is the supply-side half only.** A cell can also fire because the **key** separates it —
+> `cellNarrowC` applies `keepMin key` first. `ResolvableCellAt` is sufficient, never necessary.
+>
+> ### ★★★ STAGE 0 MEASURED (`scratchpad/probe_w2_resolvable.py` → `probe_w2_resolvable.out`)
+>
+> BFS depth 1, ≤2 members/node, leafcap 200 000. `GoodCell` is `probe_offbranch5.guard_cell` verbatim
+> (`None` = budgeted out, never counted as a pass); `CellSingleOrbit` is union-find over the
+> generators `Ctx`/`canon` discovers — sound, so **single-orbit = YES is a positive certificate** and
+> NO is only a failure to certify (⛔ never `probe_orbit_oracle`).
+>
+> | witness | n | cells | good | single | resolvable | all nodes? | target always? |
+> |---|---|---|---|---|---|---|---|
+> | CFI cubic m=8 pl | 56 | 28 | 26 | 26 | 26 | **N** (root) | N |
+> | CFI cubic m=8 tw | 56 | 28 | 26 | 26 | 26 | **N** (root) | N |
+> | **mp7 Fano multipede** | 42 | 14 | 14 | 14 | **14** | **Y** | Y |
+> | MIXED multipede | 30 | 24 | 18 | 18 | 18 | **Y** | **N** ★ |
+> | circ(5) multipede | 30 | 26 | 22 | 22 | 22 | N (root) | N |
+> | rand multipede V=6 W=5 | 34 | 8 | 0 | 0 | 0 | N | N |
+> | G8 cubic non-VT | 8 | 1 | 0 | 0 | 0 | N | N |
+> | S(K5) · S(Petersen) | 15 · 25 | 10 · 14 | all | all | all | Y | Y |
+>
+> **★ Q2 ANSWERED — THE STAGE-1 WIDENING IS LOAD-BEARING, not cosmetic.** At the **MIXED multipede
+> root** the *target* cell (colour 0, size 4) has the guard **shut**, while cells 2 and 7 have it
+> **open and are certified single orbits**. Under the old target-cell-only route that node is not
+> provably handled; under `SomeCellOrbit` it is. Positive certificates on both halves.
+>
+> **⛔⛔ Q1 ANSWERED, AND IT IS A NEGATIVE — `ResolvableCellAt` FAILS AT THE CFI ROOT.** Both root
+> cells of CFI-over-cubic m=8 (sizes 32 and 24, plain *and* twisted) have the per-cell guard
+> **genuinely shut**, and the certified orbit partition splits each into **3 blocks**. ⚠ Re-verified
+> at budget **200 000** (667× the sweep's) to rule out a budget artifact: still `False`, not `None`.
+> ★ But **26/26 depth-1 cells are good ∧ single**. ⟹ **the CFI *residue* is resolvable; the CFI
+> *root* is not**, and the failure is at exactly one node.
+>
+> ### ⟹ WHAT W2 CAN AND CANNOT BE, RESTATED ON THE MEASUREMENT
+>
+> 1. **The consume side provably cannot take the CFI-over-cubic root.** With the guard shut,
+>    `deepenCellSupply` emits `[]`, and `kernelSupply` leaves 7 orbits on `mp7`'s gadget cell — so
+>    whether the published object answers on such a graph rests **entirely on the force key at the
+>    root**. That is a **rigid/force-side** obligation (Track R, §3 suspended), and it is exactly the
+>    standing framing — *"a CFI graph's obstruction is linear and belongs to the rigid resolver"* —
+>    now measured rather than asserted. **W2 is not a consume-side item at the root.**
+> 2. **There IS a reachable positive target: `mp7`, the Fano multipede** — resolvable at **every**
+>    reached node (14/14, target always among them), and it is precisely the graph `kernelSupply` was
+>    built for and the one the *"poly where IR solvers are exponential"* claim points at. **W2's first
+>    Lean target should be the multipede family at `mp7`'s shape, not CFI-over-cubic.**
+> 3. **The class is proper in both directions** — `rand multipede V=6 W=5` (0/8 cells) and `G8` (0/1)
+>    have no resolvable cell at all, so `ResolvableCellAt` is neither vacuous nor trivial.
+> 4. ⚠ Depth 1, ≤2 members/node. A family-level claim needs every reached node; this is a
+>    feasibility read, not a proof, and the standing "root-only is not a pass" caveat applies in
+>    reverse here — it was the **root** that failed.
 >
 > ### ⚠ AND RESTATE THE PAYOFF BEFORE SPENDING THE BOX
 >
@@ -433,7 +495,15 @@ what is missing is the theorem that it *always* certifies the branch cell on the
 > population, it is a **strengthening of the residue predicate**:
 > `¬ TinhoferGraph` → `¬ TinhoferGraph ∧ ¬ (CFI-handled)`. ⛔ Do **not** add that second conjunct as
 > an `opaque` atom (§2a: an opaque disjunct re-breaks `unhandledResidue_nonvacuous`'s handled half);
-> it must be a definition backed by step 1.
+> it must be a definition backed by a real population.
+>
+> ✅ **That definition now exists and is not opaque**: `RecordDeepenCell.ResolvableCellAt`, with
+> `not_all_resolvable_of_flag` as its `③`. The residue it names — *"some reached non-discrete
+> colouring has **no** good-anchored single-orbit cell"* — is strictly narrower than `¬ Tinhofer`,
+> is a statement about the graph alone, and is **measured non-vacuous in both directions** (`mp7`
+> resolvable everywhere; `rand multipede V=6 W=5` and `G8` nowhere). Wiring it into
+> `Publication.UnhandledResidue` is a live option that needs **no new mathematics** — but read
+> point 1 above first: it does **not** capture CFI-over-cubic, whose root is a force-side node.
 
 ### W3 — extraction candidates *(box: 1 week, survey then decide)*
 Material that stands alone, independent of the canonizer's fate. Assess each for whether it
@@ -569,9 +639,14 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >    The claim is *"a flag means a real structural obstruction"*, never *"a flag means hardness"*.
 >
 > ### ▶ What is left
-> **W2** (CFI `Handled` — progress, not completion; ⛔ **re-scoped 2026-08-08, its recorded route
-> points at the wrong object** — read the correction block in §2 W2 before starting) · **W3**
-> (extraction) · **W4** (write-up) · **W5** (archive). **`W-j` is ✅ LANDED** (below).
+> **W2** — ✅ **stages 1–2 built 2026-08-08** (the `SomeCellOrbit` socket + the named obligation
+> `ResolvableCellAt`, both gated and axiom-clean, with the `Tinhofer` population re-derived through
+> them). ⛔ **Stage 0 then measured that the target must change**: `ResolvableCellAt` fails at the
+> **CFI-over-cubic root** (guard genuinely shut on both root cells), so the consume side cannot take
+> that node and CFI coverage is a **force-side** obligation; but `mp7` (Fano multipede) is resolvable
+> at **every** reached node, and the stage-1 widening is **measurably load-bearing** (MIXED root).
+> **Read §2 W2 in full before touching it.** · **W3** (extraction) · **W4** (write-up) · **W5**
+> (archive). **`W-j` is ✅ LANDED** (below).
 >
 > ### ✅ `W-j` — LANDED 2026-08-08, `SelectCell.lean` §8 + `RecordDeepenCell.lean` §5
 > The per-cell plan's *"nothing outstanding"* was right about its own scope and wrong as a statement
