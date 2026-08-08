@@ -366,7 +366,94 @@ and the covered class is a *superset*. Do **not** change the design to match (it
 `TinhoferPath`'s single-path recursion, hence `②`). Call it **path-local Tinhofer** and land the
 bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implication is machine-checked.
 
-### W2 — CFI family `Handled` *(box was 2 weeks; ✅ stages 1–2 built 2026-08-08, and stage 0 then RE-TARGETED it — read to the end of this section before starting)*
+### W2 — the CFI **layer**, not a CFI family *(box was 2 weeks; ✅ stages 1–2 built 2026-08-08; stage 0's retarget is RETRACTED — read the re-affirmation block FIRST)*
+
+> # ⛔⛔⛔ SCOPE RE-AFFIRMATION (user, 2026-08-08, later) — W2 IS A **FORCE-SIDE LAYER** THEOREM
+>
+> **The architecture, restated by the user, and it is what the built contract already says:**
+> * the **consume** resolver handles **CAO residues** — cells that *are* orbits;
+> * the **force** resolver **splits mixed-orbit cells** so that a CAO node is reached.
+>
+> That is `Force.forceBy_no_narrowing_on_orbit` + `Descend.narrow_eq_branches_of_orbit` in prose:
+> the two routes have **complementary, non-overlapping firing domains**, and force is *forbidden* to
+> fire on an orbit cell exactly where consume must.
+>
+> **Why CFI is the chosen residue family:** the obstruction it *adds* is one force can always
+> identify and convert into a solvable form (the F₂ gauge → canonical RREF → equivariant for free,
+> poly by Gaussian elimination — [`README.md`](../README.md) ¶"ladder"). And because CFI **keeps the
+> base graph's own properties**, the publication theorem is **not** *"canonize every CFI graph"* —
+> that would include canonizing every base graph, i.e. GI. It is:
+>
+> > ### ★★★ **solve the CFI *part* of every CFI graph.**
+>
+> ### ⟹ THREE CONSEQUENCES, AND THEY CHANGE WHAT STAGE 0 MEANT
+>
+> **1. Stage 0's CFI-root result is a CONFIRMATION of the design, not a blocker.** Both root cells of
+> CFI-over-cubic are **mixed-orbit** (3 certified `Aut`-blocks each). A mixed cell is *precisely*
+> force's domain and one where consume is *forbidden* to fire. Measuring *"consume cannot take the
+> CFI root"* measured the division of labour working as specified. ⛔ The inference recorded below —
+> *"⟹ force-side ⟹ Track R suspended ⟹ do not plan W2 around CFI-over-cubic"* — **inverts the
+> intent** and is struck.
+>
+> **2. ⛔ THE `mp7` RETARGET IS RETRACTED.** It replaces a **layer** theorem with a **family
+> membership** theorem — the exact move SCOPE CORRECTION #1 (just below) forbids — and it does not
+> even buy the headline it was chosen for: the Neuen–Schweitzer exponential lower bound is proved on
+> multipedes that are **rigid** (`DUAL_resolver_scoping.md` §8.2 quotes their `|Aut| = 1`; a
+> multipede is rigid ⟺ its base is *odd* ⟺ the biadjacency has **full F₂ column rank**,
+> `chain-descent-exhaustive-obstruction.md`). `mp7` has gauge `Z₂³` and **`|Aut| = 1344`** ⟹ it is
+> the **even, non-rigid** multipede, i.e. the complement of the NS family. ⚠ And note the general
+> form: **no consume-side coverage theorem can ever carry the NS claim**, because consume certifies
+> symmetry and that family has none. `mp7` remains a fine *second named family* exercising
+> `kernelSupply`; it must never be quoted as the NS sentence.
+>
+> **3. ★★★ THE REAL BLOCKER, AND IT IS NAMED IN THE SOURCE: the record key has NO SOLVER
+> COMPONENT.** `RecordKey.recordKey = pairKey holKeyFast (orbKeyG guardSupply)`, and
+> `Deepen.guardSupply = foldSupplyFast ++ deckSupply ++ deck2Supply ++ matchSupply` — **`kernelSupply`
+> is deliberately excluded** (`DeepenGuard` §8a: it is provably not `GensEquivariant`). So all of the
+> project's F₂ machinery is on the **consume/fire** side, and the *force* half of the published object
+> contains **no linear solver at all**. [`RecordKey.lean`](../GraphCanonizationProofs/ChainDescent/RecordKey.lean#L10)'s
+> own header says so verbatim: *"`Deepen.orbKeyG guardSupply` **now**, `RigidSeal.compKey`'s solver
+> key **later**"*. That "later" is `RigidRREF`/`RigidFrame`/`RigidGen`/`RigidRefine.readAgg` — built
+> and axiom-clean — whose `①` (`genEquivariant_genOfRef`) is conditioned on `RefEquivariant ref`,
+> i.e. the **poly frame set = Track R P2/P3, which §3 suspends.**
+>
+> ⟹ **The plan's inconsistency, stated plainly: W2 has been on the finish list while its sole
+> enabler has been on the suspended list.** W2-as-intended is not a family proof; it is *"wire a
+> solve-derived key component into `recordKey`"*, which is a change to the **published object**
+> (re-bill `②`; one new `KeyEquivariant` obligation) and needs exactly one piece of Track R
+> un-suspended. That is a user decision, and it is the real W2 go/no-go.
+>
+> ### ▶ WHAT TO DO, IN ORDER
+>
+> **(i) Make the socket disjunctive — required to even STATE the target.** `Select.CellOrbitAt`
+> demands the **whole cell** be one orbit, so `SomeCellOrbit`/`ResolvableCellAt` are **consume-only**
+> and structurally cannot express *"force splits, consume clears"*. ★ But the proof of
+> `cellNarrowC_length_le_one_of_cellOrbitAt` only ever applies its hypothesis to **`keepMin`
+> survivors** (`h y (keepMin_subset hy) b hbc`) — so weakening the quantifier from `cellList χ c` to
+> `keepMin key adj χ (cellList χ c)` is the **same proof**, strictly weaker, and it covers three
+> cases instead of one: the present one (via `keepMin_subset`, nothing regresses); **key-only**
+> (`|keepMin| ≤ 1` — the only route that can ever reach a **rigid** cell); and the **mixed** case
+> (key cuts between orbits, supply certifies the survivor) — which *is* the CFI story. The
+> ingredients exist but are stranded at the node-global object: `KeyComplete.KeySeparatesAt`,
+> `forcedSet_single_orbit_of_keySeparatesAt`, `Force.forceBy_singleton_of_separating`, and the
+> ceiling theorem (*an equivariant key is constant on orbits* ⟹ `keepMin` is a **union of true
+> orbits**). ~10 lines, CFI-free, no numeral moves.
+>
+> **(ii) Then measure whether today's key already splits a CFI gadget cell.** At the CFI-over-cubic
+> root, report the true-orbit **block sizes** of both root cells and whether `recordSupplyFast`'s
+> verified generators are transitive on any single block. Because `keepMin` is a union of true orbits
+> and `rep` only merges within supply-orbits: **if no block is a single supply-orbit, no equivariant
+> key can rescue that node** — and *"the published object provably flags on CFI over a cubic base"*
+> becomes a theorem-shaped negative worth publishing. If some block is, the CFI root is live at the
+> published object through (i)'s mixed case, with **no** Track R needed. ⚠ Cost: real but bounded —
+> no probe models `recordSupplyFast`'s harvest in Python yet.
+>
+> **(iii) Only then** decide the Track R question in 3.
+>
+> ⚠ The two-part **anatomy of the CFI obstruction** to carry into any statement: the **gauge**
+> (F₂ cycle space) acts by genuine automorphisms ⟹ it is *symmetry*, consume's job, and
+> `kernelSupply` already does it (measured, `mp7` 28 → 7); the **mixed-cell split** at the gadget
+> cells is force's job and is the unbuilt half. Do not write "the CFI obstruction" as one thing.
 
 > ⚠⚠ **SCOPE CORRECTION (user, 2026-08-04) — state the target as PROGRESS, not completion.**
 > W2 reaches at best ***"does not stall on a CFI residue"***. `CFI(unhandled residue)` still reaches
@@ -470,16 +557,22 @@ what is missing is the theorem that it *always* certifies the branch cell on the
 >
 > ### ⟹ WHAT W2 CAN AND CANNOT BE, RESTATED ON THE MEASUREMENT
 >
-> 1. **The consume side provably cannot take the CFI-over-cubic root.** With the guard shut,
->    `deepenCellSupply` emits `[]`, and `kernelSupply` leaves 7 orbits on `mp7`'s gadget cell — so
->    whether the published object answers on such a graph rests **entirely on the force key at the
->    root**. That is a **rigid/force-side** obligation (Track R, §3 suspended), and it is exactly the
->    standing framing — *"a CFI graph's obstruction is linear and belongs to the rigid resolver"* —
->    now measured rather than asserted. **W2 is not a consume-side item at the root.**
-> 2. **There IS a reachable positive target: `mp7`, the Fano multipede** — resolvable at **every**
->    reached node (14/14, target always among them), and it is precisely the graph `kernelSupply` was
->    built for and the one the *"poly where IR solvers are exponential"* claim points at. **W2's first
->    Lean target should be the multipede family at `mp7`'s shape, not CFI-over-cubic.**
+> 1. **The consume side cannot take the CFI-over-cubic root — WHICH IS THE DESIGN, NOT A DEFECT.**
+>    With the guard shut, `deepenCellSupply` emits `[]`; the root cells are **mixed-orbit**, where
+>    `forceBy_no_narrowing_on_orbit` says force fires and consume must not. ⛔ ~~That is a
+>    rigid/force-side obligation (Track R, §3 suspended) … **W2 is not a consume-side item at the
+>    root.**~~ **STRUCK 2026-08-08 (later)** — force *is* where CFI is supposed to land; see the
+>    re-affirmation block. ⚠ And the measurement is narrower than this sentence: the probe modelled
+>    only `GoodCell` + true orbits, **not** `recordKey` and **not** `recordSupplyFast` (which
+>    contains `kernelSupply`, the CFI-gauge component). `G8` is the standing counterexample to the
+>    inference — `ResolvableCellAt` = 0/1 there and the object still goes **flag → answer** under
+>    `recordKey` (`Regression` §19). *"The published object cannot take the CFI root"* is **not**
+>    established; *"`ResolvableCellAt` fails there"* is.
+> 2. ⛔ ~~**There IS a reachable positive target: `mp7`, the Fano multipede** … **W2's first Lean
+>    target should be the multipede family at `mp7`'s shape, not CFI-over-cubic.**~~ **RETRACTED
+>    2026-08-08 (later)** — a family-membership retarget is the move SCOPE CORRECTION #1 forbids, and
+>    `mp7` (`|Aut| = 1344`, gauge `Z₂³`) is the **non-rigid** multipede, not the Neuen–Schweitzer
+>    family. See the re-affirmation block, consequence 2.
 > 3. **The class is proper in both directions** — `rand multipede V=6 W=5` (0/8 cells) and `G8` (0/1)
 >    have no resolvable cell at all, so `ResolvableCellAt` is neither vacuous nor trivial.
 > 4. ⚠ Depth 1, ≤2 members/node. A family-level claim needs every reached node; this is a
@@ -649,11 +742,14 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > ### ▶ What is left
 > **W2** — ✅ **stages 1–2 built 2026-08-08** (the `SomeCellOrbit` socket + the named obligation
 > `ResolvableCellAt`, both gated and axiom-clean, with the `Tinhofer` population re-derived through
-> them). ⛔ **Stage 0 then measured that the target must change**: `ResolvableCellAt` fails at the
-> **CFI-over-cubic root** (guard genuinely shut on both root cells), so the consume side cannot take
-> that node and CFI coverage is a **force-side** obligation; but `mp7` (Fano multipede) is resolvable
-> at **every** reached node, and the stage-1 widening is **measurably load-bearing** (MIXED root).
-> **Read §2 W2 in full before touching it.** · **W3** (extraction) · **W4** (write-up) · **W5**
+> them). ⛔ Stage 0 measured that `ResolvableCellAt` fails at the **CFI-over-cubic root** (guard
+> genuinely shut on both root cells) — **which is the design**: those cells are mixed-orbit, force's
+> domain, and force is where the CFI obstruction is *meant* to land. ⛔ **The `mp7` retarget that
+> followed is RETRACTED** (user re-affirmation, 2026-08-08 later): W2 is a **layer** theorem —
+> *solve the CFI part of every CFI graph* — and `mp7` is the **non-rigid** multipede, not the
+> Neuen–Schweitzer family. The stage-1 widening is **measurably load-bearing** (MIXED root), but the
+> socket is **consume-only** and must be made disjunctive before W2 can be stated at all.
+> **Read §2 W2's re-affirmation block in full before touching it.** · **W3** (extraction) · **W4** (write-up) · **W5**
 > (archive). **`W-j` is ✅ LANDED** (below).
 >
 > ### ✅ `W-j` — LANDED 2026-08-08, `SelectCell.lean` §8 + `RecordDeepenCell.lean` §5
@@ -737,7 +833,7 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > | | option | size | why / why not |
 > |---|---|---|---|
 > | **A** | **Wire `ResolvableCellAt` into `Publication.UnhandledResidue`** as the narrowed residue, with `RecordDeepenCell.not_all_resolvable_of_flag` as its `③` | small — **no new mathematics**; every piece is proved and gated | It is a real definition (not an `opaque` atom, so it does not re-break `unhandledResidue_nonvacuous`), it is **measured non-vacuous both ways** (`mp7` resolvable everywhere; `rand multipede V=6 W=5` and `G8` nowhere), and it strictly narrows `¬ TinhoferGraph`. ⚠ It does **not** capture CFI-over-cubic — that must be said plainly wherever it is quoted |
-> | **B** | **W2 at `mp7`** — prove the Fano-multipede family satisfies `ResolvableCellAt` at every reached node | the real W2 box | The only *measured-reachable* positive target (14/14, target cell always among them). This is the graph `kernelSupply` was built for and the one the "poly where IR solvers are exponential" claim points at. ⛔ **Not** CFI-over-cubic — its root is a force-side node, see §2 W2 |
+> | **B** | ⛔ ~~**W2 at `mp7`**~~ **RETRACTED 2026-08-08 (later).** W2 is the **CFI layer**, not a family: *solve the CFI part of every CFI graph*. Do (i) the **disjunctive socket** (`keepMin`-relative `CellOrbitAt`, ~10 lines, required to even state it), then (ii) the CFI-root **orbit-block/supply-transitivity measurement**, then (iii) the Track R decision | (i) small · (ii) a probe · (iii) user call | The force half of the published object has **no solver component** (`guardSupply` excludes `kernelSupply`; `RecordKey.lean:10` names `RigidSeal.compKey`'s solver key as the intended addition, and that is Track R P2/P3 in §3). ⚠ `mp7` is the **non-rigid** multipede (`\|Aut\| = 1344`) — it does **not** carry the Neuen–Schweitzer sentence. **Read §2 W2's re-affirmation block before starting** |
 > | **C** | **W4 write-up** | 1 week | The go/no-go was met at W1. Read W4's must-state list first — item 3 was **corrected 2026-08-08** and items 1/9 now have the sharpened `②` story (only `deck2Supply`'s charge can move the degree) |
 > | **D** | measure `W-j`'s hoist ceiling on a many-celled node; land a `#eval` flag witness (the multipede the rigid handler cannot peel) | small each | Both are owed *before* W4 quotes a performance number or the flag semantics |
 >
@@ -990,8 +1086,13 @@ only, `None` ≠ `False`, the orbit-reduction licence, ⛔ never `probe_orbit_or
    gadget cell goes **28 → 7**; `kernelSupply` certifies the *gauge* and leaves the Z₇ translations
    standing. It is a gauge constructor; base symmetry is `deepenSupply`'s job.
 11. **⛔⛔ `ResolvableCellAt` FAILS AT THE CFI-OVER-CUBIC ROOT** (measured, budget 200 000, `False`
-   not `None`) while 26/26 depth-1 cells pass ⟹ **the consume side cannot take that node**, and CFI
-   coverage is a **force-side** obligation (Track R, suspended). Do not plan W2 around CFI-over-cubic.
+   not `None`) while 26/26 depth-1 cells pass. ⟹ the *consume* side cannot take that node — **which
+   is the architecture working**: the root cells are mixed-orbit, force's domain.
+   ⛔ ~~CFI coverage is a force-side obligation (Track R, suspended). Do not plan W2 around
+   CFI-over-cubic.~~ **STRUCK 2026-08-08 (later), user re-affirmation** — force is *where CFI is
+   meant to land*, W2 is a **layer** theorem (*solve the CFI part of every CFI graph*), and the
+   `mp7` retarget is retracted. The measurement also never modelled `recordKey`/`recordSupplyFast`,
+   so it does not bound the **published object**. See §2 W2's re-affirmation block.
 12. **⛔⛔ The recorded `②`-tightening advice is wrong** — the harvest-`|cell|²n⁴` refinement,
    `goodCellCost`'s inner `n⁶`, `holKeyFast`'s `n⁵` and per-node supply billing **all leave 13 / 69
    unchanged**. `costConst` *is* the bound polynomial at `n = 1`; `costDeg` is set by one term. The

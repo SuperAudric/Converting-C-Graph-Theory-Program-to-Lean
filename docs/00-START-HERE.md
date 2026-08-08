@@ -35,8 +35,15 @@
 > (`deepMatchSupply`, not in `recordSupplyFast`); (ii) its replacement `CellIsOrbit kernelSupply` is
 > **measurably false** (`mp7` root cell 28 → 7 — the gauge is certified, the Z₇ translations stand);
 > (iii) **`ResolvableCellAt` fails at the CFI-over-cubic root** (guard genuinely shut, budget 200 000)
-> though 26/26 depth-1 cells pass ⟹ CFI coverage is a **force-side** obligation, and the reachable
-> target is **`mp7`**; (iv) the recorded `②`-tightening advice is wrong — four of five levers move
+> though 26/26 depth-1 cells pass — **which is the architecture, not a blocker**: those root cells are
+> **mixed-orbit**, force's domain, and force is exactly where CFI's added obstruction is *meant* to
+> land. ⛔ **The `mp7` retarget that followed is RETRACTED** (user re-affirmation, 2026-08-08 later):
+> W2 is a **layer** theorem — ***solve the CFI part of every CFI graph***, never *"canonize every CFI
+> graph"*, which would be GI — and `mp7` is the **non-rigid** multipede (`|Aut| = 1344`), not the
+> Neuen–Schweitzer family. ★ The real blocker: the record key has **no solver component**
+> (`Deepen.guardSupply` excludes `kernelSupply`; `RecordKey.lean:10` names `RigidSeal.compKey`'s
+> solver key as the intended addition — Track R P2/P3, suspended). Read wind-down §2 W2's
+> re-affirmation block; (iv) the recorded `②`-tightening advice is wrong — four of five levers move
 > neither numeral, only `Deck2.deck2Supply`'s charge does (→ 11 / 65); (v) *"the canonizer flags on
 > most interesting inputs"* is **false** — it answers on every tested input including the residual
 > witness `K₃ ⊔ C₄`; say *"has not yet been **proven** on most interesting inputs"*.

@@ -356,10 +356,20 @@ It is **strictly narrower** than `¬ TinhoferGraph` and **measured non-vacuous i
 V=6 W=5` and `G8` at none). Wiring it in is `UnhandledResidue n G := ¬ ∀ χ reached non-discrete,
 ResolvableCellAt G χ` plus re-pointing `residue_if_flag` — **no new mathematics**.
 
-⚠⚠ **What must be said if it is wired:** it does **not** capture CFI-over-cubic. Measured, both root
-cells of a CFI graph over a cubic base have the per-cell guard **shut** (budget 200 000, `False` not
-`None`) while 26/26 depth-1 cells pass — so the *consume* side cannot resolve a CFI **root** at all,
-and CFI coverage is a **force-side** obligation, not this one. See `chain-descent-wind-down.md` §2 W2.
+⚠⚠ **What must be said if it is wired.** Two things, and the second is the more important:
+
+  1. It does **not** capture CFI-over-cubic. Measured, both root cells of a CFI graph over a cubic
+     base have the per-cell guard **shut** (budget 200 000, `False` not `None`) while 26/26 depth-1
+     cells pass — those root cells are **mixed-orbit**, which is force's domain by design
+     (`Force.forceBy_no_narrowing_on_orbit`), not a defect of this predicate.
+  2. ⚠⚠ **`ResolvableCellAt` is UNSATISFIABLE on a rigid graph.** `Deepen.CellSingleOrbit` quantifies
+     over the true `IsColAut`, so on a graph with trivial automorphism group it fails at every cell
+     of size ≥ 2 — hence `¬ ∀ ResolvableCellAt` is residual for **every** rigid graph whose
+     refinement is not discrete, including the whole Neuen–Schweitzer multipede family. It therefore
+     narrows `¬ TinhoferGraph` genuinely on *symmetric* graphs, but **not at all** in the direction
+     the over-approximation caveat above complains about (linear/CFI obstructions counted residual).
+     A residue that moves in that direction has to be stated at a **disjunctive** (force-or-consume)
+     condition — see `chain-descent-wind-down.md` §2 W2's re-affirmation block.
 
 **The flag semantics this rests on** (unchanged): the descent flags exactly at a **mutual stall** — no
 resolver fires anywhere. So the bridge to prove is *Tinhofer ⟹ the consume resolver fires*
@@ -381,10 +391,13 @@ def UnhandledResidue (n : ℕ) (G : AdjMatrix n) : Prop :=
 /-! ### The explicit polynomial — numerals, not an `∃ p : Polynomial …`
 
 Explicit ≫ existential: more honest, avoids formalizing the class P, and the reviewer reads the degree
-off the statement. **★ PINNED 2026-07-28** at the object above, from `RecordKey`'s §5 — and neither
-numeral is asserted: `RecordKey.recordKeyBound_expand` has `ring` check that the `②` bound polynomial
-has degree **13** and coefficients summing to **57** (was 53 until `Deepen.stepCost` was
-billed, 2026-08-06 — see `RecordKey.costConst`).
+off the statement. **★ PINNED at the object above** — and neither numeral is asserted:
+`RecordDeepenCell.recordDeepenBound_expand` has `ring` check that the `②` bound polynomial has degree
+**13** and coefficients summing to **69**.
+⚠ *Provenance, not the current pin:* the numerals were `13 / 57` at `RecordKey.recordKeyBound_expand`
+(the **node-global** record-key object) — 53 until `Deepen.stepCost` was billed on 2026-08-06, then
+57 → **69** when the object became cell-indexed (`+8` per-cell supply billing, `+4` the `W-a` guard
+charge). Quote `recordDeepenBound_expand`, not `recordKeyBound_expand`, for this file's object.
 
 ⚠⚠ **THE BOUND IS `costConst * (n + 1) ^ costDeg`, NOT `costConst * n ^ costDeg`** — the `n`-form (as
 this file pinned it until 2026-07-28) is **not provable for this object at any numerals**, and the flag
