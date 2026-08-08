@@ -1,0 +1,35 @@
+FULL SWEEP of the LEVEL-GENERATOR harvest C (keeps the node-global list).
+C = A ∪ deepen's harvest at every level of every anchor's certified path.
+BFS depth 2, ≤2 members/node, 3 relabellings, CELLCAP=10.
+
+### CFI over random cubic bases — where A is refuted
+  CFI cubic m=8 pl         nodes=6   skipped=1  cells=86   A-INV=N  C-INV=Y  C-fires=86/86  C>A=52   <<< C REPAIRS IT
+  CFI cubic m=8 tw         nodes=6   skipped=1  cells=86   A-INV=N  C-INV=Y  C-fires=86/86  C>A=50   <<< C REPAIRS IT
+  CFI cubic m=10 pl        nodes=6   skipped=1  cells=138  A-INV=N  C-INV=Y  C-fires=138/138  C>A=96   <<< C REPAIRS IT
+  CFI cubic m=10 tw        nodes=6   skipped=1  cells=138  A-INV=N  C-INV=Y  C-fires=138/138  C>A=96   <<< C REPAIRS IT
+
+### mixed / gauge / multipedes
+  MIXED multipede          nodes=7   skipped=0  cells=44   A-INV=Y  C-INV=Y  C-fires=38/44  C>A=10
+  circ(5) multipede        nodes=2   skipped=1  cells=24   A-INV=Y  C-INV=Y  C-fires=22/24  C>A=0
+  mp7 Fano multipede       nodes=4   skipped=3  cells=52   A-INV=Y  C-INV=Y  C-fires=52/52  C>A=0
+  rand multipede V=6 W=5   nodes=1   skipped=0  cells=8    A-INV=Y  C-INV=Y  C-fires=0/8  C>A=0   (C never fires — VACUOUS)
+  rand multipede V=8 W=6   nodes=1   skipped=0  cells=14   A-INV=Y  C-INV=Y  C-fires=0/14  C>A=0   (C never fires — VACUOUS)
+
+### structured / multi-cell
+  G8 cubic non-VT          nodes=1   skipped=0  cells=1    A-INV=Y  C-INV=Y  C-fires=0/1  C>A=0   (C never fires — VACUOUS)
+  S(K5)                    nodes=7   skipped=0  cells=26   A-INV=Y  C-INV=Y  C-fires=26/26  C>A=0
+  S(Petersen)              nodes=6   skipped=1  cells=48   A-INV=Y  C-INV=Y  C-fires=48/48  C>A=0
+  S(cube Q3)               nodes=2   skipped=1  cells=12   A-INV=Y  C-INV=Y  C-fires=12/12  C>A=0
+  C7 + K4                  nodes=7   skipped=0  cells=14   A-INV=Y  C-INV=Y  C-fires=14/14  C>A=3
+  K4,6                     nodes=7   skipped=0  cells=14   A-INV=Y  C-INV=Y  C-fires=14/14  C>A=7
+
+>>> SKIPPED 10 node-checks, none silently:
+      CFI cubic m=10 pl: node depth 0 × 1
+      CFI cubic m=10 tw: node depth 0 × 1
+      CFI cubic m=8 pl: node depth 0 × 1
+      CFI cubic m=8 tw: node depth 0 × 1
+      S(Petersen): node depth 0 × 1
+      S(cube Q3): node depth 0 × 1
+      circ(5) multipede: node depth 0 × 1
+      mp7 Fano multipede: node depth 0 × 1
+      mp7 Fano multipede: node depth 1 × 2

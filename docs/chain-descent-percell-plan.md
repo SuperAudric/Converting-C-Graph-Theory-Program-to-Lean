@@ -1,9 +1,9 @@
 # PER-CELL CONSUME — the plan for closing `Publication.residue_if_flag`
 
-**Rewritten 2026-08-07** after five probes and a user coverage probe. The 2026-08-06 version
-proposed *"per-cell harvest + an all-cells guard, keeping the node-global generator list"*. The
-harvest half survives; **the all-cells guard is RETRACTED** (§2). The diagnosis is now sharper, the
-design is smaller, and it is measured rather than argued.
+**Rewritten 2026-08-07** after five probes and a user coverage probe; **extended later the same day**
+with the *witness-vs-relation* diagnosis (§3a) and a **second candidate design `C`** that keeps the
+node-global list (§4b). The 2026-08-06 version proposed *"per-cell harvest + an all-cells guard"*; the
+harvest half survives, **the all-cells guard is RETRACTED** (§2).
 
 > ## ▶ IN ONE PARAGRAPH
 > Nothing about the resolver contract or the descent architecture changes. `deepenSupply` is the
@@ -11,9 +11,14 @@ design is smaller, and it is measured rather than argued.
 > one cell — but `SelectNode.cellNarrow` reads a single **node-global** `verified S adj χ` list and
 > probes every cell against it. So a cell that never had a descent run on it is judged by
 > automorphisms harvested elsewhere, and that verdict is **not relabelling-invariant** (measured, §3).
-> The fix is to make the consume half of `cellNarrow` cell-indexed and lazy, exactly matching the
-> architecture's own description — *"run the resolver on a cell; if it does not fire, move to the
-> next."* `③` is already proved (`RecordDeepen`); the work is `①`'s plumbing and `②`'s numerals.
+> `③` is already proved (`RecordDeepen`); the work is `①`'s plumbing and `②`'s numerals.
+>
+> **Two designs now repair it, both measured, and they trade plumbing against theorem strength:**
+> **`B`** cell-indexes the generator list (§4a) — more Lean plumbing, but its proof obligation is the
+> per-cell analogue of a theorem already proved once. **`C`** keeps the list node-global and simply
+> *retains the generators the guard already computes and discards* (§4b) — near-zero plumbing, but its
+> proof obligation is a strong-generating-set argument, which is `R1`-flavoured. **Recommendation: `B`
+> for the critical path, `C` as a free coverage enrichment on top. §4c carries the decision table.**
 
 ---
 
@@ -103,6 +108,9 @@ counted is verified.
 | `probe_offbranch4.py` | **per-cell list repairs it**: A-INV=N → B-INV=Y on all four CFI rows, firing 129/131 and 198/209 cells. ⚠ Not sufficient alone — `rand multipede V=6 W=5` still varies `2` vs `4`, firing 0/8 |
 | `probe_offbranch5.py` | **the proposed object holds**: per-cell list **+** per-cell guard, GUARD-INV=Y and COUNT-INV=Y on 9/9, 0 unknowns, 7 rows non-vacuous (open 26/28, 26/28, 18/24, 22/26, 14/14, 10/10, 14/14). On the rigid multipede the guard shuts on all 8 cells, so both sides read `\|cell\|` |
 | coverage probe (user, 2026-08-07) | ★ **restriction costs NOTHING**: `A-only = 0` across **646 cells** / 8 witnesses, while `B-only` = 77, 76, 14 on the CFI and MIXED rows. Own-cell evidence strictly dominates borrowed evidence |
+| `probe_coset.py` | ★★ **the mechanism, exhibited minimally** — see §3a |
+| `probe_levels.py` | first test of design `C`: at the m=8 tw / m=10 pl falsifiers, `C` repairs and **fires**, and repairs every cell of the node. 2 generators kept vs **18 available** |
+| `probe_levels2.py` | ★★ **full sweep of `C`: `C-INV = Y` on 14/14**, incl. all four CFI rows where `A-INV = N`; fires 86/86 and 138/138 on CFI, **gaining 52/50/96/96 cells over `A`**. Vacuous only on the two rigid multipedes and `G8` (the wall families). ⚠ 10 root nodes skipped by the cost gate — see §10.5 |
 
 **★ The structural fact that makes the design work.** A shut guard emits `[]`, so the count is
 `|cell c|` on **both** sides automatically (cells correspond under transport). Therefore the *only*
@@ -120,7 +128,51 @@ design is not allowed to keep, whether or not the subset claim holds.
 
 ---
 
-## 4. THE DESIGN
+## 3a. ★★ WHY IT IS NON-CANONICAL — witness vs relation (`probe_coset.py`)
+
+The question this answers: *the guard is open on both sides and every generator is a verified
+automorphism, so why is the borrowed verdict not canonical?*
+
+Deepen's job on a cell is: for each pair `(r₁, rⱼ)` that is genuinely equivalent, find **some**
+automorphism `t` with `t r₁ = rⱼ`. The **set of related pairs is canonical** — that is precisely what
+the guard certifies. **Which `t` you get is not.** Any `t · s` with `s ∈ Stab(r₁)` serves equally
+well, and the descent's lowest-index tie-breaks choose one. On the cell itself the choice is
+invisible (every representative sends `r₁ ↦ rⱼ`). Off the cell, `t` and `t·s` can act completely
+differently.
+
+**Exhibited, minimally** (CFI cubic m=8 pl, root individualized at 24, depth 1):
+
+| | |
+|---|---|
+| branch cell | colour 1, size 2 = `{25, 27}` |
+| off-branch cell | colour 13, size 2 = `{12, 13}` |
+| harvest blocks on colour 13 | **A-side 2, B-side 1** — the falsifier |
+| branch pair-relation | `\|pairs\|` 2 and 2, and `σ(A) == B` — **identical, canonical** |
+| witness action on colour 13 | A: **0/2** witnesses move it · B: **2/2** move it |
+| same pair, different behaviour | **2 of 2** — `(25→27)` fixes `{12,13}` on A, swaps it on B |
+
+`12` and `13` genuinely are one orbit (side B exhibits the automorphism); side A's `2` is sound but
+incomplete, and nothing in the descent noticed.
+
+**★★★ And the guard cannot fix this — its openness is what *creates* the ambiguity.** The guard's
+condition is *"every cell individualized along the path is a single orbit"*, which is exactly the
+statement that **the arbitrary pick does not matter, because the alternatives are automorphic**. That
+is the same fact that makes two witnesses for one pair differ by a stabilizer element. So no
+strengthening of a *branch-cell* guard can rule this out; the ambiguity is implied by the guard
+holding, not permitted by it failing.
+
+⟹ **The canonical object deepen produces is a relation on the cell it descended in; it is not a
+subgroup.** Today's code stores witnesses and re-derives a relation on *other* cells by group-closing
+them, which mixes the canonical with the arbitrary. Both designs below fix exactly that.
+
+★ **The one-line statement of the gap** (user, 2026-08-07, and it is the sharpest form): the harvest
+emits one witness per related pair — a **transversal of `Stab(r₁)`** — and, because `deepenGens` skips
+`pj.1 == p1.1`, it never emits a generator **of** `Stab(r₁)`. The stabilizer is precisely what acts on
+the other cells. A transversal determines the orbits of *its own* cell and nothing else.
+
+---
+
+## 4a. DESIGN `B` — cell-index the generator list
 
 **Per-cell, and lazy.** Cell `c`'s verdict is computed from descents on pairs drawn from `c` itself,
 gated by `c`'s own guard; cells are consulted in increasing colour order and the first that fires
@@ -141,9 +193,91 @@ is not becoming so.
 
 ---
 
+## 4b. DESIGN `C` — keep the list node-global, retain the guard's own level-generators
+
+**The observation** (user, 2026-08-07): whatever separated the two off-branch vertices was a
+*within-cell choice at some level* of the descent, and the guard **requires that cell to be a single
+orbit** — so the harvest at that level is exactly the comparison of the two picks. The generators that
+resolve the off-branch cell are therefore already being computed, and thrown away.
+
+```
+C  :=  deepenGens adj χ                                  -- today's harvest
+       ∪ { deepenGens adj ψ | ψ a level of any anchor's deepening path }
+```
+
+Every level-generator is verified `IsColAut adj ψ`, and ψ refines χ, so it is `IsColAut adj χ` — a
+legitimate generator at the original node. **`CertPath`'s per-level `CellIsOrbit deepenSupply adj ψ`
+already runs precisely that harvest**, so `C` costs nothing beyond the guard's existing (and still
+unbilled — W-a) work. Measured at the m=8 tw falsifier: **2 generators kept, 18 available.**
+
+**★ Why it is principled and not a coincidence.** §3a's gap is *"a transversal of `Stab(r₁)`, never a
+generator of `Stab(r₁)`."* A level-generator is an automorphism of a colouring that **fixes everything
+individualized above it** — i.e. it *is* a stabilizer element. `C` supplies the missing half. Taken
+across all levels this is a **strong generating set** built along the descent, and the guard's
+per-level condition (*the level's cell is one orbit*) is exactly the orbit condition the
+orbit–stabilizer/Schreier induction needs.
+
+**★ What it buys architecturally.** The generator list stays **node-global**. No `CellSupply` type, no
+signature change to `cellNarrow`/`selColour`/`selNode`/`selProbeCost`, no per-cell guard — a pure
+supply change, which is what this plan claimed to be and, as `B`, is not.
+
+**Measured** (`probe_levels2.py`, BFS depth 2, 3 relabellings, cost gate `CELLCAP = 10`):
+
+| | |
+|---|---|
+| `C-INV` | **Y on 14/14 witnesses**, including all four CFI rows where `A-INV = N` |
+| firing | 86/86 and 138/138 cells on CFI; 38/44 MIXED, 52/52 mp7, 26/26 `S(K5)` |
+| coverage gained over `A` | **52 / 50 / 96 / 96** cells on the four CFI rows; 10 MIXED, 7 `K4,6`, 3 `C7+K4` |
+| vacuous rows | the two rigid multipedes and `G8` — `C` never fires there (the wall families) |
+| skipped | 10 root nodes, branch cell > `CELLCAP`; counted, never silent |
+
+⚠⚠ **THE COST OF `C` IS THE GUARD'S COST, WHICH IS THE UNBILLED `n⁸`.** `C` is free *relative to the
+guard*, and the guard is genuinely run (it is `deepenSupplyCert`'s `if`), so no new work is introduced
+— but this makes **W-a load-bearing rather than merely tidy**. Do not state `②` for `C` before W-a.
+
+⚠ **`C` resembles a stabilizer chain, and the archive bans stabilizer-chain *supplies*.** The recorded
+ban (steers-archive §4, 2026-07-18) is about using a stabilizer chain to **prune the branch
+enumeration** and break the `n^d` ladder, its stated failure being *"no iso-invariant within-cell
+vertex pick ⟹ `①b` and `①c` fail"*. `C` does not choose or prune branches — `selColour` still picks a
+**cell**, canonically — and its within-cell picks are the ones `deepenSupply` already makes and the
+guard already licenses. So it is not the banned object. **But the resemblance is real and must be
+stated whenever `C` is proposed**, and it is exactly why `C`'s proof obligation is the harder one.
+
+---
+
+## 4c. ▶ `B` vs `C` — the decision
+
+| | `B` — cell-indexed | `C` — level-generators |
+|---|---|---|
+| plumbing | new `CellSupply` type threaded through 4 defs + restated transport | **none to `SelectNode`**; supply change only |
+| transport obligation | per-**cell** orbit transport (W-c) | per-cell orbit transport at a **node-global** list — same shape, no cell index |
+| guard | per-cell `CertifiedAt` | unchanged `CertifiedG` |
+| **proof obligation** | per-cell analogue of `tinhofer_iff_certifiedG` — *a theorem already proved once*, only the guard's **verdict** need be intrinsic | ⟨`C`⟩'s orbits are the true orbits on every cell — a **strong-generating-set** result, i.e. `OrbitComplete` at all cells ≈ **`R1`** |
+| cost | `Σ_c m_c² ≤ n²`, inside the declared flat `n⁶` | = the guard's `≈ n⁸`, already paid but **unbilled** |
+| measured invariance | 9/9 (`probe_offbranch5`) | 14/14 (`probe_levels2`) |
+| measured firing | 26/28, 26/28, 18/24, 22/26, 14/14 | 86/86, 138/138, +52/50/96/96 over `A` |
+
+**▶ RECOMMENDATION: `B` on the critical path, `C` as a free enrichment afterwards.**
+The deciding factor is **not** plumbing but the proof obligation. `B` keeps the property the whole
+guard design turns on — *only the guard's verdict must be invariant, never the harvest* — and its
+theorem is a re-run of one already in the build. `C` needs ⟨generators⟩ to actually **be** the
+automorphism group, which is `R1` in a new costume; `R1` is a suspended research item, and adopting
+`C` as the critical path silently re-opens it.
+
+⚠ **They compose.** `B`'s cell-indexed harvest can be enriched with level-generators from descents
+anchored *in that cell*, raising coverage without changing `B`'s obligation. That is the order to build
+in: `B` first, `C`'s generators folded in later as firing, never as an `①` dependency.
+★ And `C`'s measurement is not wasted either way: `C > A` by 52–96 cells per CFI witness is direct
+evidence that **the guard's discarded working set is worth keeping**, whichever list holds it.
+
+---
+
 ## 5. THE WORK, ORDERED
 
 Sized against the existing proofs each item mirrors. `③` is **already banked** — see §7.
+⚠ **W-b and W-c are `B`-specific** (§4c). Under `C` they collapse to a single node-global restatement
+of `cellNarrow_length_transport`'s hypothesis, and W-d is replaced by the strong-generating-set
+obligation. W-a, W-e, W-f, W-g are common to both.
 
 ### W-a. Bill the guard *(small; do this first)*
 `deepenSupplyCert` inherits `deepenSupplyGuarded`'s declared flat `n⁶`, which prices deepen but bills
@@ -283,7 +417,7 @@ pair `(0,1)` costs an extra individualization. The natural index for the pair ob
 project. A pair-based guard written per-member and *assumed* to cover pairs would be
 unsound-by-omission.
 
-⚠ This does **not** apply to §4's design, which is indexed by cells and uses the existing single
+⚠ This does **not** apply to §4a/§4b, both of which are indexed by cells and use the existing single
 `step`.
 
 ---
@@ -303,3 +437,14 @@ unsound-by-omission.
 4. **`BAD-BIG = 0` is falsified** (`DeepenComplete` §5.2), so good-or-rigid does not cover everything
    reachable. The per-cell guard will shut at mixed-cell nodes — sound, but it caps what the widening
    can be expected to buy.
+5. **`C`'s sweep skips the roots.** `probe_levels2` gates on `CELLCAP = 10`, so the root of every large
+   witness (CFI, mp7, `S(Petersen)`, `circ(5)`) is **untested** for `C` — 10 node-checks, counted. That
+   is where the branch cell is largest and `C` is most expensive. `probe_offbranch`'s root-only sweep
+   found `A` invariant at roots 30/30, so roots are the less suspicious end, but `C` has not been
+   measured there and must not be quoted as if it had.
+6. **`C`'s invariance is measured, not argued to a mechanism.** The level-generators are themselves
+   produced by index-picked descents, so the coset ambiguity of §3a recurs one level down. The reason
+   to expect it to bottom out is that the levels run to full discreteness, where no choice remains —
+   but that is the *strong-generating-set* claim, i.e. the obligation in §4c, not an independent
+   argument. ⚠ The project has a standing precedent for a mechanism that was widespread and still not
+   the explanation (`probe_selfsep`'s M1, 15/20 on `circ(5)` while exactness held).

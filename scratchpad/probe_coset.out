@@ -1,0 +1,19 @@
+CFI cubic m=8 pl, n=56
+  node        : root individualized at 24  (depth 1)
+  branch cell : colour 1, size 2
+  off-branch  : colour 13, size 2 = [12, 13]
+  harvest orbit-blocks on that cell:  side A = 2,  side B = 1   <<< the falsifier
+
+  BRANCH pair-relation (the CANONICAL object the guard certifies):
+    |pairs| A = 2,  |pairs| B = 2,  σ(A) == B ? YES
+  WITNESS action on colour 13 (the NON-canonical object):
+    A: 0/2 witnesses move that cell
+    B: 2/2 witnesses move that cell
+
+  ★ SAME PAIR, DIFFERENT WITNESS BEHAVIOUR OFF-CELL: 2 of 2 pairs
+      pair ( 25 ->  27)  [σ: (  0 ->  28)]   moves colour 13?   A=False   B=True
+      pair ( 27 ->  25)  [σ: ( 28 ->   0)]   moves colour 13?   A=False   B=True
+
+  Reading: the branch-cell pair relation is the same object on both sides (the guard's
+  content, canonical).  The individual automorphism realising a given pair is not —
+  it is one member of t·Stab(r₁), and members of that coset differ off the cell.

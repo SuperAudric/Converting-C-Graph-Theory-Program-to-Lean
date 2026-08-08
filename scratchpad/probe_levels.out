@@ -1,0 +1,17 @@
+Does collecting the guard's own per-level generators repair the falsifier?
+Level-generators are IsColAut adj ψ with ψ refining χ, hence valid at χ, and the
+guard already computes them — so they are free.
+
+  CFI cubic m=8 pl: no off-branch falsifier reproduced
+  CFI cubic m=8 tw: falsifier at branch colour 1 (size 2), off-branch colour 13 (size 2)
+      generators emitted:  A=2/2   C=18/18   B=2/2
+      A (today)       blocks 1 vs 2   <<<< VARIES (fires on side A)
+      C (level-gens)  blocks 1 vs 1   INVARIANT   (fires on side A)
+      B (per-cell)    blocks 1 vs 1   INVARIANT   (fires on side A)
+      C across ALL cells of this node: all invariant
+  CFI cubic m=10 pl: falsifier at branch colour 1 (size 2), off-branch colour 22 (size 2)
+      generators emitted:  A=2/2   C=18/18   B=2/2
+      A (today)       blocks 2 vs 1   <<<< VARIES (stalls on side A)
+      C (level-gens)  blocks 1 vs 1   INVARIANT   (fires on side A)
+      B (per-cell)    blocks 1 vs 1   INVARIANT   (fires on side A)
+      C across ALL cells of this node: all invariant
