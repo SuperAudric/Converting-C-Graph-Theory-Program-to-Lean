@@ -7,10 +7,12 @@ kernel primitives `[propext, Classical.choice, Quot.sound]` plus a short, inspec
 classical citations** (each a theorem *proved outside the project*). A Lean-literate reviewer audits the
 citation list and trusts the machine for everything else.
 
-**How to read it.** The theorem *statements* are the specification; the `sorry` bodies are the remaining --Much of the comments will need to be cleaned up before publishing, i.e. a reviewer doesn't need to be told how to read
-work. When the Runtime Phase lands, each `sorry` is replaced by a term that plugs into the completed
-project theorems and consumes the citation axioms — at which point `#print axioms` flips from `[sorryAx, …]`
-to `[propext, Classical.choice, Quot.sound, <citations>]`. That flip *is* "done".
+**★★★ THE FLIP HAPPENED (2026-08-08).** This file compiles with **zero `sorry` and zero custom
+axioms**: every theorem below prints exactly `[propext, Classical.choice, Quot.sound]`. The design
+note used to say *"when each `sorry` is replaced by a term that plugs into the completed project
+theorems, `#print axioms` flips from `[sorryAx, …]` — that flip is done"*. It is done, and **no
+citation was consumed to do it** — the eight in §2 stay commented out.
+--Much of the comments will need to be cleaned up before publishing, i.e. a reviewer doesn't need to be told how to read
 
 **Why the shape (see the design write-up).** Correctness is **unconditional** (the algorithm is never
 wrong — it returns a complete iso-invariant *or an honest flag*), cost is **conditional** (poly-time *or*
@@ -62,20 +64,19 @@ Per-obligation state:
     pinned monomial itself was **`n ^ costDeg`, which is false at `n = 0` for the real object at any
     numerals** — see the `costConst`/`costDeg` block below for the measurements. It is now
     `costConst * (n + 1) ^ costDeg`, the same polynomial class, true on every input.
-  · ③ — ⚠ **STILL THE ONE LIVE `sorry` at THIS object — but the STATEMENT IS PROVED elsewhere, at an
-    object that also has unconditional ①** (2026-08-08): `RecordDeepenCell.not_tinhoferGraph_of_flag`
-    + `RecordDeepenCell.recordDeepenCell_canonizer`, at the **cell-indexed** supply
-    `fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`. That is the object `canonForm?` is
-    becoming — and since W-h it carries `②` there too (`recordDeepenCell_full`), at
-    `costConst = 69`, `costDeg = 13`. What is left before the swap is the runnable twin (W-i) and
-    the repoint (W-g), neither of them mathematics. Read the ▶▶ block at the top of §1, not the
-    2026-08-04 provenance under it.
+  · ③ — ✅ **DISCHARGED 2026-08-08 (`W-g`), axiom-clean, at the same object as ① and ②.**
+    `canonForm?`/`cost` are now `RecordDeepenCell.canonFormFast`/`costFast` — the fused descent at the
+    **cell-indexed** supply `fun c => recordSupplyFast ++ Deepen.deepenCellSupply c` — and
+    `residue_if_flag` is `recordDeepenCell_full_fast.2.2`. `costConst`/`costDeg` moved with it:
+    **69 / 13** (`RecordDeepenCell.recordDeepenBound_expand`, `ring`-checked; the degree is unchanged
+    from the previous object, the constant absorbs per-cell supply billing and the newly-billed
+    deepen guard). ⚠ Read the ▶▶ block at the top of §1, not the 2026-08-04 provenance under it.
     The residue was RESHAPED (2026-08-04) to make it
     provable *in principle*: the three `opaque` atoms made both ③ obligations undischargeable, and they are
     replaced by one **definition**, `residueRigidObstruction G := ¬ TwinFamily.TinhoferGraph G` (see the
     `UnhandledResidue` block for why D0/D1 were dropped rather than kept as opaque placeholders).
-    `unhandledResidue_nonvacuous` is now **proved**, axiom-clean, with no citation axiom consumed;
-    `residue_if_flag` is not — see the open-step block in §1 for exactly what closes it and at what price.
+    `unhandledResidue_nonvacuous` and `residue_if_flag` are **both** proved now, axiom-clean, with no
+    citation axiom consumed.
     ⛔⛔ **An earlier draft discharged ③ at `canonFormCover?`, a SECOND object. That was WRONG and is
     REVERTED** (user steer, 2026-08-04): `canonForm?` is meaningful only if ①a+①b+①c+②+③ are properties of
     **the same** object — an exhaustive solver and a random solver each carry half and together prove
@@ -109,6 +110,7 @@ import ChainDescent.Deck2
 import ChainDescent.KernelTransport
 import ChainDescent.RecordKey
 import ChainDescent.RestrictedTransport
+import ChainDescent.RecordDeepenCell
 
 namespace Showcase
 
@@ -145,6 +147,14 @@ provably cannot be — `GensEquivariant` (its Gaussian basis is pivot-order depe
 PROVISIONAL by design — strengthening the record later is this one definition plus `canonForm?_record`
 below; nothing downstream changes shape.
 
+**★★★ THE SUPPLY SWAP (`W-g`, 2026-08-08): the supply is now CELL-INDEXED** —
+`fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`, read by `Select.selNodeFastC`. Same fused
+descent, same record key; each cell is judged by the generators of descents anchored *in that cell*,
+gated by that cell's own guard. This is what makes `③` provable **at the object `①` and `②` are
+about** — see the block below §1 for why the node-global form provably cannot carry `①`. The
+definition is `RecordDeepenCell.canonFormFast`; `①`+`②`+`③` are its
+`recordDeepenCell_full_fast`.
+
 **★ THE FORCE KEY SWAP (2026-07-28): the key is now `RecordKey.recordKey`** = the lex product
 `pairKey holKeyFast (orbKeyG guardSupply)` — the holonomy key, tie-broken by the union-guarded orbit
 key. `keepMin_pairKey_subset` proves the tiebreak never *widens* the narrowing, so this is a strict
@@ -154,28 +164,28 @@ of 8 is left untouched by `holKeyFast` and cut to 2 by the product (`Regression`
 interpreted wall-clock: `t3` (n = 15) goes 12 s → 412 s, so the `PerformanceTest` acceptance
 measurements were taken at the *previous* key and do not describe this object until re-run. -/
 def canonForm? (n : ℕ) (G : AdjMatrix n) : Option (Fin n → Fin n → Nat) :=
-  Select.canonFormFastS? (RecordKey.recordKey (n := n)) (RecordCost.recordSupplyFast (n := n)) G
+  RecordDeepenCell.canonFormFast (n := n) G
 
-/-- The record object satisfies the full canonical-form spec — `RecordKey.recordKey_canonizer` read
-through the definitional bridge `SelectNode.canonFormFastS?_eq`. (`selNode_canonizer_of_sameOrbits` is
-key-generic, so the swap cost exactly one `KeyEquivariant` proof: `keyEquivariant_recordKey`.) -/
+/-- The object satisfies the full canonical-form spec — **globally and with no hypothesis**.
+`Select.selNodeC_canonizer` asks for `KeyEquivariant` plus the new `Select.CellOrbitTransport`, and
+the cell-anchored guard supplies the second with no `SupplyEquivariant`, no equivariant reference
+supply and no completeness theorem about deepen; `kernelSupply`'s non-equivariance rides
+`OrbitPrune.SameOrbits` as before. -/
 theorem canonForm?_record (n : ℕ) : CanonSpec.IsCanonicalFormOpt (canonForm? n) :=
-  RecordKey.recordKey_canonizer
+  (RecordDeepenCell.recordDeepenCell_full_fast (n := n)).1
 
 /-- **★ `cost` IS REAL (2026-07-28)** — no longer an `opaque` stub. It is the `cost` projection of the
 *same* definition `canonForm?` is the `value` projection of (`descendS` is written in `CostM`), so
 there is no bridge and no second object: `②` below is a theorem about the object `①` is about. -/
 def cost (n : ℕ) (G : AdjMatrix n) : ℕ :=
-  Select.descentCostS (Refine.encodeFreeFast (n := n))
-    (Select.selNode (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
-      (RecordCost.recordSupplyFast (n := n))) G
+  RecordDeepenCell.costFast (n := n) G
 
-/-! ### ▶▶ HOW `③` CLOSES — SETTLED 2026-08-08. Read this block; the 2026-08-04 one below is PROVENANCE.
+/-! ### ▶▶ HOW `③` CLOSED — DONE 2026-08-08. Read this block; the 2026-08-04 one below is PROVENANCE.
 
-**`③` is proved, at an object that also has unconditional `①`. It is not this file's object yet, and
-the remaining step is `②`, not `③`.**
+**`①a`, `①b`, `①c`, `②` and `③` are now all properties of the same object, and that object is what
+`canonForm?` and `cost` are defined as.** The file has zero `sorry`.
 
-`ChainDescent/RecordDeepenCell.lean` builds the target:
+`ChainDescent/RecordDeepenCell.lean` builds it:
 
 ```
 Select.selNodeC encodeFreeFast recordKey (fun c => recordSupplyFast ++ Deepen.deepenCellSupply c)
@@ -209,18 +219,15 @@ node-global append `recordSupplyFast ++ deepenSupplyCert` — which does carry `
 (`RecordDeepen.not_tinhoferGraph_of_flag_recordDeepen`) — provably cannot carry `①`, and is not a
 candidate. `Select.CellOrbitTransport` replaces `SupplyEquivariant` and the defect goes away.
 
-**What is left before this file changes is NOT mathematics** (`docs/chain-descent-percell-plan.md`
-§5):
-  · **W-i** — `selNodeFastC`/`canonFormFastSC?`, the runnable `rfl`-twin. `selNodeC` is the *slow*
-    shape: it stores a generic `refineV rf …` and recomputes `verified (S c)` once per probed cell,
-    where `selNodeFast` computes the list once (see `SelectNode.lean` §5's note). It does run and
-    answer — `#eval`-measured on `K₂` and `C₅` — but at ~2× the node-global object's wall clock on a
-    one-cell graph, and the per-cell duplication is not yet measured.
-  · **W-g** — repoint `canonForm?`/`cost` here, swap `costConst`/`costDeg` to `RecordDeepenCell`'s,
-    and replace the `sorry` below.
+**And it RUNS.** `canonFormFast`/`costFast` go through `Select.selNodeFastC`, which evaluates each
+cell's supply once per node and builds children through `Refine.ColData` — so `canonForm?` is
+`#eval`-able, not merely definable. Measured: answers on `K₂`, `C₅` and `K₁,₂,₃`; on `C₅` the
+runnable form is 41 s against 216 s for the reasoning-side one, with an identical cost value.
 
 ⚠ **The residue is unchanged and is still an OVER-approximation** — a CFI graph is not Tinhofer, yet
-its obstruction is linear and belongs to the rigid resolver. Narrowing it is W2, not this.
+its obstruction is linear and belongs to the rigid resolver. Narrowing it is W2, not this. **This is
+the one thing left to say honestly about `③`:** it is *"a flag means a real structural obstruction"*,
+not *"a flag means hardness"*, and the residue is currently wider than the architecture's true gap.
 
 ---
 
@@ -377,11 +384,11 @@ harvest as `|cell|² · n⁴` and proving `Σ_{c ∈ nsColours χ} |cellList χ 
 exercise and is **not** required for the claim above; it is required before anyone reads `13` as the
 algorithm's degree. -/
 
-/-- `RecordKey.costConst` — the coefficient sum of the `②` bound polynomial. -/
-def costConst : ℕ := RecordKey.costConst
+/-- `RecordDeepenCell.costConst = 69` — the coefficient sum of the `②` bound polynomial. -/
+def costConst : ℕ := RecordDeepenCell.costConst
 
-/-- `RecordKey.costDeg` — the degree of the `②` bound polynomial. -/
-def costDeg : ℕ := RecordKey.costDeg
+/-- `RecordDeepenCell.costDeg = 13` — the degree of the `②` bound polynomial. -/
+def costDeg : ℕ := RecordDeepenCell.costDeg
 
 /-! ## 2. The trusted base — CITATIONS ONLY (placeholders; the ONLY custom axioms)
 
@@ -511,7 +518,7 @@ theorem canon_poly_or_flag (n : ℕ) (G : AdjMatrix n) :
   -- `RecordKey.supplyCost_guardSupply_le` for the union guard inside `orbKeyG`), and
   -- `RecordKey.descentCostS_selNode_recordKey_monomial` folds those into the pinned monomial.
   -- So the cost half needs no flag escape at all; what the flag is still needed for is ③.
-  Or.inl (RecordKey.descentCostS_selNode_recordKey_monomial G)
+  Or.inl ((RecordDeepenCell.recordDeepenCell_full_fast (n := n)).2.1 G)
 
 /-! ⊘ **PROVENANCE for `canon_poly_or_flag`** (superseded 2026-07-28 by the discharge above; retained
 because it records the two shapes that were *not* the answer).
@@ -545,18 +552,15 @@ contains an unhandled obstruction — NOT because the algorithm is weak. This is
 NON-VACUITY OBLIGATION (separate lemma, `unhandledResidue_nonvacuous` below): `UnhandledResidue` is neither
 always-true nor defined as "flagged". -/
 theorem residue_if_flag (n : ℕ) (G : AdjMatrix n) :
-    canonForm? n G = none → UnhandledResidue n G := by
-  -- ⚠ OPEN **at this file's object only**. The statement itself is PROVED, at an object carrying
-  -- `①` and `②` as well: `ChainDescent.RecordDeepenCell.recordDeepenCell_full`, at
-  --   `Select.selNodeC encodeFreeFast recordKey (fun c => recordSupplyFast ++ deepenCellSupply c)`
-  -- (axiom-clean; the `③` half holds for every key) — see the 2026-08-08 block in §1. Nothing
-  -- mathematical is missing: the runnable `rfl`-twin (plan W-i), then repointing `canonForm?`/`cost`
-  -- and the cost numerals (W-g), at which point this `sorry` becomes
-  -- `RecordDeepenCell.not_tinhoferGraph_of_flag`.
-  -- ⛔ Do NOT discharge it by moving the statement to a second object — `canonForm?` is only
-  -- meaningful as ONE object carrying ①+②+③. (`RecordDeepenCell` is not that move: it is the object
-  -- `canonForm?` is *becoming*, carrying all of them, not a companion object carrying one.)
-  sorry
+    canonForm? n G = none → UnhandledResidue n G :=
+  -- ★★★ DISCHARGED 2026-08-08 (`W-g`). The bridge is *Tinhofer ⟹ the consume resolver fires at every
+  -- reached node*, and this is its contrapositive. It became provable **at this object** when the
+  -- supply was cell-indexed: `RecordDeepenCell.handledSC_of_tinhoferGraph` shows the target cell
+  -- narrows to one branch **on generators anchored in that cell** (`goodCell_of_tinhofer` +
+  -- `orbitCompleteAt_of_goodCell`), and `Select.answersSC_of_handledSC` turns that into "never flags".
+  -- ⛔ NOT a second-object discharge: `recordDeepenCell_full_fast` carries ①a/①b/①c, ② and ③ of the
+  -- *same* definition `canonForm?` and `cost` are now defined as.
+  (RecordDeepenCell.recordDeepenCell_full_fast (n := n)).2.2 G
 
 /-- **Non-vacuity of ③ (the documented vacuity-trap guard).** There exist handled graphs (a flag is not
 forced) AND unhandled ones (the excluded set is real). Without this, `residue_if_flag` is meaningless.
@@ -578,8 +582,8 @@ theorem unhandledResidue_nonvacuous :
 
 /-! ## 4. THE HEADLINE — one quotable theorem, composed from the obligations
 
-This body is REAL (no `sorry`): it shows the composition. Its `#print axioms` is therefore exactly the
-union of the obligations' axioms — currently `sorryAx`, and at the endgame the citation list. -/
+This body is REAL: it shows the composition. Its `#print axioms` is therefore exactly the union of the
+obligations' axioms — **which, since 2026-08-08, is exactly Lean's three.** -/
 
 /-- **The canonizer theorem — CORRECTNESS.** For every graph `G`: (i) whenever the canonizer answers on
 `G` and any `H`, the outputs coincide iff `G ≅ H` (a complete iso-invariant — never wrong); and (ii) it
@@ -593,31 +597,43 @@ theorem canonizer (n : ℕ) (G : AdjMatrix n) :
         canonForm? n G = some cG → canonForm? n H = some cH → (Iso G H ↔ cG = cH))
     ∧ cost n G ≤ costConst * (n + 1) ^ costDeg :=
   ⟨fun H cG cH hG hH => canon_complete n G H cG cH hG hH,
-   RecordKey.descentCostS_selNode_recordKey_monomial G⟩
+   (RecordDeepenCell.recordDeepenCell_full_fast (n := n)).2.1 G⟩
 
 /-! ## 5. The axiom footprint (the deliverable)
 
-**2026-08-04.** `unhandledResidue_nonvacuous` is discharged and prints exactly
-`[propext, Classical.choice, Quot.sound]`; so do the whole `①` trio and `②`. **`residue_if_flag` remains
-the single live `sorry`** — see the open-step block in §1 for precisely what closes it. **No citation
-axiom is consumed by any theorem in this file**, so the 8 in §2 are now **commented out** rather than
-presented as the trusted base of anything proved here (each is one `-- ⏸ ` away from being restored when
-W2/Route C needs it). ⟹ **the only custom `axiom` in this file today is none**: the footprint below is
-Lean's three plus `sorryAx` from the single open obligation. The paper must still state the intended
-citation base for the parts of the project that do not live in this file. -/
+**★★★ 2026-08-08 — THE FILE IS CLOSED. Zero `sorry`, zero custom axioms.** Every `#print axioms`
+below is exactly `[propext, Classical.choice, Quot.sound]`: `canon_sound`, `canon_complete`,
+`flag_iso_invariant`, `canon_poly_or_flag`, `residue_if_flag`, `unhandledResidue_nonvacuous`, and the
+composed `canonizer`. All of them are properties of **one** object — `canonForm?` and `cost` are the
+value and cost projections of the same `RecordDeepenCell` definition, which `#eval` runs.
+
+**No citation axiom is consumed by anything here**, so the 8 in §2 stay **commented out** rather than
+being presented as the trusted base of something proved here (each is one `-- ⏸ ` from restoration
+when W2 / Route C needs it). The paper must still state the intended citation base for the parts of
+the project that do **not** live in this file.
+
+⚠⚠ **Two things a reader must not over-read, both stated at source above:**
+  · `②`'s **degree is a bound, not a measurement** — several components bill declared flat charges
+    (see the `costConst`/`costDeg` block). It rules out exponentials; it does not establish that 13
+    is the algorithm's true degree.
+  · `③`'s residue is an **over-approximation** — `¬ TinhoferGraph` currently counts CFI graphs as
+    residual although their obstruction is linear and belongs to the rigid resolver. Narrowing it is
+    W2. The claim is *"a flag means a real structural obstruction"*, never *"a flag means hardness"*.
+
+★ Measured (2026-08-08), so the object is not merely definable: `canonForm? 2 K₂` and
+`canonForm? 6 K₁,₂,₃` both **answer**; `cost` = 1606 and 38 212 276 against a budget of
+`69 · 3^13` and `69 · 7^13 ≈ 6.7 × 10¹²`. -/
 
 #print axioms canonizer
 #print axioms unhandledResidue_nonvacuous
 #print axioms residue_if_flag
 
-/-! The ① trio after the spike swap — expected `[propext, Classical.choice, Quot.sound]`, NO `sorryAx`:
-the correctness half of the showcase is real, today, for the record object. -/
+/-! The `①` trio — `[propext, Classical.choice, Quot.sound]`, no `sorryAx`. -/
 #print axioms canon_sound
 #print axioms canon_complete
 #print axioms flag_iso_invariant
 
-/-! …and ② after the 2026-07-28 swap — same expectation, no `sorryAx`: the cost half of the showcase is
-real too, for the record object at the composed force key. Only ③ and non-vacuity remain. -/
+/-! …and `②`, same footprint. -/
 #print axioms canon_poly_or_flag
 
 

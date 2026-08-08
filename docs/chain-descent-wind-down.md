@@ -5,6 +5,16 @@
 > unless it appears in §2 below. Those docs remain accurate as a *record* of what was built
 > and what was refuted; they are no longer a plan.
 >
+> # ✅✅✅ 2026-08-08 — `Publication.lean` IS CLOSED: ZERO `sorry`, ZERO CUSTOM AXIOMS
+> `canonForm?` = `RecordDeepenCell.canonFormFast` (the fused descent at the **cell-indexed** supply
+> `fun c => recordSupplyFast ++ Deepen.deepenCellSupply c`), `cost` = `costFast`,
+> `costConst`/`costDeg` = **69 / 13**, and all of ①a ①b ①c ② ③ are projections of
+> **`recordDeepenCell_full_fast`** — one object, as the standing steer requires. Every headline
+> theorem prints `[propext, Classical.choice, Quot.sound]`, and the object `#eval`s.
+> ⚠ Two caveats travel with it: `②`'s degree is a **bound from declared flat charges, not a
+> measurement**, and `③`'s residue is an **over-approximation**. Both are stated at source.
+> **Remaining from the finish list: W2 (CFI), W3 (extraction), W4 (write-up), W5 (archive).**
+>
 > ### ▶▶ PICKING THIS UP FRESH? GO TO [§2a HANDOFF](#2a--handoff--where-a-fresh-reader-picks-up-2026-08-04).
 > It carries the reading order, the gate command and its current numbers, the **`Publication.lean` state
 > table**, the measured evidence, the **eight corrections you will otherwise inherit from other docs**, and
@@ -538,7 +548,7 @@ script `cd`s via `$0`. ⚠ `build.sh` opens with `pkill -f 'lake build'`, which 
 command line contains that string — never chain a `lake build` and the gate in one command. No `sorry`,
 `native_decide` or new axiom anywhere in the gated library.
 **`Publication.lean` is NOT gated** (compile it standalone: `cd GraphCanonizationProofs && lake env lean
-Publication.lean`); it has **exactly one** live `sorry`, `residue_if_flag`.
+Publication.lean`); since 2026-08-08 it has **zero** `sorry` and **zero** custom axioms.
 
 ### ▶▶ STATE OF `Publication.lean` (2026-08-04) — read this before touching it
 | obligation | state |
@@ -547,7 +557,7 @@ Publication.lean`); it has **exactly one** live `sorry`, `residue_if_flag`.
 | `canon_poly_or_flag` (`②`) | ✅ axiom-clean, on the **LEFT** disjunct |
 | `canonizer` | ✅ axiom-clean; its cost conjunct is now **unconditional** (the residue escape was never needed) |
 | `unhandledResidue_nonvacuous` | ✅ **DISCHARGED** axiom-clean (`RestrictedTransport.tinhoferGraph_nonvacuous`) |
-| **`residue_if_flag` (`③`)** | ⚠ **THE ONE LIVE `sorry`** — see the boxed W1 correction in §2 for exactly what closes it |
+| **`residue_if_flag` (`③`)** | ✅ **DISCHARGED 2026-08-08** (`W-g`) — `recordDeepenCell_full_fast.2.2`, axiom-clean, at the same object as `①`/`②`. **The file now has zero `sorry`.** |
 | the 8 citation axioms | ⚠ **consumed by NOTHING**; retained for W2/Route C only — the paper must say so |
 
 `UnhandledResidue` is now a **definition** (`residueRigidObstruction G := ¬ TinhoferGraph G`), not three

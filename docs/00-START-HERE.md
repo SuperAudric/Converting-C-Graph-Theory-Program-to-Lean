@@ -33,8 +33,10 @@
 > Gate **118 modules, ~228–361 s, exit 0** (2026-08-08); no `sorry`/`native_decide`/new axiom in the
 > gated library. ⚠ `build.sh` opens with `pkill -f 'lake build'` — never chain a `lake build` and the
 > gate in one command.
-> `Publication.lean` (ungated, standalone) is at **one** live `sorry` (`residue_if_flag`) and, since
-> 2026-08-04, **zero custom axioms** — the 8 citations are commented out because nothing consumed them.
+> **★★★ `Publication.lean` (ungated, standalone) is CLOSED since 2026-08-08: ZERO `sorry`, ZERO custom
+> axioms.** `canonForm?` = `RecordDeepenCell.canonFormFast`, `cost` = `costFast`, `costConst`/`costDeg`
+> = 69/13, and ①a ①b ①c ② ③ are all projections of `recordDeepenCell_full_fast` — one object. The 8
+> citations stay commented out; nothing consumed them.
 > **▶ The authoritative record is [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §2 W1 and
 > its §2a HANDOFF block — read those, not this summary.** What a reader needs up front:
 >

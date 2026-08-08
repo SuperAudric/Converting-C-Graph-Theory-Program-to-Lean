@@ -1,5 +1,12 @@
 # PER-CELL CONSUME — the plan for closing `Publication.residue_if_flag`
 
+> # ✅✅✅ CLOSED 2026-08-08 — `Publication.lean` HAS ZERO `sorry` AND ZERO CUSTOM AXIOMS
+> `canonForm?` = `RecordDeepenCell.canonFormFast`, `cost` = `costFast`, `costConst`/`costDeg` = 69/13,
+> and `residue_if_flag` = `recordDeepenCell_full_fast.2.2`. All seven headline theorems print exactly
+> `[propext, Classical.choice, Quot.sound]`, all of them properties of **one** object, and that object
+> `#eval`s (answers on `K₂` and `K₁,₂,₃`; `cost` 1606 and 38 212 276).
+> **Only `W-e` (lazy `selColourC`) remains from this plan, and it is a runtime nicety.**
+
 **Rewritten 2026-08-07** after five probes and a user coverage probe; **extended later the next day**
 with the *witness-vs-relation* diagnosis (§3a) and a **second candidate design `C`** that keeps the
 node-global list (§4b). The 2026-08-06 version proposed *"per-cell harvest + an all-cells guard"*; the
@@ -307,7 +314,7 @@ obligation. W-a, W-e, W-f, W-g are common to both.
 > ### ▶▶ ORDER, REVISED 2026-08-08 (and the two items that were missing)
 >
 > **Done:** W-b ✅ · W-c ✅ · W-d ✅ · **W-d′ ✅** · **③ mirror ✅** · **W-h + W-a + W-f ✅** ·
-> **W-i ✅**. **Remaining:** **W-g (repoint `Publication.canonForm?`)** → **W-e (lazy `selColourC`)**.
+> **W-i ✅** · **W-g ✅**. **Remaining: W-e only** (lazy `selColourC`), a runtime nicety.
 >
 > ⛔ **W-a is no longer "do this first".** Its stated reason — *"before `②` becomes a claim that has
 > to be walked back"* — does not apply: the **current** `Publication.canon_poly_or_flag` is at a
@@ -490,10 +497,24 @@ separate; `#eval` of `descentCostS`, wall clock includes ~identical import time.
 bounds the constant from below rather than settling it; but it is a measurement where there was none.
 ⚠ `K₁,₂,₃` at `69·(6+1)^13 ≈ 6.7 × 10¹²` has enormous slack — see the accounting caveat in §6.
 
-### W-g. Repoint `Publication.canonForm?` and discharge `residue_if_flag`
-`RecordDeepenCell.not_tinhoferGraph_of_flag` **is** `residue_if_flag`'s statement once `canonForm?`
-names this object. ⚠ `canonFormFastS?_eq` is `rfl` for **`selNode`**; the cell-indexed object needs
-W-i's twin before the same sentence is true of it.
+### W-g. Repoint `Publication.canonForm?` — ✅ **LANDED 2026-08-08. THE FILE IS CLOSED.**
+`canonForm? n G := RecordDeepenCell.canonFormFast (n := n) G` · `cost := costFast` ·
+`costConst`/`costDeg` := `RecordDeepenCell`'s **69 / 13** · `canonForm?_record`,
+`canon_poly_or_flag` and **`residue_if_flag`** all projections of
+**`recordDeepenCell_full_fast`** — so ①a, ①b, ①c, ② and ③ are provably about the *same* definition,
+which is the standing steer this whole plan existed to respect.
+
+**`Publication.lean`: zero `sorry`, zero custom axioms.** All seven headline theorems print
+`[propext, Classical.choice, Quot.sound]`. The eight citations in §2 stay commented out — nothing
+consumed them.
+
+★ **And the deliverable RUNS**: `#eval` at the `Showcase` names gives
+`canonForm? 2 K₂` ✓ answers, `cost 2 K₂` = 1606; `canonForm? 6 K₁,₂,₃` ✓ answers,
+`cost` = 38 212 276, against `69·7^13 ≈ 6.7 × 10¹²`.
+
+⚠ Two things the file now states at source and that must travel with any quotation of it: `②`'s
+degree is a **bound from declared flat charges, not a measurement** (§6), and `③`'s residue is an
+**over-approximation** (CFI graphs are counted residual though their obstruction is linear).
 
 ### W-e. Lazy evaluation *(runtime only — but see the correction)*
 `selColourC` is `(nonSingletonColours χ).filter (…) |>.min`, a `Finset` operation, so **every** cell
