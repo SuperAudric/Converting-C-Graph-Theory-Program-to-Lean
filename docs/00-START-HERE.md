@@ -3,8 +3,9 @@
 > # ▶ PROJECT STATUS (2026-08-01): RESEARCH PHASE CLOSED — WINDING DOWN
 >
 > **Read [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) before anything else.**
-> **▶▶ 2026-08-06 — then [`chain-descent-percell-plan.md`](./chain-descent-percell-plan.md), the ACTIVE
-> plan.** It supersedes the wind-down's options table (i)–(vi): `Publication.canonForm?` **keeps its
+> **▶▶ 2026-08-08 — then [`chain-descent-percell-plan.md`](./chain-descent-percell-plan.md), the ACTIVE
+> plan** (design `B` steps 1–2 landed: `ChainDescent/SelectCell.lean` + `ChainDescent/DeepenCell.lean`,
+> `①` at the **cell-indexed** fused object with no `SupplyEquivariant`).** It supersedes the wind-down's options table (i)–(vi): `Publication.canonForm?` **keeps its
 > current fused object** and the work is a **supply change**. Option (v) references below are provenance.
 > It carries the closing assessment (why each research track was closed), the finish list
 > (the only live work), and the suspended-items table.
@@ -20,7 +21,7 @@
 >
 > ## ✅ W1 LANDED (2026-08-04) — `TwinFamily.lean` + `RestrictedTransport.lean` (+ `DeepenComplete.lean`, `DeepenTransportOn.lean`)
 >
-> Gate **116 modules, ~230–361 s, exit 0** (2026-08-06); no `sorry`/`native_decide`/new axiom in the
+> Gate **118 modules, ~228–361 s, exit 0** (2026-08-08); no `sorry`/`native_decide`/new axiom in the
 > gated library. ⚠ `build.sh` opens with `pkill -f 'lake build'` — never chain a `lake build` and the
 > gate in one command.
 > `Publication.lean` (ungated, standalone) is at **one** live `sorry` (`residue_if_flag`) and, since

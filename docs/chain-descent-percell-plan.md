@@ -13,12 +13,20 @@ harvest half survives, **the all-cells guard is RETRACTED** (§2).
 > automorphisms harvested elsewhere, and that verdict is **not relabelling-invariant** (measured, §3).
 > `③` is already proved (`RecordDeepen`); the work is `①`'s plumbing and `②`'s numerals.
 >
-> **Two designs now repair it, both measured, and they trade plumbing against theorem strength:**
-> **`B`** cell-indexes the generator list (§4a) — more Lean plumbing, but its proof obligation is the
-> per-cell analogue of a theorem already proved once. **`C`** keeps the list node-global and simply
-> *retains the generators the guard already computes and discards* (§4b) — near-zero plumbing, but its
-> proof obligation is a strong-generating-set argument, which is `R1`-flavoured. **Recommendation: `B`
-> for the critical path, `C` as a free coverage enrichment on top. §4c carries the decision table.**
+> **Two designs repair it, both measured, and they trade plumbing against theorem strength:**
+> **`B`** cell-indexes the generator list (§4a) — its proof obligation is the per-cell analogue of a
+> theorem already proved once. **`C`** keeps the list node-global and simply *retains the generators
+> the guard already computes and discards* (§4b) — near-zero plumbing, but its proof obligation is a
+> strong-generating-set argument, which is `R1`-flavoured. **Decision: `B` on the critical path, `C`
+> as a free coverage enrichment on top. §4c carries the table.**
+>
+> ## ✅ `B` STEPS 1–2 ARE LANDED (2026-08-08) — gate **118 modules / 228 s**, axiom-clean
+> `ChainDescent/SelectCell.lean` (**`Select.selNodeC_canonizer`** — `①` at the cell-indexed fused
+> resolver, **no `SupplyEquivariant` anywhere**) and `ChainDescent/DeepenCell.lean`
+> (**`Deepen.deepenCell_canonizer`** — `①` at the guarded cell-anchored supply, no hypothesis).
+> ★ `SelectNode.lean` **untouched**, blast radius **zero**. ★★ **`B`'s plumbing cost was overestimated
+> here and its risk (§10.1) was misdiagnosed** — both corrected in W-b/W-c/W-d below, which now record
+> what was actually built. **▶ Next: W-d′, then W-a/W-e/W-f/W-g (§5).**
 
 ---
 
@@ -249,15 +257,16 @@ stated whenever `C` is proposed**, and it is exactly why `C`'s proof obligation 
 
 | | `B` — cell-indexed | `C` — level-generators |
 |---|---|---|
-| plumbing | new `CellSupply` type threaded through 4 defs + restated transport | **none to `SelectNode`**; supply change only |
-| transport obligation | per-**cell** orbit transport (W-c) | per-cell orbit transport at a **node-global** list — same shape, no cell index |
-| guard | per-cell `CertifiedAt` | unchanged `CertifiedG` |
-| **proof obligation** | per-cell analogue of `tinhofer_iff_certifiedG` — *a theorem already proved once*, only the guard's **verdict** need be intrinsic | ⟨`C`⟩'s orbits are the true orbits on every cell — a **strong-generating-set** result, i.e. `OrbitComplete` at all cells ≈ **`R1`** |
+| plumbing | ~~new `CellSupply` type threaded through 4 defs~~ ✅ **measured ZERO** — `CellSupply n := Nat → Supply n` is additive, `SelectNode.lean` untouched, only `NodeTransport` re-proved | **none to `SelectNode`**; supply change only |
+| transport obligation | per-**cell** orbit transport ✅ `Select.CellOrbitTransport` | per-cell orbit transport at a **node-global** list — same shape, no cell index |
+| guard | per-cell ✅ `Deepen.GoodCell` | unchanged `CertifiedG` |
+| **proof obligation** | ~~per-cell analogue of `tinhofer_iff_certifiedG`~~ ✅ **NOT EVEN THAT** — `GoodAnchor` is about the anchor's OWN path, so decidability and **unconditional** invariance were already proved; only the guard's **verdict** need be intrinsic | ⟨`C`⟩'s orbits are the true orbits on every cell — a **strong-generating-set** result, i.e. `OrbitComplete` at all cells ≈ **`R1`** |
 | cost | `Σ_c m_c² ≤ n²`, inside the declared flat `n⁶` | = the guard's `≈ n⁸`, already paid but **unbilled** |
 | measured invariance | 9/9 (`probe_offbranch5`) | 14/14 (`probe_levels2`) |
 | measured firing | 26/28, 26/28, 18/24, 22/26, 14/14 | 86/86, 138/138, +52/50/96/96 over `A` |
 
-**▶ RECOMMENDATION: `B` on the critical path, `C` as a free enrichment afterwards.**
+**▶ DECISION: `B` on the critical path, `C` as a free enrichment afterwards.** ✅ **`B` steps 1–2 are
+built** (2026-08-08); the row above records where this table over-estimated its cost.
 The deciding factor is **not** plumbing but the proof obligation. `B` keeps the property the whole
 guard design turns on — *only the guard's verdict must be invariant, never the harvest* — and its
 theorem is a re-run of one already in the build. `C` needs ⟨generators⟩ to actually **be** the

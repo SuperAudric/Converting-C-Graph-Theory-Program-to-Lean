@@ -12,7 +12,7 @@
 >
 > **W1 is ✅ LANDED (2026-08-04)** — `TwinFamily.lean` + `RestrictedTransport.lean`, extended the same day by
 > `DeepenComplete.lean` + `DeepenTransportOn.lean`. W4's go/no-go is **MET**.
-> Gate **116 modules, ~230–361 s, exit 0** (`bash /workspace/scripts/build.sh`, 2026-08-06).
+> Gate **118 modules, ~228–361 s, exit 0** (`bash /workspace/scripts/build.sh`, 2026-08-08).
 > **Tinhofer graphs are CANONIZED** (`canonizes_on_tinhofer`), the class is **inhabited and proper**
 > (`tinhoferGraph_nonvacuous`), and `Publication.unhandledResidue_nonvacuous` is **discharged**.
 >
@@ -456,6 +456,18 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >   ⟹ **`RecordKey.costConst` 53 → 57** (degree still 13).
 > * ⛔⛔ **`BAD-BIG = 0` is FALSIFIED** (`DeepenComplete` §5.2) — the union-over-anchors question is
 >   **re-opened**. Nothing proved breaks; the *expectation* that good-or-rigid covers everything dies.
+> * ★★★★ **DESIGN `B` STEPS 1–2 LANDED 2026-08-08** — `ChainDescent/SelectCell.lean` +
+>   `ChainDescent/DeepenCell.lean`, both in `build.sh`, both axiom-clean, gate **118 modules / 228 s**.
+>   **`Select.selNodeC_canonizer`** — `①` for the **cell-indexed** fused resolver from
+>   `KeyEquivariant` + the new `Select.CellOrbitTransport`, **no `SupplyEquivariant` anywhere**; and
+>   **`Deepen.deepenCell_canonizer`** — `①` at the guarded cell-anchored supply, no hypothesis.
+>   ★ `SelectNode.lean` is **untouched**: `Select.lean`'s spine is resolver-generic, so `selNodeC` is
+>   just another `NodeRes n` and only `NodeTransport` was re-proved. ★★ **The recorded W-d risk was
+>   misdiagnosed and is dissolved** — no per-cell analogue of `tinhofer_iff_certifiedG` is needed
+>   because `GoodAnchor` is a property of the anchor's OWN path, already decidable
+>   (`goodAnchor_iff_certPath`) and **unconditionally** invariant (`goodAnchor_relabel`).
+>   ▶ Next: **W-d′** (`kernelSupply` via `SameOrbits` on the shut side —
+>   `cellOrbitTransport_append`'s hypothesis is shaped for it), then W-a/W-e/W-f/W-g.
 > * ★★★ **`RecordDeepen.lean`** (in `build.sh`, axiom-clean) — **`③` AT THE FUSED OBJECT, FOR EVERY
 >   KEY**: `not_tinhoferGraph_of_flag_recordDeepen` at `recordSupplyFast ++ deepenSupplyCert`, via
 >   supply monotonicity (`handled_append_right`) plus `certifiedG_of_tinhofer`. `canonFormFastS?_eq`
@@ -467,8 +479,8 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > (a) *"the fused object cannot carry deepen"* — it can; `①` never needed an equivariant reference;
 > (b) *"§9 is a socket, not a gain"* — a population artefact of an all-multipede/CFI sweep.
 
-**Gate is green**: `bash /workspace/scripts/build.sh` → **116 modules, ~230–361 s, exit 0** (measured
-2026-08-06; the spread is swap pressure, not a change in the work). ⚠ Use the **absolute** path — the
+**Gate is green**: `bash /workspace/scripts/build.sh` → **118 modules, ~228–361 s, exit 0** (measured
+2026-08-08; the spread is swap pressure, not a change in the work). ⚠ Use the **absolute** path — the
 script `cd`s via `$0`. ⚠ `build.sh` opens with `pkill -f 'lake build'`, which kills **any** shell whose
 command line contains that string — never chain a `lake build` and the gate in one command. No `sorry`,
 `native_decide` or new axiom anywhere in the gated library.

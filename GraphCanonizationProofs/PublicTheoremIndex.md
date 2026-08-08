@@ -5300,3 +5300,60 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Deepen.ncol_lt_pairStep_of_partners` | 130-142 | ★ Progress: `ncol` rises **twice** per pair step | ⟹ fuel adequacy gets *easier*, not harder |
 | `Deepen.pairStep_refines` | 144-149 | Monotonicity — a `pairStep` cell is a subset of the `step` cell | The point of the proposal: finer cells ⟹ `CellSingleOrbit` easier |
 | `Deepen.pairStep_refines_step` | 151-155 | The second individualization never coarsens | — |
+## ChainDescent/DeepenCell.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Deepen.deepenGensOn` | 78-96 | ★ **The deepening harvest anchored at an ARBITRARY vertex list** — `deepenGens` with `Descend.branches χ` abstracted to a parameter. All hoisting (trap #2) and the `Vector` materialisation (trap #1) preserved. | Definition; the object design `B` is built on |
+| `Deepen.deepenGens_eq_deepenGensOn` | 98-101 | The executable supply IS the branch-cell instance — `rfl`, so the two can never drift. | `rfl` |
+| `Deepen.deepenGensOn_isColAut` | 108-133 | **Soundness at any anchor list**: every emitted generator is a genuine `IsColAut`. `DeepenCrux.deepenGens_isColAut`'s proof used the anchor list nowhere. | Unconditional |
+| `Deepen.mem_deepenGensOn_of` | 140-161 | Forward membership at any anchor list — `DeepenTinhofer.mem_deepenGens_of` with `hr1`/`hrj` weakened from `branches χ` to `cell`. | They only ever fed `List.mem_map.mpr` |
+| `Deepen.exists_gen_deepenGensOn` | 169-199 | ★★ **THE CELL-ANCHORED RECOVERY THEOREM** — an automorphism carrying `r₁ ↦ rⱼ` inside `cell`, plus a Schurian path for `r₁`, ⟹ the harvest anchored at `cell` EMITS a generator doing the same. Conclusion is generator-existence, hence supply-agnostic. | `exec_recovers_cell_orbits` with its one branch-cell dependency redirected |
+| `Deepen.exists_gen_of_goodAnchor` | 208-222 | ★★★ **THE PER-CELL RECOVERY** — `DeepenComplete.exec_recovers_refgen_at` at an arbitrary same-coloured list. `χ x = χ (ρ x)` is free from `IsColAut`, so nothing about the TARGET cell is needed. | Why the branch cell was never load-bearing |
+| `Deepen.deepenSupplyAt` | 226-230 | The deepening supply anchored at the cell of colour `c`. | Definition; same declared flat `n⁶` — `Σ_c m_c² ≤ n²` |
+| `Deepen.gens_deepenSupplyAt` | 232-233 | Its generators are the cell-anchored harvest. | `rfl` |
+| `Deepen.wordReach_imp_isColAut_any` | 235-245 | Soundness at any verified list, supply-generic (`DeepenTinhofer.wordReach_imp_isColAut` is stated at `deepenSupply`). | — |
+| `Deepen.GoodCell` | 247-255 | ★★ **THE PER-CELL GUARD** — every anchor of the cell has a Schurian deepening path. | Definition; decidable + **unconditionally** invariant, both inherited |
+| `Deepen.instDecidableGoodCell` | 257-259 | Decidable, via `DeepenGuardComplete.goodAnchor_iff_certPath`. | Instance |
+| `Deepen.goodCell_transport` | 261-270 | ★★★ **THE GUARD'S VERDICT TRANSPORTS — UNCONDITIONALLY.** Cells correspond (`cellList_transport_perm`) and goodness transports outright (`goodAnchor_relabel`). ⟹ **no per-cell analogue of `tinhofer_iff_certifiedG` is needed** — the recorded risk dissolved. | The ONLY invariance the design needs |
+| `Deepen.goodCell_transport_iff` | 272-278 | Both directions. | — |
+| `Deepen.OrbitCompleteAt` | 280-284 | **Orbit completeness AT A CELL** — the per-cell analogue of `OrbitComplete`, and what `cellNarrow`'s length at colour `c` actually needs. | Definition |
+| `Deepen.orbitCompleteAt_of_goodCell` | 286-300 | ★★★ **THE GUARD DELIVERS ORBIT COMPLETENESS AT ITS OWN CELL.** | — |
+| `Deepen.cellOrbit_iff_aut_of_orbitCompleteAt` | 302-308 | Under the guard the emitted relation on the cell **is** the `IsColAut`-orbit relation: `⊆` unconditional, `⊇` the guard's. | — |
+| `Deepen.deepenCellSupply` | 316-319 | **The guarded cell-anchored supply** — deepen's generators where the cell's anchors are all good, `[]` where not. Computable. | Definition |
+| `Deepen.verified_deepenCellSupply_of_open` | 321-325 | Open ⟹ the guarded supply IS the cell-anchored one. | — |
+| `Deepen.verified_deepenCellSupply_of_shut` | 327-330 | Shut ⟹ `[]`, hence count `= |cell|` on BOTH sides automatically. | Why only the verdict must transport |
+| `Deepen.cellOrbit_transport_deepenCellSupply` | 332-365 | ★★★ **THE PER-CELL ORBIT RELATION TRANSPORTS** — open: the relation equals the intrinsic orbit relation, which conjugates; shut: both `[]`, and the guard shuts on both sides together. **No `SupplyEquivariant`, no reference supply, no completeness of deepen.** | This IS `Select.CellOrbitTransport` |
+| `Deepen.deepenCellSupplyC` | 373-374 | The cell-indexed deepening supply: each cell judged by descents anchored in itself. | Definition |
+| `Deepen.cellOrbitTransport_deepenCellSupplyC` | 376-378 | It satisfies `Select.CellOrbitTransport`. | — |
+| `Deepen.deepenCell_canonizer` | 380-391 | ★★★ **`①` FOR THE CELL-INDEXED FUSED OBJECT AT THE GUARDED CELL-ANCHORED SUPPLY** — sound ∧ complete ∧ flag-iso-invariant, no hypothesis beyond the key's. The statement the node-global object provably cannot have (`scratchpad/probe_offbranch2/3.py`). | **The capstone of design `B`** |
+| `Deepen.verified_append_deepenCell_of_shut` | 403-408 | Shut ⟹ the append reduces to the left factor. | — |
+| `Deepen.cellOrbit_append_iff_aut_of_goodCell` | 410-421 | ★★ On the OPEN side the APPENDED relation **is** the orbit relation on the cell — `⊆` by soundness, `⊇` by the guard. **No property of the left factor is used.** | Why appending is free on the open side |
+| `Deepen.cellOrbitTransport_append` | 423-449 | ★★ **THE APPEND CARRIES `CellOrbitTransport`**, given only that the left factor's own relation transports where the guard is shut. | Hypothesis shaped for the `kernelSupply`/`SameOrbits` route (W-d′) |
+| `Deepen.cellOrbitTransport_append_of_supplyEquivariant` | 451-458 | The instance for an equivariant left factor — covers `foldSupplyFast ++ deckSupply ++ deck2Supply`. | ⚠ `kernelSupply` is provably NOT `GensEquivariant` |
+| `Deepen.deepenCell_append_canonizer` | 460-467 | ★★★ **`①` AT THE APPENDED CELL-INDEXED OBJECT.** | — |
+
+## ChainDescent/SelectCell.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Select.CellSupply` | 61-63 | **A cell-indexed supply**: one supply per cell colour. A `Nat`-indexed family, NOT a new structure — which is why every existing lemma applies verbatim at `S c`. | `abbrev` |
+| `Select.ofSupply` | 65-66 | Every cell-agnostic supply lifts, ignoring the cell. `selNode`'s object is this special case. | Definition |
+| `Select.cellNarrowC` | 68-72 | **The per-cell narrowing against the cell's OWN generators.** | Definition; `= cellNarrow key (S c) adj χ c` by `rfl` |
+| `Select.cellNarrowC_eq` | 74-75 | The `rfl` bridge that makes `SelectNode`'s per-cell lemmas apply unchanged. | `rfl` |
+| `Select.cellNarrowC_ofSupply` | 77-78 | At `ofSupply` it is the node-global narrowing. | `rfl` |
+| `Select.selColourC` | 80-83 | **The selected colour** — unchanged in SHAPE from `selColour` (least non-singleton colour whose cell narrows to `≤ 1`); only the evidence each cell is judged on has changed. | Definition |
+| `Select.selColourC_ofSupply` | 85-86 | At `ofSupply` it is `selColour`. | `rfl` |
+| `Select.selColourC_spec` | 88-93 | The committed colour is non-singleton and its cell narrowed. | — |
+| `Select.selProbeCostC` | 95-102 | The per-cell probe bill: each cell pays for its own supply evaluation and orbit BFS. | Definition; `Σ_c m_c² ≤ n²` ⟹ inside the flat charge already billed |
+| `Select.selNodeC` | 104-113 | ★ **THE CELL-INDEXED FUSED NODE RESOLVER** — same decision procedure as `selNode`, each cell judged by its own generators. `[]` = the true mutual stall. | Definition; just another `NodeRes n`, so `Select.lean`'s spine applies verbatim |
+| `Select.selNodeC_children_none` | 115-117 | Stall ⟹ no children. | — |
+| `Select.selNodeC_children_some` | 119-123 | Committed ⟹ one child per kept representative. | — |
+| `Select.nodeProper_selNodeC` | 125-136 | `NodeProper` for the cell-indexed instance — inherited from `SelectNode` at `S c`. | — |
+| `Select.CellOrbitTransport` | 143-150 | ★★★ **THE HYPOTHESIS THAT REPLACES `SupplyEquivariant`** — the emitted orbit relation transports at pairs INSIDE each cell. Strictly weaker: it says nothing about WHICH generators are emitted. | Definition; satisfied by a guarded pair-anchored supply with no equivariance at all |
+| `Select.cellOrbitTransport_ofSupply` | 152-157 | **Nothing regresses**: a cell-agnostic equivariant supply satisfies it. | — |
+| `Select.cellNarrowC_length_transport` | 159-190 | ★★ **THE PER-CELL ORBIT COUNT TRANSPORTS** — `cellNarrow_length_transport` with `SupplyEquivariant` swapped for `CellOrbitTransport`; the `keepMin` members it is applied to are inside the cell (`keepMin_subset`), which is why the weaker form suffices. | — |
+| `Select.selColourC_transport` | 192-204 | ★ **THE CHOSEN COLOUR TRANSPORTS AS A VALUE** — cell ORDER is invariant (colour values are), each cell's VERDICT is invariant by `CellOrbitTransport`. | The architecture's own reading, machine-checked |
+| `Select.nodeTransport_selNodeC` | 212-258 | The node contract for the cell-indexed instance. After the colour is committed everything is supply-free (`aggregate_cellNarrow_eq` at `S c`), matched by `KeyEquivariant` alone. | **The only thing that had to be re-proved** |
+| `Select.selNodeC_canonizer` | 260-269 | ★★★ **THE CELL-INDEXED FUSED CANONIZER** — `①a`/`①b`/`①c` from `KeyEquivariant` + `CellOrbitTransport`. **No `SupplyEquivariant` anywhere**, which is what lets a pair-anchored supply enter the fused object at all. | — |
+| `Select.selNodeC_canonizer_ofSupply` | 271-278 | Conservativity: at a cell-agnostic equivariant supply it reproduces `selNode_canonizer`. | — |
