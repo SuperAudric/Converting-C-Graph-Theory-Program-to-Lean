@@ -111,6 +111,7 @@ MODULES=(
   ChainDescent.HandledBridge          # Handled population: handled_of_seal (first Residue.Handled instances)
   ChainDescent.SupplyCost             # ② cashed out: poly supplyCost per built supply
   ChainDescent.SelectNode             # fused instance selNode; selNode_stall_iff = the true mutual stall
+  ChainDescent.SelectCell             # ★ design B step 2: CELL-INDEXED fused resolver selNodeC; CellOrbitTransport replaces SupplyEquivariant
 
   # ── Rigid seal (Algorithm R) — seam + reduction layers ──
   ChainDescent.RigidSeal              # R0a: leafColKey separates non-aut pairs (discretizing) + compKey seam
@@ -153,6 +154,7 @@ MODULES=(
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object
   ChainDescent.DeepenPair             # Q2 foundation: pairStep = step∘step, whole step interface INHERITED (finer cells, no blast radius)
+  ChainDescent.DeepenCell             # ★ design B step 1: CELL-ANCHORED harvest + per-cell guard GoodCell ⟹ ① at the cell-indexed fused object
   ChainDescent.KeyComplete            # KeySeparates: consume's guard absorbed into force's separation obligation
   ChainDescent.ForcePick              # forceThenPick: the exhaustiveness corollary cashed (no stall channel)
   ChainDescent.RecordCost             # ② for the OBJECT OF RECORD: the four supplies + holKeyFast, billed

@@ -1,6 +1,6 @@
 # PER-CELL CONSUME — the plan for closing `Publication.residue_if_flag`
 
-**Rewritten 2026-08-07** after five probes and a user coverage probe; **extended later the same day**
+**Rewritten 2026-08-07** after five probes and a user coverage probe; **extended later the next day**
 with the *witness-vs-relation* diagnosis (§3a) and a **second candidate design `C`** that keeps the
 node-global list (§4b). The 2026-08-06 version proposed *"per-cell harvest + an all-cells guard"*; the
 harvest half survives, **the all-cells guard is RETRACTED** (§2).
@@ -287,21 +287,24 @@ through a supply containing it. `DeepenGuard.certPathCost` + `certPathCost_le` a
 `Deepen.stepCost` (2026-08-06) is the worked precedent, including the `ring` re-expansion.
 **Do it before `②` becomes a claim that has to be walked back.**
 
-### W-b. Cell-index the supply *(the type change; keep the blast radius controlled)*
-Introduce `CellSupply n := AdjMatrix n → Colouring n → Nat → List (Equiv.Perm (Fin n)) × Nat`
-alongside `Supply`, with an embedding
+### W-b. Cell-index the supply — ✅ **LANDED 2026-08-08, `ChainDescent/SelectCell.lean`**
+`CellSupply n := Nat → Supply n` (a family, not a new function type, so **every existing lemma
+applies verbatim at `S c`**) with `ofSupply S := fun _ => S`. `cellNarrowC` / `selColourC` /
+`selNodeC` / `selProbeCostC`, and `cellNarrowC key S adj χ c = cellNarrow key (S c) adj χ c` by
+`rfl` — which is why `cellNarrow_ne_nil`, `cellNarrow_subset`, `rep_mem_keepMin_cell` and
+`aggregate_cellNarrow_eq` needed no re-proof.
 
-```lean
-def ofSupply (S : Supply n) : CellSupply n := fun adj χ _ => S adj χ
-```
+★ **Blast radius ZERO, and it was not the type change the plan expected.** `Select.lean`'s spine is
+resolver-generic (`selNodeC` is just another `NodeRes n`), so `descendS` / `canonFormS?` /
+`isCanonicalFormOptS_canonFormS?` / `descentCostS` apply unchanged and `SelectNode.lean` is not
+touched — every theorem stated at `selNode` keeps its proof. Only `NodeTransport` was re-proved.
 
-so **every existing supply lifts unchanged** and every existing instance is recovered at `ofSupply`.
-`cellNarrow` / `selColour` / `selNode` / `selProbeCost` take a `CellSupply`;
-`RecordCost.recordSupplyFast` enters as `ofSupply recordSupplyFast`.
-
-### W-c. Restate the transport obligation *(the bulk, but mechanical)*
-Replace `SupplyEquivariant S` in `cellNarrow_length_transport` with the per-cell orbit-transport
-property it actually consumes:
+### W-c. Restate the transport obligation — ✅ **LANDED 2026-08-08, `SelectCell.lean` §2–§3**
+`Select.CellOrbitTransport` replaces `SupplyEquivariant` in `cellNarrowC_length_transport` →
+`selColourC_transport` → `nodeTransport_selNodeC` → **`selNodeC_canonizer`** (`①a`/`①b`/`①c`, no
+`SupplyEquivariant` anywhere). `cellOrbitTransport_ofSupply` derives it from `SupplyEquivariant` at a
+cell-agnostic supply, so nothing regresses (`selNodeC_canonizer_ofSupply`). The shape that was
+planned:
 
 ```lean
 def CellOrbitTransport (S : CellSupply n) : Prop :=
@@ -315,24 +318,52 @@ then `selColour_transport` / `nodeTransport_selNode` / `selNode_canonizer` resta
 cell, so this is a hypothesis swap rather than a new argument. Prove
 `CellOrbitTransport (ofSupply S)` from `SupplyEquivariant S` so nothing existing regresses.
 
-### W-d. The per-cell guard and its completeness *(the one real theorem)*
-`CertifiedAt S adj χ c` — the per-cell analogue of `CertifiedG`, quantifying over `cellList χ c`
-instead of `Descend.branches χ` — and the per-cell analogue of
-`DeepenGuardComplete.tinhofer_iff_certifiedG`. The three ingredients of that proof never mention
-*which* cell:
+### W-d. The per-cell guard — ✅ **LANDED 2026-08-08, `ChainDescent/DeepenCell.lean`**
 
-* **fuel adequacy** — `tinhoferPath_fuel_lift`, via the `ncol` measure;
-* **spreading** — `tinhoferPath_spread`, from `CellSingleOrbit` at the level;
-* **path-local ⟹ all-anchors** — `tinhofer_of_tinhoferPath`.
+★★ **THE RISK IN §10.1 DISSOLVED ON CONTACT, AND THE REASON IS WORTH KEEPING.** No per-cell analogue
+of `tinhofer_iff_certifiedG` is needed at all, so `chooseIdK_eq_targetColour` never has to be
+generalized. `GoodAnchor adj χ x` is `TinhoferPath adj χ n (step adj χ x)` — a statement about **`x`'s
+own deepening path**, which never mentions which cell `x` lives in. So the three facts a per-cell
+guard needs were **already proved, at full generality**:
 
-⚠ One place to check rather than assume: `tinhofer_of_tinhoferPath` uses
-`chooseIdK_eq_targetColour` to identify the level's cell with `Descend.branches`. At a non-target
-cell that identification is not available, so the per-cell statement must be phrased against
-`cellList χ c` directly. **This is the step to scope first** — if it does not go through, the design
-still works with a weaker sound-only guard, at the cost of proving invariance another way.
+| need | already proved |
+|---|---|
+| decidable | `DeepenGuardComplete.goodAnchor_iff_certPath` + `instDecidableGoodAnchor` |
+| relabelling-invariant | `DeepenGuardComplete.goodAnchor_relabel` — **unconditional** |
+| recovers the orbit | `DeepenCell.exists_gen_of_goodAnchor` (§5, new) |
 
-Then generalize `exec_recovers_cell_orbits`: `hr1`/`hrj` are consumed **only** via
-`mem_deepenGens_of`, so replacing `Descend.branches χ` with `cellList χ c` is mechanical.
+The guard is `GoodCell adj χ c := ∀ r ∈ cellList χ c, GoodAnchor adj χ r`, decidable, with
+`goodCell_transport` / `goodCell_transport_iff` **unconditional**. That is the design's whole
+invariance requirement discharged — a shut guard emits `[]` so the count is `|cell c|` on both sides
+automatically, and only the verdict has to transport.
+
+**What did need building** — the harvest's anchor list. `deepenGensOn adj χ cell` is `deepenGens`
+with `Descend.branches χ` abstracted to a parameter, and `deepenGens = deepenGensOn adj χ (branches χ)`
+by `rfl`. Three facts re-run, each of which used its branch-cell hypothesis in exactly one place:
+`deepenGensOn_isColAut` (nowhere), `mem_deepenGensOn_of` (one `List.mem_map.mpr` per anchor),
+`exists_gen_deepenGensOn` (one call to the previous). ⚠ Deliberate duplication, not a refactor —
+re-defining `deepenGens` in terms of `deepenGensOn` is defeq but breaks every downstream
+`unfold deepenGens`.
+
+Then `deepenSupplyAt c` / `OrbitCompleteAt` / `orbitCompleteAt_of_goodCell` /
+`deepenCellSupply c` (guarded, computable) / **`cellOrbit_transport_deepenCellSupply`** — which is
+exactly `CellOrbitTransport`, delivered with **no `SupplyEquivariant`, no equivariant reference
+supply, and no completeness theorem about deepen**.
+
+### ✅ THE CAPSTONE — `DeepenCell` §8
+**`deepenCell_canonizer`** : `①a`/`①b`/`①c` for
+`Select.selNodeC encodeFreeFast lookaheadKey deepenCellSupplyC`, no hypothesis. This is the statement
+the node-global object provably cannot have (§3's CFI falsifier).
+Plus §8a's composition, which is the shape the record append needs: on the **open** side the appended
+relation *is* the orbit relation whatever the left factor contributes (soundness caps from above,
+the guard supplies from below — `cellOrbit_append_iff_aut_of_goodCell`, no property of `R` used); on
+the **shut** side deepen emits `[]` and the union is `R`'s own relation. Hence
+`cellOrbitTransport_append` and `deepenCell_append_canonizer` for any `SupplyEquivariant` left factor
+— covering `foldSupplyFast ++ deckSupply ++ deck2Supply`.
+
+**▶ NEXT (W-d′):** `kernelSupply` is provably not `GensEquivariant`; it enters through
+`OrbitPrune.SameOrbits` against an equivariant reference. `cellOrbitTransport_append`'s hypothesis is
+stated exactly so that route can discharge it — supply the reference's transport on the shut side.
 
 ### W-e. Lazy evaluation *(runtime only; semantics unchanged)*
 `selColour` is `(nonSingletonColours χ).filter (…) |>.min` — a `Finset` operation, not lazy. Add a
@@ -380,7 +411,10 @@ different (lower) colour. That can only help branching, but it must be measured,
 | `pairStep` (`DeepenPair`) | ✅ built, blast radius zero, **no supply — decoupled from this plan** |
 | **`RecordDeepen.lean`** | ✅ **`③` AT THE FUSED OBJECT, FOR EVERY KEY** — `not_tinhoferGraph_of_flag_recordDeepen` at `recordSupplyFast ++ deepenSupplyCert`. ⚠ Referenced in **no** other doc, plan, or memory before 2026-08-07 |
 | `Deepen.stepCost` billed | ✅ `costConst` 53 → 57 |
-| W-a … W-g | ⬜ not started |
+| **W-b/W-c — `ChainDescent/SelectCell.lean`** | ✅ **LANDED 2026-08-08**, axiom-clean — `CellSupply`/`selNodeC`/`CellOrbitTransport`/**`selNodeC_canonizer`**; `SelectNode` untouched, blast radius **zero** |
+| **W-d — `ChainDescent/DeepenCell.lean`** | ✅ **LANDED 2026-08-08**, axiom-clean — `deepenGensOn` · `GoodCell` (decidable, **unconditionally** invariant) · `deepenCellSupply` · **`deepenCell_canonizer`** = `①` at the cell-indexed fused object |
+| W-a (bill the guard) · W-e · W-f · W-g | ⬜ not started |
+| W-d′ — `kernelSupply` via `SameOrbits` on the shut side | ⬜ not started; `cellOrbitTransport_append`'s hypothesis is shaped for it |
 
 ⟹ **`③` is not on the critical path.** `RecordDeepen` proves *Tinhofer graph ⟹ the fused object
 answers* by supply monotonicity (`handled_append_right`), and `TinhoferGraph` is an **all-cells**
@@ -424,9 +458,12 @@ unsound-by-omission.
 
 ## 10. RISKS
 
-1. **W-d's per-cell completeness may not go through** at a non-target cell (the
-   `chooseIdK_eq_targetColour` step). Scope it before writing W-b/W-c. Fallback: a sound-only
-   per-cell guard plus a separate invariance argument — weaker, and worth knowing early.
+1. ~~**W-d's per-cell completeness may not go through** at a non-target cell (the
+   `chooseIdK_eq_targetColour` step).~~ ✅ **RESOLVED 2026-08-08 — the risk was misdiagnosed.** No
+   per-cell analogue of `tinhofer_iff_certifiedG` is needed: `GoodAnchor` is a property of the
+   anchor's *own* path and is already decidable (`goodAnchor_iff_certPath`) and **unconditionally**
+   relabelling-invariant (`goodAnchor_relabel`), so `chooseIdK_eq_targetColour` is never touched.
+   See W-d.
 2. **Counts here are key-free.** `cellNarrow` applies `keepMin key` before counting, so a key that
    separates a small cell could mask a specific discrepancy. That is not a defence — the discrepancy
    lives in the supply — but the positive rows in §3 should be re-confirmed at `recordKey` before
