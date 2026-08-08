@@ -453,3 +453,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `TwinFamily.swap_val` | 98-105 | — | — |
 | `TwinFamily.indivOne_splits` | 133-144 | — | — |
 | `TwinFamily.card_split` | 377-384 | — | — |
+## ChainDescent/SelectCell.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Select.verOf_map` | 550-560 | — | — |

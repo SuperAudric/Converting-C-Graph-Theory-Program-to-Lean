@@ -337,6 +337,49 @@ theorem recordDeepenCell_full :
   ⟨recordDeepenCell_canonizer, descentCostSC_recordDeepen_monomial,
    fun _ hflag => not_tinhoferGraph_of_flag hflag⟩
 
+/-! ## 5. `W-i` — THE RUNNABLE FORM
+
+`Select.selNodeFastC` evaluates each cell's supply **once** per node (the shared `cellData` table)
+and builds the children through `Refine.ColData`, curing traps #2 and #1 respectively. It is
+`Select.selNodeFastC_eq`-equal to `selNodeC`, so every capstone above transfers by rewriting —
+⚠ a **proved** equation, not `rfl` (the table returns `[]` off `nsColours χ`; see `SelectCell` §6). -/
+
+/-- **The runnable endgame canonizer.** -/
+def canonFormFast (adj : AdjMatrix n) : Option (CanonSpec.Labelled n) :=
+  Select.canonFormFastSC? (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n)) adj
+
+/-- …and its cost. -/
+def costFast (adj : AdjMatrix n) : Nat :=
+  Select.descentCostS (Refine.encodeFreeFast (n := n))
+    (Select.selNodeFastC (RecordKey.recordKey (n := n)) (recordSupplyDeepenC (n := n))) adj
+
+theorem canonFormFast_eq :
+    canonFormFast (n := n)
+      = Select.canonFormS? (Refine.encodeFreeFast (n := n))
+          (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+            (recordSupplyDeepenC (n := n))) :=
+  Select.canonFormFastSC?_eq _ _
+
+theorem costFast_eq (adj : AdjMatrix n) :
+    costFast adj
+      = Select.descentCostS (Refine.encodeFreeFast (n := n))
+          (Select.selNodeC (Refine.encodeFreeFast (n := n)) (RecordKey.recordKey (n := n))
+            (recordSupplyDeepenC (n := n))) adj :=
+  Select.descentCostSC_fast_eq _ _ adj
+
+/-- **★★★ `①` ∧ `②` ∧ `③` AT THE RUNNABLE OBJECT.** `recordDeepenCell_full` transported along
+`canonFormFast_eq` / `costFast_eq` — same object, stated at the definitions that actually execute.
+This is the exact triple `Publication.canonForm?` / `Publication.cost` are to be repointed at. -/
+theorem recordDeepenCell_full_fast :
+    CanonSpec.IsCanonicalFormOpt (canonFormFast (n := n))
+    ∧ (∀ adj : AdjMatrix n, costFast adj ≤ costConst * (n + 1) ^ costDeg)
+    ∧ (∀ adj : AdjMatrix n, canonFormFast adj = none → ¬ TwinFamily.TinhoferGraph adj) := by
+  obtain ⟨h1, h2, h3⟩ := recordDeepenCell_full (n := n)
+  refine ⟨?_, ?_, ?_⟩
+  · rw [canonFormFast_eq]; exact h1
+  · intro adj; rw [costFast_eq]; exact h2 adj
+  · intro adj; rw [canonFormFast_eq]; exact h3 adj
+
 /-- **★★★ `①` ∧ `③` AT ONE OBJECT**, at the record key. -/
 theorem recordDeepenCell_record :
     CanonSpec.IsCanonicalFormOpt

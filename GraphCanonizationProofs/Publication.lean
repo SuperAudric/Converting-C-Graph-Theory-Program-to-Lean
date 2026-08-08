@@ -348,7 +348,34 @@ disjunct does not rescue it:
   measured 2026-08-06 at the billed key; `1162` before `stepCost` was billed).
 
 Nothing about the guarantee weakens: `(n + 1) ^ 13 ≤ 2 ^ 13 · n ^ 13` for `n ≥ 1`, so this is the same
-polynomial class, stated so that it is also true on the degenerate input. -/
+polynomial class, stated so that it is also true on the degenerate input.
+
+### ⚠⚠ WHAT THE DEGREE DOES AND DOES NOT CERTIFY — read before quoting `costDeg` (2026-08-08)
+
+The bound is a real, unconditional theorem about the object's `CostM` accounting. It is **not** a tight
+measurement of the algorithm's asymptotic cost, because several components bill **declared flat**
+charges that are deliberate over-estimates rather than derived ones:
+
+  · the deepening harvest bills a flat `n⁶` per cell regardless of that cell's size, where the real
+    work is `≈ m² n⁴` and `Σ_c m_c² ≤ n²` — so the family together really costs `n⁶`, not `n⁷`;
+  · `Hol.holKeyFast` bills a flat `n⁵`;
+  · `Select.selProbeBoundC` charges **every** cell the *maximum* per-cell supply bound `sB` and
+    candidate count `gB`, then multiplies by `n`, where the true total is a sum of much smaller terms;
+  · `Deepen.goodCellCost` is `n ×` `certPathCost`'s bound, which itself carries the flat `n⁶` inside.
+
+**The consequence, stated plainly: `costDeg` staying at 13 across the 57 → 69 change does NOT show
+that the algorithm's true cost polynomial has the same degree it had before.** Both numbers are upper
+bounds produced by the same loose accounting, and they can be loose by different amounts. What is
+established is exactly two things, and they are what the paper may claim:
+
+  1. an **unconditional polynomial ceiling with explicit numerals**, on every input, answer or flag
+     alike — no exponential blow-up is possible; and
+  2. that the per-cell supply change did not push *that ceiling* up a degree.
+
+Tightening this means replacing declared charges with derived ones (the first would be billing the
+harvest as `|cell|² · n⁴` and proving `Σ_{c ∈ nsColours χ} |cellList χ c|² ≤ n²`). That is a separate
+exercise and is **not** required for the claim above; it is required before anyone reads `13` as the
+algorithm's degree. -/
 
 /-- `RecordKey.costConst` — the coefficient sum of the `②` bound polynomial. -/
 def costConst : ℕ := RecordKey.costConst

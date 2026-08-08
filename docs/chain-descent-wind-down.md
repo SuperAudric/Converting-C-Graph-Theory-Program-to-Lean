@@ -495,8 +495,25 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >   `ring`-checked numerals: **`costDeg` 13 unchanged, `costConst` 57 → 69** (+8 per-cell supply
 >   billing, +4 guard). ⛔ The prediction that the degree would move was wrong — `recordKeyBound`
 >   already reaches `n^10` and the key sets the degree.
->   ▶ Next, none of it mathematics: **W-i** (`selNodeFastC`/`canonFormFastSC?`, the runnable
->   `rfl`-twin) → **W-g** (repoint `Publication.canonForm?`) → **W-e** (lazy). See the plan's §5.
+>   ★★★ **AND `W-i` LANDED THE SAME DAY** — `Select.cellData` (each cell's supply evaluated **once**
+>   per node) / `selNodeFastC` / `canonFormFastSC?`, and
+>   **`RecordDeepenCell.recordDeepenCell_full_fast`** = `①` ∧ `②` ∧ `③` at the definitions that
+>   actually execute. ⚠ `selNodeFastC_eq` is a **proved** equation, not `rfl` (the table returns `[]`
+>   off `nsColours χ`) — everything transfers by rewriting with it. ★ `C₅` **216 s → 41 s**, cost
+>   value identical, and now *faster than the node-global `selNode`* (111 s) because the twin also
+>   cures trap #1.
+>   ▶ Next: **W-g** (repoint `Publication.canonForm?`/`cost`, swap the numerals to
+>   `RecordDeepenCell.costConst/costDeg`, delete the `sorry`) → **W-e** (lazy `selColourC`).
+>
+>   ⚠⚠ **AND A STANDING CAVEAT ON `②`** (user, 2026-08-08): the bound is an unconditional theorem
+>   about the object's `CostM` accounting, but several components bill **declared flat** charges that
+>   over-estimate — the harvest's flat `n⁶` per cell (real `≈ m² n⁴`, `Σ mᵢ² ≤ n²`), `holKeyFast`'s
+>   flat `n⁵`, `selProbeBoundC` charging every cell the *maximum* `sB`/`gB`, `goodCellCost`'s nested
+>   flat `n⁶`. ⟹ **`costDeg` staying 13 across 57 → 69 does NOT show the algorithm's true cost
+>   polynomial kept its degree** — both are upper bounds from the same loose accounting. What is
+>   established: an explicit polynomial ceiling on every input (no exponential), and that the
+>   per-cell change did not raise *that ceiling*'s degree. Recorded at source in `Publication.lean`'s
+>   `costConst`/`costDeg` block.
 > * ★★★ **`RecordDeepen.lean`** (in `build.sh`, axiom-clean) — **`③` at the NODE-GLOBAL object**:
 >   `not_tinhoferGraph_of_flag_recordDeepen` at `selNode` + `recordSupplyFast ++ deepenSupplyCert`,
 >   via supply monotonicity (`handled_append_right`) plus `certifiedG_of_tinhofer`. ⚠ It landed
@@ -578,7 +595,7 @@ two-object split was tried this session and reverted.
 ### ⚠ EIGHT OBJECTS — do not mix them up when writing
 | object | executable | `①` | `②` | `③` | named coverage |
 |---|---|---|---|---|---|
-| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeC`** (`RecordDeepenCell`) | ✅ **measured** (answers on `K₂`, `C₅`) — but the **slow** shape; W-i's `rfl`-twin is owed | ✅ **global, no hypothesis** | ✅ **`69·(n+1)^13`**, every input, no flag disjunct | ✅ **every key** | ★★★ every Tinhofer graph — **THE TARGET OBJECT**, all three at once (`recordDeepenCell_full`) |
+| **`recordKey @ (fun c => recordSupplyFast ++ deepenCellSupply c)` at `selNodeFastC`** (`RecordDeepenCell`) | ✅ **runnable and measured** — `canonFormFast`/`costFast`; `C₅` 41 s | ✅ **global, no hypothesis** | ✅ **`69·(n+1)^13`**, every input, no flag disjunct ⚠ see the accounting caveat | ✅ **every key** | ★★★ every Tinhofer graph — **THE TARGET OBJECT**, all three at once (`recordDeepenCell_full_fast`) |
 | `recordKey @ recordSupplyFast` (`Publication.lean` today) | ✅ | ✅ global | ✅ | ❌ open | **none** |
 | `key @ recordSupplyFast ++ deepenSupplyCert` at `selNode` (`RecordDeepen`) | ✅ | ⛔ **measured false** (`probe_offbranch2/3`) | — | ✅ every key | every Tinhofer graph — ⚠ **`③` only; not publishable, `①` cannot be had here** |
 | `holKeyFast @ twinSupply` (`TwinFamily` §8) | ✅ | ✅ global | ✅ | — | complete multipartite, distinct part sizes |

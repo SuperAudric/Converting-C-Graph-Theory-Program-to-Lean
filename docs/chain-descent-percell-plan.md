@@ -306,9 +306,8 @@ obligation. W-a, W-e, W-f, W-g are common to both.
 
 > ### ▶▶ ORDER, REVISED 2026-08-08 (and the two items that were missing)
 >
-> **Done:** W-b ✅ · W-c ✅ · W-d ✅ · **W-d′ ✅** · **③ mirror ✅** · **W-h + W-a + W-f ✅**
-> (one pass, as planned). **Remaining:** **W-i (fast twin)** → **W-g (repoint)** → **W-e (lazy)**.
-> None of them is mathematics.
+> **Done:** W-b ✅ · W-c ✅ · W-d ✅ · **W-d′ ✅** · **③ mirror ✅** · **W-h + W-a + W-f ✅** ·
+> **W-i ✅**. **Remaining:** **W-g (repoint `Publication.canonForm?`)** → **W-e (lazy `selColourC`)**.
 >
 > ⛔ **W-a is no longer "do this first".** Its stated reason — *"before `②` becomes a claim that has
 > to be walked back"* — does not apply: the **current** `Publication.canon_poly_or_flag` is at a
@@ -455,16 +454,41 @@ per-cell supply billing and **+4** from the guard.
 ★ It also confirms `GoodCell`'s decidability is genuinely **computable**: nothing `noncomputable`
 entered with the guard.
 
-### W-i. The runnable twin *(NEW; was missing, and W-g depends on it)*
-`selNodeC` is the **slow** shape. `SelectNode.lean:387-392` records why `selNodeFast` exists: a
-stored generic `refineV rf …` re-runs the refinement on every colour lookup (≈30 ms at `n = 14`,
-enough to hang the fused descent), and `selNodeFast` also computes the verified list **once** and
-shares it between `selColourV` and `cellNarrowV`. `selNodeC` does neither — it stores the generic
-`refineV`, and it recomputes `verified (S c) adj χ` for every probed cell *and again* after
-committing. Standing traps #1 and #2, both live.
-▶ Build `selNodeFastC` + `canonFormFastSC?` as `rfl`-twins (the project's existing pattern), caching
-`(nsColours χ).map (fun c => (c, verified (S c) adj χ))`. Without this the repointed object cannot be
-`#eval`'d, which costs the "it runs" half of the artifact.
+### W-i. The runnable twin — ✅ **LANDED 2026-08-08, `SelectCell.lean` §6 + `RecordDeepenCell.lean` §5**
+`selNodeC` was the **slow** shape, with both standing traps live: it stored a generic
+`refineV rf …` (trap #1 — re-runs the refinement on every colour lookup, ≈30 ms at `n = 14`,
+`SelectNode.lean:387-392`) and it evaluated `S c adj χ` **three** times per cell (trap #2 — once in
+`selProbeCostC`, once in `selColourC`'s filter, once more for the committed cell).
+
+**`Select.cellData`** is the shared per-cell table (`(colour, gens, verified, supplyCost)` per cell,
+each supply evaluated **once**) — the cell-indexed analogue of `selNodeFast`'s `let sv := S adj χ`.
+**`Select.selNodeFastC`** reads the probe bill and the narrowing off it and builds children through
+`Refine.ColData`. Then `canonFormFastSC?` / `descentCostSC_fast_eq`, and
+`RecordDeepenCell.canonFormFast` / `costFast` / **`recordDeepenCell_full_fast`** — `①` ∧ `②` ∧ `③`
+stated at the definitions that actually execute.
+
+⚠ **The one place the twin is NOT `rfl`.** `verOf` returns `[]` off `nsColours χ`, so it agrees with
+`verified (S ·)` only there; `selNodeFastC_eq` is a **proved equation**, discharged from
+`verOf_cellData` + `mem_nsColours_iff` + `cellData_probeCost`. Everything transfers by rewriting with
+it, exactly as `selNodeFast_eq` is used — the difference is cosmetic at the call site.
+
+★★ **MEASURED — including the multi-cell case this plan had never tested.** All runs clean and
+separate; `#eval` of `descentCostS`, wall clock includes ~identical import time.
+
+| graph | non-singleton cells at root | object | billed cost | wall |
+|---|---|---|---|---|
+| `C₅` (n = 5) | 1 | `selNodeC` (slow) | 5 999 428 | 216 s |
+| `C₅` | 1 | **`selNodeFastC`** | **5 999 428** | **41 s** |
+| `C₅` | 1 | `selNode` (slow, node-global) | 4 367 803 | 111 s |
+| `K₁,₂,₃` (n = 6) | **2** | **`selNodeFastC`** | **38 212 276** | **210 s** |
+| `K₁,₂,₃` | 2 | `selNodeFast` (node-global) | 25 346 020 | 148 s |
+
+★ **`C₅`: 216 s → 41 s (5.3×)**, cost value **identical** — the twin is value-preserving, as
+`selNodeFastC_eq` says.
+★★ **The multi-cell re-harvest costs 1.51× billed / 1.42× wall against the node-global fast object**
+— *not* the ~10× the trap-#2 note warned of. Two cells is the smallest interesting case, so this
+bounds the constant from below rather than settling it; but it is a measurement where there was none.
+⚠ `K₁,₂,₃` at `69·(6+1)^13 ≈ 6.7 × 10¹²` has enormous slack — see the accounting caveat in §6.
 
 ### W-g. Repoint `Publication.canonForm?` and discharge `residue_if_flag`
 `RecordDeepenCell.not_tinhoferGraph_of_flag` **is** `residue_if_flag`'s statement once `canonForm?`
@@ -508,7 +532,25 @@ list) and prove the sort agrees with `Finset.min`.
 >    ▶ This is what makes **W-i** (the runnable twin, cache `verified (S c)` per cell) and **W-e**
 >    (stop at the first firing cell) load-bearing rather than cosmetic.
 
-⚠ The other `②` debt is (b) re-measuring any `Regression` number that pins a selected colour — more
+### ⚠⚠ AND WHAT THE DEGREE DOES NOT CERTIFY (user, 2026-08-08)
+
+`69·(n+1)^13` is a real unconditional theorem about the object's `CostM` accounting, but it is **not a
+tight measurement**. Several components bill **declared flat** charges that are deliberate
+over-estimates: the harvest's flat `n⁶` per cell (real work `≈ m² n⁴`, and `Σ mᵢ² ≤ n²`, so the family
+really costs `n⁶` not `n⁷`); `holKeyFast`'s flat `n⁵`; `selProbeBoundC` charging **every** cell the
+*maximum* `sB`/`gB` and then multiplying by `n`; and `goodCellCost` = `n ×` a `certPathCost` bound
+that carries the flat `n⁶` inside it.
+
+⟹ **`costDeg` staying at 13 across 57 → 69 does NOT show the algorithm's true cost polynomial kept its
+degree.** Both numbers are upper bounds from the same loose accounting and can be loose by different
+amounts. What is established is (1) an unconditional polynomial ceiling with explicit numerals on
+every input — no exponential is possible — and (2) that the per-cell change did not push *that
+ceiling* up a degree. Tightening starts with billing the harvest as `|cell|² · n⁴` and proving
+`Σ_{c ∈ nsColours χ} |cellList χ c|² ≤ n²`; that is a separate exercise, needed before anyone reads
+`13` as the algorithm's degree, and **not** needed for (1). Recorded at source in `Publication.lean`'s
+`costConst`/`costDeg` block.
+
+⚠ The other `②` debt is re-measuring any `Regression` number that pins a selected colour — more
 generators ⟹ `selColour` may commit to a different (lower) colour. That can only help branching, but
 it must be measured, not assumed.
 
@@ -528,7 +570,8 @@ it must be measured, not assumed.
 | **W-d — `ChainDescent/DeepenCell.lean`** | ✅ **LANDED 2026-08-08**, axiom-clean — `deepenGensOn` · `GoodCell` (decidable, **unconditionally** invariant) · `deepenCellSupply` · **`deepenCell_canonizer`** = `①` at the cell-indexed fused object |
 | **W-d′ + ③ mirror — `ChainDescent/RecordDeepenCell.lean`** | ✅ **LANDED 2026-08-08**, axiom-clean — **`recordDeepenCell_canonizer`** (`①`, global, no hypothesis, via `SameOrbits`) and **`not_tinhoferGraph_of_flag`** (`③`, every key) at **one** object; `SelectCell` §4 carries the resolver-side mirror |
 | **W-h (`②` mirror) + W-a + W-f** | ✅ **LANDED 2026-08-08**, axiom-clean — `SelectCell` §5 (`selProbeBoundC`, `selProbeCostC_le`, `descentCostS_selNodeC_le`) · `DeepenCell` §7a (**`goodCellCost_bounds_guard`** — the guard is *billed*, not declared) · `RecordDeepenCell` §4 (**`descentCostSC_recordDeepen_monomial`**, `ring`-checked: **`costConst` 69, `costDeg` 13**) · **`recordDeepenCell_full`** = `①` ∧ `②` ∧ `③` |
-| W-i (runnable twin) · W-g (repoint) · W-e (lazy) | ⬜ not started — **no mathematics left, only plumbing** |
+| **W-i — `SelectCell` §6 + `RecordDeepenCell` §5** | ✅ **LANDED 2026-08-08**, axiom-clean — `cellData` (each cell's supply evaluated **once**) · `selNodeFastC` · `canonFormFastSC?` · **`recordDeepenCell_full_fast`** = `①` ∧ `②` ∧ `③` at the definitions that execute. ⚠ `selNodeFastC_eq` is a **proved** equation, not `rfl`. ★ `C₅` **216 s → 41 s**, cost value identical |
+| W-g (repoint) · W-e (lazy) | ⬜ not started |
 
 > ## ⛔ CORRECTION (2026-08-08) — *"`③` is not on the critical path"* WAS WRONG
 >
@@ -593,13 +636,11 @@ unsound-by-omission.
    anchor's *own* path and is already decidable (`goodAnchor_iff_certPath`) and **unconditionally**
    relabelling-invariant (`goodAnchor_relabel`), so `chooseIdK_eq_targetColour` is never touched.
    See W-d.
-1a. **⚠⚠ `selNodeC` IS THE SLOW SHAPE — standing traps #1 and #2 are both live in it** (found
-   2026-08-08). It stores a generic `refineV rf …` (trap #1: re-runs the refinement on every colour
-   lookup, ≈30 ms at `n = 14` — `SelectNode.lean:387-392` records this hanging the fused descent) and
-   it recomputes `verified (S c) adj χ` once per probed cell *and again* after committing (trap #2),
-   where `selNodeFast` computes the list once and shares it. **The proofs are unaffected** — `selNode`
-   has the same shape and `selNodeFast` is its `rfl`-twin — but the repointed object cannot be
-   `#eval`'d until **W-i** builds the twin, and "it runs" is half of what the artifact claims.
+1a. ~~**`selNodeC` IS THE SLOW SHAPE — traps #1 and #2 both live in it.**~~ ✅ **RESOLVED 2026-08-08
+   by W-i** (`Select.cellData` / `selNodeFastC` / `canonFormFastSC?`): each cell's supply is now
+   evaluated once per node and children are built through `Refine.ColData`. `C₅` 216 s → **41 s**,
+   identical cost value. ⚠ What remains open is only the *measurement*: `C₅` has one non-singleton
+   cell, so the multi-cell re-harvest case is still the untested one.
 
 2. **Counts here are key-free.** `cellNarrow` applies `keepMin key` before counting, so a key that
    separates a small cell could mask a specific discrepancy. That is not a defence — the discrepancy

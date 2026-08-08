@@ -8,8 +8,11 @@
 > `ChainDescent/DeepenCell.lean` + **`ChainDescent/RecordDeepenCell.lean`**, the last carrying
 > **`recordDeepenCell_full` = `①` ∧ `②` ∧ `③` at ONE object** — `①` global and unconditional,
 > `②` `cost ≤ 69·(n+1)^13` on every input with no flag disjunct, `③` at the tight residue
-> `¬TinhoferGraph`. **No mathematics remains**: the runnable `rfl`-twin, the repoint of
-> `Publication.canonForm?`, and laziness.
+> `¬TinhoferGraph`; and since W-i it is stated at the **runnable** definitions too
+> (`recordDeepenCell_full_fast`, `C₅` in 41 s). **What remains is the repoint of
+> `Publication.canonForm?` and laziness — no mathematics.**
+> ⚠ `②`'s degree is a bound from declared flat charges, not a measurement of the algorithm's true
+> degree — see `Publication.lean`'s `costConst`/`costDeg` block.
 > It supersedes the wind-down's options table (i)–(vi), now **provenance**:
 > `Publication.canonForm?` **keeps its current fused object** and the work is a **supply change**
 > (cell-indexed). Option (iv)/(v) references below are provenance.

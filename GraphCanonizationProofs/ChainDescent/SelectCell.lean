@@ -511,5 +511,142 @@ theorem descentCostS_selNodeC_le {key : Key n} {S : CellSupply n} {adj : AdjMatr
     (selProbeCostC_le (fun c => hs c χ) (fun c => hg c χ) (fun v => hk χ v)) ?_
   exact fun χ' => le_of_eq (Cost.refiner_cost adj χ')
 
+/-! ## 6. `W-i` — THE RUNNABLE TWIN
+
+`selNodeC` is the **slow** shape, and both standing traps are live in it:
+
+* **trap #1** — it stores a generic `refineV rf adj (indivOne χ v)`, which compiles as a partial
+  application whose body re-runs the refinement on *every* colour lookup (≈ 30 ms at `n = 14`;
+  `SelectNode` §5's note on `selNodeFast` records this hanging the fused descent);
+* **trap #2** — it evaluates `S c adj χ` **three** times per cell: once inside `selProbeCostC`, once
+  inside `selColourC`'s filter, and once more for the committed cell.
+
+`selNodeFast` cures both for the node-global object by binding `sv := S adj χ` once and inlining the
+probe bill. The cell-indexed analogue needs a **table** rather than a single binding, which is the
+one place where the twin is *not* `rfl`: `verOf` agrees with `verified (S ·)` only on
+`nsColours χ`, so `selNodeFastC_eq` is a proved equation instead of a definitional one. Every
+capstone transfers by rewriting with it, exactly as `selNodeFast_eq` is used.
+
+★ After this the twin re-computes only what `selNodeFast` also re-computes (`cellNarrowV` for the
+committed cell) — i.e. it is at parity with the node-global runnable object, per cell. -/
+
+/-- One cell's probe data: `(colour, gens, verified gens, supply cost)`. -/
+abbrev CellProbe (n : Nat) :=
+  Nat × List (Equiv.Perm (Fin n)) × List (Equiv.Perm (Fin n)) × Nat
+
+/-- **The shared per-cell table** — every cell's supply evaluated **once** per node. This is the
+cell-indexed analogue of `selNodeFast`'s `let sv := S adj χ`. -/
+def cellData (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) : List (CellProbe n) :=
+  (nsColours χ).map (fun c =>
+    let sv := S c adj χ
+    (c, sv.1, sv.1.filter (fun g => decide (Consume.IsColAut adj χ g)), sv.2))
+
+/-- Read a cell's verified list off the table. Direct recursion rather than `List.find?` so the
+agreement lemma is a three-line induction. -/
+def verOf : List (CellProbe n) → Nat → List (Equiv.Perm (Fin n))
+  | [], _ => []
+  | d :: t, c => if d.1 = c then d.2.2.1 else verOf t c
+
+private theorem verOf_map (f : Nat → CellProbe n) (hf : ∀ c, (f c).1 = c) :
+    ∀ (l : List Nat) {c : Nat}, c ∈ l → verOf (l.map f) c = (f c).2.2.1 := by
+  intro l
+  induction l with
+  | nil => intro c hc; exact absurd hc (List.not_mem_nil)
+  | cons x xs ih =>
+      intro c hc
+      by_cases hx : x = c
+      · subst hx; simp [verOf, hf]
+      · rw [List.map_cons, verOf, if_neg (by rw [hf]; exact hx)]
+        exact ih (by rcases List.mem_cons.mp hc with h | h; exacts [absurd h.symm hx, h])
+
+/-- **The table agrees with the supply, on every cell the object ever probes.** ⚠ Off `nsColours χ`
+it returns `[]`, which is why the twin is a proved equation and not `rfl`. -/
+theorem verOf_cellData {S : CellSupply n} {adj : AdjMatrix n} {χ : Colouring n} {c : Nat}
+    (hc : c ∈ nsColours χ) : verOf (cellData S adj χ) c = verified (S c) adj χ :=
+  verOf_map _ (fun _ => rfl) (nsColours χ) hc
+
+/-- The selector against the shared table. -/
+def selColourT (key : Key n) (t : List (CellProbe n)) (adj : AdjMatrix n) (χ : Colouring n) :
+    Option Nat :=
+  ((nonSingletonColours χ).filter (fun c => (cellNarrowV key (verOf t c) adj χ c).length ≤ 1)).min
+
+theorem selColourT_cellData (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) :
+    selColourT key (cellData S adj χ) adj χ = selColourC key S adj χ := by
+  unfold selColourT selColourC
+  congr 1
+  refine Finset.filter_congr (fun c hc => ?_)
+  rw [verOf_cellData ((mem_nsColours_iff χ c).mpr hc)]
+  rfl
+
+/-- **★★ THE RUNNABLE CELL-INDEXED RESOLVER.** Each cell's supply is evaluated **once** (`cellData`),
+the probe bill is read off the same table, and the children's colourings are built through
+`Refine.ColData` so each refinement is forced exactly once. -/
+def selNodeFastC (key : Key n) (S : CellSupply n) : NodeRes n := fun adj χ =>
+  let t := cellData S adj χ
+  let pc := (t.map (fun d =>
+    d.2.2.2 + d.2.1.length * (n * n)
+      + ((cellList χ d.1).map (keyCost key adj χ)).sum + n * n
+      + (cellList χ d.1).length * (d.2.2.1.length * (n * n) + n * n))).sum
+  match selColourT key t adj χ with
+  | none => ([], pc)
+  | some c =>
+      let kept := cellNarrowV key (verOf t c) adj χ c
+      (kept.map (fun v => (v, (Refine.warmRefineVec adj (indivOne χ v)).col)),
+       pc + (kept.map (fun _ => CostModel.WarmRefine.warmRefineCost n)).sum)
+
+/-- The shared table reproduces the probe bill exactly — `cellData` is a `map` over the same
+`nsColours χ`, and each summand is the `selProbeCostC` summand definitionally. -/
+theorem cellData_probeCost (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) :
+    ((cellData S adj χ).map (fun d =>
+      d.2.2.2 + d.2.1.length * (n * n)
+        + ((cellList χ d.1).map (keyCost key adj χ)).sum + n * n
+        + (cellList χ d.1).length * (d.2.2.1.length * (n * n) + n * n))).sum
+      = selProbeCostC key S adj χ := by
+  unfold cellData selProbeCostC
+  rw [List.map_map]
+  rfl
+
+/-- **★★★ THE RUNNABLE RESOLVER *IS* THE REASONED-ABOUT ONE.** ⚠ A theorem, not `rfl` — see §6's
+note. Rewriting with it carries `selNodeC_canonizer`, `descentCostS_selNodeC_le`,
+`answersSC_of_handledSC` and `not_handledSC_if_flagSC` onto the runnable object verbatim. -/
+theorem selNodeFastC_eq (key : Key n) (S : CellSupply n) :
+    selNodeFastC key S = selNodeC (Refine.encodeFreeFast (n := n)) key S := by
+  funext adj χ
+  show (match selColourT key (cellData S adj χ) adj χ with
+        | none => ([], _)
+        | some c => _) = _
+  rw [selColourT_cellData key S adj χ]
+  unfold selNodeC
+  cases hsel : selColourC key S adj χ with
+  | none => simpa using cellData_probeCost key S adj χ
+  | some c =>
+      have hver : verOf (cellData S adj χ) c = verified (S c) adj χ :=
+        verOf_cellData ((mem_nsColours_iff χ c).mpr (selColourC_spec hsel).1)
+      have hkept : cellNarrowV key (verOf (cellData S adj χ) c) adj χ c
+          = cellNarrowC key S adj χ c := by rw [hver]; rfl
+      simp only [hkept, cellData_probeCost key S adj χ]
+      rfl
+
+/-- **The runnable top-level object** (root colouring materialised once too). -/
+def canonFormFastSC? (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) :
+    Option (CanonSpec.Labelled n) :=
+  (descendS (selNodeFastC key S) adj n ((Refine.warmRefineVec adj (fun _ => 0)).col)).1
+
+theorem canonFormFastSC?_eq (key : Key n) (S : CellSupply n) :
+    canonFormFastSC? key S
+      = canonFormS? (Refine.encodeFreeFast (n := n))
+          (selNodeC (Refine.encodeFreeFast (n := n)) key S) := by
+  funext adj
+  unfold canonFormFastSC?
+  rw [selNodeFastC_eq]
+  rfl
+
+/-- …and its cost, likewise. -/
+theorem descentCostSC_fast_eq (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) :
+    descentCostS (Refine.encodeFreeFast (n := n)) (selNodeFastC key S) adj
+      = descentCostS (Refine.encodeFreeFast (n := n))
+          (selNodeC (Refine.encodeFreeFast (n := n)) key S) adj := by
+  rw [selNodeFastC_eq]
+
 end Select
 end ChainDescent
