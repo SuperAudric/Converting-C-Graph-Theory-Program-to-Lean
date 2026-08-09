@@ -1142,31 +1142,145 @@ private theorem length_le_one_of_nodup_const {α : Type} {l : List α} {a : α} 
         exact List.mem_cons.mpr (Or.inl (hx.trans hy.symm)))
         (List.nodup_cons.mp hnd).1
 
-/-- **★★ ONE CELL BEING A SINGLE ORBIT OF ITS OWN GENERATORS MAKES THAT CELL FIRE** — at **any**
-cell, with no hypothesis on the key and no reference to `targetColour`. `Consume.rep_eq_of_wordReach`
-carries no hypothesis on the supply either, so this holds for every `S`. -/
-theorem cellNarrowC_length_le_one_of_cellOrbitAt {key : Key n} {S : CellSupply n}
-    {adj : AdjMatrix n} {χ : Colouring n} {c : Nat} (h : CellOrbitAt S adj χ c) :
+/-! ### 9a. ★★★ THE DISJUNCTIVE FORM — the condition is on the KEY'S SURVIVORS, not on the cell
+
+`CellOrbitAt` asks the **whole cell** to be one orbit. That is a *consume-only* hypothesis, and on a
+**rigid** cell it is not merely hard but **unsatisfiable** (`Deepen.CellSingleOrbit` quantifies over
+the true `IsColAut`), so no socket stated at it can ever express what the architecture actually does:
+
+> **consume** clears cells that *are* orbits; **force** *splits mixed-orbit cells* so that such a
+> node is reached (`Force.forceBy_no_narrowing_on_orbit`, `Descend.narrow_eq_branches_of_orbit` —
+> complementary, non-overlapping firing domains).
+
+★ But `cellNarrowC` maps `rep` over `keepMin key …`, **not** over `cellList χ c`. So the length bound
+only ever needed the **survivors** to be one orbit — and the original proof already only applied its
+hypothesis there. Weakening the quantifier is therefore the *same proof*, and it admits three routes
+where there was one:
+
+* **consume** — the whole cell is one orbit (`cellResolvedAt_of_cellOrbitAt`); nothing regresses;
+* **force** — the key is injective on the cell, so there is one survivor and nothing left to certify
+  (`cellResolvedAt_of_cellSeparatedAt`). **No supply appears**, which is the only way a *rigid* cell
+  can ever be reached;
+* **mixed** — the key cuts *between* orbits and the supply certifies the survivor. This is the case a
+  CFI gadget cell needs, and it is unreachable from either hypothesis alone. -/
+
+/-- **The per-cell condition, relative to the key's survivors.** -/
+def CellResolvedAt (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) :
+    Prop :=
+  ∀ u ∈ keepMin key adj χ (cellList χ c), ∀ w ∈ keepMin key adj χ (cellList χ c),
+    WordReach (verified (S c) adj χ) u w
+
+/-- **★★ THE SURVIVORS BEING ONE ORBIT MAKES THE CELL FIRE** — at **any** cell, with no reference to
+`targetColour`. `Consume.rep_eq_of_wordReach` carries no hypothesis on the supply, so this holds for
+every `S`. -/
+theorem cellNarrowC_length_le_one_of_cellResolvedAt {key : Key n} {S : CellSupply n}
+    {adj : AdjMatrix n} {χ : Colouring n} {c : Nat} (h : CellResolvedAt key S adj χ c) :
     (cellNarrowC key S adj χ c).length ≤ 1 := by
   rcases hk : keepMin key adj χ (cellList χ c) with _ | ⟨b, t⟩
   · show (((keepMin key adj χ (cellList χ c)).map _).dedup).length ≤ 1
     rw [hk]; simp
-  · have hbc : b ∈ cellList χ c := keepMin_subset (by rw [hk]; exact List.mem_cons_self)
+  · have hb : b ∈ keepMin key adj χ (cellList χ c) := by rw [hk]; exact List.mem_cons_self
     refine length_le_one_of_nodup_const (a := rep (verified (S c) adj χ) b)
       (List.nodup_dedup _) ?_
     intro x hx
     obtain ⟨y, hy, rfl⟩ := List.mem_map.mp (List.mem_dedup.mp hx)
-    exact Consume.rep_eq_of_wordReach (h y (keepMin_subset hy) b hbc)
+    exact Consume.rep_eq_of_wordReach (h y hy b hb)
+
+/-- **Route 1 — consume.** The whole cell being one orbit is the special case. -/
+theorem cellResolvedAt_of_cellOrbitAt {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} {c : Nat} (h : CellOrbitAt S adj χ c) : CellResolvedAt key S adj χ c :=
+  fun u hu w hw => h u (keepMin_subset hu) w (keepMin_subset hw)
+
+/-- **★★ ONE CELL BEING A SINGLE ORBIT OF ITS OWN GENERATORS MAKES THAT CELL FIRE** — the original
+statement, now a corollary of the key-relative one. -/
+theorem cellNarrowC_length_le_one_of_cellOrbitAt {key : Key n} {S : CellSupply n}
+    {adj : AdjMatrix n} {χ : Colouring n} {c : Nat} (h : CellOrbitAt S adj χ c) :
+    (cellNarrowC key S adj χ c).length ≤ 1 :=
+  cellNarrowC_length_le_one_of_cellResolvedAt (cellResolvedAt_of_cellOrbitAt h)
+
+/-- Elements of a list of length `≤ 1` are all equal. -/
+private theorem eq_of_mem_of_length_le_one {α : Type} {l : List α} (h : l.length ≤ 1) {a b : α}
+    (ha : a ∈ l) (hb : b ∈ l) : a = b := by
+  cases l with
+  | nil => simp at ha
+  | cons x t =>
+    cases t with
+    | nil => rw [List.mem_singleton] at ha hb; rw [ha, hb]
+    | cons y s => simp only [List.length_cons] at h; omega
+
+/-- **Route 2 — force, in its raw form.** At most one survivor ⟹ nothing to certify. **The supply is
+unconstrained**, so this is the branch that can reach a cell with no symmetry at all. -/
+theorem cellResolvedAt_of_keepMin_le_one {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} {c : Nat} (h : (keepMin key adj χ (cellList χ c)).length ≤ 1) :
+    CellResolvedAt key S adj χ c := by
+  intro u hu w hw
+  rw [eq_of_mem_of_length_le_one h hu hw]
+  exact Consume.WordReach.refl w
+
+/-- **The force route's hypothesis**: the key is injective on the cell — the per-cell analogue of
+`Force.forceBy_singleton_of_separating`'s hypothesis (which is stated at `branches χ`), and of
+`KeyComplete.KeySeparatesAt` with the automorphism escape removed. -/
+def CellSeparatedAt (key : Key n) (adj : AdjMatrix n) (χ : Colouring n) (c : Nat) : Prop :=
+  ∀ u ∈ cellList χ c, ∀ w ∈ cellList χ c,
+    Force.keyV key adj χ u = Force.keyV key adj χ w → u = w
+
+private theorem keepMin_nodup {key : Key n} {adj : AdjMatrix n} {χ : Colouring n}
+    {B : List (Fin n)} (hB : B.Nodup) : (keepMin key adj χ B).Nodup := by
+  cases hk : Force.kmin? (B.map (Force.keyV key adj χ)) with
+  | none => rw [Force.keepMin_none hk]; exact hB
+  | some m => rw [Force.keepMin_some hk]; exact hB.filter _
+
+/-- A separating key leaves at most one survivor: every survivor attains the same (minimal) key
+value, and injectivity turns that into equality. -/
+theorem keepMin_length_le_one_of_cellSeparatedAt {key : Key n} {adj : AdjMatrix n}
+    {χ : Colouring n} {c : Nat} (h : CellSeparatedAt key adj χ c) :
+    (keepMin key adj χ (cellList χ c)).length ≤ 1 := by
+  rcases hk : keepMin key adj χ (cellList χ c) with _ | ⟨b, t⟩
+  · simp
+  · refine length_le_one_of_nodup_const (a := b) (hk ▸ keepMin_nodup (cellList_nodup χ c)) ?_
+    intro x hx
+    have hxk : x ∈ keepMin key adj χ (cellList χ c) := by rw [hk]; exact hx
+    have hbk : b ∈ keepMin key adj χ (cellList χ c) := by rw [hk]; exact List.mem_cons_self
+    have hx' := (Force.mem_keepMin_iff x).mp hxk
+    have hb' := (Force.mem_keepMin_iff b).mp hbk
+    exact h x hx'.1 b hb'.1
+      (Descend.lexLeList_antisymm _ _ (hx'.2 b hb'.1) (hb'.2 x hx'.1))
+
+/-- **Route 2 — force.** A key that separates the cell resolves it, with no supply. -/
+theorem cellResolvedAt_of_cellSeparatedAt {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} {c : Nat} (h : CellSeparatedAt key adj χ c) : CellResolvedAt key S adj χ c :=
+  cellResolvedAt_of_keepMin_le_one (keepMin_length_le_one_of_cellSeparatedAt h)
 
 /-- **The socket's hypothesis at one node**: some non-singleton cell is a single orbit of the
-generators anchored in it. -/
+generators anchored in it. ⚠ **Consume-only** — `SomeCellResolved` is the disjunctive form. -/
 def SomeCellOrbit (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
   ∃ c ∈ nonSingletonColours χ, CellOrbitAt S adj χ c
 
-theorem nodeResolvedC_of_someCellOrbit {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
-    {χ : Colouring n} (h : SomeCellOrbit S adj χ) : NodeResolvedC key S adj χ := by
+/-- **★★★ THE DISJUNCTIVE SOCKET'S HYPOTHESIS AT ONE NODE.** Some non-singleton cell has its key
+survivors inside one orbit of the generators anchored in it — reachable by consume, by force, or by
+the two together. -/
+def SomeCellResolved (key : Key n) (S : CellSupply n) (adj : AdjMatrix n) (χ : Colouring n) : Prop :=
+  ∃ c ∈ nonSingletonColours χ, CellResolvedAt key S adj χ c
+
+theorem nodeResolvedC_of_someCellResolved {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} (h : SomeCellResolved key S adj χ) : NodeResolvedC key S adj χ := by
+  obtain ⟨c, hc, hres⟩ := h
+  exact ⟨c, hc, cellNarrowC_length_le_one_of_cellResolvedAt hres⟩
+
+theorem someCellResolved_of_someCellOrbit {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} (h : SomeCellOrbit S adj χ) : SomeCellResolved key S adj χ := by
   obtain ⟨c, hc, horb⟩ := h
-  exact ⟨c, hc, cellNarrowC_length_le_one_of_cellOrbitAt horb⟩
+  exact ⟨c, hc, cellResolvedAt_of_cellOrbitAt horb⟩
+
+/-- **The force-only instance** — some non-singleton cell is separated by the key. No supply. -/
+theorem someCellResolved_of_cellSeparatedAt {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} {c : Nat} (hc : c ∈ nonSingletonColours χ)
+    (h : CellSeparatedAt key adj χ c) : SomeCellResolved key S adj χ :=
+  ⟨c, hc, cellResolvedAt_of_cellSeparatedAt h⟩
+
+theorem nodeResolvedC_of_someCellOrbit {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} (h : SomeCellOrbit S adj χ) : NodeResolvedC key S adj χ :=
+  nodeResolvedC_of_someCellResolved (someCellResolved_of_someCellOrbit (key := key) h)
 
 /-- **★★★ THE SOCKET.** *One resolvable cell at every reached non-discrete node ⟹ `HandledSC`* —
 hence (with `answersSC_of_handledSC`) the object never flags, and (contrapositive) the flag names a
@@ -1180,6 +1294,18 @@ theorem handledSC_of_someCellOrbit {key : Key n} {S : CellSupply n} {adj : AdjMa
       SomeCellOrbit S adj χ) :
     HandledSC key S adj :=
   fun χ hr hd => nodeResolvedC_of_someCellOrbit (h χ hr hd)
+
+/-- **★★★ THE DISJUNCTIVE SOCKET.** The same statement at `SomeCellResolved`, which is strictly
+weaker: it is satisfiable on a **rigid** node (where `SomeCellOrbit` is not), and it is the form a
+force-splits-then-consume-clears argument lands in.
+
+▶ **This is the socket a CFI *layer* theorem must be stated against.** `handledSC_of_someCellOrbit`
+is its consume-only specialisation and keeps every existing population unchanged. -/
+theorem handledSC_of_someCellResolved {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    (h : ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ → ¬ Discrete χ →
+      SomeCellResolved key S adj χ) :
+    HandledSC key S adj :=
+  fun χ hr hd => nodeResolvedC_of_someCellResolved (h χ hr hd)
 
 /-- The target cell is the special case the `Tinhofer` population uses: `Descend.branches χ` **is**
 `cellList χ c` there (`branches_eq_cellList`), so `Consume.CellIsOrbit` at the cell's own supply is

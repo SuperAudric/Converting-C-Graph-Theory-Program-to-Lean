@@ -425,7 +425,46 @@ bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implicati
 >
 > ### ▶ WHAT TO DO, IN ORDER
 >
-> **(i) Make the socket disjunctive — required to even STATE the target.** `Select.CellOrbitAt`
+> ### ✅ (i) IS LANDED — 2026-08-08, `SelectCell` §9a + `RecordDeepenCell` §3b
+>
+> Gate **exit 0 / 237 s**; 15 new declarations, all `[propext, Classical.choice, Quot.sound]`;
+> `Publication.lean` untouched and still zero `sorry` / zero custom axioms. Built first try.
+>
+> | | what |
+> |---|---|
+> | `Select.CellResolvedAt` | the condition on the key's **survivors** (`keepMin key adj χ (cellList χ c)`), not on the cell |
+> | **`cellNarrowC_length_le_one_of_cellResolvedAt`** | the firing lemma — the *original proof verbatim*, weaker hypothesis |
+> | `cellResolvedAt_of_cellOrbitAt` → `cellNarrowC_length_le_one_of_cellOrbitAt` | **route 1, consume**; the old theorem is now a corollary ⟹ **nothing regressed** |
+> | `CellSeparatedAt` · `keepMin_length_le_one_of_cellSeparatedAt` · `cellResolvedAt_of_cellSeparatedAt` | **route 2, force** — a key injective on the cell resolves it with **no supply**; the only route that can reach a cell carrying no symmetry |
+> | `cellResolvedAt_of_keepMin_le_one` | route 2's raw form (`\|keepMin\| ≤ 1`) |
+> | **`SomeCellResolved`** · **`handledSC_of_someCellResolved`** | ★ the disjunctive socket |
+> | **`RecordDeepenCell.handledSC_of_resolvedCells`** · **`not_all_resolved_of_flag`** | it and its `③` at the **published** object |
+> | `someCellResolved_of_resolvableCellAt` · `someCellResolved_of_cellSeparated` | the containment, and the force half's entry point |
+>
+> ★ **The MIXED case is now expressible for the first time** — key cuts between orbits, supply
+> certifies the survivor. It was unreachable from either hypothesis alone, and it is the case a CFI
+> gadget cell needs. ⚠ `keepMin_length_le_one_of_cellSeparatedAt` needed only
+> `Force.mem_keepMin_iff` + `Descend.lexLeList_antisymm` + `cellList_nodup` — no new import.
+>
+> ### ⚠ WHAT IS MEASURED ABOUT CFI + FORCE — read before assuming force already covers CFI
+>
+> * The CFI **gauge** is consumed by the **twist/gauge harvest** — `kernelSupply` in Lean (`mp7`'s
+>   whole gauge in one call, `PerformanceTest` §13) and the **linear oracle** in C# (validated through
+>   `CFI(K7)`). That is **consume**, not force.
+> * **Force's only measured firing witness in the Lean object is `G8`** (`Regression` §18: root cell
+>   8 → 2; §19: flag → answer) — a cubic non-VT graph, **not CFI**.
+> * The consume guard is open on **26/28 depth-1 CFI cells** and **shut on both root cells**. So the
+>   CFI *residue* is consume's and largely works; the *root's mixed-cell split* is force's and is the
+>   unbuilt half.
+> * ⚠⚠ **There is NO end-to-end measurement of the Lean object on any CFI graph** — `n = 56` is far
+>   outside `#eval` reach (`K₁,₂,₃` at `n = 6` costs 50 s; `t3` at `n = 15` cost 412 s interpreted).
+>   Every CFI number on record is component-level or from the C# canonizer.
+> * ⚠ **CFI graphs are never rigid**: the cycle-space twists are automorphisms, so
+>   `Aut ⊇ Z₂^β`, `β = |E| − |V| + 1 ≥ 1` for any base with a cycle. There is no "rigid CFI" to
+>   contrast with — the rigid case is the **multipede**, where the linear oracle's own record says it
+>   **flags** (`dim ker = 0`, no twist to construct).
+>
+> **(i) ✅ DONE — Make the socket disjunctive.** `Select.CellOrbitAt`
 > demands the **whole cell** be one orbit, so `SomeCellOrbit`/`ResolvableCellAt` are **consume-only**
 > and structurally cannot express *"force splits, consume clears"*. ★ But the proof of
 > `cellNarrowC_length_le_one_of_cellOrbitAt` only ever applies its hypothesis to **`keepMin`
@@ -1005,7 +1044,8 @@ supersedes items 0–1 here.
 | **the cell-anchored harvest** | `DeepenCell.lean` | `deepenGensOn` · **`GoodCell`** (decidable, *unconditionally* invariant) · §7a **`goodCellCost_bounds_guard`** — the guard is billed, not declared |
 | **★ THE PUBLISHED OBJECT** | `RecordDeepenCell.lean` | **`recordDeepenCell_full_fast` = `①` ∧ `②` ∧ `③` at one runnable object.** `W-d′` rides `Kernel.sameOrbits_recordSupply`; `③` rides `goodCell_of_tinhofer` |
 | **`W-j` — the shared key + hoisted factor** | `SelectCell` §8 + `RecordDeepenCell` §5 | `keyTable`/`keepMinT` · `SplitSupply` · **`probeWalkH`** + **`probeWalkH_eq`** (an equation in BOTH components ⟹ no numeral moves) · `selNodeLazyHC` · `costFast_eq`. 1.33×/1.48× measured |
-| **`W2` stage 1 — the socket** | `SelectCell` §9 | `CellOrbitAt` · `cellNarrowC_length_le_one_of_cellOrbitAt` · `SomeCellOrbit` · **`handledSC_of_someCellOrbit`** — *one* resolvable cell per node suffices, at **any** cell, no `targetColour`. **Widening the handled region = supplying a wider hypothesis here** |
+| **`W2` stage 1 — the socket** | `SelectCell` §9 | `CellOrbitAt` · `cellNarrowC_length_le_one_of_cellOrbitAt` · `SomeCellOrbit` · **`handledSC_of_someCellOrbit`** — *one* resolvable cell per node suffices, at **any** cell, no `targetColour`. ⚠ **consume-only**; superseded as the W2 socket by §9a |
+| **`W2` stage 1b — the DISJUNCTIVE socket** | `SelectCell` §9a + `RecordDeepenCell` §3b | **`CellResolvedAt`** (the condition on the key's *survivors*) · **`cellNarrowC_length_le_one_of_cellResolvedAt`** · route 1 `cellResolvedAt_of_cellOrbitAt` (consume) · route 2 **`CellSeparatedAt`**/`keepMin_length_le_one_of_cellSeparatedAt`/`cellResolvedAt_of_cellSeparatedAt` (force, **no supply**) · **`SomeCellResolved`**/**`handledSC_of_someCellResolved`** · at the published object **`handledSC_of_resolvedCells`**/**`not_all_resolved_of_flag`**. ★ The **mixed** case (key cuts between orbits, supply certifies the survivor) is expressible for the first time |
 | **`W2` stage 2 — the obligation** | `DeepenCell` §9 + `RecordDeepenCell` §3a | `Deepen.cellOrbitAt_deepenCellSupply` (`GoodCell` ∧ `CellSingleOrbit` at one cell ⟹ it fires) · **`ResolvableCellAt`** · `handledSC_of_resolvableCells` · **`not_all_resolvable_of_flag`** (a narrower `③`, **not yet wired into `Publication`**) · `resolvableCellAt_of_tinhoferGraph` (so `TinhoferGraph ⊆ resolvable-everywhere` is machine-checked) |
 
 ### ⚠ EIGHT OBJECTS — do not mix them up when writing

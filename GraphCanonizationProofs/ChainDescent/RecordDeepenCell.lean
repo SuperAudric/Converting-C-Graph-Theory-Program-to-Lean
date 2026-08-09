@@ -195,6 +195,50 @@ theorem not_all_resolvable_of_flag {adj : AdjMatrix n} {key : Force.Key n}
         ¬ Discrete χ → ResolvableCellAt adj χ) :=
   fun h => Select.not_handledSC_if_flagSC hflag (handledSC_of_resolvableCells h key)
 
+/-! ### 3b. `W2` STAGE 1b — THE **DISJUNCTIVE** OBLIGATION AT THE PUBLISHED OBJECT
+
+`ResolvableCellAt` is the **consume-only** half: `Deepen.CellSingleOrbit` quantifies over the true
+`IsColAut`, so on a **rigid** node it is not merely hard but *unsatisfiable*, and a socket stated at
+it cannot express what the architecture does — *force splits mixed-orbit cells so that a
+cells-are-orbits node is reached, and consume clears those*.
+
+`Select.SomeCellResolved` (`SelectCell` §9a) is the disjunctive form: the key's **survivors** in some
+cell lie in one orbit of that cell's generators. It is reached by consume (`CellOrbitAt`), by force
+(`CellSeparatedAt` — no supply at all), or by the two together, which is the case a CFI gadget cell
+needs. ▶ **A CFI *layer* theorem must be stated against this, not against `ResolvableCellAt`.** -/
+
+/-- **★★★ THE DISJUNCTIVE SOCKET AT THE PUBLISHED OBJECT.** -/
+theorem handledSC_of_resolvedCells {adj : AdjMatrix n} {key : Force.Key n}
+    (h : ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ →
+      ¬ Discrete χ → Select.SomeCellResolved key (recordSupplyDeepenC (n := n)) adj χ) :
+    Select.HandledSC key (recordSupplyDeepenC (n := n)) adj :=
+  Select.handledSC_of_someCellResolved h
+
+/-- …and its `③`. Strictly narrower than `not_all_resolvable_of_flag`, because the class of graphs
+satisfying the hypothesis is strictly larger (it includes rigid cells the key separates). -/
+theorem not_all_resolved_of_flag {adj : AdjMatrix n} {key : Force.Key n}
+    (hflag : Select.canonFormS? (Refine.encodeFreeFast (n := n))
+      (Select.selNodeC (Refine.encodeFreeFast (n := n)) key (recordSupplyDeepenC (n := n))) adj
+        = none) :
+    ¬ (∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ →
+        ¬ Discrete χ → Select.SomeCellResolved key (recordSupplyDeepenC (n := n)) adj χ) :=
+  fun h => Select.not_handledSC_if_flagSC hflag (handledSC_of_resolvedCells h)
+
+/-- Nothing regresses: the consume-only obligation implies the disjunctive one. -/
+theorem someCellResolved_of_resolvableCellAt {adj : AdjMatrix n} {key : Force.Key n}
+    {χ : Colouring n} (h : ResolvableCellAt adj χ) :
+    Select.SomeCellResolved key (recordSupplyDeepenC (n := n)) adj χ :=
+  Select.someCellResolved_of_someCellOrbit (someCellOrbit_of_resolvableCellAt h)
+
+/-- **The per-cell entry point W2's force half will use**: the key separating *one* non-singleton
+cell resolves the node, with **no** condition on the supply — the only route that can reach a cell
+carrying no symmetry at all. -/
+theorem someCellResolved_of_cellSeparated {adj : AdjMatrix n} {key : Force.Key n}
+    {χ : Colouring n} {c : Nat} (hc : c ∈ Descend.nonSingletonColours χ)
+    (h : Select.CellSeparatedAt key adj χ c) :
+    Select.SomeCellResolved key (recordSupplyDeepenC (n := n)) adj χ :=
+  Select.someCellResolved_of_cellSeparatedAt hc h
+
 /-- **The `Tinhofer` class is an instance** — it takes `c` to be the target colour and gets both
 conjuncts from its two node-global hypotheses. So nothing regresses, and the containment
 `TinhoferGraph ⊆ {resolvable at every reached node}` is machine-checked rather than asserted. -/
