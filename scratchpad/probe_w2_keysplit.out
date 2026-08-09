@@ -1,0 +1,85 @@
+W2 STEP (ii) — does the KEY isolate a single Aut-orbit block at the CFI root?
+  the cell fires  ⟹  keepMin is exactly ONE Aut-block  ∧  the harvest is transitive on it
+  (keepMin is a union of Aut-orbits because the key is equivariant; `rep` never merges
+   across Aut-orbits because every harvested generator is a verified automorphism)
+  `recordKey`'s argmin ⊆ `holKeyFast`'s argmin (`RecordKey.keepMin_pairKey_subset`).
+  ROOT node only.  Aut gens: Ctx/canon, leafcap 200000 (sound, maybe incomplete).
+
+=== VALIDATION against shipped Lean `#guard`s (Regression §18) ===
+  G8 cubic non-VT  (n=8)
+     root: 1 colour(s), sameComps=1, crossComps=8, allSigsTrivial=False
+  ⟹ walks exist; the signature machinery is genuinely exercised
+     cell 0 (TARGET): |cell|=8   Aut-blocks=3 sizes=[4, 2, 2]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (8) over 3 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone   [VALIDATION vs Lean #guard: keeps 8, expected 8 — PASS]
+
+=== THE QUESTION: CFI over a cubic base ===
+  CFI cubic m=8 pl  (n=56)
+     root: 2 colour(s), sameComps=56, crossComps=1, allSigsTrivial=True
+  ⟹ NO VALID WALK EXISTS: `walkOk` needs THREE pairwise-distinct cross-components, so every holSig is the all-1s vector and holKeyFast is STRUCTURALLY INERT here
+     cell 0 (TARGET): |cell|=32  Aut-blocks=3 sizes=[12, 12, 8]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (32) over 3 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 1: |cell|=24  Aut-blocks=3 sizes=[12, 6, 6]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (24) over 3 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+
+  CFI cubic m=8 tw  (n=56)
+     root: 2 colour(s), sameComps=56, crossComps=1, allSigsTrivial=True
+  ⟹ NO VALID WALK EXISTS: `walkOk` needs THREE pairwise-distinct cross-components, so every holSig is the all-1s vector and holKeyFast is STRUCTURALLY INERT here
+     cell 0 (TARGET): |cell|=32  Aut-blocks=3 sizes=[12, 12, 8]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (32) over 3 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 1: |cell|=24  Aut-blocks=3 sizes=[12, 6, 6]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (24) over 3 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+
+=== CONTROLS ===
+  mp7 Fano multipede  (n=42)
+     root: 2 colour(s), sameComps=42, crossComps=1, allSigsTrivial=True
+  ⟹ NO VALID WALK EXISTS: `walkOk` needs THREE pairwise-distinct cross-components, so every holSig is the all-1s vector and holKeyFast is STRUCTURALLY INERT here
+     cell 0 (TARGET): |cell|=28  Aut-blocks=1 sizes=[28]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (28) over 1 block(s)
+        ⟹ cell is ONE block
+     cell 1: |cell|=14  Aut-blocks=1 sizes=[14]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (14) over 1 block(s)
+        ⟹ cell is ONE block
+
+  MIXED multipede  (n=30)
+     root: 8 colour(s), sameComps=30, crossComps=1, allSigsTrivial=True
+  ⟹ NO VALID WALK EXISTS: `walkOk` needs THREE pairwise-distinct cross-components, so every holSig is the all-1s vector and holKeyFast is STRUCTURALLY INERT here
+     cell 0 (TARGET): |cell|=4   Aut-blocks=2 sizes=[2, 2]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (4) over 2 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 1: |cell|=2   Aut-blocks=2 sizes=[1, 1]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (2) over 2 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 2: |cell|=2   Aut-blocks=1 sizes=[2]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (2) over 1 block(s)
+        ⟹ cell is ONE block
+     cell 3: |cell|=4   Aut-blocks=2 sizes=[2, 2]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (4) over 2 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 4: |cell|=2   Aut-blocks=2 sizes=[1, 1]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (2) over 2 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 5: |cell|=8   Aut-blocks=3 sizes=[4, 2, 2]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (8) over 3 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 6: |cell|=4   Aut-blocks=2 sizes=[2, 2]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (4) over 2 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 7: |cell|=4   Aut-blocks=1 sizes=[4]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (4) over 1 block(s)
+        ⟹ cell is ONE block
+
+  circ(5) multipede  (n=30)
+     root: 2 colour(s), sameComps=30, crossComps=1, allSigsTrivial=True
+  ⟹ NO VALID WALK EXISTS: `walkOk` needs THREE pairwise-distinct cross-components, so every holSig is the all-1s vector and holKeyFast is STRUCTURALLY INERT here
+     cell 0 (TARGET): |cell|=20  Aut-blocks=3 sizes=[10, 5, 5]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (20) over 3 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+     cell 1: |cell|=10  Aut-blocks=2 sizes=[5, 5]
+        holKeyFast: 1 distinct sig(s); argmin = WHOLE CELL (10) over 2 block(s)
+        ⟹ CANNOT FIRE on holKeyFast alone
+

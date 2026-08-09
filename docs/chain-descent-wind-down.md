@@ -478,7 +478,64 @@ bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implicati
 > ceiling theorem (*an equivariant key is constant on orbits* ⟹ `keepMin` is a **union of true
 > orbits**). ~10 lines, CFI-free, no numeral moves.
 >
-> **(ii) Then measure whether today's key already splits a CFI gadget cell.** At the CFI-over-cubic
+> ### ◐ (ii) RAN — `scratchpad/probe_w2_keysplit.py` → `.out` (2026-08-09). ONE HALF SETTLED
+>
+> **The firing condition, pinned by two facts about the built object.** A cell fires iff
+> `((keepMin key …).map (rep V)).dedup` has length ≤ 1, and
+> * **(F1)** the key is equivariant ⟹ `keyV` is **constant on Aut-orbits** (`Force.lean` §"THE
+>   CEILING") ⟹ `keepMin` is a **union of Aut-orbits**;
+> * **(F2)** every harvested generator is `IsColAut`-checked ⟹ `H = ⟨V⟩ ≤ Aut` ⟹ `rep V` **never
+>   merges across Aut-orbits**.
+>
+> ⟹ **the cell fires ⟹ `keepMin` is EXACTLY ONE Aut-orbit block, and the harvest is transitive on
+> it.** The probe measures the first conjunct — the key's half, no supply model needed.
+>
+> | witness | root cells | Aut-blocks (sizes) | `holKeyFast` |
+> |---|---|---|---|
+> | **CFI cubic m=8 pl / tw** (n=56) | 32, 24 | **3** each — `[12,12,8]` and `[12,6,6]` | **1 signature — argmin = the WHOLE cell** |
+> | `mp7` (n=42) | 28, 14 | **1** each | 1 signature (cell is one block — consume's case) |
+> | MIXED (n=30) | 4,2,2,4,2,8,4,4 | 2,2,1,2,2,3,2,1 | 1 signature throughout |
+> | `G8` (n=8) — **validation** | 8 | 3 — `[4,2,2]` | 1 signature, **keeps 8** |
+>
+> ★★ **VALIDATED AGAINST SHIPPED LEAN.** `Regression` §18's `#guard` pins `holKeyFast` keeping **all
+> 8** of `G8`'s root cell; the model reproduces 8. And the model's built-in self-check — (F1), the key
+> must be constant on every Aut-block — **never fired** on any witness.
+>
+> ### ★★★ AND THE REASON IS STRUCTURAL, NOT INCIDENTAL
+>
+> `holKeyFast`'s walk is over **cross-cell components** ("copies"), and `walkOk` demands **three
+> pairwise-distinct** ones. Measured at the root:
+>
+> | | colours | cross-components | ⟹ |
+> |---|---|---|---|
+> | CFI cubic m=8 · `mp7` · MIXED | 2 · 2 · 8 | **1** | **no valid walk exists** ⟹ every `holSig` is the all-1s vector ⟹ **`holKeyFast` is STRUCTURALLY INERT** |
+> | `G8` | 1 | 8 (singletons) | walks exist, signatures non-trivial — so the machinery *is* exercised, and still keeps all 8 |
+>
+> ⟹ **at any node whose cross-cell graph is connected, `holKeyFast` cannot be anything but constant.**
+> That is a statement about a shipped component, and it means **the CFI root rests entirely on the
+> `orbKeyG guardSupply` tiebreak** — `holKeyFast` contributes nothing there.
+>
+> ### ▶ WHAT REMAINS, AND IT IS NOW ONE BOOLEAN
+>
+> `RecordKey.keyV_pairKey_of_guard_shut`: where `orbKeyG`'s guard is shut the second component is the
+> constant `[]` and `recordKey` **is** `holKeyFast` verbatim. So:
+>
+> > **if `CertPath guardSupply` is shut at every vertex of both CFI root cells, then `recordKey` is
+> > constant there ⟹ `keepMin` = the whole cell = 3 Aut-blocks ⟹ by (F2) no supply can collapse it
+> > ⟹ neither cell fires ⟹ the node stalls ⟹ *the published object provably flags on CFI over a
+> > cubic base*.**
+>
+> That is a theorem-shaped negative and it needs exactly one measurement: the guard's verdict.
+> ⚠ **Cost, honestly:** `guardSupply = fold ++ deck ++ deck2 ++ match`, and **no Python model of any
+> of those four exists** (the probes model only the *deepen* harvest) — so it is four supply models,
+> not an adaptation. The Lean route is blocked differently: `CFI.cfiAdjMatrix` is **`noncomputable`**
+> (`Fintype.equivFin`), so `#eval`ing the shipped guard needs an `n = 56` computable fixture built
+> first, and `deck2` at that size is untested in the interpreter (the recorded 412 s was at `n = 15`).
+> ⚠ Aut-blocks come from `Ctx`/`canon` — sound but possibly incomplete, so they are a *refinement* of
+> the true orbits. That direction is the safe one here: a coarser truth only makes "argmin = the whole
+> cell over ≥ 2 blocks" easier to satisfy, never harder.
+>
+> **(ii) ORIGINAL PLAN — the supply half, still open.** At the CFI-over-cubic
 > root, report the true-orbit **block sizes** of both root cells and whether `recordSupplyFast`'s
 > verified generators are transitive on any single block. Because `keepMin` is a union of true orbits
 > and `rep` only merges within supply-orbits: **if no block is a single supply-orbit, no equivariant
@@ -1079,6 +1136,7 @@ statement (every key), rows 6–7 are `noncomputable` and **must not appear in a
 | Lean `#eval` (2026-08-04) | the **record object answers** on `C₅ C₆ P₅ K₅ 3K₂ K₁,₂,₃ K₃⊔C₄` (7/7) ⟹ no falsifier of `③` at the record object; option (ii) is open, not dead |
 | Lean `#eval` (2026-08-08) — **the published object** | `RecordDeepenCell.canonFormFast` answers on `K₂`, `C₅`, `K₁,₂,₃`; `costFast` = **1606 / 5 212 728 / 20 321 716**, wall **— / 20.8 s / 50.4 s** (after `W-j`; 34 s / 87 s before it — the *billed* values are unchanged by `W-j`). It also answers on **`K₃ ⊔ C₄`**, the residual witness, which is expected: `③` bounds what is *proved*, not what the object can do. Reproduce with a two-line file: `import ChainDescent.RecordDeepenCell` then `#eval (RecordDeepenCell.canonFormFast (n := 6) (TwinFamily.mpAdj TwinFamily.part123)).isSome` and the same at `costFast`; run `lake env lean <file>` from `GraphCanonizationProofs/`. ⚠ At the `Showcase` names instead, copy `Publication.lean` and append the `#eval`s — it is not a library module, so `import Publication` fails |
 | lazy vs eager vs node-global (2026-08-08) | `K₁,₂,₃`: lazy **20 321 716 / 87 s** · eager cell-indexed 38 212 276 / 210 s · node-global `selNodeFast` 25 346 020 / 148 s ⟹ **2.4× / 1.7× faster**, 20 % less billed than node-global. ⚠ Only 1–2 non-singleton cells exercised |
+| **`probe_w2_keysplit.py` → `probe_w2_keysplit.out` (W2 step (ii), 2026-08-09)** | ★★ **`holKeyFast` is STRUCTURALLY INERT at the CFI root**: the walk needs 3 pairwise-distinct **cross-cell components** and the CFI/mp7/MIXED roots have **1** ⟹ no valid walk ⟹ every `holSig` is all-1s ⟹ argmin = the whole cell. CFI root cells carry **3 Aut-blocks** each (`[12,12,8]`, `[12,6,6]` — **no singleton block**). ⟹ the CFI root rests **entirely** on the `orbKeyG guardSupply` tiebreak. ★ **Validated against Lean**: `Regression` §18's `#guard` (`G8` keeps 8) is reproduced, and the (F1) self-check (equivariant key constant on Aut-blocks) never fired. ⚠ Aut-blocks are a sound *refinement* of the true orbits — the safe direction here |
 | **`probe_w2_resolvable.py` → `probe_w2_resolvable.out` (W2 stage 0, 2026-08-08)** | ★ `ResolvableCellAt` at every reached node (depth 1, ≤2/node): **`mp7` 14/14 Y** · `S(K5)`/`S(Petersen)` Y · **MIXED Y but the TARGET cell shut at the root ⟹ the stage-1 widening is LOAD-BEARING** · ⛔ **CFI cubic m=8 pl/tw N at the ROOT** (both root cells guard-shut, re-verified at budget 200 000; 26/26 depth-1 cells pass) · `rand multipede V=6 W=5` 0/8, `G8` 0/1. ⚠ `GoodCell` `None` never counted as a pass; single-orbit is a **positive certificate** only (union-find over `Ctx`/`canon`'s sound gens, ⛔ never `probe_orbit_oracle`) |
 | `W-j` — key shared + left factor hoisted (2026-08-08) | `scratchpad/ProbeShareWalk*.lean` predicted it, `ProbeWjMeasure.lean` confirms it at the shipped definitions: `C₅` 27.6 s → **20.8 s** (1.33×), `K₁,₂,₃` 74.4 s → **50.4 s** (1.48×), **billed costs byte-identical** (5 212 728 / 20 321 716). ⚠ The *hoist* half only pays where several cells are probed, i.e. where early cells fail to fire; no small library witness has that shape |
 
