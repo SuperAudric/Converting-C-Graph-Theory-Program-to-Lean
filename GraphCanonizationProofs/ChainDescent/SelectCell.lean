@@ -1307,6 +1307,61 @@ theorem handledSC_of_someCellResolved {key : Key n} {S : CellSupply n} {adj : Ad
     HandledSC key S adj :=
   fun χ hr hd => nodeResolvedC_of_someCellResolved (h χ hr hd)
 
+/-! ### 9b. THE FORCE ROUTE'S ENTRY POINT — separation on `branches χ` lands in the socket
+
+The rigid stack's firing lemmas (`RigidSeal.nodeResolved_compKey_of_rigid`,
+`RigidGen.nodeResolved_compKey_genOfRef`) conclude at **`Select.NodeResolved`** — the `selNode` layer
+— and by the three-layer inheritance rule that does **not** transfer to the cell-indexed object.
+
+★ But look at what their proofs actually establish: both end in
+`Select.nodeResolved_of_cellResolved hnd (Or.inr …)`, whose right disjunct is precisely *"the key is
+injective on `branches χ`"*. And `branches χ` **is** `cellList χ c` at the target colour
+(`branches_eq_cellList`). So the rigid conclusion lands in `CellSeparatedAt` — hence in
+`SomeCellResolved` — by plumbing alone.
+
+⚠ Stated **generically**, with no rigid-stack import: this file is upstream of the published object,
+and pulling `Rigid*` into its dependency graph would change the deliverable's imports for no proof
+benefit. Instantiating these at `compKey` is a one-liner wherever the solver key is eventually
+wired. -/
+
+/-- Separation on the branch cell **is** separation on the target cell. -/
+theorem cellSeparatedAt_of_branchSeparation {key : Key n} {adj : AdjMatrix n} {χ : Colouring n}
+    {c : Nat} (htc : Descend.targetColour χ = some c)
+    (hsep : ∀ u ∈ Descend.branches χ, ∀ w ∈ Descend.branches χ,
+      Force.keyV key adj χ u = Force.keyV key adj χ w → u = w) :
+    CellSeparatedAt key adj χ c := by
+  intro u hu w hw h
+  rw [← branches_eq_cellList htc] at hu hw
+  exact hsep u hu w hw h
+
+/-- **★★★ THE FORCE ROUTE, AT THE CELL-INDEXED LAYER.** A key that separates the branch cell resolves
+the node — **with no condition on the supply**, which is what lets it reach a cell carrying no
+symmetry. The force-side analogue of `handledSC_of_someCellOrbit`'s consume-side entry. -/
+theorem someCellResolved_of_branchSeparation {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} (hnd : ¬ Discrete χ)
+    (hsep : ∀ u ∈ Descend.branches χ, ∀ w ∈ Descend.branches χ,
+      Force.keyV key adj χ u = Force.keyV key adj χ w → u = w) :
+    SomeCellResolved key S adj χ := by
+  obtain ⟨c, hc⟩ := exists_targetColour_of_not_discrete hnd
+  exact someCellResolved_of_cellSeparatedAt (Finset.mem_of_min hc)
+    (cellSeparatedAt_of_branchSeparation hc hsep)
+
+theorem nodeResolvedC_of_branchSeparation {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} (hnd : ¬ Discrete χ)
+    (hsep : ∀ u ∈ Descend.branches χ, ∀ w ∈ Descend.branches χ,
+      Force.keyV key adj χ u = Force.keyV key adj χ w → u = w) :
+    NodeResolvedC key S adj χ :=
+  nodeResolvedC_of_someCellResolved (someCellResolved_of_branchSeparation hnd hsep)
+
+/-- **The socket, force side**: a key separating the branch cell at every reached non-discrete node
+makes the cell-indexed object `HandledSC`, for **every** supply. -/
+theorem handledSC_of_branchSeparation {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    (h : ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ → ¬ Discrete χ →
+      ∀ u ∈ Descend.branches χ, ∀ w ∈ Descend.branches χ,
+        Force.keyV key adj χ u = Force.keyV key adj χ w → u = w) :
+    HandledSC key S adj :=
+  handledSC_of_someCellResolved (fun χ hr hd => someCellResolved_of_branchSeparation hd (h χ hr hd))
+
 /-- The target cell is the special case the `Tinhofer` population uses: `Descend.branches χ` **is**
 `cellList χ c` there (`branches_eq_cellList`), so `Consume.CellIsOrbit` at the cell's own supply is
 literally `CellOrbitAt` at that colour. -/

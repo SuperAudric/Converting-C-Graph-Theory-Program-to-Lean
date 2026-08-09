@@ -598,13 +598,53 @@ bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implicati
 >    `refineByFrame` has *unconditional* `RefEquivariant` and provably **cannot** discretize (≤ 2
 >    classes/cell — it fails the multipede), so equivariance alone is not the bottleneck: **one named
 >    property, one named gap.**
-> 4. **A cheap layer bridge, worth doing regardless.** `nodeResolved_compKey_genOfRef` is at
->    `selNode`, and the three-layer inheritance rule says it does **not** transfer to the published
->    object. With `CellSeparatedAt` the mirror is short — *rigid cell + separating key ⟹
->    `CellSeparatedAt` ⟹ `CellResolvedAt`* — and it is the force-side analogue of what
->    `handledSC_of_resolvedCells` did for consume.
-> 5. **The third row is mathematics, not plumbing**: showing a solve-derived key isolates one
->    Aut-block on a CFI gadget cell. Nothing existing covers it.
+> 4. ✅ **LANDED 2026-08-09 — the layer bridge** (`SelectCell` §9b, 4 decls, axiom-clean). Both rigid
+>    firing lemmas end in `Select.nodeResolved_of_cellResolved hnd (Or.inr …)`, whose right disjunct
+>    is exactly *"the key is injective on `branches χ`"*, and `branches χ` **is** `cellList χ c` at
+>    the target colour — so the rigid conclusion reaches the cell-indexed socket by plumbing alone:
+>    `cellSeparatedAt_of_branchSeparation` · **`someCellResolved_of_branchSeparation`** ·
+>    `nodeResolvedC_of_branchSeparation` · **`handledSC_of_branchSeparation`** (for **every** supply).
+>    ⚠ Stated **generically, with no rigid-stack import** — `SelectCell` is upstream of the published
+>    object and pulling `Rigid*` into its graph would change the deliverable's imports for no proof
+>    benefit. Instantiating at `compKey` is a one-liner wherever the solver key is wired.
+> 5. **The third row is mathematics, not plumbing** — but ★ **it is not uncharted**: the project
+>    already built the instrument. `structRead`'s single-`ord` path is *"whole-node-rigid = the
+>    `ker = 0` anchor, **superseded by `readAgg` for the mixed residue**"*, and
+>    `readEquivariant_readAgg` is unconditional from `FramesEquivariant`. So item 5 **is** the
+>    recorded **P3 `AggFaithful (seedFrames …)` per-family** obligation, stated at a concrete frame
+>    set. ⛔ **Do not try to instantiate `nodeResolved_compKey_genOfRef`'s `hrigid` at a CFI root** —
+>    it is *measurably false* there (gauge non-trivial ⟹ not rigid; 3 Aut-blocks per cell). P3-F₂'s
+>    **uniqueness** needs `dim ker = 0` and a CFI root has `dim ker > 0`; what stays canonical there
+>    is the **RREF of the row space**, which is what `readAgg` reads.
+>
+> ### ★ AND THE DISJUNCTION WAS NOT NEW — the cell-indexed rewrite had DROPPED it
+>
+> `Cost.CellResolved key S adj χ := Consume.CellIsOrbit S adj χ ∨ (∀ u w ∈ branches χ, keyV u = keyV w
+> → u = w)` has existed all along at the **node-global** layer, and its own header says *"a graph may
+> be handled by consume at one cell and by force at the next — that is exactly what the **mixed**
+> resolver is for."* The cell-indexed rewrite carried over only the **left** disjunct
+> (`CellOrbitAt`), which is why the socket came out consume-only.
+>
+> ⟹ §9a/§9b **restore** the disjunction at the cell-indexed layer — and go past it: `Cost.CellResolved`'s
+> two disjuncts are *"the whole cell is one orbit"* and *"the key separates the whole cell"*, and
+> **neither covers the mixed case**, where `keepMin` is a proper sub-union that the supply then
+> collapses. `CellResolvedAt` is stated on the survivors, so it covers all three. That is strictly
+> stronger than the node-global predicate, not a port of it.
+>
+> ### ▶▶ ORDERING: **4 → 3 → 5 → 2** (assessed 2026-08-09)
+>
+> * **4 first** — done; small, no dependencies, and it makes every later force-side result land at
+>   the published object instead of at `selNode`.
+> * **3 before 5** — item 5's hypothesis `AggFaithful (seedFrames …)` is stated *at a concrete frame
+>   set*, and item 3 is what produces one. `framesEquivariant_seedFrames` + `card_seedFrames_le` give
+>   equivariance ✅ and poly size ✅ already; 3 supplies **discretizing**, and only then can 5 be
+>   stated at all.
+> * **⚠ 2 LAST, not second.** Wiring the solver key changes the **published object**: `②` re-bills
+>   and **the pinned numerals move** (`costDeg` is set by `recordKeyBound`, so a new component needs
+>   its own `keyCost` bound), and `①` acquires a `KeyEquivariant` obligation that **cannot be
+>   discharged until 3 lands**. Wiring first would put an undischargeable obligation into the
+>   deliverable and move `costConst`/`costDeg` for nothing. Build the capability, then wire it once
+>   it pays.
 >
 > ⟹ **the claim is reachable in shape, and its force half bottoms out on exactly one unbuilt
 > property** (a discretizing equivariant poly frame set = Track R P2). That is the same conclusion as
