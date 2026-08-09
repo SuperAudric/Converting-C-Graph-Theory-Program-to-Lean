@@ -409,9 +409,22 @@ bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implicati
 > **3. ★★★ THE REAL BLOCKER, AND IT IS NAMED IN THE SOURCE: the record key has NO SOLVER
 > COMPONENT.** `RecordKey.recordKey = pairKey holKeyFast (orbKeyG guardSupply)`, and
 > `Deepen.guardSupply = foldSupplyFast ++ deckSupply ++ deck2Supply ++ matchSupply` — **`kernelSupply`
-> is deliberately excluded** (`DeepenGuard` §8a: it is provably not `GensEquivariant`). So all of the
-> project's F₂ machinery is on the **consume/fire** side, and the *force* half of the published object
-> contains **no linear solver at all**. [`RecordKey.lean`](../GraphCanonizationProofs/ChainDescent/RecordKey.lean#L10)'s
+> is deliberately excluded** (`DeepenGuard` §8a: it is provably not `GensEquivariant`).
+>
+> ⛔ **CORRECTION (2026-08-09) — an earlier version of this line said *"all of the project's F₂
+> machinery is on the consume side"*. That is FALSE.** There are **two independent F₂ solvers**, and
+> they solve opposite sides of the same matrix:
+>
+> | | solves for | output | runs today? |
+> |---|---|---|---|
+> | **consume-side** `Kernel*` (~1200 lines) | what **can** move — the null space `L` (`dim ker > 0`) via rails → parity patterns → Gaussian elimination, each basis vector emitted as a permutation and **verified edge-by-edge** | automorphisms | ✅ **yes** — inside `recordSupplyFast`, at every node |
+> | **force-side** `Forcing*` + `Rigid*` (~4400 lines) | what **cannot** move — P1 extracts refinement-as-unit-propagation into rows of `H`; P3-F₂ gives uniqueness when `dim ker = 0`; `RigidRREF` makes the answer canonical (RREF depends only on the subspace, so relabelling-invariance is free); `RigidGen`/`RigidRefine` turn it into a key | a canonical labelling | ❌ **gated and axiom-clean, instantiated in NOTHING** |
+>
+> ★ That is the architecture exactly: **consume solves the kernel to clear orbit cells; force solves
+> where the kernel is empty to split mixed cells.** The surviving claim is the narrow one —
+> **the *published object's force key* contains no solver** (`compKey` appears in `RecordKey.lean`
+> and `ForcePick.lean` only in **comments**, verified).
+> [`RecordKey.lean`](../GraphCanonizationProofs/ChainDescent/RecordKey.lean#L10)'s
 > own header says so verbatim: *"`Deepen.orbKeyG guardSupply` **now**, `RigidSeal.compKey`'s solver
 > key **later**"*. That "later" is `RigidRREF`/`RigidFrame`/`RigidGen`/`RigidRefine.readAgg` — built
 > and axiom-clean — whose `①` (`genEquivariant_genOfRef`) is conditioned on `RefEquivariant ref`,
@@ -545,6 +558,57 @@ bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implicati
 > no probe models `recordSupplyFast`'s harvest in Python yet.
 >
 > **(iii) Only then** decide the Track R question in 3.
+>
+> ### ▶▶▶ THE TARGET CLAIM — *"the residue will not stall if it contains a linear obstruction"*
+> *(assessed 2026-08-09 against source; this is W2's statement in its general form)*
+>
+> **✅ The predicate already exists and needs no invention.** `ForcingModel adj χ H var gForce` (P2,
+> `ForcingModel.lean`) **is** *"this node's obstruction is linear"* — the module's own header says
+> *"where it fails, the residue is **non-linear** rigid."* Carrying the bridge as a hypothesis is
+> therefore **not a gap; it is the definition of "linear"**. The claim is statable today.
+>
+> **✅ And the disjunctive socket (`CellResolvedAt`) is exactly its shape** — which retroactively
+> makes step (i) necessary rather than convenient. But the natural two-case reading (kernel vs rigid)
+> is **wrong**, and the gap is where the measured CFI root lives:
+>
+> | case | what it is | route | status |
+> |---|---|---|---|
+> | `dim ker > 0`, cell = **one** Aut-orbit | pure gauge slack | **consume** — `kernelSupply` / `deepenCellSupply` certifies it | ✅ built **and fires** (`mp7` 14/14) |
+> | `dim ker = 0` (rigid cell) | no slack | **force** — P3-F₂ uniqueness + canonical RREF ⟹ separating key | ◐ `RigidGen.nodeResolved_compKey_genOfRef` exists — but at `Select.NodeResolved`/`selNode` and at `compKey`, under `hdisc` (the reader discretizes) + `hrigid` |
+> | **`dim ker > 0`, cell = SEVERAL Aut-orbits** | gauge slack **and** non-automorphic blocks | **mixed** — key isolates one block, supply certifies it | ❌ **nothing built** |
+>
+> ⛔⛔ **THE THIRD ROW IS THE CFI-OVER-CUBIC ROOT** — measured: the gauge is non-trivial (so it is
+> *not* rigid, and `hrigid` fails) **and** each root cell carries **3 Aut-blocks** (so consume cannot
+> take it). It is in **neither** of the two clean branches. Any plan that assumes a kernel/rigid
+> dichotomy will miss exactly the node W2 is about.
+>
+> ### ▶ WHAT WOULD HAVE TO CHANGE, in order
+>
+> 1. **Nothing in the socket** — `CellResolvedAt` already admits all three rows.
+> 2. **Wire a solver key into `recordKey`.** The slot exists (`pairKey`; `keyEquivariant_pairKey` is
+>    unconditional and `keepMin_pairKey_subset` guarantees no strength loss). Two real costs: `②`
+>    re-bills and **the numerals will move** (`costDeg` is set by `recordKeyBound`, so a new key
+>    component changes it — it needs its own `keyCost` bound); and `①` needs its `KeyEquivariant`.
+> 3. ★ **That `①` gap is NARROWER than "not built".** The chain is
+>    `readEquivariant_readAgg` (unconditional given `FramesEquivariant`) → `RigidRefine.refineBy read`
+>    is `RefEquivariant` from `ReadEquivariant` alone → `RigidGen.genEquivariant_genOfRef`. And
+>    `framesEquivariant_seedFrames` + `card_seedFrames_le` are **built**. So the frame set already has
+>    **equivariance ✅ and poly size ✅**; the single missing property is that it **DISCRETIZES**
+>    (Track R P2's *"concrete poly seed + discretizing solve-completion `orderOf`"*). ⚠ Note
+>    `refineByFrame` has *unconditional* `RefEquivariant` and provably **cannot** discretize (≤ 2
+>    classes/cell — it fails the multipede), so equivariance alone is not the bottleneck: **one named
+>    property, one named gap.**
+> 4. **A cheap layer bridge, worth doing regardless.** `nodeResolved_compKey_genOfRef` is at
+>    `selNode`, and the three-layer inheritance rule says it does **not** transfer to the published
+>    object. With `CellSeparatedAt` the mirror is short — *rigid cell + separating key ⟹
+>    `CellSeparatedAt` ⟹ `CellResolvedAt`* — and it is the force-side analogue of what
+>    `handledSC_of_resolvedCells` did for consume.
+> 5. **The third row is mathematics, not plumbing**: showing a solve-derived key isolates one
+>    Aut-block on a CFI gadget cell. Nothing existing covers it.
+>
+> ⟹ **the claim is reachable in shape, and its force half bottoms out on exactly one unbuilt
+> property** (a discretizing equivariant poly frame set = Track R P2). That is the same conclusion as
+> before, now named precisely rather than as "Track R".
 >
 > ⚠ The two-part **anatomy of the CFI obstruction** to carry into any statement: the **gauge**
 > (F₂ cycle space) acts by genuine automorphisms ⟹ it is *symmetry*, consume's job, and
