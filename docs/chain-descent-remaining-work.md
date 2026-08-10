@@ -291,10 +291,15 @@ transfer). "Complete" = the flag provably never fires.
 >   (2) an equivariant order PERM exists ONLY on rigid inputs, so the single-`ord` `structRead` path (steps 6b–9C) is
 >   **whole-node-rigid = the `ker=0` anchor**, superseded by `readAgg`; (3) a poly (`<n!`) equivariant frame set needs a
 >   structural discretizing order = the LINEAR solve (WL won't discretize the multipede).
-> - **▶ NEXT (the frontier) — the POLY frame set** (`②`-cost, replaces the exponential `framesUniv`): **✅ P1** interface
->   (`seedFrames`/`framesEquivariant_seedFrames`/`card_seedFrames_le`) → **▶ P2** concrete poly seed (bounded base,
->   `|seeds| ≤ n^k`) + discretizing solve-completion `orderOf` (carried per-family = the recover core) · **P3**
->   `AggFaithful (seedFrames …)` per-family (= `ForcingModel.bridge`/L4) → **P3-ring** (`Z_{2^k}`) → **P4**.
+> - ⛔⛔⛔ **RETIRED — DO NOT FOLLOW THIS ITEM.** ~~**▶ NEXT (the frontier) — the POLY frame set**: **✅ P1**
+>   interface (`seedFrames`/`framesEquivariant_seedFrames`/`card_seedFrames_le`) → **▶ P2** concrete poly seed +
+>   discretizing solve-completion `orderOf` · **P3** `AggFaithful (seedFrames …)` per-family → **P3-ring** → **P4**.~~
+>   **A poly `FramesEquivariant` set of FULL ORDERS is TYPE-IMPOSSIBLE on a gauged input** (`RigidRefine` §9F,
+>   `chain-descent-rigid-seal.md` §8.2): at a gauge automorphism, equivariance forces closure under left-multiplication
+>   by the whole gauge group, which is a **free** action ⟹ `|frames| ≥ 2^β`. `OrderOfEquivariant` is **target-vacuous**
+>   (it holds only on purely rigid inputs). ⚠ **This item cost a fresh reader real work on 2026-08-09** — it reads as
+>   the live frontier and is not. The escape is §9F's re-typing over `(B, act, baseRead)`; the current target is
+>   **wind-down §2 W2's item-3 block** (S1–S4), whose S3 is the discretizing reader **in the rigid regime**.
 >
 > **▶▶▶ UPDATE 2026-07-24 — RIGID SEAL IS THE ACTIVE TRACK; the Algorithm-R scaffold AND the full
 > `gen`-reduction chain (A)–(D) are LANDED (axiom-clean, gate green ~97 modules).**

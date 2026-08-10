@@ -118,6 +118,37 @@ Live-doc homes referenced below: **build doc** = `chain-descent-general-cc-separ
 
 ## 4. Dead / do-not-build
 
+- **⛔⛔⛔ A POLY EQUIVARIANT **FULL-ORDER** FRAME SET IS TYPE-IMPOSSIBLE ON A GAUGED INPUT — `seedFrames` and
+  `OrderOfEquivariant` are RETIRED** (live homes: `RigidRefine.lean` §9F, `chain-descent-rigid-seal.md` §8.2).
+  At a gauge colour-automorphism `σ` (`relabelAdj σ adj = adj`, `transportColouring σ χ = χ`),
+  `FramesEquivariant` forces `frames adj χ = (frames adj χ).image (σ * ·)` — closure under **left multiplication
+  by the whole gauge group `G`**. Left-mult on a group is a **free** action (`σ * o = o ⟹ σ = 1`), so any
+  nonempty invariant set is a union of full `G`-orbits ⟹ **`|frames| ≥ |G| = 2^β`**. The exponential is forced by
+  the **TYPE** (`Finset (Equiv.Perm (Fin n))` = full vertex orders), not by a bad choice of set;
+  `OrderOfEquivariant` at a gauge fixing a seed forces `σ = 1`, so it holds **only on purely rigid inputs** and is
+  target-vacuous. ⚠⚠ **This one bites hard because two docs still advertise it as the live frontier** —
+  `00-START-HERE.md` §2's *"FRONTIER: the POLY frame set … ▶ P2 concrete poly seed"* and
+  `remaining-work.md` §1's identical line (both now banner-ed, 2026-08-09, after they cost a session real work).
+  ⟹ **Do not scope "supply a discretizing equivariant poly frame set".** The escape is §9F's re-typing of the
+  aggregate over an abstract base-frame type `(B, act, baseRead)` where the gauge acts **non-freely**
+  (`FramesEquivariantB` / `ReadAtEquivariant` / `AggFaithfulB`, all built, with a concrete poly pinning instance).
+
+- **⛔⛔⛔ A GAUGE CAN NEVER MAKE A CELL MIXED — "the cell is mixed due to a linear (gauge) obstruction" is close to
+  a contradiction in terms** (measured 2026-08-09, `scratchpad/probe_w2_linear.py` → `.out`; live home:
+  `chain-descent-wind-down.md` §2 W2's item-3 block). The gauge (F₂ cycle space) is a **subgroup of `Aut`**, and a
+  subgroup only ever **merges** vertices; "mixed" means several `Aut`-orbits, i.e. the **absence** of
+  automorphisms. Measured exactly, with every gauge element verified edge-by-edge first: at every CFI root
+  **no `Aut`-block is a single gauge-orbit** — gadgets 8 gauge-orbits vs 3 blocks `[12,12,8]`, wires 12 vs 3
+  `[12,6,6]`, over `K₄` 4 vs **1**, over `C₆` 12 vs **1**. Since an equivariant key is constant on `Aut`-orbits
+  (so it cannot cut *inside* a block) and `rep` merges only within harvest-orbits, the surviving representative
+  count is `≥ |block| / |gauge-orbit| ≥ 2` **at every cell of every witness** ⟹ **no key whatsoever — perfect,
+  solve-derived, or otherwise — can make a CFI root cell fire on the gauge.** A counting fact, not a missing
+  solver. What `Aut` does *beyond* the gauge is **base** automorphism structure, which the linear layer cannot
+  see. ⟹ **CFI-over-cubic is NOT an instance of "no stall if the residue contains a linear obstruction"**; that
+  claim's home is the **rigid** case (`dim ker = 0`), where `hrigid` *is* the hypothesis and an equivariant order
+  provably **exists**. ⚠ Corollary for scoping: the CFI *gauge* is precisely what `kernelSupply` already consumes;
+  what remains mixed is the base graph — *"it handles the residue, then hands you back the original graph"*.
+
 - **⛔ "deck MODULO the verified subgroup" is DEAD as a standalone C3b mechanism — measured 2026-07-19
   (`PerformanceTest` §15).** It was the *plan of record* in remaining-work §1C C3 (ii-c) and in the handoff, so it
   looks endorsed in any doc snapshot before that date — it is not. The idea: once `kernelSupply` certifies the gauge

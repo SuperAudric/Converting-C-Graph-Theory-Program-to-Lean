@@ -3,7 +3,11 @@
 > **▶ [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) is authoritative** for what
 > remains; its §2a *WHAT TO PICK UP* table is the entry point. This file is the **design record** of
 > the object that closed, plus `W-j` (§5). ⚠ `W2`'s sockets are **not** here — they are
-> `SelectCell.lean` §9 and `RecordDeepenCell.lean` §3a; see wind-down §2 W2.
+> `SelectCell.lean` **§9a** (`CellResolvedAt` — the *disjunctive* socket) and **§9b** (the force
+> route), with `RecordDeepenCell.lean` **§3a/§3b**. ⚠ §9's `SomeCellOrbit`/`ResolvableCellAt` are the
+> **consume-only** predecessors, *unsatisfiable on a rigid graph*. See wind-down §2 W2 — its item-3
+> block records that **a gauge can never make a cell mixed**, which retargeted W2 to the **rigid**
+> case (`dim ker = 0`).
 
 > # ✅✅✅ COMPLETE 2026-08-08 — this is now a DESIGN RECORD, not a plan
 > **Every item (W-a … W-i) is done and `Publication.lean` has zero `sorry` and zero custom axioms.**

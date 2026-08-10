@@ -362,6 +362,14 @@ ResolvableCellAt G χ` plus re-pointing `residue_if_flag` — **no new mathemati
      base have the per-cell guard **shut** (budget 200 000, `False` not `None`) while 26/26 depth-1
      cells pass — those root cells are **mixed-orbit**, which is force's domain by design
      (`Force.forceBy_no_narrowing_on_orbit`), not a defect of this predicate.
+     ⚠⚠ **And do not read that as "force will get it later" (measured 2026-08-09,
+     `scratchpad/probe_w2_linear.py`).** The CFI gauge is a *subgroup* of `Aut`, so it only merges,
+     never separates; at every CFI root **no `Aut`-block is a single gauge-orbit**. Since an
+     equivariant key is constant on `Aut`-orbits and `rep` merges only within harvest-orbits, the
+     surviving representative count is `≥ |block| / |gauge-orbit| ≥ 2` — so **no key of any kind can
+     make a CFI root cell fire on the gauge.** What separates those blocks is *base* automorphism
+     structure, which no linear solver supplies. The honest reading: the CFI layer's own obstruction
+     (the gauge) is what `kernelSupply` already consumes, and what remains is the base graph.
   2. ⚠⚠ **`ResolvableCellAt` is UNSATISFIABLE on a rigid graph.** `Deepen.CellSingleOrbit` quantifies
      over the true `IsColAut`, so on a graph with trivial automorphism group it fails at every cell
      of size ≥ 2 — hence `¬ ∀ ResolvableCellAt` is residual for **every** rigid graph whose

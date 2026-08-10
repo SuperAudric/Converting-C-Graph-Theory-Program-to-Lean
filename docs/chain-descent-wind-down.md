@@ -21,7 +21,7 @@
 >
 > ### ▶▶ PICKING THIS UP FRESH? GO TO [§2a HANDOFF](#2a--handoff--where-a-fresh-reader-picks-up-2026-08-04).
 > It carries the reading order, the gate command and its current numbers, the **`Publication.lean` state
-> table**, the measured evidence, and the **thirteen corrections you will otherwise inherit from other
+> table**, the measured evidence, and the **sixteen corrections you will otherwise inherit from other
 > docs**. ⚠ There is **no open decision** any more — that block is struck through below.
 >
 > **W1 is ✅ LANDED (2026-08-04)** — `TwinFamily.lean` + `RestrictedTransport.lean`, extended the same day by
@@ -1014,14 +1014,23 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > ### ▶ What is left
 > **W2** — ✅ **stages 1–2 built 2026-08-08** (the `SomeCellOrbit` socket + the named obligation
 > `ResolvableCellAt`, both gated and axiom-clean, with the `Tinhofer` population re-derived through
-> them). ⛔ Stage 0 measured that `ResolvableCellAt` fails at the **CFI-over-cubic root** (guard
-> genuinely shut on both root cells) — **which is the design**: those cells are mixed-orbit, force's
-> domain, and force is where the CFI obstruction is *meant* to land. ⛔ **The `mp7` retarget that
-> followed is RETRACTED** (user re-affirmation, 2026-08-08 later): W2 is a **layer** theorem —
-> *solve the CFI part of every CFI graph* — and `mp7` is the **non-rigid** multipede, not the
-> Neuen–Schweitzer family. The stage-1 widening is **measurably load-bearing** (MIXED root), but the
-> socket is **consume-only** and must be made disjunctive before W2 can be stated at all.
-> **Read §2 W2's re-affirmation block in full before touching it.** · **W3** (extraction) · **W4** (write-up) · **W5**
+> them), and the **disjunctive socket** followed (§9a/§9b, 2026-08-09) — `CellResolvedAt` on the
+> key's **survivors**, admitting consume / force / **mixed**, plus the force route's entry point.
+> **Three probes have now run, and between them they RETARGETED W2 twice:**
+> 1. ⛔ `ResolvableCellAt` fails at the **CFI-over-cubic root** — which is the design (mixed-orbit
+>    cells are force's domain), **not** a blocker; the `mp7` retarget that followed is **RETRACTED**.
+> 2. ◐ **`holKeyFast` is structurally inert at the CFI root** (1 cross-cell component ⟹ no valid
+>    walk) ⟹ that root rests entirely on the `orbKeyG guardSupply` tiebreak.
+> 3. ⛔⛔⛔ **And then the premise inverted: a gauge can NEVER make a cell mixed** — it is a
+>    *subgroup* of `Aut`, so it only merges. Measured, **no `Aut`-block at any CFI root is a single
+>    gauge-orbit**, so reps ≥ 2 always ⟹ **no key of any kind can fire a CFI root cell**, and
+>    **CFI-over-cubic is not an instance of the target claim at all**. Its gauge is what
+>    `kernelSupply` already consumes; the remainder is the **base graph**.
+>
+> ⟹ **W2's target is now the RIGID case (`dim ker = 0`)**, where every hypothesis flips from obstacle
+> to satisfied. ▶ **NEXT = S3, the discretizing reader in the rigid regime** (⛔ *not* the retired
+> `seedFrames`, which is type-impossible on gauged inputs).
+> **Read §2 W2's re-affirmation block AND its item-3 block in full before touching it.** · **W3** (extraction) · **W4** (write-up) · **W5**
 > (archive). **`W-j` is ✅ LANDED** (below).
 >
 > ### ✅ `W-j` — LANDED 2026-08-08, `SelectCell.lean` §8 + `RecordDeepenCell.lean` §5
@@ -1105,7 +1114,7 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > | | option | size | why / why not |
 > |---|---|---|---|
 > | **A** | **Wire `ResolvableCellAt` into `Publication.UnhandledResidue`** as the narrowed residue, with `RecordDeepenCell.not_all_resolvable_of_flag` as its `③` | small — **no new mathematics**; every piece is proved and gated | It is a real definition (not an `opaque` atom, so it does not re-break `unhandledResidue_nonvacuous`), it is **measured non-vacuous both ways** (`mp7` resolvable everywhere; `rand multipede V=6 W=5` and `G8` nowhere), and it strictly narrows `¬ TinhoferGraph`. ⚠ It does **not** capture CFI-over-cubic — that must be said plainly wherever it is quoted |
-> | **B** | ⛔ ~~**W2 at `mp7`**~~ **RETRACTED 2026-08-08 (later).** W2 is the **CFI layer**, not a family: *solve the CFI part of every CFI graph*. Do (i) the **disjunctive socket** (`keepMin`-relative `CellOrbitAt`, ~10 lines, required to even state it), then (ii) the CFI-root **orbit-block/supply-transitivity measurement**, then (iii) the Track R decision | (i) small · (ii) a probe · (iii) user call | The force half of the published object has **no solver component** (`guardSupply` excludes `kernelSupply`; `RecordKey.lean:10` names `RigidSeal.compKey`'s solver key as the intended addition, and that is Track R P2/P3 in §3). ⚠ `mp7` is the **non-rigid** multipede (`\|Aut\| = 1344`) — it does **not** carry the Neuen–Schweitzer sentence. **Read §2 W2's re-affirmation block before starting** |
+> | **B** | **W2 = the CFI LAYER.** ✅ **socket built** (§9a/§9b); ✅ **two probes run**; ▶ **NEXT = S3, the discretizing reader IN THE RIGID REGIME.** ⛔ ~~W2 at `mp7`~~ and ~~W2 at the CFI root~~ are **both retracted** | S3 = the real research box | **Read §2 W2's re-affirmation block AND its item-3 block before starting** — four routes are refuted there, and the target was *inverted* on 2026-08-09: **a gauge can never make a cell mixed** (it is a subgroup of `Aut`), so **CFI-over-cubic is not an instance of the claim at all** and no key of any kind can fire its root cells. The claim's home is the **rigid** case (`dim ker = 0`), where every hypothesis flips to satisfied |
 > | **C** | **W4 write-up** | 1 week | The go/no-go was met at W1. Read W4's must-state list first — item 3 was **corrected 2026-08-08** and items 1/9 now have the sharpened `②` story (only `deck2Supply`'s charge can move the degree) |
 > | **D** | measure `W-j`'s hoist ceiling on a many-celled node; land a `#eval` flag witness (the multipede the rigid handler cannot peel) | small each | Both are owed *before* W4 quotes a performance number or the flag semantics |
 >
@@ -1113,17 +1122,22 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > per-node billing (computed to change neither numeral); anything in §3's suspended table.
 >
 > ### Reading order for a fresh pickup
-> 1. This block, then §2a's `Publication.lean` state table and the **thirteen corrections** below.
+> 1. This block, then §2a's `Publication.lean` state table and the **sixteen corrections** below.
 > 2. [`chain-descent-percell-plan.md`](chain-descent-percell-plan.md) — **the design record of the
 >    object above** (it is no longer a plan; every item is ✅). Its §1–§3a explain *why* the supply
 >    had to be cell-indexed, and its §2/§6/§7/§10 carry the retractions.
 > 3. `Publication.lean` top-to-bottom — it is the deliverable and its prose is current.
 > 4. `RecordDeepenCell.lean` → `SelectCell.lean` → `DeepenCell.lean`, in that order. ★ For **W2**
->    read `SelectCell.lean` **§9** (the `SomeCellOrbit` socket) and `RecordDeepenCell.lean` **§3a**
->    (`ResolvableCellAt`) first — they are the whole of what W2 stages 1–2 built, and §2 W2's
->    correction blocks say why two earlier routes were wrong.
+>    read `SelectCell.lean` **§9a** (`CellResolvedAt` — the *disjunctive* socket, the one to state
+>    any CFI theorem against) and **§9b** (the force route's entry point), then
+>    `RecordDeepenCell.lean` **§3a/§3b**. ⚠ §9's `SomeCellOrbit`/`ResolvableCellAt` are the
+>    **consume-only** predecessors — kept because the `Tinhofer` population rides them, but
+>    **unsatisfiable on a rigid graph**, so do not state a CFI theorem there. §2 W2's correction
+>    blocks say why **four** earlier routes were wrong.
 > 5. `PublicTheoremIndex.md` for anything else.
-> 6. Measured evidence: `scratchpad/probe_w2_resolvable.out` (W2 stage 0),
+> 6. Measured evidence: **`scratchpad/probe_w2_linear.out` (item 3a — the gauge/mixedness inversion,
+>    read this one for W2)**, `probe_w2_keysplit.out` (step (ii) — `holKeyFast` inert at the CFI
+>    root), `probe_w2_resolvable.out` (W2 stage 0),
 >    `scratchpad/ProbeShareWalk*.lean` + `ProbeWjMeasure.lean` (`W-j`),
 >    `scratchpad/ProbeAnswers.lean` (what the object answers on).
 >
@@ -1278,6 +1292,7 @@ supersedes items 0–1 here.
 | **★ THE PUBLISHED OBJECT** | `RecordDeepenCell.lean` | **`recordDeepenCell_full_fast` = `①` ∧ `②` ∧ `③` at one runnable object.** `W-d′` rides `Kernel.sameOrbits_recordSupply`; `③` rides `goodCell_of_tinhofer` |
 | **`W-j` — the shared key + hoisted factor** | `SelectCell` §8 + `RecordDeepenCell` §5 | `keyTable`/`keepMinT` · `SplitSupply` · **`probeWalkH`** + **`probeWalkH_eq`** (an equation in BOTH components ⟹ no numeral moves) · `selNodeLazyHC` · `costFast_eq`. 1.33×/1.48× measured |
 | **`W2` stage 1 — the socket** | `SelectCell` §9 | `CellOrbitAt` · `cellNarrowC_length_le_one_of_cellOrbitAt` · `SomeCellOrbit` · **`handledSC_of_someCellOrbit`** — *one* resolvable cell per node suffices, at **any** cell, no `targetColour`. ⚠ **consume-only**; superseded as the W2 socket by §9a |
+| **`W2` — the FORCE route's entry point** | `SelectCell` §9b | `cellSeparatedAt_of_branchSeparation` · **`someCellResolved_of_branchSeparation`** · `nodeResolvedC_of_branchSeparation` · **`handledSC_of_branchSeparation`** — the rigid stack's firing lemmas end in `nodeResolved_of_cellResolved (Or.inr …)`, whose disjunct **is** *"the key is injective on `branches χ`"*, so they reach the cell-indexed socket by plumbing. ⚠ Stated **generically — no `Rigid*` import**, so the published object's dependency graph is unchanged |
 | **`W2` stage 1b — the DISJUNCTIVE socket** | `SelectCell` §9a + `RecordDeepenCell` §3b | **`CellResolvedAt`** (the condition on the key's *survivors*) · **`cellNarrowC_length_le_one_of_cellResolvedAt`** · route 1 `cellResolvedAt_of_cellOrbitAt` (consume) · route 2 **`CellSeparatedAt`**/`keepMin_length_le_one_of_cellSeparatedAt`/`cellResolvedAt_of_cellSeparatedAt` (force, **no supply**) · **`SomeCellResolved`**/**`handledSC_of_someCellResolved`** · at the published object **`handledSC_of_resolvedCells`**/**`not_all_resolved_of_flag`**. ★ The **mixed** case (key cuts between orbits, supply certifies the survivor) is expressible for the first time |
 | **`W2` stage 2 — the obligation** | `DeepenCell` §9 + `RecordDeepenCell` §3a | `Deepen.cellOrbitAt_deepenCellSupply` (`GoodCell` ∧ `CellSingleOrbit` at one cell ⟹ it fires) · **`ResolvableCellAt`** · `handledSC_of_resolvableCells` · **`not_all_resolvable_of_flag`** (a narrower `③`, **not yet wired into `Publication`**) · `resolvableCellAt_of_tinhoferGraph` (so `TinhoferGraph ⊆ resolvable-everywhere` is machine-checked) |
 
@@ -1312,6 +1327,7 @@ statement (every key), rows 6–7 are `noncomputable` and **must not appear in a
 | Lean `#eval` (2026-08-04) | the **record object answers** on `C₅ C₆ P₅ K₅ 3K₂ K₁,₂,₃ K₃⊔C₄` (7/7) ⟹ no falsifier of `③` at the record object; option (ii) is open, not dead |
 | Lean `#eval` (2026-08-08) — **the published object** | `RecordDeepenCell.canonFormFast` answers on `K₂`, `C₅`, `K₁,₂,₃`; `costFast` = **1606 / 5 212 728 / 20 321 716**, wall **— / 20.8 s / 50.4 s** (after `W-j`; 34 s / 87 s before it — the *billed* values are unchanged by `W-j`). It also answers on **`K₃ ⊔ C₄`**, the residual witness, which is expected: `③` bounds what is *proved*, not what the object can do. Reproduce with a two-line file: `import ChainDescent.RecordDeepenCell` then `#eval (RecordDeepenCell.canonFormFast (n := 6) (TwinFamily.mpAdj TwinFamily.part123)).isSome` and the same at `costFast`; run `lake env lean <file>` from `GraphCanonizationProofs/`. ⚠ At the `Showcase` names instead, copy `Publication.lean` and append the `#eval`s — it is not a library module, so `import Publication` fails |
 | lazy vs eager vs node-global (2026-08-08) | `K₁,₂,₃`: lazy **20 321 716 / 87 s** · eager cell-indexed 38 212 276 / 210 s · node-global `selNodeFast` 25 346 020 / 148 s ⟹ **2.4× / 1.7× faster**, 20 % less billed than node-global. ⚠ Only 1–2 non-singleton cells exercised |
+| **`probe_w2_linear.py` → `probe_w2_linear.out` (W2 item 3a, 2026-08-09)** | ★★★★ **A GAUGE CAN NEVER MAKE A CELL MIXED** — it is a **subgroup of `Aut`**, so it only merges. Exact, no search, every gauge element **verified edge-by-edge** first: at every CFI root **no `Aut`-block is a single gauge-orbit** (gadgets 8 gauge-orbits vs 3 `Aut`-blocks; wires 12 vs 3; `K₄` 4 vs **1**; `C₆` 12 vs **1**) ⟹ reps ≥ `\|block\|/\|gauge-orbit\|` **≥ 2 everywhere** ⟹ **no key of any kind can fire a CFI root cell** (a counting fact, not a missing solver). The extra merging is **BASE** automorphism structure. ⟹ **CFI-over-cubic is NOT an instance of the target claim**; its home is the **rigid** case | |
 | **`probe_w2_keysplit.py` → `probe_w2_keysplit.out` (W2 step (ii), 2026-08-09)** | ★★ **`holKeyFast` is STRUCTURALLY INERT at the CFI root**: the walk needs 3 pairwise-distinct **cross-cell components** and the CFI/mp7/MIXED roots have **1** ⟹ no valid walk ⟹ every `holSig` is all-1s ⟹ argmin = the whole cell. CFI root cells carry **3 Aut-blocks** each (`[12,12,8]`, `[12,6,6]` — **no singleton block**). ⟹ the CFI root rests **entirely** on the `orbKeyG guardSupply` tiebreak. ★ **Validated against Lean**: `Regression` §18's `#guard` (`G8` keeps 8) is reproduced, and the (F1) self-check (equivariant key constant on Aut-blocks) never fired. ⚠ Aut-blocks are a sound *refinement* of the true orbits — the safe direction here |
 | **`probe_w2_resolvable.py` → `probe_w2_resolvable.out` (W2 stage 0, 2026-08-08)** | ★ `ResolvableCellAt` at every reached node (depth 1, ≤2/node): **`mp7` 14/14 Y** · `S(K5)`/`S(Petersen)` Y · **MIXED Y but the TARGET cell shut at the root ⟹ the stage-1 widening is LOAD-BEARING** · ⛔ **CFI cubic m=8 pl/tw N at the ROOT** (both root cells guard-shut, re-verified at budget 200 000; 26/26 depth-1 cells pass) · `rand multipede V=6 W=5` 0/8, `G8` 0/1. ⚠ `GoodCell` `None` never counted as a pass; single-orbit is a **positive certificate** only (union-find over `Ctx`/`canon`'s sound gens, ⛔ never `probe_orbit_oracle`) |
 | `W-j` — key shared + left factor hoisted (2026-08-08) | `scratchpad/ProbeShareWalk*.lean` predicted it, `ProbeWjMeasure.lean` confirms it at the shipped definitions: `C₅` 27.6 s → **20.8 s** (1.33×), `K₁,₂,₃` 74.4 s → **50.4 s** (1.48×), **billed costs byte-identical** (5 212 728 / 20 321 716). ⚠ The *hoist* half only pays where several cells are probed, i.e. where early cells fail to fire; no small library witness has that shape |
@@ -1323,8 +1339,27 @@ only, `None` ≠ `False`, the orbit-reduction licence, ⛔ never `probe_orbit_or
 ⚠ **Probes must materialise colourings** (`Refine.warmRefineVec`): a `def … : Colouring n` probe ran
 >10 min against ~1 min for the same measurement — standing trap #1 is live in probe code too.
 
-### ⛔ THIRTEEN corrections a fresh reader will otherwise inherit
-*(1–8 predate 2026-08-08; 9–13 were found this session and each cost real work to catch.)*
+### ⛔ SIXTEEN corrections a fresh reader will otherwise inherit
+*(1–8 predate 2026-08-08; 9–13 were found on 2026-08-08; **14–16 on 2026-08-09, and 15–16 each
+retired a route I was about to build**.)*
+
+14. **⛔ *"All the project's F₂ machinery is on the consume side"* is FALSE** (my own line, corrected
+   at source). There are **two** solvers: consume's `Kernel*` solves the **kernel** (what *can* move)
+   and **runs today** inside `recordSupplyFast`; force's `Forcing*`/`Rigid*` (~4400 lines) solves
+   **uniqueness + canonical RREF** (what *cannot* move) and is **gated, axiom-clean, instantiated in
+   nothing**. The surviving narrow claim: the **published object's force key** has no solver
+   (`compKey` is comment-only in `RecordKey.lean`/`ForcePick.lean`, verified).
+15. **⛔⛔ `seedFrames` IS RETIRED and my *"only DISCRETIZING is missing"* was FALSE.**
+   `RigidRefine` §9F: at a gauge automorphism `FramesEquivariant` forces the frame set closed under
+   **left-mult by the whole gauge group**, a **free** action ⟹ `|frames| ≥ 2^β`. **A poly
+   equivariant full-order frame set is TYPE-IMPOSSIBLE on a gauged input**; `OrderOfEquivariant` is
+   target-vacuous. Equivariance and poly size are *jointly* unattainable there.
+16. **⛔⛔⛔ A GAUGE CAN NEVER MAKE A CELL MIXED** (`probe_w2_linear.py`). The gauge is a **subgroup
+   of `Aut`**, so it only *merges*; mixedness is the **absence** of automorphisms. Measured: at every
+   CFI root **no `Aut`-block is a single gauge-orbit**, so surviving reps ≥ `|block|/|gauge-orbit|`
+   ≥ 2 ⟹ **no key of any kind fires a CFI root cell** — a counting fact, not a missing solver. The
+   extra merging is **base** automorphism structure. ⟹ **CFI-over-cubic is NOT an instance of
+   *"mixed due to a linear obstruction"***; the claim's home is the **rigid** case (`dim ker = 0`).
 1. **rigid-seal §9.1 does NOT block W1** — corrected at source, at `00-START-HERE.md`'s W1 line, and
    at `remaining-work.md` §1T. The socket is pure-consume; a rigid obstruction *fails* its hypothesis.
 2. **CAO "known false" is not a located citation** — `cao-propagation.md` §0.0a. Closure stands; the

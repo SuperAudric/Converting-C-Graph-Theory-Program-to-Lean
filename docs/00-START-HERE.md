@@ -30,7 +30,32 @@
 > `resolvableCellAt_of_tinhoferGraph` so the containment is machine-checked.
 > **Gate exit 0 / 224 s / 119 modules; `Publication.lean` still zero `sorry`, zero custom axioms.**
 >
-> ⛔ **Five corrections to carry into any pickup** (full list = wind-down §2a's *thirteen
+> ✅ **2026-08-09 — the DISJUNCTIVE SOCKET + the FORCE ROUTE.** `SelectCell.lean` **§9a**:
+> **`Select.CellResolvedAt`** states the condition on the key's **survivors** (`keepMin`), not on the
+> cell — the same proof, weaker hypothesis — so it admits **three** routes where `CellOrbitAt` admits
+> one: **consume** (`cellResolvedAt_of_cellOrbitAt`, so nothing regressed), **force**
+> (`CellSeparatedAt`, **no supply** — the only route that reaches a cell with no symmetry), and the
+> **MIXED** case (key cuts between orbits, supply certifies the survivor), which was previously
+> inexpressible. Sockets `SomeCellResolved`/`handledSC_of_someCellResolved`, at the published object
+> `RecordDeepenCell.handledSC_of_resolvedCells` + `not_all_resolved_of_flag`. **§9b** lands the rigid
+> stack's firing lemmas there (`someCellResolved_of_branchSeparation`). Gate exit 0 / 279 s;
+> `Publication.lean` untouched. ★ The disjunction was **not new** — `Cost.CellResolved` had it at the
+> node-global layer and the cell-indexed rewrite had dropped it; §9a restores it **and goes past it**
+> (its two disjuncts do not cover the mixed case).
+>
+> ⛔⛔⛔ **2026-08-09 — W2's TARGET WAS INVERTED. A GAUGE CAN NEVER MAKE A CELL MIXED.** The gauge is a
+> **subgroup of `Aut`**, so it only *merges*; mixedness is the **absence** of automorphisms. Measured
+> exactly (`scratchpad/probe_w2_linear.py`, gauge elements verified edge-by-edge): at every CFI root
+> **no `Aut`-block is a single gauge-orbit** (gadgets 8 gauge-orbits vs 3 blocks; wires 12 vs 3; over
+> `K₄` 4 vs **1**), so surviving reps ≥ `|block|/|gauge-orbit|` **≥ 2** ⟹ **no key of any kind can
+> fire a CFI root cell** — a counting fact, not a missing solver. The extra merging is **base**
+> automorphism structure. ⟹ **CFI-over-cubic is NOT an instance of *"mixed by a linear obstruction"***
+> (its gauge is exactly what `kernelSupply` already consumes; the remainder is the base graph), and
+> **W2's home is the RIGID case `dim ker = 0`**, where `hrigid` *is* the hypothesis and an equivariant
+> order provably **exists**. ▶ **NEXT = S3, the discretizing reader in the rigid regime** — ⛔ *not*
+> the retired `seedFrames`, which is **type-impossible** on gauged inputs (`RigidRefine` §9F).
+>
+> ⛔ **Five corrections to carry into any pickup** (full list = wind-down §2a's *sixteen
 > corrections*): (i) W2's `CascadeOracle` → `handled_of_seal` route is at the **wrong object**
 > (`deepMatchSupply`, not in `recordSupplyFast`); (ii) its replacement `CellIsOrbit kernelSupply` is
 > **measurably false** (`mp7` root cell 28 → 7 — the gauge is certified, the Z₇ translations stand);
@@ -457,10 +482,14 @@ pure-consume Schurianity at every reached node — a family carrying a `RigidObs
 > the single-bit `refineByFrame` (Route B′, steps 1–5) does `①` but **cannot discretize** (≤2 classes/cell ⟹ fails the
 > multipede); (2) an equivariant order PERM exists ONLY on rigid inputs, so the single-`ord` `structRead` path (steps
 > 6b–9C) is **whole-node-rigid = the `ker=0` anchor**, superseded by `readAgg` for the mixed residue; (3) a poly (`<n!`)
-> equivariant frame set needs a structural discretizing order = the LINEAR solve (WL won't). **FRONTIER: the POLY frame
+> equivariant frame set needs a structural discretizing order = the LINEAR solve (WL won't). ⛔⛔⛔ ~~**FRONTIER: the POLY frame
 > set** — ✅ P1 interface (`seedFrames`/`framesEquivariant_seedFrames`/`card_seedFrames_le`) → ▶ P2 concrete poly seed +
 > discretizing solve-completion `orderOf` (carried per-family) · P3 `AggFaithful (seedFrames …)` per-family → P3-ring
-> (`Z_{2^k}`) → P4. ⚠ user-flagged open Q (deferred): the rigid solver likely covers MORE than linear residues. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
+> (`Z_{2^k}`) → P4.~~ **RETIRED — DO NOT FOLLOW.** A poly `FramesEquivariant` set of **full orders** is
+> **type-impossible** on a gauged input (`RigidRefine` §9F): equivariance forces closure under left-mult by the whole
+> gauge group, a **free** action ⟹ `|frames| ≥ 2^β`; `OrderOfEquivariant` is target-vacuous. ⚠ **This sentence cost a
+> fresh reader real work on 2026-08-09** — it reads as the live frontier and is not. Current target = wind-down §2 W2's
+> **item-3 block** (S1–S4). ⚠ user-flagged open Q (deferred): the rigid solver likely covers MORE than linear residues. Everything from 2026-07-18 through 2026-07-22 below (base-recovery/lift, R1/R2, `deepenRefSupply`,
 > `hL1`/`K∖cell`, WL-completeness framing) is **SUPERSEDED PROVENANCE**. Measured (`DeepenStrengthProbe.cs`, 39
 > rows): starvation = 0, every checkable row COMPLETE, Chang-A 384/384 (survivor = fusion), expander multipedes rigid.
 > ⛔ `KernelBase.lean` (base recovery + lift) **parked** — not in `build.sh`.
