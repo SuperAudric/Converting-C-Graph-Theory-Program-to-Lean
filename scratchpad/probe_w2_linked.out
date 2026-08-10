@@ -1,0 +1,125 @@
+============================================================================================
+probe_w2_linked.py — STEP 0 of the force-refinement-channel doc (§6)
+  Linked u v := e_u + e_v ∈ rowspace_F2(adj)   [the BUILT extraction: extractOf rowAdj witChi]
+============================================================================================
+
+--- §6 row 2: the SOUNDNESS control.  CFI over K4 — Aut merges the blocks, so an
+    equivariant invariant MUST NOT separate them.  A split here means a bug.
+  CFI(K4) [base m=4 |E|=6 |Aut(base)|=24 1-WL COARSE]   n=28   dim ker_F2(adj) = 12   Linked-classes = 28
+     ✔ identity verified: Linked u v ⟺ sig u = sig v ⟺ e_u+e_v ∈ rowspace(adj)
+     Linked class-size profile: {1: 28}   ⟹ the only equivariant read a relation offers (class size) is CONSTANT ⟹ VACUOUS
+     soundness vs 8 edge-verified gauge automorphisms:
+        (a) the RELATION `Linked` transports: ✔ 0 violations
+        (b) the kernel-SIGNATURE read transports: ⛔ 144 VIOLATIONS ⟹ `sig` is NOT `ReadEquivariant` — a basis/pivot order was chosen
+     cell 0 |cell|=16  ⟹ ★ SPLIT into 16 Linked-classes
+     cell 1 |cell|=12  ⟹ ★ SPLIT into 12 Linked-classes
+     1-WL non-singleton cells: 2   ★ split by Linked: 2   untouched: 0
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [16, 12]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 2 → 2   sizes [16, 12]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 2 → 2   sizes [16, 12]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 2 → 0   sizes []   — this is what a pivot order buys, and it is not available
+
+--- §6 row 1: CFI over Frucht (asymmetric base, 1-WL coarse).  12 Aut-blocks,
+    each already a single gauge-orbit — force needs only to SPLIT them.
+  CFI(Frucht) [base m=12 |E|=18 |Aut(base)|=1 1-WL COARSE]   n=84   dim ker_F2(adj) = 28   Linked-classes = 84
+     Linked class-size profile: {1: 84}   ⟹ the only equivariant read a relation offers (class size) is CONSTANT ⟹ VACUOUS
+     soundness vs 128 edge-verified gauge automorphisms:
+        (a) the RELATION `Linked` transports: ✔ 0 violations
+        (b) the kernel-SIGNATURE read transports: ⛔ 6912 VIOLATIONS ⟹ `sig` is NOT `ReadEquivariant` — a basis/pivot order was chosen
+     cell 0 |cell|=48  ⟹ ★ SPLIT into 48 Linked-classes
+     cell 1 |cell|=36  ⟹ ★ SPLIT into 36 Linked-classes
+     1-WL non-singleton cells: 2   ★ split by Linked: 2   untouched: 0
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [48, 36]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 2 → 2   sizes [48, 36]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 2 → 2   sizes [48, 36]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 2 → 0   sizes []   — this is what a pivot order buys, and it is not available
+
+--- the item-3a witness, for continuity
+  CFI(cubic m=8 seed=8) [base m=8 |E|=12 |Aut(base)|=12 1-WL COARSE]   n=56   dim ker_F2(adj) = 20   Linked-classes = 56
+     Linked class-size profile: {1: 56}   ⟹ the only equivariant read a relation offers (class size) is CONSTANT ⟹ VACUOUS
+     soundness vs 32 edge-verified gauge automorphisms:
+        (a) the RELATION `Linked` transports: ✔ 0 violations
+        (b) the kernel-SIGNATURE read transports: ⛔ 1152 VIOLATIONS ⟹ `sig` is NOT `ReadEquivariant` — a basis/pivot order was chosen
+     cell 0 |cell|=32  ⟹ ★ SPLIT into 32 Linked-classes
+     cell 1 |cell|=24  ⟹ ★ SPLIT into 24 Linked-classes
+     1-WL non-singleton cells: 2   ★ split by Linked: 2   untouched: 0
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [32, 24]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 2 → 2   sizes [32, 24]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 2 → 2   sizes [32, 24]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 2 → 0   sizes []   — this is what a pivot order buys, and it is not available
+
+  CFI(cubic m=8 seed=8) twisted [base m=8 |E|=12 |Aut(base)|=12 1-WL COARSE]   n=56   dim ker_F2(adj) = 18   Linked-classes = 44
+     Linked class-size profile: {1: 32, 2: 12}   ⟹ the only equivariant read a relation offers (class size) is non-constant
+     soundness vs 32 edge-verified gauge automorphisms:
+        (a) the RELATION `Linked` transports: ✔ 0 violations
+        (b) the kernel-SIGNATURE read transports: ⛔ 768 VIOLATIONS ⟹ `sig` is NOT `ReadEquivariant` — a basis/pivot order was chosen
+     cell 0 |cell|=32  ⟹ ★ SPLIT into 32 Linked-classes
+     cell 1 |cell|=24  ⟹ ★ SPLIT into 12 Linked-classes
+     1-WL non-singleton cells: 2   ★ split by Linked: 2   untouched: 0
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [32, 24]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 2 → 2   sizes [32, 24]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 2 → 2   sizes [32, 24]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 2 → 0   sizes []   — this is what a pivot order buys, and it is not available
+
+--- §6 row 3: multipedes (the rigid family is where the headline claim lives)
+  multipede mp7 Fano   n=42   dim ker_F2(adj) = 22   Linked-classes = 42
+     Linked class-size profile: {1: 42}   ⟹ the only equivariant read a relation offers (class size) is CONSTANT ⟹ VACUOUS
+     cell 0 |cell|=28  ⟹ ★ SPLIT into 28 Linked-classes
+     cell 1 |cell|=14  ⟹ ★ SPLIT into 14 Linked-classes
+     1-WL non-singleton cells: 2   ★ split by Linked: 2   untouched: 0
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [28, 14]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 2 → 2   sizes [28, 14]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 2 → 2   sizes [28, 14]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 2 → 0   sizes []   — this is what a pivot order buys, and it is not available
+
+  multipede MIXED   n=30   dim ker_F2(adj) = 14   Linked-classes = 24
+     Linked class-size profile: {1: 20, 2: 2, 3: 2}   ⟹ the only equivariant read a relation offers (class size) is non-constant
+     cell 0 |cell|=4  ⟹ ★ SPLIT into 4 Linked-classes
+     cell 1 |cell|=2  ⟹ ★ SPLIT into 2 Linked-classes
+     cell 2 |cell|=2  ⟹ ★ SPLIT into 2 Linked-classes
+     cell 3 |cell|=4  ⟹ ★ SPLIT into 4 Linked-classes
+     cell 4 |cell|=2  ⟹ ★ SPLIT into 2 Linked-classes
+     cell 5 |cell|=8  ⟹ ★ SPLIT into 8 Linked-classes
+     cell 6 |cell|=4  ⟹ ★ SPLIT into 2 Linked-classes
+     cell 7 |cell|=4  ⟹ ★ SPLIT into 2 Linked-classes
+     1-WL non-singleton cells: 8   ★ split by Linked: 8   untouched: 0
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [8, 4, 4, 4, 4, 2, 2, 2]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 8 → 8   sizes [8, 4, 4, 4, 4, 2, 2, 2]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 8 → 8   sizes [8, 4, 4, 4, 4, 2, 2, 2]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 8 → 0   sizes []   — this is what a pivot order buys, and it is not available
+
+  multipede circ(5)   n=30   dim ker_F2(adj) = 12   Linked-classes = 22
+     Linked class-size profile: {1: 20, 5: 2}   ⟹ the only equivariant read a relation offers (class size) is non-constant
+     cell 0 |cell|=20  ⟹ ★ SPLIT into 20 Linked-classes
+     cell 1 |cell|=10  ⟹ ★ SPLIT into 2 Linked-classes
+     1-WL non-singleton cells: 2   ★ split by Linked: 2   untouched: 0
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [20, 10]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 2 → 2   sizes [20, 10]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 2 → 2   sizes [20, 10]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 2 → 0   sizes []   — this is what a pivot order buys, and it is not available
+
+  multipede rand V=6 W=5   n=34   dim ker_F2(adj) = 16   Linked-classes = 26
+     Linked class-size profile: {1: 24, 5: 2}   ⟹ the only equivariant read a relation offers (class size) is non-constant
+     cell 0 |cell|=8  ⟹ ★ SPLIT into 8 Linked-classes
+     cell 1 |cell|=4  ⟹ ★ SPLIT into 4 Linked-classes
+     cell 2 |cell|=8  ⟹ ★ SPLIT into 8 Linked-classes
+     cell 3 |cell|=4  ⟹ ★ SPLIT into 4 Linked-classes
+     cell 4 |cell|=2  ⟹ ★ SPLIT into 2 Linked-classes
+     cell 5 |cell|=2  ⟹ ★ SPLIT into 2 Linked-classes
+     cell 6 |cell|=4  ⟹ ★ SPLIT into 2 Linked-classes
+     cell 7 |cell|=2  ⟹ ★ SPLIT into 2 Linked-classes
+     1-WL non-singleton cells: 8   ★ split by Linked: 8   untouched: 0
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [8, 8, 4, 4, 4, 2, 2, 2]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 8 → 8   sizes [8, 8, 4, 4, 4, 2, 2, 2]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 8 → 8   sizes [8, 8, 4, 4, 4, 2, 2, 2]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 8 → 0   sizes []   — this is what a pivot order buys, and it is not available
+
+--- controls: G8 (force's only measured firing witness) and small graphs
+  G8 cubic non-VT   n=8   dim ker_F2(adj) = 0   Linked-classes = 1
+     Linked class-size profile: {8: 1}   ⟹ the only equivariant read a relation offers (class size) is CONSTANT ⟹ VACUOUS
+     1-WL non-singleton cells: 1   ★ split by Linked: 0   untouched: 1
+     METHOD 1, refine-then-1-WL-to-fixpoint.  cells before [8]
+        ✔ LEGAL read (class size, equivariant): non-singleton cells 1 → 1   sizes [8]
+        ✔ LEGAL STEELMAN (1-WL on the 2-relation adj ∪ Linked): 1 → 1   sizes [8]
+        ⛔ ILLEGAL read (kernel signature, basis-dependent): 1 → 1   sizes [8]   — this is what a pivot order buys, and it is not available
+

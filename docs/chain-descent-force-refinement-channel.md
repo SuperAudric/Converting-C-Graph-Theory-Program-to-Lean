@@ -1,5 +1,49 @@
 # FORCE HAS NO REFINEMENT CHANNEL — the missing foundation under W2
 
+> # ⛔⛔⛔ 2026-08-10 (later) — **§6'S PROBE RAN. METHOD 2 IS REFUTED AT THE BUILT EXTRACTION.**
+> `scratchpad/probe_w2_linked.py` → **`probe_w2_linked.out`**, 9 witnesses. Read this before §4/§6.
+>
+> **The identity that makes `Linked` cheap also predicts it, and both were verified.** `H` symmetric
+> ⟹ `rowspace H = ker(H)^⊥`, so
+> **`Linked u v ⟺ x_u = x_v for every x ∈ ker H`** — *"the kernel cannot tell `u` from `v`"*. Checked
+> against independent Gaussian-elimination span membership on `CFI(K₄)`, every pair.
+>
+> ⟹ **Two degenerate regimes and nothing in between:**
+> | regime | witness | `dim ker_F₂(adj)` | `Linked` | classes |
+> |---|---|---|---|---|
+> | rigid | `G8` | **0** | rowspace is everything ⟹ the **TOTAL** relation | **1** |
+> | gauged | CFI(K₄) · CFI(Frucht) · CFI(cubic m=8) · `mp7` · MIXED · circ(5) · rand multipede | 12 · 28 · 20 · 22 · 14 · 12 · 16 | essentially **EQUALITY** | 28/28 · 84/84 · 56/56 · 42/42 · 24/30 · 22/30 · 26/34 |
+>
+> ⟹ ⛔ **Every legal read is vacuous, measured on all 9 witnesses.** Class size (the cheapest
+> σ-invariant of a class) and the **steelman** — 1-WL on the 2-relation `adj ∪ Linked`, strictly
+> stronger and still order-free — each leave the non-singleton cells **`k → k` with identical sizes**,
+> on every witness. Not one cell split.
+>
+> ⛔⛔ **And the tempting fix is the old trap wearing a new costume.** Reading the kernel *signature*
+> `sig v := (x¹_v,…,x^k_v)` over a basis discretizes everything — including **`CFI(K₄)`, where `Aut`
+> merges all 16 gadget vertices into ONE block**. §8's falsifier #2 fired, and the probe's own
+> read-equivariance check localizes it: **144 / 1152 / 768 / 6912 direct violations** of
+> `read (σ·) (σv) = read v` against **edge-verified** gauge automorphisms. Choosing a kernel basis
+> **is** choosing a pivot/column order — *`OrdEquivariant` is unsatisfiable* (S3 correction 1), again.
+> ⟹ *"the row space is gauge-blind"* is true and **not enough**: gauge-blindness was never the
+> obstacle; **naming a class without an order** is, and a relation does not dodge it — it only moves
+> the order from the labelling to the *class indexing*.
+>
+> **▶ WHAT SURVIVES.** §1's diagnosis (force has no refinement channel) is **untouched** — it was
+> verified at source and is independent of §4. §3's **Method 1 is untouched as a channel** but now has
+> **no reader to put through it**: `Linked` was the proposed `read`, and it is empty. §5's reduction
+> and ceiling are untouched. ⟹ **Method 1 is a mechanism in search of an invariant; finding the
+> invariant is the whole problem, and it is the same one S3 bottoms out on (`AggFaithfulB`,
+> per-family).** ⛔ Do not build the refiner plumbing until a reader is measured to split something.
+>
+> ★ **AND ONE THING §1 UNDERSTATES, checked at source** ([Select.lean:22-23](../GraphCanonizationProofs/ChainDescent/Select.lean#L22)):
+> the `≤ 1` in `NodeResolvedC` is **not an oversight — it is what buys `②`.** *"Fan-out `≤ 1` **by
+> construction** — the single path of `≤ n+1` nodes"* is the reason `cost ≤ 69·(n+1)^13` holds with no
+> flag disjunct. ⟹ ⛔ **Never "fix" the missing partial-success rung by letting a node commit to `k > 1`
+> survivors** — that restores the tree and the cost becomes a product again, which is the one thing
+> chain descent exists to avoid. A **refinement** channel is the only shape that adds information
+> without branching, which is why §3 is the right idea even though §4 failed to feed it.
+
 > ## ▶▶ STATUS (2026-08-10) — a DIAGNOSIS + three ranked methods. **Nothing here is built yet.**
 >
 > **The finding, verified against source:** in the published object the force key's value **never
@@ -101,6 +145,12 @@ with the predicate that already exists. Force separates, consume clears — with
 
 ## 4. METHOD 2 — the automorphism-blind solver: use the row space **relationally**
 
+> ⛔⛔ **REFUTED 2026-08-10 at the built extraction — read the block at the top of this file.**
+> Everything below is a correct derivation of a **vacuous** object: `Linked` is the total relation
+> when `dim ker = 0` and the equality relation when `dim ker > 0`, so no equivariant read comes out of
+> it. The section is kept because the *identity* it establishes (`Linked u v ⟺ ∀ x ∈ ker H, x_u = x_v`)
+> is the useful residue and is now verified.
+
 **The row space is already gauge-blind.** `R := rowspace H = ker(H)^⊥` is a canonical function of
 `(adj, χ)` — no order, no pivot, no basis is chosen — and **`RigidRefine.rowspace_transport` is
 proved** ([RigidRefine.lean:87](../GraphCanonizationProofs/ChainDescent/RigidRefine.lean#L87)).
@@ -149,6 +199,13 @@ equivariant invariant provably cannot split them (the (F1) ceiling: an equivaria
 the honest scope sentence to publish with any of this.
 
 ## 6. ▶▶ STEP 0 — THE PROBE, BEFORE ANY LEAN
+
+> ✅ **IT RAN (2026-08-10): `scratchpad/probe_w2_linked.py` → `probe_w2_linked.out`.** All three rows
+> below plus six more witnesses. **Row 2 (`K₄`) fired the falsifier** for the signature read, and rows
+> 1 and 3 came back **vacuous** for every legal read. Verdict block at the top of this file. The probe
+> is reusable: it carries exact F₂ nullspace/rowspace, the `Linked` identity check, a
+> **read-equivariance** check against edge-verified gauge automorphisms, and the refine-to-fixpoint
+> measurement — point it at a **new** extraction and it answers in seconds.
 
 Compute `Linked` and the refinement it induces on witnesses already characterized, and ask whether it
 **splits** the mixed cells. Three rows, and the middle one is a soundness check, not a hope:

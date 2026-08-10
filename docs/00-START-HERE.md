@@ -107,6 +107,15 @@
 > **relationally** (`Linked u v := e_u + e_v ∈ rowspace H`: order-free, gauge-blind, **decidable**,
 > and `rowspace_transport` is proved); and the **reduction** of CFI cell-separation to base
 > edge-separation, with its ceiling — plus **the step-0 probe that must run before any Lean**.
+> ⛔⛔ **AND THE PROBE RAN (2026-08-10, `scratchpad/probe_w2_linked.out`, 9 witnesses): METHOD 2 IS
+> REFUTED.** `rowspace H = ker(H)^⊥` ⟹ `Linked u v ⟺ ∀ x ∈ ker H, x_u = x_v` — the **total** relation
+> at `dim ker = 0`, the **equality** relation at `dim ker > 0`. Every legal read (class size; and the
+> steelman, 1-WL on `adj ∪ Linked`) leaves the cells **unchanged on all 9 witnesses**; the kernel
+> **signature** does split them and splits **`CFI(K₄)`, where `Aut` merges all 16 gadget vertices into
+> one block** (144–6912 read-equivariance violations vs edge-verified gauge automorphisms) — a basis
+> **is** a column order. ★ **Gauge-blindness was never the obstacle; naming a class without an order
+> is.** Method 1 (the channel) survives with **no reader to carry**. ★ And `Select.lean:22-23`: the
+> `≤ 1` success bar is what buys `②`'s single path — ⛔ never widen it to `k > 1` survivors.
 >
 > ⛔ **Five corrections to carry into any pickup** (full list = wind-down §2a's *sixteen
 > corrections*): (i) W2's `CascadeOracle` → `handled_of_seal` route is at the **wrong object**

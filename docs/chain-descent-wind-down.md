@@ -1178,9 +1178,20 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >    orbit-blocks registers as **failure**. Success is binary — whole cell one orbit, or key injective
 >    on the cell. ⟹ *"force separates mixed cells"* is **inexpressible as success**, and the ≤ 8-value
 >    cap, the `hrigid` hypothesis and item 3b's Frucht result are **one** wall seen three ways.
->    ▶ **NEXT = that doc's §6 probe** (`Linked u v := e_u + e_v ∈ rowspace H` — order-free,
->    gauge-blind, decidable; does it *split* the measured mixed cells?), then its method 1 (wire the
->    solver read in as a **refiner**, not a key).
+>    ⛔⛔ **AND ITS §6 PROBE HAS NOW RUN — METHOD 2 IS REFUTED** (`scratchpad/probe_w2_linked.out`,
+>    9 witnesses, 2026-08-10). `rowspace H = ker(H)^⊥` ⟹ `Linked u v ⟺ ∀ x ∈ ker H, x_u = x_v`, so it
+>    is the **total** relation when `dim ker = 0` (`G8`) and the **equality** relation when
+>    `dim ker > 0` (84/84, 56/56, 42/42, 28/28 singleton classes). Every legal read — class size, and
+>    the steelman *1-WL on the 2-relation `adj ∪ Linked`* — leaves the non-singleton cells `k → k`
+>    with identical sizes on **all 9** witnesses. The kernel **signature** does split them, and
+>    splits `CFI(K₄)` where `Aut` merges all 16 gadget vertices into one block — **144/1152/768/6912
+>    read-equivariance violations** against edge-verified gauge automorphisms. Choosing a kernel basis
+>    **is** choosing a column order: `OrdEquivariant` unsatisfiability again.
+>    ⟹ ★ **Gauge-blindness was never the obstacle; naming a class without an order is**, and a
+>    relation does not dodge it. Method 1 (the refinement **channel**) survives intact but has **no
+>    reader to carry** — do not build its plumbing until some read is *measured* to split a cell.
+>    ★ And note (source, `Select.lean:22-23`): the `≤ 1` success bar is what buys `②`'s single path of
+>    `≤ n+1` nodes — ⛔ never "fix" the missing partial-success rung by committing to `k > 1` survivors.
 >
 > ⟹ **TWO live targets, and the cheap one is the CFI LAYER, not S3.** ✅ The socket **and the instance
 > kit** are built (`SelectCell` §9a/§9b/**§9c**): a family discharges its consume half by exhibiting
@@ -1272,7 +1283,7 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > | | option | size | why / why not |
 > |---|---|---|---|
 > | **A** | **Wire `ResolvableCellAt` into `Publication.UnhandledResidue`** as the narrowed residue, with `RecordDeepenCell.not_all_resolvable_of_flag` as its `③` | small — **no new mathematics**; every piece is proved and gated | It is a real definition (not an `opaque` atom, so it does not re-break `unhandledResidue_nonvacuous`), it is **measured non-vacuous both ways** (`mp7` resolvable everywhere; `rand multipede V=6 W=5` and `G8` nowhere), and it strictly narrows `¬ TinhoferGraph`. ⚠ It does **not** capture CFI-over-cubic — that must be said plainly wherever it is quoted |
-> | **B** | **W2 = the CFI LAYER.** ⛔⛔ **FIRST read [`chain-descent-force-refinement-channel.md`](chain-descent-force-refinement-channel.md)** — force has **no refinement channel**, so its core job is inexpressible as success here, and that is the common cause of the ≤ 8-value cap, `hrigid`, and item 3b's Frucht result. Its **§6 probe is the next step.** ✅ **socket + instance kit built** (§9a/§9b/**§9c**); ✅ **four probes run**; then **the CFI layer instance** (`V` = the gauge flips; *sound* ✅, *transitive* ✅ measured at every reached node, *emitted* = the one carried hypothesis — `KernelSupply.lean` has zero theorems). ⚠ **S3 is the OTHER target and is mis-aimed as written** — see the S3 corrections. ⛔ ~~W2 at `mp7`~~ and ~~W2 at the CFI root~~ are **both retracted** | S3 = the real research box | **Read §2 W2's re-affirmation block AND its item-3 block before starting** — four routes are refuted there, and the target was *inverted* on 2026-08-09: **a gauge can never make a cell mixed** (it is a subgroup of `Aut`), so **CFI-over-cubic is not an instance of the claim at all** and the **gauge alone** cannot fire its root cells (⚠ the earlier *"no key of any kind"* is over-strong — see the 2026-08-10 scope correction in the item-3 block: every witness has a symmetric base). The claim's home is the **rigid** case (`dim ker = 0`), where every hypothesis flips to satisfied |
+> | **B** | **W2 = the CFI LAYER.** ⛔⛔ **FIRST read [`chain-descent-force-refinement-channel.md`](chain-descent-force-refinement-channel.md)** — force has **no refinement channel**, so its core job is inexpressible as success here, and that is the common cause of the ≤ 8-value cap, `hrigid`, and item 3b's Frucht result. ⛔ **Its §6 probe HAS RUN and REFUTED method 2** (`probe_w2_linked.out`) — the channel has no reader, so B's force half is now *"find an equivariant read that splits a mixed cell"*, i.e. the same open property S3 bottoms out on. **B's consume half (the §9c kit + the carried `emitted` hypothesis) is unaffected and is the part that can still land.** ✅ **socket + instance kit built** (§9a/§9b/**§9c**); ✅ **four probes run**; then **the CFI layer instance** (`V` = the gauge flips; *sound* ✅, *transitive* ✅ measured at every reached node, *emitted* = the one carried hypothesis — `KernelSupply.lean` has zero theorems). ⚠ **S3 is the OTHER target and is mis-aimed as written** — see the S3 corrections. ⛔ ~~W2 at `mp7`~~ and ~~W2 at the CFI root~~ are **both retracted** | S3 = the real research box | **Read §2 W2's re-affirmation block AND its item-3 block before starting** — four routes are refuted there, and the target was *inverted* on 2026-08-09: **a gauge can never make a cell mixed** (it is a subgroup of `Aut`), so **CFI-over-cubic is not an instance of the claim at all** and the **gauge alone** cannot fire its root cells (⚠ the earlier *"no key of any kind"* is over-strong — see the 2026-08-10 scope correction in the item-3 block: every witness has a symmetric base). The claim's home is the **rigid** case (`dim ker = 0`), where every hypothesis flips to satisfied |
 > | **C** | **W4 write-up** | 1 week | The go/no-go was met at W1. Read W4's must-state list first — item 3 was **corrected 2026-08-08** and items 1/9 now have the sharpened `②` story (only `deck2Supply`'s charge can move the degree) |
 > | **D** | measure `W-j`'s hoist ceiling on a many-celled node; land a `#eval` flag witness (the multipede the rigid handler cannot peel) | small each | Both are owed *before* W4 quotes a performance number or the flag semantics |
 >
