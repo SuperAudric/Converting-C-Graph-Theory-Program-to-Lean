@@ -631,6 +631,78 @@ bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implicati
 > collapses. `CellResolvedAt` is stated on the survivors, so it covers all three. That is strictly
 > stronger than the node-global predicate, not a port of it.
 >
+> ### ⛔⛔⛔ ITEM 3 — PROBED 2026-08-09 (`probe_w2_linear.py` → `.out`), AND IT INVERTS THE TARGET
+>
+> ⛔ **First, a correction to my own item-3 scoping.** *"`framesEquivariant_seedFrames` +
+> `card_seedFrames_le` are built ⟹ equivariance ✅ + poly ✅, missing only discretizing"* is **FALSE**,
+> and `RigidRefine` §9F says so at source: at a gauge colour-aut, `FramesEquivariant` forces the frame
+> set to be closed under **left multiplication by the whole gauge group**, left-mult is a **free**
+> action, so `|frames| ≥ |G| = 2^β`. **No poly equivariant full-order frame set exists on a gauged
+> input — the exponential is forced by the TYPE.** `seedFrames` is **retired** and
+> `OrderOfEquivariant` is **target-vacuous** (it holds only on purely rigid inputs). Equivariance and
+> poly size are *jointly unattainable* there; "discretizing" was never the missing third.
+>
+> ### ★★★★ AND THEN THE PROBE INVERTED THE PREMISE: **a gauge can never make a cell mixed**
+>
+> The gauge (F₂ cycle space) is a **subgroup of `Aut`**. Subgroups only ever *merge* vertices — they
+> never create mixedness. Mixedness is several `Aut`-orbits, i.e. the **absence** of automorphisms.
+> So *"a cell mixed due to a linear (gauge) obstruction"* is close to a contradiction in terms.
+>
+> Measured exactly (no search, no budget; every gauge element **verified edge-by-edge** first):
+>
+> | witness | cell | gauge-orbits | `Aut`-orbits | some `Aut`-block a single gauge-orbit? |
+> |---|---|---|---|---|
+> | CFI cubic m=8 pl / tw | gadgets 32 | **8** × 4 | **3** — `[12,12,8]` | ⛔ **no** |
+> | ” | wires 24 | **12** × 2 | **3** — `[12,6,6]` | ⛔ **no** |
+> | CFI over `K₄` (edge-transitive base) | gadgets 16 | **4** × 4 | **1** — `[16]` | ⛔ **no** |
+> | CFI over `C₆` | gadgets 24 | **12** × 2 | **1** — `[24]` | ⛔ **no** |
+>
+> By (F1) the key is constant on `Aut`-orbits, so it **cannot cut inside a block**; by (F2) `rep`
+> merges only within harvest-orbits. So the surviving representative count is at least
+> `|block| / |gauge-orbit| ≥ 2` **at every cell of every witness**. ⟹ **no key whatsoever — perfect,
+> solve-derived, or otherwise — can make a CFI root cell fire on the gauge.** That is a *counting
+> fact*, not a difficulty, and it is not what a linear solver is short of.
+>
+> ★ **What Aut does beyond the gauge is BASE automorphism structure**: on `K₄` (edge-transitive base)
+> `Aut` merges all 4 gauge-orbits into **one** block; on the asymmetric cubic, 8 into 3. The linear
+> layer sees none of it.
+>
+> ⟹ ⛔⛔ **CFI-over-cubic is NOT an instance of the target claim.** Its CFI part — the gauge — is
+> exactly what `kernelSupply` already consumes; what is left mixed is the **base graph**, which is
+> the base's problem. That is precisely the design's own sentence: *"families like CFI apply a
+> difficult residue over the top of an arbitrary graph; it can handle this residue but then hands you
+> back the original graph."*
+>
+> ### ⟹ THE TARGET CLAIM'S REAL HOME IS THE **RIGID** CASE (`dim ker = 0`)
+>
+> There: no gauge, `Aut` trivial, every cell fully mixed, and the F₂ **forced values** genuinely
+> separate. And every hypothesis flips from obstacle to satisfied:
+>
+> | | at a CFI root (`dim ker > 0`) | at a rigid node (`dim ker = 0`) |
+> |---|---|---|
+> | consume | the gauge is *inside* `Aut` — merges, never separates | nothing to certify (correctly) |
+> | `nodeResolved_compKey_genOfRef`'s `hrigid` | **false** (measured) | **satisfied — it is the hypothesis** |
+> | an equivariant order perm | provably does **not** exist (the `2^β` bound) | **exists** — the recorded *"only on rigid inputs"* is a **positive** here |
+> | `RigidSolveF2` uniqueness | inapplicable (`dim ker > 0`) | **applies** |
+>
+> ### ▶▶ STEPS TO *"the resolver fires somewhere when a cell is mixed by a linear obstruction"*
+>
+> * **S1 — state the predicate.** *"Mixed by a linear obstruction"* = the `ForcingModel` bridge holds
+>   **and** the system is rigid on that cell (`dim ker = 0`). Both halves exist: `ForcingModel` (P2)
+>   and `RigidSolveF2`'s rigidity. ⚠ It must **not** be read as *"a gauge is present"* — probed above,
+>   that reading is empty.
+> * **S2 — the route is already plumbed.** `RigidGen.nodeResolved_compKey_genOfRef` gives
+>   `NodeResolved` from `hdisc` + `hrigid`, and **item 4** (`SelectCell` §9b,
+>   `someCellResolved_of_branchSeparation`) lands it at the **published** object. Nothing new here.
+> * **S3 — the one real gap, now much narrower: the discretizing reader IN THE RIGID REGIME.**
+>   `hdisc` needs the reader to discretize; `structRead`'s equivariant order exists *exactly* on rigid
+>   inputs. This is **not** the retired `seedFrames` problem, which had to work on gauged inputs where
+>   it is type-impossible. **This is item 3, correctly scoped.**
+> * **S4 — wire (item 2), last**, unchanged: `②` re-bills, numerals move, `①` rides S3.
+> * **⚠ Scope sentence to publish with it:** the theorem is *"no stall at a node whose obstruction is
+>   linear **and rigid**"*. CFI-over-cubic roots are **not** covered and provably cannot be by any
+>   key — say it as the counting fact it is.
+>
 > ### ▶▶ ORDERING: **4 → 3 → 5 → 2** (assessed 2026-08-09)
 >
 > * **4 first** — done; small, no dependencies, and it makes every later force-side result land at

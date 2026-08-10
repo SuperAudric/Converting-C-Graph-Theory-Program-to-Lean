@@ -1,0 +1,67 @@
+W2 item 3a — is a mixed cell's mixedness LINEAR, and can the gauge fire on it?
+  FIRES ⟺ keepMin is exactly one Aut-orbit ∧ the harvest is transitive on it.
+  gauge <= Aut always ⟹ #gauge-orbits >= #Aut-orbits; EQUAL means the mixedness is
+  entirely linear.  Every gauge element is verified edge-by-edge before use.
+
+  CFI cubic m=8 pl  n=56  |E|=12  beta=dim(cycle space)=5  |gauge|=32
+     base graph: |Aut(base)|=12, edge-orbit sizes [6, 3, 3]
+     cell 0 (TARGET) [gadgets]: |cell|=32
+        gauge-orbits: 8 sizes=[4, 4, 4, 4, 4, 4, 4, 4]
+        Aut-orbits  : 3 sizes=[12, 12, 8]
+        ⟹ ⛔ NOT linear: Aut merges 8 gauge-orbits into 3 blocks
+           the extra merging is BASE automorphism structure, which no linear
+           solver supplies — so even a perfect key leaves 2+ reps
+        ⟹ ⛔ NO Aut-block is a single gauge-orbit — every block splits into >= 2 gauge-orbits, so even a PERFECT key leaves >= 2 reps ⟹ THE CELL CANNOT FIRE on the gauge (block/gauge ratio 4)
+     cell 1 [wires]: |cell|=24
+        gauge-orbits: 12 sizes=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        Aut-orbits  : 3 sizes=[12, 6, 6]
+        ⟹ ⛔ NOT linear: Aut merges 12 gauge-orbits into 3 blocks
+           the extra merging is BASE automorphism structure, which no linear
+           solver supplies — so even a perfect key leaves 3+ reps
+        ⟹ ⛔ NO Aut-block is a single gauge-orbit — every block splits into >= 3 gauge-orbits, so even a PERFECT key leaves >= 2 reps ⟹ THE CELL CANNOT FIRE on the gauge (block/gauge ratio 2)
+
+  CFI cubic m=8 tw  n=56  |E|=12  beta=dim(cycle space)=5  |gauge|=32
+     base graph: |Aut(base)|=12, edge-orbit sizes [6, 3, 3]
+     cell 0 (TARGET) [gadgets]: |cell|=32
+        gauge-orbits: 8 sizes=[4, 4, 4, 4, 4, 4, 4, 4]
+        Aut-orbits  : 3 sizes=[12, 12, 8]
+        ⟹ ⛔ NOT linear: Aut merges 8 gauge-orbits into 3 blocks
+           the extra merging is BASE automorphism structure, which no linear
+           solver supplies — so even a perfect key leaves 2+ reps
+        ⟹ ⛔ NO Aut-block is a single gauge-orbit — every block splits into >= 2 gauge-orbits, so even a PERFECT key leaves >= 2 reps ⟹ THE CELL CANNOT FIRE on the gauge (block/gauge ratio 4)
+     cell 1 [wires]: |cell|=24
+        gauge-orbits: 12 sizes=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        Aut-orbits  : 3 sizes=[12, 6, 6]
+        ⟹ ⛔ NOT linear: Aut merges 12 gauge-orbits into 3 blocks
+           the extra merging is BASE automorphism structure, which no linear
+           solver supplies — so even a perfect key leaves 3+ reps
+        ⟹ ⛔ NO Aut-block is a single gauge-orbit — every block splits into >= 3 gauge-orbits, so even a PERFECT key leaves >= 2 reps ⟹ THE CELL CANNOT FIRE on the gauge (block/gauge ratio 2)
+
+=== a SYMMETRIC base — removes the base's own asymmetry from the picture ===
+  CFI over K4  n=28  |E|=6  beta=dim(cycle space)=3  |gauge|=8
+     base graph: |Aut(base)|=24, edge-orbit sizes [6]
+     cell 0 (TARGET) [gadgets]: |cell|=16
+        gauge-orbits: 4 sizes=[4, 4, 4, 4]
+        Aut-orbits  : 1 sizes=[16]
+        ⟹ ⛔ NOT linear: Aut merges 4 gauge-orbits into 1 blocks
+           the extra merging is BASE automorphism structure, which no linear
+           solver supplies — so even a perfect key leaves 4+ reps
+        ⟹ ⛔ NO Aut-block is a single gauge-orbit — every block splits into >= 4 gauge-orbits, so even a PERFECT key leaves >= 2 reps ⟹ THE CELL CANNOT FIRE on the gauge (block/gauge ratio 4)
+     cell 1 [wires]: |cell|=12
+        gauge-orbits: 6 sizes=[2, 2, 2, 2, 2, 2]
+        Aut-orbits  : 1 sizes=[12]
+        ⟹ ⛔ NOT linear: Aut merges 6 gauge-orbits into 1 blocks
+           the extra merging is BASE automorphism structure, which no linear
+           solver supplies — so even a perfect key leaves 6+ reps
+        ⟹ ⛔ NO Aut-block is a single gauge-orbit — every block splits into >= 6 gauge-orbits, so even a PERFECT key leaves >= 2 reps ⟹ THE CELL CANNOT FIRE on the gauge (block/gauge ratio 2)
+
+  CFI over C6  n=24  |E|=6  beta=dim(cycle space)=1  |gauge|=2
+     base graph: |Aut(base)|=12, edge-orbit sizes [6]
+     cell 0 (TARGET) [gadgets]: |cell|=24
+        gauge-orbits: 12 sizes=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        Aut-orbits  : 1 sizes=[24]
+        ⟹ ⛔ NOT linear: Aut merges 12 gauge-orbits into 1 blocks
+           the extra merging is BASE automorphism structure, which no linear
+           solver supplies — so even a perfect key leaves 12+ reps
+        ⟹ ⛔ NO Aut-block is a single gauge-orbit — every block splits into >= 12 gauge-orbits, so even a PERFECT key leaves >= 2 reps ⟹ THE CELL CANNOT FIRE on the gauge (block/gauge ratio 2)
+
