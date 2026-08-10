@@ -368,6 +368,30 @@ bridge lemma `akrvTinhofer → ∀ reached χ, Deepen.Tinhofer` so the implicati
 
 ### W2 — the CFI **layer**, not a CFI family *(box was 2 weeks; ✅ stages 1–2 built 2026-08-08; stage 0's retarget is RETRACTED — read the re-affirmation block FIRST)*
 
+> # ⛔⛔⛔ 2026-08-10 — READ [`chain-descent-force-refinement-channel.md`](./chain-descent-force-refinement-channel.md) BEFORE ANY OF THIS SECTION
+>
+> **The foundation under W2 is missing, and it explains every dead end below.** Verified at source:
+> in the published object **the force key's value never enters a colouring** — force's only channel is
+> `Force.keepMin`, *selection inside one cell*. So a force key that cleanly splits a mixed cell into
+> three orbit-blocks **accomplishes nothing**: the argmin block is kept and the fact that the others
+> were different is discarded. ⟹ *"force separates mixed-orbit cells"* — force's core job — **is not
+> expressible as success** in the object as built, and success is binary: whole cell one orbit
+> (consume) or key injective on the cell (force).
+>
+> ★★ That single fact is the common cause of three "independent" walls recorded below: the **≤ 8-value
+> cap** on `baseReadPin` (a cap on a *standalone key*, not on a refiner — `refineBy` pairs the read
+> with χ and the next 1-WL round propagates it), the **`hrigid`** hypothesis in every rigid firing
+> lemma (whole-cell injectivity is the only force success the interface offers), and the **Frucht**
+> result of item 3b (12 blocks, *each already a single gauge-orbit* — force needs only to **split**,
+> and there is no channel for a split).
+>
+> ⟹ **Chasing a stronger reader (S3) or a CFI coverage theorem on this interface is building on a
+> foundation that cannot express the goal.** The new doc carries the diagnosis, three ranked methods
+> (give force a **refinement channel**; use the row space **relationally** via
+> `Linked u v := e_u + e_v ∈ rowspace H`, which is order-free, gauge-blind and *decidable*; and the
+> **reduction** of CFI cell-separation to base edge-separation, with its ceiling), and **the step-0
+> probe that must run first**. Everything below stays accurate as a record of what is refuted.
+
 > # ⛔⛔⛔ SCOPE RE-AFFIRMATION (user, 2026-08-08, later) — W2 IS A **FORCE-SIDE LAYER** THEOREM
 >
 > **The architecture, restated by the user, and it is what the built contract already says:**
@@ -1147,6 +1171,17 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >    (Frucht): blocks **=** gauge-orbits exactly ⟹ the counting bound is **gone**, firing is a pure
 >    **key** question. Base symmetric: ⛔ still blocked. ⟹ *solve the CFI part, hand back the base.*
 >
+> 5. ⛔⛔⛔ **AND THEN (2026-08-10) THE FOUNDATION UNDER ALL OF IT TURNED OUT TO BE MISSING** —
+>    **[`chain-descent-force-refinement-channel.md`](chain-descent-force-refinement-channel.md)**, read
+>    it before W2. In the published object **the force key's value never enters a colouring**: force's
+>    only channel is `keepMin` (selection inside one cell), so a key that *splits* a mixed cell into
+>    orbit-blocks registers as **failure**. Success is binary — whole cell one orbit, or key injective
+>    on the cell. ⟹ *"force separates mixed cells"* is **inexpressible as success**, and the ≤ 8-value
+>    cap, the `hrigid` hypothesis and item 3b's Frucht result are **one** wall seen three ways.
+>    ▶ **NEXT = that doc's §6 probe** (`Linked u v := e_u + e_v ∈ rowspace H` — order-free,
+>    gauge-blind, decidable; does it *split* the measured mixed cells?), then its method 1 (wire the
+>    solver read in as a **refiner**, not a key).
+>
 > ⟹ **TWO live targets, and the cheap one is the CFI LAYER, not S3.** ✅ The socket **and the instance
 > kit** are built (`SelectCell` §9a/§9b/**§9c**): a family discharges its consume half by exhibiting
 > one **emitted + sound + transitive** generator list. For CFI that is *sound* ✅ (`CFI.cfiFlipAut`),
@@ -1237,7 +1272,7 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > | | option | size | why / why not |
 > |---|---|---|---|
 > | **A** | **Wire `ResolvableCellAt` into `Publication.UnhandledResidue`** as the narrowed residue, with `RecordDeepenCell.not_all_resolvable_of_flag` as its `③` | small — **no new mathematics**; every piece is proved and gated | It is a real definition (not an `opaque` atom, so it does not re-break `unhandledResidue_nonvacuous`), it is **measured non-vacuous both ways** (`mp7` resolvable everywhere; `rand multipede V=6 W=5` and `G8` nowhere), and it strictly narrows `¬ TinhoferGraph`. ⚠ It does **not** capture CFI-over-cubic — that must be said plainly wherever it is quoted |
-> | **B** | **W2 = the CFI LAYER.** ✅ **socket + instance kit built** (§9a/§9b/**§9c**); ✅ **four probes run**; ▶ **NEXT = the CFI layer instance** (`V` = the gauge flips; *sound* ✅, *transitive* ✅ measured at every reached node, *emitted* = the one carried hypothesis — `KernelSupply.lean` has zero theorems). ⚠ **S3 is the OTHER target and is mis-aimed as written** — see the S3 corrections. ⛔ ~~W2 at `mp7`~~ and ~~W2 at the CFI root~~ are **both retracted** | S3 = the real research box | **Read §2 W2's re-affirmation block AND its item-3 block before starting** — four routes are refuted there, and the target was *inverted* on 2026-08-09: **a gauge can never make a cell mixed** (it is a subgroup of `Aut`), so **CFI-over-cubic is not an instance of the claim at all** and the **gauge alone** cannot fire its root cells (⚠ the earlier *"no key of any kind"* is over-strong — see the 2026-08-10 scope correction in the item-3 block: every witness has a symmetric base). The claim's home is the **rigid** case (`dim ker = 0`), where every hypothesis flips to satisfied |
+> | **B** | **W2 = the CFI LAYER.** ⛔⛔ **FIRST read [`chain-descent-force-refinement-channel.md`](chain-descent-force-refinement-channel.md)** — force has **no refinement channel**, so its core job is inexpressible as success here, and that is the common cause of the ≤ 8-value cap, `hrigid`, and item 3b's Frucht result. Its **§6 probe is the next step.** ✅ **socket + instance kit built** (§9a/§9b/**§9c**); ✅ **four probes run**; then **the CFI layer instance** (`V` = the gauge flips; *sound* ✅, *transitive* ✅ measured at every reached node, *emitted* = the one carried hypothesis — `KernelSupply.lean` has zero theorems). ⚠ **S3 is the OTHER target and is mis-aimed as written** — see the S3 corrections. ⛔ ~~W2 at `mp7`~~ and ~~W2 at the CFI root~~ are **both retracted** | S3 = the real research box | **Read §2 W2's re-affirmation block AND its item-3 block before starting** — four routes are refuted there, and the target was *inverted* on 2026-08-09: **a gauge can never make a cell mixed** (it is a subgroup of `Aut`), so **CFI-over-cubic is not an instance of the claim at all** and the **gauge alone** cannot fire its root cells (⚠ the earlier *"no key of any kind"* is over-strong — see the 2026-08-10 scope correction in the item-3 block: every witness has a symmetric base). The claim's home is the **rigid** case (`dim ker = 0`), where every hypothesis flips to satisfied |
 > | **C** | **W4 write-up** | 1 week | The go/no-go was met at W1. Read W4's must-state list first — item 3 was **corrected 2026-08-08** and items 1/9 now have the sharpened `②` story (only `deck2Supply`'s charge can move the degree) |
 > | **D** | measure `W-j`'s hoist ceiling on a many-celled node; land a `#eval` flag witness (the multipede the rigid handler cannot peel) | small each | Both are owed *before* W4 quotes a performance number or the flag semantics |
 >
@@ -1258,7 +1293,11 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >    **unsatisfiable on a rigid graph**, so do not state a CFI theorem there. §2 W2's correction
 >    blocks say why **four** earlier routes were wrong.
 > 5. `PublicTheoremIndex.md` for anything else.
-> 6. Measured evidence: **`scratchpad/probe_w2_linear.out` (item 3a — the gauge/mixedness inversion,
+> 5a. ⛔⛔ **[`chain-descent-force-refinement-channel.md`](chain-descent-force-refinement-channel.md)**
+>    — the 2026-08-10 diagnosis (force has no refinement channel), the three ranked methods, and the
+>    step-0 probe. **Read it before doing anything in W2.**
+> 6. Measured evidence: **`scratchpad/probe_w2_asymbase.out` (item 3b — CFI over an asymmetric base;
+>    the layer theorem measured true), `probe_w2_linear.out` (item 3a — the gauge/mixedness inversion,
 >    read this one for W2)**, `probe_w2_keysplit.out` (step (ii) — `holKeyFast` inert at the CFI
 >    root), `probe_w2_resolvable.out` (W2 stage 0),
 >    `scratchpad/ProbeShareWalk*.lean` + `ProbeWjMeasure.lean` (`W-j`),

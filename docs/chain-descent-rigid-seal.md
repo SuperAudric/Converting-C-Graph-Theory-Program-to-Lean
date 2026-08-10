@@ -7,6 +7,27 @@
 > ⚠ **One item here stays live:** §9.1 (the per-family `Tinhofer` discharge) is the scoping risk on
 > wind-down item **W1** — read it before starting W1, then stop.
 > Everything below is an accurate record of what was built and the three do-not-re-derive traps. It is not a plan.
+>
+> ## ⛔⛔⛔ 2026-08-10 — TWO CORRECTIONS TO THIS DOC'S FRONTIER. Read
+> ## [`chain-descent-force-refinement-channel.md`](./chain-descent-force-refinement-channel.md) first.
+>
+> 1. **`OrdEquivariant` is UNSATISFIABLE for `n ≥ 2`**, not merely "carried". It quantifies over all
+>    `adj χ`; at the empty graph with the constant colouring every `σ` is a colour-automorphism, so it
+>    forces `σ = 1`. A `Force.Key` must be **one global function**, so there is no "restrict to the
+>    rigid regime" instantiation. ⟹ the whole **single-`ord` `structRead` generation** (§8, §9A–§9C, and
+>    this doc's *"P2 = the recover-core read"* frontier) has an **undischargeable** hypothesis. The
+>    live interface is `RigidRefine` §9F `readAggB`, whose `①` is already closed **and poly**;
+>    `seedFrames` is type-impossible on a gauged input. Full list = wind-down §2 W2's
+>    *"S3 AS WRITTEN ABOVE IS MIS-AIMED"* block (six corrections) + `RigidRefine.lean`'s header banner.
+> 2. **★★ And the deeper one: force has no refinement channel.** In the published object the force
+>    key's value **never enters a colouring** — its only channel is `Force.keepMin`, selection inside
+>    one cell. So *"separate a mixed-orbit cell"*, which is what this whole doc is *for*, is **not
+>    expressible as success**; success is binary (whole cell one orbit, or key injective on the cell).
+>    That is the common cause of the ≤ 8-value reader cap, the `hrigid` hypothesis in every firing
+>    lemma here, and the Frucht measurement. **The new doc has the diagnosis, three ranked methods and
+>    the step-0 probe** — including that the row space is *already* gauge-blind
+>    (`rowspace_transport`, proved) and needs only to be used **relationally**
+>    (`Linked u v := e_u + e_v ∈ rowspace H`) rather than as a labelling.
 
 > **What this doc is.** The self-contained working home for the **rigid seal** — Algorithm R, the force/rigid side
 > of the mixed canonizer. It covers *everything the rigid work must now do* (canonize a rigid residue or honestly

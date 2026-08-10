@@ -51,9 +51,13 @@
 > fire a CFI root cell** — a counting fact, not a missing solver. The extra merging is **base**
 > automorphism structure. ⟹ **CFI-over-cubic is NOT an instance of *"mixed by a linear obstruction"***
 > (its gauge is exactly what `kernelSupply` already consumes; the remainder is the base graph), and
-> **W2's home is the RIGID case `dim ker = 0`**, where `hrigid` *is* the hypothesis and an equivariant
-> order provably **exists**. ▶ **NEXT = S3, the discretizing reader in the rigid regime** — ⛔ *not*
-> the retired `seedFrames`, which is **type-impossible** on gauged inputs (`RigidRefine` §9F).
+> **W2's home is the RIGID case `dim ker = 0`**, where `hrigid` *is* the hypothesis. ⚠⚠ ~~and an
+> equivariant order provably **exists**~~ — **FALSE, corrected 2026-08-10**: `OrdEquivariant` is a
+> **global** predicate (∀ `adj χ`) and is **unsatisfiable for `n ≥ 2`**, so no per-input "rigid
+> regime" instantiation exists. ⛔ ~~▶ NEXT = S3, the discretizing reader in the rigid regime~~ — **S3 is
+> NOT the next step** (superseded twice below: it is aimed at the retired single-`ord` generation, and
+> the foundation under it is missing). ⛔ *not* the retired `seedFrames` either, which is
+> **type-impossible** on gauged inputs (`RigidRefine` §9F).
 >
 > ⚠ **SCOPE OF *"no key of any kind"* (added 2026-08-10, read before quoting it).** The probe's own
 > wording is *"cannot fire **on the gauge**"*, and the bound `reps ≥ |block|/|gauge-orbit|` holds only
@@ -86,6 +90,23 @@
 > interface is §9F `readAggB` (whose `①` is already closed and poly), and the only concrete
 > `baseRead` is capped at **8 values** so no frame family can rescue it. Read wind-down §2 W2's
 > *"S3 AS WRITTEN ABOVE IS MIS-AIMED"* block before touching it.
+>
+> ⛔⛔⛔ **2026-08-10 — AND THE FOUNDATION UNDER W2 IS MISSING. NEW DOC:
+> [`chain-descent-force-refinement-channel.md`](./chain-descent-force-refinement-channel.md) — read it
+> before any W2 work.** Verified at source: in the published object **the force key's value never
+> enters a colouring**. Force's only channel is `Force.keepMin` — *selection inside one cell* — so a
+> force key that cleanly splits a mixed cell into three orbit-blocks **accomplishes nothing**: the
+> argmin block is kept and the fact that the others were different is discarded. Success is binary
+> (whole cell one orbit / key injective on the cell), so ***"force separates mixed-orbit cells"* — its
+> core job — is not expressible as success.**
+> ★★ That one fact is the common cause of three walls recorded as independent: the **≤ 8-value cap**
+> on `baseReadPin` (a cap on a *standalone key*; `refineBy` pairs the read with χ and the next 1-WL
+> round propagates it), the **`hrigid`** hypothesis in every rigid firing lemma, and item 3b's
+> **Frucht** result (12 blocks, each *already* a single gauge-orbit — force needs only to **split**).
+> ▶ The doc carries three ranked methods — give force a **refinement channel**; use the row space
+> **relationally** (`Linked u v := e_u + e_v ∈ rowspace H`: order-free, gauge-blind, **decidable**,
+> and `rowspace_transport` is proved); and the **reduction** of CFI cell-separation to base
+> edge-separation, with its ceiling — plus **the step-0 probe that must run before any Lean**.
 >
 > ⛔ **Five corrections to carry into any pickup** (full list = wind-down §2a's *sixteen
 > corrections*): (i) W2's `CascadeOracle` → `handled_of_seal` route is at the **wrong object**
