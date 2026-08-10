@@ -1373,5 +1373,68 @@ theorem someCellOrbit_of_targetCellIsOrbit {S : CellSupply n} {adj : AdjMatrix n
   rw [← branches_eq_cellList htc] at hu hw
   exact h u hu w hw
 
+/-! ### 9c. THE INSTANCE KIT — a transitive verified subgroup lands in the socket
+
+§9a/§9b give the socket; this gives the **only** way a *family* ever discharges its consume half, so
+that no future family has to re-derive it. The pattern is always the same: exhibit a list `V` of
+permutations that (1) the supply for that cell actually **emits**, (2) are **colour-automorphisms**,
+and (3) act **transitively** on the cell. Then the cell is a single orbit of the *verified* list and
+the node resolves. `verified` is `gens.filter IsColAut`, so (1)+(2) put `V` inside it and (3)
+transports through `WordReach`'s monotonicity.
+
+▶ **This is the shape the CFI layer theorem lands in** (`docs/chain-descent-wind-down.md` §2 W2,
+item 3b). Take `V` = the F₂ gauge flips of the cycle space: (2) is `CFI.cfiFlipAut`, (3) is measured
+exact at **every reached node** whenever the base is resolved (`scratchpad/probe_w2_asymbase.out` —
+1-WL-discrete base ⟹ every non-singleton cell is a *single* gauge-orbit, 21/21 and 26/26 at the root
+and at all four levels of the descent walk), and (1) — *`Kernel.kernelSupply`'s harvest emits them* —
+is the one carried, algorithmic obligation. ⚠ `KernelSupply.lean` is a **definition module with no
+theorems**, so (1) is not a small proof; carry it as a hypothesis, as `ForcingModel.bridge` is. -/
+
+/-- `WordReach` only grows when the generator list does. -/
+theorem wordReach_mono {V V' : List (Equiv.Perm (Fin n))} (hsub : ∀ g ∈ V, g ∈ V')
+    {u w : Fin n} (h : Consume.WordReach V u w) : Consume.WordReach V' u w := by
+  induction h with
+  | refl => exact Consume.WordReach.refl _
+  | step _ hg ih => exact Consume.WordReach.step ih (hsub _ hg)
+
+/-- **★★★ THE INSTANCE KIT.** A list of emitted, colour-automorphic permutations that is transitive
+on cell `c` discharges `CellOrbitAt` there — hence `SomeCellResolved`, hence (at every reached node)
+`HandledSC`. The three hypotheses are exactly *emitted* / *sound* / *transitive*. -/
+theorem cellOrbitAt_of_transitiveGens {S : CellSupply n} {adj : AdjMatrix n} {χ : Colouring n}
+    {c : Nat} (V : List (Equiv.Perm (Fin n)))
+    (hemit : ∀ g ∈ V, g ∈ Consume.gens (S c) adj χ)
+    (haut : ∀ g ∈ V, Consume.IsColAut adj χ g)
+    (htrans : ∀ u ∈ cellList χ c, ∀ w ∈ cellList χ c, Consume.WordReach V u w) :
+    CellOrbitAt S adj χ c := by
+  have hsub : ∀ g ∈ V, g ∈ Consume.verified (S c) adj χ := by
+    intro g hg
+    exact List.mem_filter.mpr ⟨hemit g hg, decide_eq_true (haut g hg)⟩
+  intro u hu w hw
+  exact wordReach_mono hsub (htrans u hu w hw)
+
+/-- The same kit delivered straight to the disjunctive socket's hypothesis at one node. -/
+theorem someCellResolved_of_transitiveGens {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    {χ : Colouring n} {c : Nat} (hc : c ∈ nonSingletonColours χ)
+    (V : List (Equiv.Perm (Fin n)))
+    (hemit : ∀ g ∈ V, g ∈ Consume.gens (S c) adj χ)
+    (haut : ∀ g ∈ V, Consume.IsColAut adj χ g)
+    (htrans : ∀ u ∈ cellList χ c, ∀ w ∈ cellList χ c, Consume.WordReach V u w) :
+    SomeCellResolved key S adj χ :=
+  someCellResolved_of_someCellOrbit ⟨c, hc, cellOrbitAt_of_transitiveGens V hemit haut htrans⟩
+
+/-- **★★★ THE LAYER SOCKET.** *If at every reached non-discrete node some cell carries an emitted,
+sound, transitive generator list, the object is `HandledSC`* — the consume-side layer statement in
+the form a family instantiates. `key` is arbitrary: **no key work is required**, which is precisely
+what the CFI measurement says about a resolved base. -/
+theorem handledSC_of_transitiveGens {key : Key n} {S : CellSupply n} {adj : AdjMatrix n}
+    (h : ∀ χ : Colouring n, Descend.Reaches (Refine.encodeFreeFast (n := n)) adj χ → ¬ Discrete χ →
+      ∃ c ∈ nonSingletonColours χ, ∃ V : List (Equiv.Perm (Fin n)),
+        (∀ g ∈ V, g ∈ Consume.gens (S c) adj χ) ∧ (∀ g ∈ V, Consume.IsColAut adj χ g) ∧
+        (∀ u ∈ cellList χ c, ∀ w ∈ cellList χ c, Consume.WordReach V u w)) :
+    HandledSC key S adj := by
+  refine handledSC_of_someCellResolved (fun χ hr hd => ?_)
+  obtain ⟨c, hc, V, hemit, haut, htrans⟩ := h χ hr hd
+  exact someCellResolved_of_transitiveGens hc V hemit haut htrans
+
 end Select
 end ChainDescent

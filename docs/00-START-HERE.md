@@ -55,6 +55,38 @@
 > order provably **exists**. ▶ **NEXT = S3, the discretizing reader in the rigid regime** — ⛔ *not*
 > the retired `seedFrames`, which is **type-impossible** on gauged inputs (`RigidRefine` §9F).
 >
+> ⚠ **SCOPE OF *"no key of any kind"* (added 2026-08-10, read before quoting it).** The probe's own
+> wording is *"cannot fire **on the gauge**"*, and the bound `reps ≥ |block|/|gauge-orbit|` holds only
+> when the supply-orbits **are** the gauge-orbits. All four witnesses have a **symmetric** base
+> (`|Aut(base)| = 12, 12, 24, 12` — the probe prints it); over an **asymmetric** base `Aut` *is* the
+> gauge, every block is a single gauge-orbit and the bound vanishes. So quote it as *"the gauge alone
+> cannot fire a CFI root cell"*. The retarget to the rigid case still stands — a gauge is a subgroup
+> of `Aut` and so can never create mixedness, which is the load-bearing half — but *"CFI is out of
+> reach for any key"* is **not** what was measured.
+>
+> ✅✅✅ **2026-08-10 — ITEM 3b PUT THE CFI LAYER BACK ON THE TABLE, AND THE SOCKET NOW HAS ITS
+> INSTANCE KIT.** `scratchpad/probe_w2_asymbase.py` → `.out`: exact `Aut(base)`, gauge verified
+> edge-by-edge, **and a descent walk** (⚠ root-only is not a pass — every non-singleton cell
+> re-measured at each reached node). All four item-3a witnesses had a **symmetric** base, and the
+> `reps ≥ 2` bound needs exactly that. Measured over asymmetric bases:
+> * base 1-WL **discrete** ⟹ **every** non-singleton cell is a **single gauge-orbit** at the root
+>   (21/21, 26/26) **and at all four walk levels** ⟹ `Select.CellOrbitAt` holds for the gauge, which
+>   `RecordCost.recordSupplyFast` **already contains** (`kernelSupply`), and `CellOrbitAt` carries
+>   **no guard** ⟹ ✅ **fires with the shipped object, no key work**;
+> * base asymmetric but 1-WL **coarse** (Frucht) ⟹ `Aut`-blocks **=** gauge-orbits (12=12, 18=18) ⟹
+>   the counting bound is **gone**; firing is a pure **key** question, and it is **never blocked**;
+> * base **symmetric** ⟹ ⛔ still blocked, at every level.
+>
+> ★★★ *Solve the CFI part, hand back the base* — measured. ✅ **`SelectCell` §9c** lands the instance
+> kit (`cellOrbitAt_of_transitiveGens` · `handledSC_of_transitiveGens`): a family discharges its
+> consume half with one **emitted + sound + transitive** generator list, at **any** key. For CFI:
+> *sound* ✅ (`CFI.cfiFlipAut`), *transitive* ✅ (measured), *emitted* ⛔ — `KernelSupply.lean` has
+> **zero theorems**, so carry it as a hypothesis the way `ForcingModel.bridge` is carried.
+> ⛔ **And S3 is mis-aimed as written** — `OrdEquivariant` is *unsatisfiable* for `n ≥ 2`, the live
+> interface is §9F `readAggB` (whose `①` is already closed and poly), and the only concrete
+> `baseRead` is capped at **8 values** so no frame family can rescue it. Read wind-down §2 W2's
+> *"S3 AS WRITTEN ABOVE IS MIS-AIMED"* block before touching it.
+>
 > ⛔ **Five corrections to carry into any pickup** (full list = wind-down §2a's *sixteen
 > corrections*): (i) W2's `CascadeOracle` → `handled_of_seal` route is at the **wrong object**
 > (`deepMatchSupply`, not in `recordSupplyFast`); (ii) its replacement `CellIsOrbit kernelSupply` is

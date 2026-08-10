@@ -1,0 +1,100 @@
+W2 item 3b — CFI over an ASYMMETRIC base (does the item-3a counting bound survive?)
+  item 3a's bound  reps >= |Aut-block| / |gauge-orbit| >= 2  needs Aut > gauge.
+  Aut(CFI(G)) > gauge exactly when the BASE has automorphisms. All four item-3a
+  witnesses had |Aut(base)| = 12, 12, 24, 12.  Here Aut(base) = 1.
+  Every gauge element is verified edge-by-edge before use (same as item 3a).
+
+=== 1. control: a SYMMETRIC base, to reproduce item 3a's verdict ===
+  CFI over K4  (|Aut(base)|=24)  n=28  m=4  |E|=6  beta=3  |gauge|=8
+     base: |Aut(base)|=24  degrees=[3, 3, 3, 3]  1-WL classes=1/4 ⟹ base is COARSE under 1-WL
+     cell 0 (TARGET) [gadgets] |cell|=16  gauge-orbits=4  Aut-blocks=1  ⟹ ⛔ (B) NO block is one gauge-orbit — no key can fire it
+     cell 1 [wires] |cell|=12  gauge-orbits=6  Aut-blocks=1  ⟹ ⛔ (B) NO block is one gauge-orbit — no key can fire it
+     ⟹ non-singleton cells: 2   ✅ fire-today 0   ◐ key-limited 0   ⛔ blocked 2
+
+=== 2. ASYMMETRIC base, NON-regular ⟹ 1-WL discrete on the base ===
+  CFI over asym m=7 [(0, 2), (0, 3), (0, 4), (0, 5), (1, 2), (1, 3), (1, 5), (1, 6), (2, 3), (2, 4), (2, 6), (3, 6), (4, 6), (5, 6)]  n=92  m=7  |E|=14  beta=8  |gauge|=256
+     base: |Aut(base)|=1  degrees=[5, 5, 4, 4, 4, 3, 3]  1-WL classes=7/7 ⟹ base is DISCRETE under 1-WL
+     cell 0 (TARGET) [gadgets] |cell|=4  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 1 [gadgets] |cell|=4  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 2 [gadgets] |cell|=8  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 3 [gadgets] |cell|=8  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 4 [gadgets] |cell|=8  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 5 [gadgets] |cell|=16  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 6 [gadgets] |cell|=16  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 7 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 8 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 9 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 10 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 11 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 12 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 13 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 14 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 15 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 16 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 17 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 18 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 19 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 20 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     ⟹ non-singleton cells: 21   ✅ fire-today 21   ◐ key-limited 0   ⛔ blocked 0
+
+  CFI over asym m=8 [(0, 1), (0, 3), (0, 5), (0, 7), (1, 3), (1, 4), (1, 7), (2, 5), (2, 6), (2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (4, 5), (4, 6), (4, 7), (6, 7)]  n=152  m=8  |E|=18  beta=11  |gauge|=2048
+     base: |Aut(base)|=1  degrees=[6, 6, 5, 4, 4, 4, 4, 3]  1-WL classes=8/8 ⟹ base is DISCRETE under 1-WL
+     cell 0 (TARGET) [gadgets] |cell|=4  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 1 [gadgets] |cell|=8  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 2 [gadgets] |cell|=8  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 3 [gadgets] |cell|=8  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 4 [gadgets] |cell|=8  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 5 [gadgets] |cell|=16  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 6 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 7 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 8 [gadgets] |cell|=32  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 9 [gadgets] |cell|=32  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 10 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 11 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 12 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 13 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 14 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 15 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 16 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 17 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 18 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 19 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 20 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 21 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 22 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 23 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 24 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     cell 25 [wires] |cell|=2  gauge-orbits=1  Aut-blocks=1  ⟹ ✅ THE WHOLE CELL IS ONE gauge-orbit ⟹ `CellOrbitAt` holds for kernelSupply ⟹ FIRES with the shipped supply, no key work
+     ⟹ non-singleton cells: 26   ✅ fire-today 26   ◐ key-limited 0   ⛔ blocked 0
+
+=== 3. ASYMMETRIC but REGULAR base (Frucht, cubic) ⟹ 1-WL COARSE on the base ===
+     the case that separates 'key failure' from 'supply failure'
+  CFI over Frucht (cubic, |Aut(base)|=1)  n=84  m=12  |E|=18  beta=7  |gauge|=128
+     base: |Aut(base)|=1  degrees=[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]  1-WL classes=1/12 ⟹ base is COARSE under 1-WL
+     cell 0 (TARGET) [gadgets] |cell|=48  gauge-orbits=12  Aut-blocks=12  ⟹ ◐ (A) every block IS one gauge-orbit, but there are 12 of them ⟹ firing is a KEY question (separate the blocks), not a supply one
+     cell 1 [wires] |cell|=36  gauge-orbits=18  Aut-blocks=18  ⟹ ◐ (A) every block IS one gauge-orbit, but there are 18 of them ⟹ firing is a KEY question (separate the blocks), not a supply one
+     ⟹ non-singleton cells: 2   ✅ fire-today 0   ◐ key-limited 2   ⛔ blocked 0
+
+=== 4. ⚠ ROOT-ONLY IS NOT A PASS — the same question at REACHED nodes ===
+  CFI over asym m=7 — descent walk, 3 levels past the root
+     level 0: ns-cells=21  |gauge fixing χ|=256  ✅21 ◐0 ⛔0  ⟹ ✅ every cell fires on the gauge
+     level 1: ns-cells=20  |gauge fixing χ|=64  ✅20 ◐0 ⛔0  ⟹ ✅ every cell fires on the gauge
+     level 2: ns-cells=21  |gauge fixing χ|=16  ✅21 ◐0 ⛔0  ⟹ ✅ every cell fires on the gauge
+     level 3: ns-cells=18  |gauge fixing χ|=8  ✅18 ◐0 ⛔0  ⟹ ✅ every cell fires on the gauge
+
+  CFI over Frucht — descent walk, 3 levels past the root
+     level 0: ns-cells=2  |gauge fixing χ|=128  ✅0 ◐2 ⛔0  ⟹ ◐ 2 key-limited / ⛔ 0 blocked
+     level 1: ns-cells=29  |gauge fixing χ|=32  ✅29 ◐0 ⛔0  ⟹ ✅ every cell fires on the gauge
+     level 2: ns-cells=28  |gauge fixing χ|=8  ✅25 ◐3 ⛔0  ⟹ ◐ 3 key-limited / ⛔ 0 blocked
+     level 3: ns-cells=23  |gauge fixing χ|=4  ✅14 ◐9 ⛔0  ⟹ ◐ 9 key-limited / ⛔ 0 blocked
+
+  CFI over K4 (symmetric control) — descent walk, 3 levels past the root
+     level 0: ns-cells=2  |gauge fixing χ|=8  ✅0 ◐0 ⛔2  ⟹ ◐ 0 key-limited / ⛔ 2 blocked
+        first blocked cell 0: |cell|=16, 1 Aut-block(s)
+     level 1: ns-cells=4  |gauge fixing χ|=2  ✅0 ◐0 ⛔4  ⟹ ◐ 0 key-limited / ⛔ 4 blocked
+        first blocked cell 0: |cell|=6, 1 Aut-block(s)
+     level 2: ns-cells=7  |gauge fixing χ|=1  ✅0 ◐0 ⛔7  ⟹ ◐ 0 key-limited / ⛔ 7 blocked
+        first blocked cell 0: |cell|=2, 1 Aut-block(s)
+     level 3: ns-cells=8  |gauge fixing χ|=1  ✅0 ◐0 ⛔8  ⟹ ◐ 0 key-limited / ⛔ 8 blocked
+        first blocked cell 2: |cell|=3, 1 Aut-block(s)
+

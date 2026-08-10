@@ -148,6 +148,12 @@ Live-doc homes referenced below: **build doc** = `chain-descent-general-cc-separ
   claim's home is the **rigid** case (`dim ker = 0`), where `hrigid` *is* the hypothesis and an equivariant order
   provably **exists**. ⚠ Corollary for scoping: the CFI *gauge* is precisely what `kernelSupply` already consumes;
   what remains mixed is the base graph — *"it handles the residue, then hands you back the original graph"*.
+  ⚠⚠ **SCOPE, added 2026-08-10 — do not over-quote this entry.** The `≥ 2` bound holds only where the
+  supply-orbits **are** the gauge-orbits, and **all four witnesses have a symmetric base**
+  (`|Aut(base)| = 12, 12, 24, 12`; no asymmetric base was ever run). Over an asymmetric base
+  `Aut(CFI(G))` **is** the gauge, every block is a single gauge-orbit, and the bound vanishes — firing
+  there is an open question about key strength, not a closed counting fact. The dead route is
+  *"a gauge makes a cell mixed"*; **"CFI is unreachable for any key" is NOT part of it.**
 
 - **⛔ "deck MODULO the verified subgroup" is DEAD as a standalone C3b mechanism — measured 2026-07-19
   (`PerformanceTest` §15).** It was the *plan of record* in remaining-work §1C C3 (ii-c) and in the handoff, so it

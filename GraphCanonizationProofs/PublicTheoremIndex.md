@@ -5448,6 +5448,10 @@ OFF the build path (like `PerformanceTest`/`SelectWitness`; `lake build ChainDes
 | `Select.nodeResolvedC_of_branchSeparation` | 1348-1355 | …hence a `NodeResolvedC` node. | — |
 | `Select.handledSC_of_branchSeparation` | 1356-1364 | **The socket, force side** — branch separation at every reached non-discrete node ⟹ `HandledSC`, for **every** supply. | ⚠ Stated generically: no `Rigid*` import, so the published object's dependency graph is unchanged |
 | `Select.someCellOrbit_of_targetCellIsOrbit` | 1366-1376 | The target cell is the special case the `Tinhofer` population uses — `branches χ` **is** `cellList χ c` there, so `Consume.CellIsOrbit` at the cell's own supply is literally `CellOrbitAt`. | — |
+| `Select.wordReach_mono` | 1392-1398 | `Consume.WordReach` only grows when the generator list does (induction on the `refl`/`step` constructors). | — |
+| **`Select.cellOrbitAt_of_transitiveGens`** | 1400-1414 | **★★★ THE INSTANCE KIT (§9c).** A list `V` of permutations that the cell's supply **emits** (`V ⊆ gens (S c)`), that are **sound** (`IsColAut`), and that act **transitively** on the cell discharges `CellOrbitAt` there — `verified` is `gens.filter IsColAut`, so emitted+sound puts `V` inside it and transitivity transports by `wordReach_mono`. The only way a *family* ever discharges its consume half. | — |
+| `Select.someCellResolved_of_transitiveGens` | 1415-1424 | The instance kit delivered straight to the disjunctive socket's hypothesis at one node. | — |
+| **`Select.handledSC_of_transitiveGens`** | 1425-1437 | **★★★ THE LAYER SOCKET (§9c).** An emitted/sound/transitive generator list at *some* cell of *every* reached non-discrete node ⟹ `HandledSC`, for an **arbitrary key** — no key work required. This is the form the CFI layer theorem instantiates: `V` = the F₂ gauge flips, *sound* = `CFI.cfiFlipAut`, *transitive* = measured at every reached node on a resolved base (`scratchpad/probe_w2_asymbase.out`), *emitted* = the carried algorithmic obligation on `Kernel.kernelSupply`. | — |
 ## ChainDescent/RecordDeepenCell.lean
 
 | Name | Line | Description | Notes |

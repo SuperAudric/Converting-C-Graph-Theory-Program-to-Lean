@@ -10,6 +10,37 @@ import ChainDescent.RigidSolveF2
 **the object of record is the structural reader `structRead` (§ step 6b)** — the coordinate-free reader
 (`refineByFrame`, steps 1–5) is retained but provably **cannot discretize** the primary target.
 
+⛔⛔⛔ **STOP — THAT SENTENCE IS SUPERSEDED BY THIS FILE'S OWN §9D/§9F (banner added 2026-08-10).**
+Read this before acting on anything in "The two readers", "Build order" or "What remains" below; those
+three sections predate steps 9D–9F and will route you into a retired generation. There are **three**
+generations of reader here, not two:
+* **(1) single-order `structRead` (§6b, §8, §9A–§9C) — DEAD.** Its `①` hypothesis `OrdEquivariant ord`
+  is stated ∀ `adj χ` and is **unsatisfiable for `n ≥ 2`**: at the empty graph with the constant
+  colouring every `σ` is a colour-aut, so the definition forces `ord adj χ = σ * ord adj χ`, i.e.
+  `σ = 1`. §9F's milder wording (*"holds only on purely rigid inputs"*) is too generous — a `Force.Key`
+  must be **one global function**, so there is no "restrict to the rigid regime" instantiation.
+  ⟹ `readEquivariant_structRead`, `keyEquivariant_compKey_structRead`, `nodeResolved_compKey_structRead`,
+  `keyEquivariant_compKey_skStruct*` are all correct lemmas with an undischargeable hypothesis.
+* **(2) full-order aggregate `readAgg` (§9D) — CORRECT BUT EXPONENTIAL.** `①` unconditional, read is
+  RICH (a full RREF column signature), but §9F proves any `FramesEquivariant` set of full orders has
+  `|frames| ≥ 2^β` on a gauged input. `framesUniv` is the only instance.
+* **(3) de-classed aggregate `readAggB` (§9F) — THE LIVE ONE.** `①` unconditional **and poly**;
+  `keyEquivariant_compKey_readAggB_pin` closes with zero carried hypotheses once `refExtractEquivariant_adj`
+  (step 4, proved) is plugged in. The open wall is `AggFaithfulB`, per-family.
+
+⚠⚠ **AND A CAP ON THE ONLY CONCRETE `baseRead` — check this before enlarging any frame family.**
+`baseReadPin = encOpt (forcedVal …)` and `encOpt_lt_three` bounds its codomain by `{0,1,2}`. `readAggB`
+is `encode ∘ sort` of the **image** of that read over the frames, so it takes **at most 8 distinct
+values on any input, for any frame family whatsoever**. By pigeonhole `AggFaithfulB` is *provably false*
+at any node with ≥ 9 pairwise-non-automorphic branches — i.e. at every rigid multipede cell of interest.
+⟹ §9F's own `▶ NEXT` (*"a RICH pinning family"*) cannot be satisfied by enlarging `frames`: **richness
+has to come from the READ, not the frame set** (e.g. pair each per-frame read with an invariant of the
+frame, so the aggregate encodes the map `frame ↦ value` instead of collapsing it).
+
+⚠ Everything from `forcedVal` down is `noncomputable` (`rowspace` membership is a `Prop`), and so are
+`readAgg`/`readAggB`/`genOfRef`. Wiring any of them into `RecordKey.recordKey` would cost the published
+object its executability — that is a real cost the wind-down's "S4 = wire" step does not price in.
+
 ## The two readers (read this before editing)
 
 **(A) `refineByFrame` — coordinate-free forcing (steps 1–5). `①` yes, `②` NO.** Per vertex reads one F₂ bit:
