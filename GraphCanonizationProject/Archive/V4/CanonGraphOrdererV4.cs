@@ -67,6 +67,32 @@ namespace Canonizer
                                 from == to ? [new BottomPathSegment(from)] : [];
                             continue;
                         }
+                        // THIS RECURSION IS *ALMOST* 2-WL. Analysis added 2026-08-10; archived code,
+                        // recorded here because the explanation is worth more than the artifact.
+                        //
+                        //   here  :  P_d(a,b) = {{ ( rank P_{d-1}(a,mid),  G[mid,b] ) : mid }}
+                        //   2-WL  :  c'(a,b)  = ( c(a,b), {{ ( c(a,mid),   c(mid,b) ) : mid }} )
+                        //
+                        // The left leg carries the refined rank; the right hop carries RAW adjacency.
+                        // That single token is the whole difference. Substitute the refined pair
+                        // colour c(mid,b) for G[mid,b] below and this recursion IS 2-WL exactly --
+                        // nothing else here is implicated: not ComparePathsBetween's sorted-list
+                        // comparison (a cost choice; it moves no partition), not the join across
+                        // depths, not the vertexTypes feedback.
+                        //
+                        // Consequence: V4 <= 2-WL always (any pair object composed over a SINGLE
+                        // midpoint is determined by the stable 2-WL colouring -- cao-propagation
+                        // doc SS14.5g), with equality on the 7 objects originally measured but NOT
+                        // in general. Falsifier: the truncated tetrahedron, Cay(A4,{(123),(132),
+                        // (12)(34)}), n=12 cubic vertex-transitive -- V4 6 = walk 6 vs 2-WL 7, the
+                        // merge being a class together with its TRANSPOSE, and there 2-WL equals the
+                        // orbitals exactly (7) while V4 does not. So the shortcut costs an attainable
+                        // exact answer, not just resolution. See doc SS14.5a's correction box and
+                        // scratchpad/probe_v4_vs_2wl.py, which runs the falsifier.
+                        //
+                        // NOT the reason (measured, do not re-derive): "V4 cannot represent an
+                        // asymmetric relation". net(Z4) and all four CFI objects have asymmetric
+                        // stable 2-WL colourings and V4 matches them exactly.
                         for (int mid = 0; mid < n; mid++)
                         {
                             pathsOfLength[depth].pathsFromVertex[from].pathsToVertex[to].connectedSubPaths[mid] =
