@@ -152,6 +152,7 @@ MODULES=(
   ChainDescent.DeepenKey              # C3b: orbKey — the equivariant force key (KeyEquivariant, no hypothesis)
   ChainDescent.CaoFibring             # CAO-propagation Step 1: orbitals ↔ stabilizer orbits; the Step-2 bridge
   ChainDescent.CaoRound               # CAO-propagation: Step 2 at the REAL closure + the round-1 barrier (§12.3)
+  ChainDescent.CaoTarget              # FT2: the 2-WL closure as a FUNCTION; Propagates ↔ Separates; ext_comm (§15.4)
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object

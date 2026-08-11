@@ -2100,14 +2100,59 @@ it makes **R1b** (base-point uniformity) a theorem rather than a measurement, si
 > §14.5e's window ≈ arity — are the **same** obstruction seen three ways. ⚠ It is an explanation of a
 > convergence, **not** a proof that the three quantities are equivalent.
 
-### 15.4 **FT2** — `ChainDescent/CaoTarget.lean`
+### 15.4 **FT2** — ✅ **LANDED 2026-08-11** — `ChainDescent/CaoTarget.lean`
 
-The 2-WL closure as an actual function (FT1 at `V = Fin n × Fin n`), then `CAO`, then **`Propagates`**
-stated at that object, then `Propagates ↔ Separates` wired end-to-end from §15.1's landed reduction,
-then the transposition-symmetry theorem of §15.3.
-
-⟹ **the deliverable is a single named open proposition** where today there is a hypothesis on an
-abstract colouring.
+> ## ✅ DELIVERED — in `scripts/build.sh` after `ChainDescent.CaoRound`; 0 `sorry`, 0 custom axioms
+>
+> | theorem | statement |
+> |---|---|
+> | `rankOf` · `rankOf_eq_iff` | the encode-free ranking, extracted carrier-generically from `Refine.refineRound` |
+> | `pairSig` · `pairKey` · **`isRound_round2`** | one 2-WL round, and that it is a `PartitionClosure.IsRound` |
+> | **`wl2`** | ★ **the 2-WL closure, as a FUNCTION** — `wl2_stable`, `wl2_refines`, **`refines_wl2_of_stable`** (coarsest) |
+> | `ext c v` | the **one-point extension** `X_v` = `wl2 (meet c (ptsPair v))` |
+> | **`Propagates`** / **`Separates`** | ★★★ the §2 target, and the §12.3 / R1f crux, **at that object** |
+> | **`propagates_iff_separates`** | ★★★ the reduction, wired to `CaoRound.levelSet_iff_stabOrbit_of_separatesAt` |
+> | `ext_eq_of_sameStabOrbit` | the free half — an orbit is **never** split, from invariance alone |
+> | `row_complete_of_cao` | the **only** place CAO is consumed — `CaoFibring.exists_row_transport` at the shipped `Deepen.CellSingleOrbit` |
+> | **`ext_comm`** | ★★★ **the transposition symmetry** — one line from FT1's (K) |
+> | `ext_collapse` | *"individualize `{u,v}`"* is a single meet |
+>
+> ### ★★ TWO BRIDGES THAT MAKE THE LANDED BARRIERS BITE ON THE REAL OBJECT
+>
+> * **`pairSig_eq_sig` is `rfl`** — `pairSig` **is** `CaoRound.sig`, so `round2` is `CaoRound.roundBy`
+>   with the *rank* as its `enc`. Not a re-implementation: the same object the barriers are proved about.
+> * **`coherent_of_stable` / `coherent_wl2`** — `PartitionClosure.Stable` at `round2` **is**
+>   `CaoRound.Coherent`. ⟹ **`round1_barrier` and `round2_barrier_real` apply verbatim to `wl2`'s
+>   output**, so *"separation cannot happen before round 3"* is now a statement about the closure the
+>   target is stated at, not about an abstract `f`. ★ And **R1g is dissolved**: ranking means no
+>   `Function.Injective enc` hypothesis exists to fail.
+>
+> ### ★ MEASURED — `round2` runs, and reproduces this doc's own witness
+>
+> `scratchpad/CaoTargetRound2Probe.lean` (outside the package root, §8.3 pattern; no `native_decide`).
+> On **`K₃ ⊔ C₄`** (`n = 7`, degrees `[2,2,2,2,2,2,2]` — 2-regular, so 1-WL sees **one** cell):
+>
+> | rounds | diagonal colours |
+> |---|---|
+> | 1 | `[28,28,28,28,28,28,28]` — one cell |
+> | **2** | **`[32,32,32,28,28,28,28]` = `{0,1,2} \| {3,4,5,6}`** |
+>
+> That is **exactly** the partition step-0c/§4.4 measured externally for this graph, and exactly its
+> `Aut`-orbits. ⟹ non-vacuity *and* correctness of `round2`, in Lean.
+>
+> ### ⚠⚠ BUT `wl2` IS A SPECIFICATION, NOT A RUNNABLE OBJECT — measured, and it is LEAN TRAP #1
+>
+> `wl2 = round2^[n²]` under `Function.iterate` with **function-typed** intermediates, so evaluation
+> compounds. Measured at `n = 7`: **2 rounds evaluate in seconds, 3 rounds do not finish in 300 s.**
+> This is the same defect `Refine.warmRefineVec` fixes for 1-WL (materialize into `ColData`/`Vector`,
+> tie the fast form to the slow one by a **proved equation**, never `@[implemented_by]`).
+> ⟹ **owed work if anyone wants to run the 2-WL closure**; *not* owed for FT2's purpose, which is to
+> make the target statable. Say which you mean before quoting `wl2`.
+>
+> ### ⟹ THE DELIVERABLE
+>
+> **A single named open proposition — `CaoTarget.Separates` — where there was a hypothesis on an
+> abstract colouring.** Everything else in the target is now a theorem.
 
 ### 15.5 Order, and what is explicitly NOT in the box
 
