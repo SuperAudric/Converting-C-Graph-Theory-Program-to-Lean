@@ -91,6 +91,8 @@ MODULES=(
 
   # ── The resolvers (refiner, consume, force, composite, cost, flag, residue) ──
   ChainDescent.Refine                 # THE REFINER: encode-free structural round (RefineEquivariant/Splits)
+  ChainDescent.PartitionClosure       # FT1: refinement as a closure operator; the spine facts, carrier-generic
+  ChainDescent.PartitionClosureWL     # FT1b: the 1-WL instance + non-vacuity; warmRefineR is the coarsest stable
   ChainDescent.Consume                # oracle resolver (Covering route): untrusted Supply + IsColAut check
   ChainDescent.Force                  # force resolver (NarrowEquivariant): forceBy key, KeyEquivariant
   ChainDescent.MatchSupply            # cascade oracle as a supply (fires at a Discretizing node)

@@ -1979,3 +1979,141 @@ between steps and it falls back to 2.
 > independent probe to land on **arity 3** — alongside §14.4's ladder (a 2-WL failure needs a group
 > transitive on pairs but not triples) and §12.5a's `triCount` (three anchors `a,b,v`). ⚠ That
 > convergence is an **observation, not a proof of equivalence** between the three.
+
+---
+
+## 15. ▶▶ **FT — THE LEAN FOOTING BUILD** (opened 2026-08-11, user-directed)
+
+> ⚠ **Labels are `FT1`/`FT2` deliberately.** `S1–S5` are §13.5's conversion-gap scoping plan,
+> `R1a–R1g` are §12.5a's crux plan, `M1–M5` are §12.6's mechanism track, `E1/E2` are §12.5b's
+> instruments. **FT ("footing") collides with none of them.**
+
+**Why this exists.** The 2-WL leg of the closure is retracted (banner, §0.0a) and the track is live
+again *for footing only*. Footing means: **make the target statable and its crux nameable in Lean at
+the real object.** ⛔ It is **not** an attempt at a general proof — §4.1 (CAO alone cannot close the
+gap) and §4.2 (no counting proof can conclude "an automorphism exists") both stand, and neither is
+touched here.
+
+### 15.0 ⛔ THE STATEMENT TRAPS — three, and two of them have bitten already
+
+1. **The target is FIBRES ONLY.** *"pair classes = orbitals"* is **full schurity**, measured false at
+   CAO nodes (Shrikhande 3 vs 4 · §12.5b's E2 = 477 · S0's 22). §0.0a is the correction.
+2. ⚠ **"walks between `v₁` and `v₂`" is the WRONG OBJECT.** Walk counts are entries of products of
+   class-indicator matrices ⟹ **coherence-determined ⟹ never finer than 2-WL** (§14.5c), and
+   `round1_barrier` + `round2_barrier_real` + `round3_separates_iff_triCount_ne` say the separating
+   quantity is a **triple count** — three simultaneous constraints, not a path. State the theorem at
+   the **2-WL closure**, never at walk existence.
+3. **The automorphism must come from the CAO hypothesis, not from the colouring** (§4.2). This is
+   already how `CaoRound.step2_closure` is built — `hsep` concludes *separation*, and
+   `CaoFibring.exists_row_transport` supplies the group element. Do not invert it.
+
+### 15.1 WHAT IS ALREADY LANDED — do not rebuild
+
+| | |
+|---|---|
+| `CaoFibring` | the reduction: orbitals in `D × C` ↔ `K_v`-orbits on `C`, **`exists_row_transport` consumes exactly the CAO hypothesis** |
+| `CaoRound.step2_closure` | that reduction applied to the real individualized closure ⟹ everything is down to **`hsep`** |
+| `round1_barrier` · `round2_barrier_real` | separation before round 3 is **impossible**, unconditional, CC axioms only |
+| `round3_separates_iff_triCount_ne` | the crux is pinned to the **triple count** |
+
+⟹ **the reduction is ~2/3 of the proof and is at the right object.** FT does not touch it.
+
+### 15.2 ⛔ THE GAP FT1/FT2 CLOSE — the target is **not statable in Lean today**
+
+`CaoRound` has `roundBy` / `iterRoundBy` / `ext0`, but **no closure** (no stabilization theorem, so
+"the 2-WL closure" is not a function), **no `CAO` predicate**, and **no `Propagates`**. `hsep` is
+carried as a hypothesis on an *abstract* `f` with an *abstract* `enc` — and **R1g** records that the
+real refiner does not satisfy that `enc`'s injectivity. So the target currently exists only as its own
+reduction, stated about an object the algorithm does not build.
+
+### 15.3 **FT1** — ✅ **LANDED 2026-08-11** — `PartitionClosure.lean` + `PartitionClosureWL.lean`
+
+> ## ✅ DELIVERED — gate **exit 0 / 239 s**, both modules in `scripts/build.sh` after `ChainDescent.Refine`
+> 681 lines, 0 `sorry`, 0 custom axioms; every headline `[propext, Classical.choice, Quot.sound]`
+> (`discretizes_ptsCol` / `splits_blkCol` are even `Classical.choice`-free).
+>
+> | theorem | statement |
+> |---|---|
+> | **`closure_meet`** | ★★★ **(K)** — `SamePart (wl F (meet (wl F c) ρ)) (wl F (meet c ρ))` |
+> | `closure_meet_comm` · `closure_defer` · `closure_collapse` | the three spine facts |
+> | **`reached_partition_order_free`** | the consumer form: set `T` individualized + set `S` split, **either order, any refinement schedule, any colour encoding** ⟹ one partition |
+> | `stable_iterate_card` | convergence in `card V` rounds, via strict cell-count growth |
+> | **`refines_wl_of_stable`** | ★ `wl F c` is the **COARSEST** stable refinement — no cardinality needed |
+> | `Discretizes` · `Splits` + their `samePart` | the two operation shapes as **specs**; any two witnesses agree, which is why `indivOne`, `IndivStep` and a fresh colour are interchangeable |
+>
+> ### ⚠ NON-VACUITY, DISCHARGED AGAINST THE SHIPPED REFINER — not against a model of it
+>
+> **`isRound_refineRound`** — `Refine.refineRound adj` **is** an `IsRound`. The substantive half is
+> `mono`, and it needed a lemma the project did not have: **`signature_map_of_factor`** — `Refines c d`
+> factors as `d = g ∘ c`, and a signature's first coordinate is the neighbour colour, so the coarser
+> signature is the `g`-image of the finer one ⟹ **signature equality survives coarsening**.
+> **`isMeet_indivOne`** then proves the shipped `Descend.indivOne χ v` *is* the meet of `χ` with
+> `ptsCol {v}` — so the descent's own individualization is one of the `ρ`s, at no encoding cost.
+>
+> ### ★★ TWO FACTS THE PROJECT NEVER HAD
+>
+> **`warmRefineR_stable`** — `n` rounds really do reach the 1-WL fixpoint — and
+> **`refines_warmRefineR_of_stable`** — and it is the **coarsest** one. Every prior use of
+> `warmRefine`/`warmRefineR` went through *split-only* + *equivariance* only; that it converges, and to
+> what, was never proved. `warmRefineR_eq_wl` is the bridge (`Fintype.card (Fin n) = n`).
+>
+> ⚠ **Lean trap worth keeping:** the file is carrier-generic, so `unusedSectionVars` fires constantly —
+> ~20 `omit [...] in` lines, and **`omit` must go ABOVE the docstring**, not between docstring and
+> `theorem` (otherwise *"unexpected token 'omit'; expected 'lemma'"*). `Nat.pair_eq_pair` lives in
+> `Mathlib.Data.Nat.Pairing`, not `Finset.Card`.
+
+#### The design, as built
+
+The refinement round as a **closure operator on partitions**, over an arbitrary `[Fintype V]`:
+
+| § | content |
+|---|---|
+| 1 | `Refines` / `SamePart` — the refinement preorder on `V → Nat` |
+| 2 | `IsRound F` = **splits** (`Refines (F c) c`) + **mono** (`Refines c d → Refines (F c) (F d)`). Partition-determinacy is a *consequence*, not a field |
+| 3 | `ncell` + **stabilization**: `F^[card V]` is `Stable`. Sharp bound via strict cell-count growth (`Finset.injOn_of_card_image_eq`), not the `card V ^ 2` pair-set bound |
+| 4 | ★ **coarsest stable refinement**: `Stable s → Refines s c → Refines s (F^[k] c)`. Needs no cardinality — pure induction on mono + stability |
+| 5 | `IsMeet` (common refinement; witness `Nat.pair`) and the composition law |
+
+> ### ★★★ (K) THE ONE THEOREM — `SamePart (wl (meet (wl c) ρ)) (wl (meet c ρ))`
+> *Refining early changes nothing.* With `⊓` commutative, every spine fact is a corollary at a
+> different `ρ`:
+> * `ρ =` points ⟹ **cells depend only on the SET individualized, not the order**;
+> * `ρ =` a two-block partition ⟹ **cell splits** (individualize a group from everything but itself);
+> * (K) itself ⟹ **any such operation may be performed at any point in the descent**.
+
+**★ Why it is generic in the carrier, and why that is the whole point.** `V = Fin n` gives 1-WL;
+`V = Fin n × Fin n` gives **2-WL** — one file, both. ★ And it **dissolves R1g**: the induced
+*partition* is invariant under any re-encoding, so `Function.Injective enc` stops being needed.
+
+**★★ AND IT IS A PROOF LEVER, NOT PLUMBING.** (K) gives `closure {v,u} = closure {u,v}` ⟹ **the target
+is a fixed point of transposition.** That is exactly §4.1's circularity — *"the `Aut_u`-orbits on `D`
+are the transpose of what is being proved"* — as a **structural fact** rather than a route death, and
+it makes **R1b** (base-point uniformity) a theorem rather than a measurement, since CAO makes `D` one
+`K`-orbit so all base points are conjugate.
+
+> ### ⟹ AND THEREFORE **ARITY 3 IS FORCED**
+> If the target is transposition-symmetric in `(v, u)`, no argument that reads only `v` and `u` can
+> break the tie — **a proof must consume a third point.** ⚠ **This is a synthesis of material already
+> in this doc, not a new result**, and it is stated here because it *explains* what §14.5e called an
+> observation: the three independent arity-3 sightings — §12.5a's `triCount` (three anchors `a,b,v`),
+> §14.4's ladder (a 2-WL failure needs a group transitive on pairs but **not** on triples), and
+> §14.5e's window ≈ arity — are the **same** obstruction seen three ways. ⚠ It is an explanation of a
+> convergence, **not** a proof that the three quantities are equivalent.
+
+### 15.4 **FT2** — `ChainDescent/CaoTarget.lean`
+
+The 2-WL closure as an actual function (FT1 at `V = Fin n × Fin n`), then `CAO`, then **`Propagates`**
+stated at that object, then `Propagates ↔ Separates` wired end-to-end from §15.1's landed reduction,
+then the transposition-symmetry theorem of §15.3.
+
+⟹ **the deliverable is a single named open proposition** where today there is a hypothesis on an
+abstract colouring.
+
+### 15.5 Order, and what is explicitly NOT in the box
+
+**FT1 → FT2.** FT1 is independently useful outside this track: the splitter-lift's L1 certified
+collapse and the force-refinement channel both currently *assume* individualization-order-independence
+with no theorem behind it.
+
+⛔ **Not in the box:** any attempt at `hsep` itself (R1f); the refiner swap (§13, still suspended —
+it is a cost question, not a footing one); any per-family certificate (§12.4 R2/R3).
