@@ -1,0 +1,105 @@
+============================================================================================
+Chang-2  (C8 switching of T(8)) — divergence-lift §4.2 habitat   n = 28
+  root cells: [28]   |Aut_chi| enumerated = 96
+  D  certified depth: first MIXED target cell at depth 0
+  cell 0: size 28   Aut-orbit blocks = [4, 24]
+    ~_1  classes = [28]                         S=ok              N=vacuous  E=coarser
+    C_1  certified-path classes = [28]            S=ok              MATCHES ~_1   refines=420 branchlevels=28
+    ^_1  single-path classes = [2, 4, 22]      S=**OVER-SPLIT**  P=44 same-orbit pairs separated
+    ~_2  classes = [4, 24]                      S=ok              N=splits   E=exact
+    C_2  certified-path classes = [4, 24]         S=ok              MATCHES ~_2   refines=732 branchlevels=64
+    ^_2  single-path classes = [1, 1, 4, 22]   S=**OVER-SPLIT**  P=45 same-orbit pairs separated
+============================================================================================
+rook4x4 ⊔ Shrikhande — the NOAUT habitat (§4.3)   n = 32
+  root cells: [32]   |Aut_chi| enumerated = 221184
+  D  certified depth: first MIXED target cell at depth 0
+  cell 0: size 32   Aut-orbit blocks = [16, 16]
+    ~_1  classes = [32]                         S=ok              N=vacuous  E=coarser
+    C_1  certified-path classes = [32]            S=ok              MATCHES ~_1   refines=32 branchlevels=0
+    ^_1  single-path classes = [32]            S=ok              P=0 same-orbit pairs separated
+    ~_2  classes = [32]                         S=ok              N=vacuous  E=coarser
+    C_2  certified-path classes = [32]            S=ok              MATCHES ~_2   refines=192 branchlevels=16
+    ^_2  single-path classes = [32]            S=ok              P=0 same-orbit pairs separated
+============================================================================================
+Shrikhande   n = 16
+  root cells: [16]   |Aut_chi| enumerated = 192
+  D  certified depth: first MIXED target cell at depth 1
+  cell 0: size 16   Aut-orbit blocks = [16]
+    ~_1  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [16]            S=ok              MATCHES ~_1   refines=144 branchlevels=16
+    ^_1  single-path classes = [6, 10]         S=**OVER-SPLIT**  P=60 same-orbit pairs separated
+    ~_2  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [16]            S=ok              MATCHES ~_2   refines=432 branchlevels=64
+    ^_2  single-path classes = [6, 10]         S=**OVER-SPLIT**  P=60 same-orbit pairs separated
+============================================================================================
+net(Z4)   n = 28
+  root cells: [16, 12]   |Aut_chi| enumerated = 192
+  D  certified depth: first MIXED target cell at depth none within 3
+  cell 0: size 16   Aut-orbit blocks = [16]
+    ~_1  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [16]            S=ok              MATCHES ~_1   refines=16 branchlevels=0
+    ^_1  single-path classes = [16]            S=ok              P=0 same-orbit pairs separated
+    ~_2  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [16]            S=ok              MATCHES ~_2   refines=32 branchlevels=0
+    ^_2  single-path classes = [16]            S=ok              P=0 same-orbit pairs separated
+  cell 1: size 12   Aut-orbit blocks = [12]
+    ~_1  classes = [12]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [12]            S=ok              MATCHES ~_1   refines=144 branchlevels=12
+    ^_1  single-path classes = [3, 9]          S=**OVER-SPLIT**  P=27 same-orbit pairs separated
+    ~_2  classes = [12]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [12]            S=ok              MATCHES ~_2   refines=288 branchlevels=12
+    ^_2  single-path classes = [3, 9]          S=**OVER-SPLIT**  P=27 same-orbit pairs separated
+============================================================================================
+net(Z2xZ2)   n = 28
+  root cells: [16, 12]   |Aut_chi| enumerated = 576
+  D  certified depth: first MIXED target cell at depth none within 4
+  cell 0: size 16   Aut-orbit blocks = [16]
+    ~_1  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [16]            S=ok              MATCHES ~_1   refines=16 branchlevels=0
+    ^_1  single-path classes = [16]            S=ok              P=0 same-orbit pairs separated
+    ~_2  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [16]            S=ok              MATCHES ~_2   refines=32 branchlevels=0
+    ^_2  single-path classes = [16]            S=ok              P=0 same-orbit pairs separated
+  cell 1: size 12   Aut-orbit blocks = [12]
+    ~_1  classes = [12]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [12]            S=ok              MATCHES ~_1   refines=12 branchlevels=0
+    ^_1  single-path classes = [12]            S=ok              P=0 same-orbit pairs separated
+    ~_2  classes = [12]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [12]            S=ok              MATCHES ~_2   refines=24 branchlevels=0
+    ^_2  single-path classes = [12]            S=ok              P=0 same-orbit pairs separated
+============================================================================================
+CFI(K4) untwisted   n = 28
+  root cells: [16, 12]   |Aut_chi| enumerated = 576
+  D  certified depth: first MIXED target cell at depth none within 4
+  cell 0: size 16   Aut-orbit blocks = [16]
+    ~_1  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [16]            S=ok              MATCHES ~_1   refines=16 branchlevels=0
+    ^_1  single-path classes = [16]            S=ok              P=0 same-orbit pairs separated
+    ~_2  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [16]            S=ok              MATCHES ~_2   refines=32 branchlevels=0
+    ^_2  single-path classes = [16]            S=ok              P=0 same-orbit pairs separated
+  cell 1: size 12   Aut-orbit blocks = [12]
+    ~_1  classes = [12]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [12]            S=ok              MATCHES ~_1   refines=12 branchlevels=0
+    ^_1  single-path classes = [12]            S=ok              P=0 same-orbit pairs separated
+    ~_2  classes = [12]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [12]            S=ok              MATCHES ~_2   refines=24 branchlevels=0
+    ^_2  single-path classes = [12]            S=ok              P=0 same-orbit pairs separated
+============================================================================================
+CFI(K4) twisted   n = 28
+  root cells: [16, 12]   |Aut_chi| enumerated = 192
+  D  certified depth: first MIXED target cell at depth none within 3
+  cell 0: size 16   Aut-orbit blocks = [16]
+    ~_1  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [16]            S=ok              MATCHES ~_1   refines=16 branchlevels=0
+    ^_1  single-path classes = [16]            S=ok              P=0 same-orbit pairs separated
+    ~_2  classes = [16]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [16]            S=ok              MATCHES ~_2   refines=32 branchlevels=0
+    ^_2  single-path classes = [16]            S=ok              P=0 same-orbit pairs separated
+  cell 1: size 12   Aut-orbit blocks = [12]
+    ~_1  classes = [12]                         S=ok              N=vacuous  E=exact
+    C_1  certified-path classes = [12]            S=ok              MATCHES ~_1   refines=144 branchlevels=12
+    ^_1  single-path classes = [6, 6]          S=**OVER-SPLIT**  P=36 same-orbit pairs separated
+    ~_2  classes = [12]                         S=ok              N=vacuous  E=exact
+    C_2  certified-path classes = [12]            S=ok              MATCHES ~_2   refines=288 branchlevels=12
+    ^_2  single-path classes = [6, 6]          S=**OVER-SPLIT**  P=36 same-orbit pairs separated

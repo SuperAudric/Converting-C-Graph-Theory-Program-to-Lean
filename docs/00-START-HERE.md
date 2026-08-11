@@ -117,6 +117,31 @@
 > is.** Method 1 (the channel) survives with **no reader to carry**. ★ And `Select.lean:22-23`: the
 > `≤ 1` success bar is what buys `②`'s single path — ⛔ never widen it to `k > 1` survivors.
 >
+> ✅★★ **2026-08-11 — THE SPLITTER: the same computation, the OTHER soundness direction. NEW DOC:
+> [`chain-descent-splitter-lift.md`](./chain-descent-splitter-lift.md).** The divergence lift was
+> refuted as a symmetry *detector* and as a *direction* read; used as a **splitter** it inverts.
+> Define `u ~_d w` := the depth-`d` matched-descent **footprint sets** intersect (footprint = the
+> sequence of canonical `(cell id, 1-WL signature)`; no vertex names). Then **`SameOrbit ⊆ ~_d`
+> unconditionally** — a five-line proof — so `¬(u ~_d w)` is a **sound "different orbits" verdict** and
+> `~_d`'s classes are a sound *coarsening* of the orbit partition. ★ **Over-merging is the safe
+> direction here**, so `NOAUT` (§4.3), the §4.1 false positives and the §4.2 direction flip are all
+> **free**. **Measured** (`scratchpad/probe_holonomy_split.py` → `.out`, 7 witnesses / 9 root cells):
+> **0 soundness violations**; **`~_2` computes the Chang-2 orbit partition EXACTLY (`[4,24]`)** — the
+> first non-vacuous equivariant splitter in this area, against `Linked`'s vacuity on all 9; ★★ the
+> **certified-path collapse is exact, `C_d = ~_d` on 18/18 rows** (a single-orbit level costs one pick,
+> not `|cell|`); ★★ and the cheap single-path read **over-splits on 4/7 witnesses** (27–60 same-orbit
+> pairs; CFI(K₄)-twisted splits a genuine 12-orbit into `[6,6]`) ⟹ **the 2-WL CAO hypothesis is
+> load-bearing, and the price is now a number.** Cost identity: **`|C| · Π over MIXED levels |cell|`** —
+> the exponent is the mixed-level count and nothing else (`branchlevels = 0 ⟹ refines = |C|·d`,
+> measured). ⚠ **Only TWO posed instances** — 7 cells are single-orbit controls; `rook4x4 ⊔ Shrikhande`
+> is **unsolved** at `d ≤ 2`. Beachhead, not a result. ▶ The doc is written to be **harvested**: its §5
+> marks each piece *usable by the rigid route today* (the soundness theorem; `~`-classes as a
+> `refineBy` read — **no ≤8-value cap, no `2^β` frame family**; the consume-certified collapse, which
+> **dodges R1**) or *blocked on the grounding* (the cheap read). ⛔ §6 corrects a natural mis-framing:
+> **recovery/faithfulness (R-b / L4) is the gate, not solvability** — solvability only prices
+> `Γ`-orbit computation once `Γ` is in hand, and a recovered `Γ` that is too small errs by
+> **over-splitting**, the fatal direction, with no `O(n²)` verifier.
+>
 > ⛔ **Five corrections to carry into any pickup** (full list = wind-down §2a's *sixteen
 > corrections*): (i) W2's `CascadeOracle` → `handled_of_seal` route is at the **wrong object**
 > (`deepMatchSupply`, not in `recordSupplyFast`); (ii) its replacement `CellIsOrbit kernelSupply` is
