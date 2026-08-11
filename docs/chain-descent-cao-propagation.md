@@ -2140,14 +2140,70 @@ it makes **R1b** (base-point uniformity) a theorem rather than a measurement, si
 > That is **exactly** the partition step-0c/§4.4 measured externally for this graph, and exactly its
 > `Aut`-orbits. ⟹ non-vacuity *and* correctness of `round2`, in Lean.
 >
-> ### ⚠⚠ BUT `wl2` IS A SPECIFICATION, NOT A RUNNABLE OBJECT — measured, and it is LEAN TRAP #1
+> ### ⚠ `wl2` ITSELF IS A SPECIFICATION, NOT A RUNNABLE OBJECT — ✅ **RESOLVED by FT2b, §15.5**
 >
 > `wl2 = round2^[n²]` under `Function.iterate` with **function-typed** intermediates, so evaluation
-> compounds. Measured at `n = 7`: **2 rounds evaluate in seconds, 3 rounds do not finish in 300 s.**
-> This is the same defect `Refine.warmRefineVec` fixes for 1-WL (materialize into `ColData`/`Vector`,
-> tie the fast form to the slow one by a **proved equation**, never `@[implemented_by]`).
-> ⟹ **owed work if anyone wants to run the 2-WL closure**; *not* owed for FT2's purpose, which is to
-> make the target statable. Say which you mean before quoting `wl2`.
+> compounds — LEAN TRAP #1. Measured at `n = 7`: **2 rounds evaluate in seconds, 3 rounds do not
+> finish in 300 s.** `CaoFast.wl2Fast` is the runnable form, tied to `wl2` by `samePart_wl2Fast`.
+> ⚠ **Quote `wl2` for statements and `wl2Fast` for measurements** — they are the same partition, not
+> the same colour values.
+
+### 15.5 **FT2b** — ✅ **LANDED 2026-08-11** — `ChainDescent/CaoFast.lean`, the **runnable** 2-WL closure
+
+> ## ✅ DELIVERED — gate **exit 0 / 234 s / 123 modules**; 0 `sorry`, 0 custom axioms
+>
+> ### The four costs, and what fixes each
+>
+> | cost | in `wl2` | in `wl2Fast` |
+> |---|---|---|
+> | colour lookup | `c : Fin n × Fin n → Nat` is a closure tower `k` deep ⟹ `n^{3k}` | `PairVec = Vector (Vector Nat n) n`, `getP` is **O(1)** |
+> | key recomputation | `rankOf (pairKey c) p` recomputes **every** key for **every** pair ⟹ `n⁴` keys/round | `keyTable`, built **once**, read O(1) |
+> | ranking | `Finset.filter` over all `n²` pairs, **per pair** ⟹ `n⁴` key comparisons/round | ranked against the `d` **distinct** keys (sorted + adjacent-deduped once) ⟹ `n²·d` |
+> | round count | `n²` rounds, unconditionally | **`iterFast` exits at the fixpoint**, and `iterFast_eq` proves that equals the full iterate |
+>
+> ⟹ per round `O(n³ log n)` to build keys, `O(n² log n)` to sort them, `O(n²·d)` to rank.
+>
+> ### ★★ THE TIE IS A **PARTITION** EQUATION, AND THAT IS THE RIGHT ONE
+>
+> `round2Fast` uses a **denser** renumbering (`0..d−1`, not "count of strictly smaller keys"), so it is
+> **not value-equal** to `round2`. **`samePart_round2Fast` / `samePart_wl2Fast` / `samePart_extFast`**
+> tie them, and **`propagates_fast_iff`** transfers the target itself. That is exactly the level every
+> theorem in FT1/FT2 is stated at — `SamePart`, `Refines`, `IsRound`, and `Propagates`, whose content
+> is a colour *equality between two pairs*. A colour **value** is meaningless on its own (that is
+> `PartitionClosure`'s whole premise), so the tie is complete, not weaker.
+> ⛔ **Not a second object carrying an obligation** — nothing is proved here that is not proved of the
+> spec. Same relationship `Refine.warmRefineVec` has to `warmRefineR`. ⚠ **No `@[implemented_by]`.**
+> ★ `denseRank_lt` needs **no `Nodup`** — only that a pair's own key *occurs* in `D` — so sorting and
+> deduplication are pure performance and carry **zero** proof obligation.
+>
+> ### ★★★ MEASURED — SIX independent matches against numbers THIS DOC already recorded
+>
+> `scratchpad/CaoFastProbe.lean` (outside the package root, §8.3; no `native_decide`).
+>
+> | input | `n` | computed | recorded |
+> |---|---|---|---|
+> | `K₃ ⊔ C₄` (2-regular ⟹ 1-WL sees one cell) | 7 | `{0,1,2} \| {3,4,5,6}` | §4.4 step-0c — and its `Aut`-orbits |
+> | `C₅` · Petersen | 5 · 10 | 3 · 3 | — |
+> | **Shrikhande** (the deficient root: 2-WL 3 vs orbitals 4) | 16 | **3** | §14.5c |
+> | rook 4×4 (same `SRG(16,6,2,2)` parameters) | 16 | **3** | §14.5c |
+> | **CFI(K₄) plain** and **twisted** | 28 | **10** and **10** | §14.5c |
+>
+> ### Timing (wall includes ~2.5 s Lean startup)
+>
+> | input | `n` | `d` | wall |
+> |---|---|---|---|
+> | CFI(K₄) | 28 | 10 | **6 s** |
+> | circulant `C_n(1,5)` | 56 · 100 · 128 | 29 · 51 · 65 | **8.5 s · 16.8 s · 31.7 s** |
+> | pseudo-random — **worst case**, 2-WL discretizes | 56 | 3136 | **26 s** |
+>
+> ★ Symmetric inputs — the ones this track is about — are **key-building-bound** (`O(n³ log n)`, the
+> irreducible cost of 2-WL). The near-discrete worst case is `denseRank`-scan-bound (`O(n²·d)`), and it
+> is precisely the regime where propagation is trivial. **Practical ceiling ≈ `n` 130–200** interpreted.
+> ⚠ Hoisting the index list and dropping tuple boxing (`sigNats`/`keyFast`, tied by `keyFast_eq`) bought
+> **1.35×**; the remaining cost is inherent.
+> ⚠⚠ **A defect caught in this file's own first draft:** `distinctKeys` took `c` and rebuilt the key
+> table, i.e. the **W-j defect the file claims to avoid**. It now takes the built table
+> (`distinctKeysOf`). Check this shape whenever a "computed once" claim is made.
 >
 > ### ⟹ THE DELIVERABLE
 >
