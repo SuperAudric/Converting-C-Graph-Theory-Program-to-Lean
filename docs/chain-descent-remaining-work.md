@@ -1069,8 +1069,13 @@ Grouped by decision type. Each entry: what it is → the mechanism that should c
   ledger's older row used. ⚠ **64% coverage, not a population result:** three order-32 groups short,
   77 descents truncated at a 400-node budget, 3 Aut searches blown, and 12 groups **sampled** at
   `CAP_SETS = 4000` (a pre-existing bound on *every* number from this population, the 729 included).
-  ★ This population genuinely pays §7.2's entry ticket (S-ring non-schurian **is** "the one-point
-  extension at `e` is non-schurian"), unlike the CFI population below.
+  ★ This population genuinely pays an entry ticket, unlike the CFI population below — a schurian
+  S-ring forces the extension's fibres to equal the `Aut_e`-orbits, so **S-ring non-schurity is
+  necessary for a failure at `e`**. ⛔ **CORRECTION (2026-08-11):** ~~S-ring non-schurian **is** "the
+  one-point extension at `e` is non-schurian"~~ — **false.** The S-ring is the **root** closure only
+  (cao-propagation §8.4); the extension's fibres are strictly finer (**Shrikhande: 3 basic sets vs 4
+  fibres**, and those 4 *are* the `Aut_e`-orbits). These are **root**-deficiency tickets, not §7.2's
+  *extension* ticket. **E1's evidential value is unchanged.** See cao-propagation §0.0a / §12.5b.
   ★★ **AND THE 2-WL A/B ON THE SAME NODES INVERTED THE SCOPING (that doc §13.6):** swapping
   `Deepen.step` alone changes **nothing** (identical harvest, identical partitions at every level),
   but the **2-WL closure of the node colouring equals the exact orbit partition at both nodes**

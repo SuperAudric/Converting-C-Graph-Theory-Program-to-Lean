@@ -1,0 +1,138 @@
+S0 -- the 2-WL CAO instrument, separating PROPAGATION from SCHURITY at every node.
+
+TWO DISTINCT STATEMENTS, measured independently (this separation is the whole point):
+
+  (P) PROPAGATION -- "every CAO graph is Tinhofer under 2-WL".  At a node with colouring
+      chi, let f = the 2-WL closure started from chi.  Then
+            fibres(f)  ==  orbits of Aut(adj, chi)
+      i.e. CellsAreOrbits survives individualize + 2-WL re-close.   <-- THE TARGET
+
+  (S) SCHURITY -- the strictly STRONGER statement at the same node:
+            pair classes of f  ==  ORBITALS of Aut(adj, chi)
+      i.e. the closure is a schurian coherent configuration.
+
+(P) is what `docs/chain-descent-cao-propagation.md` Sec 2 targets.  (S) is not.  The
+recorded "falsifiers" -- Shrikhande's 2-WL rank 3 vs orbital rank 4 (Sec 14.5b), and the
+477 E2 nodes (Sec 12.5b) -- are failures of (S).  If this probe finds nodes where
+(S) FAILS and (P) PASSES, then Sec 0.0a's identification of the target with
+"the one-point extension of a schurian CC is schurian" is an OVER-identification, and the
+literature leg of the 2026-08-01 closure does not bear on (P).
+
+METHOD
+  * Clean-room oblivious 2-WL on ordered pairs, full pair colouring retained (not just the
+    diagonal).  Pair-level individualization is CaoRound.ext0: mark (a,b) with
+    (a==v, b==v).  That is the one-point extension X_v.
+  * Automorphisms: probe_dir_flip.all_auts -- exact backtracking IR search, every leaf
+    permutation edge-verified.  NEVER probe_orbit_oracle (proven wrong, errs by merging).
+  * Descent, not root-only: at each node take the lowest-id non-singleton fibre and recurse
+    on every vertex of it, to a node budget.  Root-only is not a pass (standing steer).
+  * Posedness is recorded per node: a node is POSED iff individualizing splits some cell,
+    i.e. Aut_v is intransitive on a cell.  Where nothing splits, (P) is trivially safe and
+    the node is a CONTROL, not evidence.
+==============================================================================
+
+[K3 + C4  (1-WL root failure; 2-WL fixes it)]  n=7
+    seed: |Aut|=    48  orbits=  2   plain 2-WL root fibres=  2 [reaches CAO]
+    nodes=   8 maxdepth=3 posed=3 controls=5 blown=0 (0.0s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 0
+    ** (S) FAILS while (P) HOLDS : 0 **
+    PAID propagation tests (landed on a NON-schurian node) : 0
+
+[Shrikhande  (CAO root, non-schurian: 2-WL 3 vs 4 orbitals)]  n=16
+    seed: |Aut|=   192  orbits=  1   plain 2-WL root fibres=  1 [reaches CAO]
+    nodes=   7 maxdepth=3 posed=7 controls=0 blown=0 (0.2s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 1
+    ** (S) FAILS while (P) HOLDS : 1 **
+    PAID propagation tests (landed on a NON-schurian node) : 0
+       depth=0  fibres=1=orbits=1  pairclasses=3 vs orbitals=4   split=True
+
+[rook 4x4  (the Shrikhande partner, schurian)]  n=16
+    seed: |Aut|=  1152  orbits=  1   plain 2-WL root fibres=  1 [reaches CAO]
+    nodes=   9 maxdepth=4 posed=9 controls=0 blown=0 (0.4s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 0
+    ** (S) FAILS while (P) HOLDS : 0 **
+    PAID propagation tests (landed on a NON-schurian node) : 0
+
+[Chang-2  (CAO root, deficient)]  n=28
+    seed: |Aut|=    96  orbits=  2   plain 2-WL root fibres=  1 [does NOT reach CAO -- hypothesis unmet]
+    nodes=  10 maxdepth=3 posed=10 controls=0 blown=0 (1.6s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 1
+    ** (S) FAILS while (P) HOLDS : 1 **
+    PAID propagation tests (landed on a NON-schurian node) : 0
+       depth=0  fibres=2=orbits=2  pairclasses=12 vs orbitals=14   split=True
+
+[net(Z4)  (the 1-WL falsifier; deficient at root)]  n=28
+    seed: |Aut|=   192  orbits=  2   plain 2-WL root fibres=  2 [reaches CAO]
+    nodes=  14 maxdepth=3 posed=14 controls=0 blown=0 (2.3s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 1
+    ** (S) FAILS while (P) HOLDS : 1 **
+    PAID propagation tests (landed on a NON-schurian node) : 0
+       depth=0  fibres=2=orbits=2  pairclasses=10 vs orbitals=14   split=True
+
+[net(Z2xZ2)]  n=28
+    seed: |Aut|=   576  orbits=  2   plain 2-WL root fibres=  2 [reaches CAO]
+    nodes=  18 maxdepth=4 posed=18 controls=0 blown=0 (3.0s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 0
+    ** (S) FAILS while (P) HOLDS : 0 **
+    PAID propagation tests (landed on a NON-schurian node) : 0
+
+[CFI(K4) untwisted]  n=28
+    seed: |Aut|=   576  orbits=  2   plain 2-WL root fibres=  2 [reaches CAO]
+    nodes=  21 maxdepth=4 posed=21 controls=0 blown=0 (3.8s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 0
+    ** (S) FAILS while (P) HOLDS : 0 **
+    PAID propagation tests (landed on a NON-schurian node) : 0
+
+[CFI(K4) twisted]  n=28
+    seed: |Aut|=   192  orbits=  2   plain 2-WL root fibres=  2 [reaches CAO]
+    nodes=  16 maxdepth=3 posed=16 controls=0 blown=0 (2.7s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 1
+    ** (S) FAILS while (P) HOLDS : 1 **
+    PAID propagation tests (landed on a NON-schurian node) : 0
+       depth=0  fibres=2=orbits=2  pairclasses=10 vs orbitals=14   split=True
+
+[Shrikhande + rook4x4  (THE UNION FILTER)]  n=32
+    seed: |Aut|=221184  orbits=  2   plain 2-WL root fibres=  1 [does NOT reach CAO -- hypothesis unmet]
+    nodes=  79 maxdepth=7 posed=79 controls=0 blown=0 (419.3s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 10
+    ** (S) FAILS while (P) HOLDS : 10 **
+    PAID propagation tests (landed on a NON-schurian node) : 9
+       depth=0  fibres=2=orbits=2  pairclasses=8 vs orbitals=9   split=True
+       depth=1  fibres=4=orbits=4  pairclasses=24 vs orbitals=25   split=True
+       depth=2  fibres=7=orbits=7  pairclasses=70 vs orbitals=71   split=True
+       depth=3  fibres=11=orbits=11  pairclasses=159 vs orbitals=160   split=True
+
+[Shrikhande + Shrikhande  (G + G)]  n=32
+    seed: |Aut|= 73728  orbits=  1   plain 2-WL root fibres=  1 [reaches CAO]
+    nodes=  56 maxdepth=6 posed=56 controls=0 blown=0 (236.1s)
+    (P) propagation failures : 0
+    (S) schurity    failures : 8
+    ** (S) FAILS while (P) HOLDS : 8 **
+    PAID propagation tests (landed on a NON-schurian node) : 7
+       depth=0  fibres=1=orbits=1  pairclasses=4 vs orbitals=5   split=True
+       depth=1  fibres=5=orbits=5  pairclasses=42 vs orbitals=43   split=True
+       depth=2  fibres=11=orbits=11  pairclasses=159 vs orbitals=160   split=True
+       depth=3  fibres=17=orbits=17  pairclasses=291 vs orbitals=292   split=True
+
+==============================================================================
+TOTALS
+  nodes visited              : 238
+  posed nodes                : 233   (controls: 5)
+  (P) PROPAGATION failures   : 0
+  (S) SCHURITY    failures   : 22
+  ** (S) fails, (P) holds    : 22 **
+  PAID propagation tests     : 16   (§7.2 ticket: a test landing on a
+                                schurian node CANNOT fail, so it is worthless)
+  aut-budget blown           : 0
+
+Reading: S_fail_P_pass > 0 means propagation and schurity are DIFFERENT
+statements, so the literature leg against schurity does not close propagation.

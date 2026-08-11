@@ -1,31 +1,82 @@
 # CAO propagation — does refinement preserve `CellsAreOrbits` under individualization?
 
-> ## ⛔ CLOSED 2026-08-01 — and closed on the mathematics, not on time
-> The 2-WL target is essentially *"a one-point extension of a schurian coherent configuration is
-> schurian"*, which is **not true in general** — the literature's positive results are confined to special
-> classes (e.g. point extensions of cyclotomic schemes). This doc's own §4.3 had already concluded the
-> statement could only ever be per-family; the external check confirms it. Combined with the four 1-WL
-> refutations already recorded here, this route does not reach a general theorem.
-> **Suspended: §12.5a (mechanism), §13 (the conversion gap), the `triCount` pin, the 2-WL refiner swap.**
-> See [`chain-descent-wind-down.md`](./chain-descent-wind-down.md) §1.
+> ## ⛔⛔ 2026-08-11 — THE 2-WL LEG OF THE 2026-08-01 CLOSURE IS **RETRACTED**. Read §0.0a.
+> The closure below rested on identifying this doc's target with *"a one-point extension of a schurian
+> coherent configuration is schurian"*. **That identification is false in both directions** — weaker
+> hypothesis (CAO ⊂ schurian) *and* weaker conclusion (fibres = orbits ⊂ all relations = orbitals) ⟹
+> the two statements are **incomparable**, so the literature leg (M–P per-class, Wielandt, the
+> Evdokimov–Ponomarenko schurity number) is evidence about a **different statement** and does not bear
+> on the target. Named witness: **Shrikhande** — a non-schurian S-ring (genuine entry ticket) whose
+> one-point extension has fibres `[1,3,6,6]` = exactly the `Aut_e`-orbits, i.e. **propagation holds on
+> a paid ticket**. §0.0a carries the full correction.
+>
+> **What survives, unchanged:** the **four 1-WL refutations** (STATUS table); the **route** refutations
+> §4.1 (coset transfer circular), §4.2 (no counting proof), §4.3 (bounded shattering depth, killed by
+> `G ⊔ G`) — note these are statements about *proof routes*, not about the target; and every
+> measurement in §5–§6 and §12.5b.
+>
+> **The honest status is the one the STATUS table always carried: at 2-WL, OPEN — no counterexample.**
+> This doc contradicted itself: §4.5, §7.2, §8.4, §12.5b's E1-vs-E2 split and §14.5b all hold the
+> CAO-vs-schurity distinction correctly; only this banner, §0.0a, wind-down §1's row and `MEMORY.md`
+> conflated them.
+>
+> ▶ **Live again as of 2026-08-11 (user):** the thread's purpose is to provide **Lean footing for a CAO
+> propagation argument**. Un-suspended for that purpose: §12.5a (mechanism), the `triCount` pin.
+> §13 (the conversion gap) stays suspended — it is a cost question, not a footing question.
 > ★ The landed Lean (`CaoFibring`, `CaoRound` — incl. the unconditional round-1/round-2 barriers) is
-> axiom-clean and is an **extraction candidate**, wind-down item W3.
-> ⚠ **NOT ARCHIVED (user, 2026-08-04).** The closure is weaker than the banner above claims — read
-> §0.0a before quoting it.
+> axiom-clean and is now **load-bearing**, not merely an extraction candidate (wind-down W3).
 
-### 0.0a ▶ LITERATURE VERIFICATION OF THE CLOSURE (2026-08-04) — and the one step nobody has checked
+### 0.0a ▶ LITERATURE VERIFICATION OF THE CLOSURE — ⛔⛔ **THE IDENTIFICATION IS WRONG** (corrected 2026-08-11)
 
-The closure above was taken on an external check whose citations were never written down. They are
-recorded here. **Two of the three legs verify; the third is weaker than stated.**
+The closure above was taken on an external check whose citations were never written down. They were
+recorded here on 2026-08-04. **The object leg verifies. The identification built on it does not, and
+it is the leg the whole closure rested on.**
 
 **✅ The object is the literature's, exactly.** Muzychuk–Ponomarenko, *On quasi-thin association
 schemes* ([arXiv:1010.4450](https://arxiv.org/abs/1010.4450)) §2.4 defines, verbatim: *"The coherent
 configuration `Xα = (Ω, Sα)` is called the **α-extension** (or a **one point extension**) of the
 coherent configuration `X`"* — `Sα` = the basic relations of the smallest CC on `Ω` with `1α ∈ Sα`
 refining `S`, i.e. **the 2-WL closure with one point individualized**. Same paper, §2: *"given `α ∈ Ω`
-we have `Aut(X)α = Aut(Xα)`."* ⟹ this doc's target ("after individualizing `v`, are the cells still
-orbits of the stabilizer?") **is** the statement *`Xα` is schurian*. The identification in wind-down §1
-is correct and is not a loose analogy.
+we have `Aut(X)α = Aut(Xα)`."* Both quotes are accurate and both are useful: they name the object and
+they let the stabilizer be computed on the extension.
+
+> ## ⛔⛔ AND THE STEP AFTER THEM IS FALSE — *"the target **is** `Xα` is schurian"* (2026-08-11)
+>
+> The M–P quotes are about the **object** and about **automorphism groups**. Neither says anything
+> about schurity. The inference from them to *"this doc's target is `Xα` is schurian"* fails on **both**
+> quantifiers:
+>
+> | | this doc's target | *"extensions preserve schurity"* |
+> |---|---|---|
+> | **hypothesis** | `X` is **CAO** — the *fibres* are `Aut(X)`-orbits | `X` is **schurian** — *every* basic relation is an orbital |
+> | **conclusion** | `Xα`'s **fibres** are `Aut(X)α`-orbits | `Xα` is **schurian** — every basic relation of `Xα` is an orbital |
+>
+> Schurian ⟹ CAO (the diagonal relations of a schurian CC are orbits), so the target has the
+> **weaker hypothesis**; and fibres are only the diagonal part, so the target has the **weaker
+> conclusion**. Weaker-in, weaker-out ⟹ **the two statements are incomparable.** Neither implies the
+> other, and evidence about one is not evidence about the other.
+>
+> ### ★ THE NAMED WITNESS — Shrikhande, measured
+>
+> `Cay(Z₄², S)`: the S-ring `⟨S⟩` has **3** basic sets while `Aut_e` has **4** orbits `[1,3,6,6]` ⟹
+> **non-schurian S-ring**, a genuine §7.2-shaped entry ticket. Its one-point extension `X_e` has
+> fibres `[1,3,6,6]` = **exactly the `Aut_e`-orbits** ⟹ **propagation holds.** A non-schurian input on
+> which the target is *true*. (Root vs extension: 3 vs 4 — see the §12.5b correction below.)
+>
+> ⟹ **The literature leg is retracted.** M–P's per-class positive results, the Wielandt non-schurian
+> S-ring, and Evdokimov–Ponomarenko's schurity number `t(X)` are all evidence about *"extensions
+> preserve schurity"*. That statement is genuinely false in general and genuinely only per-class — and
+> **none of it bears on the target.** ⚠ The "unchecked step" recorded below is therefore doubly moot:
+> even if Wielandt's base CC were verified schurian, it would refute the wrong statement.
+>
+> ### ▶ THIS DOC ALREADY HELD THE DISTINCTION EVERYWHERE ELSE — it is an internal inconsistency
+>
+> §4.5 (*"the fibre hypothesis is doing real work, and any route that would also prove the unrestricted
+> version is doomed"*) · §7.2 (states the ticket as an **extension** condition, correctly) · §8.4
+> (*"the S-ring is the **ROOT** closure only"*) · §12.5b (measures **E1** fibre-schurity and **E2** full
+> schurity **separately**, 0 vs 477) · §14.5b (*"CAO gives cells = orbits; it does **NOT** give pair
+> classes = orbitals"*) · the STATUS table (*2-WL: OPEN*). Only the banner, this block, wind-down §1's
+> row and `MEMORY.md` conflated the two.
 
 **✅ The literature only ever proves it per-class.** Schurity of one-point extensions appears as a
 *sufficient condition* on a restricted class, never as a general theorem: M–P Thm 6.5 (quasi-thin with
@@ -36,17 +87,22 @@ quasi-thin schemes. Evdokimov–Ponomarenko's *schurity number* `t(X)`
 precisely to measure how many extensions schurity costs — machinery that would be vacuous if extension
 preserved it. So §4.3's own "per-family only" conclusion is the literature's position too.
 
-**⚠ The "known false in general" leg is NOT a located citation.** No paper was found stating *"the
+**⚠ The "known false in general" leg is NOT a located citation** — and after the correction above it is
+also **aimed at the wrong statement**. Kept as provenance. No paper was found stating *"the
 one-point extension of a schurian coherent configuration need not be schurian"* in those words. What
 supports it:
 
 * the closest published instance of the right shape — **Wielandt's non-schurian Schur ring** over the
   elementary abelian group of order `p²`, `p > 3` (recorded in
   [arXiv:2109.01385](https://arxiv.org/abs/2109.01385), *On a huge family of non-schurian Schur rings*);
-* this project's own identification, `remaining-work.md` §1T: *"S-ring non-schurian **is** 'the
-  one-point extension at `e` is non-schurian'"*;
+* ⛔ ~~this project's own identification, `remaining-work.md` §1T: *"S-ring non-schurian **is** 'the
+  one-point extension at `e` is non-schurian'"*~~ — **RETRACTED 2026-08-11.** The S-ring is the **root**
+  closure (§8.4); the extension's fibres are strictly finer (Shrikhande 3 vs 4). ⚠ The same wrong
+  identification appears in `remaining-work.md` §1T and §12.5b — both are corrected in place;
 * this project's own measurement, §12.5b: **477 nodes where fibre-schurity holds but full schurity
-  fails** ⟹ unrestricted "extensions preserve schurity" cannot prove the target.
+  fails** ⟹ unrestricted "extensions preserve schurity" cannot prove the target. ★ **This bullet is
+  the one that survives, and it is now read the other way**: it is the project's own evidence that the
+  two statements are **incomparable**, i.e. against the identification, not for it.
 
 ⚠⚠ **The unchecked step.** Wielandt's example refutes the target *only if* the base CC in the S-ring
 correspondence is itself **schurian** — otherwise it is a non-schurian object with a non-schurian
@@ -548,6 +604,16 @@ too. Every "shrink the group" design dies on this.
 | The original 2-WL sweep (21 objects) | ⛔ **WORTHLESS** — 0/21 had a non-schurian one-point extension, so it could not possibly have found a counterexample. The recorded vacuity failure |
 | **CFI cubic m=8, node sweep (2026-07-31)**: 58 nodes, ~800 propagation tests, **1-WL fails 5× (all at depth 0), 2-WL fails 0×** | ⛔ **THE 2-WL HALF IS WORTHLESS — same failure as the row above**, and I checked it on myself: `--ticket` shows the roots are non-schurian but **all 5 one-point extensions are schurian**, so 2-WL could not have failed. ✅ **The 1-WL half is real and new** — it narrows §5's "CFI over any base" row (which sampled only symmetric named bases) |
 | The old 498 + 313 VT pins | ⛔ **UNSOUND** — produced by the broken oracle (§8.2), which errs by *merging* ⟹ false "ok"s |
+| **★ P-vs-S separation sweep (2026-08-11, S0)**: 10 named witnesses, `n ≤ 32`, 238 descent nodes, **(P) propagation 0 failures / (S) full schurity 22 failures**, and **every one of the 22 is at a node where (P) holds** | ⚠ **DISCOUNT — near-zero new propagation evidence, and it is not why it matters.** All **16** §7.2-paid tests are on the two union witnesses (`Shrikhande ⊔ rook4×4`, `Shrikhande ⊔ Shrikhande`) — the weakest kind of paid ticket, since `G ⊔ G` is §7.2's own named "non-schurity lives off-diagonal" case. Shrikhande's own (P) tests are **vacuous** (its depth-1 nodes are schurian). 10 witnesses is a beachhead, not a population. **The strong (P) evidence remains the S-ring sweep two rows up.** ★ Its actual value is the **P/S separation itself**: 22 clean instances of *"fibres accurate, pairs not"*, which is §0.0a's incomparability exhibited on named graphs |
+
+⚠ **Two items the S0 sweep flagged, both unresolved and both worth a line before they are re-quoted:**
+* **Chang-2 and `Shrikhande ⊔ rook4×4` do not reach CAO from the plain 2-WL root** (1 fibre vs 2
+  orbits, each). That is **base-case refiner strength**, not propagation — the sweep seeded from the
+  exact orbit partition, so its (P) verdicts are unaffected. But this row's *"Chang-2 is a real 1-WL
+  failure repaired exactly by 2-WL"* is ambiguous against it: 2-WL repairs the *propagation* failure,
+  it does not necessarily *reach* CAO from the raw graph. **Pin which one is meant before quoting.**
+* The same distinction is §13.6(c)'s pattern (failure at the **base case**, not in propagation) and
+  §4.4/step-0c's cograph finding. Three sightings; nobody has stated it as one fact.
 
 **Why the descent numbers collapse:** max cell size drops per level (Shrikhande 16→6→4→2→1;
 T(8) 28→15→10→6→4→2→1). Descents are over in 4–6 levels, so almost every node is trivially schurian.
@@ -1050,9 +1116,22 @@ sharp-Cayley section iterates 8 groups of order 16 and `break`s at `hits > 3`, s
 with the cap removed and every sample/skip/truncation logged (§9).
 
 **★ The entry ticket here is genuinely PAID — and that is not automatic.** For a Cayley graph the root
-2-WL closure is the Schur ring `⟨S⟩`, whose basic sets are exactly the diagonal classes of the
-one-point extension at the identity. So *"S-ring non-schurian"* **is** *"the one-point extension at
-`e` is non-schurian"* — §7.2's ticket, literally; a schurian S-ring makes failure impossible.
+2-WL closure is the Schur ring `⟨S⟩`. A **schurian** S-ring has basic sets = `Aut_e`-orbits; the
+extension's fibres refine the basic sets and are unions of `Aut_e`-orbits, so they are forced to equal
+both ⟹ **a schurian S-ring makes failure impossible.** Hence *"S-ring non-schurian"* is a **necessary**
+condition for a failure at `e`, i.e. a valid entry ticket, and the 465 sharp inputs are genuinely
+sharp. **E1's evidential value is unchanged by the correction below.**
+
+> ### ⛔ CORRECTION (2026-08-11) — the ticket is valid, its NAME was wrong
+> An earlier version of this paragraph said the basic sets *"are exactly the diagonal classes of the
+> one-point extension at the identity"*, hence *"S-ring non-schurian **is** the one-point extension at
+> `e` is non-schurian — §7.2's ticket, literally"*. **Both halves are false.** §8.4 states it in this
+> doc's own words: **the S-ring is the ROOT closure only**; individualizing `e` and re-closing gives a
+> *strictly finer* partition. **Shrikhande, measured: 3 basic sets, 4 extension fibres** — and those 4
+> are exactly the `Aut_e`-orbits, so the extension is fibre-accurate while the S-ring is not.
+> ⟹ the 729 are **root-deficiency** tickets (necessary, as re-derived above), **not** §7.2's
+> *extension*-non-schurity ticket, which was never checked on this population. ⚠ §7.2's ticket is
+> also only necessary, not sufficient — non-schurity can live entirely off-diagonal (`G ⊔ G`).
 ⚠ **Contrast the CFI population measured the same day** (§5's correction block): there the **root** was
 non-schurian but every one-point **extension** was schurian, so the ticket was **UNPAID** and the 2-WL
 result was worthless. Two different populations, opposite verdicts — do not conflate them.
