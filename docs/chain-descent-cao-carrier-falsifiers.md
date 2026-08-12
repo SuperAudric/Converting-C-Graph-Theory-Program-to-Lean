@@ -3,8 +3,9 @@
 > **What this is.** Three related *designed* attacks on CAO propagation, raised from outside the
 > project (2026-08-12) and measured here. **Construction B is a genuine 1-WL CAO-propagation
 > counterexample** — the first one on record that was built to order rather than found by sweeping.
-> **Construction C is the 2-WL attempt**; its first payload is measured dead, the scheme is not.
-> This doc owns the constructions, the measurements, the reusable filters, and the one open experiment.
+> **Construction C is the 2-WL attempt**; its first payload (Shrikhande/rook) is measured dead, the
+> **scheme is not** — and at rung 1 it runs end to end, with **100 mixed cells** and the ensemble
+> measured **passive** (§6). This doc owns the constructions, the measurements and the reusable filters.
 >
 > ⚠ Companion, not replacement: [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)
 > owns the *question*. Read its §1 (the hypothesis), §3 (the coupling principle) and §14 (the anatomy
@@ -265,9 +266,12 @@ payload's own edge set** — stepping outside lands either in the full ensemble 
 symmetric by construction) or in the cube (symmetric by construction). So the extra strength available
 to 2-WL is exactly *2-WL on the edge-bisected payload*. Hence:
 
-> ### ▶ A candidate payload pair survives Construction C **iff** it is still 2-WL-resistant after edge-bisection.
-> Shrikhande vs rook **fails** this test (§4.2/§4.3), which is why it dies. Apply the test to any
-> candidate **before** building anything around it.
+> ### ▶ A candidate payload pair must be 2-WL-resistant **after edge-bisection**, not before.
+> ⚠ **Stated as a NECESSARY condition, and only that direction is supported.** *Fails the test ⟹
+> dies* is what §4.2/§4.3 measure, and it is the direction that makes it a useful filter — apply it to
+> any candidate **before** building anything around it. **The converse (*passes ⟹ survives*) is a
+> design conjecture, not a theorem**: it assumes the ensemble contributes nothing (§6), and there is no
+> theorem here bounding what the encoded closure can compute. Do not quote this as an `iff`.
 
 **The measured calibration is consistent with that account, and rules out the simpler readings:**
 
@@ -289,30 +293,56 @@ larger than one level even if the extension delivers more. **Nothing here bounds
 Budget generously: *"a payload that beats 4-WL to beat 2-WL"* is a safe floor, not a target. Pinning
 the number needs calibration against CFI pairs of known WL-hardness — not yet done.
 
-**One assumption inside the admission test, and it is the open item**: that the ensemble contributes
-nothing. See §6.
+**One assumption inside the admission test**: that the ensemble contributes nothing. ✅ **Measured
+TRUE at rung 1** (§6 — the full `2^15`-copy ensemble separates `C6` from `2C3` no better than the
+two-copy model). ⚠ Assumed, not measured, at rung 2.
 
 ---
 
-## 6. ▶ THE ONE OPEN EXPERIMENT — is the ensemble passive?
+## 6. ✅ THE ENSEMBLE IS PASSIVE AT RUNG 1 — RAN 2026-08-12
 
-The ensemble is not obviously a passive container. With every colouring present, WL gets the whole
-**Hamming structure on colouring space** as a reference frame: two copies differing in a single slot
-agree at all the others, and that relation is WL-visible. Whether encoded-WL-on-the-full-ensemble is
-still bounded by any fixed level on the payload is the unproved step, and §3.3's argument silently
-assumes it.
+**The worry.** With every colouring present, WL gets the whole **Hamming structure on colouring
+space** as a reference frame: two copies differing in a single slot agree at all the others, and that
+relation is WL-visible. §3.3's reduction and §5's admission test both silently assume this contributes
+nothing. It is the only unproved step in the scheme, so it was measured.
 
-**It is answerable at rung 1, and the answer is sharp either way:**
+**Object** — `scratchpad/probe_cao_ensemble.py`, Construction C at rung 1 with **nothing restricted**:
+6 labels, 15 slots, gauge `Z₂` per slot, **all `2^15` copies and all `2^15` central vertices**.
+`|V| = 229,406`, `|E| = 1,966,095`.
 
-* **two-copy model** — measured (§5): 1-WL does **not** separate `C6` from `2C3` extended;
-* **full ensemble** — 6 labels, 15 slots, all `2^15` copies, `2^15` central vertices, 30 frame
-  vertices ≈ **230k vertices, ~2M edges**. 1-WL is linear, so this runs in minutes.
+```
+CAO start cells : payload 196608 | frame 30 | centrals 32767 | m(0) individualized
+1-WL            : stabilized in 4 rounds -> 292 payload cells
+Aut_v = S_6     : 544 true orbits on the payload
+MIXED CELLS     : 100        (orbits fused per cell, top 10: 9 9 8 8 8 8 7 7 7 7)
+C6 copy cells [218] | 2C3 copy cells [218]
+   share a 1-WL cell: True   |   share an Aut_v-orbit: False
+```
 
-If the full ensemble separates them, the ensemble is doing work no bounded-level argument covers and
-the scheme needs rethinking. If it does not, there is a *designed* 1-WL CAO failure with a chosen
-payload, and rung 2 becomes purely a payload-budget question — where CFI over a treewidth-4 base
+> ### ▶ VERDICT: the full ensemble gives 1-WL **nothing** beyond the two-copy model.
+> The two-copy model did not separate `C6` from `2C3` (§5) and neither does the ensemble — they land
+> in the *same* cell 218 while sitting in different `Aut_v`-orbits. ⟹ **§5's admission test's ensemble
+> assumption HOLDS at rung 1**, measured. ⚠ Rung 1 only; this is evidence for the rung-2 case, not a
+> proof of it, and the Hamming structure is genuinely richer at higher WL levels.
+
+★★ **And it is a second designed 1-WL CAO-propagation counterexample — Construction C's machinery
+working end to end**, with the payload *chosen* rather than inherited from the frame, and 100 mixed
+cells rather than 4.
+
+**Both group facts are proved, not assumed, and the orbit count is independently cross-checked.**
+The CAO start is exactly three cells because the gauge `(Z₂)^15` and the label group `S₆` are jointly
+transitive on each kind and the kinds cannot merge (degrees 10 / ~49k / 15); `Aut_{m(0)} = S₆`
+**exactly**, because a stabilizing `α` preserves `m(0)`'s neighbourhood hence types, "two slots share a
+label" is recoverable (disjoint slots have no common payload neighbour), `Aut(T(6)) = S₆`, and the slot
+permutation then determines the action on every copy. **Burnside cross-check** of the union-find:
+`156` iso classes of 6-vertex graphs (known value) and `544` orbits on (graph, marked vertex) — both
+match exactly.
+
+**▶ What it leaves.** Rung 2 is now purely a **payload-budget** question: CFI over a treewidth-4 base
 (`CFI[K5]`, 60 vertices) is the natural candidate, putting the frame at `C(60,2) = 1770` slots and the
-ensemble at `2^1770` copies. Untestable, but that is then a **size** problem, not a soundness problem.
+ensemble at `2^1770` copies. Untestable — but that is a **size** problem, not a soundness problem, and
+the two things that could have made it a soundness problem (the frame leaking, §4; the ensemble
+leaking, here) are now one measured-dead and one measured-clean.
 
 ---
 
@@ -325,7 +355,8 @@ ensemble at `2^1770` copies. Untestable, but that is then a **size** problem, no
 3. **The parity test** (§2.1) — complementary-pair carriers need `c` **even**.
 4. **The `δ` test** (§3.2) — `1 ⊕ 1' = 2 ⊕ 2'` or the root is not CAO.
 5. **The payload admission test** (§5) — 2-WL-resistant *after edge-bisection*, not before.
-   Shrikhande/rook fails; it is a cheap kill for any design that encodes payload adjacency as vertices.
+   ⚠ **Necessary only** — a cheap kill for any design that encodes payload adjacency as vertices
+   (Shrikhande/rook fails it); passing it is **not** a survival guarantee.
 6. **The binary-coincidence test** (§2.4) — if the hidden fact is a pairwise coincidence, 2-WL reads it.
 
 ---
@@ -338,6 +369,7 @@ ensemble at `2^1770` copies. Untestable, but that is then a **size** problem, no
 | `scratchpad/probe_cao_hypercube_2wl.py` | reduced 112-vertex model; 1-WL calibration + the 2-WL repair | ~5 s |
 | `scratchpad/probe_cao_payload_pair.py` | Shrikhande/rook: 2-WL plain vs one-point extension (⚠ cases C/D never ran) | ~1 s for A/B |
 | `scratchpad/probe_cao_triangle_frame.py` | the triangle-frame kill, 6 variants + controls; `disjoint`/`shared`, `freeze` ∈ `False`/`True`/`'minimal'` | ~1–3 min |
+| `scratchpad/probe_cao_ensemble.py` | §6 — Construction C at rung 1, full symmetry, `n = 229406`; 100 mixed cells | ~2 min |
 
 ⛔ **Two process traps hit while producing this, both already in the CAO doc §9 — do not repeat.**
 (a) `pkill -f probe_...` **matches your own launcher** ⟹ self-kill, exit 144; kill by PID.
@@ -353,9 +385,9 @@ badly enough to stall a 32-vertex job to > 120 s.
 
 ## 9. Provenance
 
-Measured (this doc): §2.3, §2.4, §4.1 A/B, §4.2, §4.3 K4 counts, §5's calibration table.
-Proved, not measured: §1's dichotomy, §2.3's `Aut_{m₀}` upper bound, §2.1's parity requirement,
-§3.2's `δ` condition, §3.3's reduction.
-Argued, not established: §5's admission test (its ensemble assumption is §6), and the claim that the
-`4`-vertex window is *the* separating mechanism in §4.3 — consistent with the numbers, not isolated by
-ablation.
+Measured (this doc): §2.3, §2.4, §4.1 A/B, §4.2, §4.3 K4 counts, §5's calibration table, §6.
+Proved, not measured: §1's dichotomy, §2.3's and §6's `Aut_v` upper bounds, §2.1's parity requirement,
+§3.2's `δ` condition, §3.3's reduction. Cross-checked: §6's 544 orbits (Burnside, plus the known 156).
+Argued, not established: §5's admission test — ⚠ **necessary direction only**; its ensemble assumption
+is measured at **rung 1** (§6) and *assumed* at rung 2. Also the claim that the 4-vertex window is
+*the* separating mechanism in §4.3 — consistent with the numbers, not isolated by ablation.
