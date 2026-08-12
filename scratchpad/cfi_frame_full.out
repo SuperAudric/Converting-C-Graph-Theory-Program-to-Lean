@@ -1,0 +1,5 @@
+CFI[K4]  n=28 |E|=48   encoding=full
+  [K4/full/control] 812 vertices
+    [K4/full/control] round 1: 17 -> 46 colours
+    [K4/full/control] round 2: 46 -> 165 colours
+    [K4/full/control] round 3: 165 -> 528 colours

@@ -173,6 +173,40 @@ cube's gauge move flips one slot's type, the gauge acts transitively on all colo
 genuinely is one orbit. Using complementary pairs (`X` and `X'` opposite corners) satisfies it by
 construction, since every complementary pair has `δ = 1…1`.
 
+### 3.2a ★ THE GADGET REDUCTION — one cube per slot, and what the doubling was really for
+
+**Reduction (reader, 2026-08-12, verified here).** The two cubes per slot — present so the encoding
+is reversible (`1→1'` vs `1'→1`) — halve to **one cube**, by attaching **both** payload endpoints to
+**both** corners of the pair. Symmetric in `i, j` by construction.
+
+Verified in two parts.
+
+**(a) The frame algebra still works** (`scratchpad/probe_cao_gadget_check.py`): the `Q₄` gauge is
+**transitive on the 8 unordered complementary pairs** (stabilizer `{0000, 1111}`, order 2, so
+`16/2 = 8` types), and `δ = p ⊕ p'` is **constant `1111`** across every complementary pair. ⟹ the
+root stays one orbit, and ★ **§3.2's `δ` condition becomes AUTOMATIC** — using complementary pairs,
+which the `Q₄` parity insight already forced, discharges it. It stops being a design obligation.
+
+**(b) What the doubling was actually load-bearing for** — and it is **not** root symmetry
+(`scratchpad/probe_cao_gadget_variants.py`, small ensemble, `L = 4`):
+
+| frame shape | gauge is an aut | transposition is an aut | it fixes `m(0)` | |
+|---|---|---|---|---|
+| **both-to-both** (one cube) | ✓ | ✓ | ✓ | **PASS** |
+| one cube, ordered, `m` holds one corner | ✓ | ✗ | — | **FAIL** |
+| two cubes, opposite orientations (the original) | ✓ | ✓ | ✓ | **PASS** |
+
+> ### ★★ The real obligation: `m` must hold exactly ONE corner per cube — that is what makes it a
+> gauge choice — and the label transposition must still be an automorphism **fixing `m`**, or
+> `Aut_m` loses its transpositions and **T4 fails**.
+> The original doubling buys that by letting the transposition **swap the cubes**. Both-to-both buys
+> it more cheaply: the transposition then fixes the frame **pointwise**, so it fixes every `m(g)`
+> outright. ⟹ the reduction is not a convenience — it makes T4 nearly trivial.
+
+⚠⚠ **A modelling trap, hit here:** the first run reported the two-cube original as **FAIL**. That was
+wrong — the transposition there must **swap the cubes**, not swap the ends within a cube, and mapping
+ends breaks `m`. Do not re-derive "the original design was broken"; it was the model that was.
+
 ### 3.3 What the construction reduces to
 
 `Aut = gauge ⋊ (label symmetries)`; after individualizing `m` the gauge dies and `Aut_m` is the label
@@ -297,6 +331,41 @@ the number needs calibration against CFI pairs of known WL-hardness — not yet 
 TRUE at rung 1** (§6 — the full `2^15`-copy ensemble separates `C6` from `2C3` no better than the
 two-copy model). ⚠ Assumed, not measured, at rung 2.
 
+### 5.1 ▶ CFI PAYLOADS — the first candidates that pass anything
+
+`scratchpad/probe_cao_cfi_frame.py`. Both CFI pairs are checked 2-WL-blind **bare** first, so the
+test is not vacuous: `CFI[K4]` (`n = 28`) and `CFI[K5]` (`n = 60`), plain vs twisted, **equivalent =
+True**. ★ `CFI[K4]` already suffices — base treewidth 3 > 2 — so the payload costs `n = 28`, **not**
+the `n = 60` of `K5`.
+
+| payload | encoding | union `|V|` | control | 2-WL separates? |
+|---|---|---|---|---|
+| `CFI[K4]` | subdivision (edges only) | 152 | clean | ⭕ **No — survives** |
+| `CFI[K5]` | subdivision (edges only) | 440 | clean | ⭕ **No — survives** |
+| `CFI[K4]` | full, ⚠ **non-faithful variant** (see below) | 812 | clean | ⛔ **Yes — separates** (5 rounds, 1848 colours vs the control's 567) |
+| `CFI[K4]` | **full, faithful** (clique payload) | 812 | — | ▶ re-running |
+| `CFI[K5]` | full | 3660 | — | ⛔ out of reach (`n³` time, `n²` signatures) |
+
+⚠⚠ **THE FAITHFULNESS DEFECT IN ROW 3 — found after the run, do not quote that row as the verdict.**
+That run kept the payload's **own edges** alongside the typed frame vertices. Construction C makes
+the copy a **complete** graph with adjacency living *only* in the frame types (which is what
+`probe_cao_triangle_frame.py` does for Shrikhande/rook). So it handed 2-WL the adjacency **twice** —
+atomically at round 0 *and* through the frame — making it both a stronger model than the object and
+not comparable with §4.2. The control was clean and the separation is real *for that model*; it is
+row 4 that decides the question. Fixed in `encode`, re-running.
+
+⚠⚠ **Do not read the two ⭕ rows as the admission test being passed.** They use **subdivision**;
+Construction C types **every pair**, edges and non-edges alike — that is the `full` row, and it is the
+encoding under which Shrikhande/rook died. The comparison is not yet apples-to-apples. What the ⭕
+rows *do* establish is that subdivision alone costs a CFI pair nothing, a sharp contrast with
+Shrikhande/rook that makes the 812-vertex run worth its runtime.
+
+⚠ **On the "doubling" reading** (*to beat `k`-WL you need a pair resistant to `2k`-WL*, each
+subdivision adding a window as wide as the `k` in use): the subdivision rows are **consistent with it
+being too pessimistic** — `CFI[K4]` resists 2-WL bare and still resists it subdivided, which a strict
+doubling would not predict. But subdivision is the weak encoding. **Suspend judgement until the
+812-vertex row lands.**
+
 ---
 
 ## 6. ✅ THE ENSEMBLE IS PASSIVE AT RUNG 1 — RAN 2026-08-12
@@ -353,7 +422,11 @@ leaking, here) are now one measured-dead and one measured-clean.
 2. **The attachment-set test** (§1) — if the carrier's attachment set determines `v`, it is dead.
    ⚠ Conditional only; `Q₄` complementary pairs break its premise.
 3. **The parity test** (§2.1) — complementary-pair carriers need `c` **even**.
-4. **The `δ` test** (§3.2) — `1 ⊕ 1' = 2 ⊕ 2'` or the root is not CAO.
+4. **The `δ` test** (§3.2) — `1 ⊕ 1' = 2 ⊕ 2'` or the root is not CAO. ✅ **Discharged automatically**
+   by complementary-pair corners (§3.2a); keep the test only for non-complementary designs.
+4b. **The transposition-fixes-`m` test** (§3.2a) — for any frame shape, check that a label
+   transposition is an automorphism *and* fixes the individualized central vertex. It is the cheapest
+   way to catch a frame that silently loses T4, and it is what separates the three shapes.
 5. **The payload admission test** (§5) — 2-WL-resistant *after edge-bisection*, not before.
    ⚠ **Necessary only** — a cheap kill for any design that encodes payload adjacency as vertices
    (Shrikhande/rook fails it); passing it is **not** a survival guarantee.
@@ -370,6 +443,18 @@ leaking, here) are now one measured-dead and one measured-clean.
 | `scratchpad/probe_cao_payload_pair.py` | Shrikhande/rook: 2-WL plain vs one-point extension (⚠ cases C/D never ran) | ~1 s for A/B |
 | `scratchpad/probe_cao_triangle_frame.py` | the triangle-frame kill, 6 variants + controls; `disjoint`/`shared`, `freeze` ∈ `False`/`True`/`'minimal'` | ~1–3 min |
 | `scratchpad/probe_cao_ensemble.py` | §6 — Construction C at rung 1, full symmetry, `n = 229406`; 100 mixed cells | ~2 min |
+| `scratchpad/probe_cao_gadget_check.py` | §3.2a(a) — gauge transitive on the 8 complementary pairs; `δ` constant | < 1 s |
+| `scratchpad/probe_cao_gadget_variants.py` | §3.2a(b) — the three frame shapes vs the transposition-fixes-`m` test | < 5 s |
+| `scratchpad/probe_cao_cfi_frame.py` | §5.1 — CFI payloads through the frame; `<m> <sub\|full>` | 152/440 fast; 812 ~1 h |
+
+**Lean.** `GraphCanonizationProofs/ChainDescent/CaoEnsemble.lean` — the index-level skeleton
+(`gact_transitive` = T1, `gact_eq_self_iff` + `lact_base` = T2⁻, `Propagates` +
+`not_propagates_of_merge` = the target and the bridge the probes instantiate). Builds clean, all
+declarations `[propext, Classical.choice, Quot.sound]`, no `sorry`, no custom axiom. ⚠ **Not in
+`scripts/build.sh`'s `MODULES` list** — the gate is a hand-maintained enumeration, so this is
+unbuilt by the gate until someone adds it. ⛔ It contains **no graph, no adjacency and no refiner**:
+T2⁺ (`Aut_m` is *exactly* the label group, needing `Aut(T(n)) = Sym n`) and T3 (the frame's cells are
+the position classes) are **not** in it.
 
 ⛔ **Two process traps hit while producing this, both already in the CAO doc §9 — do not repeat.**
 (a) `pkill -f probe_...` **matches your own launcher** ⟹ self-kill, exit 144; kill by PID.
@@ -385,9 +470,12 @@ badly enough to stall a 32-vertex job to > 120 s.
 
 ## 9. Provenance
 
-Measured (this doc): §2.3, §2.4, §4.1 A/B, §4.2, §4.3 K4 counts, §5's calibration table, §6.
+Measured (this doc): §2.3, §2.4, §3.2a, §4.1 A/B, §4.2, §4.3 K4 counts, §5's calibration table,
+§5.1's two subdivision rows, §6.
 Proved, not measured: §1's dichotomy, §2.3's and §6's `Aut_v` upper bounds, §2.1's parity requirement,
 §3.2's `δ` condition, §3.3's reduction. Cross-checked: §6's 544 orbits (Burnside, plus the known 156).
+Machine-checked: T1 and T2⁻ in `ChainDescent/CaoEnsemble.lean` (axiom-clean; ⚠ not gate-listed).
+▶ **Outstanding at time of writing: §5.1's `CFI[K4]` full-pairs row is still running.**
 Argued, not established: §5's admission test — ⚠ **necessary direction only**; its ensemble assumption
 is measured at **rung 1** (§6) and *assumed* at rung 2. Also the claim that the 4-vertex window is
 *the* separating mechanism in §4.3 — consistent with the numbers, not isolated by ablation.

@@ -1,0 +1,30 @@
+CFI[K5]  n=60 |E|=160   encoding=sub
+  [K5/sub/control] 440 vertices
+    [K5/sub/control] round 1: 8 -> 19 colours
+    [K5/sub/control] round 2: 19 -> 29 colours
+    [K5/sub/control] round 3: 29 -> 69 colours
+    [K5/sub/control] round 4: 69 -> 72 colours
+    [K5/sub/control] round 5: 72 -> 72 colours
+  CONTROL (plain vs plain) separated: False
+  [K5/sub/test] 440 vertices
+    [K5/sub/test] round 1: 8 -> 19 colours
+    [K5/sub/test] round 2: 19 -> 29 colours
+    [K5/sub/test] round 3: 29 -> 69 colours
+    [K5/sub/test] round 4: 69 -> 72 colours
+    [K5/sub/test] round 5: 72 -> 72 colours
+==> CFI[K5] sub-encoded, 2-WL separates plain from twisted: False
+=== NEXT ===
+CFI[K4]  n=28 |E|=48   encoding=full
+  [K4/full/control] 812 vertices
+    [K4/full/control] round 1: 17 -> 52 colours
+    [K4/full/control] round 2: 52 -> 438 colours
+    [K4/full/control] round 3: 438 -> 567 colours
+    [K4/full/control] round 4: 567 -> 567 colours
+  CONTROL (plain vs plain) separated: False
+  [K4/full/test] 812 vertices
+    [K4/full/test] round 1: 17 -> 52 colours
+    [K4/full/test] round 2: 52 -> 444 colours
+    [K4/full/test] round 3: 444 -> 1305 colours
+    [K4/full/test] round 4: 1305 -> 1848 colours
+    [K4/full/test] round 5: 1848 -> 1848 colours
+==> CFI[K4] full-encoded, 2-WL separates plain from twisted: True
