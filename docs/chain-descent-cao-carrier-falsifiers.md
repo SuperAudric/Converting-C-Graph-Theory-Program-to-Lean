@@ -342,29 +342,48 @@ the `n = 60` of `K5`.
 |---|---|---|---|---|
 | `CFI[K4]` | subdivision (edges only) | 152 | clean | ⭕ **No — survives** |
 | `CFI[K5]` | subdivision (edges only) | 440 | clean | ⭕ **No — survives** |
-| `CFI[K4]` | full, ⚠ **non-faithful variant** (see below) | 812 | clean | ⛔ **Yes — separates** (5 rounds, 1848 colours vs the control's 567) |
-| `CFI[K4]` | **full, faithful** (clique payload) | 812 | — | ▶ re-running |
+| `CFI[K4]` | full, ⚠ **non-faithful variant** (see below) | 812 | clean | ⛔ Yes — separates, diverging at **round 2** |
+| **`CFI[K4]`** | **full, faithful** (clique payload) | **812** | **clean** | ⛔⛔ **YES — SEPARATES**, diverging at **round 3**, 1848 colours vs the control's 567 |
 | `CFI[K5]` | full | 3660 | — | ⛔ out of reach (`n³` time, `n²` signatures) |
 
-⚠⚠ **THE FAITHFULNESS DEFECT IN ROW 3 — found after the run, do not quote that row as the verdict.**
-That run kept the payload's **own edges** alongside the typed frame vertices. Construction C makes
-the copy a **complete** graph with adjacency living *only* in the frame types (which is what
-`probe_cao_triangle_frame.py` does for Shrikhande/rook). So it handed 2-WL the adjacency **twice** —
-atomically at round 0 *and* through the frame — making it both a stronger model than the object and
-not comparable with §4.2. The control was clean and the separation is real *for that model*; it is
-row 4 that decides the question. Fixed in `encode`, re-running.
+> ### ⛔⛔ VERDICT: `CFI[K4]` FAILS the payload admission test.
+> The full all-pairs frame cracks a pair that is 2-WL-blind bare, so **encoded-2-WL ≥ bare-3-WL** on
+> this pair. `CFI[K4]` is out as a payload, and subdivision was indeed the weak encoding: the same
+> pair survives it (row 1) and dies here.
 
-⚠⚠ **Do not read the two ⭕ rows as the admission test being passed.** They use **subdivision**;
-Construction C types **every pair**, edges and non-edges alike — that is the `full` row, and it is the
-encoding under which Shrikhande/rook died. The comparison is not yet apples-to-apples. What the ⭕
-rows *do* establish is that subdivision alone costs a CFI pair nothing, a sharp contrast with
-Shrikhande/rook that makes the 812-vertex run worth its runtime.
+⚠⚠ **THE FAITHFULNESS DEFECT IN ROW 3 — found after that run, kept only as provenance.** It retained
+the payload's **own edges** alongside the typed frame vertices; Construction C makes the copy a
+**complete** graph with adjacency living *only* in the types (as `probe_cao_triangle_frame.py` does).
+So it handed 2-WL the adjacency **twice** — atomically at round 0 *and* through the frame. Fixed in
+`encode`; row 4 is the verdict. ★ **The two rows agree and the fix behaved exactly as predicted**: the
+faithful model diverges one round *later* (3 vs 2) and reaches the same 1848 colours, which is what
+removing a duplicated round-0 signal should do. Raw output kept at `scratchpad/cfi_frame_unfaithful.out`.
 
-⚠ **On the "doubling" reading** (*to beat `k`-WL you need a pair resistant to `2k`-WL*, each
-subdivision adding a window as wide as the `k` in use): the subdivision rows are **consistent with it
-being too pessimistic** — `CFI[K4]` resists 2-WL bare and still resists it subdivided, which a strict
-doubling would not predict. But subdivision is the weak encoding. **Suspend judgement until the
-812-vertex row lands.**
+### 5.2 ▶ WHERE THE CALIBRATION NOW STANDS — and the one measurement that would settle it
+
+| pair | bare WL dimension | encoded, tested at | result |
+|---|---|---|---|
+| `C6` / `2C3` | 2 (1-WL blind) | 1-WL | survives ⟹ **gain 0** |
+| Shrikhande / rook | 3 (2-WL blind) | 2-WL | separates ⟹ **gain ≥ 1** |
+| `CFI[K4]` | 3 (2-WL blind) | 2-WL | separates ⟹ **gain ≥ 1** |
+| **`CFI[K5]`** | **4 (3-WL blind)** | **2-WL** | **▶ NOT RUN — the decisive cell** |
+
+Both rung-2 points give `≥ 1` and **neither bounds the gain above**, so the two live readings are
+still open: *"costs exactly one level"* (⟹ `CFI[K5]` is the payload, and the programme is sound but
+huge) versus the **doubling** reading, *encoded-`k`-WL ≈ bare-`2k`-WL* (⟹ `CFI[K5]` dies too and the
+payload must be 4-WL-blind, i.e. CFI over a treewidth-5 base). A 3-WL-blind pair tested at encoded
+2-WL separates them, and `CFI[K5]` full at `n = 3660` is the only instance in hand.
+
+**▶ To make that run possible**, one of: (a) a C implementation of the counting-signature 2-WL —
+`n³ ≈ 4.9×10^10` simple ops per round is ~2–3 min/round in C against ~4 h in Python; (b) a
+**smaller 3-WL-blind pair** than `CFI[K5]`'s 60 vertices, which would shrink `C(n,2)` quadratically
+and is the higher-leverage search; (c) an algorithmic 2-WL (partition-refinement rather than
+recolour-everything). ⛔ Do **not** attempt it in the current Python prober.
+
+⚠⚠ **The two ⭕ rows are NOT the admission test being passed.** They use **subdivision**; Construction
+C types **every pair**, edges and non-edges alike — that is the `full` row, and the same `CFI[K4]`
+that survives subdivision **dies** there. ⟹ **subdivision is the weak encoding, and measuring it
+answers a different question.** Keep the rows only as the contrast that establishes it.
 
 ---
 
@@ -475,7 +494,8 @@ Measured (this doc): §2.3, §2.4, §3.2a, §4.1 A/B, §4.2, §4.3 K4 counts, §
 Proved, not measured: §1's dichotomy, §2.3's and §6's `Aut_v` upper bounds, §2.1's parity requirement,
 §3.2's `δ` condition, §3.3's reduction. Cross-checked: §6's 544 orbits (Burnside, plus the known 156).
 Machine-checked: T1 and T2⁻ in `ChainDescent/CaoEnsemble.lean` (axiom-clean; ⚠ not gate-listed).
-▶ **Outstanding at time of writing: §5.1's `CFI[K4]` full-pairs row is still running.**
+▶ **Outstanding: §5.2's `CFI[K5]`-full cell — the only measurement that separates "costs one level"
+from "doubling", and out of reach of the Python prober.**
 Argued, not established: §5's admission test — ⚠ **necessary direction only**; its ensemble assumption
 is measured at **rung 1** (§6) and *assumed* at rung 2. Also the claim that the 4-vertex window is
 *the* separating mechanism in §4.3 — consistent with the numbers, not isolated by ablation.

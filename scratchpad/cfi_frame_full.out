@@ -3,3 +3,14 @@ CFI[K4]  n=28 |E|=48   encoding=full
     [K4/full/control] round 1: 17 -> 46 colours
     [K4/full/control] round 2: 46 -> 165 colours
     [K4/full/control] round 3: 165 -> 528 colours
+    [K4/full/control] round 4: 528 -> 567 colours
+    [K4/full/control] round 5: 567 -> 567 colours
+  CONTROL (plain vs plain) separated: False
+  [K4/full/test] 812 vertices
+    [K4/full/test] round 1: 17 -> 46 colours
+    [K4/full/test] round 2: 46 -> 165 colours
+    [K4/full/test] round 3: 165 -> 540 colours
+    [K4/full/test] round 4: 540 -> 1611 colours
+    [K4/full/test] round 5: 1611 -> 1848 colours
+    [K4/full/test] round 6: 1848 -> 1848 colours
+==> CFI[K4] full-encoded, 2-WL separates plain from twisted: True
