@@ -123,7 +123,7 @@ be quoted as a refutation in the W4 write-up.
 
 | level | verdict | witness |
 |---|---|---|
-| **1-WL** | ⛔ **REFUTED** | `net(Z₄) ≅ CFI[K4]-tw` (n=28); also Shrikhande (n=16, VT), Chang-2 (n=28), `Cay(Z₁₂⋊₅Z₂)` (n=24, VT) |
+| **1-WL** | ⛔ **REFUTED** | `net(Z₄) ≅ CFI[K4]-tw` (n=28); also Shrikhande (n=16, VT), Chang-2 (n=28), `Cay(Z₁₂⋊₅Z₂)` (n=24, VT); **and a DESIGNED one**, the `Q₄` complementary-pair carrier (n=352, 2026-08-12) — [`chain-descent-cao-carrier-falsifiers.md`](./chain-descent-cao-carrier-falsifiers.md) §2 |
 | **2-WL** | **OPEN — no counterexample; evidence upgraded 2026-07-30/31 (see §6)** | — |
 | `VT ⟹ Tinhofer` | ⛔ **REFUTED at 1-WL** by the parallel branch — see [`../scratchpad/HANDOFF_2wl.md`](../scratchpad/HANDOFF_2wl.md) §5 | `Cay(Z₁₂⋊₅Z₂)` |
 | `CAO ⟹ Tinhofer` | ⛔ **REFUTED at 1-WL** | `net(Z₄)` |
@@ -1612,6 +1612,20 @@ it hands the crux, and **why it closes** (**§14.5**, raised and closed 2026-08-
 **§14.5e**). §14.1–§14.4 are measured by
 **`scratchpad/probe_cao_anatomy.py`** (clean-room machinery of §8.1, ~22 s; output
 `probe_cao_anatomy.out`); **§14.5 has its own probe list** — see its header.
+
+> ### ▶▶ ADDED 2026-08-12 — §14.4's ladder was CLIMBED FROM OUTSIDE; the record is its own doc
+> [`chain-descent-cao-carrier-falsifiers.md`](./chain-descent-cao-carrier-falsifiers.md) owns three
+> reader-proposed *designed* attacks and their measurements. What it changes here:
+> 1. **A DESIGNED 1-WL counterexample exists** (`Q₄` complementary-pair carrier, n=352, 4 mixed cells
+>    from the exact orbit partition). The §STATUS verdict is unchanged; what is new is that a 1-WL CAO
+>    failure can be **built to order**, mechanism chosen in advance — not only found by sweeping.
+> 2. ★★ **A NEW CHEAP FALSIFIER FILTER, orthogonal to §14.4's**: *2-WL cannot distinguish Shrikhande
+>    from rook 4×4, but it CAN distinguish their **triangle-extended** versions* (measured, 6 model
+>    variants + controls; `K4` count 0 vs 8). ⟹ **any design that encodes payload adjacency as
+>    vertices must have a payload pair that is 2-WL-resistant AFTER edge-bisection** — cheap to test,
+>    and it kills the obvious candidates before the design is built.
+> 3. ⚠ The extension's cost in WL levels is **not constant** (measured 0 at `k=1`, ≥1 at `k=2`) and is
+>    **not bounded above** by anything measured. Do not quote a fixed number.
 
 ### 14.1 ★ The far cell's split is a PULLBACK of the exposed shape's PAIR-orbits
 
