@@ -1620,12 +1620,16 @@ it hands the crux, and **why it closes** (**§14.5**, raised and closed 2026-08-
 >    from the exact orbit partition). The §STATUS verdict is unchanged; what is new is that a 1-WL CAO
 >    failure can be **built to order**, mechanism chosen in advance — not only found by sweeping.
 > 2. ★★ **A NEW CHEAP FALSIFIER FILTER, orthogonal to §14.4's**: *2-WL cannot distinguish Shrikhande
->    from rook 4×4, but it CAN distinguish their **triangle-extended** versions* (measured, 6 model
+>    from rook 4×4, but it CAN distinguish their **frame-encoded** versions* (measured, 6 model
 >    variants + controls; `K4` count 0 vs 8). ⟹ **any design that encodes payload adjacency as
->    vertices must have a payload pair that is 2-WL-resistant AFTER edge-bisection** — cheap to test,
->    and it kills the obvious candidates before the design is built.
-> 3. ⚠ The extension's cost in WL levels is **not constant** (measured 0 at `k=1`, ≥1 at `k=2`) and is
+>    vertices must have a payload pair that is 2-WL-resistant AFTER that encoding** — cheap to test,
+>    and it kills the obvious candidates before the design is built. ⛔⛔ **`CFI[K4]` fails it too**
+>    (n=28 payload, 812 encoded, control clean) ⟹ *2-WL-blind bare* is **not** sufficient, and the
+>    smallest known survivor candidate is now `CFI[K5]`, **untested** at `n = 3660` encoded.
+> 3. ⚠ The encoding's cost in WL levels is **not constant** (measured 0 at `k=1`, ≥1 at `k=2`) and is
 >    **not bounded above** by anything measured. Do not quote a fixed number.
+> 4. ⛔⛔ **"Edge-bisection" is NOT the encoding** — subdivision and the real all-pairs frame give
+>    **opposite** verdicts on `CFI[K4]` (survives / dies). Never substitute the cheap one.
 
 ### 14.1 ★ The far cell's split is a PULLBACK of the exposed shape's PAIR-orbits
 
