@@ -890,16 +890,58 @@ encoding — the objects those sections actually measured.
 > copies) and found it incomparable to the ensemble. That verdict stands — but it indicts the
 > `shared` rows, **not** the `disjoint` ones. ⚠ I stated the caution too broadly; this narrows it.
 
-⚠⚠ **The honest tension, and the first thing the proof must explain.** At **1-WL** the `disjoint`
-model provably *disagrees* with the ensemble (§6a: **538 / 6** vs **292 / 100**). So the collapse is
-**not level-uniform** — false at `k = 1`, measured true at `k = 2`. The mechanism has to be that at
-2-WL the pair colours already carry the adjacency (§6b), so the extra vertex-level frame refinement a
-private frame allows is **subsumed**, whereas at 1-WL it is the only channel and is not. That story is
-coherent and it is **not yet proved**.
+### 6d.5 ✅ THE LEVEL-UNIFORMITY WORRY IS RESOLVED — **FREEZE THE FRAME VERTICES**
 
-⚠ **Verified at `L = 4` only** — `d = 6`, a 12-vertex frame. It is a sharp falsifiable claim with a
-proved half (a) and a conjectural half (b); it is not yet a theorem. ⛔ Do not restate §4/§5.1 as
-unconditional until (b) is proved.
+⚠ This paragraph originally recorded a tension: at **1-WL** the `disjoint` model *disagrees* with the
+ensemble (§6a: **538 / 6** vs **292 / 100**), so the collapse looked **not level-uniform** — false at
+`k = 1`, true at `k = 2`. **It was an artefact of not freezing.**
+
+**The reader's argument (2026-08-13), which supplies the rule.** A frame vertex may split into its two
+individualization orbits and then **never refine again**: for every within-copy path that would
+distinguish two frame vertices, *every alternative exists across the other copies*, so the multiset
+balances. Stepping off a payload vertex onto the frame reaches every other graph at once, so nothing
+distinguishing comes back — the escape channel is uniform **by construction**, at every `k`.
+
+**Measured — `scratchpad/probe_cao_bound_freeze.py`, `L = 6`, 1-WL, against §6a's true partition:**
+
+```
+single-copy model, frame FROZEN  :  292 cells   identical to the ensemble: True
+single-copy model, frame unfrozen:  538 cells   identical to the ensemble: False
+```
+
+> ### ★★★ The faithful model is level-uniform: **one copy + the frame, frame vertices frozen at their two orbit colours** (and frame–frame *pairs* frozen at the 12 classes of §6d.2(a) for `k = 2`).
+> The freeze is **necessary at 1-WL** and **redundant at 2-WL** (`L = 4`, measured both ways). ⟹ §6d's
+> collapse holds at `k = 1` *and* `k = 2`, and the "not level-uniform" caveat is **withdrawn**.
+
+### 6d.6 ▶ THE OPERATIONAL RECIPE, and what is still conjectural
+
+```
+M_frozen(G), G a payload graph on L labels, d = C(L,2):
+   K_L payload  +  2d frame vertices;  f(k,0) ~ f(k,1);  p(i) ~ f(k, G_k) for every slot k ∋ i
+   frame VERTEX colours frozen at t;  frame-frame PAIR colours frozen at (t, t', |k ∩ k'|)
+   |M| = L + 2d = L².   Shrikhande/rook 256 · CFI[K4] 784 · CFI[K5] 3540.
+Compare two payloads with a SHARED intern table and LOCKSTEP rounds (≡ the disjoint union, but at
+n = |M| rather than 2|M| — an 8x saving in the n³ loop).  ⚠ different round counts are not comparable.
+```
+
+**First run of the recipe — `scratchpad/probe_cao_mfrozen.py`, `L = 16`, 256 vertices per side:**
+
+```
+Shrikhande  84 pair colours    rook4x4  (separates)    control (Shrikhande vs itself): NOT separated
+==> M_frozen 2-WL separates Shrikhande from rook 4x4: True
+```
+
+⟹ §4's kill **survives the move to the faithful object**. ⚠ Under §6d.1's direction rule this is a
+*separation*, so it does not refute anything by itself — it says only that this payload cannot be the
+counterexample. The refutation route still needs a payload that **merges**.
+
+⚠ **Still conjectural: §6d.2(b).** Verified now at `k = 1` (`L = 6`, elementwise) and `k = 2`
+(`L = 4`, every channel), with (a) proved for all `L`. The residual hole is precise: the averaging
+argument is exact **at round 1**, where cross-copy colours depend only on `δ = c ⊕ c'`. Once
+payload–frame colours carry absolute copy data — which they do from round 1, via `c_k = t` — a
+cross-copy pair can carry a **joint** invariant `Φ((G_c,i), (G_{c'},l))`, and `Σ_{c'} Φ` is then the
+profile of `(G_c,i)` against *all* graphs, which is a genuine invariant and not obviously constant in
+`c`. **Closing that induction is item 1.** ⛔ Do not restate §4/§5.1 as unconditional until it is closed.
 
 ### 6d.5 ▶ What follows immediately
 
