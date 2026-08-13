@@ -935,13 +935,62 @@ Shrikhande  84 pair colours    rook4x4  (separates)    control (Shrikhande vs it
 *separation*, so it does not refute anything by itself — it says only that this payload cannot be the
 counterexample. The refutation route still needs a payload that **merges**.
 
-⚠ **Still conjectural: §6d.2(b).** Verified now at `k = 1` (`L = 6`, elementwise) and `k = 2`
-(`L = 4`, every channel), with (a) proved for all `L`. The residual hole is precise: the averaging
-argument is exact **at round 1**, where cross-copy colours depend only on `δ = c ⊕ c'`. Once
-payload–frame colours carry absolute copy data — which they do from round 1, via `c_k = t` — a
-cross-copy pair can carry a **joint** invariant `Φ((G_c,i), (G_{c'},l))`, and `Σ_{c'} Φ` is then the
-profile of `(G_c,i)` against *all* graphs, which is a genuine invariant and not obviously constant in
-`c`. **Closing that induction is item 1.** ⛔ Do not restate §4/§5.1 as unconditional until it is closed.
+### 6d.7 ★★★ THE CLOSED FORM IS COMPLETE — every channel expressed in `M`-data
+
+`scratchpad/probe_cao_crosscopy.py`, `L = 4`, against the ensemble's stable colouring.
+
+⚠⚠ **First, a retraction of my own mechanism.** §6d.2(b) said *"at round 1 cross-copy colours depend
+only on `δ = c ⊕ c'`"*. **That is false.** The round-1 frame contribution counts slots `k ∋ i, k ∌ l`
+with `c_k = t`, which is `deg_{G_c}(i)` — **absolute** copy data, already at round 1. The reader's
+uniformity argument does not use that claim, which is why it survives its failure.
+
+**The reader's uniformity argument (2026-08-13), which is the right one.** For a pebbled pair, split
+`z` by copy. The copies holding pebbles (at most `k`) are handled explicitly; *all other copies
+together* give `[global count] − [copy c] − [copy c']`. The global count is a constant of `E(L)`, and
+each correction is fixed by that vertex's own `M`-colour — because in a **stable** colouring
+`col_M(i,i)` already determines `{(col_M(i,m), col_M(m,m)) : m}`, i.e. the copy's whole colour profile.
+*Uniform minus a uniform selection of `≤ k` is uniform*, for any `k`.
+
+**Measured, and the shape is not what either of us first guessed:**
+
+```
+cross-copy pair colours in the ensemble: 2932   (over 64512 ordered cross pairs)
+  A  determined by the pair of M-diagonal colours alone        : False   (398 classes)
+  B  ... plus δ = c ⊕ c'                                       : False   (8030 classes)
+  C  ... plus the slot-alignment MULTISET (below)              : TRUE    (2932 classes = exact)
+  ==> the cross-copy contribution to the DIAGONAL is determined by M-col(c,i): TRUE  (20 values)
+```
+
+> ### ★★★ The individual cross-copy colours are RICH — 2932 of them, not a function of the `M`-diagonals even with `δ`. Their **aggregate over all other copies** is nonetheless exactly a function of `M-col(c,i)`. That is "uniform on the return": the summands are complicated, the sum is not.
+
+⟹ **the collapse cannot be proved by claiming cross-copy colours are simple — only their aggregate is.**
+
+**The closed form, complete and exact at `L = 4`:**
+
+| channel | closed form |
+|---|---|
+| diagonal · within-copy pairs · payload–frame | `M(c)`'s own colouring (§6d.3) |
+| frame–frame | the 12 classes `(t, t', |k ∩ k'|)` — **proved, all `L`** (§6d.2a) |
+| **cross-copy pairs** | `(M-col(c,i), M-col(c',l), multiset over (k,t) of (M(c)-col(i, f(k,t)), M(c')-col(f(k,t), l)))` — **bijective**, 2932 = 2932 |
+
+⚠ **A vacuity trap hit and caught here.** The same hypothesis with an *ordered tuple* over slots
+instead of a multiset reported `True` with **64512 classes over 64512 pairs** — an **injective** key,
+so "determines the colour" was vacuously true. The class count is what exposes it. WL aggregates over
+`z` and yields a multiset, so the multiset is also the faithful form. ★ Always check the witness is
+not degenerate (standing project steer).
+
+### 6d.8 ▶ WHAT ITEM 1 HAS BEEN REDUCED TO
+
+Everything is now `M`-data, so the residual obligation is a self-contained combinatorial lemma with
+no WL, no graph and no ensemble in it:
+
+> ### ▶ **LEMMA (open).** For fixed `(c,i)`, the multiset over all `(c',l)` of `(M-col(c',l), the slot-alignment multiset of a(c,i) against b(c',l))` is determined by `M-col(c,i)`.
+> where `a(c,i)` is the vector `(k,t) ↦ M(c)-col(i, f(k,t))` and likewise `b(c',l)`.
+
+★ It looks provable: the distribution of `b(c',l)` over all `c'` is **`S_L`-invariant and independent
+of `c`**, while `a(c,i)` is held fixed — so the sum should factor through `a`'s `S_L`-orbit, which
+stability ties to `M-col(c,i)`. **Measured true at `L = 4` (20 values).** ⛔ Until it is proved, do not
+restate §4/§5.1 as unconditional.
 
 ### 6d.5 ▶ What follows immediately
 
