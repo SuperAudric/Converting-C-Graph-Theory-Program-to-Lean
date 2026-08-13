@@ -146,9 +146,13 @@ def profile(col, idx, verts, tag):
 
 if __name__ == '__main__':
     mode = sys.argv[1] if len(sys.argv) > 1 else 'disjoint'
+    # ⚠ freeze was previously not wired to argv, so only the two freeze=False rows of the doc's
+    # section 4.2 table were reproducible from the committed file.  argv[2] in {none,orbit,minimal}.
+    fz = {'none': False, 'orbit': True, 'minimal': 'minimal'}[sys.argv[2] if len(sys.argv) > 2
+                                                              else 'none']
     verts, typ, adj = build(mode)
-    print(f'[{mode}] {len(verts)} vertices', flush=True)
-    col, idx, rounds = wl2(verts, typ, adj)
+    print(f'[{mode}/freeze={fz}] {len(verts)} vertices', flush=True)
+    col, idx, rounds = wl2(verts, typ, adj, fz)
     pS, pR = profile(col, idx, verts, 'S'), profile(col, idx, verts, 'R')
     n = len(verts)
     diagS = sorted(sum(1 for v in verts if v[0] == 'S' and len(v) == 2
