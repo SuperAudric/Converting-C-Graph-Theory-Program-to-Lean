@@ -1619,12 +1619,14 @@ it hands the crux, and **why it closes** (**§14.5**, raised and closed 2026-08-
 > 1. **A DESIGNED 1-WL counterexample exists** (`Q₄` complementary-pair carrier, n=352, 4 mixed cells
 >    from the exact orbit partition). The §STATUS verdict is unchanged; what is new is that a 1-WL CAO
 >    failure can be **built to order**, mechanism chosen in advance — not only found by sweeping.
-> 2. ⚠⚠ **A CHEAP FALSIFIER FILTER — but ITS MODEL FAILED ITS AUDIT (2026-08-13).** *2-WL cannot
->    distinguish Shrikhande from rook 4×4, but it CAN distinguish their **frame-encoded** versions*
->    (measured, 6 variants + controls; `K4` count 0 vs 8), and `CFI[K4]` falls the same way (812
->    encoded, control clean). ⛔⛔ **Both measurements live in a TWO-COPY PRIVATE-FRAME model that has
->    since been shown not to be the construction** — see that doc's **§6a**. Treat a failure of this
->    filter as a reason to look harder, **not as a kill**.
+> 2. ★★ **A CHEAP FALSIFIER FILTER, AND IT SURVIVED ITS AUDIT.** *2-WL cannot distinguish Shrikhande
+>    from rook 4×4, but it CAN distinguish their **frame-encoded** versions* (measured, 6 variants +
+>    controls; `K4` count 0 vs 8), and `CFI[K4]` falls the same way (812 encoded, control clean).
+>    ⚠⚠ **An intermediate 2026-08-13 verdict called these "model claims"; that was NARROWED the same
+>    day** — the audit indicts the **shared**-frame two-copy model, while these rows use the
+>    **disjoint** one, which that doc's **§6d** measures to reproduce the real ensemble exactly.
+>    ⛔ But the filter only carries in **one direction**: a payload that **merges** under it is a
+>    counterexample; a payload that **separates** proves nothing about the ensemble (§6d.1).
 > 3. ★★★ **What replaces it, and this one is a theorem about the real object** (that doc's **§6b**):
 >    the two payload vertices of a slot have the slot's frame vertex as a **typed common neighbour**,
 >    and an edge encoded as a typed common neighbour is exactly what 2-WL counts. ⟹ **2-WL recovers
@@ -1636,6 +1638,12 @@ it hands the crux, and **why it closes** (**§14.5**, raised and closed 2026-08-
 >    **not bounded above** by anything measured. Do not quote a fixed number.
 > 5. ⛔⛔ **"Edge-bisection" is NOT the encoding** — subdivision and the real all-pairs frame give
 >    **opposite** verdicts on `CFI[K4]` (survives / dies). Never substitute the cheap one.
+> 6. ★★★ **THE COLLAPSE (that doc's §6d), which is what makes any of this computable.** The ensemble's
+>    2-WL colouring of a copy equals 2-WL on that copy's own `L + 2·C(L,2) = L²`-vertex frame encoding
+>    — measured exactly at `L = 4` on payload-payload, diagonal *and* payload-frame channels.
+>    `L=16 → 256` vertices. **Half is proved for all `L`** (frame–frame pairs carry ≤ 12 colours,
+>    `(t,t',|k∩k'|)`); the **cross-copy averaging half is conjectural** — proved at round 1, validated
+>    at `L = 4` and `L = 5`, open in general. Lean footing: `ChainDescent/CaoCollapse.lean` (gated).
 
 ### 14.1 ★ The far cell's split is a PULLBACK of the exposed shape's PAIR-orbits
 

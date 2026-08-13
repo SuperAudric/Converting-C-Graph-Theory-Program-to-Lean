@@ -1091,6 +1091,28 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 
 ## 2a. ▶▶ HANDOFF — where a fresh reader picks up (updated 2026-08-08)
 
+> # ⛔⛔⛔ FIRST, A TRACK THIS DOC DOES NOT COVER — **CAO 2-WL propagation is LIVE AGAIN**
+> §3 lists *"CAO 2-WL propagation"* as suspended and §2's closing note says do **not** re-open it.
+> **Both are superseded**: the 2-WL leg of the closure was **retracted 2026-08-11** (the literature
+> statement is *schurian ⟹ schurian*, the target is *CAO ⟹ CAO* — **incomparable**; Shrikhande is the
+> witness), and the user re-opened it for Lean footing. It has run continuously since.
+>
+> ▶▶ **Its record is its own doc: [`chain-descent-cao-carrier-falsifiers.md`](./chain-descent-cao-carrier-falsifiers.md)**
+> — read its `▶▶ HANDOFF` block, not this one, for that track. One-screen version:
+> * a `Q₄` carrier is a **designed 1-WL counterexample** (`n = 352`), and the gauge ensemble is a
+>   second one at rung 1 (`n = 229,406`, 100 mixed cells);
+> * **2-WL reads an edge encoded as a typed common neighbour** (proved + measured), so the frame hides
+>   the payload *completely at 1-WL and not at all at 2-WL*;
+> * ★★★ the ensemble's 2-WL on a copy **collapses to that copy's own `L²`-vertex encoding** — exact at
+>   `L = 4` on every channel — which makes the faithful object **poly-size**;
+> * the one open obligation is the collapse's cross-copy half (that doc's §6e.4), with a written proof
+>   plan (§6e) whose Step 1 and base case are done and whose Phase 0 passes at `L = 4` and `L = 5`.
+>
+> **Lean:** `ChainDescent/CaoEnsemble.lean` + `ChainDescent/CaoCollapse.lean`, both **gate-listed**
+> (gate is now **125 modules, ~249 s**). ⚠ `PublicTheoremIndex.md` has **no rows** for `CaoTarget`,
+> `CaoFast`, `CaoEnsemble` or `CaoCollapse` — a regen is owed.
+
+
 > # ★★★ START HERE — THE STATE, IN ONE SCREEN (2026-08-08)
 >
 > ### The artifact is closed.
@@ -1986,7 +2008,9 @@ started.**
 * **W2 (CFI)**, **W3 (extraction)**, **W5 (archive)** — unchanged.
 
 ⚠ **Do NOT** re-open: per-family Lean proofs of Tinhofer membership (decided against — the bridge
-covers them by citation), cographs (refuted), CAO 2-WL propagation (§3 suspended list).
+covers them by citation), cographs (refuted). ⛔⛔ **`CAO 2-WL propagation` is NO LONGER on this list**
+— retracted 2026-08-11 and live since; see §2a's opening box and
+[`chain-descent-cao-carrier-falsifiers.md`](./chain-descent-cao-carrier-falsifiers.md).
 
 ---
 
@@ -1999,7 +2023,7 @@ stay in place as the record of what was learned.
 |---|---|
 | Track R: rigid seal P2 (recover-core read), P3 `AggFaithful`, P3-ring `Z_{2^k}`, P4 | `chain-descent-rigid-seal.md` §8.2 |
 | Track W2: the L4 obligation, the solvable corner | `chain-descent-w2-solvability-route.md` §3b |
-| CAO propagation at 2-WL: §12.5a mechanism, §13 conversion gap, the `triCount` pin | `chain-descent-cao-propagation.md` |
+| ⛔⛔ ~~CAO propagation at 2-WL~~ — **NOT SUSPENDED, retracted 2026-08-11 and live since**; §2a's opening box has the state | `chain-descent-cao-propagation.md` + **`chain-descent-cao-carrier-falsifiers.md`** |
 | The 2-WL refiner swap (`n²` → `n³` per round) | same, §13.6 |
 | T3 citation discharge (all 8 axioms) | `chain-descent-citation-discharge.md` |
 | T5 totality assembly / `Publication`'s remaining `sorry` (now **1**: `residue_if_flag`) | `chain-descent-remaining-work.md` §1T |

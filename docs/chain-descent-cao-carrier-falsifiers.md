@@ -6,14 +6,21 @@
 > C is the 2-WL attempt**: its machinery runs end to end at rung 1 (**100 mixed cells**, §6), and both
 > payloads tried — Shrikhande/rook (§4) and `CFI[K4]` (§5.1) — separate under the two-copy model.
 >
-> ⛔⛔⛔ **AUDITED 2026-08-13 (§6a, §6b), and the picture changed.** That two-copy model is **not the
-> construction**: the real ensemble's 1-WL sees only the degree sequence, so it is far coarser
-> (**292 cells / 100 mixed** vs the model's **538 / 6**), and §6's *"the ensemble is passive"* is
-> **withdrawn** — its witness was degree-regular and could not have detected the gap. ⟹ **neither
-> payload is established dead for Construction C.** What *is* established, proved and measured on the
-> real object, is sharper than either kill: **2-WL reads an edge encoded as a typed common neighbour,
-> so the frame hides the payload COMPLETELY at 1-WL and NOT AT ALL at 2-WL** (§6b). The scheme is not
-> refuted; it is blocked on **tooling that can run 2-WL on a shared-frame object**.
+> ⛔⛔⛔ **AUDITED 2026-08-13 — the picture changed twice in one session; this box is the NET state.**
+> §6's *"the ensemble is passive"* is **withdrawn** (§6a): the real ensemble's 1-WL sees only the
+> degree sequence, so it is far coarser than the two-copy model (**292 / 100** vs **538 / 6**), and
+> §6's witness was degree-regular and could not have detected the gap. Two things then landed on top:
+>
+> * **§6b, proved and measured on the real object:** 2-WL reads an edge encoded as a **typed common
+>   neighbour**, so the frame hides the payload **completely at 1-WL and not at all at 2-WL**.
+> * **§6d, measured exactly at `L = 4` on every channel:** the ensemble's 2-WL colouring of a copy
+>   **collapses to that copy's own `L²`-vertex frame encoding**. ⟹ the faithful object is **poly-size**
+>   (`L=16 → 256` vertices), and §4/§5.1's kills are **REINSTATED** — §6a indicts the **`shared`**-frame
+>   two-copy model, *not* the `disjoint` one, which is what those sections actually measured.
+>
+> ⟹ **the scheme is blocked on a payload, not on tooling.** ⚠ The collapse's cross-copy half is
+> **conjectural** (§6d.2(b)) — proved at round 1, validated at `L = 4` *and* `L = 5`, open in general;
+> §6e is the plan and §6e.4 is the one gap.
 >
 > ⚠ Companion, not replacement: [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)
 > owns the *question*. Read its §1 (the hypothesis), §3 (the coupling principle) and §14 (the anatomy
@@ -24,36 +31,52 @@
 
 ## ▶▶ HANDOFF — start here
 
-**Where it stands, in five sentences.** The CAO-propagation hypothesis starts from the *exact orbit
+**Where it stands, in six sentences.** The CAO-propagation hypothesis starts from the *exact orbit
 partition* (§0) — forget that and you will build something that fails at the root instead of at
 propagation, which is how Construction A died (§1). A `Q₄` complementary-pair carrier **is** a 1-WL
 counterexample (§2, `n = 352`, 4 mixed cells), and the gauge-ensemble Construction C is a second one
 at rung 1 (§6, `n = 229,406`, 100 mixed cells) — so at 1-WL the design programme **works**. At 2-WL
-everything turns on a payload surviving the frame encoding; the two tried both separate under the
-**two-copy model** (§4, §5.1) — ⚠ but that model has since been measured **unfaithful** (§6a), so
-those are not yet verdicts about Construction C. What *is* settled about the real object is worse
-for the programme than either kill: **2-WL reads the encoded adjacency directly, no matter how
-symmetric the frame** (§6b, proved and measured).
+it does not, and §6b says why in one line: **an edge encoded as a typed common neighbour is exactly
+what 2-WL counts**, so the frame hides nothing there. §6d then measured that the ensemble's 2-WL on a
+copy **collapses to that copy's own `L²`-vertex encoding**, which makes the faithful object poly-size
+and **reinstates** §4/§5.1's kills. So the programme is blocked on finding a payload that **merges**
+under that `L²` object, and the one open obligation is §6e.4 — the cross-copy half of the collapse.
 
 **Reading order.** §0 (the hypothesis + N1/N2) → §7 (the filters — cheapest thing in the doc) →
-§2 (the construction that works) → §3 incl. **§3.2a** (the gadget reduction) → §5 + **§5.2** (the
-payload bar and the calibration) → §6, **§6a, §6b** (the ensemble, the model audit, the theorem) →
-§8 (files) → §9 (what is proved vs measured vs argued).
+§2 (the construction that works) → §3 incl. **§3.2b–d** (the 2-vertex gauge and the ablations) →
+§6b, **§6d** (what transfers, and the collapse) → **§6e** (the proof plan) → §4 + §5 (the payload bar,
+⚠ read §6d.4 first) → §8 (files) → §9 (proved vs measured vs argued).
 
 > ### ▶ IF YOU DO ONE THING
-> **Read §6d.** The ensemble's 2-WL colouring of a copy is measured to **collapse to that copy's own
-> `L²`-vertex frame encoding** — exactly, on every channel, at `L = 4`. That makes the faithful object
-> poly-size and every blocked measurement runnable, and it **reinstates** §4's and §5.1's kills
-> (§6a/§3.2c indict the **`shared`**-frame model, not the `disjoint` one). ⚠ Half of it is proved
-> (frame–frame ≤ 12 classes, all `L`); the cross-copy averaging half is **conjectural and verified at
-> `L = 4` only**, and it is demonstrably **false at 1-WL** — that is the open proof obligation.
+> **Read §6d, then §6e.** The ensemble's 2-WL colouring of a copy **collapses to that copy's own
+> `L²`-vertex frame encoding** — measured exactly, on every channel, at `L = 4`. That makes the
+> faithful object poly-size (`L=16 → 256` vertices), unblocks every measurement this doc was stuck on,
+> and **reinstates** §4's and §5.1's kills (§6a/§3.2c indict the **`shared`**-frame model, not the
+> `disjoint` one, which is what those sections measured).
+>
+> **What is proved vs open, precisely.** Proved for all `L`: frame–frame pairs carry **≤ 12** colours
+> (§6d.2a). Open: the **cross-copy averaging** half (§6d.2(b)) — proved at round 1 (§6e.3), validated
+> at `L = 4` **and `L = 5`** (§6e.0, which is `M`-only so it runs where the ensemble cannot), and the
+> single gap is §6e.4. ⚠ An intermediate verdict called the collapse *"false at 1-WL"*; that was an
+> artefact of **not freezing the frame vertices** and is **withdrawn** — with the freeze the model is
+> level-uniform (§6d.5).
+>
+> ⛔ **Direction discipline, and it governs every use:** only a **MERGE** under the `M` model refutes
+> anything (§6d.1, machine-checked as `CaoCollapse.merge_of_stable_merge`). Every separation on record
+> rules out *that payload* and says nothing about the scheme.
 
 > ### ⛔ WHAT NOT TO DO
 > * Do **not** quote §5's admission test as an `iff` — only *fails ⟹ dies* is supported (§5, §9).
-> * Do **not** quote §4 or §5.1 as *"Construction C cannot use this payload"*. They are statements
->   about the two-copy model. §6a is why. (What *does* transfer to the real object is §6b.)
 > * Do **not** repeat §6's inference *"the ensemble is passive"*. It is **withdrawn** (§6a): the
 >   ensemble is far coarser than the model, and the witness pair could not have detected it.
+> * ⚠⚠ Do **not** carry §6a/§3.2c's *"the kills are model claims"* as written — **narrowed by §6d.4**.
+>   It indicts the **`shared`**-frame two-copy model only; the `disjoint` model is `M(G) ⊔ M(H)` and
+>   §6d measures that to reproduce the ensemble. §4/§5.1 are reinstated, modulo §6d.2(b).
+> * ⛔ Do **not** treat a **separation** in the `M` model as evidence of anything (§6d.1): the bound
+>   direction only carries **merges**. `CaoCollapse.merge_of_stable_merge` is the machine-checked form.
+> * ⛔ Do **not** spend effort on a faster 2-WL for a *shared-frame* object, nor on a smaller **copy
+>   set** (§3.2d: none is faithful), nor on an *exact poly simulation* of the ensemble (§6c.2: that
+>   **is** `GI ∈ P`).
 > * Do **not** measure **subdivision** and conclude anything about the construction: `CFI[K4]`
 >   survives subdivision and dies under the real all-pairs encoding (§5.1).
 > * Do **not** re-derive *"the original two-cube design was broken"* — that was a modelling error of
@@ -354,6 +377,12 @@ B. GAUGE-CLOSED subsets  |H| =  2   4   8  16  32  64
 > and therefore `~2^120` copies. **This is not a constant-factor problem and no implementation fixes
 > it.** §5.2's *"get a C 2-WL, it is 2–3 min/round"* addresses the wrong bottleneck: a faster prober
 > makes the **unfaithful** model cheaper, not the faithful one reachable.
+>
+> ⚠⚠ **RE-REVERSED BY §6d — read that before acting on this box.** §6d found the ensemble's 2-WL on a
+> copy collapses to a **poly-size** single-copy object, so the faithful test does *not* need `2^d`
+> copies after all and **a C 2-WL is worth building**. What survives here is narrower and still true:
+> **no restriction of the copy set is faithful**, so a *shared-frame* object cannot be shrunk — the
+> escape is that you never needed one.
 
 ⚠ **§3.4 is corrected by this.** Its *"you only have to gauge the slots where the two target graphs
 differ, so `2^d` copies"* is true as a statement about **preserving the gauge symmetry**, and ladder B
@@ -395,11 +424,13 @@ and it is what the only decisive test used.
 
 ---
 
-## 4. ⛔ The Shrikhande/rook payload dies IN THE TWO-COPY MODEL — measured
+## 4. ⛔ The Shrikhande/rook payload is DEAD — measured
 
-> ⚠⚠ **Heading corrected 2026-08-13.** It read *"is DEAD"*. The measurement is real and reproduces,
-> but it lives in the two-copy private-frame model, which **§6a shows is not the construction**. Read
-> §6a before carrying this row anywhere.
+> ⚠⚠ **This heading changed twice on 2026-08-13; this is the net state.** It was downgraded to
+> *"dies in the two-copy model"* by §6a, then **restored** by §6d.4: §6a indicts the **`shared`**-frame
+> variant, while §4.2's `disjoint` rows are `M(G) ⊔ M(H)`, which §6d measures to reproduce the
+> ensemble. ⚠ Two live caveats remain: the restoration is modulo §6d.2(b), and by §6d.1 a
+> **separation** rules out *this payload* without being evidence about the scheme.
 
 ### 4.1 The premise, checked — `scratchpad/probe_cao_payload_pair.py`
 
@@ -501,11 +532,14 @@ assumes the two-copy private-frame model stands in for the ensemble. It does not
 gives **538 cells / 6 mixed** where the ensemble gives **292 / 100**, and at 2-WL the two are
 **incomparable** (each has a channel the other lacks — §6a.1). §6's *"measured TRUE at rung 1"* is
 withdrawn; its witness `C6`/`2C3` is 2-regular and so could not have detected the disagreement.
-⟹ **everything below this line in §5 is a statement about the model, not about Construction C.**
-The part of the admission test that survives without any model is the weaker clause proved in §6b:
+⚠⚠ **NARROWED THE SAME DAY BY §6d — read that before acting on this paragraph.** The audit indicts
+the **`shared`**-frame two-copy model; the `disjoint` model is `M(G) ⊔ M(H)`, and §6d measures *that*
+to reproduce the ensemble exactly. So §5.1's rows (which are `disjoint`) stand, modulo §6d.2(b).
+⛔ What does **not** survive in any model is the *direction*: a **separation** under the test proves
+nothing about the ensemble; only a **merge** does (§6d.1). The model-free clause is §6b's weaker one:
 *a payload pair separated by **bare** 2-WL is dead.*
 
-### 5.1 ⛔ CFI PAYLOADS — `CFI[K4]` TESTED, and dead IN THE MODEL (⚠ §6a)
+### 5.1 ⛔ CFI PAYLOADS — `CFI[K4]` TESTED AND DEAD (⚠ direction: §6d.1)
 
 `scratchpad/probe_cao_cfi_frame.py`. Both CFI pairs are checked 2-WL-blind **bare** first, so the
 test is not vacuous: `CFI[K4]` (`n = 28`) and `CFI[K5]` (`n = 60`), plain vs twisted, **equivalent =
@@ -522,11 +556,13 @@ the surviving content of it is only that `K4` is where to *start* testing, not w
 | **`CFI[K4]`** | **full, faithful** (clique payload) | **812** | **clean** | ⛔⛔ **YES — SEPARATES**, diverging at **round 3**, 1848 colours vs the control's 567 |
 | `CFI[K5]` | full | 3660 | — | ⛔ out of reach (`n³` time, `n²` signatures) |
 
-> ### ⛔⛔ VERDICT: `CFI[K4]` FAILS the payload admission test **as modelled**.
-> The full all-pairs frame cracks a pair that is 2-WL-blind bare, so **model-2-WL ≥ bare-3-WL** on
+> ### ⛔⛔ VERDICT: `CFI[K4]` FAILS the payload admission test.
+> The full all-pairs frame cracks a pair that is 2-WL-blind bare, so **encoded-2-WL ≥ bare-3-WL** on
 > this pair, and subdivision was indeed the weak encoding: the same pair survives it (row 1) and dies
-> here. ⚠⚠ **Corrected 2026-08-13: this is a statement about the two-copy private-frame model, not
-> about Construction C** (§6a). `CFI[K4]` is not established dead as a payload.
+> here. ⚠ An intermediate 2026-08-13 verdict downgraded this to *"a statement about the model"*;
+> **§6d narrowed that** — the encoding used here is `disjoint`, which §6d measures to reproduce the
+> ensemble. It stands, modulo §6d.2(b). ⛔ But it is a **separation**, so by §6d.1 it only rules this
+> payload out; it is not evidence about the scheme.
 
 **✅ The premise of this section is now reproducible** — `scratchpad/probe_cao_cfi_bare.py`. It was
 asserted here and measured only ad hoc, which left the whole section unfalsifiable: if the pair were
@@ -677,9 +713,12 @@ lacks:
 | frame–frame pairs = a 4-payload-vertex window (§4.3's stated mechanism) | **present**, copy-specific | **absent** — a frame pair is shared by *every* copy, so it cannot carry copy-specific data |
 | the `2^{C(n,2)}` **central** vertices | **absent entirely** — no 2-copy model has them | ⛔ **MEASURED EMPTY 2026-08-13 (§3.2c)** — ablating every central leaves the payload-pair partition **identical**. A central touches only frame, so it is *never* a common neighbour of two payload vertices; its whole effect is making the types absolute. ⚠ This row originally read "real at 2-WL and still unmeasured" — **retracted** |
 
-⟹ of the two channels, **one is empty and one is real**: sharing. And sharing was then measured to
-over-separate at 2-WL directly (§3.2c: **1936 / 2016** copy pairs), so the 2-WL kills (§4, §5.1) are
-**confirmed** model claims rather than merely suspected ones.
+⟹ of the two channels, **one is empty and one is real**: sharing, measured to make the shared-frame
+two-copy model disagree with the ensemble on **1936 / 2016** copy pairs (§3.2c).
+⚠⚠ **This section originally concluded "so §4 and §5.1 are confirmed model claims". That is
+WITHDRAWN by §6d.4**: those sections use the **`disjoint`** model, which is `M(G) ⊔ M(H)` and *does*
+reproduce the ensemble. What this section establishes is that the **`shared`** two-copy variant is
+not the construction — a narrower and still useful fact, since §4.2 has `shared` rows.
 
 ### 6a.2 ⚠ §4.3's stated mechanism does not survive its own evidence
 
@@ -811,7 +850,7 @@ it only explains why Step 2 cannot be a stepping stone.
 > by proof, with the witness handed to you. §6's 100 mixed cells were a *measurement* of the same
 > fact; the closed form is what makes it a theorem. **The template works; only the level is open.**
 
-**▶ So outstanding item 1 is retargeted.** It asked for the *exact* 2-WL closed form. The weaker
+**▶ So the top outstanding item (§9 A.1) is retargeted.** It asked for the *exact* 2-WL closed form. The weaker
 **upper bound** suffices and is far more tractable, and §6b already supplies the matching lower bound
 `ensemble-2-WL ≥ bare-2-WL`. The open interval is `2 ≤ m ≤ ?`, and **any finite `m` refutes 2-WL CAO
 propagation.**
@@ -845,7 +884,7 @@ and §3.2d already measured that no restriction of the copy set is faithful anyw
 
 WL's stable colouring is the **coarsest** stable partition refining the atoms. So to prove
 *"ensemble-`k`-WL is coarser than `X`"* it suffices to **exhibit any stable partition refining the
-atoms whose payload part is `X`** — nothing has to be computed on the big object. That converts item 1
+atoms whose payload part is `X`** — nothing has to be computed on the big object. That converts the top outstanding item (§9 A.1)
 from *"simulate an exponential graph"* into *"guess a closed form and verify stability"*, which is
 checkable symbolically. ★ Note the direction this buys: **a MERGE in the bound implies a merge in the
 ensemble** (hence a mixed cell, hence a refutation); a *separation* in the bound implies nothing.
@@ -992,11 +1031,13 @@ of `c`**, while `a(c,i)` is held fixed — so the sum should factor through `a`'
 stability ties to `M-col(c,i)`. **Measured true at `L = 4` (20 values).** ⛔ Until it is proved, do not
 restate §4/§5.1 as unconditional.
 
-### 6d.5 ▶ What follows immediately
+### 6d.9 ▶ What follows immediately
 
-* **`CFI[K5]`-full at `n = 3660` is again THE measurement**, and now against the *right* object rather
-  than a proxy. ⚠ This **re-reverses** §3.2d's *"a faster 2-WL addresses the wrong bottleneck"*: under
-  the collapse, the faithful object **is** poly-size, so a C implementation is worth building after all.
+* **`CFI[K5]` is again THE measurement**, and now against the *right* object rather than a proxy.
+  ⚠ **Size, stated in the new units:** `|M_frozen| = L + 2·C(L,2) = 3540` per side at `L = 60`, *not*
+  §5.1's `3660` — that figure was the two-copy **union** under the old encoding. ⚠ This
+  **re-reverses** §3.2d's *"a faster 2-WL addresses the wrong bottleneck"*: under the collapse the
+  faithful object **is** poly-size, so a C implementation is worth building after all.
 * The refutation route (§6c.3) needs a **merge**, so the target is a payload that `M`-2-WL fails to
   separate. `Shrikhande`/`rook` and `CFI[K4]` both separate under `M` (§4.2, §5.1), so neither
   refutes; a 3-WL-blind pair is the next candidate.
@@ -1151,6 +1192,10 @@ distribution `D` resolves.
 | `scratchpad/probe_cao_gauge2_saturate.py` | **§3.2d** — the copy set does **not** saturate; random *and* gauge-closed ladders. ⚠ its `coset` needs GF(2)-**independent** generators or the `2^j` labels silently lie | ~20 min |
 | `scratchpad/probe_cao_gauge2_diag.py` | **§3.2c precision** — diagonal partition and separation verdict, not just pair colours | ~5 min |
 | `scratchpad/probe_cao_bound_single.py` | **§6d** — the single-copy collapse: frame–frame = 12 classes, and `M(c)` reproduces the ensemble on payload-payload, diagonal and payload-frame | ~5 min |
+| `scratchpad/probe_cao_bound_freeze.py` | **§6d.5** — the freeze rule: frozen single-copy = the ensemble at 1-WL (292, elementwise), unfrozen = 538 | ~2 min |
+| `scratchpad/probe_cao_mfrozen.py` | **§6d.6 — THE FAITHFUL TEST, and the tool to reach for.** `M_frozen(G)` for any payload; args `sr` or `<m>` for `CFI[K_m]`. Shrikhande/rook at 256 v | ~5 min (`sr`) |
+| `scratchpad/probe_cao_crosscopy.py` | **§6d.7** — cross-copy colours are rich but their aggregate is `M`-determined; the exact closed form. ⚠ its hypothesis C **must** use a multiset, not an ordered tuple (injective key ⟹ vacuous) | ~5 min |
+| `scratchpad/probe_cao_lemma_check.py` | **§6e.0 — PHASE 0 of the proof plan.** `M`-only, so it runs where the ensemble cannot; args `<L> <reps>`. `L=4` calibrates, `L=5` passes, ▶ `L=6` is the next rung | `L=5` ~10 min |
 | `scratchpad/probe_cao_gadget_check.py` | §3.2a(a) — gauge transitive on the 8 complementary pairs; `δ` constant | < 1 s |
 | `scratchpad/probe_cao_gadget_variants.py` | §3.2a(b) — the three frame shapes vs the transposition-fixes-`m` test | < 5 s |
 | `scratchpad/probe_cao_cfi_frame.py` | §5.1 — CFI payloads through the frame; args `<m> <sub\|full>`. Outputs kept: `cfi_frame_full.out` (faithful), `cfi_frame_unfaithful.out` (row 3, provenance) | 152/440 fast; 812 ~1 h |
@@ -1226,9 +1271,13 @@ present). ⚠ §3.2c/§3.2d are measured at `L = 4` only; the *mechanisms* they 
 never a common neighbour of two payload vertices; the copy set does not saturate) are stated for
 general `L` but proved only for the first.
 
-**Measured — IN THE TWO-COPY MODEL, which §6a shows is not the construction.** §4.2, §4.3's `K4`
-counts, §5.1 (all rows), §5.2's table. Every separation has a same-object control that came out
-unseparated, so none is a *machinery* artefact — but each is a *modelling* claim.
+**Measured — in the `M`-model, which §6d measures to reproduce the ensemble (at `L = 4`).** §4.2's
+**`disjoint`** rows, §4.3's `K4` counts, §5.1 (all rows), §5.2's table. Every separation has a
+same-object control that came out unseparated. ⚠ Each inherits §6d.2(b), and each is a *separation*,
+so by §6d.1 none is evidence about the scheme — only about that payload.
+
+**Measured in a model now known NOT to be the construction.** §4.2's **`shared`** rows, and §3.2c/§3.2d
+(which use a shared frame by construction — that is what they were measuring).
 
 **Proved, not measured.** §1's dichotomy · §2.3's and §6's `Aut_v` **upper** bounds (without these the
 mixed-cell counts are unfalsifiable) · §2.1's parity requirement · §3.2's `δ` condition · §3.3's
@@ -1260,29 +1309,42 @@ of the admission test (→ necessary only, §5) · *"rung 2 is purely a budget q
 · *"rung 2 is a payload question, not a scaffolding question"* (→ §6a — the scaffolding is exactly
 what is unresolved).
 
-> ### ▶ OUTSTANDING, in priority order — REORDERED 2026-08-13
-> 1. ★★★ **Close §6e.4** — the induction step of §6d.8's lemma. The plan is §6e: Step 1 (reduction to
->    a pushforward) and Step 3 (the round-1 base case) are **done**, §6d.2(a) is **proved for all `L`**,
->    and Phase 0 validates the lemma at `L = 4` *and* `L = 5`. The gap is one statement: at the
->    fixpoint the slot-vector `b(c',l)` is not a product measure, so full slot-exchangeability fails.
->    ⭐ Keep **R3** (bound by `M⁺` instead of `M`) in reserve — it preserves the refutation route even
->    if the exact collapse turns out false.
-> 1b. ▶ **Run `probe_cao_lemma_check.py` at `L = 6`** — the highest-value cheap run in the plan, and
->    still `M`-only, so it needs nothing exponential.
-> 1a. ▶ **`CFI[K5]`-full at `n = 3660`** — under §6d it is again THE measurement and now against the
->    *right* object. ⚠ §3.2d's *"a faster 2-WL is the wrong bottleneck"* is **re-reversed** by §6d:
->    the faithful object is poly-size, so a C 2-WL is worth building. ⛔ Still do not use a smaller
->    **copy set** (§3.2d) or chase an *exact* poly simulation of the ensemble (§6c.2: that IS `GI ∈ P`).
-> 2. ★★ **§6b in Lean** — it is the one 2-WL statement that is proved and about the real object, it
->    is a **single-round** claim rather than a fixpoint, and it forces the refiner into the Lean layer
->    that T3 needs anyway. Better first target than T2⁺.
-> 3. **§5.2's `CFI[K5]`-full cell** — still the calibration of *"costs one level"* vs *doubling*, but
->    ⚠ it now calibrates **the model**, so it dropped below (1). ★ Prefer hunting a **3-WL-blind pair
->    under 60 vertices** over brute-forcing `n = 3660`.
-> 4. **T2⁺ in Lean** (`Aut_m` is *exactly* the label group) — makes every mixed-cell count here
->    unconditional; `Aut(T(n)) = Sym n` is the whole content.
-> 5. **T3 in Lean** (frame cells = position classes) — needs a refiner in the Lean layer.
-> 6. ~~Decide whether `CaoEnsemble.lean` joins `scripts/build.sh`'s `MODULES` list.~~ ✅ **DONE
->    2026-08-13** — `CaoEnsemble` *and* `CaoCollapse` are gate-listed and the gate passes.
-> 7. ▶ **Prove `CaoCollapse.FrameClassComplete`** — the completeness half of §6d.2(a), the one pin in
->    the new module. Route identified: `Equiv.extendSubtype` + three cases on `|k ∩ k'|`, `4 ≤ L`.
+> ### ▶▶ OUTSTANDING — the handoff list, rewritten clean 2026-08-13
+> *(the earlier list had duplicated the `CFI[K5]` item and mis-ordered 1/1a/1b; this supersedes it)*
+>
+> **A. The one open obligation.**
+> 1. ★★★ **Close §6e.4** — the induction step of §6d.8's lemma, which is the only thing between the
+>    collapse and a theorem. §6e is the plan: Step 1 (reduction to a pushforward) and Step 3 (the
+>    round-1 base case) are **done**; §6d.2(a) is **proved for all `L`**; Phase 0 validates at `L = 4`
+>    and `L = 5`. The gap is one statement: at the fixpoint `b(c',l)` is not a product measure, so
+>    full slot-exchangeability fails. **R1** (round-indexed induction) first; ⭐ keep **R3** (bound by
+>    `M⁺`) in reserve — it preserves the refutation route *even if the collapse is false*.
+>    ⚠ **R4** (the `C³` route) is aimed at the 2-WL propagation statement itself rather than at this
+>    lemma, so it subsumes rather than replaces R1 — reach for it if R1's invariant will not close.
+> 2. ▶ **`probe_cao_lemma_check.py` at `L = 6`** — cheapest high-value run left, and `M`-only, so it
+>    needs nothing exponential. A failure there makes **R3 mandatory** and localizes the missing feature.
+>
+> **B. The payload search — what the collapse unblocks.**
+> 3. ▶ **Find a payload that MERGES under `M_frozen`** (`probe_cao_mfrozen.py`). ⚠ Direction discipline
+>    (§6d.1): only a **merge** refutes; every separation so far (Shrikhande/rook, `CFI[K4]`) rules out
+>    that payload and nothing more. `CFI[K5]` at `L = 60` (`|M| = 3540`) is the next instance and now
+>    sits against the *right* object, so a C 2-WL is finally worth building. ★ Higher leverage:
+>    **a 3-WL-blind pair under 60 vertices** — `|M| = L²`, so it shrinks quadratically.
+>
+> **C. Lean.**
+> 4. ▶ **Prove `CaoCollapse.FrameClassComplete`** — the one pin in the new module, and the completeness
+>    half of §6d.2(a). Route identified: Mathlib `Equiv.extendSubtype` + three cases on
+>    `|k ∩ k'| ∈ {0,1,2}`, needs `4 ≤ L`.
+> 5. ★★ **§6b in Lean** — the one 2-WL statement that is both proved and about the real object, and a
+>    **single-round** claim rather than a fixpoint. It forces the refiner into the Lean layer that T3
+>    needs anyway, so it is a better next target than T2⁺.
+> 6. **T2⁺** (`Aut_m` is *exactly* the label group; `Aut(T(n)) = Sym n` is the content) — makes every
+>    mixed-cell count here unconditional. Then **T3** (frame cells = position classes).
+> 7. ⚠ **`PublicTheoremIndex.md` is stale for the whole CAO family** — `CaoTarget`, `CaoFast`,
+>    `CaoEnsemble` and `CaoCollapse` have **no rows**. This predates the 2026-08-13 work
+>    (`CaoTarget`/`CaoFast` landed 08-11). Regen is `scripts/GenerateTheoremIndexes.py rewrite
+>    --with-line-numbers` per `scripts/theorem-index-maintenance.md`; ⚠⚠ it recomputes the **Notes**
+>    column and can resurrect **phantom rows**, so verify *unmatched deletions = 0*. Deliberately
+>    **not** run unverified at handoff.
+> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — both are in `scripts/build.sh`; gate = **125 modules,
+>    ~249 s**, passing.
