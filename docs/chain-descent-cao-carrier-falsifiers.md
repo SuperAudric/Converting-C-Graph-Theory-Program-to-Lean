@@ -256,6 +256,94 @@ which the `Q₄` parity insight already forced, discharges it. It stops being a 
 wrong — the transposition there must **swap the cubes**, not swap the ends within a cube, and mapping
 ends breaks `m`. Do not re-derive "the original design was broken"; it was the model that was.
 
+### 3.2b ★★ THE GAUGE REDUCES TO **TWO VERTICES** PER SLOT — and that is what rung 1 already is
+
+**Reduction (reader, 2026-08-13).** Drop the `Q_c` cube entirely. A slot owns a **connected pair**
+`f(k,0) ~ f(k,1)`; the gauge is the swap, so the gauge group is `(Z₂)^d` with `d = C(L,2)` slots; a
+**central** `m(g)`, one per `g ∈ {0,1}^d`, joins `f(k, g_k)` for every `k`; and a copy attaches **both**
+endpoints of slot `{i,j}` to the **same** frame vertex `f(k, c_k)`.
+
+> ### ★★★ This is exactly what `probe_cao_ensemble.py` builds. Every measurement in §6, §6a and §6b is therefore a measurement of the **simplified** design, not of a toy rung.
+
+**Nothing the design uses is lost**, and each obligation is discharged more cheaply than before:
+
+| obligation | under the cube | under the pair |
+|---|---|---|
+| root is one orbit (**T1**) | gauge transitive on copies | same — and ★ `CaoEnsemble.lean`'s `Col = Slot → Bool` is *already* this gauge, so **T1 is machine-checked for the simplified design**, not the cube (`gact_transitive`) |
+| one individualization kills the gauge (**T2⁻**) | gauge acts freely | same — `gact_eq_self_iff`, also already proved at `Slot → Bool` |
+| the `δ` condition (§3.2) | needs complementary pairs, needs `c` **even** (§2.1) | **vacuous** — a 2-element gauge has one non-trivial element per slot |
+| transposition fixes `m` (§3.2a) | needs both-to-both, or two cubes | **automatic** — both endpoints attach to the *same* frame vertex, so a label transposition fixes the frame pointwise |
+| `Aut_m` = the label group (**T2⁺**) | `Aut(T(L)) = S_L` | unchanged |
+
+⚠ §2.1's *"`c` must be EVEN"* is a **Construction B carrier** requirement and does not transfer here;
+Construction C never needed it. The relaxation the reduction buys — no longer caring whether several
+same-orbit vertices are individualized together — is not used by the design either: a single `m(0)`
+still rigidifies the whole gauge, and that is precisely `gact_eq_self_iff`.
+
+**Sizing.** `|V| = L·2^d + 2^d + 2d`, `d = C(L,2)`. `L=4 → 332` · `L=6 → 229,406` · `L=16 → 17·2^120`.
+⚠ The reduction shrinks the per-copy cost, **not the `2^d` copy count**, which is the binding term —
+so it does not by itself put a 16-label payload in reach. What it does buy is §3.2c.
+
+### 3.2c ★★★ WITH THE 2-VERTEX GAUGE THE MODEL GAP IS ONLY TWO CHANNELS — AND ONE OF THEM IS EMPTY
+
+Because a slot's frame vertex is now literally the triangle-frame test's **typed edge vertex**, just
+shared, the whole distance between the real object and §4's admission-test model collapses to two
+differences: **sharing** and **the centrals**. §6a.1 listed both and measured neither. Both are now
+measured — `scratchpad/probe_cao_gauge2_ablate.py`, `L = 4`, at **2-WL**:
+
+```
+FULL     all 64 copies + all 64 centrals, m(0) individualized   332 v, 4 rounds, 5344 pair colours
+ABLATED  all 64 copies, NO centrals, frame types given          268 v, 4 rounds, 3324 pair colours
+
+channel (ii) centrals : FULL (2992 colours) vs ABLATED (2992) -> IDENTICAL
+channel (i)  sharing  : 1936 / 2016 copy pairs -> TWO-COPY model strictly FINER than FULL
+                          80 / 2016 copy pairs -> identical
+```
+
+> ### ⛔ **The centrals are worth NOTHING at 2-WL.** Their entire contribution to the payload-pair partition is making the frame types absolute. ⟹ **§6a.1's second channel is EMPTY**, and a faithful test object does not need the `2^d` centrals at all — retracting half of §6a.1's caution.
+> ### ⛔⛔ **Sharing over-separates, at 2-WL, on 96% of copy pairs.** §6a's 1-WL finding repeats one level up, now at the level the kills are stated at. ⟹ §4 and §5.1 are **confirmed** to be model claims, no longer merely suspected of it.
+
+★ Together these say the faithful object is **`k` copies + one shared frame + absolute types** — no
+centrals. So the question that decides whether the kills can be re-run honestly is *how large must
+`k` be*. It was measured immediately, and the answer is the worst one available.
+
+### 3.2d ⛔⛔⛔ THE COPY SET DOES NOT SATURATE — `k = 2^d` IS REQUIRED, AND THAT CLOSES THE TOOLING ROUTE
+
+`scratchpad/probe_cao_gauge2_saturate.py`, `L = 4` (`2^6 = 64` copies). Fix a copy pair, grow the
+copy set, and ask when the induced 2-WL partition on that pair's payload pairs **matches the full
+ensemble's**. Both ways of growing it were tried — arbitrary subsets, and §3.4's own **gauge-closed**
+subsets:
+
+```
+A. RANDOM subsets        k =  2  3  4  6  8 12 16 24 32 48 64
+   4 / 4 copy pairs           ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ✓     (matches ONLY at the full 64)
+
+B. GAUGE-CLOSED subsets  |H| =  2   4   8  16  32  64
+   3 / 4 copy pairs             ·   ·   ·   ·   ·   ✓
+   1 / 4 copy pairs             ·   ·   ·   ·   ✓   ✓            (one index-2 subgroup sufficed)
+```
+
+> ### ⛔⛔⛔ There is no small-`k` regime. Faithfulness needs the complete gauge orbit — at best an index-2 subgroup of it, and only sometimes.
+> ⟹ a faithful re-test of a **16-label** payload (Shrikhande/rook, `CFI[K4]`) needs `d = C(16,2) = 120`
+> and therefore `~2^120` copies. **This is not a constant-factor problem and no implementation fixes
+> it.** §5.2's *"get a C 2-WL, it is 2–3 min/round"* addresses the wrong bottleneck: a faster prober
+> makes the **unfaithful** model cheaper, not the faithful one reachable.
+
+⚠ **§3.4 is corrected by this.** Its *"you only have to gauge the slots where the two target graphs
+differ, so `2^d` copies"* is true as a statement about **preserving the gauge symmetry**, and ladder B
+is exactly that construction — but gauge-closure turns out **not** to be the faithfulness criterion.
+The two-copy model is *already* gauge-closed (`H = ⟨c ⊕ c'⟩`, order 2) and it is the thing that
+over-separates. So §3.4's sizing argument does not license a small test object.
+
+> ### ▶▶ WHAT THIS LEAVES — the route is ANALYTIC, not computational
+> §6a derived the ensemble's **1-WL** colouring in closed form (`(degree sequence, own degree)`) and
+> settled that level for **all** `L` at once, with no build. The same is now the only available move
+> at 2-WL, and ★ the 2-vertex gauge is precisely what makes it plausible: the object is a payload
+> clique, one connected pair per slot, and (measured removable) centrals. Two pieces are already in
+> hand — **a central is never a common neighbour of two payload vertices** (it touches only frame),
+> which is *why* §3.2c's ablation came out empty; and **§6b** fixes what the payload-payload pairs
+> see at round 1. What is missing is the payload–frame and frame–frame pair colours at the fixpoint.
+
 ### 3.3 What the construction reduces to
 
 `Aut = gauge ⋊ (label symmetries)`; after individualizing `m` the gauge dies and `Aut_m` is the label
@@ -561,10 +649,11 @@ lacks:
 | channel | two-copy model | real ensemble |
 |---|---|---|
 | frame–frame pairs = a 4-payload-vertex window (§4.3's stated mechanism) | **present**, copy-specific | **absent** — a frame pair is shared by *every* copy, so it cannot carry copy-specific data |
-| the `2^{C(n,2)}` **central** vertices | **absent entirely** — no 2-copy model has them | **present**: `(p(c,i), m(g))` counts `#{k ∋ i : g_k = c_k}`, so a pair of payload vertices can be correlated *through a central* — §6's own "Hamming structure" worry, real at 2-WL and still unmeasured |
+| the `2^{C(n,2)}` **central** vertices | **absent entirely** — no 2-copy model has them | ⛔ **MEASURED EMPTY 2026-08-13 (§3.2c)** — ablating every central leaves the payload-pair partition **identical**. A central touches only frame, so it is *never* a common neighbour of two payload vertices; its whole effect is making the types absolute. ⚠ This row originally read "real at 2-WL and still unmeasured" — **retracted** |
 
-⟹ **neither survivals nor separations transfer rigorously.** Both 2-WL kills (§4, §5.1) carry an
-open faithfulness question, and so does any future `CFI[K5]` row.
+⟹ of the two channels, **one is empty and one is real**: sharing. And sharing was then measured to
+over-separate at 2-WL directly (§3.2c: **1936 / 2016** copy pairs), so the 2-WL kills (§4, §5.1) are
+**confirmed** model claims rather than merely suspected ones.
 
 ### 6a.2 ⚠ §4.3's stated mechanism does not survive its own evidence
 
@@ -666,6 +755,8 @@ bigger payload.
 | `scratchpad/probe_cao_ensemble_exact.py` | **§6a** — the same claim **elementwise** against the real 229406-vertex object, not by matching counts | ~2 min |
 | `scratchpad/probe_cao_ensemble_2wl.py` | **§6b** — 2-WL on the REAL shared-frame ensemble, `L=4`, `n=332`; adjacency recovered, 0 mixed cells. The only 2-WL run in this doc on the real object | ~2 min |
 | `scratchpad/probe_cao_cfi_bare.py` | **§5.1's premise** — `CFI[K4]`/`CFI[K5]` are 2-WL-blind bare. Was asserted but never checked in | ~1 min |
+| `scratchpad/probe_cao_gauge2_ablate.py` | **§3.2c** — ablates the two channels at 2-WL: centrals **empty**, sharing over-separates on 1936/2016 copy pairs | ~5 min |
+| `scratchpad/probe_cao_gauge2_saturate.py` | **§3.2d** — the copy set does **not** saturate; random *and* gauge-closed ladders. ⚠ its `coset` needs GF(2)-**independent** generators or the `2^j` labels silently lie | ~20 min |
 | `scratchpad/probe_cao_gadget_check.py` | §3.2a(a) — gauge transitive on the 8 complementary pairs; `δ` constant | < 1 s |
 | `scratchpad/probe_cao_gadget_variants.py` | §3.2a(b) — the three frame shapes vs the transposition-fixes-`m` test | < 5 s |
 | `scratchpad/probe_cao_cfi_frame.py` | §5.1 — CFI payloads through the frame; args `<m> <sub\|full>`. Outputs kept: `cfi_frame_full.out` (faithful), `cfi_frame_unfaithful.out` (row 3, provenance) | 152/440 fast; 812 ~1 h |
@@ -714,7 +805,10 @@ is what makes `n = 812` fit at all.
 ## 9. Provenance
 
 **Measured — on the REAL object.** §2.3, §2.4, §3.2a, §6's three numbers, **§6a** (elementwise, at
-`n = 229406`), **§6b** (`L = 4`, `n = 332`).
+`n = 229406`), **§6b** (`L = 4`, `n = 332`), **§3.2c** and **§3.2d** (`L = 4`, at 2-WL, every copy
+present). ⚠ §3.2c/§3.2d are measured at `L = 4` only; the *mechanisms* they isolate (a central is
+never a common neighbour of two payload vertices; the copy set does not saturate) are stated for
+general `L` but proved only for the first.
 
 **Measured — IN THE TWO-COPY MODEL, which §6a shows is not the construction.** §4.2, §4.3's `K4`
 counts, §5.1 (all rows), §5.2's table. Every separation has a same-object control that came out
@@ -749,12 +843,14 @@ of the admission test (→ necessary only, §5) · *"rung 2 is purely a budget q
 what is unresolved).
 
 > ### ▶ OUTSTANDING, in priority order — REORDERED 2026-08-13
-> 1. ★★★ **Re-establish or discard the two 2-WL kills against a faithful object.** They are the only
->    reason the programme looks blocked, and they are now model claims (§6a). The obstacle is that
->    2-WL on a shared-frame ensemble needs `n` in the thousands. **Cheapest honest route: add the
->    missing channel to the model rather than growing the object** — a 2-copy *shared*-frame test
->    that also carries the `2^d` **central** vertices (§6a.1's second row), which is what no current
->    variant has. ⛔ Do not simply re-run `disjoint`.
+> 1. ★★★ **Derive the ensemble's 2-WL colouring in CLOSED FORM** (§3.2d). This replaced *"re-run the
+>    kills against a faithful object"*, which was item 1 for about an hour before §3.2c/§3.2d
+>    measured it impossible: the centrals are removable but the copy set **does not saturate**, so a
+>    faithful 16-label test needs `~2^120` copies and no prober reaches it. §6a did exactly this
+>    derivation at 1-WL and settled that level for all `L` with no build. Two pieces are in hand
+>    (centrals are never common neighbours of payload vertices; §6b fixes the payload–payload round-1
+>    colour); the gap is payload–frame and frame–frame pairs at the fixpoint.
+>    ⛔ Do **not** spend effort on a faster 2-WL: §3.2d shows it addresses the wrong bottleneck.
 > 2. ★★ **§6b in Lean** — it is the one 2-WL statement that is proved and about the real object, it
 >    is a **single-round** claim rather than a fixpoint, and it forces the refiner into the Lean layer
 >    that T3 needs anyway. Better first target than T2⁺.
