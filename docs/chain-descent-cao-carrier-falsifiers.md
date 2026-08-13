@@ -47,6 +47,19 @@ under that `L²` object, and the one open obligation is §6e.4 — the cross-cop
 §6b, **§6d** (what transfers, and the collapse) → **§6e** (the proof plan) → §4 + §5 (the payload bar,
 ⚠ read §6d.4 first) → §8 (files) → §9 (proved vs measured vs argued).
 
+> ### ▶▶▶ 2026-08-13 REVIEW — TWO CHANGES THAT MOVE THE FINISH LINE. Read §6f and the R1 box in §6e.5.
+> **1. ★★★ The encoding's WL gain is BOUNDED — by a proof, not a measurement (§6f).** `M(G)` is a
+> fixed-dimension FO interpretation of `G`, uniform in `L`, so `M`-2-WL ≼ bare-8-WL (crude; likely 4).
+> ⟹ **CFI over a treewidth-9 base is *guaranteed* to merge, and is never computed.** The refutation
+> needs **no payload search and no big 2-WL run**: ⛔ `CFI[K5]`-full, the C 2-WL, and the hunt for a
+> small 3-WL-blind pair are all **downgraded to constant-pinning** (§6f.4). It also scales to every
+> fixed `k`, and it makes §6c's `GI ∈ P` characterization **vacuous** for WL-based propagation.
+> **2. ⚠⚠ R1's premise was untested and half of it is FALSE (§6e.5 box).** There is **no** round offset
+> with `E^{(r)} = M^{(r+s)}` — measured. But the **one-sided** invariant `M^{(r)} ⊑ E^{(r)}` holds at
+> every round with slack, and it is exactly the direction §6d.1 consumes. ⟹ **the refutation never
+> needed the collapse to be *exact*.** State R1 one-sided; promote **R3** to a co-equal first target.
+> ⟹ **the only thing left on the critical path is (i) = §6e.4.** Everything else is now argued or done.
+
 > ### ▶ IF YOU DO ONE THING
 > **Read §6d, then §6e.** The ensemble's 2-WL colouring of a copy **collapses to that copy's own
 > `L²`-vertex frame encoding** — measured exactly, on every channel, at `L = 4`. That makes the
@@ -600,6 +613,11 @@ to separate there means failing to separate under the faithful encoding a fortio
 reasoning does **not** rescue a separation — which is exactly why §5.1's row 3 had to be re-run and
 row 4 is the verdict. **If you re-derive the rung-1 row, use the clique payload.**
 
+> ### ⚠⚠ SUPERSEDED BY §6f — **the gain IS bounded above**, by an interpretation argument and with no
+> measurement: `M`-2-WL ≼ bare-8-WL, uniformly in `L`. The paragraph below is kept as the record of
+> why `CFI[K5]`-full was once "the decisive cell"; it is now **constant-pinning, not decisive**, and
+> §6f.4 says do not build tooling for it.
+
 Both rung-2 points give `≥ 1` and **neither bounds the gain above**, so the two live readings are
 still open: *"costs exactly one level"* (⟹ `CFI[K5]` is the payload, and the programme is sound but
 huge) versus the **doubling** reading, *encoded-`k`-WL ≈ bare-`2k`-WL* (⟹ `CFI[K5]` dies too and the
@@ -1033,6 +1051,10 @@ restate §4/§5.1 as unconditional.
 
 ### 6d.9 ▶ What follows immediately
 
+⚠⚠ **This whole list is written under §5.2's belief that the encoding's gain is unbounded above.
+§6f bounds it** — so bullets 1 and 2 are **downgraded to constant-pinning**. Read §6f before acting
+on them.
+
 * **`CFI[K5]` is again THE measurement**, and now against the *right* object rather than a proxy.
   ⚠ **Size, stated in the new units:** `|M_frozen| = L + 2·C(L,2) = 3540` per side at `L = 60`, *not*
   §5.1's `3660` — that figure was the two-copy **union** under the old encoding. ⚠ This
@@ -1119,6 +1141,37 @@ induction hypothesis supplies its `M`-form. §6e.3 is the base case. **Obligatio
 round-indexed invariant — a statement of the shape *"the round-`r` slot profile is a function of
 (round-`(r−1)` data local to `k`) and (`μ`-determined globals)"*.
 
+> #### ⚠⚠ R1's PREMISE WAS UNTESTED, AND HALF OF IT IS FALSE — `scratchpad/probe_cao_roundmatch.py`, `L = 4`, 2026-08-13
+> Every earlier measurement (§6d.3) compares only **fixpoints**: the prober runs `M` for 12 rounds and
+> the ensemble to stability. R1 needs a *round-wise* correspondence, and that had never been looked at.
+> Measured, as a refinement relation on payload pairs at every `(r_E, r_M)`:
+> ```
+>            M0       M1       M2       M3+          E colours: e0,e1 = 2   e2 = 52   e3,e4 = 60
+>   e0     IDENT   M-fine   M-fine   M-fine         M colours: m0 = 2  m1 = 24  m2+ = 60 (fixpoint)
+>   e1     IDENT   M-fine   M-fine   M-fine
+>   e2    E-fine   E-fine   M-fine   M-fine
+>   e3    E-fine   E-fine    IDENT    IDENT
+>   e4    E-fine   E-fine    IDENT    IDENT
+> ```
+> **⛔ There is NO offset `s` with `E^{(r)} = M^{(r+s)}`.** `s = −1` matches `e1 = m0` and `e3 = m2` but
+> fails at `e2`, which sits **strictly between** `m1` and `m2`. So R1 must **not** be stated as a
+> round-indexed *equality* — that statement is false, and an induction carrying it cannot close.
+>
+> **✅ But the one-sided invariant holds at every round, with slack:**
+> > ### ▶ `M^{(r)}` **refines** `E^{(r)}`, for every `r` (`IDENT` or `M-fine` on the whole upper triangle `r_M ≥ r_E`).
+> ★ Two things follow, and they change what R1 should carry. **(1)** The chains are **nested, never
+> `INCOMPARABLE`** — the two refinement schedules interleave monotonically rather than diverging, which
+> is the good case. **(2)** The surviving direction is *exactly* the one §6d.1 consumes: `M` finer than
+> `E` is what turns an `M`-merge into an `E`-merge. ⟹ **the refutation never needed the collapse to be
+> exact.** §6d.8's lemma states an equality; only `⊑` is load-bearing, `M` reaches its fixpoint a round
+> **before** the ensemble, and that slack is what an induction gets to spend.
+>
+> ⚠ Honest limit: this does not shrink the *analytic* obligation much — proving `M^{(r+1)} ⊑ E^{(r+1)}`
+> still requires the cross-copy aggregate to be `M`-determined, which is §6d.8. What it changes is the
+> **shape** R1 carries (one-sided, not equality) and it promotes **R3** from fallback to co-equal
+> first target: any *finer* stable `s` between `M` and `WL_E` also carries merges, so over-approximating
+> the cross-copy channel is legitimate from the start rather than a concession after failure.
+
 **R2 — finite-range dependence.** Show `b(c',l)_k` depends on `c'` only through slots within bounded
 distance of `k` (share a label, or share a label with a label of `k`). Then `b` is a finite-range
 field over i.i.d. bits and exchangeability is replaced by a local-independence argument.
@@ -1145,6 +1198,97 @@ searches for exactly that and is cheap at `L = 5`; ★ **`L = 6` is the next run
 run in the plan** (`2^15` copies × a 36-vertex `M`), because it is still `M`-only. A failure there would
 make **R3 mandatory** and would localize which feature of `a` beyond §6e.3's (i)/(ii) the fixed
 distribution `D` resolves.
+
+---
+
+## 6f. ★★★ THE ENCODING'S WL GAIN IS **BOUNDED BY A PROOF** — so the payload search is not needed
+
+**Raised and argued 2026-08-13, reviewing §5.2.** ⚠ *Argued, not machine-checked and not yet written
+out in full* — see the caveats at the end. But it is the single largest change to what should be done
+next, so it is stated before it is polished.
+
+### 6f.1 The gap it closes
+
+§5.2 records two live readings of how much the frame encoding gains over bare WL — *"exactly one
+level"* vs *"doubling"* — and says **"neither bounds the gain above"**, which is why `CFI[K5]`-full was
+"the decisive cell" and why §6d.9 concluded a C 2-WL was finally worth building. **The gain is bounded
+above, and the bound needs no measurement at all.**
+
+### 6f.2 `M(G)` is a fixed-dimension interpretation of `G`
+
+`M(G)` (§6d.6) is: the payload as `K_L`, plus two frame vertices per slot, `f(k,0) ~ f(k,1)`, with
+`p(i) ~ f(k, G_k)` for `k ∋ i`, frame vertices coloured by `t`. Code its universe inside tuples over
+`G`'s:
+
+```
+   p(i)          <-  (i, i, 0)
+   f({a,b}, τ)   <-  (a, b, τ)      modulo the definable involution (a,b,τ) ~ (b,a,τ)
+   adjacency, and the colour τ, are FO-definable from G's edge relation:
+       (i,i,0) ~ (a,b,τ)   iff   (i = a ∨ i = b) ∧ ( τ = 1 ↔ E(a,b) )
+       (a,b,τ) ~ (a,b,1−τ) ;   (i,i,0) ~ (j,j,0) for i ≠ j
+```
+
+So `M(·)` is a **3-dimensional FO interpretation, uniform in `L`** (the formulas do not mention `L`),
+into `G` expanded by two constants, with every quotient class of **constant size 2** — which is the
+technical point that makes the counting translation go through. By the standard interpretation lemma
+for counting logic (a `C^m` formula over the interpreted structure pulls back to a `C^{d·m}` formula
+over the base), and `k`-WL ≡ `C^{k+1}`:
+
+> ### ▶ **`2`-WL on `M(G)`** is refined by **`8`-WL on `G`** — and generally **`k`-WL on `M(G)` ≼ `(3k+2)`-WL on `G`**, for a constant that does **not** depend on `L`.
+
+⚠ `8` is a deliberately crude constant (`C³ → C⁹`). Counting the coordinates that actually occur —
+payload pairs are 2-tuples, payload–frame pairs are 3-tuples, frame–frame pairs are **frozen** and
+carry nothing, and one update step adds ≤ 2 — suggests `4`-WL suffices. **The constant does not
+matter; only that it is finite and uniform in `L`.** Freezing only coarsens, so the bound covers
+`M_frozen` a fortiori.
+
+### 6f.3 What it buys — §6c.3's template, executed at rung 2, with no computation
+
+§6c.3 asks for *"`E(L)`'s `k`-WL closure on the payload `≤` some invariant already KNOWN to be
+incomplete"*, and names bare-`m`-WL as the natural target because CFI over a base of treewidth `m+1`
+then supplies the witness **by a theorem**. Composing:
+
+```
+  (i)  ensemble-2-WL  ⊒  M_frozen-2-WL          -- §6d.8's lemma, ONE-SIDED (§6e.5 R1 box).  ⛔ OPEN
+  (ii) M_frozen-2-WL  ≼  8-WL on the payload    -- §6f.2.                                     ▶ ARGUED
+  ---------------------------------------------------------------------------------------------
+  take X of treewidth >= 9 (K10).  CFI(X,0), CFI(X,1) are 8-WL-equivalent  [CFI, literature]
+  => their M's are 2-WL-equivalent => equal colour MULTISETS => some i in one, l in the other
+     share a colour;  CFI(X,0) not iso CFI(X,1) => p(c,i), p(c',l) lie in DIFFERENT Aut_{m(0)}-orbits
+  => a MIXED CELL  =>  2-WL CAO PROPAGATION IS FALSE.
+```
+
+> ### ★★★ The refutation needs **no merging payload to be found, and no large 2-WL run**. `CFI[K10]` is *guaranteed* to merge by the two bounds; it is never computed. The only open input is (i).
+
+★ And it **scales**: `k`-WL on `M` ≼ `(3k+2)`-WL, so CFI over a base of treewidth `3k+3` refutes level
+`k` — provided the collapse holds at level `k` (§6d.5 makes it level-uniform at `k = 1, 2`; higher is
+untested). ⟹ the construction is aimed at *every* fixed WL level, not just rung 2.
+
+### 6f.4 ⚠⚠ WHAT THIS SUPERSEDES — and one thing it makes vacuous
+
+* §5.2's *"neither bounds the gain above"* and its two live readings — **superseded**; the gain is
+  bounded by a constant, so the *"doubling"* reading is no longer a threat to the programme, it merely
+  moves which CFI base is needed.
+* §5.2's *"the one measurement that would settle it"* (`CFI[K5]`-full) and §6d.9's *"a C 2-WL is worth
+  building after all"* — **downgraded from decisive to constant-pinning.** They would tell us whether
+  the true constant is 3, 4 or 8; they are no longer on the critical path. ⛔ Do not build the C 2-WL
+  or hunt for a small 3-WL-blind pair (outstanding B.3) as if the refutation depended on it.
+* ⚠ **It makes §6c's `GI ∈ P` characterization vacuous at every fixed `k`** — if 2-WL CAO propagation
+  is *false*, then *"2-WL CAO propagation ⟹ `GI ∈ P`"* has a false antecedent. §6c keeps its value
+  only for **non-WL** propagation algorithms, which is where the reader's original question lives.
+  ⟹ these are two exits from the same door, and the refutation exit **strictly dominates** for the
+  purpose of settling the WL levels. Both need (i).
+
+### 6f.5 ⚠ Caveats, stated so they travel
+
+1. **Argued, not proved.** The interpretation lemma for `C^m` under `d`-dimensional quotient
+   interpretations is standard, but it is cited here from memory and has **not** been written out
+   against this specific interpretation. ▶ Pin it before quoting the numeral.
+2. **The constant is crude** and the tightening is unexamined (§6f.2).
+3. ⚠ It is consistent with everything measured: `M`-2-WL separates Shrikhande/rook and `CFI[K4]`
+   (both need ≥ 3-WL bare), which sits inside `≤ 8`. It predicts `M`-2-WL **fails** on a CFI pair over
+   a large enough base — ★ and *that* is a falsifiable prediction the constant-pinning runs would test.
+4. ⛔ It does **not** touch (i). The whole programme still rests on §6e.4.
 
 ---
 
@@ -1196,6 +1340,7 @@ distribution `D` resolves.
 | `scratchpad/probe_cao_mfrozen.py` | **§6d.6 — THE FAITHFUL TEST, and the tool to reach for.** `M_frozen(G)` for any payload; args `sr` or `<m>` for `CFI[K_m]`. Shrikhande/rook at 256 v | ~5 min (`sr`) |
 | `scratchpad/probe_cao_crosscopy.py` | **§6d.7** — cross-copy colours are rich but their aggregate is `M`-determined; the exact closed form. ⚠ its hypothesis C **must** use a multiset, not an ordered tuple (injective key ⟹ vacuous) | ~5 min |
 | `scratchpad/probe_cao_lemma_check.py` | **§6e.0 — PHASE 0 of the proof plan.** `M`-only, so it runs where the ensemble cannot; args `<L> <reps>`. `L=4` calibrates, `L=5` passes, ▶ `L=6` is the next rung | `L=5` ~10 min |
+| `scratchpad/probe_cao_roundmatch.py` | **§6e.5's R1 box** — the ensemble/`M` correspondence **round by round**, which every earlier probe compared only at the fixpoint. ⛔ found: no round offset exists; ✅ the one-sided `M^{(r)} ⊑ E^{(r)}` holds throughout. Args `<L> <E-rounds> <M-rounds>` — ⚠ **`argv[1]` is `L`**, consumed by `probe_cao_gauge2_ablate` on import (I lost a run to `L=5`, a 6164-vertex ensemble) | `L=4` ~3 min |
 | `scratchpad/probe_cao_gadget_check.py` | §3.2a(a) — gauge transitive on the 8 complementary pairs; `δ` constant | < 1 s |
 | `scratchpad/probe_cao_gadget_variants.py` | §3.2a(b) — the three frame shapes vs the transposition-fixes-`m` test | < 5 s |
 | `scratchpad/probe_cao_cfi_frame.py` | §5.1 — CFI payloads through the frame; args `<m> <sub\|full>`. Outputs kept: `cfi_frame_full.out` (faithful), `cfi_frame_unfaithful.out` (row 3, provenance) | 152/440 fast; 812 ~1 h |
@@ -1294,7 +1439,15 @@ merge-direction corollary, the round-indexed form, and the frame layer's invaria
 ✅ **Both are now gate-listed and the gate passes** — the earlier *"not gate-listed"* caveat is
 discharged. ⛔ `FrameClassComplete` is a pinned `Prop`, **not** a theorem.
 
-**Argued, not established.** §5's admission test — ⚠ **necessary direction only**, and ⚠⚠ its
+**Measured — round by round rather than at the fixpoint.** §6e.5's R1 box (`L = 4`, `n = 332`,
+`probe_cao_roundmatch.py`): no round offset aligns `E` and `M`; the one-sided `M^{(r)} ⊑ E^{(r)}`
+holds at every round, and the two chains are never `INCOMPARABLE`.
+
+**Argued, not established — ▶ and §6f is the one that matters.** §6f's interpretation bound
+(`M`-2-WL ≼ bare-8-WL, uniform in `L`): the interpretation is written out, the counting-translation
+lemma it invokes is cited from memory and **not** verified against it (§6f.5). It is consistent with
+every measurement on record and makes a falsifiable prediction. ⛔ Do not quote the numeral `8` as
+established. Also: §5's admission test — ⚠ **necessary direction only**, and ⚠⚠ its
 ensemble assumption is now **refuted at rung 1** (§6a), not merely unmeasured at rung 2. §4.3's
 4-vertex-window mechanism is **counter-indicated** by two facts already in the doc (§6a.2).
 
@@ -1312,24 +1465,30 @@ what is unresolved).
 > ### ▶▶ OUTSTANDING — the handoff list, rewritten clean 2026-08-13
 > *(the earlier list had duplicated the `CFI[K5]` item and mis-ordered 1/1a/1b; this supersedes it)*
 >
-> **A. The one open obligation.**
-> 1. ★★★ **Close §6e.4** — the induction step of §6d.8's lemma, which is the only thing between the
->    collapse and a theorem. §6e is the plan: Step 1 (reduction to a pushforward) and Step 3 (the
->    round-1 base case) are **done**; §6d.2(a) is **proved for all `L`**; Phase 0 validates at `L = 4`
->    and `L = 5`. The gap is one statement: at the fixpoint `b(c',l)` is not a product measure, so
->    full slot-exchangeability fails. **R1** (round-indexed induction) first; ⭐ keep **R3** (bound by
->    `M⁺`) in reserve — it preserves the refutation route *even if the collapse is false*.
->    ⚠ **R4** (the `C³` route) is aimed at the 2-WL propagation statement itself rather than at this
->    lemma, so it subsumes rather than replaces R1 — reach for it if R1's invariant will not close.
-> 2. ▶ **`probe_cao_lemma_check.py` at `L = 6`** — cheapest high-value run left, and `M`-only, so it
->    needs nothing exponential. A failure there makes **R3 mandatory** and localizes the missing feature.
+> **A. The one open obligation — and after the 2026-08-13 review it really is the ONLY one.**
+> 1. ★★★ **Close §6e.4** — now in its **one-sided** form: `M^{(r)} ⊑ E^{(r)}`, *not* the equality of
+>    §6d.8 (§6e.5's R1 box: no round offset exists, and only `⊑` is load-bearing). §6e is the plan:
+>    Step 1 (pushforward) and Step 3 (round-1 base case) are **done**; §6d.2(a) is **proved for all
+>    `L`**; Phase 0 validates at `L = 4` and `L = 5`. The gap: at the fixpoint `b(c',l)` is not a
+>    product measure, so full slot-exchangeability fails. ▶ **R1 and R3 are now co-equal first
+>    targets** — R3 (a *finer* stable `s` between `M` and `WL_E`, e.g. `M⁺ = M + Φ`) still carries
+>    merges, so over-approximating the cross-copy channel is legitimate from the start, not a
+>    concession after R1 fails. ⚠ **R4** (`C³`) is aimed at the propagation statement itself; note it
+>    is now **adjacent to §6f**, which uses the same interpretation machinery on `M` — if §6f's lemma
+>    is written out properly, R4 inherits the tooling.
+> 1a. ▶ **Pin §6f's interpretation lemma** (§6f.5 caveat 1) — cheap, purely bibliographic/write-out,
+>    and it is what licenses skipping the entire payload search. Do this **before** quoting the `8`.
+> 2. ▶ **`probe_cao_lemma_check.py` at `L = 6`** — still the cheapest high-value run, `M`-only.
+>    ⚠ Budget it: `2^15` copies × a 36-vertex `M` is **hours in pure Python** — a previous background
+>    attempt was killed unfinished. Vectorize (numpy, batched over copies) or do not start it.
 >
-> **B. The payload search — what the collapse unblocks.**
-> 3. ▶ **Find a payload that MERGES under `M_frozen`** (`probe_cao_mfrozen.py`). ⚠ Direction discipline
->    (§6d.1): only a **merge** refutes; every separation so far (Shrikhande/rook, `CFI[K4]`) rules out
->    that payload and nothing more. `CFI[K5]` at `L = 60` (`|M| = 3540`) is the next instance and now
->    sits against the *right* object, so a C 2-WL is finally worth building. ★ Higher leverage:
->    **a 3-WL-blind pair under 60 vertices** — `|M| = L²`, so it shrinks quadratically.
+> **B. ⛔ THE PAYLOAD SEARCH IS OFF THE CRITICAL PATH — §6f.**
+> 3. ⛔ **Do NOT** build a C 2-WL, run `CFI[K5]`-full, or hunt for a small 3-WL-blind pair *as if the
+>    refutation depended on it*. §6f bounds `M`-2-WL by bare-8-WL uniformly in `L`, so CFI over a
+>    treewidth-9 base is **guaranteed** to merge without ever being computed. These runs now only pin
+>    the constant (is it 3, 4 or 8?) and test §6f.5's falsifiable prediction — worth doing eventually,
+>    worth **nothing** on the critical path. ⚠ Direction discipline (§6d.1) still governs: only a
+>    **merge** refutes.
 >
 > **C. Lean.**
 > 4. ▶ **Prove `CaoCollapse.FrameClassComplete`** — the one pin in the new module, and the completeness
