@@ -1334,11 +1334,37 @@ key) · `tupSig`/`tupKey`/**`roundT`**/**`isRound_roundT`** ⟹ FT1's whole clos
 > dimension count, now stated and proved with **no logic and no interpretation lemma**. This is the
 > mathematical content of *"the encoding's WL gain is bounded"*.
 
-⚠ **The assembly still needs one more ingredient, and it is recorded at source so it is not
-discovered late.** `blocks`'s summand is a **pair** `(b (P₁, Z), b (Z, P₂))` — two different
-*reindexings* of one combined tuple — so closing it also needs a **restriction/covariance** lemma:
-*the colour of a big tuple determines the colours of its sub-tuples*. Standard for `k`-WL (the atomic
-type is coordinate-covariant and the round preserves it), but not free. ▶ That is increment 2 part two.
+### 6f.4c ✅ INCREMENT 2, PART TWO — COVARIANCE, and the two assembly-ready forms
+
+`blocks`'s summand is a **pair** `(b (P₁, Z), b (Z, P₂))` — two different *reindexings* of one
+combined six-label tuple — so the block lemma alone does not close it. Landed:
+
+> ### ⛔ A DEAD ROUTE, RECORDED SO IT IS NOT RE-WALKED: covariance does **not** follow from `roundT`-stability.
+> For a **permutation** `σ` it would: `(x ∘ σ)[i := v] = (x[σ i := v]) ∘ σ`, so the signature
+> transports. For a **collapse** (`σ` non-injective — dropping and repeating coordinates, which is what
+> padding needs) it fails: `(x ∘ σ)[i := v]` is not a reindexing of any update of `x`. The natural
+> rescue — identify `v = x i` inside the signature by its colour — also fails, because a tuple whose
+> `i`-th coordinate differs from all others has the **same equality pattern** as one with a *fresh*
+> value there. ⟹ no amount of stability gives it.
+
+▶ **The fix is to put it in the round.** `roundTS` records, beside the signature, the colours of
+**every** reindexing `x ∘ σ`. It is a genuine refinement round (`isRound_roundTS`), it still yields
+`SigDet` so §3's block lemma applies verbatim, and its stable colourings are covariant by construction
+(`cov_of_stableS`). ⚠ It is *finer* than `roundT`, so the bound is **weaker** — the safe direction for
+an upper bound — and it is still **bounded-arity**, so §6f.3's CFI input is unaffected in kind.
+
+**The two shapes the encoding's two sums consume, both proved:**
+
+| | |
+|---|---|
+| `exists_factor_cov` | covariance as a **function** of the colour (an implication cannot be mapped over a multiset) |
+| **`substPair1_of_stableS`** | ONE fresh label, paired reindexings — the **payload** sum of `pairSigG_split` |
+| **`substPair2_of_stableS`** | TWO fresh labels, paired reindexings — the **frame** sum; block lemma and covariance combined |
+
+⚠ **What is left of the assembly is plumbing, not mathematics**: define `bOf s` (pack the two sorts
+and two type-bits as a decoration, the four labels as a padded 6-tuple), name the four concrete
+reindexings `σ`, and reconcile `Finset.univ (Fin L × Fin L × Bool)` with the `join`-over-`(u,v)` shape
+plus a two-case split on the bit. ⛔ No further *ingredient* is missing.
 
 > ### ⛔ WHAT IS NOT PROVED, AND IT IS THE POINT: `Adequate.blocks`
 > *The multiset over `z : MVert L` of the two half-colours is determined by the pair's own colour.*

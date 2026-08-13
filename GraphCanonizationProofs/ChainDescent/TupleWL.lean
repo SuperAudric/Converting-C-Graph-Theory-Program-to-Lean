@@ -154,6 +154,14 @@ theorem stable_iff_tupSig {s : Col (Tup k L)} :
   · intro hs x y h; exact ((roundT_eq_iff s x y).mp (hs x y h)).2
   · intro h x y hxy; exact (roundT_eq_iff s x y).mpr ⟨hxy, h x y hxy⟩
 
+/-- **The only property of a round that the block lemma uses**: equal colours force equal signatures.
+`stable_iff_tupSig` supplies it from `roundT`-stability, and §4's substitution-closed round supplies it
+too — so the block lemma is stated at this weaker hypothesis and serves both rounds. -/
+def SigDet (s : Col (Tup k L)) : Prop := ∀ x y : Tup k L, s x = s y → tupSig s x = tupSig s y
+
+theorem sigDet_of_stable {s : Col (Tup k L)} (hs : Stable (roundT (k := k) (L := L)) s) : SigDet s :=
+  stable_iff_tupSig.mp hs
+
 /-! ## 3. ★★★ The block lemma — one fresh coordinate, then two
 
 `subst1` is what stability hands you directly. `subst2` is what the consumer needs. -/
@@ -169,9 +177,9 @@ theorem subst1_eq_tupSig (s : Col (Tup k L)) (x : Tup k L) (i : Fin k) :
   rfl
 
 /-- **One fresh coordinate is free**: it is the projection of stability's own signature. -/
-theorem subst1_of_stable {s : Col (Tup k L)} (hs : Stable (roundT (k := k) (L := L)) s)
+theorem subst1_of_sigDet {s : Col (Tup k L)} (hs : SigDet s)
     {x y : Tup k L} (h : s x = s y) (i : Fin k) : subst1 s x i = subst1 s y i := by
-  rw [subst1_eq_tupSig, subst1_eq_tupSig, stable_iff_tupSig.mp hs x y h]
+  rw [subst1_eq_tupSig, subst1_eq_tupSig, hs x y h]
 
 /-- A colouring-indexed family that respects `s`'s classes factors through `s`. The `Multiset`-valued
 analogue of `PartitionClosure.exists_factor`, and the move the block lemma turns on. -/
@@ -197,10 +205,10 @@ tuple's own colour.
 `subst1_of_stable`), so the outer multiset is the image of a *one*-coordinate substitution multiset
 under a fixed map — and that one is determined by `s x`. ⟹ each extra coordinate costs one nesting,
 which is exactly why §6f's bound is a constant. -/
-theorem subst2_of_stable {s : Col (Tup k L)} (hs : Stable (roundT (k := k) (L := L)) s)
+theorem subst2_of_sigDet {s : Col (Tup k L)} (hs : SigDet s)
     {x y : Tup k L} (h : s x = s y) (i j : Fin k) : subst2 s x i j = subst2 s y i j := by
   obtain ⟨f, hf⟩ := exists_factor_ms (g := fun z => subst1 s z j)
-    (fun z z' hz => subst1_of_stable hs hz j)
+    (fun z z' hz => subst1_of_sigDet hs hz j)
   have key : ∀ w : Tup k L, subst2 s w i j = (subst1 s w i).map (fun n => (n, f n)) := by
     intro w
     show (Finset.univ : Finset (Fin L)).val.map
@@ -212,7 +220,7 @@ theorem subst2_of_stable {s : Col (Tup k L)} (hs : Stable (roundT (k := k) (L :=
     show (s (Function.update w i v), subst1 s (Function.update w i v) j)
         = (s (Function.update w i v), f (s (Function.update w i v)))
     rw [hf]
-  rw [key, key, subst1_of_stable hs h i]
+  rw [key, key, subst1_of_sigDet hs h i]
 
 /-- **The flattened form** — the shape a WL signature actually has: the multiset over *both* fresh
 coordinates at once. -/
@@ -227,9 +235,214 @@ theorem substJoin_eq_subst2 (s : Col (Tup k L)) (x : Tup k L) (i j : Fin k) :
   rfl
 
 /-- **★★ THE CONSUMER FORM.** A two-coordinate WL signature is determined by the tuple's colour. -/
-theorem substJoin_of_stable {s : Col (Tup k L)} (hs : Stable (roundT (k := k) (L := L)) s)
+theorem substJoin_of_sigDet {s : Col (Tup k L)} (hs : SigDet s)
     {x y : Tup k L} (h : s x = s y) (i j : Fin k) : substJoin s x i j = substJoin s y i j := by
-  rw [substJoin_eq_subst2, substJoin_eq_subst2, subst2_of_stable hs h i j]
+  rw [substJoin_eq_subst2, substJoin_eq_subst2, subst2_of_sigDet hs h i j]
+
+/-- The block lemma at plain `roundT`-stability — the form §3's headline states. -/
+theorem substJoin_of_stable {s : Col (Tup k L)} (hs : Stable (roundT (k := k) (L := L)) s)
+    {x y : Tup k L} (h : s x = s y) (i j : Fin k) : substJoin s x i j = substJoin s y i j :=
+  substJoin_of_sigDet (sigDet_of_stable hs) h i j
+
+/-! ## 4. ★★★ Substitution closure — the covariance the assembly needs
+
+⚠ **Why a second round.** §3 closes the *counting* half of `FrameEncoding.Adequate.blocks`. It does
+not close the whole thing, and the reason is worth stating precisely: `blocks`'s summand is a **pair**
+`(b (P₁, Z), b (Z, P₂))`, and those two evaluations use *different* four-label sub-tuples of one
+six-label tuple. So the assembly needs the colour of a tuple to determine the colours of its
+**reindexings** `x ∘ σ` — including non-injective `σ`, which drop and repeat coordinates.
+
+⛔ **That does NOT follow from `roundT`-stability.** For a *permutation* `σ` it would:
+`(x ∘ σ)[i := v] = (x[σ i := v]) ∘ σ`, so the signature transports. For a **collapse** it fails —
+`(x ∘ σ)[i := v]` is not a reindexing of any update of `x`, and the natural rescue (identify `v = x i`
+inside the signature by its colour) breaks, because a tuple whose `i`-th coordinate is distinct from
+all others has the same equality pattern as one with a *fresh* value there. ★ Recorded so the dead
+route is not re-walked.
+
+▶ **The fix is to put it in the round.** `roundTS` records, alongside the signature, the colours of
+**every** reindexing `x ∘ σ`. It is a legitimate refinement round (`isRound_roundTS`), it still gives
+`SigDet`, and its stable colourings are covariant by construction. ⚠ It is *finer* than `roundT`, so
+the bound it yields is **weaker** — which is the safe direction for an upper bound — and it is still
+bounded-arity, so the CFI input (§6f.3) is unaffected in kind. -/
+
+section Subst
+
+variable {k L : Nat}
+
+private theorem map_eq_pointwise {α β : Type*} {f g : α → β} :
+    ∀ {l : List α}, l.map f = l.map g → ∀ a ∈ l, f a = g a
+  | [], _, a, ha => absurd ha (by simp)
+  | b :: t, h, a, ha => by
+      simp only [List.map_cons, List.cons.injEq] at h
+      rcases List.mem_cons.mp ha with rfl | ht
+      · exact h.1
+      · exact map_eq_pointwise h.2 a ht
+
+/-- The colours of **all** reindexings of `x`, folded into one natural number.
+⚠ `noncomputable` (via `Finset.toList`) — §4 is proof-side only; the *runnable* 2-WL closure is
+`CaoFast.wl2Fast`, and nothing here is meant to execute. -/
+noncomputable def subEnc (s : Col (Tup k L)) (x : Tup k L) : Nat :=
+  encList ((Finset.univ : Finset (Fin k → Fin k)).toList.map (fun σ => s (x ∘ σ)))
+
+theorem subEnc_eq_iff (s : Col (Tup k L)) (x y : Tup k L) :
+    subEnc s x = subEnc s y ↔ ∀ σ : Fin k → Fin k, s (x ∘ σ) = s (y ∘ σ) := by
+  constructor
+  · intro h σ
+    have hlen : (((Finset.univ : Finset (Fin k → Fin k)).toList).map (fun τ => s (x ∘ τ))).length
+        = (((Finset.univ : Finset (Fin k → Fin k)).toList).map (fun τ => s (y ∘ τ))).length := by
+      simp
+    exact map_eq_pointwise (encList_inj _ _ hlen h) σ (Finset.mem_toList.mpr (Finset.mem_univ σ))
+  · intro h
+    unfold subEnc
+    congr 1
+    exact List.map_congr_left (fun σ _ => h σ)
+
+/-- The **substitution-closed** `k`-WL key: colour, all reindexing colours, then the signature. -/
+noncomputable def tupKeyS (s : Col (Tup k L)) (x : Tup k L) : List Nat :=
+  s x :: subEnc s x :: Multiset.sort ((tupSig s x).map encVec) (· ≤ ·)
+
+theorem tupKeyS_eq_iff (s : Col (Tup k L)) (x y : Tup k L) :
+    tupKeyS s x = tupKeyS s y ↔
+      (s x = s y ∧ subEnc s x = subEnc s y ∧ tupSig s x = tupSig s y) := by
+  unfold tupKeyS
+  rw [List.cons.injEq, List.cons.injEq]
+  refine and_congr_right (fun _ => and_congr_right (fun _ => ?_))
+  constructor
+  · intro hsort
+    have hmap : (tupSig s x).map encVec = (tupSig s y).map encVec := by
+      have := congrArg (fun l : List Nat => (↑l : Multiset Nat)) hsort
+      simpa only [Multiset.sort_eq] using this
+    exact Multiset.map_injective encVec_injective hmap
+  · intro h; rw [h]
+
+/-- **The substitution-closed round.** -/
+noncomputable def roundTS (s : Col (Tup k L)) : Col (Tup k L) := rankOf (tupKeyS s)
+
+theorem roundTS_eq_iff (s : Col (Tup k L)) (x y : Tup k L) :
+    roundTS s x = roundTS s y ↔
+      (s x = s y ∧ subEnc s x = subEnc s y ∧ tupSig s x = tupSig s y) :=
+  (rankOf_eq_iff _ x y).trans (tupKeyS_eq_iff s x y)
+
+/-- **It is a genuine refinement round**, so FT1's closure theory applies to it verbatim. -/
+theorem isRound_roundTS : IsRound (roundTS (k := k) (L := L)) where
+  splits := fun s x y h => ((roundTS_eq_iff s x y).mp h).1
+  mono := by
+    intro s d hsd x y h
+    obtain ⟨hc, hsub, hsig⟩ := (roundTS_eq_iff s x y).mp h
+    obtain ⟨g, hg⟩ := exists_factor hsd
+    refine (roundTS_eq_iff d x y).mpr ⟨hsd x y hc, ?_, ?_⟩
+    · refine (subEnc_eq_iff d x y).mpr (fun σ => ?_)
+      rw [← hg (x ∘ σ), ← hg (y ∘ σ), (subEnc_eq_iff s x y).mp hsub σ]
+    · rw [tupSig_map_of_factor hg x, tupSig_map_of_factor hg y, hsig]
+
+/-- The substitution-closed closure. -/
+noncomputable def wlTS (s : Col (Tup k L)) : Col (Tup k L) := wl roundTS s
+
+theorem refines_wlTS_of_stable {s c : Col (Tup k L)} (hs : Stable (roundTS (k := k) (L := L)) s)
+    (h : PartitionClosure.Refines s c) : PartitionClosure.Refines s (wlTS c) :=
+  refines_wl_of_stable isRound_roundTS hs h
+
+/-- A `roundTS`-stable colouring still has `SigDet`, so **the whole block lemma of §3 applies to it**. -/
+theorem sigDet_of_stableS {s : Col (Tup k L)} (hs : Stable (roundTS (k := k) (L := L)) s) :
+    SigDet s := fun x y h => ((roundTS_eq_iff s x y).mp (hs x y h)).2.2
+
+/-- **★★★ COVARIANCE.** For a `roundTS`-stable colouring, the colour of a tuple determines the colour
+of **every** reindexing — dropped and repeated coordinates included. This is the ingredient §3 could
+not supply, and the one `FrameEncoding.Adequate.blocks` needs on top of the block lemma. -/
+theorem cov_of_stableS {s : Col (Tup k L)} (hs : Stable (roundTS (k := k) (L := L)) s)
+    {x y : Tup k L} (h : s x = s y) (σ : Fin k → Fin k) : s (x ∘ σ) = s (y ∘ σ) :=
+  (subEnc_eq_iff s x y).mp ((roundTS_eq_iff s x y).mp (hs x y h)).2.1 σ
+
+/-- ★ Both halves at once, in the shape the assembly consumes: a `roundTS`-stable colouring is
+covariant **and** its two-coordinate signatures are determined. -/
+theorem cov_and_block_of_stableS {s : Col (Tup k L)} (hs : Stable (roundTS (k := k) (L := L)) s)
+    {x y : Tup k L} (h : s x = s y) :
+    (∀ σ : Fin k → Fin k, s (x ∘ σ) = s (y ∘ σ)) ∧
+      (∀ i j : Fin k, substJoin s x i j = substJoin s y i j) :=
+  ⟨fun σ => cov_of_stableS hs h σ, fun i j => substJoin_of_sigDet (sigDet_of_stableS hs) h i j⟩
+
+/-! ## 5. The assembly-ready forms
+
+`FrameEncoding.pairSigG_split` sums a **pair** `(b (P₁, Z), b (Z, P₂))` — two *different* reindexings
+of one combined tuple — over one fresh label (payload `Z`) and over two (frame `Z`). §5 states exactly
+those two shapes, so the consumer never has to redo the factoring. -/
+
+/-- **Covariance as a FUNCTION of the colour.** `cov_of_stableS` is an implication; mapping over a
+multiset needs it as a map, and choice supplies one. -/
+theorem exists_factor_cov {s : Col (Tup k L)} (hs : Stable (roundTS (k := k) (L := L)) s)
+    (σ : Fin k → Fin k) : ∃ f : Nat → Nat, ∀ z : Tup k L, f (s z) = s (z ∘ σ) := by
+  classical
+  refine ⟨fun n => if hn : ∃ z : Tup k L, s z = n then s (hn.choose ∘ σ) else 0, fun z => ?_⟩
+  have hz : ∃ w : Tup k L, s w = s z := ⟨z, rfl⟩
+  show (if hn : ∃ w : Tup k L, s w = s z then s (hn.choose ∘ σ) else 0) = s (z ∘ σ)
+  rw [dif_pos hz]
+  exact cov_of_stableS hs hz.choose_spec σ
+
+/-- **★★ ONE fresh coordinate, paired reindexings** — the shape the encoding's **payload** sum has. -/
+theorem substPair1_of_stableS {s : Col (Tup k L)} (hs : Stable (roundTS (k := k) (L := L)) s)
+    {x y : Tup k L} (h : s x = s y) (i : Fin k) (σ₁ σ₂ : Fin k → Fin k) :
+    (Finset.univ : Finset (Fin L)).val.map
+        (fun v => (s (Function.update x i v ∘ σ₁), s (Function.update x i v ∘ σ₂)))
+      = (Finset.univ : Finset (Fin L)).val.map
+        (fun v => (s (Function.update y i v ∘ σ₁), s (Function.update y i v ∘ σ₂))) := by
+  obtain ⟨f₁, hf₁⟩ := exists_factor_cov hs σ₁
+  obtain ⟨f₂, hf₂⟩ := exists_factor_cov hs σ₂
+  have key : ∀ w : Tup k L, (Finset.univ : Finset (Fin L)).val.map
+      (fun v => (s (Function.update w i v ∘ σ₁), s (Function.update w i v ∘ σ₂)))
+      = (subst1 s w i).map (fun n => (f₁ n, f₂ n)) := by
+    intro w
+    show _ = ((Finset.univ : Finset (Fin L)).val.map
+      (fun v => s (Function.update w i v))).map (fun n => (f₁ n, f₂ n))
+    rw [Multiset.map_map]
+    refine Multiset.map_congr rfl (fun v _ => ?_)
+    show (s (Function.update w i v ∘ σ₁), s (Function.update w i v ∘ σ₂))
+        = (f₁ (s (Function.update w i v)), f₂ (s (Function.update w i v)))
+    rw [hf₁, hf₂]
+  rw [key, key, subst1_of_sigDet (sigDet_of_stableS hs) h i]
+
+/-- **★★★ TWO fresh coordinates, paired reindexings** — the shape the encoding's **frame** sum has,
+and the last generic ingredient the assembly needs. Block lemma (two coordinates) and covariance
+(two reindexings) combined in one statement. -/
+theorem substPair2_of_stableS {s : Col (Tup k L)} (hs : Stable (roundTS (k := k) (L := L)) s)
+    {x y : Tup k L} (h : s x = s y) (i j : Fin k) (σ₁ σ₂ : Fin k → Fin k) :
+    Multiset.join ((Finset.univ : Finset (Fin L)).val.map (fun u =>
+        (Finset.univ : Finset (Fin L)).val.map (fun v =>
+          (s (Function.update (Function.update x i u) j v ∘ σ₁),
+           s (Function.update (Function.update x i u) j v ∘ σ₂)))))
+      = Multiset.join ((Finset.univ : Finset (Fin L)).val.map (fun u =>
+        (Finset.univ : Finset (Fin L)).val.map (fun v =>
+          (s (Function.update (Function.update y i u) j v ∘ σ₁),
+           s (Function.update (Function.update y i u) j v ∘ σ₂))))) := by
+  obtain ⟨f₁, hf₁⟩ := exists_factor_cov hs σ₁
+  obtain ⟨f₂, hf₂⟩ := exists_factor_cov hs σ₂
+  have inner : ∀ (w : Tup k L) (u : Fin L),
+      (Finset.univ : Finset (Fin L)).val.map (fun v =>
+        (s (Function.update (Function.update w i u) j v ∘ σ₁),
+         s (Function.update (Function.update w i u) j v ∘ σ₂)))
+      = (subst1 s (Function.update w i u) j).map (fun n => (f₁ n, f₂ n)) := by
+    intro w u
+    show _ = ((Finset.univ : Finset (Fin L)).val.map
+      (fun v => s (Function.update (Function.update w i u) j v))).map (fun n => (f₁ n, f₂ n))
+    rw [Multiset.map_map]
+    refine Multiset.map_congr rfl (fun v _ => ?_)
+    show (s (Function.update (Function.update w i u) j v ∘ σ₁),
+          s (Function.update (Function.update w i u) j v ∘ σ₂))
+        = (f₁ (s (Function.update (Function.update w i u) j v)),
+           f₂ (s (Function.update (Function.update w i u) j v)))
+    rw [hf₁, hf₂]
+  have key : ∀ w : Tup k L,
+      Multiset.join ((Finset.univ : Finset (Fin L)).val.map (fun u =>
+        (Finset.univ : Finset (Fin L)).val.map (fun v =>
+          (s (Function.update (Function.update w i u) j v ∘ σ₁),
+           s (Function.update (Function.update w i u) j v ∘ σ₂)))))
+      = (substJoin s w i j).map (fun n => (f₁ n, f₂ n)) := by
+    intro w
+    unfold substJoin
+    rw [Multiset.map_join, Multiset.map_map]
+    exact congrArg Multiset.join (Multiset.map_congr rfl (fun u _ => inner w u))
+  rw [key, key, substJoin_of_sigDet (sigDet_of_stableS hs) h i j]
+
+end Subst
 
 end Round
 
