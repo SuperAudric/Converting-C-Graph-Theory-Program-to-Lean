@@ -301,7 +301,25 @@ channel (i)  sharing  : 1936 / 2016 copy pairs -> TWO-COPY model strictly FINER 
 ```
 
 > ### ⛔ **The centrals are worth NOTHING at 2-WL.** Their entire contribution to the payload-pair partition is making the frame types absolute. ⟹ **§6a.1's second channel is EMPTY**, and a faithful test object does not need the `2^d` centrals at all — retracting half of §6a.1's caution.
-> ### ⛔⛔ **Sharing over-separates, at 2-WL, on 96% of copy pairs.** §6a's 1-WL finding repeats one level up, now at the level the kills are stated at. ⟹ §4 and §5.1 are **confirmed** to be model claims, no longer merely suspected of it.
+> ### ⛔⛔ **Sharing makes the model DISAGREE at 2-WL, on 96% of copy pairs.**
+
+⚠ **Precision, and it matters — `scratchpad/probe_cao_gauge2_diag.py`.** The 1936 above is the
+partition of payload **pairs**. CAO is a statement about the **vertex** partition, and §4/§5.1's kills
+are stated as a **separation verdict**, so both were re-measured at those two levels:
+
+| level | two-copy model vs full ensemble, over 2016 copy pairs |
+|---|---|
+| pair-colour partition | **1936** strictly finer · 80 identical |
+| **diagonal (vertex) partition** | **1864 differ** · 152 agree |
+| **separation verdict** | 1944 agree · **72 differ** |
+
+★★ The 72 all go the **other way**. At `L = 4` the ensemble has 0 mixed cells, so it separates *every*
+non-isomorphic copy pair; and an isomorphism `π : G_c → G_{c'}` always extends to an automorphism of
+the two-copy model exchanging the copies (`π` permutes slots, types are absolute), so the model never
+separates an isomorphic pair. ⟹ those 72 are pairs the **model FAILS to separate and the ensemble
+does**.
+
+> ### ⛔⛔⛔ So the two-copy model **over-separates on the diagonal AND under-separates on the verdict**. It is not a stronger object and not a weaker one — it is **INCOMPARABLE, now measured at the level the kills are stated at**, not inferred from 1-WL. §4 and §5.1 are confirmed model claims.
 
 ★ Together these say the faithful object is **`k` copies + one shared frame + absolute types** — no
 centrals. So the question that decides whether the kills can be re-run honestly is *how large must
@@ -715,6 +733,102 @@ bigger payload.
 
 ---
 
+## 6c. ★★★ THE ENSEMBLE AS A REDUCTION — *"does poly-time CAO propagation give `GI ∈ P`?"*
+
+**Raised by the reader 2026-08-13.** ⚠ This is **not** the banned *"X ⟹ `GI∈P`, therefore X is
+impossible"* argument (steers-archive), and it must not be turned into one. It asks a narrower and
+legitimate question — what a CAO-propagation algorithm would *cost* — and its useful form turns out
+to be the contrapositive, which refutes via a **theorem** (bounded-dimension WL is incomplete), never
+via the unprovability of `GI ∈ P`.
+
+### 6c.1 The move that makes it work: the ensemble needs NO orbit oracle
+
+The standing objection to any "CAO gives you canonization" argument is that **reaching** a CAO
+colouring needs the orbit partition, and orbit partition is poly-time equivalent to GI (Mathon). The
+ensemble sidesteps it, and this is the argument's real idea:
+
+> ### ★★★ `E(L)`'s root orbit partition is **known by construction, not computed** — §6's proof: the gauge `(Z₂)^d` and the label group `S_L` are jointly transitive on each kind, and the three kinds cannot merge on degrees. Three cells, for free, for every `L`.
+
+Two further facts are also proved rather than computed: `Aut_{m(0)} = S_L` **exactly** (§6, via
+`Aut(T(L)) = S_L`), and therefore the `Aut_{m(0)}`-orbits on payload vertices are exactly the
+isomorphism classes of **(graph, marked vertex)** on `L` labels.
+
+★ Note also that `E(L)` is **universal**: it depends only on `L`, never on the input graph. The input
+merely *selects a copy*. So "Step 1" is not a computation at all.
+
+### 6c.2 What the reduction actually establishes
+
+Assume `k`-WL CAO propagation. Individualize `m(0)`; by hypothesis the `k`-WL cells are the
+`Aut_{m(0)}`-orbits. Then:
+
+* restricted to one copy `c`, the cells **are the `Aut(G_c)`-orbit partition** of the payload graph;
+* across copies, `G_c ≅ G_{c'}` iff their copies share cells.
+
+⟹ *if* "which cell is `p(c,i)` in" is computable in `poly(L)`, then `GI ∈ P`.
+
+**▶ Step 3 of the reader's version is redundant.** It routes through *"the payload is now CAO, hence
+Tinhofer, hence canonized by W1"*. But the orbit partition alone already gives `GI ∈ P`, so the
+Tinhofer leg and its dependency on `canonizes_on_tinhofer` can be dropped. Shorter argument, one
+fewer thing to prove.
+
+> ### ⛔ **Step 2 is not a lemma — under the hypothesis it IS the conclusion.**
+> A poly-time simulation of the ensemble's `k`-WL closure computes iso classes, and conversely
+> `GI ∈ P` computes them. So what the argument proves is a **characterization**, not an implication:
+> ```
+> k-WL CAO propagation  ⟹  ( GI ∈ P  ⟺  E(L)'s k-WL closure is poly-simulable )
+> ```
+> ⟹ **no amount of cleverness discharges Step 2 short of solving GI**, and the simulation route can
+> never be a stepping stone: any success at it *is* the whole prize.
+
+⛔ **And the object named for Step 2 — the triangle frame — is measured to be the wrong one** (§3.2c:
+incomparable on both the diagonal and the verdict; §3.2d: no copy subset saturates). A faithful
+extraction must be **analytic**, not a smaller build.
+
+### 6c.3 ★★★ THE CONTRAPOSITIVE IS THE USABLE FORM — and it is a proof strategy, not a hope
+
+Do not chase an exact poly-time simulation. Prove an **upper bound**:
+
+> ### ▶ `E(L)`'s `k`-WL closure on the payload `≤` some invariant already KNOWN to be incomplete.
+
+Then the closure is not a complete isomorphism invariant, so its cells are strictly coarser than the
+`Aut_{m(0)}`-orbits, so **`k`-WL CAO propagation is FALSE** — with an explicit counterexample family
+and **no large computation at all**. The natural bound to aim at is `≤ bare-m-WL` for a fixed `m`,
+because CFI over a base of treewidth `m+1` then supplies the witness, and CFI's incompleteness is a
+**theorem**, not an open problem. ⟹ the GI-hardness observation in §6c.2 is *not* load-bearing here;
+it only explains why Step 2 cannot be a stepping stone.
+
+> ### ★★ THIS TEMPLATE HAS ALREADY BEEN EXECUTED ONCE — at 1-WL, by §6a.
+> The closed form there is `(degree sequence, own degree)`, which is **weaker than bare 1-WL**. Degree
+> sequence is not a complete invariant (`C6` / `2C3`), so 1-WL CAO propagation fails — for **all `L`**,
+> by proof, with the witness handed to you. §6's 100 mixed cells were a *measurement* of the same
+> fact; the closed form is what makes it a theorem. **The template works; only the level is open.**
+
+**▶ So outstanding item 1 is retargeted.** It asked for the *exact* 2-WL closed form. The weaker
+**upper bound** suffices and is far more tractable, and §6b already supplies the matching lower bound
+`ensemble-2-WL ≥ bare-2-WL`. The open interval is `2 ≤ m ≤ ?`, and **any finite `m` refutes 2-WL CAO
+propagation.**
+
+⚠⚠ **The honest risk: the upper bound may not exist.** With every copy present, a cross-copy pair
+gives copy `c` access to the multiset over *all* graphs `H` of an invariant of `(G_c, H)`. Nothing
+yet bounds that by a fixed WL dimension. If it is unbounded, this strategy stalls at exactly the wall
+the rest of the programme is stuck on — it is a better-shaped attack, not a guaranteed one.
+
+### 6c.4 ⛔ The `d`-reduction by restricting to constant-edge-count copies is NOT available
+
+The reader's accompanying suggestion — consider only the `48`-edge copies, cutting `2^120` to
+`C(120,48)` — **breaks §6c.1's key move**, and provably so within this frame design:
+
+> A gauge orbit is a coset `c ⊕ H` for a subspace `H ≤ (Z₂)^d` (the gauge acts on the frame only by
+> swapping `f(k,0) ↔ f(k,1)`, so every gauge is such a subspace). Weight preservation demands
+> `|c ⊕ h| = |c|` for all `c`, which forces `h = 0`. ⟹ **a weight-preserving gauge is trivial.**
+
+So a constant-edge-count copy set is not a gauge orbit; the root is then no longer one orbit by
+construction, the orbit partition stops being free, and Step 1's whole advantage is lost. Restricting
+the copy set is not a sizing optimization here — it is the thing the design is built to avoid (§3.4),
+and §3.2d already measured that no restriction of the copy set is faithful anyway.
+
+---
+
 ## 7. Reusable filters extracted (apply before building)
 
 1. **N1 / N2** (§0) — the fusing automorphism must move `v`; the distinguishing relation must be
@@ -843,14 +957,13 @@ of the admission test (→ necessary only, §5) · *"rung 2 is purely a budget q
 what is unresolved).
 
 > ### ▶ OUTSTANDING, in priority order — REORDERED 2026-08-13
-> 1. ★★★ **Derive the ensemble's 2-WL colouring in CLOSED FORM** (§3.2d). This replaced *"re-run the
->    kills against a faithful object"*, which was item 1 for about an hour before §3.2c/§3.2d
->    measured it impossible: the centrals are removable but the copy set **does not saturate**, so a
->    faithful 16-label test needs `~2^120` copies and no prober reaches it. §6a did exactly this
->    derivation at 1-WL and settled that level for all `L` with no build. Two pieces are in hand
->    (centrals are never common neighbours of payload vertices; §6b fixes the payload–payload round-1
->    colour); the gap is payload–frame and frame–frame pairs at the fixpoint.
->    ⛔ Do **not** spend effort on a faster 2-WL: §3.2d shows it addresses the wrong bottleneck.
+> 1. ★★★ **Bound the ensemble's 2-WL closure ABOVE by a known-incomplete invariant** (§6c.3) — ideally
+>    `≤ bare-m-WL` for a fixed `m`, since CFI over treewidth `m+1` then supplies the witness and
+>    **refutes 2-WL CAO propagation outright, with no build**. ⚠ This *retargets* the previous item 1
+>    (*"derive the exact closed form"*, §3.2d): an upper bound suffices and is much weaker.
+>    §6a is the same template executed at 1-WL; §6b is the matching lower bound `≥ bare-2-WL`.
+>    ⛔ Do **not** spend effort on a faster 2-WL (§3.2d: wrong bottleneck), on a smaller copy set
+>    (§3.2d: none is faithful), or on an *exact* poly-time simulation (§6c.2: that IS `GI ∈ P`).
 > 2. ★★ **§6b in Lean** — it is the one 2-WL statement that is proved and about the real object, it
 >    is a **single-round** claim rather than a fixpoint, and it forces the refiner into the Lean layer
 >    that T3 needs anyway. Better first target than T2⁺.
