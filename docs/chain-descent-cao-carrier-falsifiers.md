@@ -1153,9 +1153,17 @@ round-indexed invariant — a statement of the shape *"the round-`r` slot profil
 >   e3    E-fine   E-fine    IDENT    IDENT
 >   e4    E-fine   E-fine    IDENT    IDENT
 > ```
-> **⛔ There is NO offset `s` with `E^{(r)} = M^{(r+s)}`.** `s = −1` matches `e1 = m0` and `e3 = m2` but
-> fails at `e2`, which sits **strictly between** `m1` and `m2`. So R1 must **not** be stated as a
-> round-indexed *equality* — that statement is false, and an induction carrying it cannot close.
+> **⛔ There is no INTEGER offset `s` with `E^{(r)} = M^{(r+s)}`.** `s = −1` matches `e1 = m0` and
+> `e3 = m2` but fails at `e2`, which sits **strictly between** `m1` and `m2`. So R1 must **not** be
+> stated as a round-indexed *equality* — that statement is false, and an induction carrying it cannot
+> close.
+>
+> ⚠ **Read this as a DELAY, not a divergence** (reader, 2026-08-13, and it is the better reading). The
+> ensemble is running the same refinement one step behind and *half a step out of phase* — `e2` lands
+> between two `M` rounds rather than off to the side, which is exactly what a construction that must
+> first earn the frame types (§6b) before it can use them would produce. Nothing here says the two
+> objects compute different things; it says the schedules do not line up on integers. ⟹ the correction
+> to R1 is about the **shape of the invariant**, not about whether the collapse is real.
 >
 > **✅ But the one-sided invariant holds at every round, with slack:**
 > > ### ▶ `M^{(r)}` **refines** `E^{(r)}`, for every `r` (`IDENT` or `M-fine` on the whole upper triangle `r_M ≥ r_E`).
@@ -1279,11 +1287,52 @@ untested). ⟹ the construction is aimed at *every* fixed WL level, not just run
   ⟹ these are two exits from the same door, and the refutation exit **strictly dominates** for the
   purpose of settling the WL levels. Both need (i).
 
+### 6f.4a ✅ THE LEAN SKELETON IS BUILT — `ChainDescent/FrameEncoding.lean`, 2026-08-13
+
+The formalization is scoped in three inputs, and only the middle one is ours to prove:
+
+```
+  (i)   ensemble-2-WL  ⊒  M-2-WL        -- §6e.4.  OPEN mathematically  => a named hypothesis
+  (ii)  M-2-WL  ≼  bounded-WL on G      -- §6f.    OURS                 => the Lean target
+  (iii) CFI over high treewidth is bounded-WL-blind   -- literature, a pebble-game argument over
+        arbitrary-treewidth bases; a formalization project in its own right => a named hypothesis
+```
+
+**Landed** (axiom-clean, no `sorry`, no custom axiom, gate-listed):
+
+| | |
+|---|---|
+| §1 | the 2-WL round at a **generic finite carrier** (`roundG`, `isRound_roundG`, `wl2G`, `refines_wl2G_of_stable`) — `CaoTarget.round2` is the `Fin n` case, and the encoding's carrier is a sum type |
+| §2 | `MVert`, `mAdj`, `mInit` — the §6d.6 object |
+| §3 | the coding `MVert L → TCode L` (**injective**, proved) and `Adequate` |
+| §4 | ★★★ `refines_wl2G_of_adequate` and **`merge_of_adequate`** — the transfer bound, and the only consumer form, so the direction cannot be got backwards |
+| §5 | a non-vacuity witness, ⚠ **flagged degenerate** |
+
+**Three modelling decisions, each of which shrank the build and each of which is recorded at source:**
+* **Unfrozen.** §6d.6 freezes frame–frame pairs; the Lean file uses the **plain** round. Stability
+  against it is strictly *stronger*, and the unfrozen closure refines the frozen one, so the frozen
+  conclusion follows by transitivity. ★ It also makes pin (i) **weaker**, hence safer to carry.
+* **Ordered slots.** Two twin frame vertices per unordered slot. Twins separate nothing, and it buys
+  free `Fintype`/`DecidableEq` instead of an index bijection into `Fin N`.
+* **Types atomic.** `mInit` hands each frame vertex its type; in the ensemble it is *earned* (§6b).
+  This makes the guess's target **finer**, hence pin (i) **stronger** — the honest direction.
+
+> ### ⛔ WHAT IS NOT PROVED, AND IT IS THE POINT: `Adequate.blocks`
+> *The multiset over `z : MVert L` of the two half-colours is determined by the pair's own colour.*
+> That **is** §6f.2's obligation, named. `pairSigG_split` (proved) decomposes that sum into a sum over
+> one fresh label and a sum over two labels plus a bit — which is literally where §6f's dimension count
+> comes from. ▶ **Increment 2 = a tuple-WL layer + the "multiset over `j` fresh coordinates" lemma,
+> discharging `blocks` for a `k`-WL `b`.** ⚠ The witness in §5 is the *discrete* bound: it proves the
+> skeleton is not vacuous and **nothing more**, since a discrete bound merges nothing.
+
 ### 6f.5 ⚠ Caveats, stated so they travel
 
 1. **Argued, not proved.** The interpretation lemma for `C^m` under `d`-dimensional quotient
    interpretations is standard, but it is cited here from memory and has **not** been written out
-   against this specific interpretation. ▶ Pin it before quoting the numeral.
+   against this specific interpretation. ▶ Pin it before quoting the numeral. ★ §6f.4a's Lean route
+   **bypasses the logic entirely** — it asks for `Adequate.blocks` directly, by the same
+   stable-guess method as §6d.1, so the citation is a sanity check on the constant rather than a
+   dependency of the proof.
 2. **The constant is crude** and the tightening is unexamined (§6f.2).
 3. ⚠ It is consistent with everything measured: `M`-2-WL separates Shrikhande/rook and `CFI[K4]`
    (both need ≥ 3-WL bare), which sits inside `≤ 8`. It predicts `M`-2-WL **fails** on a CFI pair over
@@ -1435,7 +1484,9 @@ formula and then compared **elementwise**.
 
 **Machine-checked.** T1 and T2⁻ in `ChainDescent/CaoEnsemble.lean`; §6d.1's method, its
 merge-direction corollary, the round-indexed form, and the frame layer's invariance + `≤ 12` bound in
-`ChainDescent/CaoCollapse.lean` (2026-08-13). All axiom-clean, no `sorry`, no custom axiom.
+`ChainDescent/CaoCollapse.lean`; **§6f's transfer skeleton** — the generic-carrier 2-WL round, the
+encoding, the injective coding, and `merge_of_adequate` — in `ChainDescent/FrameEncoding.lean`
+(all 2026-08-13). All axiom-clean, no `sorry`, no custom axiom.
 ✅ **Both are now gate-listed and the gate passes** — the earlier *"not gate-listed"* caveat is
 discharged. ⛔ `FrameClassComplete` is a pinned `Prop`, **not** a theorem.
 
@@ -1505,5 +1556,13 @@ what is unresolved).
 >    --with-line-numbers` per `scripts/theorem-index-maintenance.md`; ⚠⚠ it recomputes the **Notes**
 >    column and can resurrect **phantom rows**, so verify *unmatched deletions = 0*. Deliberately
 >    **not** run unverified at handoff.
-> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — both are in `scripts/build.sh`; gate = **125 modules,
->    ~249 s**, passing.
+> 4a. ▶▶ **INCREMENT 2 OF §6f.4a — discharge `FrameEncoding.Adequate.blocks`.** ★ This is now the
+>    single most valuable Lean target: it converts §6f from *argued* to *proved*. Needs (a) a `k`-WL
+>    layer on tuples over `Fin L` — `PartitionClosure` is generic in the carrier, so `wl` at
+>    `V = Fin k → Fin L` costs only a round plus its `IsRound`; (b) the **block lemma**, *the multiset
+>    over `j` fresh coordinates is determined by the truncation's colour*, proved by nesting
+>    single-coordinate stability `j` times; (c) `blocks` via `pairSigG_split`. ⚠ Do **not** state the
+>    `k`-WL round with a `List Nat` key without an injective tuple encoding — that is where the
+>    arity bookkeeping bites.
+> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all three are in `scripts/build.sh`; gate = **126 modules,
+>    ~275 s**, passing.
