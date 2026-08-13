@@ -82,7 +82,7 @@ def build(copies, centrals):
     return verts, adj, vcol
 
 
-def wl2(verts, adj, vcol, tag):
+def wl2_full(verts, adj, vcol, tag):
     n = len(verts)
     idx = {v: i for i, v in enumerate(verts)}
     col = [0] * (n * n)
@@ -119,9 +119,16 @@ def wl2(verts, adj, vcol, tag):
         if len(table) == ncol:
             print(f'  [{tag}] {n} vertices, stable after {rnd} rounds, {ncol} pair colours',
                   flush=True)
-            return {(x, y): col[idx[x] * n + idx[y]] for x in verts for y in verts
-                    if x[0] == 'p' and y[0] == 'p'}
+            return col, verts, idx
         col, ncol = new, len(table)
+
+
+def wl2(verts, adj, vcol, tag):
+    """payload-pair restriction of wl2_full -- what the ablation comparisons use."""
+    col, verts, idx = wl2_full(verts, adj, vcol, tag)
+    n = len(verts)
+    return {(x, y): col[idx[x] * n + idx[y]] for x in verts for y in verts
+            if x[0] == 'p' and y[0] == 'p'}
 
 
 def compare(name_a, pa, name_b, pb, keys):
