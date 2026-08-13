@@ -157,6 +157,7 @@ MODULES=(
   ChainDescent.CaoEnsemble            # gauge-ensemble index layer: T1/T2⁻ + the propagation target
   ChainDescent.CaoCollapse            # the single-copy collapse: the upper-bound method + the frame layer
   ChainDescent.FrameEncoding          # the frame encoding + the transfer bound skeleton (doc §6f)
+  ChainDescent.TupleWL                # k-WL on tuples + the BLOCK LEMMA (doc §6f increment 2)
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object

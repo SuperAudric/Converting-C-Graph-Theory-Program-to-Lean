@@ -1317,6 +1317,29 @@ The formalization is scoped in three inputs, and only the middle one is ours to 
 * **Types atomic.** `mInit` hands each frame vertex its type; in the ensemble it is *earned* (§6b).
   This makes the guess's target **finer**, hence pin (i) **stronger** — the honest direction.
 
+### 6f.4b ✅ INCREMENT 2, PART ONE — `ChainDescent/TupleWL.lean`: **the block lemma is PROVED**
+
+`k`-WL on tuples (`Tup k L := Fin k → Fin L`), landed axiom-clean and gate-listed:
+`encList`/`encVec` with **injectivity at fixed arity** (what lets a colour *vector* be a `rankOf`
+key) · `tupSig`/`tupKey`/**`roundT`**/**`isRound_roundT`** ⟹ FT1's whole closure theory now applies at
+**every** arity, not just 2 · `wlT`, `refines_wlT_of_stable`, `stable_iff_tupSig`.
+
+> ### ★★★ THE BLOCK LEMMA — `subst2_of_stable` / `substJoin_of_stable`
+> `k`-WL stability is about replacing **one** coordinate; `Adequate.blocks` needs **two** (a frame
+> vertex costs two fresh labels). They are not the same statement, and the gap closes by **nesting**:
+> the inner multiset **factors through `s`** (stability at `j`), so the outer sum is the image of a
+> *one*-coordinate substitution multiset under a fixed map — and that is determined by `s x` by
+> stability at `i`.
+> ⟹ **each extra coordinate costs one nesting, `j` coordinates cost `j`** — which is *exactly* §6f's
+> dimension count, now stated and proved with **no logic and no interpretation lemma**. This is the
+> mathematical content of *"the encoding's WL gain is bounded"*.
+
+⚠ **The assembly still needs one more ingredient, and it is recorded at source so it is not
+discovered late.** `blocks`'s summand is a **pair** `(b (P₁, Z), b (Z, P₂))` — two different
+*reindexings* of one combined tuple — so closing it also needs a **restriction/covariance** lemma:
+*the colour of a big tuple determines the colours of its sub-tuples*. Standard for `k`-WL (the atomic
+type is coordinate-covariant and the round preserves it), but not free. ▶ That is increment 2 part two.
+
 > ### ⛔ WHAT IS NOT PROVED, AND IT IS THE POINT: `Adequate.blocks`
 > *The multiset over `z : MVert L` of the two half-colours is determined by the pair's own colour.*
 > That **is** §6f.2's obligation, named. `pairSigG_split` (proved) decomposes that sum into a sum over
@@ -1635,6 +1658,11 @@ what is unresolved).
 > 4. ▶ **Prove `CaoCollapse.FrameClassComplete`** — the one pin in the new module, and the completeness
 >    half of §6d.2(a). Route identified: Mathlib `Equiv.extendSubtype` + three cases on
 >    `|k ∩ k'| ∈ {0,1,2}`, needs `4 ≤ L`.
+> 4b. ▶ **§6g's (A) in Lean — *"the frame is inert"***, the 1-WL analogue of §6d.2(a). Statement:
+>    a pointwise individualization induces a label partition, its stabilizer is a **Young subgroup**,
+>    and a Young subgroup's orbits (blocks on payload, *unordered pairs of blocks* on slots) are
+>    exactly the 1-WL cells. ⚠ **Lower priority than 4a** — it bounds the *easy* half; §6g.2 shows the
+>    payload half is unreachable this way. Logged so the measured result does not rot.
 > 5. ★★ **§6b in Lean** — the one 2-WL statement that is both proved and about the real object, and a
 >    **single-round** claim rather than a fixpoint. It forces the refiner into the Lean layer that T3
 >    needs anyway, so it is a better next target than T2⁺.
@@ -1646,13 +1674,13 @@ what is unresolved).
 >    --with-line-numbers` per `scripts/theorem-index-maintenance.md`; ⚠⚠ it recomputes the **Notes**
 >    column and can resurrect **phantom rows**, so verify *unmatched deletions = 0*. Deliberately
 >    **not** run unverified at handoff.
-> 4a. ▶▶ **INCREMENT 2 OF §6f.4a — discharge `FrameEncoding.Adequate.blocks`.** ★ This is now the
->    single most valuable Lean target: it converts §6f from *argued* to *proved*. Needs (a) a `k`-WL
->    layer on tuples over `Fin L` — `PartitionClosure` is generic in the carrier, so `wl` at
->    `V = Fin k → Fin L` costs only a round plus its `IsRound`; (b) the **block lemma**, *the multiset
->    over `j` fresh coordinates is determined by the truncation's colour*, proved by nesting
->    single-coordinate stability `j` times; (c) `blocks` via `pairSigG_split`. ⚠ Do **not** state the
->    `k`-WL round with a `List Nat` key without an injective tuple encoding — that is where the
->    arity bookkeeping bites.
-> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all three are in `scripts/build.sh`; gate = **126 modules,
->    ~275 s**, passing.
+> 4a. ▶▶ **INCREMENT 2 — discharge `FrameEncoding.Adequate.blocks`.** ★ Still the single most
+>    valuable Lean target: it converts §6f from *argued* to *proved*.
+>    ✅ **(a) the `k`-WL tuple layer and (b) the BLOCK LEMMA are DONE** — `ChainDescent/TupleWL.lean`
+>    (§6f.4b), gate-listed and axiom-clean.
+>    ▶ **(c) the restriction/covariance lemma** — *the colour of a big tuple determines the colours of
+>    its sub-tuples* — which `blocks` needs because its summand is a **pair** of reindexings
+>    `(b (P₁, Z), b (Z, P₂))` of one combined tuple. Standard for `k`-WL, not free.
+>    ▶ **(d) the assembly**: `blocks` via `pairSigG_split` + (b) + (c).
+> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all four are in `scripts/build.sh`; gate = **127 modules,
+>    ~245–275 s**, passing.
