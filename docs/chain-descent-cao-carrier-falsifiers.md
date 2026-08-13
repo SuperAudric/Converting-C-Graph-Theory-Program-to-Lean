@@ -1341,6 +1341,93 @@ The formalization is scoped in three inputs, and only the middle one is ours to 
 
 ---
 
+## 6g. ★★★ THE OPPOSITE-SIDE ATTACK — *"the bare frame is Tinhofer anyway"*. ✅ HALF TRUE, AND THE OTHER HALF IS THE WHOLE PROBLEM
+
+**Raised by the reader 2026-08-13**, independently of whether CAO propagates: the frame's own
+structure — `L` payload vertices plus one vertex per slot, incidence only; this is the subdivision of
+`K_L`, whose slot part is the triangular graph `T(L) = J(L,2)` — should be **Tinhofer**, because every
+individualization set produces a CAO residue. Individualizing a payload vertex splits by distance and
+no further; individualizing a slot vertex acts like individualizing its two endpoints *to a common
+colour*. Measured — `scratchpad/probe_cao_frame_tinhofer.py`, orbits by brute force over `S_L`, so
+nothing here is heuristic.
+
+### 6g.1 ✅ (A) THE BARE FRAME, POINTWISE — holds everywhere tested
+
+```
+L=4: 176 individualization sets, |S| <= 3   FAILURES 0
+L=5: 576 individualization sets, |S| <= 3   FAILURES 0
+L=6: 232 individualization sets, |S| <= 2   FAILURES 0
+```
+
+★ **And there is a reason, which is the right way to state the claim.** Pointwise individualization
+can only ever induce a **partition of the labels**, whose setwise stabilizer is a **Young subgroup**
+`S_{B₁} × … × S_{B_r}`. A Young subgroup's orbits are: the blocks (on payload) and the *unordered
+pairs of blocks* (on slots) — which is **exactly** what 1-WL computes, since a slot vertex's entire
+1-WL view is the pair of its endpoints' colours. ⟹ (A) is a statement about Young subgroups, and that
+is what makes it true. ⚠ Evidence to `|S| ≤ 3`, not proof.
+
+> ### ⚠ CORRECTION — *"within an orbit every ordering is a valid automorphism"* is FALSE on slot cells
+> It holds on **payload** cells (a block's full `S_{B}` acts). It fails on **slot** cells: the cell of
+> pairs of free labels has size `C(m,2)` and carries only the induced `S_m`-action, not the full
+> symmetric group (`L = 6`, no individualization: 15 slots, `|Aut| = 720 ≪ 15!`). ⟹ the *"orbit of
+> size 5 has 5! identical outputs"* property is **not** what makes (A) work — the Young-subgroup
+> structure is. Do not lean on it.
+
+### 6g.2 ⛔⛔⛔ (B) GROUP INDIVIDUALIZATION — NOT "unproven at 3+". **FALSE AT 4**, AND IT IS THE WHOLE PROBLEM
+
+> ### ★★★ THE OBSERVATION THAT SETTLES IT: **a set of slots given one shared colour IS a graph.**
+> `T` = a set of slot vertices `=` `E(H)` for a graph `H` on the labels, and the stabilizer of `T` in
+> `S_L` is exactly **`Aut(H)`**. ⟹ *"Tinhofer under group individualization"* **is** *"1-WL reaches
+> `Aut(H)`-orbits for every graph `H`"* — i.e. **every graph is 1-WL-amenable**, which is false.
+> Group individualization of slots **is the payload encoding**. The opposite-side attack lands on the
+> same wall, and it lands there in one line.
+
+Swept exhaustively (every slot-set, orbits by brute force):
+
+```
+L=4:    64 slot-sets   FAILURES 0
+L=5:  1024 slot-sets   FAILURES 0          <- so a counterexample needs L >= 6
+L=6: 16384 slot-sets   FAILURES 1140       ★ smallest failing GROUP SIZE = 4
+     witness  T = {04, 05, 12, 13}  =  H = K_{1,2} ⊔ K_{1,2}  (two "cherries")
+```
+
+★★ **The size-4 failure is on the SLOT cells, not the payload** — which is why it was not anticipated.
+On `H` itself 1-WL is perfectly correct (centres degree 2, leaves degree 1 = the two orbits). On the
+**frame**, the slot vertices `{2,3}` and `{4,5}` (two leaves of the *same* cherry) and `{2,4}` (leaves
+of *different* cherries) all present 1-WL with the same view — `(¬T, {leaf, leaf})` — and never
+diverge. *Same-cherry vs different-cherry is a **pairwise coincidence**, and §7's filter 6 says 1-WL
+cannot read one.* ⟹ **the claim survives group sizes 1, 2 and 3, and dies at 4.**
+
+**The second, starker failure mode — and it is the CAO-relevant one:**
+
+```
+L=7, T = E(C3 ⊔ C4), |T| = 7:  |Aut| = 48,  1-WL 3 cells vs 6 orbits  -> Tinhofer FALSE
+                                ★ PAYLOAD: 1 cell vs 2 orbits  = a MIXED CELL
+control  T = E(C3 ⊔ C3), L = 6:  1-WL 3 cells vs 3 orbits      -> Tinhofer TRUE  (Aut transitive)
+```
+
+⟹ at `|T| = 4` the frame fails on slots; at `|T| = 7` it fails **on the payload**, which is the
+falsifier shape itself. `C3 ⊔ C4` is §5.2's own rung-1 witness, arrived at from the opposite direction.
+
+### 6g.3 ▶ WHAT THIS IS WORTH — it is not only a negative
+
+1. ⛔ **The route does not reach the payload.** The literature's Tinhofer/IR definition individualizes
+   **pointwise**, so (A) is the literature statement and (B) is a strictly stronger property the
+   payload needs. (B) is equivalent to `GI`-completeness of 1-WL amenability, so it cannot be patched.
+2. ★★ **But (A) is exactly the theorem *"the frame is inert"***, which this doc has been asserting
+   informally. It is the **1-WL analogue of §6d.2(a)**'s `≤ 12` frame bound at 2-WL, and it is
+   stronger in kind: not just that the frame carries few colours, but that its skeleton is
+   **IR-solvable at every individualization set**. ⟹ **100% of the hardness is in the payload
+   colouring**, now from two independent directions (§6b at 2-WL, §6g at 1-WL).
+3. ✅ **The reader's spine-fact step is already machine-checked** — *"the individualization set matters,
+   not the order, so piecewise = all at once"* is `PartitionClosure.closure_meet_comm` /
+   `reached_partition_order_free` (FT1). Nothing to prove there.
+4. ▶ **(A) is a plausible Lean target** (Young subgroup ⟹ orbits = blocks and unordered pairs of
+   blocks = the 1-WL slot colour), and it would discharge item 2 as a theorem. ⚠ Lower priority than
+   §6f's `Adequate.blocks`, because (A) bounds the *easy* half.
+
+---
+
 ## 7. Reusable filters extracted (apply before building)
 
 1. **N1 / N2** (§0) — the fusing automorphism must move `v`; the distinguishing relation must be
@@ -1361,6 +1448,8 @@ The formalization is scoped in three inputs, and only the middle one is ours to 
    this one is a **theorem about the real object**: an edge encoded as a typed common neighbour is
    exactly what 2-WL counts, so no amount of frame-sharing or gauge symmetry hides it.
 6. **The binary-coincidence test** (§2.4) — if the hidden fact is a pairwise coincidence, 2-WL reads it.
+   ★ **And 1-WL does not** — §6g.2's group-size-4 failure is exactly this: a slot vertex's whole 1-WL
+   view is its two endpoints' colours, so *"do these two leaves share a centre"* is invisible to it.
 7. ★ **The partition-comparison rule** (§6a) — when validating an abstraction against the object,
    **compare the whole partitions, not one witness pair**. §6 validated on `C6`/`2C3`, which are
    2-regular and therefore agree under *every* candidate invariant; the abstraction was off by
@@ -1389,6 +1478,7 @@ The formalization is scoped in three inputs, and only the middle one is ours to 
 | `scratchpad/probe_cao_mfrozen.py` | **§6d.6 — THE FAITHFUL TEST, and the tool to reach for.** `M_frozen(G)` for any payload; args `sr` or `<m>` for `CFI[K_m]`. Shrikhande/rook at 256 v | ~5 min (`sr`) |
 | `scratchpad/probe_cao_crosscopy.py` | **§6d.7** — cross-copy colours are rich but their aggregate is `M`-determined; the exact closed form. ⚠ its hypothesis C **must** use a multiset, not an ordered tuple (injective key ⟹ vacuous) | ~5 min |
 | `scratchpad/probe_cao_lemma_check.py` | **§6e.0 — PHASE 0 of the proof plan.** `M`-only, so it runs where the ensemble cannot; args `<L> <reps>`. `L=4` calibrates, `L=5` passes, ▶ `L=6` is the next rung | `L=5` ~10 min |
+| `scratchpad/probe_cao_frame_tinhofer.py` | **§6g** — is the bare frame Tinhofer? (A) pointwise: 0 failures; (B) **group** individualization of a slot set: ⛔ **fails at group size 4** (`L=6`, `T = E(K_{1,2} ⊔ K_{1,2})`), on the **slot** cells. Orbits by brute force over `S_L`, so no heuristic. Args `all|A|B` | ~15 min |
 | `scratchpad/probe_cao_roundmatch.py` | **§6e.5's R1 box** — the ensemble/`M` correspondence **round by round**, which every earlier probe compared only at the fixpoint. ⛔ found: no round offset exists; ✅ the one-sided `M^{(r)} ⊑ E^{(r)}` holds throughout. Args `<L> <E-rounds> <M-rounds>` — ⚠ **`argv[1]` is `L`**, consumed by `probe_cao_gauge2_ablate` on import (I lost a run to `L=5`, a 6164-vertex ensemble) | `L=4` ~3 min |
 | `scratchpad/probe_cao_gadget_check.py` | §3.2a(a) — gauge transitive on the 8 complementary pairs; `δ` constant | < 1 s |
 | `scratchpad/probe_cao_gadget_variants.py` | §3.2a(b) — the three frame shapes vs the transposition-fixes-`m` test | < 5 s |
