@@ -1005,6 +1005,108 @@ restate §4/§5.1 as unconditional.
 
 ---
 
+## 6e. ▶▶ PROOF PLAN FOR §6d.8's LEMMA — two steps done, one gap, four candidate resolutions
+
+**Notation.** `S` = the `d = C(L,2)` slots. A copy is `c ∈ {0,1}^S`. In the stable colouring of
+`M(c)`: `μ_c(i,j)` = payload-pair colours, `a(c,i) = ((k,t) ↦ M(c)\text{-col}(p(i), f(k,t)))` = the
+**slot profile** of `i`, and `Align(a,b) = {{ (a_{k,t}, b_{k,t}) : (k,t) }}` = their contingency
+table over slots.
+
+> ### TARGET. For all `(c,i)`, `Φ(c,i) := {{ (μ_{c'}(l,l), Align(a(c,i), b(c',l))) : (c',l) }}` is determined by `μ_c(i,i)`.
+
+### 6e.0 ✅ PHASE 0 — validated beyond the ensemble's reach
+
+★ The lemma mentions **only `M`-data** — no ensemble, no `2^d`-vertex graph. So it is testable where
+the ensemble is not. `scratchpad/probe_cao_lemma_check.py`:
+
+```
+L=4:  20 mu-classes, 0 violations   (calibration — matches the L=4 ensemble ground truth)
+L=5:  90 mu-classes, 0 violations   ★ the L=5 ensemble is 6164 vertices at 2-WL, unreachable
+```
+
+⟹ the §6d collapse now has support at an `L` the direct method could never test. ⚠ Representative
+sampling (3 per class), so this is evidence, not proof.
+
+### 6e.1 ✅ STEP 1 — reduce to a pushforward. This is the step that makes the lemma tractable
+
+Let `D := {{ (μ_{c'}(l,l), b(c',l)) : (c',l) ∈ {0,1}^S × [L] }}`. **`D` does not depend on `(c,i)`.**
+Then
+
+```
+Φ(c,i)  =  pushforward of D under  (y, b) ↦ (y, Align(a(c,i), b))
+```
+
+⟹ `Φ(c,i)` depends on `(c,i)` **only through the single vector `a(c,i)`**, and the whole question is
+*which features of `a` the fixed distribution `D` can resolve*. ★ This disposes of the "profile of
+`(G_c,i)` against all graphs" worry that §6d.7 raised: there is no unbounded object — one fixed
+distribution, probed by one vector.
+
+### 6e.2 ✅ STEP 2 — `D` is `S_L`-invariant (free), and ⚠ why that alone must NOT suffice
+
+`M` is built equivariantly, so `b(πc', πl)_{πk} = b(c',l)_k` and `(c',l) ↦ (πc', πl)` permutes the
+index set. Hence `Φ(c,i)` depends only on the `S_L`-**orbit** of `a(c,i)`.
+
+> ### ⚠⚠ A TRAP: do not try to finish from here. Finishing from `S_L`-invariance alone would require `μ_c(i,i)` to determine the `S_L`-orbit of `a(c,i)` — i.e. *`M` is a complete isomorphism invariant*, which is exactly what must not be true (it would make the whole programme vacuous, §6c.2). **The proof must use something strictly finer than the group action.**
+
+### 6e.3 ✅ STEP 3 — the base case is provable, and it identifies that "something finer"
+
+At **round 1**, `b(c',l)_k = ([l ∈ k], c'_k)`. As `c'` ranges over **all** of `{0,1}^S`, the bits
+`(c'_k)_k` are i.i.d. uniform, hence **fully exchangeable across slots** — not merely
+`S_L`-exchangeable. ★ *This is where "every copy is present" does its work, and it is the formal
+content of the reader's uniformity argument.* `Align(a,b)` then splits into
+
+| ingredient | what it needs from `a` | why `μ_c(i,i)` determines it |
+|---|---|---|
+| the `c'`-bit counts | only the **sizes** of the `a`-classes | the multiset `{{a(c,i)_k : k}}` **is** the diagonal's refinement aggregated over frame `z` in `M(c)` |
+| the `[l ∈ k]` counts | the incidences `n_{l,A} = #{k ∋ l : k ∈ A}` | `μ_c(i,l)` determines `n_{l,·}` (frame-aggregation in `M(c)`), and the multiset over `l` of `μ_c(i,l)` is the diagonal's refinement aggregated over payload `z` |
+
+∎ base case.
+
+### 6e.4 ⛔ THE GAP — the induction step
+
+At the **fixpoint**, `b(c',l)_k` is the stable `M(c')` colour, which depends on **all** of `c'`, not
+just `c'_k`. So the slot-vector `b` is not a product measure, the full exchangeability of §6e.3 fails,
+and only §6e.2's `S_L`-invariance survives — which §6e.2 shows is insufficient by itself.
+
+**That is the entire remaining obligation.** Everything else above is done.
+
+### 6e.5 ▶ FOUR CANDIDATE RESOLUTIONS, best first
+
+**R1 — round-indexed induction (most likely to work).** Prove the collapse and the lemma together by
+induction on the WL round `r`: `b^{(r)}(c',l)_k` is determined by round-`(r−1)` data, and the
+induction hypothesis supplies its `M`-form. §6e.3 is the base case. **Obligation:** find the right
+round-indexed invariant — a statement of the shape *"the round-`r` slot profile is a function of
+(round-`(r−1)` data local to `k`) and (`μ`-determined globals)"*.
+
+**R2 — finite-range dependence.** Show `b(c',l)_k` depends on `c'` only through slots within bounded
+distance of `k` (share a label, or share a label with a label of `k`). Then `b` is a finite-range
+field over i.i.d. bits and exchangeability is replaced by a local-independence argument.
+⚠ Probably false at the fixpoint (WL colours are global), but plausible for a bounded number of
+rounds — so it composes with R1 rather than replacing it.
+
+**R3 — ⭐ the workaround that keeps the payoff even if the collapse is false.** We never needed the
+*exact* collapse; §6c.3 needs an **upper bound by something incomplete**. Define `M⁺ = M` with `Φ`
+adjoined as an extra colour coordinate, close under refinement, and show the closure terminates with
+a bounded description. Then `ensemble ⊑ M⁺`, and the refutation route survives **provided `M⁺` is
+still not a complete invariant**. ★ This turns a failed proof into a weaker but usable one, and it
+should be kept in reserve from the start.
+
+**R4 — the logical route.** A 2-WL colour is a `C³` (three-variable counting logic) type. Show
+`Φ(c,i)` is `C³`-definable over `M(c)`, hence determined by `μ_c(i,i)`. The sum over all `c'` is a sum
+over a *fixed, uniformly described* family — precisely the reader's uniformity — and the technical
+content is that aggregating against a uniformly described family of 2-WL structures stays inside 2-WL.
+**Cleanest if it works**; the work is in making "uniformly described" expressible.
+
+### 6e.6 ▶ WHAT WOULD FALSIFY THE APPROACH
+
+A single pair `(c,i)`, `(e,m)` with `μ_c(i,i) = μ_e(m,m)` but `Φ(c,i) ≠ Φ(e,m)`. `probe_cao_lemma_check.py`
+searches for exactly that and is cheap at `L = 5`; ★ **`L = 6` is the next rung and is the highest-value
+run in the plan** (`2^15` copies × a 36-vertex `M`), because it is still `M`-only. A failure there would
+make **R3 mandatory** and would localize which feature of `a` beyond §6e.3's (i)/(ii) the fixed
+distribution `D` resolves.
+
+---
+
 ## 7. Reusable filters extracted (apply before building)
 
 1. **N1 / N2** (§0) — the fusing automorphism must move `v`; the distinguishing relation must be
@@ -1135,11 +1237,14 @@ of the admission test (→ necessary only, §5) · *"rung 2 is purely a budget q
 what is unresolved).
 
 > ### ▶ OUTSTANDING, in priority order — REORDERED 2026-08-13
-> 1. ★★★ **Prove §6d.2(b)** — that the partition built from the single-copy model `M` is stable in
->    `E(L)`. §6d.2(a) is done (frame–frame ≤ 12 classes, for every `L`). (b) is the whole remaining
->    content, and it must explain why the collapse holds at `k = 2` but demonstrably **fails at
->    `k = 1`** (§6d.4). With (b), `ensemble-2-WL` on a copy is `2-WL` on an `L²`-vertex object and
->    every blocked measurement in this doc becomes runnable.
+> 1. ★★★ **Close §6e.4** — the induction step of §6d.8's lemma. The plan is §6e: Step 1 (reduction to
+>    a pushforward) and Step 3 (the round-1 base case) are **done**, §6d.2(a) is **proved for all `L`**,
+>    and Phase 0 validates the lemma at `L = 4` *and* `L = 5`. The gap is one statement: at the
+>    fixpoint the slot-vector `b(c',l)` is not a product measure, so full slot-exchangeability fails.
+>    ⭐ Keep **R3** (bound by `M⁺` instead of `M`) in reserve — it preserves the refutation route even
+>    if the exact collapse turns out false.
+> 1b. ▶ **Run `probe_cao_lemma_check.py` at `L = 6`** — the highest-value cheap run in the plan, and
+>    still `M`-only, so it needs nothing exponential.
 > 1a. ▶ **`CFI[K5]`-full at `n = 3660`** — under §6d it is again THE measurement and now against the
 >    *right* object. ⚠ §3.2d's *"a faster 2-WL is the wrong bottleneck"* is **re-reversed** by §6d:
 >    the faithful object is poly-size, so a C 2-WL is worth building. ⛔ Still do not use a smaller
