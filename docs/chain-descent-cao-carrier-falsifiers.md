@@ -1155,6 +1155,28 @@ distribution `D` resolves.
 | `scratchpad/probe_cao_gadget_variants.py` | §3.2a(b) — the three frame shapes vs the transposition-fixes-`m` test | < 5 s |
 | `scratchpad/probe_cao_cfi_frame.py` | §5.1 — CFI payloads through the frame; args `<m> <sub\|full>`. Outputs kept: `cfi_frame_full.out` (faithful), `cfi_frame_unfaithful.out` (row 3, provenance) | 152/440 fast; 812 ~1 h |
 
+**Lean — `ChainDescent/CaoCollapse.lean` (NEW 2026-08-13), the footing for §6d/§6e.** ★ The method of
+§6d.1 was **already machine-checked** before this: `CaoTarget.refines_wl2_of_stable` (from FT1's
+`PartitionClosure.refines_wl_of_stable`) says `wl2` is the **coarsest** stable refinement of the
+atoms, and `CaoTarget.inv2_wl2` gives that WL colours are automorphism-invariant — i.e. *"WL is
+coarser than the orbit partition"*, §6d.2(a)'s first half, done. `CaoCollapse` adds:
+
+| | |
+|---|---|
+| `rootPair_upperBound_of_stable`, `ext_upperBound_of_stable` | §6d.1's method in the shape the collapse cites, at the root closure and after individualization |
+| `merge_of_stable_merge` | ★ the **usable direction** isolated — a merge in the guess forces a merge in the closure — so a refutation argument cannot silently use the other one |
+| `rounds_upperBound_of_stable` | the **round-indexed** form, which is the skeleton **R1** (§6e.5) consumes |
+| `Slot`, `mapSlot`, `frameClass`, `frameClass_mapSlot`, `frameClass_overlap_le` | the frame layer; **invariance proved** and the **`≤ 12`** bound proved, uniformly in `L` |
+| `FrameClassComplete`, `frameClass_eq_orbit_of_complete` | ⛔ the completeness half of §6d.2(a) **pinned as a `Prop`, not proved**, with its consumer recorded so proving the pin discharges it |
+
+All declarations `[propext, Classical.choice, Quot.sound]` or a subset; no `sorry`, no custom axiom,
+no `native_decide`. ▶ The pin's route is identified: `Equiv.extendSubtype` (Mathlib
+`Logic/Equiv/Fintype.lean`) plus a three-case construction on `|k ∩ k'| ∈ {0,1,2}`, needing `4 ≤ L`.
+
+✅ **BOTH CAO MODULES ARE NOW GATE-LISTED** — `CaoEnsemble` and `CaoCollapse` added to
+`scripts/build.sh`'s `MODULES`; the gate passes. That discharges the doc's standing *"not gate-listed"*
+caveat and outstanding item 6.
+
 **Lean.** `GraphCanonizationProofs/ChainDescent/CaoEnsemble.lean` — the index-level skeleton
 (`gact_transitive` = T1, `gact_eq_self_iff` + `lact_base` = T2⁻, `Propagates` +
 `not_propagates_of_merge` = the target and the bridge the probes instantiate). Builds clean, all
@@ -1217,9 +1239,11 @@ proved and about the real object.
 independently re-derived in `probe_cao_ensemble_audit.py`. §6's 292/100 re-derived from a closed
 formula and then compared **elementwise**.
 
-**Machine-checked.** T1 and T2⁻ in `ChainDescent/CaoEnsemble.lean`; re-verified 2026-08-13 — builds
-clean, all seven declarations `[propext, Classical.choice, Quot.sound]` or a subset, no `sorry`, no
-custom axiom. ⚠ **not gate-listed.**
+**Machine-checked.** T1 and T2⁻ in `ChainDescent/CaoEnsemble.lean`; §6d.1's method, its
+merge-direction corollary, the round-indexed form, and the frame layer's invariance + `≤ 12` bound in
+`ChainDescent/CaoCollapse.lean` (2026-08-13). All axiom-clean, no `sorry`, no custom axiom.
+✅ **Both are now gate-listed and the gate passes** — the earlier *"not gate-listed"* caveat is
+discharged. ⛔ `FrameClassComplete` is a pinned `Prop`, **not** a theorem.
 
 **Argued, not established.** §5's admission test — ⚠ **necessary direction only**, and ⚠⚠ its
 ensemble assumption is now **refuted at rung 1** (§6a), not merely unmeasured at rung 2. §4.3's
@@ -1258,4 +1282,7 @@ what is unresolved).
 > 4. **T2⁺ in Lean** (`Aut_m` is *exactly* the label group) — makes every mixed-cell count here
 >    unconditional; `Aut(T(n)) = Sym n` is the whole content.
 > 5. **T3 in Lean** (frame cells = position classes) — needs a refiner in the Lean layer.
-> 6. Decide whether `CaoEnsemble.lean` joins `scripts/build.sh`'s `MODULES` list.
+> 6. ~~Decide whether `CaoEnsemble.lean` joins `scripts/build.sh`'s `MODULES` list.~~ ✅ **DONE
+>    2026-08-13** — `CaoEnsemble` *and* `CaoCollapse` are gate-listed and the gate passes.
+> 7. ▶ **Prove `CaoCollapse.FrameClassComplete`** — the completeness half of §6d.2(a), the one pin in
+>    the new module. Route identified: `Equiv.extendSubtype` + three cases on `|k ∩ k'|`, `4 ≤ L`.
