@@ -158,6 +158,8 @@ MODULES=(
   ChainDescent.CaoCollapse            # the single-copy collapse: the upper-bound method + the frame layer
   ChainDescent.FrameEncoding          # the frame encoding + the transfer bound skeleton (doc §6f)
   ChainDescent.TupleWL                # k-WL on tuples + the BLOCK LEMMA (doc §6f increment 2)
+  ChainDescent.FrameTransfer          # the assembly: Adequate discharged from tuple stability (§6f.4d)
+  ChainDescent.Ensemble               # THE ENSEMBLE AS A GRAPH: eRoot, the label action, MixedCell
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object

@@ -1361,10 +1361,42 @@ an upper bound — and it is still **bounded-arity**, so §6f.3's CFI input is u
 | **`substPair1_of_stableS`** | ONE fresh label, paired reindexings — the **payload** sum of `pairSigG_split` |
 | **`substPair2_of_stableS`** | TWO fresh labels, paired reindexings — the **frame** sum; block lemma and covariance combined |
 
-⚠ **What is left of the assembly is plumbing, not mathematics**: define `bOf s` (pack the two sorts
-and two type-bits as a decoration, the four labels as a padded 6-tuple), name the four concrete
-reindexings `σ`, and reconcile `Finset.univ (Fin L × Fin L × Bool)` with the `join`-over-`(u,v)` shape
-plus a two-case split on the bit. ⛔ No further *ingredient* is missing.
+### 6f.4d ✅ INCREMENT 2, PART THREE — `Adequate` IS DISCHARGED. `ChainDescent/FrameTransfer.lean`
+
+The plumbing closed, and the prediction *"no further ingredient is missing"* held. Gate = **129
+modules, 254 s**, axiom-clean. `mk6` + the four reindexings `σA1 σA2 σB1 σB2` (each `funext i;
+fin_cases i <;> rfl`) · `update4`/`update5` · `dec`/`tup6`/**`bOf`** · `payload_sum` and `frame_sum`
+putting the two halves of `pairSigG_split` into `TupleWL` §5's shapes · **`blocks_bOf`** ·
+**`adequate_bOf`** · **`merge_of_tuple_merge`**.
+
+> ### ★★★ `merge_of_tuple_merge` — §6f's BOUND, MACHINE-CHECKED
+> A merge under a **bounded-arity** (`k = 6`) tuple colouring is a merge in the **encoding's 2-WL
+> closure**. `Adequate.blocks` — the clause §6f.4a opened — is now a **theorem**, from `roundTS`
+> stability alone. ⟹ §6f goes from *argued* to **proved at `k = 2`**, and it never needed the `C^m`
+> interpretation lemma.
+
+⚠ **One side condition remains a hypothesis, honestly:** `adequate_bOf`'s `refinesAtoms` — that the
+tuple colouring is fine enough to see `E`'s adjacency. It is discharged by closing an `E`-dependent
+start colouring under `roundTS`, which is mechanical but not written.
+
+> ### ⛔⛔ WHAT THIS IS **NOT** — read before quoting it
+> It is the **transfer**, at `k = 2`. It is **not** a counterexample to CAO propagation, and five
+> things stand between the two:
+> 1. ⛔ **(i) the collapse is open mathematically** (§6e.4) — nothing yet links `M(E)` to `E(L)`.
+> 2. ⛔ **(iii) CFI's WL-blindness is not formalized** — a pebble-game argument over arbitrary-treewidth
+>    bases; a named hypothesis and a project of its own.
+> 3. ✅ ~~the ensemble has no Lean object~~ **CLOSED 2026-08-14 — `ChainDescent/Ensemble.lean`**
+>    (gate **130 modules**, axiom-clean): `eAdj`/`eInit`/**`eRoot`** with `m(base)` individualized, a
+>    **generic `InvG` layer** for `roundG`/`wl2G`, the label action as an `Equiv`, `eact_base` (T4 at the
+>    graph), and ⟹ ★ **`orbit_not_split`** — the free half, an orbit is never split. ⛔ **`MixedCell`**
+>    is **stated, not proved**; `not_labelPropagates_of_mixed` is the bridge. ⟹ the target sentence is
+>    now **expressible**. ⚠ Against **label** orbits (T2⁺ unproved) and ⚠ ordered slots ⟹ twin frame
+>    vertices, so ⛔ never quote `Aut = ` the label group from it.
+> 4. ⛔ **T2⁺ unproved** — only `Aut_{m(0)} ⊇ S_L` is machine-checked; *different orbits* needs the
+>    "exactly" direction, plus root-is-CAO (§6c.1, argued).
+> 5. ⛔ **"any `k`-WL" is not what this gives** — `TupleWL` is generic in `k`, but `FrameEncoding` is
+>    2-WL-specific (`roundG` is the pair round) and the collapse is level-uniform only at `k = 1, 2`
+>    (measured). Arbitrary `k` needs the encoding side re-run at arity `≈ 3k + 2`.
 
 > ### ⛔ WHAT IS NOT PROVED, AND IT IS THE POINT: `Adequate.blocks`
 > *The multiset over `z : MVert L` of the two half-colours is determined by the pair's own colour.*
@@ -1704,9 +1736,11 @@ what is unresolved).
 >    valuable Lean target: it converts §6f from *argued* to *proved*.
 >    ✅ **(a) the `k`-WL tuple layer and (b) the BLOCK LEMMA are DONE** — `ChainDescent/TupleWL.lean`
 >    (§6f.4b), gate-listed and axiom-clean.
->    ▶ **(c) the restriction/covariance lemma** — *the colour of a big tuple determines the colours of
->    its sub-tuples* — which `blocks` needs because its summand is a **pair** of reindexings
->    `(b (P₁, Z), b (Z, P₂))` of one combined tuple. Standard for `k`-WL, not free.
->    ▶ **(d) the assembly**: `blocks` via `pairSigG_split` + (b) + (c).
-> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all four are in `scripts/build.sh`; gate = **127 modules,
+>    ✅ **(c) covariance and (d) the assembly are DONE TOO** — §6f.4c/§6f.4d. `Adequate.blocks` is a
+>    **theorem**; §6f is proved at `k = 2`. ▶ What is left on THIS item is only `refinesAtoms`
+>    (mechanical: close an `E`-dependent start colouring under `roundTS`).
+> 4c. ▶▶ **CONSTRUCT `E(L)` AS A GRAPH IN LEAN** — now the cheapest step with the largest effect: it is
+>    what makes *"the ensemble has a mixed cell"* expressible at all (§6f.4d caveat 3). Then **T2⁺**
+>    (caveat 4). ⛔ Neither closes (i) or (iii).
+> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all seven are in `scripts/build.sh`; gate = **130 modules,
 >    ~245–275 s**, passing.
