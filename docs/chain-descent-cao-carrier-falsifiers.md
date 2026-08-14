@@ -60,7 +60,7 @@ vs argued, and the OUTSTANDING list).
 > ✅ **2026-08-14: the CROSS-GRAPH joint is closed** (`DisjointUnion.lean`, §6f.4e) — WL-additivity
 > on `A ⊔ B` makes the refutation a **single-graph** statement, which is the shape
 > `merge_of_tuple_merge` already has. ⚠⚠ **§6f.5a records three joints the gap list does not
-> name: (α) `roundTS` ≠ standard `k`-WL — OPEN and it is where (iii) enters · (β) R3 is coupled
+> name: ✅ (α) `roundTS` ≠ standard `k`-WL — **CLOSED**, and the dead route is retracted · (β) R3 is coupled
 > to (ii) · (γ) the constant is `2k+2`, so `K₈` not `K₁₀`.**
 > ⛔⛔ **THERE IS STILL NO COUNTEREXAMPLE, and four gaps remain: (i) the collapse (§6e.4) · (iii) CFI's
 > WL-blindness (literature) · T2⁺ · "any `k`" (`FrameEncoding` is 2-WL-specific).** ▶ **(i) is the only
@@ -1462,19 +1462,36 @@ discrete bound that merges nothing (the `FrameEncoding` §5 trap).
 
 ### 6f.5a ⚠⚠ THREE JOINTS THE FOUR-GAP LIST DOES NOT NAME — found 2026-08-14, two still open
 
-> #### ⛔⛔ (α) `roundTS` IS NOT STANDARD `k`-WL, AND (iii) IS A STATEMENT ABOUT STANDARD `k`-WL. **OPEN.**
+> #### ✅✅ (α) — **CLOSED 2026-08-14**, and the dead route it rested on is RETRACTED. `ChainDescent/TupleCov.lean`
 > §6f.4c correctly put covariance **into the round**, because it does not follow from `roundT`-stability
 > (the dead-route box). ⟹ `roundTS` is *finer* than `roundT` — the safe direction for an upper bound,
 > but the CFI theorem says CFI over treewidth `> m` bases is indistinguishable by **standard `m`-WL**,
 > and nothing on record puts `roundTS` at arity `m` below that. §6f.4c's *"bounded-arity, so the CFI
 > input is unaffected **in kind**"* is carrying real weight.
-> ▶ **The available fix, and it is a restatement, not new mathematics:** state (iii) in **pebble-game /
-> `C^{m+1}`-equivalence** form. Reindexing-covariance is free in the game (a Duplicator strategy is
-> invariant under permuting *and identifying* pebbled positions), so `C^{m+1}`-type equality implies
-> `roundTS`-colour equality — which is exactly what `roundT` alone fails to give.
-> ⚠⚠ **But that only gets the input in the door.** The claim being made is about `k`-WL CAO
-> propagation, so the relation must be **drawn back out** to standard `k`-WL. Do not let the
-> restatement silently discharge the bridge.
+> ⛔ **The planned fix — restate (iii) in pebble-game / `C^{m+1}` form — was NOT needed, and would
+> not have been enough.** It gets the input in the door but leaves the relation to standard `k`-WL to
+> be drawn back out, which is the actual claim. ★ **A better answer was available and is now proved.**
+>
+> ### ★★★ THE DEAD ROUTE WAS NOT DEAD. §6f.4c rejects *"identify `v = x i` in the signature by its colour"* because a coordinate distinct from all others has the same equality pattern as a fresh value. **True for `v = x i` — but a COLLAPSE NEVER NEEDS THAT CASE.** A collapse writes into a coordinate it does not read from, and `x[i := x j]` with `i ≠ j` has coordinates `i` and `j` **equal**, which the equality pattern *does* see.
+>
+> **Landed** (gate **131 modules, 239 s**, axiom-clean):
+>
+> | | |
+> |---|---|
+> | §1 | `Cov`/`CovPerm` · ★ **`stableS_iff`** — `roundTS`-stability **is** `roundT`-stability **plus** `Cov`, nothing else. This is what prices §6f.4c's move |
+> | §2 | ★★★ **`subst_of_stable`** — from `roundT`-stability alone plus one equality marker, the colour of `x` determines the colour of every `x[m := x j]`. One-element extraction: exactly one `v` marks coordinate `i` against `j` |
+> | §3 | `covPerm_roundT`/**`covPerm_wlT`** — permutations, by induction **on the rounds** (⚠ not available from stability; that asymmetry is why the two halves need different proofs) |
+> | §4 | **`cov_idem_of_stable`** — idempotent reindexes, by iterated substitution along `part ρ S`. ★ Idempotence is the right target because `ρ` fixes `im ρ` pointwise, so a write never clobbers a position a later step reads |
+> | §5 | **`exists_perm_comp_idem`** — every `σ` factors as `π ∘ ρ`, `ρ = (section of σ) ∘ σ` idempotent, `π` from `Equiv.extendSubtype` |
+> | §6 | ★★★ **`stableS_wlT`** — the **standard `k`-WL closure is already `roundTS`-stable** |
+>
+> ⟹ ⛔⛔ **`roundTS` adds NOTHING over standard `k`-WL on a closure**, so §6f.4c's round was a sound
+> but **unnecessary** detour, and (iii) may be stated in its literature form:
+> *base treewidth `≥ k+1` ⟹ the two CFI graphs are `k`-WL indistinguishable* — confirmed against the
+> literature 2026-08-14. With arity 6 that is treewidth ≥ 7, i.e. **`K₈`**, matching (γ).
+> ▶ **Residual, both instantiation not mathematics:** `CovPerm` of the start colouring, and
+> `SeesEqAll` of the closure — both free for the atomic type of a tuple, but not yet written for the
+> start `FrameTransfer` uses. ⛔ It does **not** formalize (iii); that is still literature.
 
 > #### ⚠ (β) R3 IS NOT FREE — IT IS COUPLED TO (ii). **OPEN, and unpriced.**
 > §6e.5 promotes R3 (`M⁺ = M + Φ`) to a co-equal first target with the proviso *"provided `M⁺` is still
@@ -1777,7 +1794,7 @@ merge-direction corollary, the round-indexed form, and the frame layer's invaria
 `ChainDescent/CaoCollapse.lean`; **§6f's transfer skeleton** — the generic-carrier 2-WL round, the
 encoding, the injective coding, and `merge_of_adequate` — in `ChainDescent/FrameEncoding.lean`
 (all 2026-08-13). All axiom-clean, no `sorry`, no custom axiom.
-✅ **All CAO modules are gate-listed and the gate passes (130 modules, ~236–254 s)** — the earlier
+✅ **All CAO modules are gate-listed and the gate passes (131 modules, ~239–254 s)** — the earlier
 *"not gate-listed"* caveat is discharged. **§8a is the authoritative per-module table**: what each owns
 and what it owes. ⛔ Pinned, **not** theorems: `CaoCollapse.FrameClassComplete`,
 `Ensemble.MixedCell`; and `FrameTransfer.adequate_bOf`'s `refinesAtoms` is a side hypothesis.
@@ -1810,7 +1827,7 @@ what is unresolved).
 > per-module state. Read §8a before touching Lean.)*
 >
 > ### ✅ 2026-08-14 — CLOSED: the cross-graph joint (§6f.4e, `DisjointUnion.lean`, gate 130 modules).
-> ### ⚠⚠ 2026-08-14 — ADDED: §6f.5a's (α) `roundTS` ≠ standard `k`-WL (OPEN, and (iii) enters through it) · (β) R3 is coupled to (ii) (OPEN) · (γ) the constant is `2k+2` ⟹ `K₈` not `K₁₀` (resolved).
+> ### ✅ 2026-08-14 — CLOSED: §6f.5a's (α) — `TupleCov.stableS_wlT`, the standard `k`-WL closure is already `roundTS`-stable ⟹ (iii) is quotable in its literature form. ⚠⚠ STILL OPEN: (β) R3 is coupled to (ii) (OPEN) · (γ) the constant is `2k+2` ⟹ `K₈` not `K₁₀` (resolved).
 >
 > ### ⛔⛔ THE FOUR GAPS BETWEEN HERE AND A COUNTEREXAMPLE — memorize these before quoting anything
 > **(i) the collapse (§6e.4) — the ONLY mathematics** · **(iii) CFI's WL-blindness — literature, a

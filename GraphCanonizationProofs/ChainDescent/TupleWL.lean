@@ -252,6 +252,15 @@ not close the whole thing, and the reason is worth stating precisely: `blocks`'s
 six-label tuple. So the assembly needs the colour of a tuple to determine the colours of its
 **reindexings** `x ∘ σ` — including non-injective `σ`, which drop and repeat coordinates.
 
+> ### ⚠⚠ RETRACTED IN PART, 2026-08-14 — see `ChainDescent/TupleCov.lean`
+> The objection below is correct **only for `v = x i`**, and a *collapse never needs that case*: it
+> writes into a coordinate it does not read from. For `i ≠ j` the tuple `x[i := x j]` has coordinates
+> `i` and `j` **equal**, which the equality pattern does see, so the rescue works —
+> `TupleCov.subst_of_stable`. ⟹ `TupleCov.stableS_wlT` shows the standard `k`-WL closure is **already**
+> `roundTS`-stable, so `roundTS` is not finer than standard `k`-WL on a closure and this round was an
+> unnecessary (though sound) detour. ⚠ Nothing below is *wrong*; it is merely not the whole story, and
+> the price it hid was that the CFI input (iii) is a theorem about **standard** `k`-WL.
+
 ⛔ **That does NOT follow from `roundT`-stability.** For a *permutation* `σ` it would:
 `(x ∘ σ)[i := v] = (x[σ i := v]) ∘ σ`, so the signature transports. For a **collapse** it fails —
 `(x ∘ σ)[i := v]` is not a reindexing of any update of `x`, and the natural rescue (identify `v = x i`
