@@ -160,6 +160,7 @@ MODULES=(
   ChainDescent.TupleWL                # k-WL on tuples + the BLOCK LEMMA (doc §6f increment 2)
   ChainDescent.FrameTransfer          # the assembly: Adequate discharged from tuple stability (§6f.4d)
   ChainDescent.Ensemble               # THE ENSEMBLE AS A GRAPH: eRoot, the label action, MixedCell
+  ChainDescent.DisjointUnion          # 2-WL on A ⊔ B: the block lemma, cross-component merge (§6f.3)
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object

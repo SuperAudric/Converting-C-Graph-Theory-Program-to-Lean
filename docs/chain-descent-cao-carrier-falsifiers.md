@@ -57,6 +57,11 @@ vs argued, and the OUTSTANDING list).
 > (`orbit_not_split`) is proved. **The opposite-side "the frame is Tinhofer" route is closed** (§6g):
 > pointwise holds, **group** individualization is **false at size 4**, and group-individualizing slots
 > **is** payload encoding — so it lands on the same wall.
+> ✅ **2026-08-14: the CROSS-GRAPH joint is closed** (`DisjointUnion.lean`, §6f.4e) — WL-additivity
+> on `A ⊔ B` makes the refutation a **single-graph** statement, which is the shape
+> `merge_of_tuple_merge` already has. ⚠⚠ **§6f.5a records three joints the gap list does not
+> name: (α) `roundTS` ≠ standard `k`-WL — OPEN and it is where (iii) enters · (β) R3 is coupled
+> to (ii) · (γ) the constant is `2k+2`, so `K₈` not `K₁₀`.**
 > ⛔⛔ **THERE IS STILL NO COUNTEREXAMPLE, and four gaps remain: (i) the collapse (§6e.4) · (iii) CFI's
 > WL-blindness (literature) · T2⁺ · "any `k`" (`FrameEncoding` is 2-WL-specific).** ▶ **(i) is the only
 > mathematics; everything else is formalization.** Read §6f.4a–d, then §6e.5's R1 box, then §8a.
@@ -1420,6 +1425,77 @@ start colouring under `roundTS`, which is mechanical but not written.
 > discharging `blocks` for a `k`-WL `b`.** ⚠ The witness in §5 is the *discrete* bound: it proves the
 > skeleton is not vacuous and **nothing more**, since a discrete bound merges nothing.
 
+### 6f.4e ✅ 2026-08-14 REVIEW — THE CROSS-GRAPH JOINT IS CLOSED. `ChainDescent/DisjointUnion.lean`
+
+A review of the §6f.3 composition found **four joints that were not on the four-gap list**. This one
+was real and is now closed; the others are recorded in §6f.5a.
+
+> ### ⛔ THE DEFECT — `merge_of_tuple_merge` is SINGLE-GRAPH, the template consumes a CROSS-GRAPH merge
+> `FrameTransfer.merge_of_tuple_merge` fixes one `E` and merges two vertices of `M(E)`. §6f.3 instead
+> wants `x ∈ M(CFI(X,0))`, `y ∈ M(CFI(X,1))`. Worse, its premise compares `rankOf` colours produced by
+> **two separate runs** — colours that are not comparable at all. Every `M`-model statement in this doc
+> that writes *"`M`-col`(c,i)` = `M`-col`(c',l)`"* quietly assumes a common structure.
+
+★ **The fix is not a patch — the two halves are one fact.** WL-additivity on a disjoint union turns
+*"`A`, `B` are `m`-WL-equivalent but non-isomorphic"* into *"the **single** graph `A ⊔ B` has a `k`-WL
+cell meeting two `Aut`-orbits"*: no automorphism crosses non-isomorphic components, while WL does not
+separate them. ⟹ the single-carrier shape `merge_of_tuple_merge` already has **is** the right shape,
+and the cross-copy comparability that the `M` model rests on is licensed at the same time.
+
+**Landed** (gate **130 modules, 236 s**, axiom-clean, no `sorry`, no custom axiom):
+
+| | |
+|---|---|
+| §1–2 | `dAdj`/`dInit` (⚠ **side-blind** atoms — tagging the sides would forbid the merge by fiat) · `side` · the split `pairSigG = sigL + sigR` |
+| §3 | **`Blocked A B u κ`** — intra pairs carry their own side's run, **cross** pairs carry *only* the two endpoint diagonal colours through `κ`, cross never confused with intra (`sep`), `endFst`/`endSnd`, own-side signatures agree **across the two sides** (`sideDet`), and ★ **`diagEq`** |
+| §5 | `ownP_eq`/`ownQ_eq` — the two `exists_factor` steps that make the sides comparable |
+| §6 | ★★★ **`stable_of_blocked`** — case A (both intra) needs `sideDet` + `κ` + `diagEq`; case B (both cross) needs `ownP_eq`/`ownQ_eq`; `sep` forbids the mixed case |
+| §7 | **`refines_wl2G_of_blocked`**, and the consumer **`merge_of_blocked`** |
+| §8 | ★ non-vacuity, and it **merges**: `wl2G_double_merge` — 2-WL cannot separate the two copies of `A ⊔ A`, *even when each side's own colouring is discrete* |
+
+★ **`diagEq` is where *"the two sides are WL-equivalent"* enters**, and it is used in exactly one case
+(A2). ★ The `A ⊔ A` witness is deliberately not a CAO statement — the copies *are* one orbit there;
+it exists so `Blocked` is inhabited by something that actually fires `merge_of_blocked`, not by a
+discrete bound that merges nothing (the `FrameEncoding` §5 trap).
+
+⚠ It does **not** supply a `Blocked` witness for a CFI pair — that is input (iii), literature.
+
+### 6f.5a ⚠⚠ THREE JOINTS THE FOUR-GAP LIST DOES NOT NAME — found 2026-08-14, two still open
+
+> #### ⛔⛔ (α) `roundTS` IS NOT STANDARD `k`-WL, AND (iii) IS A STATEMENT ABOUT STANDARD `k`-WL. **OPEN.**
+> §6f.4c correctly put covariance **into the round**, because it does not follow from `roundT`-stability
+> (the dead-route box). ⟹ `roundTS` is *finer* than `roundT` — the safe direction for an upper bound,
+> but the CFI theorem says CFI over treewidth `> m` bases is indistinguishable by **standard `m`-WL**,
+> and nothing on record puts `roundTS` at arity `m` below that. §6f.4c's *"bounded-arity, so the CFI
+> input is unaffected **in kind**"* is carrying real weight.
+> ▶ **The available fix, and it is a restatement, not new mathematics:** state (iii) in **pebble-game /
+> `C^{m+1}`-equivalence** form. Reindexing-covariance is free in the game (a Duplicator strategy is
+> invariant under permuting *and identifying* pebbled positions), so `C^{m+1}`-type equality implies
+> `roundTS`-colour equality — which is exactly what `roundT` alone fails to give.
+> ⚠⚠ **But that only gets the input in the door.** The claim being made is about `k`-WL CAO
+> propagation, so the relation must be **drawn back out** to standard `k`-WL. Do not let the
+> restatement silently discharge the bridge.
+
+> #### ⚠ (β) R3 IS NOT FREE — IT IS COUPLED TO (ii). **OPEN, and unpriced.**
+> §6e.5 promotes R3 (`M⁺ = M + Φ`) to a co-equal first target with the proviso *"provided `M⁺` is still
+> not a complete invariant"*. Two things that proviso does not say. **(1)** It is nearer §6e.2's trap
+> than a fallback should be: `Φ` is a function of `a(c,i)` alone (§6e.1), and `a(c,i)` reads off `c_k`
+> for every `k ∋ i` at round 1, so `{a(c,i)}_i` determines `G` up to iso — `Φ` is only a symmetric
+> shadow of a complete invariant. **(2)** ⛔ **Adjoining `Φ` re-opens (ii):** the proved transfer is
+> `Adequate` for `mInit E`'s atoms, so new atoms need `refinesAtoms` re-established for them, and `Φ`
+> is a **slot-joint** aggregate (`Align` pairs two slot-indexed vectors) — not a symmetric function of
+> one vertex's data, hence not obviously bounded-arity. ⟹ **R3 buys (i) with currency drawn from (ii).**
+> The doc treats them as independent; they are not.
+
+> #### ▶ (γ) THE CONSTANT IS `2k+2`, NOT `3k+2` — the Lean already beat the interpretation lemma.
+> §6f.2 reads `3k+2` off a 3-dimensional interpretation, but the third coordinate is a **`Bool`** — a
+> bounded decoration, not a label. The Lean count is the honest one: a coded `M`-vertex spends **2**
+> labels and a fresh `z` spends **≤ 2**, so arity `2k+2`; `k = 2 → 6`, which is exactly `FrameTransfer`'s
+> `mk6`. ⟹ **`2`-WL on `M` ≼ arity-`6` WL on `G`**, and the CFI base needs treewidth **≥ 7** (`K₈`),
+> not 9 (`K₁₀`). Both are crude so nothing downstream breaks — but ⛔ stop quoting the numeral `8` and
+> `K₁₀` as if the interpretation lemma were the source, and §6f.5 caveat 2's *"the tightening is
+> unexamined"* is **superseded**: the Lean tightened it.
+
 ### 6f.5 ⚠ Caveats, stated so they travel
 
 1. **Argued, not proved.** The interpretation lemma for `C^m` under `d`-dimensional quotient
@@ -1701,7 +1777,7 @@ merge-direction corollary, the round-indexed form, and the frame layer's invaria
 `ChainDescent/CaoCollapse.lean`; **§6f's transfer skeleton** — the generic-carrier 2-WL round, the
 encoding, the injective coding, and `merge_of_adequate` — in `ChainDescent/FrameEncoding.lean`
 (all 2026-08-13). All axiom-clean, no `sorry`, no custom axiom.
-✅ **All seven CAO modules are gate-listed and the gate passes (129 modules, ~254 s)** — the earlier
+✅ **All CAO modules are gate-listed and the gate passes (130 modules, ~236–254 s)** — the earlier
 *"not gate-listed"* caveat is discharged. **§8a is the authoritative per-module table**: what each owns
 and what it owes. ⛔ Pinned, **not** theorems: `CaoCollapse.FrameClassComplete`,
 `Ensemble.MixedCell`; and `FrameTransfer.adequate_bOf`'s `refinesAtoms` is a side hypothesis.
@@ -1732,6 +1808,9 @@ what is unresolved).
 > ### ▶▶ OUTSTANDING — the handoff list, rewritten clean 2026-08-14
 > *(supersedes the 08-13 list: §6f's Lean chain is now DONE, so items 4a/4c changed and §8a carries the
 > per-module state. Read §8a before touching Lean.)*
+>
+> ### ✅ 2026-08-14 — CLOSED: the cross-graph joint (§6f.4e, `DisjointUnion.lean`, gate 130 modules).
+> ### ⚠⚠ 2026-08-14 — ADDED: §6f.5a's (α) `roundTS` ≠ standard `k`-WL (OPEN, and (iii) enters through it) · (β) R3 is coupled to (ii) (OPEN) · (γ) the constant is `2k+2` ⟹ `K₈` not `K₁₀` (resolved).
 >
 > ### ⛔⛔ THE FOUR GAPS BETWEEN HERE AND A COUNTEREXAMPLE — memorize these before quoting anything
 > **(i) the collapse (§6e.4) — the ONLY mathematics** · **(iii) CFI's WL-blindness — literature, a
