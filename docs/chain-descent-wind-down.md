@@ -1105,12 +1105,21 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 >   the payload *completely at 1-WL and not at all at 2-WL*;
 > * ★★★ the ensemble's 2-WL on a copy **collapses to that copy's own `L²`-vertex encoding** — exact at
 >   `L = 4` on every channel — which makes the faithful object **poly-size**;
+> * ★★★ **2026-08-14: the encoding's WL gain is BOUNDED, and that is now PROVED in Lean at `k = 2`**
+>   (`FrameTransfer.merge_of_tuple_merge`) ⟹ the payload search is **off the critical path**; and the
+>   **ensemble is now a graph** (`Ensemble.lean`), so *"`E(L)` has a mixed cell"* is finally expressible.
+>   ⛔⛔ **There is still NO counterexample** — four gaps: the collapse, CFI's WL-blindness (literature),
+>   T2⁺, and *"any `k`"*. Only the collapse is mathematics.
+> * ✅ **Seven CAO modules are gate-listed; the gate is 129 modules, ~254 s.** That doc's **§8a** is the
+>   authoritative per-module table and carries the Lean trap list.
 > * the one open obligation is the collapse's cross-copy half (that doc's §6e.4), with a written proof
 >   plan (§6e) whose Step 1 and base case are done and whose Phase 0 passes at `L = 4` and `L = 5`.
 >
-> **Lean:** `ChainDescent/CaoEnsemble.lean` + `ChainDescent/CaoCollapse.lean`, both **gate-listed**
-> (gate is now **125 modules, ~249 s**). ⚠ `PublicTheoremIndex.md` has **no rows** for `CaoTarget`,
-> `CaoFast`, `CaoEnsemble` or `CaoCollapse` — a regen is owed.
+> **Lean:** **seven** CAO modules, all gate-listed — `CaoTarget`, `CaoFast`, `CaoEnsemble`,
+> `CaoCollapse`, `FrameEncoding`, `TupleWL`, `FrameTransfer`, `Ensemble` (gate **129 modules, ~254 s**).
+> ▶ That doc's **§8a** is the authoritative per-module table (what each owns, what each owes) and it
+> carries the paid-for Lean trap list. ⚠ `PublicTheoremIndex.md` has **no rows for any of them** — a
+> regen is owed and is hazardous (it clobbers the Notes column).
 
 
 > # ★★★ START HERE — THE STATE, IN ONE SCREEN (2026-08-08)

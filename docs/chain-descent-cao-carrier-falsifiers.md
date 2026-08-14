@@ -44,10 +44,24 @@ under that `L²` object, and the one open obligation is §6e.4 — the cross-cop
 
 **Reading order.** §0 (the hypothesis + N1/N2) → §7 (the filters — cheapest thing in the doc) →
 §2 (the construction that works) → §3 incl. **§3.2b–d** (the 2-vertex gauge and the ablations) →
-§6b, **§6d** (what transfers, and the collapse) → **§6e** (the proof plan) → §4 + §5 (the payload bar,
-⚠ read §6d.4 first) → §8 (files) → §9 (proved vs measured vs argued).
+§6b, **§6d** (what transfers, and the collapse) → **§6e** (the proof plan) → **§6f incl. §6f.4a–d**
+(the bound, and its Lean chain) → **§6g** (the closed opposite-side route) → §4 + §5 (the payload bar,
+⚠ read §6d.4 first) → **§8a** (the Lean layer + the trap list) → §8 (files) → §9 (proved vs measured
+vs argued, and the OUTSTANDING list).
 
-> ### ▶▶▶ 2026-08-13 REVIEW — TWO CHANGES THAT MOVE THE FINISH LINE. Read §6f and the R1 box in §6e.5.
+> ### ▶▶▶ FRESH PICKUP, 2026-08-14 — WHERE THIS STANDS IN SIX LINES
+> **§6f is PROVED at `k = 2`** (`FrameTransfer.merge_of_tuple_merge`): a merge under a bounded-arity
+> tuple colouring is a merge in the encoding's 2-WL closure, so the frame encoding's WL gain is bounded
+> by a constant ⟹ ⛔ **the payload search is OFF the critical path** (§6f.4). **The ensemble is now a
+> graph** (`Ensemble.lean`) so *"`E(L)` has a mixed cell"* is finally **expressible**, and the free half
+> (`orbit_not_split`) is proved. **The opposite-side "the frame is Tinhofer" route is closed** (§6g):
+> pointwise holds, **group** individualization is **false at size 4**, and group-individualizing slots
+> **is** payload encoding — so it lands on the same wall.
+> ⛔⛔ **THERE IS STILL NO COUNTEREXAMPLE, and four gaps remain: (i) the collapse (§6e.4) · (iii) CFI's
+> WL-blindness (literature) · T2⁺ · "any `k`" (`FrameEncoding` is 2-WL-specific).** ▶ **(i) is the only
+> mathematics; everything else is formalization.** Read §6f.4a–d, then §6e.5's R1 box, then §8a.
+>
+> ### ▶▶ 2026-08-13 REVIEW — the two changes that got it here. Read §6f and the R1 box in §6e.5.
 > **1. ★★★ The encoding's WL gain is BOUNDED — by a proof, not a measurement (§6f).** `M(G)` is a
 > fixed-dimension FO interpretation of `G`, uniform in `L`, so `M`-2-WL ≼ bare-8-WL (crude; likely 4).
 > ⟹ **CFI over a treewidth-9 base is *guaranteed* to merge, and is never computed.** The refutation
@@ -1386,7 +1400,7 @@ start colouring under `roundTS`, which is mechanical but not written.
 > 2. ⛔ **(iii) CFI's WL-blindness is not formalized** — a pebble-game argument over arbitrary-treewidth
 >    bases; a named hypothesis and a project of its own.
 > 3. ✅ ~~the ensemble has no Lean object~~ **CLOSED 2026-08-14 — `ChainDescent/Ensemble.lean`**
->    (gate **130 modules**, axiom-clean): `eAdj`/`eInit`/**`eRoot`** with `m(base)` individualized, a
+>    (gate **129 modules**, axiom-clean): `eAdj`/`eInit`/**`eRoot`** with `m(base)` individualized, a
 >    **generic `InvG` layer** for `roundG`/`wl2G`, the label action as an `Equiv`, `eact_base` (T4 at the
 >    graph), and ⟹ ★ **`orbit_not_split`** — the free half, an orbit is never split. ⛔ **`MixedCell`**
 >    is **stated, not proved**; `not_labelPropagates_of_mixed` is the bridge. ⟹ the target sentence is
@@ -1587,14 +1601,43 @@ no `native_decide`. ▶ The pin's route is identified: `Equiv.extendSubtype` (Ma
 `scripts/build.sh`'s `MODULES`; the gate passes. That discharges the doc's standing *"not gate-listed"*
 caveat and outstanding item 6.
 
-**Lean.** `GraphCanonizationProofs/ChainDescent/CaoEnsemble.lean` — the index-level skeleton
-(`gact_transitive` = T1, `gact_eq_self_iff` + `lact_base` = T2⁻, `Propagates` +
-`not_propagates_of_merge` = the target and the bridge the probes instantiate). Builds clean, all
-declarations `[propext, Classical.choice, Quot.sound]`, no `sorry`, no custom axiom. ⚠ **Not in
-`scripts/build.sh`'s `MODULES` list** — the gate is a hand-maintained enumeration, so this is
-unbuilt by the gate until someone adds it. ⛔ It contains **no graph, no adjacency and no refiner**:
-T2⁺ (`Aut_m` is *exactly* the label group, needing `Aut(T(n)) = Sym n`) and T3 (the frame's cells are
-the position classes) are **not** in it.
+### 8a. ▶▶ THE LEAN LAYER — all seven modules, and exactly what each one owes
+
+**All are gate-listed in `scripts/build.sh`; the gate is 129 modules, ~254 s, and passes.**
+⚠ **Count modules with `grep -c '✔ ChainDescent'`, not `grep -c '✔'`** — the latter also matches the
+*"serial build complete"* line, which is why earlier numbers in this doc's history ran one high. Every
+declaration is `[propext, Classical.choice, Quot.sound]` or a subset — no `sorry`, no custom axiom, no
+`native_decide`.
+
+| module | what it owns | ⛔ what it still owes |
+|---|---|---|
+| `CaoTarget` (FT2) | `round2`, **`wl2`** (the 2-WL closure as a function), `refines_wl2_of_stable` (§6d.1's method), `inv2_wl2`, `Propagates`/`Separates` | — |
+| `CaoFast` | `wl2Fast`, the **runnable** closure | — |
+| `CaoEnsemble` | the **index** layer: `gact_transitive` = T1, `gact_eq_self_iff` + `lact_base` = T2⁻ | no graph — superseded for that by `Ensemble` below |
+| `CaoCollapse` | §6d.1 at `rootPair`/`ext`, ★ **`merge_of_stable_merge`** (the usable direction), the round-indexed form, the frame layer with invariance + **`≤ 12` proved** | ⛔ **`FrameClassComplete`** — pinned `Prop`. Route: Mathlib `Equiv.extendSubtype` + three cases on `|k ∩ k'| ∈ {0,1,2}`, needs `4 ≤ L` |
+| `FrameEncoding` | the **generic-carrier** 2-WL round (`roundG`/`isRound_roundG`/`wl2G`/`refines_wl2G_of_stable`), `MVert`/`mAdj`/`mInit`, the injective `code`, `Adequate`, `pairSigG_split`, ★ **`merge_of_adequate`** | ⚠ non-vacuity witness is **degenerate** (discrete `b` merges nothing) |
+| `TupleWL` | `k`-WL at **every** arity (`roundT`/`isRound_roundT`/`wlT`), ★★★ **the block lemma** (`subst2_of_stable`/`substJoin_of_sigDet`), the **substitution-closed** round `roundTS` + `cov_of_stableS`, and the two assembly shapes `substPair1/2_of_stableS` | ⚠ §4–§5 are `noncomputable` (via `Finset.toList`) — proof-side only |
+| `FrameTransfer` | `mk6`, the four reindexings, `bOf`, `payload_sum`/`frame_sum`, ★★★ **`blocks_bOf`** ⟹ **`adequate_bOf`** ⟹ **`merge_of_tuple_merge`** — §6f's bound, **proved at `k = 2`** | ⚠ `refinesAtoms` is a side **hypothesis** (mechanical: close an `E`-dependent start colouring under `roundTS`) |
+| `Ensemble` | ★ **the ensemble AS A GRAPH**: `eAdj`/`eInit`/**`eRoot`**, a **generic `InvG`** layer for `roundG`/`wl2G`, the label action `eact` (+`eact_base` = T4 at the graph), `invG_eRoot`, ★ **`orbit_not_split`** (the free half), ⛔ **`MixedCell`** + `not_labelPropagates_of_mixed` | ⛔ `MixedCell` **stated, not proved** · ⚠ against **label** orbits (T2⁺ unproved) · ⚠ ordered slots ⟹ twin frame vertices, so **never** claim `Aut = ` the label group from it |
+
+⛔ **NOT in the Lean layer, and each is a real gap:** the **collapse** (§6e.4) · **CFI's WL-blindness**
+(literature) · **T2⁺** (`Aut_{m(base)}` is *exactly* the label group; needs `Aut(T(n)) = Sym n`) · **T3**
+(the frame's cells are the position classes) · the **triangle frame** `TF(E)` (§6g, queued).
+
+⚠⚠ **LEAN TRAPS PAID FOR IN THIS FAMILY — do not re-pay them.**
+`Refines` is **ambiguous** (`Refine` exports a `Colouring`-typed one) ⟹ write `PartitionClosure.Refines` ·
+`omit [..] in` goes **BEFORE** the docstring, never between docstring and theorem ·
+`obtain ⟨..⟩ := ⟨h.1, ..⟩` with no expected type fails — let `simp [Nat.pair_eq_pair]` build the nested
+conjunction and destructure that (⚠ it nests: `h.1.1`, not `h.1`) ·
+`Multiset.product` and `Multiset.bind` will **not** `rw` — get the product decomposition by **`rfl`** and
+unfold `bind` with **`unfold`**; `Multiset.map_join`, `Multiset.bind_assoc` and `Multiset.map_bind` all
+exist and are the right bridges ·
+build a group action from **`Equiv` combinators** (`arrowCongr`/`prodCongr`/`sumCongr`), never as a raw
+function — the direct definition's inverse laws do not close by `rfl` ·
+use `Prod.map_fst`/`Prod.map_snd`, not `Prod.map_apply` ·
+**`ne_eq`** must be in the simp set before `Equiv.apply_eq_iff_eq` fires inside `decide` ·
+write adjacency as `decide (… ∧ …)`, not `==`/`!=`, or the `Bool` goals will not simp ·
+`k.2 ▸ …` gives "failed to compute motive" — use `have h … ; rwa [k.2] at h`.
 
 ⛔ **Traps hit while producing this — do not repeat.** (a) and (b) are already in the CAO doc §9.
 (a) `pkill -f probe_...` **matches your own launcher** ⟹ self-kill, exit 144; kill by PID.
@@ -1658,8 +1701,10 @@ merge-direction corollary, the round-indexed form, and the frame layer's invaria
 `ChainDescent/CaoCollapse.lean`; **§6f's transfer skeleton** — the generic-carrier 2-WL round, the
 encoding, the injective coding, and `merge_of_adequate` — in `ChainDescent/FrameEncoding.lean`
 (all 2026-08-13). All axiom-clean, no `sorry`, no custom axiom.
-✅ **Both are now gate-listed and the gate passes** — the earlier *"not gate-listed"* caveat is
-discharged. ⛔ `FrameClassComplete` is a pinned `Prop`, **not** a theorem.
+✅ **All seven CAO modules are gate-listed and the gate passes (129 modules, ~254 s)** — the earlier
+*"not gate-listed"* caveat is discharged. **§8a is the authoritative per-module table**: what each owns
+and what it owes. ⛔ Pinned, **not** theorems: `CaoCollapse.FrameClassComplete`,
+`Ensemble.MixedCell`; and `FrameTransfer.adequate_bOf`'s `refinesAtoms` is a side hypothesis.
 
 **Measured — round by round rather than at the fixpoint.** §6e.5's R1 box (`L = 4`, `n = 332`,
 `probe_cao_roundmatch.py`): no round offset aligns `E` and `M`; the one-sided `M^{(r)} ⊑ E^{(r)}`
@@ -1684,10 +1729,18 @@ of the admission test (→ necessary only, §5) · *"rung 2 is purely a budget q
 · *"rung 2 is a payload question, not a scaffolding question"* (→ §6a — the scaffolding is exactly
 what is unresolved).
 
-> ### ▶▶ OUTSTANDING — the handoff list, rewritten clean 2026-08-13
-> *(the earlier list had duplicated the `CFI[K5]` item and mis-ordered 1/1a/1b; this supersedes it)*
+> ### ▶▶ OUTSTANDING — the handoff list, rewritten clean 2026-08-14
+> *(supersedes the 08-13 list: §6f's Lean chain is now DONE, so items 4a/4c changed and §8a carries the
+> per-module state. Read §8a before touching Lean.)*
 >
-> **A. The one open obligation — and after the 2026-08-13 review it really is the ONLY one.**
+> ### ⛔⛔ THE FOUR GAPS BETWEEN HERE AND A COUNTEREXAMPLE — memorize these before quoting anything
+> **(i) the collapse (§6e.4) — the ONLY mathematics** · **(iii) CFI's WL-blindness — literature, a
+> formalization project of its own** · **T2⁺** — so `Ensemble`'s target is stated against *label*
+> orbits · **"any `k`"** — `FrameEncoding` is 2-WL-specific and the collapse is level-uniform only at
+> `k = 1, 2` (measured); arbitrary `k` needs the encoding side re-run at arity `≈ 3k + 2`.
+> ⟹ ⛔ **nothing in this doc refutes CAO propagation.** What is proved is the **transfer** at `k = 2`.
+>
+> **A. The one open obligation — and it really is the only mathematics left.**
 > 1. ★★★ **Close §6e.4** — now in its **one-sided** form: `M^{(r)} ⊑ E^{(r)}`, *not* the equality of
 >    §6d.8 (§6e.5's R1 box: no round offset exists, and only `⊑` is load-bearing). §6e is the plan:
 >    Step 1 (pushforward) and Step 3 (round-1 base case) are **done**; §6d.2(a) is **proved for all
@@ -1712,11 +1765,24 @@ what is unresolved).
 >    worth **nothing** on the critical path. ⚠ Direction discipline (§6d.1) still governs: only a
 >    **merge** refutes.
 >
-> **C. Lean.**
-> 4. ▶ **Prove `CaoCollapse.FrameClassComplete`** — the one pin in the new module, and the completeness
->    half of §6d.2(a). Route identified: Mathlib `Equiv.extendSubtype` + three cases on
->    `|k ∩ k'| ∈ {0,1,2}`, needs `4 ≤ L`.
-> 4b. ▶ **§6g's (A) in Lean — *"the frame is inert"***, the 1-WL analogue of §6d.2(a). Statement:
+> **C. Lean — ▶ read §8a first; it is the per-module state and the trap list.**
+> 4. ▶ **T2⁺** (`Aut_{m(base)}` is *exactly* the label group; `Aut(T(n)) = Sym n` is the content) —
+>    ★ **now the highest-value Lean item.** `Ensemble.lean` exists, so this is what upgrades
+>    `MixedCell`/`orbit_not_split` from **label** orbits to real `Aut`-orbits and makes every
+>    mixed-cell count in this doc unconditional. ⚠ Mind the ordered-slot twins (§8a). Then **T3**.
+> 4a′. ▶ **Discharge `FrameTransfer`'s `refinesAtoms`** — mechanical: close an `E`-dependent start
+>    colouring under `roundTS` and show the pullback refines `mInit E`. Removes the last side
+>    hypothesis from the §6f chain.
+> 4b′. ▶ **Prove `CaoCollapse.FrameClassComplete`** — completeness half of §6d.2(a). Route: Mathlib
+>    `Equiv.extendSubtype` + three cases on `|k ∩ k'| ∈ {0,1,2}`, needs `4 ≤ L`.
+> 4c. ▶ **Build the triangle frame `TF(E)`** (reader's suggestion, §6g): the bare frame with a **pendant**
+>    on each edge-slot in place of a colour, so it is a plain uncoloured graph. ⚠⚠ **Frame it honestly:**
+>    its WL dimension is **inherited** from the payload — bounded above by §6f's argument and below by
+>    §6b's, both within a constant — so it **transports** hardness rather than creating it, and it needs
+>    a high-WL payload family as input (the same unformalized literature input). ★ Its value is as the
+>    **poly-size** object that grounds §6g, not as a new hardness source. ⚠ With ordered slots the slot
+>    vertices are twins; use `Sym2`-style unordered slots if an `Aut ≅ Aut(H)` claim is wanted.
+> 4d. ▶ **§6g's (A) in Lean — *"the frame is inert"***, the 1-WL analogue of §6d.2(a). Statement:
 >    a pointwise individualization induces a label partition, its stabilizer is a **Young subgroup**,
 >    and a Young subgroup's orbits (blocks on payload, *unordered pairs of blocks* on slots) are
 >    exactly the 1-WL cells. ⚠ **Lower priority than 4a** — it bounds the *easy* half; §6g.2 shows the
@@ -1727,8 +1793,8 @@ what is unresolved).
 > 6. **T2⁺** (`Aut_m` is *exactly* the label group; `Aut(T(n)) = Sym n` is the content) — makes every
 >    mixed-cell count here unconditional. Then **T3** (frame cells = position classes).
 > 7. ⚠ **`PublicTheoremIndex.md` is stale for the whole CAO family** — `CaoTarget`, `CaoFast`,
->    `CaoEnsemble` and `CaoCollapse` have **no rows**. This predates the 2026-08-13 work
->    (`CaoTarget`/`CaoFast` landed 08-11). Regen is `scripts/GenerateTheoremIndexes.py rewrite
+>    `CaoEnsemble`, `CaoCollapse`, `FrameEncoding`, `TupleWL`, `FrameTransfer` and `Ensemble` have
+>    **no rows** — the whole family. This predates the 08-13/08-14 work (`CaoTarget`/`CaoFast` landed 08-11). Regen is `scripts/GenerateTheoremIndexes.py rewrite
 >    --with-line-numbers` per `scripts/theorem-index-maintenance.md`; ⚠⚠ it recomputes the **Notes**
 >    column and can resurrect **phantom rows**, so verify *unmatched deletions = 0*. Deliberately
 >    **not** run unverified at handoff.
@@ -1742,5 +1808,5 @@ what is unresolved).
 > 4c. ▶▶ **CONSTRUCT `E(L)` AS A GRAPH IN LEAN** — now the cheapest step with the largest effect: it is
 >    what makes *"the ensemble has a mixed cell"* expressible at all (§6f.4d caveat 3). Then **T2⁺**
 >    (caveat 4). ⛔ Neither closes (i) or (iii).
-> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all seven are in `scripts/build.sh`; gate = **130 modules,
+> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all seven are in `scripts/build.sh`; gate = **129 modules,
 >    ~245–275 s**, passing.
