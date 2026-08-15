@@ -61,10 +61,14 @@ vs argued, and the OUTSTANDING list).
 > on `A ⊔ B` makes the refutation a **single-graph** statement, which is the shape
 > `merge_of_tuple_merge` already has. ⚠⚠ **§6f.5a records three joints the gap list does not
 > name: ✅ (α) `roundTS` ≠ standard `k`-WL — **CLOSED**, and the dead route is retracted · ✅ (β) R3's (ii)-cost is now **priced and machine-checked**, and looks unpayable for `Φ` · (γ) the constant is `2k+2`, so `K₈` not `K₁₀`.**
-> ⛔⛔⛔ **2026-08-15b — (i) IS FALSE AND CONSTRUCTION C IS REFUTED AT 2-WL (§6e.4b): the ensemble's
+> ⚠⚠ **2026-08-15c — §6e.4b's HEADLINE IS RETRACTED (§6e.4c): the inference needs an isolation step that
+> presupposes its conclusion, and `L=4` measures ensemble cells = `M` classes = 20, i.e. the cross-copy
+> channel adding NOTHING. ★ What survives is sharp: ORB ⟺ `M`-complete, so ORB is FALSE at large `L`,
+> and §6d.8's lemma can only hold if `Φ` is STRICTLY COARSER than `a`'s orbit. That is the question.**
+> ~~⛔⛔⛔ **2026-08-15b — (i) IS FALSE AND CONSTRUCTION C IS REFUTED AT 2-WL (§6e.4b): the ensemble's
 > 2-WL is a COMPLETE invariant of the marked payload graph at every `L`, so there are no mixed cells
 > ever. The frame channel is measurably IDENTICAL to `M`'s, and dropping the payload clique changes
-> nothing. 1-WL results (§2, §6) are unaffected.**
+> nothing. 1-WL results (§2, §6) are unaffected.**~~
 > ⛔⛔⛔ **2026-08-15 — (i) THE COLLAPSE LOST ITS PROOF ROUTE. §6d.8's LEMMA IS FALSE (§6e.4a), Phase 0's
 > `L=4/5` evidence is VACUOUS (`M`-2-WL is COMPLETE at every rung tested: 20=20, 90=90, 544=544), and
 > R3 is PROVABLY vacuous (`M⁺` is a complete invariant). ▶ The lesson: the guess exposed the whole
@@ -1160,7 +1164,11 @@ and only §6e.2's `S_L`-invariance survives — which §6e.2 shows is insufficie
 
 **That is the entire remaining obligation.** Everything else above is done.
 
-### 6e.4a ⛔⛔⛔ 2026-08-15 — **THE LEMMA IS FALSE, AND PHASE 0 WAS VACUOUS.** THE COLLAPSE ROUTE IS DEAD
+### 6e.4a ⚠⚠ 2026-08-15 — **PHASE 0 WAS VACUOUS** (stands); ~~the lemma is false~~ **DOWNGRADED — read §6e.4c first**
+
+> ### ⚠⚠ 2026-08-15c: *"the LEMMA IS FALSE"* is **DOWNGRADED to NOT ESTABLISHED** — the `LEMMA ⟹ ORB`
+> direction needs an isolation step that presupposes its own conclusion (§6e.4c). `ORB ⟹ LEMMA` and
+> **ORB ⟺ `M`-complete** (hence ORB false at large `L`) both **stand**, as does the vacuity finding.
 
 **This supersedes §6e.4's diagnosis, §6e.0's validation, and §6e.5's R1/R3.** §6e.4 blames the gap on
 cross-copy exchangeability failing at the fixpoint. That was a red herring: the obligation dies for a
@@ -1225,7 +1233,16 @@ is not used, and must not be substituted for §6f here even though it looks shor
 is refuted is the *stable-guess proof route* to it, and its designated repair. (i) keeps its status as
 the one open mathematical obligation — it simply no longer has a plan.
 
-### 6e.4b ⛔⛔⛔ 2026-08-15 — **(i) IS FALSE, AND CONSTRUCTION C IS REFUTED AT 2-WL.** THE FRAME IS FULLY TRANSPARENT
+### 6e.4b ⚠⚠ 2026-08-15 — ~~(i) IS FALSE, CONSTRUCTION C REFUTED AT 2-WL~~ **RETRACTED SAME DAY. Read §6e.4c.**
+
+> ### ⛔⛔ RETRACTION, 2026-08-15c — the headline of this section was WRONG and is withdrawn.
+> The measurements below are sound and stand. The **inference** from them — that the ensemble's 2-WL
+> is a complete invariant, hence no mixed cells, hence (i) false — **is not established**: see §6e.4c
+> for the exact broken step. ⚠ The one measurement that bears on it points the OTHER way:
+> **ensemble payload cells = 20 = `M`'s μ-classes = 20** at `L=4`, i.e. the cross-copy channel added
+> **nothing**, which is (i) holding with equality. ⛔ Do not quote this section's title.
+
+### 6e.4b (measurements, which stand) — THE FRAME IS NOT 1-WL-BLIND AT THE PAIR LEVEL
 
 §6e.4a killed the *proof route*. This kills the **construction**. Both proposed rescues — *"guess from
 the ensemble's own coarser frame channel"* (mine, 2026-08-14) and *"the gauge vertices see every
@@ -1286,6 +1303,47 @@ a rigid copy supplies it, but that is not written out.
 >   vertex read its own graph off the frame — which every all-pairs slot encoding does.
 > * ⟹ **2-WL CAO propagation is back to OPEN with no live construction**, and §6f/§6f.5a's machinery
 >   (the transfer, `DisjointUnion`, `TupleCov`, `AtomAugment`) is what survives, all of it carrier-generic.
+
+### 6e.4c ⚠⚠ 2026-08-15c — **THE BROKEN STEP, AND WHAT THE QUESTION REALLY REDUCES TO**
+
+Raised by the reader against §6e.4b, and the objection is **half right — the better half**.
+
+> ### ⛔ THE BROKEN STEP — an isolation that presupposes what it proves
+> §6e.4a and §6e.4b both run: *`Φ` contains the alignments against a rigid injective profile `b₀`;
+> those spell out `a ∘ π` for every `π`, which is the orbit of `a`.* ⚠ To read them out one must
+> **isolate** the entries coming from `b₀`'s orbit, and the only handle for that is their colour —
+> which presupposes the colouring already separates those copies, i.e. part of the conclusion. Not
+> viciously circular (rigid copies plausibly separate early and bootstrap) but **not established**.
+> ⟹ **RETRACT both:** §6e.4b's *"(i) is false / Construction C refuted at 2-WL"*, and §6e.4a's
+> *"the LEMMA IS FALSE"*. `ORB ⟹ LEMMA` is solid (§6e.1+§6e.2); only the **converse** is gapped.
+
+> ### ⚠ AND THE READER'S PREMISE IS ALSO WRONG, MEASURABLY — do not adopt it either
+> *"What a payload vertex sees outside its clique does not differ from 1-WL — the gauge vertices
+> staying one colour showcases it."* The frame vertices being one **colour** is a statement about
+> **vertices**, i.e. 1-WL. 2-WL colours **pairs**, and `(p(c,i), f(k,t))` has common neighbours
+> `{j ∈ k}` exactly when `c_k = t`, so one round separates it. ✅ Measured on the real ensemble
+> (`L=4`, `N=332`): `aE(c,i)` **determines `c`**, 0 collisions, 96/256 injective. That is §6b in
+> strong form. ⟹ the outward channel is *not* 1-WL-blind; what is unproved is only whether a
+> **cross-copy** pair can use it to learn anything a within-copy pair does not already have.
+
+> ### ▶▶▶ WHAT SURVIVES, AND IT IS SHARP — the whole thing now rests on ONE question
+> ### **Does `Φ(c,i)` determine the `S_L`-orbit of `a(c,i)`?**
+> * **Reader's position: NO** — the uniform distribution over all copies washes the alignment out, so
+>   a cross-copy pair reduces to the disjoint (triangle-frame) case, which needs no exponential object.
+> * **§6e.4a/b's position: YES**, via the isolation step above — **not established**.
+>
+> ★★ **What IS established, and it is what makes the question sharp.** `a(c,i)` determines `c`
+> (§6e.4a's clique/common-neighbour mechanism, measured), so the **orbit of `a` IS the marked-graph
+> iso class**. Hence **ORB ⟺ `M`-2-WL is complete**, and therefore **ORB is FALSE for large `L`**
+> (§6f + CFI). ORB was the one clean sufficient condition for §6d.8's lemma. ⟹ **the lemma can only
+> hold if `Φ` is STRICTLY COARSER than `a`'s orbit** — which is exactly the reader's washout claim,
+> now promoted from intuition to *the precise statement that must be proved*.
+> ⚠ ⛔ **Not testable by climbing `L`:** at every reachable `L`, `μ` is complete (§6e.4a), so `Φ` and
+> the orbit trivially agree. The question is analytic.
+
+⚠ **Unaffected by this retraction:** §6e.4a's vacuity finding (`M`-2-WL complete at `L=4/5/6` —
+20=20, 90=90, 544=544) and §6e.4b's frame-channel measurements. Both are direct measurements and
+neither depends on the isolation step.
 
 ### 6e.5 ▶ FOUR CANDIDATE RESOLUTIONS, best first
 
