@@ -61,6 +61,11 @@ vs argued, and the OUTSTANDING list).
 > on `A ⊔ B` makes the refutation a **single-graph** statement, which is the shape
 > `merge_of_tuple_merge` already has. ⚠⚠ **§6f.5a records three joints the gap list does not
 > name: ✅ (α) `roundTS` ≠ standard `k`-WL — **CLOSED**, and the dead route is retracted · ✅ (β) R3's (ii)-cost is now **priced and machine-checked**, and looks unpayable for `Φ` · (γ) the constant is `2k+2`, so `K₈` not `K₁₀`.**
+> ⛔⛔⛔ **2026-08-15 — (i) THE COLLAPSE LOST ITS PROOF ROUTE. §6d.8's LEMMA IS FALSE (§6e.4a), Phase 0's
+> `L=4/5` evidence is VACUOUS (`M`-2-WL is COMPLETE at every rung tested: 20=20, 90=90, 544=544), and
+> R3 is PROVABLY vacuous (`M⁺` is a complete invariant). ▶ The lesson: the guess exposed the whole
+> slot-profile VECTOR across copies, and a vector of coarse colours is complete. ▶ Alternative path:
+> build the guess from the ENSEMBLE's own (far coarser, §6a) frame channel, not from `M`'s.**
 > ⛔⛔ **THERE IS STILL NO COUNTEREXAMPLE, and four gaps remain: (i) the collapse (§6e.4) · (iii) CFI's
 > WL-blindness (literature) · T2⁺ · "any `k`" (`FrameEncoding` is 2-WL-specific).** ▶ **(i) is the only
 > mathematics; everything else is formalization.** Read §6f.4a–d, then §6e.5's R1 box, then §8a.
@@ -1095,7 +1100,7 @@ table over slots.
 
 > ### TARGET. For all `(c,i)`, `Φ(c,i) := {{ (μ_{c'}(l,l), Align(a(c,i), b(c',l))) : (c',l) }}` is determined by `μ_c(i,i)`.
 
-### 6e.0 ✅ PHASE 0 — validated beyond the ensemble's reach
+### 6e.0 ⛔⛔ PHASE 0 — ~~validated beyond the ensemble's reach~~ **VACUOUS, see §6e.4a**
 
 ★ The lemma mentions **only `M`-data** — no ensemble, no `2^d`-vertex graph. So it is testable where
 the ensemble is not. `scratchpad/probe_cao_lemma_check.py`:
@@ -1151,7 +1156,74 @@ and only §6e.2's `S_L`-invariance survives — which §6e.2 shows is insufficie
 
 **That is the entire remaining obligation.** Everything else above is done.
 
+### 6e.4a ⛔⛔⛔ 2026-08-15 — **THE LEMMA IS FALSE, AND PHASE 0 WAS VACUOUS.** THE COLLAPSE ROUTE IS DEAD
+
+**This supersedes §6e.4's diagnosis, §6e.0's validation, and §6e.5's R1/R3.** §6e.4 blames the gap on
+cross-copy exchangeability failing at the fixpoint. That was a red herring: the obligation dies for a
+much simpler reason, and it dies at every `L` a prober can never reach while holding trivially at
+every `L` one can.
+
+> ### THE REDUCTION. §6e.1 + §6e.2 already give `Φ(c,i) = F(a(c,i))` with `F` **`S_L`-invariant**. So `Φ` is a function of the `S_L`-**orbit** of `a(c,i)`, and the LEMMA follows at once from
+> ### **ORB.** *`μ_c(i,i)` determines the `S_L`-orbit of `a(c,i)`.*
+> No sum over copies, no product measure — §6e.4's whole difficulty evaporates. And ORB is *equivalent*
+> to the lemma whenever some `b(c',l)` is **injective on typed slots**, because then `Align(a, b(c',l))`
+> simply reads `a(c,i)` off in `b`'s labelling. ✅ Injective profiles are abundant:
+> **96/256 at `L=4`, 1920/5120 at `L=5`** (`scratchpad/probe_cao_orb.py`).
+
+> ### ⛔ AND ORB IS EXACTLY *"`M`-2-WL IS COMPLETE"*. §6e.2's TRAP BOX IS **RIGHT**.
+> **Mechanism, and it is one line.** In `M(c)` the payload is a **clique**. So for *any* slot `k`, the
+> pair `(p(i), f(k,t))` has common payload neighbours `{j ∈ k}` when `c_k = t` (two of them, or one if
+> `i ∈ k`) and **none** otherwise. ⟹ **one** refinement round makes that pair's colour see `c_k` — for
+> **every** slot, including the slots that do not contain `i`. ⟹ `a(c,i)` reads off the whole of `c`.
+> ✅ Measured at `L=5`: `a(c,i)` determines `c` with **0 collisions**, and the profiles have
+> **90 `S_L`-orbits = 90 marked-graph iso classes = 90 `μ`-classes** (`probe_cao_orb_mech.py`).
+> ⟹ the orbit of `a(c,i)` **is** the iso class of `(G,i)`, so ORB ⟺ `μ` is complete.
+
+```
+  LEMMA  +  injectivity   ==>  ORB  ==>  `M`-2-WL is a COMPLETE invariant of (graph, marked vertex)
+  but    `M`-2-WL  <=  arity-6 WL on G          -- §6f, MACHINE-CHECKED at k = 2
+  and    CFI over a treewidth->=7 base is 6-WL-blind, non-isomorphic   -- literature, (iii)
+  ============================================================================================
+  ==>  `M`-2-WL is INCOMPLETE for large L   ==>   **§6d.8's LEMMA IS FALSE.**
+```
+
+⚠ **This refutes via a THEOREM (bounded-WL incompleteness), never via `GI ∈ P`** — the banned argument
+is not used, and must not be substituted for §6f here even though it looks shorter.
+
+> ### ⛔⛔ §6e.0's PHASE 0 IS VACUOUS, AND NO REACHABLE `L` CAN FIX IT
+> The lemma is **true** at every `L` where `M`-2-WL is complete — and it is complete at *every rung
+> ever tested*: `μ`-classes vs marked-graph iso classes (Burnside) come out
+> **`L=4`: 20 = 20 · `L=5`: 90 = 90 · `L=6`: 544 = 544** (`probe_cao_vacuity.py`, and the `L=6`
+> `μ`-count from the numpy port). ⟹ §6e.0's *"support at an `L` the direct method could never test"*
+> tests **nothing**. ⚠⚠ And it is unfixable by climbing: `M`-2-WL is at least bare 2-WL, so
+> incompleteness needs `L` in the tens at minimum, where `2^{C(L,2)}` copies is beyond any prober
+> for ever. ⛔ **Do not run `probe_cao_lemma_check*` at a larger `L` expecting information.**
+
+> ### ⛔⛔ R3 IS NOT MERELY *"UNPAYABLE-LOOKING"* (§6f.5a β) — IT IS **PROVABLY VACUOUS**
+> `M⁺ = M + Φ` is a **complete isomorphism invariant**: `Φ` determines the `S_L`-orbit of `a(c,i)`
+> (given injectivity), and that orbit *is* the iso class of `(G,i)`. ⟹ bounding the ensemble above by
+> `M⁺` bounds it by a complete invariant, which refutes nothing. (β) is upgraded from suspicion to
+> proof, and §6e.5's R3 proviso is **violated**.
+
+> ### ▶▶ WHAT ACTUALLY WENT WRONG — the design lesson, and it points at the alternative
+> The defect is **not** averaging, exchangeability, or product measures. It is that the guess
+> **exposes the whole slot-profile VECTOR `a(c,i)` across copies**, and *a vector of coarse colours is
+> a complete invariant even when every entry is coarse*. The `Align` channel with an injective `b`
+> reads it straight off.
+> ⟹ ★ **Any surviving guess must aggregate the slot profile into a BOUNDED summary before it crosses
+> copies.** ★★ And there is a positive lead already on record: **§6a measured the ensemble at 1-WL to
+> be far COARSER than the model.** So `col_E(p(c,i), f(k,t))` is plausibly far coarser than
+> `a(c,i)_{(k,t)}`, and the injectivity that kills the lemma may be an artefact of building the guess
+> out of **`M`-colours instead of the ensemble's own frame colours**. ▶ That is the alternative path:
+> guess from the ensemble's frame channel, not from `M`'s.
+
+⚠ **What this does NOT show.** It does **not** show (i) is false. `wl_E ⊑ M`-2-WL may still hold; what
+is refuted is the *stable-guess proof route* to it, and its designated repair. (i) keeps its status as
+the one open mathematical obligation — it simply no longer has a plan.
+
 ### 6e.5 ▶ FOUR CANDIDATE RESOLUTIONS, best first
+
+> #### ⛔⛔⛔ 2026-08-15 — R1 AND R3 ARE BOTH DEAD. §6e.4a refutes the lemma outright and proves `M⁺` complete. Kept as a record of the plan, not as work to do.
 
 **R1 — round-indexed induction (most likely to work).** Prove the collapse and the lemma together by
 induction on the WL round `r`: `b^{(r)}(c',l)_k` is determined by round-`(r−1)` data, and the
@@ -1711,6 +1783,22 @@ no `native_decide`. ▶ The pin's route is identified: `Equiv.extendSubtype` (Ma
 `scripts/build.sh`'s `MODULES`; the gate passes. That discharges the doc's standing *"not gate-listed"*
 caveat and outstanding item 6.
 
+> ### ▶ 2026-08-15 PROBES ADDED (all in `scratchpad/`)
+> * `probe_cao_lemma_check_np.py` — numpy port of `probe_cao_lemma_check.py`. `L=5` in **4 s** vs hours;
+>   `L=4`→20/0 and `L=5`→90/0 reproduce the original exactly (validate on those before trusting it).
+>   Args `<L> <REPS> <CHUNK>`. Frame frozen, colours interned **globally** across copies, `Φ` compared
+>   by lexsort + sha256. ⛔ Its verdict is **vacuous at every reachable `L`** (§6e.4a).
+> * `probe_cao_orb.py` — (A) ORB by brute force over `S_L`; (B) how many `b(c',l)` are injective on
+>   typed slots (which is what makes LEMMA ⟹ ORB live). Imports the port; arg `<L>`.
+> * `probe_cao_orb_mech.py` — the mechanism: does `a(c,i)` determine `c`, and how many `S_L`-orbits do
+>   the profiles have. **This is the file that refutes the lemma.**
+> * `probe_cao_vacuity.py` — `μ`-classes vs marked-graph iso classes. ⚠⚠ **Trap paid for:** the
+>   canonical form must send the marked vertex to `p[i]` *with the graph relabelled the same way* — the
+>   first version applied `p` to the graph and `p` to the vertex inconsistently and reported 38/243
+>   instead of 20/90, which would have inverted the conclusion.
+> ⚠⚠ `pkill -f <probe name>` **kills the launching shell too** (its command line contains the string) —
+> same trap as the gate's `pkill -f 'lake build'`. Kill by PID.
+
 ### 8a. ▶▶ THE LEAN LAYER — all seven modules, and exactly what each one owes
 
 **All are gate-listed in `scripts/build.sh`; the gate is 129 modules, ~254 s, and passes.**
@@ -1853,8 +1941,9 @@ what is unresolved).
 > `k = 1, 2` (measured); arbitrary `k` needs the encoding side re-run at arity `≈ 3k + 2`.
 > ⟹ ⛔ **nothing in this doc refutes CAO propagation.** What is proved is the **transfer** at `k = 2`.
 >
-> **A. The one open obligation — and it really is the only mathematics left.**
-> 1. ★★★ **Close §6e.4** — now in its **one-sided** form: `M^{(r)} ⊑ E^{(r)}`, *not* the equality of
+> **A. The one open obligation — ⛔⛔ AND AS OF 2026-08-15 IT HAS NO PLAN. Read §6e.4a first: the
+> lemma below is FALSE, Phase 0 is VACUOUS, and R1/R3 are both dead. Item 2 is WITHDRAWN.**
+> 1. ⛔ ~~**Close §6e.4**~~ — now in its **one-sided** form: `M^{(r)} ⊑ E^{(r)}`, *not* the equality of
 >    §6d.8 (§6e.5's R1 box: no round offset exists, and only `⊑` is load-bearing). §6e is the plan:
 >    Step 1 (pushforward) and Step 3 (round-1 base case) are **done**; §6d.2(a) is **proved for all
 >    `L`**; Phase 0 validates at `L = 4` and `L = 5`. The gap: at the fixpoint `b(c',l)` is not a
@@ -1866,7 +1955,10 @@ what is unresolved).
 >    is written out properly, R4 inherits the tooling.
 > 1a. ▶ **Pin §6f's interpretation lemma** (§6f.5 caveat 1) — cheap, purely bibliographic/write-out,
 >    and it is what licenses skipping the entire payload search. Do this **before** quoting the `8`.
-> 2. ▶ **`probe_cao_lemma_check.py` at `L = 6`** — still the cheapest high-value run, `M`-only.
+> 2. ⛔ ~~**`probe_cao_lemma_check.py` at `L = 6`**~~ **DONE AND WITHDRAWN 2026-08-15.** Ported to numpy
+>    (`probe_cao_lemma_check_np.py`, `L=5` in 4 s where the original was hours; `L=4`/`L=5` reproduce
+>    20/0 and 90/0 exactly). `L=6` builds in 353 s and gives **544 `μ`-classes = 544 iso classes** —
+>    i.e. **vacuous**, like every other reachable `L` (§6e.4a). ⛔ Do not re-run it for information.
 >    ⚠ Budget it: `2^15` copies × a 36-vertex `M` is **hours in pure Python** — a previous background
 >    attempt was killed unfinished. Vectorize (numpy, batched over copies) or do not start it.
 >

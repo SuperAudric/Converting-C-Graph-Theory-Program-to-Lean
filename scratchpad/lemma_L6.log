@@ -1,0 +1,11 @@
+L=6: 32768 copies, M(c) = 36 vertices, 3 reps/class, chunk 128
+  round 1: 192 free-pair classes (118s)
+  round 2: 23796 free-pair classes (210s)
+  round 3: 24776 free-pair classes (282s)
+  round 4: 24776 free-pair classes (353s)
+  stable at round 4
+  M built in 353.1s
+M-diagonal classes: 544   (payload vertices: 196608)
+  ...25 classes checked, 0 violations (377s)
+  ...50 classes checked, 0 violations (403s)
+  ...75 classes checked, 0 violations (428s)
