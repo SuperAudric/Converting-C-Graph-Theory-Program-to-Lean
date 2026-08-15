@@ -61,6 +61,10 @@ vs argued, and the OUTSTANDING list).
 > on `A ⊔ B` makes the refutation a **single-graph** statement, which is the shape
 > `merge_of_tuple_merge` already has. ⚠⚠ **§6f.5a records three joints the gap list does not
 > name: ✅ (α) `roundTS` ≠ standard `k`-WL — **CLOSED**, and the dead route is retracted · ✅ (β) R3's (ii)-cost is now **priced and machine-checked**, and looks unpayable for `Φ` · (γ) the constant is `2k+2`, so `K₈` not `K₁₀`.**
+> ⛔⛔⛔ **2026-08-15b — (i) IS FALSE AND CONSTRUCTION C IS REFUTED AT 2-WL (§6e.4b): the ensemble's
+> 2-WL is a COMPLETE invariant of the marked payload graph at every `L`, so there are no mixed cells
+> ever. The frame channel is measurably IDENTICAL to `M`'s, and dropping the payload clique changes
+> nothing. 1-WL results (§2, §6) are unaffected.**
 > ⛔⛔⛔ **2026-08-15 — (i) THE COLLAPSE LOST ITS PROOF ROUTE. §6d.8's LEMMA IS FALSE (§6e.4a), Phase 0's
 > `L=4/5` evidence is VACUOUS (`M`-2-WL is COMPLETE at every rung tested: 20=20, 90=90, 544=544), and
 > R3 is PROVABLY vacuous (`M⁺` is a complete invariant). ▶ The lesson: the guess exposed the whole
@@ -1220,6 +1224,68 @@ is not used, and must not be substituted for §6f here even though it looks shor
 ⚠ **What this does NOT show.** It does **not** show (i) is false. `wl_E ⊑ M`-2-WL may still hold; what
 is refuted is the *stable-guess proof route* to it, and its designated repair. (i) keeps its status as
 the one open mathematical obligation — it simply no longer has a plan.
+
+### 6e.4b ⛔⛔⛔ 2026-08-15 — **(i) IS FALSE, AND CONSTRUCTION C IS REFUTED AT 2-WL.** THE FRAME IS FULLY TRANSPARENT
+
+§6e.4a killed the *proof route*. This kills the **construction**. Both proposed rescues — *"guess from
+the ensemble's own coarser frame channel"* (mine, 2026-08-14) and *"the gauge vertices see every
+colour in equal proportions, so paths through them carry no more than their endpoints"* (reader,
+2026-08-15) — rest on the same hope, and it is **measurably false**.
+
+> ### THE MEASUREMENT — `scratchpad/probe_cao_ensemble_frame.py`, the real ensemble, `L=4`, `N=332`
+> The ensemble's frame channel is not coarser than `M`'s. **It is identical.**
+> ```
+>   aE(c,i) determines the copy c          TRUE, 0 collisions      (M: same)
+>   aE injective on all 12 typed slots     96 / 256                (M: 96 / 256, identical)
+>   S_L-orbits of aE                       20  =  ensemble payload cells 20  =  M's mu-classes 20
+> ```
+> ⚠ Sharing the frame is **irrelevant** to the mechanism, because the mechanism never leaves one copy:
+> `p(c,i) ~ p(c,j)` (payload of a copy) and `p(c,j) ~ f(k,t)` iff `c_k = t`, so the pair
+> `(p(c,i), f(k,t))` counts common neighbours `{j ∈ k}` exactly when `c_k = t`. ⟹ *"the ensemble is far
+> coarser than the model"* is a **1-WL** fact (§6a) and does **not** survive to 2-WL.
+
+```
+  aE(c,i) sees [c_k = t] at every slot          ==> aE(c,i) determines c
+  some aE(c',l) is injective on typed slots     (96/256 at L=4)
+  col_E(p(c,i), p(c',l))  refines  Align(aE(c,i), aE(c',l))     -- the frame terms of its signature
+  the DIAGONAL colour of p(c,i) refines the multiset of those over all payload z
+  ==============================================================================================
+  ==> the ensemble's 2-WL diagonal colour determines the S_L-orbit of aE(c,i)
+      = the ISO CLASS of (G_c, i)
+  ==> ENSEMBLE 2-WL IS A COMPLETE INVARIANT OF THE MARKED PAYLOAD GRAPH, AT EVERY L
+  ==> NO MIXED CELLS, EVER.  (i) IS FALSE, AND CONSTRUCTION C DIES AT RUNG 2.
+```
+
+✅ Independently confirmed at `L=4`: **20 payload cells = 20 orbits** — complete, and matching §6b's
+measured *"0 mixed cells, 20 cells = 20 orbits"*, which is now **explained rather than merely observed**.
+⚠ No complexity contradiction: the ensemble has `L·2^{C(L,2)}` vertices, so this is an exponential-time
+isomorphism test. ⚠ One link is genericity, not proof: *some* `aE(c',l)` injective. Measured at `L=4`;
+a rigid copy supplies it, but that is not written out.
+
+> ### ⛔ AND THE OBVIOUS DESIGN FIX DOES NOT WORK — the payload clique is **not** the culprit
+> The clique is what makes the one-round argument work, so dropping it is the natural repair.
+> Measured (`probe_cao_noclique.py`, `probe_cao_noclique_mech.py`) with the payload an **independent
+> set** instead: **identical figures at `L=4` (0 collisions, 96/256, 20 orbits = 20 `μ`-classes) and
+> at `L=5` (0 collisions, 1920/5120, 90 = 90).** The information simply takes the longer route
+> `p(i) → f(k',c_{k'}) → p(j) → f(k,c_k)` and arrives a round or two later. ⟹ this is **structural to
+> the frame encoding**, not a removable detail.
+
+> ### ⛔ THE INDUCTION-ON-`L` IDEA IS BLOCKED FOR THE SAME REASON
+> *"the equivalence is calculable for small `L` and the growth is pure addition of vertices and their
+> edges"* (reader) is a sound instinct — but the statement one would induct (`E(L)`-2-WL bounded by an
+> incomplete invariant) is **false at every `L`**, not merely unproved at large `L`. There is nothing
+> true to carry up.
+
+> ### ▶▶ WHAT SURVIVES, AND WHAT THIS MEANS FOR THE TRACK
+> * **Unaffected:** Construction B (§2) is still a genuine **1-WL** CAO counterexample, and
+>   Construction C at rung 1 (§6, 100 mixed cells) still stands. The 1-WL design programme works.
+> * **Dead:** Construction C at 2-WL, (i), R1, R3, and the `M`-collapse. ⛔ Do not restart any of them.
+> * ★★ **The general lesson, and it is the strong form of §6b.** §6b said the frame *"hides the payload
+>   completely at 1-WL and not at all at 2-WL"*. The true statement is worse: at 2-WL the frame hands
+>   over the **entire marked-graph isomorphism class**. Any future carrier must not let a payload
+>   vertex read its own graph off the frame — which every all-pairs slot encoding does.
+> * ⟹ **2-WL CAO propagation is back to OPEN with no live construction**, and §6f/§6f.5a's machinery
+>   (the transfer, `DisjointUnion`, `TupleCov`, `AtomAugment`) is what survives, all of it carrier-generic.
 
 ### 6e.5 ▶ FOUR CANDIDATE RESOLUTIONS, best first
 
