@@ -162,6 +162,7 @@ MODULES=(
   ChainDescent.Ensemble               # THE ENSEMBLE AS A GRAPH: eRoot, the label action, MixedCell
   ChainDescent.DisjointUnion          # 2-WL on A ⊔ B: the block lemma, cross-component merge (§6f.3)
   ChainDescent.TupleCov               # roundTS = standard k-WL on a closure: the (α) bridge (§6f.5a)
+  ChainDescent.AtomAugment            # the price of augmenting the atoms: R3's (ii)-cost (§6f.5a β)
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object

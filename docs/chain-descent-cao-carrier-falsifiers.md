@@ -60,8 +60,7 @@ vs argued, and the OUTSTANDING list).
 > ✅ **2026-08-14: the CROSS-GRAPH joint is closed** (`DisjointUnion.lean`, §6f.4e) — WL-additivity
 > on `A ⊔ B` makes the refutation a **single-graph** statement, which is the shape
 > `merge_of_tuple_merge` already has. ⚠⚠ **§6f.5a records three joints the gap list does not
-> name: ✅ (α) `roundTS` ≠ standard `k`-WL — **CLOSED**, and the dead route is retracted · (β) R3 is coupled
-> to (ii) · (γ) the constant is `2k+2`, so `K₈` not `K₁₀`.**
+> name: ✅ (α) `roundTS` ≠ standard `k`-WL — **CLOSED**, and the dead route is retracted · ✅ (β) R3's (ii)-cost is now **priced and machine-checked**, and looks unpayable for `Φ` · (γ) the constant is `2k+2`, so `K₈` not `K₁₀`.**
 > ⛔⛔ **THERE IS STILL NO COUNTEREXAMPLE, and four gaps remain: (i) the collapse (§6e.4) · (iii) CFI's
 > WL-blindness (literature) · T2⁺ · "any `k`" (`FrameEncoding` is 2-WL-specific).** ▶ **(i) is the only
 > mathematics; everything else is formalization.** Read §6f.4a–d, then §6e.5's R1 box, then §8a.
@@ -1205,6 +1204,8 @@ field over i.i.d. bits and exchangeability is replaced by a local-independence a
 ⚠ Probably false at the fixpoint (WL colours are global), but plausible for a bounded number of
 rounds — so it composes with R1 rather than replacing it.
 
+> #### ⛔⛔ 2026-08-14 — READ §6f.5a(β) BEFORE ACTING ON R3. Adjoining `Φ` **re-opens (ii)**, at an exactly-known price (`AtomAugment.adequateFor_augment_iff`), and `Φ` is at least an orbit computation, so the price looks unpayable. ▶ The surviving form is the **reframe**: adjoin only tuple-determined data; ceiling = `pull (bOf s)`.
+
 **R3 — ⭐ the workaround that keeps the payoff even if the collapse is false.** We never needed the
 *exact* collapse; §6c.3 needs an **upper bound by something incomplete**. Define `M⁺ = M` with `Φ`
 adjoined as an extra colour coordinate, close under refinement, and show the closure terminates with
@@ -1493,16 +1494,32 @@ discrete bound that merges nothing (the `FrameEncoding` §5 trap).
 > `SeesEqAll` of the closure — both free for the atomic type of a tuple, but not yet written for the
 > start `FrameTransfer` uses. ⛔ It does **not** formalize (iii); that is still literature.
 
-> #### ⚠ (β) R3 IS NOT FREE — IT IS COUPLED TO (ii). **OPEN, and unpriced.**
-> §6e.5 promotes R3 (`M⁺ = M + Φ`) to a co-equal first target with the proviso *"provided `M⁺` is still
-> not a complete invariant"*. Two things that proviso does not say. **(1)** It is nearer §6e.2's trap
-> than a fallback should be: `Φ` is a function of `a(c,i)` alone (§6e.1), and `a(c,i)` reads off `c_k`
-> for every `k ∋ i` at round 1, so `{a(c,i)}_i` determines `G` up to iso — `Φ` is only a symmetric
-> shadow of a complete invariant. **(2)** ⛔ **Adjoining `Φ` re-opens (ii):** the proved transfer is
-> `Adequate` for `mInit E`'s atoms, so new atoms need `refinesAtoms` re-established for them, and `Φ`
-> is a **slot-joint** aggregate (`Align` pairs two slot-indexed vectors) — not a symmetric function of
-> one vertex's data, hence not obviously bounded-arity. ⟹ **R3 buys (i) with currency drawn from (ii).**
-> The doc treats them as independent; they are not.
+> #### ✅ (β) — **PRICED 2026-08-14, and the price is bad for R3 as written.** `ChainDescent/AtomAugment.lean`
+> §6e.5 promotes R3 (`M⁺ = M + Φ`) to a co-equal first target with one proviso — *"provided `M⁺` is
+> still not a complete invariant"*. **There is a second cost, and it is now machine-checked.**
+>
+> ### ★★★ `AtomAugment.adequateFor_augment_iff` — THE PRICE, AND IT IS AN `iff`
+> Augmenting the encoding's atoms by `extra` costs **exactly** `Refines (pull b) extra`: the adjoined
+> data must itself be determined by the bounded-arity bound. Nothing less suffices, nothing more is
+> needed. ★ The reason it is computable at all is structural — `Adequate`'s `blocks` clause is
+> **start-colouring-free**, so the *entire* start-dependence of the transfer is the one `refinesAtoms`
+> clause. ⟹ **R3 buys (i) with currency drawn from (ii)**; §6e.5 treats them as independent.
+>
+> ### ⛔⛔ AND FOR `Φ` SPECIFICALLY THE PRICE LOOKS UNPAYABLE
+> `Φ(c,i)` depends only on the **`S_L`-orbit** of the slot profile `a(c,i)` (§6e.2), and at the
+> fixpoint `a(c,i)` decorates each typed slot with an `M(c)`-2-WL colour. So `Φ` is at least as strong
+> as *the isomorphism type of a WL-colour-decorated structure* — an **orbit** computation, not a WL
+> computation. ⟹ this is not *"unmeasured"*; it is on the wrong side of the line, and §6e.2's own trap
+> box says why it had better be. ⚠ Not a proof that `Φ` fails `Refines (pull b) Φ` — that is now a
+> stated, checkable obligation rather than a silence.
+>
+> ### ▶▶ THE REFRAME — RUN R3 IN THE OTHER DIRECTION
+> Instead of *adjoin `Φ`, then hope it is bounded*, adjoin only data that is **tuple-determined by
+> construction**; then (ii) is free and the whole obligation stays on (i), where it belongs.
+> `AtomAugment.adequateFor_augment_self` is the ceiling for that: **the strongest augmentation this
+> route can carry is `pull (bOf s)` itself.** ⟹ the precise sense in which R3 cannot over-approximate
+> the cross-copy channel for free. ⚠ `merge_of_tuple_merge_aug` is the augmented consumer, with `hex`
+> — the whole of (β) — visible as a hypothesis.
 
 > #### ▶ (γ) THE CONSTANT IS `2k+2`, NOT `3k+2` — the Lean already beat the interpretation lemma.
 > §6f.2 reads `3k+2` off a 3-dimensional interpretation, but the third coordinate is a **`Bool`** — a
@@ -1794,7 +1811,7 @@ merge-direction corollary, the round-indexed form, and the frame layer's invaria
 `ChainDescent/CaoCollapse.lean`; **§6f's transfer skeleton** — the generic-carrier 2-WL round, the
 encoding, the injective coding, and `merge_of_adequate` — in `ChainDescent/FrameEncoding.lean`
 (all 2026-08-13). All axiom-clean, no `sorry`, no custom axiom.
-✅ **All CAO modules are gate-listed and the gate passes (131 modules, ~239–254 s)** — the earlier
+✅ **All CAO modules are gate-listed and the gate passes (132 modules, ~239–264 s)** — the earlier
 *"not gate-listed"* caveat is discharged. **§8a is the authoritative per-module table**: what each owns
 and what it owes. ⛔ Pinned, **not** theorems: `CaoCollapse.FrameClassComplete`,
 `Ensemble.MixedCell`; and `FrameTransfer.adequate_bOf`'s `refinesAtoms` is a side hypothesis.
@@ -1827,7 +1844,7 @@ what is unresolved).
 > per-module state. Read §8a before touching Lean.)*
 >
 > ### ✅ 2026-08-14 — CLOSED: the cross-graph joint (§6f.4e, `DisjointUnion.lean`, gate 130 modules).
-> ### ✅ 2026-08-14 — CLOSED: §6f.5a's (α) — `TupleCov.stableS_wlT`, the standard `k`-WL closure is already `roundTS`-stable ⟹ (iii) is quotable in its literature form. ⚠⚠ STILL OPEN: (β) R3 is coupled to (ii) (OPEN) · (γ) the constant is `2k+2` ⟹ `K₈` not `K₁₀` (resolved).
+> ### ✅ 2026-08-14 — CLOSED: §6f.5a's (α) — `TupleCov.stableS_wlT`, the standard `k`-WL closure is already `roundTS`-stable ⟹ (iii) is quotable in its literature form. ✅ ALSO PRICED: (β) — `AtomAugment.adequateFor_augment_iff`, an `iff`; R3-as-written looks unpayable, the reframe survives. (β) R3 is coupled to (ii) (OPEN) · (γ) the constant is `2k+2` ⟹ `K₈` not `K₁₀` (resolved).
 >
 > ### ⛔⛔ THE FOUR GAPS BETWEEN HERE AND A COUNTEREXAMPLE — memorize these before quoting anything
 > **(i) the collapse (§6e.4) — the ONLY mathematics** · **(iii) CFI's WL-blindness — literature, a
