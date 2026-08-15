@@ -1098,7 +1098,18 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > witness), and the user re-opened it for Lean footing. It has run continuously since.
 >
 > ▶▶ **Its record is its own doc: [`chain-descent-cao-carrier-falsifiers.md`](./chain-descent-cao-carrier-falsifiers.md)**
-> — read its `▶▶ HANDOFF` block, not this one, for that track. One-screen version:
+> — read its **`▶▶▶ FRESH PICKUP`** block, not this one, for that track.
+>
+> > ### ▶ STATE STAMP, 2026-08-15 (end of session) — everything below this box is the 08-13 picture
+> > **No counterexample at 2-WL.** The refutation template is `(i) ∘ (ii) ∘ (iii)`: **(ii) is proved**
+> > (`FrameTransfer.merge_of_tuple_merge`), **(iii) is quotable in its standard `k`-WL form**
+> > (`TupleCov.stableS_wlT`), and **(i) — the collapse — is OPEN WITH NO PLAN**: both designated routes
+> > (R1, R3) are dead and it reduces to one analytic question, *does `Φ(c,i)` determine the `S_L`-orbit
+> > of `a(c,i)`?* ⛔ Untestable by computation — `M`-2-WL is **complete** at every reachable `L`.
+> > ✅ **The 1-WL results below are unaffected**; every 2026-08-15 negative is about rung 2 only.
+> > ✅ Gate **132 modules**; eleven CAO modules, all axiom-clean.
+
+One-screen version of the 08-13 picture:
 > * a `Q₄` carrier is a **designed 1-WL counterexample** (`n = 352`), and the gauge ensemble is a
 >   second one at rung 1 (`n = 229,406`, 100 mixed cells);
 > * **2-WL reads an edge encoded as a typed common neighbour** (proved + measured), so the frame hides

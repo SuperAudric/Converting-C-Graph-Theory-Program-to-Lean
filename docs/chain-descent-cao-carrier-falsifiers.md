@@ -49,35 +49,68 @@ under that `L²` object, and the one open obligation is §6e.4 — the cross-cop
 ⚠ read §6d.4 first) → **§8a** (the Lean layer + the trap list) → §8 (files) → §9 (proved vs measured
 vs argued, and the OUTSTANDING list).
 
-> ### ▶▶▶ FRESH PICKUP, 2026-08-14 — WHERE THIS STANDS IN SIX LINES
-> **§6f is PROVED at `k = 2`** (`FrameTransfer.merge_of_tuple_merge`): a merge under a bounded-arity
-> tuple colouring is a merge in the encoding's 2-WL closure, so the frame encoding's WL gain is bounded
-> by a constant ⟹ ⛔ **the payload search is OFF the critical path** (§6f.4). **The ensemble is now a
-> graph** (`Ensemble.lean`) so *"`E(L)` has a mixed cell"* is finally **expressible**, and the free half
-> (`orbit_not_split`) is proved. **The opposite-side "the frame is Tinhofer" route is closed** (§6g):
-> pointwise holds, **group** individualization is **false at size 4**, and group-individualizing slots
-> **is** payload encoding — so it lands on the same wall.
-> ✅ **2026-08-14: the CROSS-GRAPH joint is closed** (`DisjointUnion.lean`, §6f.4e) — WL-additivity
-> on `A ⊔ B` makes the refutation a **single-graph** statement, which is the shape
-> `merge_of_tuple_merge` already has. ⚠⚠ **§6f.5a records three joints the gap list does not
-> name: ✅ (α) `roundTS` ≠ standard `k`-WL — **CLOSED**, and the dead route is retracted · ✅ (β) R3's (ii)-cost is now **priced and machine-checked**, and looks unpayable for `Φ` · (γ) the constant is `2k+2`, so `K₈` not `K₁₀`.**
-> ⚠⚠ **2026-08-15c — §6e.4b's HEADLINE IS RETRACTED (§6e.4c): the inference needs an isolation step that
-> presupposes its conclusion, and `L=4` measures ensemble cells = `M` classes = 20, i.e. the cross-copy
-> channel adding NOTHING. ★ What survives is sharp: ORB ⟺ `M`-complete, so ORB is FALSE at large `L`,
-> and §6d.8's lemma can only hold if `Φ` is STRICTLY COARSER than `a`'s orbit. That is the question.**
-> ~~⛔⛔⛔ **2026-08-15b — (i) IS FALSE AND CONSTRUCTION C IS REFUTED AT 2-WL (§6e.4b): the ensemble's
-> 2-WL is a COMPLETE invariant of the marked payload graph at every `L`, so there are no mixed cells
-> ever. The frame channel is measurably IDENTICAL to `M`'s, and dropping the payload clique changes
-> nothing. 1-WL results (§2, §6) are unaffected.**~~
-> ⛔⛔⛔ **2026-08-15 — (i) THE COLLAPSE LOST ITS PROOF ROUTE. §6d.8's LEMMA IS FALSE (§6e.4a), Phase 0's
-> `L=4/5` evidence is VACUOUS (`M`-2-WL is COMPLETE at every rung tested: 20=20, 90=90, 544=544), and
-> R3 is PROVABLY vacuous (`M⁺` is a complete invariant). ▶ The lesson: the guess exposed the whole
-> slot-profile VECTOR across copies, and a vector of coarse colours is complete. ▶ Alternative path:
-> build the guess from the ENSEMBLE's own (far coarser, §6a) frame channel, not from `M`'s.**
-> ⛔⛔ **THERE IS STILL NO COUNTEREXAMPLE, and four gaps remain: (i) the collapse (§6e.4) · (iii) CFI's
-> WL-blindness (literature) · T2⁺ · "any `k`" (`FrameEncoding` is 2-WL-specific).** ▶ **(i) is the only
-> mathematics; everything else is formalization.** Read §6f.4a–d, then §6e.5's R1 box, then §8a.
+> ### ▶▶▶ FRESH PICKUP — 2026-08-15, END OF SESSION. THIS BLOCK SUPERSEDES EVERY DATED BOX BELOW IT.
+> **Goal of the track:** exhibit a *designed* counterexample to **CAO propagation at 2-WL** (§0 for the
+> hypothesis — start from the exact orbit partition, individualize **one vertex**, take the `k`-WL
+> closure, ask whether cells are still `Aut_v`-orbits).
 >
+> ### ⛔⛔ STATE: THERE IS NO COUNTEREXAMPLE, AND THE ONE OPEN OBLIGATION HAS NO PLAN.
+> The refutation template is `(i) ∘ (ii) ∘ (iii)` (§6f.3). **(ii) is proved** and **(iii) is quotable**;
+> **(i) — the collapse — is open and its two designated routes (R1, R3) are both dead.**
+>
+> ### ▶▶▶ EVERYTHING NOW RESTS ON ONE SHARP, ANALYTIC QUESTION (§6e.4c)
+> ### **Does `Φ(c,i)` determine the `S_L`-orbit of `a(c,i)`?**
+> * **NO** (reader's position) ⟹ the uniform distribution over all copies washes the cross-copy
+>   alignment out, a cross-copy pair reduces to the **disjoint** case, and the exponential ensemble
+>   buys nothing over the **poly-size triangle frame**. That is (i) holding with equality.
+> * **YES** ⟹ the ensemble separates everything and Construction C dies at rung 2.
+> * ⛔ **Neither is established.** §6e.4a/b claimed YES; the proof needs an **isolation** step that
+>   presupposes its own conclusion, and that claim is **RETRACTED** (§6e.4c).
+> * ★★ Why this is the whole question: `a(c,i)` **determines `c`** (measured), so the orbit of `a`
+>   **is** the marked-graph iso class ⟹ **ORB ⟺ `M`-2-WL complete ⟹ ORB is FALSE at large `L`**. ORB
+>   was the one clean sufficient condition for §6d.8's lemma, so **the lemma can only hold if `Φ` is
+>   strictly coarser than `a`'s orbit.**
+> * ⛔⛔ **It is NOT testable by climbing `L`** — `M`-2-WL is **complete** at every reachable `L`
+>   (20=20, 90=90, 544=544), so `Φ` and the orbit agree there for a trivial reason. ⛔ Do not write a
+>   `probe_cao_washout.py`; there is nothing for it to see. **The question is analytic.**
+>
+> ### ✅ WHAT IS MACHINE-CHECKED AND SURVIVES — all of it carrier-generic, none of it tied to Construction C
+> | | |
+> |---|---|
+> | **(ii) the transfer** | `FrameTransfer.merge_of_tuple_merge` — a merge under a bounded-arity tuple colouring is a merge in the encoding's 2-WL closure. §6f **proved at `k = 2`** ⟹ ⛔ the payload search is **off** the critical path |
+> | **disjoint unions** | `DisjointUnion.merge_of_blocked` (§6f.4e) — makes the refutation a **single-graph** statement and licenses cross-copy colour comparison. Non-vacuity **merges** |
+> | **(α) the `k`-WL bridge** | `TupleCov.stableS_wlT` (§6f.5a α) — the **standard** `k`-WL closure is already `roundTS`-stable ⟹ `roundTS` adds nothing ⟹ **(iii) is quotable in its literature form** (*base treewidth ≥ `k+1` ⟹ the two CFI graphs are `k`-WL indistinguishable*) |
+> | **(β) the augmentation price** | `AtomAugment.adequateFor_augment_iff` (§6f.5a β) — adjoining atoms costs **exactly** `Refines (pull b) extra`, an `iff` |
+> | **the ensemble as a graph** | `Ensemble.eRoot`, `orbit_not_split` (the free half), `MixedCell` **stated only** |
+> ✅ Gate = **132 modules, ~239–264 s**, all axiom-clean. ⚠ Count with `grep -cE '^  ChainDescent' scripts/build.sh`.
+>
+> ### ⛔⛔ WHAT IS DEAD — DO NOT RESTART ANY OF THESE
+> * **R1** (round-indexed induction) and **R3** (`M⁺ = M + Φ`) — §6e.4a/§6e.4c. R3 additionally
+>   re-opens (ii) at a priced cost (§6f.5a β).
+> * **§6e.0's Phase 0** — *vacuous*, and unfixably so (`M`-2-WL complete at every reachable `L`).
+>   ⛔ Do not re-run `probe_cao_lemma_check*` for information.
+> * **The payload search** (§6f.4), the **C 2-WL**, `CFI[K5]`-full, the small-3-WL-blind-pair hunt.
+> * **§6g's "the bare frame is Tinhofer"** — group individualization is false at size 4.
+> * **"Guess from the ensemble's own coarser frame channel"** (my 2026-08-14 suggestion) — refuted by
+>   measurement: the ensemble's frame channel is **identical** to `M`'s (§6e.4b).
+> * **"The gauge vertices are transparent / outside-the-clique is 1-WL"** — same measurement refutes it;
+>   the frame vertices being one **colour** is a 1-WL fact about **vertices**, and 2-WL colours **pairs**.
+> * **Induction on `L`** — the statement one would induct is false at every `L`, so there is no true
+>   base case to carry up.
+>
+> ### ✅ WHAT IS UNAFFECTED BY ALL OF THE ABOVE
+> **1-WL is a solved success story:** Construction B (§2, `n=352`, 4 mixed cells) is a genuine 1-WL CAO
+> counterexample, and Construction C at rung 1 (§6, `n=229,406`, 100 mixed cells) is a second one.
+> Every 2026-08-15 negative result is about **rung 2 only**.
+>
+> ### ▶ IF YOU PICK THIS UP
+> Read **§0** (the hypothesis) → **§6e.4c** (the one live question, and the two retractions) →
+> **§6f.3** (the template) → **§8a** (the Lean layer + the paid-for trap list). Then decide between:
+> (a) attack the washout question analytically; (b) accept the reader's reading, drop the ensemble, and
+> work the **poly-size triangle frame** directly (§6g, `TF(E)` still unbuilt); (c) design a *new*
+> carrier — ★ the binding design constraint is §6e.4b's: **a payload vertex must not be able to read
+> its own graph off the frame**, which every all-pairs slot encoding lets it do.
+
 > ### ▶▶ 2026-08-13 REVIEW — the two changes that got it here. Read §6f and the R1 box in §6e.5.
 > **1. ★★★ The encoding's WL gain is BOUNDED — by a proof, not a measurement (§6f).** `M(G)` is a
 > fixed-dimension FO interpretation of `G`, uniform in `L`, so `M`-2-WL ≼ bare-8-WL (crude; likely 4).
@@ -1474,15 +1507,17 @@ then supplies the witness **by a theorem**. Composing:
 
 ```
   (i)  ensemble-2-WL  ⊒  M_frozen-2-WL          -- §6d.8's lemma, ONE-SIDED (§6e.5 R1 box).  ⛔ OPEN
-  (ii) M_frozen-2-WL  ≼  8-WL on the payload    -- §6f.2.                                     ▶ ARGUED
+  (ii) M_frozen-2-WL  ≼  6-WL on the payload    -- §6f.2, TIGHTENED by §6f.5a(γ).      ✅ PROVED k=2
   ---------------------------------------------------------------------------------------------
-  take X of treewidth >= 9 (K10).  CFI(X,0), CFI(X,1) are 8-WL-equivalent  [CFI, literature]
+  take X of treewidth >= 7 (K8).   CFI(X,0), CFI(X,1) are 6-WL-equivalent  [CFI, literature]
   => their M's are 2-WL-equivalent => equal colour MULTISETS => some i in one, l in the other
      share a colour;  CFI(X,0) not iso CFI(X,1) => p(c,i), p(c',l) lie in DIFFERENT Aut_{m(0)}-orbits
   => a MIXED CELL  =>  2-WL CAO PROPAGATION IS FALSE.
 ```
 
-> ### ★★★ The refutation needs **no merging payload to be found, and no large 2-WL run**. `CFI[K10]` is *guaranteed* to merge by the two bounds; it is never computed. The only open input is (i).
+> ### ★★★ The refutation needs **no merging payload to be found, and no large 2-WL run**. `CFI[K₈]` is *guaranteed* to merge by the two bounds; it is never computed. The only open input is (i).
+> ⚠⚠ **2026-08-15: (i) is not merely open — it has NO PROOF ROUTE (§6e.4c).** The constants here are
+> §6f.5a(γ)'s (`2k+2`, so `6`/`K₈`), **not** §6f.2's crude `3k+2` (`8`/`K₁₀`), which the Lean superseded.
 
 ★ And it **scales**: `k`-WL on `M` ≼ `(3k+2)`-WL, so CFI over a base of treewidth `3k+3` refutes level
 `k` — provided the collapse holds at level `k` (§6d.5 makes it level-uniform at `k = 1, 2`; higher is
@@ -1916,16 +1951,28 @@ caveat and outstanding item 6.
 >   typed slots (which is what makes LEMMA ⟹ ORB live). Imports the port; arg `<L>`.
 > * `probe_cao_orb_mech.py` — the mechanism: does `a(c,i)` determine `c`, and how many `S_L`-orbits do
 >   the profiles have. **This is the file that refutes the lemma.**
+> * `probe_cao_ensemble_frame.py` — 2-WL on the **REAL ensemble** (`L=4`, `N=332`) with `m(base)`
+>   individualized; extracts the ensemble slot profile `aE(c,i)` and answers: does it determine `c`,
+>   how many are injective, how many `S_L`-orbits vs payload cells. ★ **This is the file that refutes
+>   both "the ensemble's frame channel is coarser" and "outside-the-clique is 1-WL".** ~25 s.
+> * `probe_cao_noclique.py` / `probe_cao_noclique_mech.py` — the same mechanism test with the payload
+>   an **independent set** instead of a clique (`CLIQUE = False`, `ROUNDS = 20`). Answer: identical
+>   figures ⟹ the clique is **not** the culprit.
 > * `probe_cao_vacuity.py` — `μ`-classes vs marked-graph iso classes. ⚠⚠ **Trap paid for:** the
 >   canonical form must send the marked vertex to `p[i]` *with the graph relabelled the same way* — the
 >   first version applied `p` to the graph and `p` to the vertex inconsistently and reported 38/243
 >   instead of 20/90, which would have inverted the conclusion.
 > ⚠⚠ `pkill -f <probe name>` **kills the launching shell too** (its command line contains the string) —
 > same trap as the gate's `pkill -f 'lake build'`. Kill by PID.
+> ⚠ `numpy` is not installed system-wide and `venv` creation fails here; use
+> `python3 -m pip install --break-system-packages numpy` (already done, numpy 2.4.6).
+> ⛔ **There is no `probe_cao_washout.py` and there should not be.** The one live question (§6e.4c) is
+> **vacuous at every reachable `L`**, because `μ` is complete there — a probe would return "holds" and
+> mean nothing, exactly as Phase 0 did.
 
-### 8a. ▶▶ THE LEAN LAYER — all seven modules, and exactly what each one owes
+### 8a. ▶▶ THE LEAN LAYER — all **eleven** modules, and exactly what each one owes
 
-**All are gate-listed in `scripts/build.sh`; the gate is 129 modules, ~254 s, and passes.**
+**All are gate-listed in `scripts/build.sh`; the gate is 132 modules, ~239–264 s, and passes.**
 ⚠ **Count modules with `grep -c '✔ ChainDescent'`, not `grep -c '✔'`** — the latter also matches the
 *"serial build complete"* line, which is why earlier numbers in this doc's history ran one high. Every
 declaration is `[propext, Classical.choice, Quot.sound]` or a subset — no `sorry`, no custom axiom, no
@@ -1942,9 +1989,23 @@ declaration is `[propext, Classical.choice, Quot.sound]` or a subset — no `sor
 | `FrameTransfer` | `mk6`, the four reindexings, `bOf`, `payload_sum`/`frame_sum`, ★★★ **`blocks_bOf`** ⟹ **`adequate_bOf`** ⟹ **`merge_of_tuple_merge`** — §6f's bound, **proved at `k = 2`** | ⚠ `refinesAtoms` is a side **hypothesis** (mechanical: close an `E`-dependent start colouring under `roundTS`) |
 | `Ensemble` | ★ **the ensemble AS A GRAPH**: `eAdj`/`eInit`/**`eRoot`**, a **generic `InvG`** layer for `roundG`/`wl2G`, the label action `eact` (+`eact_base` = T4 at the graph), `invG_eRoot`, ★ **`orbit_not_split`** (the free half), ⛔ **`MixedCell`** + `not_labelPropagates_of_mixed` | ⛔ `MixedCell` **stated, not proved** · ⚠ against **label** orbits (T2⁺ unproved) · ⚠ ordered slots ⟹ twin frame vertices, so **never** claim `Aut = ` the label group from it |
 
-⛔ **NOT in the Lean layer, and each is a real gap:** the **collapse** (§6e.4) · **CFI's WL-blindness**
-(literature) · **T2⁺** (`Aut_{m(base)}` is *exactly* the label group; needs `Aut(T(n)) = Sym n`) · **T3**
-(the frame's cells are the position classes) · the **triangle frame** `TF(E)` (§6g, queued).
+| `DisjointUnion` | ★ 2-WL on `A ⊔ B`: side-blind `dInit`, the `sigL`/`sigR` split, **`Blocked`** (cross pairs carry only the two endpoint diagonal colours; ★ `diagEq` is where *"the two sides are WL-equivalent"* enters, used in exactly one case), `stable_of_blocked`, ★★★ **`merge_of_blocked`**, and a non-vacuity witness that **merges** (`wl2G_double_merge`) | — ⚠ supplies no `Blocked` witness for a CFI pair; that is (iii) |
+| `TupleCov` | ★★★ **`stableS_iff`** (`roundTS`-stability **=** `roundT`-stability **+** `Cov`, nothing else) · **`subst_of_stable`** (the extraction lemma, from stability alone) · `covPerm_wlT` (permutations, by induction **on the rounds**) · `cov_idem_of_stable` · `exists_perm_comp_idem` (σ = π∘ρ) ⟹ ★★★ **`stableS_wlT`** | ⚠ two side conditions are **instantiation, not mathematics**: `CovPerm` of the start colouring and `SeesEqAll` of the closure — both free for the atomic type, neither written for the start `FrameTransfer` uses |
+| `AtomAugment` | ★★★ **`adequateFor_augment_iff`** — augmenting the atoms costs **exactly** `Refines (pull b) extra` (an `iff`; it works because `Adequate.blocks` is **start-colouring-free**) · `merge_of_tuple_merge_aug` (the augmented consumer, with the cost visible as `hex`) · ★ **`adequateFor_augment_self`** = the ceiling | — |
+
+⛔ **NOT in the Lean layer, and each is a real gap:** the **collapse** (§6e.4 — ⚠⚠ and as of
+2026-08-15 it has **no proof route at all**, §6e.4c; do not start Lean work on it before the washout
+question is settled on paper) · **CFI's WL-blindness** (literature; ✅ now quotable in its *standard*
+`k`-WL form thanks to `TupleCov`) · **T2⁺** (`Aut_{m(base)}` is *exactly* the label group; needs
+`Aut(T(n)) = Sym n`) · **T3** (the frame's cells are the position classes) · the **triangle frame**
+`TF(E)` (§6g, queued — ★ **and it is the natural object if the reader's washout reading is right**,
+since it is poly-size where the ensemble is exponential).
+
+▶ **The mechanical Lean items still owed, cheapest first:** `FrameTransfer.refinesAtoms` ·
+`TupleCov`'s two side conditions · `CaoCollapse.FrameClassComplete` · **T2⁺** · `TF(E)`.
+⚠ `PublicTheoremIndex.md` has **no rows for any of the eleven** — regen is
+`scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`, ⚠⚠ it recomputes the **Notes**
+column and can resurrect **phantom rows**, so verify *unmatched deletions = 0*. Deliberately not run.
 
 ⚠⚠ **LEAN TRAPS PAID FOR IN THIS FAMILY — do not re-pay them.**
 `Refines` is **ambiguous** (`Refine` exports a `Colouring`-typed one) ⟹ write `PartitionClosure.Refines` ·
@@ -1967,7 +2028,14 @@ write adjacency as `decide (… ∧ …)`, not `==`/`!=`, or the `Bool` goals wi
 colouring always refines the old), so the loop returns after one round; compare
 `len(set(new)) == len(set(old))` instead. This produced a wrong `[3,45]` corner split before it was
 caught.
-(c) ⚠⚠ **THE MODEL-FAITHFULNESS TRAP, and it cost a whole 812-vertex run.** In the `full` encoding the
+(d) ⚠⚠ **2026-08-15 Lean traps.** `wl_stable`, **not** `stable_wl` · `have e : _ ≃ _ := {..}` in
+tactic mode **forgets the body** ⟹ use `let`, or the later `rfl` will not close · `rw [sect_spec]`
+fails with a metavariable pattern ⟹ use `congrArg` · state helper lemmas with **explicit** vertex
+arguments: an implicit `{p}` cannot unify against `p.1`/`p.2` · `cases h : side v` **substitutes into
+the goal**, so close those branches with `rfl`, not `exact h` · `(univ : Finset (α ⊕ β)).val =
+univ.val.map inl + univ.val.map inr` holds **by `rfl`** · `rw`'s trailing `rfl` will not reduce
+`fold (Sum.inr a)` — add `simp only [fold_inl, fold_inr]`.
+(e) ⚠⚠ **THE MODEL-FAITHFULNESS TRAP, and it cost a whole 812-vertex run.** In the `full` encoding the
 payload copy must be a **clique** with adjacency carried *only* by the frame types. Keeping the
 payload's own edges as well hands 2-WL the adjacency **twice** — atomically at round 0 *and* through
 the frame. It is a *stronger* model than the object, so **survivals under it are still sound but
@@ -2023,7 +2091,9 @@ merge-direction corollary, the round-indexed form, and the frame layer's invaria
 `ChainDescent/CaoCollapse.lean`; **§6f's transfer skeleton** — the generic-carrier 2-WL round, the
 encoding, the injective coding, and `merge_of_adequate` — in `ChainDescent/FrameEncoding.lean`
 (all 2026-08-13). All axiom-clean, no `sorry`, no custom axiom.
-✅ **All CAO modules are gate-listed and the gate passes (132 modules, ~239–264 s)** — the earlier
+✅ **2026-08-14/15 additions, all axiom-clean:** `DisjointUnion` (2-WL on `A ⊔ B`, §6f.4e) ·
+`TupleCov` (the standard-`k`-WL bridge, §6f.5a α) · `AtomAugment` (the augmentation price, §6f.5a β).
+✅ **All eleven CAO modules are gate-listed and the gate passes (132 modules, ~239–264 s)** — the earlier
 *"not gate-listed"* caveat is discharged. **§8a is the authoritative per-module table**: what each owns
 and what it owes. ⛔ Pinned, **not** theorems: `CaoCollapse.FrameClassComplete`,
 `Ensemble.MixedCell`; and `FrameTransfer.adequate_bOf`'s `refinesAtoms` is a side hypothesis.
@@ -2039,6 +2109,27 @@ every measurement on record and makes a falsifiable prediction. ⛔ Do not quote
 established. Also: §5's admission test — ⚠ **necessary direction only**, and ⚠⚠ its
 ensemble assumption is now **refuted at rung 1** (§6a), not merely unmeasured at rung 2. §4.3's
 4-vertex-window mechanism is **counter-indicated** by two facts already in the doc (§6a.2).
+
+**Measured 2026-08-15 — and these three are what the current state rests on.**
+* **`M`-2-WL is a COMPLETE invariant of (graph, marked vertex) at every reachable `L`** — `μ`-classes
+  vs Burnside iso-class counts: `L=4` 20 = 20, `L=5` 90 = 90, `L=6` 544 = 544. ⟹ §6e.0's Phase 0 is
+  **vacuous**, and unfixably so.
+* **`a(c,i)` determines `c`** (0 collisions at `L=5`), and the profiles have exactly as many
+  `S_L`-orbits as there are marked-graph iso classes ⟹ **the orbit of `a` IS the iso class** ⟹
+  **ORB ⟺ `M`-complete ⟹ ORB is false at large `L`**. Mechanism: the payload clique gives
+  `(p(i), f(k,t))` common neighbours `{j ∈ k}` exactly when `c_k = t`, in one round, at every slot.
+  ⚠ Dropping the clique changes **nothing** (identical figures) — the information reroutes.
+* **On the REAL ensemble (`L=4`, `N=332`): `aE(c,i)` determines `c`, 96/256 injective, 20 `S_L`-orbits
+  = 20 payload cells = `M`'s 20 `μ`-classes.** ⟹ the ensemble's frame channel is **identical** to
+  `M`'s (killing *"guess from the ensemble's coarser channel"*), and simultaneously the cross-copy
+  channel added **nothing** at `L=4` (which is (i) holding with equality).
+
+**⛔⛔ RETRACTED 2026-08-15c, same day as claimed — do not re-inherit either.**
+*"§6d.8's LEMMA IS FALSE"* and *"(i) is false / Construction C is refuted at 2-WL"*. Both ran through
+an **isolation** step (identify, inside `Φ`, the entries coming from a rigid injective profile's orbit)
+whose only handle is colour — which presupposes the colouring already separates those copies, i.e.
+part of the conclusion. ⚠ `ORB ⟹ LEMMA` is **solid** (§6e.1+§6e.2); only the **converse** is gapped.
+⚠ The retraction does **not** touch the three measurements above.
 
 **Superseded, listed so the retractions are not silently re-inherited.**
 *"The encoding hands WL exactly one extra level"* (→ not constant, §5) · *"a carrier's attachment set
@@ -2056,14 +2147,17 @@ what is unresolved).
 > per-module state. Read §8a before touching Lean.)*
 >
 > ### ✅ 2026-08-14 — CLOSED: the cross-graph joint (§6f.4e, `DisjointUnion.lean`, gate 130 modules).
-> ### ✅ 2026-08-14 — CLOSED: §6f.5a's (α) — `TupleCov.stableS_wlT`, the standard `k`-WL closure is already `roundTS`-stable ⟹ (iii) is quotable in its literature form. ✅ ALSO PRICED: (β) — `AtomAugment.adequateFor_augment_iff`, an `iff`; R3-as-written looks unpayable, the reframe survives. (β) R3 is coupled to (ii) (OPEN) · (γ) the constant is `2k+2` ⟹ `K₈` not `K₁₀` (resolved).
+> ### ✅ 2026-08-14 — CLOSED: §6f.5a's (α) — `TupleCov.stableS_wlT`, the standard `k`-WL closure is already `roundTS`-stable ⟹ (iii) is quotable in its literature form. ✅ ALSO PRICED: (β) — `AtomAugment.adequateFor_augment_iff`, an `iff`; R3-as-written looks unpayable, the reframe survives. (γ) the constant is `2k+2` ⟹ `K₈` not `K₁₀` (resolved).
 >
 > ### ⛔⛔ THE FOUR GAPS BETWEEN HERE AND A COUNTEREXAMPLE — memorize these before quoting anything
-> **(i) the collapse (§6e.4) — the ONLY mathematics** · **(iii) CFI's WL-blindness — literature, a
-> formalization project of its own** · **T2⁺** — so `Ensemble`'s target is stated against *label*
-> orbits · **"any `k`"** — `FrameEncoding` is 2-WL-specific and the collapse is level-uniform only at
-> `k = 1, 2` (measured); arbitrary `k` needs the encoding side re-run at arity `≈ 3k + 2`.
-> ⟹ ⛔ **nothing in this doc refutes CAO propagation.** What is proved is the **transfer** at `k = 2`.
+> **(i) the collapse (§6e.4) — the ONLY mathematics, and as of 2026-08-15 it has NO PLAN: R1 and R3
+> are both dead and the whole thing reduces to one analytic question (§6e.4c)** · **(iii) CFI's
+> WL-blindness — literature; ✅ now quotable in its *standard* `k`-WL form (`TupleCov`), but still not
+> formalized** · **T2⁺** — so `Ensemble`'s target is stated against *label* orbits · **"any `k`"** —
+> `FrameEncoding` is 2-WL-specific and the collapse is level-uniform only at `k = 1, 2` (measured);
+> arbitrary `k` needs the encoding side re-run at arity **`2k + 2`** (§6f.5a γ — *not* `3k+2`).
+> ⟹ ⛔ **nothing in this doc refutes CAO propagation.** What is proved is the **transfer** at `k = 2`,
+> plus the three carrier-generic supports (`DisjointUnion`, `TupleCov`, `AtomAugment`).
 >
 > **A. The one open obligation — ⛔⛔ AND AS OF 2026-08-15 IT HAS NO PLAN. Read §6e.4a first: the
 > lemma below is FALSE, Phase 0 is VACUOUS, and R1/R3 are both dead. Item 2 is WITHDRAWN.**
@@ -2137,5 +2231,4 @@ what is unresolved).
 > 4c. ▶▶ **CONSTRUCT `E(L)` AS A GRAPH IN LEAN** — now the cheapest step with the largest effect: it is
 >    what makes *"the ensemble has a mixed cell"* expressible at all (§6f.4d caveat 3). Then **T2⁺**
 >    (caveat 4). ⛔ Neither closes (i) or (iii).
-> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all seven are in `scripts/build.sh`; gate = **129 modules,
->    ~245–275 s**, passing.
+> 8. ✅ ~~Gate-list the CAO modules.~~ **DONE** — all seven are in `scripts/build.sh`; gate = **132 modules, ~239–264 s**, passing.
