@@ -1,38 +1,78 @@
 # CAO carrier/payload falsifier constructions — the record
 
-> **What this is.** Three related *designed* attacks on CAO propagation, raised from outside the
-> project (2026-08-12) and measured here. **Construction B is a genuine 1-WL CAO-propagation
-> counterexample** — the first on record built to order rather than found by sweeping. **Construction
-> C is the 2-WL attempt**: its machinery runs end to end at rung 1 (**100 mixed cells**, §6), and both
-> payloads tried — Shrikhande/rook (§4) and `CFI[K4]` (§5.1) — separate under the two-copy model.
+> ## ▶▶▶ STATE OF THE QUESTION — self-contained, 2026-08-16. Read only this to know where things stand.
 >
-> ⛔⛔⛔ **AUDITED 2026-08-13 — the picture changed twice in one session; this box is the NET state.**
-> §6's *"the ensemble is passive"* is **withdrawn** (§6a): the real ensemble's 1-WL sees only the
-> degree sequence, so it is far coarser than the two-copy model (**292 / 100** vs **538 / 6**), and
-> §6's witness was degree-regular and could not have detected the gap. Two things then landed on top:
+> **The goal.** Build a *designed* counterexample to CAO propagation at 2-WL: an object whose 2-WL
+> closure, started from the exact orbit partition and with one vertex individualized, has a **mixed
+> cell** (a cell meeting two `Aut_v`-orbits). §0 has the hypothesis; get it right before building.
 >
-> * **§6b, proved and measured on the real object:** 2-WL reads an edge encoded as a **typed common
->   neighbour**, so the frame hides the payload **completely at 1-WL and not at all at 2-WL**.
-> * **§6d, measured exactly at `L = 4` on every channel:** the ensemble's 2-WL colouring of a copy
->   **collapses to that copy's own `L²`-vertex frame encoding**. ⟹ the faithful object is **poly-size**
->   (`L=16 → 256` vertices), and §4/§5.1's kills are **REINSTATED** — §6a indicts the **`shared`**-frame
->   two-copy model, *not* the `disjoint` one, which is what those sections actually measured.
+> **The object (Construction C, "the ensemble").** One graph. It contains a *copy* for every graph on
+> `L` labels — a copy is `L` payload vertices forming a clique. All copies share one **frame**: two
+> vertices per label-pair, "edge" and "non-edge"; a copy's payload vertex attaches to whichever
+> matches its own graph. Plus gauge/central vertices. Payload orbits = **marked-graph iso classes**.
 >
-> ⟹ **the scheme is blocked on a payload, not on tooling.** ⚠ The collapse's cross-copy half is
-> **conjectural** (§6d.2(b)) — proved at round 1, validated at `L = 4` *and* `L = 5`, open in general;
-> §6e is the plan and §6e.4 is the one gap.
+> ### ✅ SETTLED (measured on the real object, or proved)
+> * **1-WL: the design programme WORKS.** Construction B is a genuine counterexample (§2, 4 mixed
+>   cells); Construction C at rung 1 is a second (§6, 100 mixed cells). Nothing below touches these.
+> * **2-WL reads the encoded edge** (§6b, proved + measured): a typed common neighbour is exactly what
+>   pair-refinement counts. ⟹ the frame hides the payload **totally at 1-WL, not at all at 2-WL**.
+> * **No mixed cell has ever been observed at 2-WL**, in any vertex kind: `L=4`, `N=332` — payload
+>   20 = 20, frame 2 = 2, central 11 = 11 (§6e.4d.4).
+> * **The reason no measurement can settle the question** (§6e.4a): the single-copy encoding `M` is a
+>   **complete** invariant at every reachable `L` (20=20, 90=90, 544=544). Where `M` is complete
+>   nothing can be added to it, so every "the ensemble equals `M`" measurement was **forced** and
+>   carries no information about large `L`.
 >
-> ⛔⛔⛔ **SUPERSEDED 2026-08-15d — CONSTRUCTION C IS DEAD AT 2-WL (§6e.4d).** It is not blocked on a
-> payload and not blocked on the collapse: `E(L)`'s 2-WL is a **complete** invariant of the marked
-> payload graph at every `L`, because the ensemble necessarily contains a **rigid, refinement-discrete
-> copy**, whose own colour names it and whose injective slot profile turns the cross-copy `Align`
-> channel into a **ruler**. ⟹ no mixed cells, in any vertex kind. **Read §6e.4d first; the payload
-> question below is moot.**
+> ### ⚖️ THE WHOLE QUESTION IS ONE UNDECIDED DISJUNCTION — and both sides are live
+> Within a copy, refinement recovers that copy's own graph. Across copies, the pair colour of two
+> payload vertices records the **alignment** of their two readings of the shared frame. At large `L`
+> the within-copy channel must fail (CFI). **Does the cross-copy channel then supply the orbit?**
+>
+> | | **(A) it supplies the orbit** | **(B) it supplies nothing the copy lacks** |
+> |---|---|---|
+> | consequence | `E(L)`-2-WL is complete ⟹ **no mixed cell, ever** ⟹ Construction C dies at rung 2 | the ensemble ≡ the poly-size frame encoding ⟹ a CFI payload **merges** ⟹ counterexample |
+> | argued by | §6e.4d — the **Ruler Lemma** plus (LB), (P1), (P2) | §6d/§6e — the **collapse**, and §6d.8's lemma |
+> | supporting measurement | the ruler channel demonstrably separates what a copy provably cannot (§6e.4f, `P6`: 3 → 6 cells) | `E ⊑ M` round by round at `L=4`, and the cross-copy aggregate is `M`-determined at `L=4` |
+> | ⚠ why that measurement is weak | taken where the within-copy channel was **also** available | taken where `M` is **complete**, so it was forced (above) |
+> | status | **NOT PROVED.** A proof sketch exists; its premises are measured only at `L = 4` | **NOT PROVED.** §6d.8's lemma is open; ORB, its one clean sufficient condition, is false at large `L` |
+>
+> ⛔ **Neither side is established, and this doc must not be read as endorsing either.** Earlier
+> revisions of §6e.4a/b/d declared (A) proved and Construction C dead; that verdict is **withdrawn**
+> — the argument stands as an argument, not as a settled result.
+>
+> ### ▶▶ NEXT STEPS — verifiable only. Do not add prose to this file.
+> **§6e.4g is the decision procedure.** Each item settles the disjunction one way or the other and
+> each is a theorem or an experiment, never an argument:
+> 1. **Formalize the Ruler Lemma** (3 lines, carrier-generic). Settles whether (A)'s engine is sound.
+> 2. **Formalize (LB)** — *the ensemble's colouring inside a copy refines that copy's own 2-WL.* This
+>    is (A)'s single load-bearing structural claim; measured 64/64 at `L=4`, not machine-checked.
+> 3. **Formalize (P1)/(P2) for the ensemble.** 1+2+3 ⟹ (A) is a theorem and (B) is refuted.
+> 4. **For (B): prove §6d.8's lemma**, or exhibit an object with a ruler *and* a surviving mixed cell.
+>    The falsification search (§6e.4f) is the harness; it found 0 in 1491 objects, with a thin margin.
+>
+> ⚠ **Everything below §6e.4d is the RECORD, including several retractions.** It is kept so that
+> withdrawn claims are not silently re-inherited (§9 lists them), not because it is a reading path.
+> A fresh reader needs: this box → §0 → §7 (the filters) → §6e.4d–g → §8a. Nothing else is required.
 >
 > ⚠ Companion, not replacement: [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)
 > owns the *question*. Read its §1 (the hypothesis), §3 (the coupling principle) and §14 (the anatomy
 > and the arity ladder) before this. ⚠ The research phase is closed
 > ([`chain-descent-wind-down.md`](./chain-descent-wind-down.md)); this is a **record**, not a live track.
+
+<details>
+<summary><b>Superseded framing kept for provenance — the 2026-08-13 audit box (click to expand)</b></summary>
+
+> **What this was.** Three related *designed* attacks on CAO propagation, raised from outside the
+> project (2026-08-12). §6's *"the ensemble is passive"* is **withdrawn** (§6a): the real ensemble's
+> 1-WL sees only the degree sequence, so it is far coarser than the two-copy model (**292 / 100** vs
+> **538 / 6**), and §6's witness was degree-regular and could not have detected the gap. Then:
+> §6b (2-WL reads the encoded edge) and §6d (the `L=4` collapse, every channel) landed on top, and
+> §4/§5.1's payload kills were **REINSTATED** — §6a indicts the **`shared`**-frame two-copy model, not
+> the `disjoint` one. The conclusion drawn at the time — *"the scheme is blocked on a payload, not on
+> tooling"* — is **superseded**: §6e.4a showed the payload question is unreachable by measurement, and
+> the live question is now the (A)/(B) disjunction above, not a payload search.
+
+</details>
 
 ---
 
@@ -43,55 +83,60 @@ partition* (§0) — forget that and you will build something that fails at the 
 propagation, which is how Construction A died (§1). A `Q₄` complementary-pair carrier **is** a 1-WL
 counterexample (§2, `n = 352`, 4 mixed cells), and the gauge-ensemble Construction C is a second one
 at rung 1 (§6, `n = 229,406`, 100 mixed cells) — so at 1-WL the design programme **works**. At 2-WL
-it does not, and §6b says why in one line: **an edge encoded as a typed common neighbour is exactly
-what 2-WL counts**, so the frame hides nothing there. §6d then measured that the ensemble's 2-WL on a
-copy **collapses to that copy's own `L²`-vertex encoding**, which makes the faithful object poly-size
-and **reinstates** §4/§5.1's kills. So the programme is blocked on finding a payload that **merges**
-under that `L²` object, and the one open obligation is §6e.4 — the cross-copy half of the collapse.
+no mixed cell has ever been observed, and §6b says why the obvious hiding fails: **an edge encoded as
+a typed common neighbour is exactly what 2-WL counts.** Whether the construction is *dead* at 2-WL or
+merely *unmeasurable* there turns on one undecided disjunction — does the **cross-copy** channel
+supply the orbit (A), or nothing the copy lacks (B)? — stated in the box at the top of this file.
+Both sides have an argument, neither has a proof, and **no measurement at any reachable size can
+discriminate them** (§6e.4a), which is why §6e.4g lists only theorems and experiments as next steps.
 
-**Reading order.** §0 (the hypothesis + N1/N2) → §7 (the filters — cheapest thing in the doc) →
-§2 (the construction that works) → §3 incl. **§3.2b–d** (the 2-vertex gauge and the ablations) →
-§6b, **§6d** (what transfers, and the collapse) → **§6e** (the proof plan) → **§6f incl. §6f.4a–d**
-(the bound, and its Lean chain) → **§6g** (the closed opposite-side route) → §4 + §5 (the payload bar,
-⚠ read §6d.4 first) → **§8a** (the Lean layer + the trap list) → §8 (files) → §9 (proved vs measured
-vs argued, and the OUTSTANDING list).
+**Reading order — minimal path for a fresh reader.** The top box → §0 (the hypothesis + N1/N2) →
+§7 (the filters — cheapest thing in the doc) → **§6e.4d** (the case for (A)) → **§6e.4e** (the case
+for (B), and why the two cannot be told apart by measurement) → **§6e.4f** (this session's
+experiments) → **§6e.4g** (the decision procedure) → **§8a** (the Lean layer + the trap list).
+
+**Everything else is the record.** §2/§3 (how the constructions are built), §4/§5 (the payload bar —
+⚠ now known unreachable by measurement, §6e.4a), §6/§6a–c (the rung-1 result and its audits), §6d/§6e
+(the collapse programme and its retractions), §6f (the arity bound and its Lean chain), §6g (a closed
+side route), §8 (files), §9 (proved vs measured vs argued, and the retraction list). Read them when
+you need provenance for a specific claim, not as a path.
 
 > ### ▶▶▶ FRESH PICKUP — 2026-08-15**d**. THIS BLOCK SUPERSEDES EVERY DATED BOX BELOW IT.
 > **Goal of the track:** exhibit a *designed* counterexample to **CAO propagation at 2-WL** (§0 for the
 > hypothesis — start from the exact orbit partition, individualize **one vertex**, take the `k`-WL
 > closure, ask whether cells are still `Aut_v`-orbits).
 >
-> ### ⛔⛔⛔ STATE: **CONSTRUCTION C IS DEAD AT 2-WL.** The sharp question is ANSWERED — **YES** — and the answer kills the construction *without* going through the collapse (i).
-> **§6e.4d is the section.** One-screen version:
-> * ### ▶▶▶ **Does `Φ(c,i)` determine the `S_L`-orbit of `a(c,i)`? — YES.**
-> * ★★★ **THE RULER LEMMA** (carrier-generic, three lines, no graphs in it). If **one** `ω₀` has
->   (i) a tag class equal to its own orbit and (ii) an **injective** profile, then `Φ` decodes the whole
->   orbit of `b_ω` — the `y(ω₀)`-block is `{{Align(b_ω∘γ, b_{ω₀})}}`, and an injective `b_{ω₀}` makes
->   each entry the *graph of the function* `b_ω∘γ`.
-> * ★★★ **THE REPAIR of §6e.4c's broken step, in one sentence: the probe is CHOSEN, not arbitrary.**
->   §6e.4c is right that isolating an *arbitrary* `b₀` presupposes the conclusion. Isolating a *chosen*
->   generic copy does not: it is bought by a **LOWER** bound (`col_E` restricted to a copy refines that
->   copy's own bare 2-WL — proved, level-independent), applied to a graph that is **discrete** under
->   that lower bound. The CFI-like copies the conclusion is about are **never used as probes**.
-> * ⛔ **The escape is closed:** gauge-transitivity forces the copy set to be *all* of `{0,1}^S`, so for
->   `L ≥ 6` the ensemble **necessarily contains** 1-WL-discrete copies (5760/32768 at `L=6`, measured).
->   ⟹ every instance carries its own rulers.
-> * ⟹ `E(L)`-2-WL is a **complete** invariant of the marked payload graph at every `L` ⟹ **no mixed
->   cells** ⟹ the construction dies. ⚠ No complexity contradiction: `E(L)` has `L·2^{C(L,2)}` vertices.
-> * ⟹ **§6d.8's LEMMA is FALSE at large `L`** (§6e.4a's conclusion, reinstated with the isolation step
->   repaired) ⟹ R1 and R3 stay dead, now for a reason that survives §6e.4c.
-> * ★★★ **THE REUSABLE ASSET — "THE RIGID RULER" DESIGN FILTER.** *An ensemble containing a rigid,
->   refinement-discrete member cannot hide anything its profile channel exposes.* One member is enough.
->   ⟹ **"hide the payload among all its relabellings" is self-defeating**: a family closed enough to be
->   a single orbit is large enough to contain a ruler.
-> * ⚠ **(i) the collapse is still open** — but it is no longer on the path to anything. The refutation
->   of the *construction* and the open question about the *bound* have come apart.
-> * ⚠⚠ **What was measured is the PROOF, not the conclusion** — the conclusion is vacuously true at
->   reachable `L` (`μ` is complete there: 20=20, 90=90, 544=544). Decode verified `L=4` 20/20 and `L=5`
->   90/90; hypotheses (P1)+(P2) verified at `L=6,7,8,9` in the single-copy object; **washout refuted by
->   measurement** in a bounded-round surrogate where the tag *is* incomplete (`L=5`, `r=1`: tag 5
->   classes, `Φ` all 90). ⛔ Still do not write a `probe_cao_washout.py` against the *fixpoint* — there
->   is nothing there for it to see.
+> ### ⚖️ STATE: **UNDECIDED, between two named positions.** ⛔ An earlier revision of this block said *"Construction C is dead at 2-WL, the question is ANSWERED"*. **That verdict is WITHDRAWN** (2026-08-16). The argument for it stands as an argument; it is not a result.
+> **§6e.4d = the case for (A). §6e.4e = the case for (B) and why measurement cannot separate them.
+> §6e.4f = this session's experiments. §6e.4g = the decision procedure.** One-screen version:
+> * ### ▶▶▶ THE QUESTION: at large `L` the within-copy channel must fail (CFI). Does the **cross-copy** channel then supply the orbit?
+>   **(A) yes** ⟹ no mixed cell ever, Construction C dies at rung 2. **(B) no** ⟹ the ensemble ≡ the
+>   poly-size frame encoding, a CFI payload merges, and the construction works. ⛔ **Neither proved.**
+> * ★★★ **THE RULER LEMMA** — (A)'s engine, carrier-generic, three lines, no graphs in it. If **one**
+>   `ω₀` has (i) a tag class equal to its own orbit and (ii) an **injective** reading, then `Φ` decodes
+>   the whole orbit of `b_ω`. ▶ **Formalizing this is next step 1**; the lemma itself should not be in
+>   dispute once machine-checked, which isolates the disagreement to (LB)/(P1)/(P2).
+> * ★★★ **(A)'s repair of §6e.4c's broken step: the probe is CHOSEN, not arbitrary.** Isolating an
+>   *arbitrary* `b₀` presupposes the conclusion; isolating a *chosen* refinement-discrete copy is
+>   bought by a **LOWER** bound — **(LB)** `col_E` restricted to a copy refines that copy's own bare
+>   2-WL. ⚠ **(LB) is (A)'s single load-bearing claim**: proved on paper, measured **64/64** copies at
+>   `L=4`, not machine-checked. Attack it first if (A) is wrong.
+> * ⚠⚠ **(B) is NOT refuted, and its supporting measurements are not weaker than (A)'s.** `E ⊑ M` holds
+>   round by round at `L=4` and the cross-copy aggregate is `M`-determined there. Those are forced,
+>   because `M` is already complete at `L=4` — but (A)'s measurements are equally circumstantial: every
+>   one was taken where the within-copy channel was *also* available.
+> * ★★★ **THE REUSABLE ASSET, and it survives whichever way the disjunction falls — "THE RIGID RULER"
+>   DESIGN FILTER.** *If (A) holds, an ensemble containing a rigid refinement-discrete member cannot
+>   hide anything its reading channel exposes*, and gauge-transitivity forces the copy set to be all of
+>   `{0,1}^S`, so for `L ≥ 6` such members are unavoidable (5760/32768 at `L=6`, measured). ⟹ any
+>   successor carrier must state how it escapes that, whether or not (A) is proved.
+> * ⛔ **A ruler is NOT a bolt-on device** (§6e.4f, and it is the cleanest limit on (A)): attaching
+>   rulers uniformly to a 2-WL-blind graph resolves **nothing** — rook ⊔ Shrikhande stays one cell over
+>   two orbits under every uniform attachment tried. Only individualization resolves it, and that uses
+>   the orbit knowledge you were after. (A) is therefore **not** a general orbit oracle.
+> * ⚠⚠ **What has been measured is the machinery, never the conclusion** — the conclusion is vacuous at
+>   reachable `L` (`M` is complete there: 20=20, 90=90, 544=544). ⛔ Still do not write a
+>   `probe_cao_washout.py` against the *fixpoint*; there is nothing there for it to see.
 >
 > ### ✅ WHAT IS MACHINE-CHECKED AND SURVIVES — all of it carrier-generic, none of it tied to Construction C
 > | | |
@@ -104,8 +149,12 @@ vs argued, and the OUTSTANDING list).
 > ✅ Gate = **132 modules, ~239–264 s**, all axiom-clean. ⚠ Count with `grep -cE '^  ChainDescent' scripts/build.sh`.
 >
 > ### ⛔⛔ WHAT IS DEAD — DO NOT RESTART ANY OF THESE
+> ⚠ **Read this list as conditional where it says so.** Several entries died *because* (A) was
+> believed; with (A) withdrawn to "argued", they are suspended rather than buried.
 > * **R1** (round-indexed induction) and **R3** (`M⁺ = M + Φ`) — §6e.4a/§6e.4c. R3 additionally
->   re-opens (ii) at a priced cost (§6f.5a β).
+>   re-opens (ii) at a priced cost (§6f.5a β). ⚠⚠ **Both deaths are CONDITIONAL ON (A).** They follow
+>   from *"§6d.8's lemma is false"*, which follows from (A). If (A) fails, R1 and R3 are live again —
+>   do not treat them as independently refuted.
 > * **§6e.0's Phase 0** — *vacuous*, and unfixably so (`M`-2-WL complete at every reachable `L`).
 >   ⛔ Do not re-run `probe_cao_lemma_check*` for information.
 > * **The payload search** (§6f.4), the **C 2-WL**, `CFI[K5]`-full, the small-3-WL-blind-pair hunt.
@@ -123,20 +172,13 @@ vs argued, and the OUTSTANDING list).
 > Every 2026-08-15 negative result is about **rung 2 only**.
 >
 > ### ▶ IF YOU PICK THIS UP
-> Read **§0** (the hypothesis) → **§6e.4d** (the answer, the Ruler Lemma, and what it kills) →
-> **§6e.4c** (the retraction it repairs) → **§6f.3** (the template) → **§8a** (the Lean layer + the
-> paid-for trap list). ⛔ Construction C is closed; do not re-open it. Then choose:
-> * **(a) ★ Formalize the Ruler Lemma** — three lines, carrier-generic, and it is the only *new*
->   mathematics this session produced. It belongs next to `CaoCollapse.merge_of_stable_merge`.
-> * **(b) Design a new carrier** — ★★ the binding constraint is now **two**, and the second is the
->   harder one: (1) §6e.4b's *a payload vertex must not read its own graph off the frame*, and
->   (2) §6e.4d's ***no member of the family may be individually identifiable***. ⚠ (2) fights
->   root-transitivity directly: the group that makes the root one orbit is what forces every copy to
->   be present, rulers included. Any proposal must say how it escapes that, first.
-> * **(c) Leave the construction route.** The `(i)∘(ii)∘(iii)` template's surviving parts ((ii), (iii),
->   `DisjointUnion`, `TupleCov`, `AtomAugment`) are all carrier-generic and outlive Construction C.
-> ⚠ **(i) the collapse is still formally open** — but nothing depends on it now; it is a curiosity,
-> not an obligation. Do not spend a session on it without a new reason.
+> Read **§0** (the hypothesis) → **§6e.4d** (the case for (A)) → **§6e.4e** (the case for (B), and the
+> symmetry of the evidence) → **§6e.4f** (the experiments) → **§6e.4g** (the decision procedure) →
+> **§8a** (the Lean layer + the paid-for trap list).
+> ⛔⛔ **Do not add prose to this file.** The disjunction has had three sessions of argument on each
+> side and is no closer; only a theorem or an experiment moves it. §6e.4g lists four, all verifiable.
+> ⚠ Construction C is **not** closed — that verdict was withdrawn. It is undecided, and which way it
+> falls is exactly the (A)/(B) question.
 
 > ### ▶▶ 2026-08-13 REVIEW — the two changes that got it here. Read §6f and the R1 box in §6e.5.
 > **1. ★★★ The encoding's WL gain is BOUNDED — by a proof, not a measurement (§6f).** `M(G)` is a
@@ -1366,13 +1408,15 @@ a rigid copy supplies it, but that is not written out.
 
 ### 6e.4c ⚠⚠ 2026-08-15c — **THE BROKEN STEP, AND WHAT THE QUESTION REALLY REDUCES TO**
 
-> ### ▶▶ **ANSWERED 2026-08-15d — see §6e.4d.** The diagnosis in this section is **correct and stands**:
-> the retracted argument really did presuppose its conclusion. What it got wrong is the *scope* of the
-> objection — it applies to an **arbitrary** probe, and the probe can be **chosen**. Isolating one
-> chosen generic copy is bought by a LOWER bound on the colouring, not by completeness. ⟹ the answer
-> to this section's question is **YES**, and Construction C dies at rung 2.
+> ### ▶▶ **STILL OPEN — this section states the question that §6e.4d–g are about.** The diagnosis here
+> is **correct and stands**: the retracted argument really did presuppose its conclusion. §6e.4d
+> answers the *scope* objection — the probe can be **chosen**, and isolating a chosen generic copy is
+> bought by a lower bound rather than by completeness — but that is **position (A)**, argued, not
+> established (§6e.4e states (B), which is not refuted).
 > ⚠ Read this section anyway: its statement of *what* the question is, and the `ORB ⟺ M`-complete
-> equivalence, are what make §6e.4d's consequences (the LEMMA's falsity) follow.
+> equivalence, are what make §6e.4d's consequences follow *if* (A) holds.
+> ⛔ A 2026-08-15d revision of this box read *"ANSWERED — the answer is YES and Construction C dies"*.
+> **Withdrawn 2026-08-16.**
 
 Raised by the reader against §6e.4b, and the objection is **half right — the better half**.
 
@@ -1413,9 +1457,15 @@ Raised by the reader against §6e.4b, and the objection is **half right — the 
 20=20, 90=90, 544=544) and §6e.4b's frame-channel measurements. Both are direct measurements and
 neither depends on the isolation step.
 
-### 6e.4d ★★★★ 2026-08-15d — **THE QUESTION IS ANSWERED: YES.** The isolation step is repaired by *choosing* the probe
+### 6e.4d ★★★ 2026-08-15d — **THE CASE FOR (A):** `Φ(c,i)` determines the `S_L`-orbit of `a(c,i)`
 
-> ### ▶▶▶ **`Φ(c,i)` DOES determine the `S_L`-orbit of `a(c,i)`.**
+> ### ⚠⚠ STATUS, corrected 2026-08-16. This section was originally titled *"THE QUESTION IS ANSWERED: YES"* and concluded that Construction C is dead. **That verdict is WITHDRAWN.**
+> What follows is a **proof sketch whose premises are measured only at `L = 4`**, not a settled
+> result. It is (A) in the top box's disjunction; (B) is stated in §6e.4e and is **not refuted**.
+> The mathematics below is unchanged and still believed by its author — what changed is the label on
+> it. ⚠ Read §6e.4e immediately after; reading this section alone will leave you over-confident.
+
+> ### ▶▶▶ **(A): `Φ(c,i)` determines the `S_L`-orbit of `a(c,i)`.**
 > The retracted argument tried to isolate an **arbitrary** rigid injective `b₀` inside its tag class,
 > and §6e.4c is right that this presupposes the conclusion. But nothing forces the probe to be
 > arbitrary. **The probe is chosen**, and isolating one *chosen* copy is bought by a **LOWER bound**
@@ -1491,7 +1541,7 @@ graphs** — measured: **5760 of the 32768** copies at `L=6`, and 35 %–78 % of
 `L = 7,8,9` (rising, as Babai–Erdős–Selkow predicts). ⟹ *every* instance of Construction C carries
 its own rulers, at every `L` where the construction is interesting.
 
-#### 6e.4d.3 ▶▶ WHAT THIS FORCES
+#### 6e.4d.3 ▶▶ WHAT (A) WOULD FORCE — ⚠ conditional on (LB), (P1), (P2), none machine-checked
 
 ```
  col_E(p(c,i))  ==> {{ (y(c',l), col_E(p(c,i),p(c',l))) }}        [stability; pair colour fixes fibres]
@@ -1500,8 +1550,13 @@ its own rulers, at every `L` where the construction is interesting.
                 ==> the S_L-orbit of (c,i)                        [aE(c,i) determines c, and i]
  ================================================================================================
  ==> E(L)'s 2-WL colouring is a COMPLETE invariant of the marked payload graph, at every L
- ==> NO MIXED CELLS.  CONSTRUCTION C DIES AT RUNG 2.
+ ==> NO MIXED CELLS.  Construction C would die at rung 2.
 ```
+
+⚠⚠ **Read the chain as a conditional.** Every arrow is a coherence step and is safe; the load is
+carried entirely by the three premises feeding the third arrow. **The chain is only as good as (LB),
+and (LB) is measured at `L = 4` and proved on paper.** §6e.4g items 1–3 are exactly the job of turning
+this from a sketch into a theorem. Until then this block states what (A) *would* force, not what is.
 
 > ### ⚠ THE STANDING STEER, CHECKED — *"the CAO start is the ORBIT PARTITION, not the WL colouring"*
 > The probes here start from the plain atoms; the hypothesis starts from the exact orbit partition
@@ -1512,26 +1567,29 @@ its own rulers, at every `L` where the construction is interesting.
 > only a **lower** bound on the colouring, which a finer start preserves. ★ This is the steer that
 > killed Construction A; it costs one paragraph to check, and it does not bite here.
 
-1. ⛔ **Construction C is refuted at 2-WL**, and the argument **does not use the collapse (i)** as an
-   input. ⚠⚠ **CORRECTION to a first draft of this section, which said (i) was left "moot but open":
-   that is wrong — (i) is FALSE at large `L`, as an output.** If `E(L)`-2-WL is complete and `M`-2-WL
-   is not (§6f's bounded arity + CFI), then `E` is *strictly finer* than `M`, which is the negation of
-   the collapse. ⟹ the collapse and this section are **directly contradictory**, not independent; one
-   of them is wrong. ⚠ Note the dependency: *(i) is false* inherits §6f + (iii), which are argued and
-   literature. *Construction C is dead* does not — it needs only §6e.4d.1.
-2. ⛔ **§6d.8's LEMMA is FALSE at large `L`** — §6e.4a's conclusion, reinstated with the isolation
-   step repaired. (`LEMMA` + `Φ ⟹ orbit` would give ORB, and ORB ⟺ `M`-2-WL complete, false by
-   §6f + CFI.) ⟹ **R1 has nothing true to induct, and R3's `M⁺` is a complete invariant** — both stay
-   dead, but now for a reason that survives §6e.4c's retraction.
-3. ★★★ **The general design filter, and it is the reusable asset — THE RIGID RULER.**
+1. **Construction C would be refuted at 2-WL**, and the argument **does not use the collapse (i)** as
+   an input. ⚠⚠ It does, however, **contradict** (i): if `E(L)`-2-WL is complete and `M`-2-WL is not
+   (§6f's bounded arity + CFI), then `E` is *strictly finer* than `M`, which is the negation of the
+   collapse. ⟹ **(A) and (B) are directly contradictory, not independent — exactly one is right**,
+   which is why §6e.4g's items settle both at once. ⚠ Note the dependency: *(i) is false* additionally
+   inherits §6f + (iii), which are argued and literature; *(A)* itself needs only §6e.4d.1.
+2. ⛔ **§6d.8's LEMMA would be FALSE at large `L`** — §6e.4a's conclusion, with the isolation step
+   repaired. (`LEMMA` + `Φ ⟹ orbit` would give ORB, and ORB ⟺ `M`-2-WL complete, false by
+   §6f + CFI.) ⟹ **R1 would have nothing true to induct, and R3's `M⁺` would be a complete
+   invariant.** ⚠⚠ **This is conditional on (A).** If (A) fails, R1 and R3 are live again — the
+   handoff's *"what is dead"* list flags this.
+3. ★★★ **The general design filter — THE RIGID RULER.** ⚠ Conditional on (A) like everything else
+   here, but it is the part worth carrying into a successor carrier either way, because a design that
+   survives it is strictly safer.
    > **An ensemble that contains a rigid, refinement-discrete member cannot hide anything from 2-WL
-   > that its profile channel exposes.** One such member is enough: its own colour names it, and its
-   > injective profile turns the `Align` channel into a *ruler* against which every other member is
+   > that its reading channel exposes.** One such member is enough: its own colour names it, and its
+   > injective reading turns the `Align` channel into a *ruler* against which every other member is
    > read off. ⟹ *"hide the payload among all its relabellings"* is self-defeating, because a family
    > closed enough to be one orbit is large enough to contain a ruler.
-   ⚠ This is the strong form of §6b and it subsumes §6e.4b's lesson: not merely *"a payload vertex
-   must not read its own graph off the frame"*, but *"no member may be individually identifiable"* —
-   and gauge-transitivity makes that unachievable.
+   ⚠ This is the strong form of §6b: not merely *"a payload vertex must not read its own graph off the
+   frame"*, but *"no member may be individually identifiable"* — and gauge-transitivity makes that
+   unachievable. ⛔ **But see §6e.4f #5**: the ruler is **not** a bolt-on device, so this filter binds
+   only on carriers whose members read a **shared frame**. It says nothing about other designs.
 
 #### 6e.4d.4 ▶ THE MEASUREMENTS — and how the vacuity trap was avoided
 
@@ -1578,6 +1636,11 @@ which is what (P1)/(P2) use and what `probe_cao_ruler_exists.py` measures.
 
 #### 6e.4d.5 ⚠ WHAT IS PROVED, ARGUED, AND PINNED — read before quoting
 
+> ### ⛔ TOP-LINE, 2026-08-16: **nothing in §6e.4d is machine-checked, and its conclusion is not
+> established.** The list below is accurate about the *internal* status of each step; it does not
+> license the section's original verdict. See §6e.4e for the competing position and §6e.4g for the
+> four items that would actually settle it.
+
 * **Proved (paper-level, not yet Lean):** the Ruler Lemma (§6e.4d, three lines, carrier-generic and a
   natural Lean target); *`col_E` restricted to a copy is finer than that copy's bare 2-WL*; (P1) and
   (P2) from within-copy discreteness. ⚠ Write that middle one in words — `Refines`/`⊑` is ambiguous in
@@ -1612,6 +1675,75 @@ which is what (P1)/(P2) use and what `probe_cao_ruler_exists.py` measures.
 >    lines, so this should be impossible — which is precisely why it is the right thing to attack.
 > ⛔ **What would NOT falsify it:** any measurement at reachable `L` of the *conclusion* (vacuous), and
 > anything about the collapse (i), which the argument does not use as an input.
+
+### 6e.4e ⚖️ 2026-08-16 — **THE CASE FOR (B)**, stated at full strength, and why the evidence is SYMMETRIC
+
+> ### ▶▶ **(B): the cross-copy channel supplies nothing the within-copy channel cannot.**
+> The ensemble's family is closed under `S_L`, so everything computable from it is `S_L`-invariant.
+> (B) says the uniform average over all copies **washes the alignment out**: a cross-copy pair reduces
+> to the disjoint (triangle-frame) case, the exponential object buys nothing over the poly-size
+> encoding, and the collapse (i) holds with equality. ⟹ a CFI payload **merges** at large `L`, giving
+> the mixed cell, and Construction C works.
+
+**What supports (B).**
+* `M^{(r)} ⊑ E^{(r)}` **at every round** at `L = 4` (§6e.5's R1 box) — the ensemble is *coarser* than
+  the single-copy encoding at every round measured, which is the direction (B) predicts.
+* The cross-copy aggregate is exactly `M`-determined at `L = 4` (§6d.7), on every channel (§6d.3).
+* Ensemble payload cells = `M`'s `μ`-classes = 20 at `L = 4` (§6e.4b) — the cross-copy channel added
+  **nothing** there.
+
+> ### ⚠⚠ AND NOW THE PART THAT MATTERS: **BOTH SIDES' MEASUREMENTS ARE CIRCUMSTANTIAL, FOR THE SAME REASON**
+> * **(B)'s are forced.** `M` is a **complete** invariant at every reachable `L`. Nothing can be added
+>   to a complete invariant, so "the ensemble equals `M`" had to come out true regardless of the
+>   cross-copy channel's strength. The measurement had no power.
+> * **(A)'s are equally circumstantial.** Every ruler measurement — the decode at `L=4,5`, (P1)/(P2)
+>   at `L=6..9`, the kind census — was taken where the **within-copy channel already sufficed**. None
+>   of them shows the ruler channel doing work that was *necessary*.
+> ⟹ **the two positions are observationally equivalent at every size we can compute.** This is not a
+> rhetorical concession; it is why §6e.4g admits only theorems and experiments.
+
+> ### ⚠⚠⚠ THE SHARPEST POINT IN (B)'s FAVOUR — TWO DIFFERENT FAILURE MODES, AND ONLY ONE HAS BEEN TESTED
+> The one measurement where the ruler channel provably supplied something the within-copy channel
+> could not is §6e.4f's `P6` ablation. But there the within-copy channel fails because the copy has a
+> genuine **automorphism** (reversal), not because 2-WL is **blind**. At large `L` the failure mode is
+> WL-blindness. The Ruler Lemma does not distinguish the two — it only needs the readings to differ —
+> but **empirically the ruler has only ever been seen to defeat the symmetry mode.** ⟹ *"it beats
+> automorphisms, therefore it beats WL-blindness"* is an extrapolation, and it is (A)'s weakest joint
+> alongside (LB). ⛔ Do not quote §6e.4f's `P6` result as evidence about CFI.
+
+### 6e.4f ▶ 2026-08-16 — THE SESSION'S EXPERIMENTS, and exactly what each does and does not show
+
+All reader-designed except the last two. ⚠ Each row says what it **cannot** show; that column is the
+point of the table.
+
+| # | experiment | result | ⚠ does NOT show |
+|---|---|---|---|
+| 1 | **The `C6` construction** (reader): 15 gauges, 6 rotated copies of the smallest asymmetric graph as rulers, 6 rotated copies of a payload. `probe_cao_c6_ensemble.py` | 102 vertices (not 152). cells = orbits in every variant; with `P6` the rotations act **freely**, so `Aut_v = 1` and one individualization **discretizes all 102** | anything about large `L` — six labels admits no 2-WL-hard pair |
+| 2 | **Ruler ablation** on that object, from the plain colouring. `probe_cao_c6_ablate.py` | shared frame **+ ruler** → **6** payload cells; ruler deleted → 3; private frames → 3; private frames + ruler → 3. The ruler supplied *which end of its own path a vertex sits at* — invisible to any within-copy refinement | that the channel survives **WL-blindness** — see §6e.4e's box |
+| 3 | **Mirrored-ruler repair** (reader): close the ruler set under `D₆` instead of `Z₆` | `\|Aut\|` 6 → 12, cells **6 → 3** = orbits, positions `[0,5][1,4][2,3]`. Symmetrising **merges orbits**; it does not hide information | that symmetrising can *create* a mixed cell — it moves the target |
+| 4 | **Full `S_L` closure** — every relabelling of every base graph present. `probe_cao_fullclosure.py` | `P5` 3=3 · chair 4=4 · `P5`+chair+`C5` **8=8** · `C6`+`2C3` 2=2 · prism+`K₃,₃` 2=2, all mixed = 0 | ⚠ **"preserves all symmetries ⟹ detects none" is false as stated** — closure kills *labellings*, and `S_L` is not transitive on marked graphs. But none of these objects has a 2-WL-hard pair |
+| 5 | **Is a ruler a bolt-on device?** (reader) `X` = rook(4,4) ⊔ Shrikhande — 32 vertices, 2 orbits, **1 cell**, a genuine 2-WL mixed cell with no CFI needed. `probe_cao_ruler_bolt_on.py` | ⛔ **NO.** private ruler on every vertex → still 1 cell; one shared ruler → 1; rulers + hub → 1. Only attaching to **one** vertex resolves it, and that is individualization | ★ this is the cleanest **limit** on (A): the ruler is not a general orbit oracle. Its power needs members with **readings of a shared frame**, and manufacturing those from an arbitrary graph costs exponential size |
+| 6 | **Falsification search** for the conditional *ruler ⟹ no mixed cell*. Exhaustive over `S_4`-closed families, round by round. `probe_cao_ruler_falsify.py` | 1491 objects; **1487 have a mixed cell at some round** (the search had teeth); mixed at `r=0`: 1487, `r=1`: 1450, `r=2`: 0. **0 falsifiers** | ⚠ **thin margin**: rulers first appear at `r=2` and mixed cells vanish at `r=2`, so the two coincide. *"Both happen once the colouring is fine enough"* is **not excluded** |
+| 7 | **(LB) measured**, real ensemble `L=4`. `probe_cao_lowerbound.py` | all **64/64** copies: the ensemble's within-copy vertex colouring refines the copy's bare 1-WL and 2-WL, and its within-copy **pair** colouring refines the copy's bare 2-WL | that (LB) holds at large `L` — it is proved on paper, measured only here |
+
+### 6e.4g ▶▶▶ THE DECISION PROCEDURE — the only next steps. ⛔ No more prose on this question.
+
+Three sessions of argument have not moved the disjunction. Each item below settles it one way or the
+other and each is a **theorem or an experiment**.
+
+| # | item | settles |
+|---|---|---|
+| **1** | ★ **Formalize the Ruler Lemma** — `Γ` acting on `X`, equivariant `b : Ω → C^X`, invariant tag `y`, one `ω₀` with `y⁻¹(y ω₀) = Γ·ω₀` and `b_{ω₀}` injective ⟹ `Φ` determines the `Γ`-orbit of `b_ω`. Three lines, carrier-generic, belongs beside `CaoCollapse.merge_of_stable_merge` | whether (A)'s **engine** is sound. Cheapest item by far; do it first |
+| **2** | ★★ **Formalize (LB)** — the ensemble's colouring restricted to a copy refines that copy's own 2-WL closure. Proof: within-copy payload pairs are adjacent and cross-copy ones are not, so *"same copy"* is pair-colour-definable; `E`-stability restricts; a stable colouring refining the atoms refines the closure | (A)'s **single load-bearing structural claim**. If it fails, (A) fails outright |
+| **3** | **Formalize (P1)/(P2)** for the ensemble from (LB) + refinement-discreteness of a chosen copy | **1 + 2 + 3 ⟹ (A) is a theorem and (B) is refuted.** Any one of them failing leaves (A) as prose |
+| **4** | **For (B):** either prove §6d.8's lemma (the cross-copy aggregate is `M`-determined at the fixpoint), or **exhibit an object with a ruler AND a surviving mixed cell**. The harness exists (`probe_cao_ruler_falsify.py`); extend it to `L=5`, more rounds, and to carriers that are not the frame encoding | **(B) directly.** One such object refutes (A) without any large-`L` argument |
+
+> ### ⚠ WHAT WOULD *NOT* SETTLE IT — each of these has already been tried this session
+> * Any measurement of the **conclusion** at reachable `L` — vacuous, `M` is complete there.
+> * Any measurement of a fully-symmetrised small object — settled (§6e.4f #4), and it does not reach
+>   the WL-blind regime.
+> * Any further **argument** from either side about washout. Both have been stated at full strength;
+>   they are observationally equivalent (§6e.4e).
 
 ### 6e.5 ▶ FOUR CANDIDATE RESOLUTIONS, best first
 
@@ -2238,6 +2370,32 @@ caveat and outstanding item 6.
 >   (structured-array lexsort is ~50× slower and `L=6` needs 550 passes); a collision could only
 >   **merge** `Φ`-classes, i.e. only ever argue *against* the hypothesis under test — check the
 >   direction before reusing this trick anywhere it could argue *for* one.
+> ### ▶ 2026-08-16 PROBES — the session that withdrew §6e.4d's verdict (§6e.4e–g)
+> ⚠ Five of these are **reader-designed**, and each was built to attack the ruler argument. They are
+> the falsification harness; keep them together.
+> * `probe_cao_lowerbound.py` — ★★ **(LB) measured**, the one load-bearing structural claim: real
+>   ensemble `L=4`, all **64/64** copies, the within-copy vertex *and* pair colourings refine the
+>   copy's own bare 1-WL/2-WL. ~30 s. ▶ §6e.4g item 2 is to formalize exactly this.
+> * `probe_cao_c6_ensemble.py` — the reader's `C6` construction (102 vertices, 15 gauges, rotated
+>   ruler + payload copies), with **exact** automorphisms via VF2 and the CAO start (orbit partition).
+>   Args = payload names. ⚠ `networkx` is needed and was installed for this (`--break-system-packages`).
+> * `probe_cao_c6_ablate.py` — ★★ the ruler ablation: shared frame ± ruler vs private frames ± ruler.
+>   **6 / 3 / 3 / 3 payload cells** — the only measurement on record where the cross-copy channel
+>   supplies something no within-copy refinement can. ⚠ Its within-copy failure is an **automorphism**,
+>   not WL-blindness (§6e.4e) — do not quote it as evidence about CFI.
+> * `probe_cao_fullclosure.py` — ★ full `S_L` closure (every relabelling of every base graph).
+>   `P5`+chair+`C5` → **8 cells = 8 orbits**. ⚠ Uses an O(n²)-memory hashed WL round; the naive round
+>   materializes an `n² × (n+1)` array (1.9 GB at n = 620).
+> * `probe_cao_ruler_bolt_on.py` — ★★★ **the cleanest limit on (A)**: rook(4,4) ⊔ Shrikhande, a real
+>   32-vertex 2-WL mixed cell, and **no uniform ruler attachment resolves it**. A ruler is not a
+>   bolt-on device. Run this before claiming the argument generalizes to anything.
+> * `probe_cao_ruler_falsify.py` — ★★ the falsification harness for *ruler ⟹ no mixed cell*, exhaustive
+>   over `S_4`-closed families with capped rounds. 1491 objects, 1487 with mixed cells, **0
+>   falsifiers**, thin margin. ▶ §6e.4g item 4 is to extend it (`L=5`, more rounds, other carriers).
+>   ⚠⚠ **Two performance traps paid for here:** a `C × C` random-hash table is `O(C²)` and `C` grows
+>   every round (~5000 by the fixpoint at n = 268) — use two `O(C)` tables and multiply; and
+>   ⛔ **`pkill -f <probe name>` kills the launching shell too** (the doc's standing trap) — it ate a
+>   `sed` and two runs this session. Kill by PID.
 > * `probe_cao_kind_census.py` — ★ cells vs orbits for **every vertex kind** of the real ensemble, not
 >   just payload, which is all the record ever counted. `L=4`, `N=332`: payload 20=20, frame 2=2,
 >   **central 11=11**, 0 mixed cells anywhere. Imports `probe_cao_ensemble_frame`; ~31 s.
@@ -2406,7 +2564,13 @@ whose only handle is colour — which presupposes the colouring already separate
 part of the conclusion. ⚠ `ORB ⟹ LEMMA` is **solid** (§6e.1+§6e.2); only the **converse** is gapped.
 ⚠ The retraction does **not** touch the three measurements above.
 
-**✅ 2026-08-15d — THE RETRACTION IS *RESOLVED*, NOT REVERSED (§6e.4d).** The isolation step is
+**⚠⚠ 2026-08-16 — THE PARAGRAPH BELOW OVERSTATES ITS CASE AND IS DOWNGRADED.** *"Re-established with
+a sound proof"* should read *"argued, with the isolation step repaired"*: (LB)/(P1)/(P2) are proved on
+paper and measured at `L = 4` only, and the competing position (B) is **not refuted** (§6e.4e). The
+measurements listed are accurate and stand; the verdict language does not. ⛔ Do not quote *"and
+Construction C is refuted with them"*.
+
+**~~✅~~ 2026-08-15d — THE RETRACTION IS *RESOLVED*, NOT REVERSED (§6e.4d).** The isolation step is
 repaired by **choosing** the probe: a generic (1-WL-discrete) copy is isolated by a **lower** bound on
 the colouring, and the CFI-like copies the conclusion concerns are never used as probes. ⟹ *"`Φ`
 determines the orbit"* and *"§6d.8's LEMMA is false at large `L`"* are **re-established with a sound
@@ -2443,13 +2607,14 @@ what is unresolved).
 > ### ✅ 2026-08-14 — CLOSED: the cross-graph joint (§6f.4e, `DisjointUnion.lean`, gate 130 modules).
 > ### ✅ 2026-08-14 — CLOSED: §6f.5a's (α) — `TupleCov.stableS_wlT`, the standard `k`-WL closure is already `roundTS`-stable ⟹ (iii) is quotable in its literature form. ✅ ALSO PRICED: (β) — `AtomAugment.adequateFor_augment_iff`, an `iff`; R3-as-written looks unpayable, the reframe survives. (γ) the constant is `2k+2` ⟹ `K₈` not `K₁₀` (resolved).
 >
-> ### ⛔⛔⛔ 2026-08-15d — THE FOUR-GAP LIST BELOW IS NOW A LIST ABOUT A **DEAD CONSTRUCTION**.
-> §6e.4d closes Construction C at 2-WL outright, so gap **(i)** is no longer a gap *to a
-> counterexample* — there is no counterexample down this road at all. The list stays because
-> **(iii)**, **T2⁺**, **"any `k`"** and the carrier-generic Lean assets are about the `(i)∘(ii)∘(iii)`
-> *template*, which outlives the carrier and would be reused by any successor construction.
-> ▶ **The genuinely new outstanding item is: formalize the Ruler Lemma** (§6e.4d — three lines,
-> carrier-generic, and the only new mathematics of 2026-08-15d).
+> ### ⚖️ 2026-08-16 — THE FOUR-GAP LIST BELOW IS **STILL LIVE**, and gap (i) is now the (A)/(B) disjunction
+> ⛔ A 2026-08-15d revision of this box said the list was *"about a dead construction"* because §6e.4d
+> closed Construction C. **That is withdrawn.** Gap **(i)** — the collapse — is exactly the undecided
+> disjunction in the top box: (B) is (i) holding, (A) is (i) failing at large `L`. It is neither
+> resolved nor bypassed.
+> ▶ **The four items that would settle it are §6e.4g**, and item 1 (formalize the Ruler Lemma) is the
+> cheapest thing in this file. **(iii)**, **T2⁺**, **"any `k`"** and the carrier-generic Lean assets
+> remain as listed — they are about the `(i)∘(ii)∘(iii)` *template*, which outlives any one carrier.
 >
 > ### ⛔⛔ THE FOUR GAPS BETWEEN HERE AND A COUNTEREXAMPLE — memorize these before quoting anything
 > **(i) the collapse (§6e.4) — the ONLY mathematics, and as of 2026-08-15 it has NO PLAN: R1 and R3

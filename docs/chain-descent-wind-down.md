@@ -1100,13 +1100,21 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > ▶▶ **Its record is its own doc: [`chain-descent-cao-carrier-falsifiers.md`](./chain-descent-cao-carrier-falsifiers.md)**
 > — read its **`▶▶▶ FRESH PICKUP`** block, not this one, for that track.
 >
-> > ### ▶ STATE STAMP, 2026-08-15 (end of session) — everything below this box is the 08-13 picture
-> > **No counterexample at 2-WL.** The refutation template is `(i) ∘ (ii) ∘ (iii)`: **(ii) is proved**
-> > (`FrameTransfer.merge_of_tuple_merge`), **(iii) is quotable in its standard `k`-WL form**
-> > (`TupleCov.stableS_wlT`), and **(i) — the collapse — is OPEN WITH NO PLAN**: both designated routes
-> > (R1, R3) are dead and it reduces to one analytic question, *does `Φ(c,i)` determine the `S_L`-orbit
-> > of `a(c,i)`?* ⛔ Untestable by computation — `M`-2-WL is **complete** at every reachable `L`.
-> > ✅ **The 1-WL results below are unaffected**; every 2026-08-15 negative is about rung 2 only.
+> > ### ▶ STATE STAMP, 2026-08-16 (supersedes the 08-15 stamp; everything below this box is the 08-13 picture)
+> > **No counterexample at 2-WL, and the question is UNDECIDED between two named positions.** The
+> > refutation template is `(i) ∘ (ii) ∘ (iii)`: **(ii) is proved** (`FrameTransfer.merge_of_tuple_merge`),
+> > **(iii) is quotable in its standard `k`-WL form** (`TupleCov.stableS_wlT`), and **(i) — the collapse
+> > — is exactly the open disjunction**: at large `L` the within-copy channel must fail, and either
+> > **(A)** the cross-copy channel supplies the orbit (⟹ no mixed cell ever, the construction dies) or
+> > **(B)** it supplies nothing the copy lacks (⟹ the ensemble ≡ the poly-size encoding, a CFI payload
+> > merges, the construction works). ⛔ **Neither is proved, and the two are observationally equivalent
+> > at every computable size** — `M`-2-WL is complete at every reachable `L`, so every measurement that
+> > looked decisive was forced.
+> > ⚠⚠ An 08-15 stamp said *"(i) is OPEN WITH NO PLAN"* and a later revision of the carrier doc said
+> > *"Construction C is dead at 2-WL"*. **Both are withdrawn**: there is now a plan, and it is a
+> > decision procedure of four verifiable items (carrier doc §6e.4g), the cheapest being to formalize
+> > the three-line **Ruler Lemma**.
+> > ✅ **The 1-WL results below are unaffected**; every rung-2 negative is about rung 2 only.
 > > ✅ Gate **132 modules**; eleven CAO modules, all axiom-clean.
 
 One-screen version of the 08-13 picture:
