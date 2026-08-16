@@ -1,0 +1,10 @@
+[    0.0s] B2 THE TEST, with ruler orbit, FAITHFUL PLATEAU: 790 copies, handicap=2
+[    3.9s]   N = 4770 vertices
+[   96.3s]     round 1: 31222 pair classes
+[  178.5s]     round 2: 31417 pair classes
+[  258.6s]     stable after 3 rounds, 31417 pair classes
+[  264.6s]   payload cells 8   S_6-orbits 8   MIXED CELLS 0
+[  264.6s]   C6 cells [31412]   2C3 cells [31411]
+[  264.6s]   ==> C6 and 2C3 SEPARATED: True
+[  264.6s]   ruler dots occupy 6 cells (6 = fully split)
+

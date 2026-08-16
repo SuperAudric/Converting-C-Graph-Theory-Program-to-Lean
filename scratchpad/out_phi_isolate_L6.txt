@@ -1,0 +1,14 @@
+[    0.0s] L=6: 32768 copies, M(c) = 36 vertices, 196608 marked payload vertices
+[    6.4s] marked-graph iso classes (ground truth orbits): 544
+
+ r   y-cls  Phi-cls  (y,Phi)  washout  Phi=orb       inj  isolated  iso+inj
+----------------------------------------------------------------------------------
+ 0       1        6        6    False    False         0         0        0
+[  180.9s]   round 1: 192 free-pair classes
+ 1       6      544      544    False     True         0         0        0
+
+orbits (ground truth) = 544
+columns:  y-cls = #tag classes | Phi-cls = #Phi values (<= orbits, Phi is orbit-invariant)
+          washout = y determines Phi (section 6d.8 LEMMA) | Phi=orb = Phi determines the orbit
+          inj = profiles injective on typed slots | isolated = y-class is a single orbit
+          iso+inj = ISOLATED INJECTIVE PROBES -- the predicted switch for Phi=orb

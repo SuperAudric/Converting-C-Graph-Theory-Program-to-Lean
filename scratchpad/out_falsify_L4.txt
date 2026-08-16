@@ -1,0 +1,19 @@
+L=4: 11 graph iso classes, 64 labelled graphs  ==> 2048 S_L-closed families (exhaustive)
+  families tested: 1491   families with a mixed cell at SOME round: 1487
+  round : families with >=1 mixed cell  (search POWER -- if these are 0 the test is empty)
+    r=0 :  1487 / 1491
+    r=1 :  1450 / 1491
+    r=2 :     0 / 1491
+    r=3 :     0 / 1491
+    r=4 :     0 / 1428
+
+  joint (first round with a RULER, last round with a MIXED cell) -> #families:
+    first-ruler=   2  last-mixed=   0  : 8
+    first-ruler=   2  last-mixed=   1  : 1228
+    first-ruler=None  last-mixed=   0  : 29
+    first-ruler=None  last-mixed=   1  : 222
+    first-ruler=None  last-mixed=None  : 4
+
+  FALSIFIERS (ruler at round r, mixed cell still at r+2): 0
+
+  (115s)
