@@ -34,21 +34,61 @@
 > | argued by | §6e.4d — the **Ruler Lemma** plus (LB), (P1), (P2) | §6d/§6e — the **collapse**, and §6d.8's lemma |
 > | supporting measurement | the ruler channel demonstrably separates what a copy provably cannot (§6e.4f, `P6`: 3 → 6 cells) | `E ⊑ M` round by round at `L=4`, and the cross-copy aggregate is `M`-determined at `L=4` |
 > | ⚠ why that measurement is weak | taken where the within-copy channel was **also** available | taken where `M` is **complete**, so it was forced (above) |
-> | status | **NOT PROVED.** A proof sketch exists; its premises are measured only at `L = 4` | **NOT PROVED.** §6d.8's lemma is open; ORB, its one clean sufficient condition, is false at large `L` |
+> | status | **NOT PROVED.** ✅ 2026-08-16b: its engine and *both* premises are now **theorems** (§6e.4g items 1–3, Lean); ⛔ what is still missing is the **instantiation** — see the green block below | **NOT PROVED.** §6d.8's lemma is open; ORB, its one clean sufficient condition, is false at large `L` |
 >
 > ⛔ **Neither side is established, and this doc must not be read as endorsing either.** Earlier
 > revisions of §6e.4a/b/d declared (A) proved and Construction C dead; that verdict is **withdrawn**
 > — the argument stands as an argument, not as a settled result.
 >
+> ### ✅✅ 2026-08-16b — **§6e.4g ITEMS 1, 2 AND 3 ARE DISCHARGED IN LEAN.** The disjunction is **still open**, and it is now localized to one step.
+> Three new gate-listed modules, all `[propext, Classical.choice, Quot.sound]`, no `sorry`:
+> * **item 1** `ChainDescent/RulerLemma.lean` — ★ `ruler` and `phi_eq_iff_orbit`: carrier-generic, no
+>   graphs, and with a **non-vacuity witness where `Φ` is strictly finer than the tag**. (A)'s engine
+>   is sound; it is no longer in dispute. ⚠ Two corrections to §6e.4d's prose are recorded in the
+>   module header (the conclusion is the **orbit**, not the multiset over `Γ`; hypothesis (i) is used
+>   in one direction only).
+> * **item 2** `ChainDescent/CopyRestrict.lean` — ★★★ **`lb` is (LB) as a theorem, at every `L`, at the
+>   real object `Ensemble.eRoot`** — previously paper + `L=4`. It carries two pieces worth naming:
+>   `restrict_sig_eq` (*stability restricts to any colour-definable sub-carrier* — carrier-generic, and
+>   the genuinely new lemma) and **`encoded_edge_eq` = §6b at the object**, proved via the individualized
+>   centre being the unique sort-3 vertex.
+> * **item 3** `ChainDescent/CopyProbe.lean` — ★★ `tag_isolates` **(P1)** and `profile_injective`
+>   **(P2)**, from (LB) plus discreteness of the *chosen* copy. Corollary **`sameLabelOrbit_of_tag`:
+>   `Ensemble.MixedCell` can never be witnessed with a refinement-discrete proper copy on the left.**
+>
+> ⛔⛔ **The doc's own claim *"1+2+3 ⟹ (A) is a theorem and (B) is refuted"* was TOO STRONG, and doing
+> the work is what showed it.** Three things sit between the items and (A), and *all three are about the
+> instantiation, not the mathematics*:
+> 1. **the coherence chain** (§6e.4d.3's first two arrows): *diagonal colour ⟹ `Φ_E`*. Reachable with
+>    the same machinery — `sig_singleton_snd` gives *"a pair colour determines its endpoints' diagonal
+>    colours"*, and `sig_restrict` at the frame injection gives *"a pair colour determines the `Align`
+>    of the two slot profiles"*. Not written.
+> 2. **the instantiation** of `RulerLemma` at the ensemble (`Γ = S_L`, `X` = typed slots, `Ω` = payload
+>    vertices, `b` = the slot profile, `y` = the diagonal colour). Equivariance is free from
+>    `Ensemble.invG_eRoot`. ⛔ **But `Ensemble`'s slots are ORDERED**, so the ruler's reading is 2-to-1
+>    (twins) and `RulerLemma`'s hypothesis (ii) fails as stated. ★ The fix is identified and cheap:
+>    weaken `eq_of_align_eq`'s *"`v` injective"* to *"`v` refines `u'`"*, which every reading satisfies
+>    because readings are twin-invariant. `hiso` additionally needs `Ω` cut down to **proper symmetric**
+>    copies — a model refactor of `Ensemble.lean`, not a mathematical obstacle.
+> 3. **existence of a refinement-discrete copy** in `E(L)` — Babai–Erdős–Selkow plus §6e.4d.2's
+>    closure argument. Measured (5760/32768 at `L=6`); not formalized, and it is a statement about the
+>    payload family, not about the ensemble.
+>
+> ⟹ ★★★ **What is now machine-checked is that the ruler is isolated and that it works as a ruler.
+> What is NOT checked is that the `Align` channel reaches the NON-discrete copies** — and that is
+> exactly the sentence (A) asserts and (B) denies. The disagreement has gone from *"is the whole
+> argument sound"* to *"does one identified, writable chain of coherence steps go through at the real
+> object"*. ⛔ Do not read the three green items as (A).
+>
 > ### ▶▶ NEXT STEPS — verifiable only. Do not add prose to this file.
-> **§6e.4g is the decision procedure.** Each item settles the disjunction one way or the other and
-> each is a theorem or an experiment, never an argument:
-> 1. **Formalize the Ruler Lemma** (3 lines, carrier-generic). Settles whether (A)'s engine is sound.
-> 2. **Formalize (LB)** — *the ensemble's colouring inside a copy refines that copy's own 2-WL.* This
->    is (A)'s single load-bearing structural claim; measured 64/64 at `L=4`, not machine-checked.
-> 3. **Formalize (P1)/(P2) for the ensemble.** 1+2+3 ⟹ (A) is a theorem and (B) is refuted.
-> 4. **For (B): prove §6d.8's lemma**, or exhibit an object with a ruler *and* a surviving mixed cell.
+> **§6e.4g is the decision procedure**, items 1–3 now done. What remains:
+> 4. **For (A):** the three numbered gaps above, in order 1 → 2 → 3. Item 1 is pure bookkeeping with
+>    machinery that already exists; item 2 needs the `Ensemble` model moved to unordered proper slots.
+> 5. **For (B): prove §6d.8's lemma**, or exhibit an object with a ruler *and* a surviving mixed cell.
 >    The falsification search (§6e.4f) is the harness; it found 0 in 1491 objects, with a thin margin.
+>    ★ (B) is now the *cheaper* side to attack: one object refutes (A) with no large-`L` argument, and
+>    `sameLabelOrbit_of_tag` tells you exactly where it cannot live (any copy the search uses as the
+>    ruler is off the table, so the mixed pair must be two non-discrete copies).
 >
 > ⚠ **Everything below §6e.4d is the RECORD, including several retractions.** It is kept so that
 > withdrawn claims are not silently re-inherited (§9 lists them), not because it is a reading path.
@@ -1501,7 +1541,15 @@ Both are supplied by **one generic copy**, and the fact that supplies them is a 
 
 > ### ▶ **(LB) `col_E` restricted to a copy refines that copy's own bare 2-WL.** Proof: within-copy payload pairs are adjacent (the payload is a clique) and cross-copy ones are not, so *"z is in the same copy as u"* is determined by `col_E(u,z)`; hence `E`-stability restricts to within-copy stability, and by §6b the within-copy pair colours already see the encoded adjacency. A stable colouring refining the atoms refines the 2-WL closure. ∎ ⚠ Level-independent, and independent of the collapse (i).
 
-✅ **(LB) is now MEASURED, not only argued** — `probe_cao_ruler`/`probe_cao_lowerbound.py`, real
+> ### ✅✅ **2026-08-16b — (LB) IS NOW A THEOREM**, at every `L`, at the real object:
+> `ChainDescent/CopyRestrict.lean`, **`lb : Refines (eCopy L c) (wl2G (hInit c))`** for every
+> `SymCopy` copy `c`. The proof is the paragraph above, in three parts: `restrict_sig_eq` (*stability
+> restricts to a colour-definable sub-carrier* — carrier-generic, and the part that was actually
+> load-bearing), `centre_readout` + `frame_type_eq` (the individualized `m(base)` is the **unique**
+> sort-3 vertex, so any pair colour reads a frame vertex's type), and `encoded_edge_eq` = **§6b at the
+> object**. ⚠ `SymCopy` is forced by `Ensemble`'s ordered-slot model, not by the mathematics.
+
+✅ **(LB) was also MEASURED before that** — `probe_cao_ruler`/`probe_cao_lowerbound.py`, real
 ensemble `L=4`, **all 64 copies**: the ensemble's within-copy vertex colouring refines the copy's bare
 1-WL (64/64) and its bare 2-WL diagonal (64/64); the within-copy **pair** colouring refines the copy's
 bare 2-WL pair colouring (64/64); sanity, it refines the copy's `Aut`-orbits (64/64).
@@ -1636,10 +1684,12 @@ which is what (P1)/(P2) use and what `probe_cao_ruler_exists.py` measures.
 
 #### 6e.4d.5 ⚠ WHAT IS PROVED, ARGUED, AND PINNED — read before quoting
 
-> ### ⛔ TOP-LINE, 2026-08-16: **nothing in §6e.4d is machine-checked, and its conclusion is not
-> established.** The list below is accurate about the *internal* status of each step; it does not
-> license the section's original verdict. See §6e.4e for the competing position and §6e.4g for the
-> four items that would actually settle it.
+> ### ⛔ TOP-LINE, **corrected 2026-08-16b**: the Ruler Lemma, (LB), (P1) and (P2) **are now
+> machine-checked** (`RulerLemma.lean`, `CopyRestrict.lean`, `CopyProbe.lean`) — but the section's
+> **conclusion is still not established**, because the *instantiation* of the lemma at the ensemble is
+> not written and one of its two hypotheses fails as stated in the ordered-slot model. See the top
+> box's green block for the exact remaining gaps, §6e.4e for the competing position, §6e.4g for what is
+> left to do. ⛔ The list below is accurate about each step; it does not license the original verdict.
 
 * **Proved (paper-level, not yet Lean):** the Ruler Lemma (§6e.4d, three lines, carrier-generic and a
   natural Lean target); *`col_E` restricted to a copy is finer than that copy's bare 2-WL*; (P1) and
@@ -1731,12 +1781,15 @@ point of the table.
 Three sessions of argument have not moved the disjunction. Each item below settles it one way or the
 other and each is a **theorem or an experiment**.
 
-| # | item | settles |
-|---|---|---|
-| **1** | ★ **Formalize the Ruler Lemma** — `Γ` acting on `X`, equivariant `b : Ω → C^X`, invariant tag `y`, one `ω₀` with `y⁻¹(y ω₀) = Γ·ω₀` and `b_{ω₀}` injective ⟹ `Φ` determines the `Γ`-orbit of `b_ω`. Three lines, carrier-generic, belongs beside `CaoCollapse.merge_of_stable_merge` | whether (A)'s **engine** is sound. Cheapest item by far; do it first |
-| **2** | ★★ **Formalize (LB)** — the ensemble's colouring restricted to a copy refines that copy's own 2-WL closure. Proof: within-copy payload pairs are adjacent and cross-copy ones are not, so *"same copy"* is pair-colour-definable; `E`-stability restricts; a stable colouring refining the atoms refines the closure | (A)'s **single load-bearing structural claim**. If it fails, (A) fails outright |
-| **3** | **Formalize (P1)/(P2)** for the ensemble from (LB) + refinement-discreteness of a chosen copy | **1 + 2 + 3 ⟹ (A) is a theorem and (B) is refuted.** Any one of them failing leaves (A) as prose |
-| **4** | **For (B):** either prove §6d.8's lemma (the cross-copy aggregate is `M`-determined at the fixpoint), or **exhibit an object with a ruler AND a surviving mixed cell**. The harness exists (`probe_cao_ruler_falsify.py`); extend it to `L=5`, more rounds, and to carriers that are not the frame encoding | **(B) directly.** One such object refutes (A) without any large-`L` argument |
+| # | item | settles | status |
+|---|---|---|---|
+| **1** | ★ **Formalize the Ruler Lemma** — `Γ` acting on `X`, equivariant `b : Ω → C^X`, invariant tag `y`, one `ω₀` with `y⁻¹(y ω₀) = Γ·ω₀` and `b_{ω₀}` injective ⟹ `Φ` determines the `Γ`-orbit of `b_ω` | whether (A)'s **engine** is sound | ✅ **DONE 2026-08-16b** — `RulerLemma.ruler`, `phi_eq_iff_orbit`, plus a non-vacuity witness (`Φ` strictly finer than the tag) |
+| **2** | ★★ **Formalize (LB)** — the ensemble's colouring restricted to a copy refines that copy's own 2-WL closure | (A)'s **single load-bearing structural claim** | ✅ **DONE 2026-08-16b** — `CopyRestrict.lb`, every `L`, real object; carries `restrict_sig_eq` and **§6b** (`encoded_edge_eq`) |
+| **3** | **Formalize (P1)/(P2)** for the ensemble from (LB) + refinement-discreteness of a chosen copy | ~~1+2+3 ⟹ (A)~~ ⛔ **that claim was too strong** | ✅ **DONE 2026-08-16b** — `CopyProbe.tag_isolates`, `profile_injective`, `transfer`; ★ corollary `sameLabelOrbit_of_tag` |
+| **4a** | ▶▶ **The coherence chain** (§6e.4d.3's arrows 1–2): *diagonal colour ⟹ `Φ_E`*. Machinery exists — `CopyProbe.sig_singleton_snd` for *"a pair colour determines endpoint diagonal colours"*, `CopyRestrict.sig_restrict` at the frame injection for *"a pair colour determines `Align`"* | pure bookkeeping; do it first | ▶ **NOT WRITTEN** |
+| **4b** | ▶▶ **Instantiate `RulerLemma` at the ensemble.** Equivariance is free (`Ensemble.invG_eRoot`). ⛔ Blocked on the **ordered-slot** model: the ruler's reading is 2-to-1 on twins, so hypothesis (ii) fails. ★ Fix: weaken `eq_of_align_eq`'s *"`v` injective"* to *"`v` refines `u'`"* (every reading is twin-invariant), and cut `Ω` down to **proper symmetric** copies | **(A) directly**, given 4a and 4c | ▶ **NOT WRITTEN** — needs an `Ensemble.lean` model refactor |
+| **4c** | **Existence of a refinement-discrete copy** in `E(L)` (Babai–Erdős–Selkow + §6e.4d.2) | (A)'s remaining input | ▶ measured only (5760/32768 at `L=6`) |
+| **5** | **For (B):** either prove §6d.8's lemma (the cross-copy aggregate is `M`-determined at the fixpoint), or **exhibit an object with a ruler AND a surviving mixed cell**. The harness exists (`probe_cao_ruler_falsify.py`); extend it to `L=5`, more rounds, and to carriers that are not the frame encoding | **(B) directly.** One such object refutes (A) without any large-`L` argument | ▶ open. ★ `sameLabelOrbit_of_tag` narrows the search: **both** members of the mixed pair must be non-discrete |
 
 > ### ⚠ WHAT WOULD *NOT* SETTLE IT — each of these has already been tried this session
 > * Any measurement of the **conclusion** at reachable `L` — vacuous, `M` is complete there.
@@ -2403,9 +2456,9 @@ caveat and outstanding item 6.
 >   mechanism does not run inside a copy and central–central pairs see only `#{k : g_k = h_k}`, whose
 >   distribution over all `h` is `g`-independent. It is nonetheless complete — via the same ruler.
 
-### 8a. ▶▶ THE LEAN LAYER — all **eleven** modules, and exactly what each one owes
+### 8a. ▶▶ THE LEAN LAYER — all **fourteen** modules, and exactly what each one owes
 
-**All are gate-listed in `scripts/build.sh`; the gate is 132 modules, ~239–264 s, and passes.**
+**All are gate-listed in `scripts/build.sh`; the gate is 135 modules, ~280–360 s, and passes.**
 ⚠ **Count modules with `grep -c '✔ ChainDescent'`, not `grep -c '✔'`** — the latter also matches the
 *"serial build complete"* line, which is why earlier numbers in this doc's history ran one high. Every
 declaration is `[propext, Classical.choice, Quot.sound]` or a subset — no `sorry`, no custom axiom, no
@@ -2424,19 +2477,25 @@ declaration is `[propext, Classical.choice, Quot.sound]` or a subset — no `sor
 
 | `DisjointUnion` | ★ 2-WL on `A ⊔ B`: side-blind `dInit`, the `sigL`/`sigR` split, **`Blocked`** (cross pairs carry only the two endpoint diagonal colours; ★ `diagEq` is where *"the two sides are WL-equivalent"* enters, used in exactly one case), `stable_of_blocked`, ★★★ **`merge_of_blocked`**, and a non-vacuity witness that **merges** (`wl2G_double_merge`) | — ⚠ supplies no `Blocked` witness for a CFI pair; that is (iii) |
 | `TupleCov` | ★★★ **`stableS_iff`** (`roundTS`-stability **=** `roundT`-stability **+** `Cov`, nothing else) · **`subst_of_stable`** (the extraction lemma, from stability alone) · `covPerm_wlT` (permutations, by induction **on the rounds**) · `cov_idem_of_stable` · `exists_perm_comp_idem` (σ = π∘ρ) ⟹ ★★★ **`stableS_wlT`** | ⚠ two side conditions are **instantiation, not mathematics**: `CovPerm` of the start colouring and `SeesEqAll` of the closure — both free for the atomic type, neither written for the start `FrameTransfer` uses |
+| ★ `RulerLemma` (item 1) | **carrier-generic**, no graphs: `Align`, `Phi`, `Equivariant`, `Invariant`, `map_univ_smul`, ★ **`eq_of_align_eq`** (the decode), `align_smul`, ★★★ **`ruler`**, `phi_smul`, `phi_eq_iff_orbit`; `Witness` = a non-vacuity instance where `Φ` is **strictly finer** than the tag | ⚠ `ruler`'s (ii) is *"`b ω₀` injective"* — **too strong for the ordered-slot ensemble**; the identified fix is *"`b ω₀` refines the other reading"* |
+| ★★★ `CopyRestrict` (item 2) | ★★★ **`restrict_sig_eq`** (stability restricts to a colour-definable sub-carrier — carrier-generic), `sig_restrict`/`sig_singleton`, `exists_copy_pred`, `centre_readout`, `frame_type_eq`, ★ **`encoded_edge_eq` = §6b at the object**, `eCopy_stable`, ★★★ **`lb` = (LB)**, `eCopy_injective_of_discrete` | ⚠ `SymCopy` is carried wherever the encoded edge is pinned — an ordered-slot artifact |
+| ★★ `CopyProbe` (item 3) | `sig_singleton_snd`, `frame_type_eq'`, `frame_partner`, ★★★ **`transfer`** (a discrete copy is a coordinate system), ★ **`profile_injective` = (P2)**, ★★ **`tag_isolates` = (P1)**, ★ **`sameLabelOrbit_of_tag`** (no mixed cell touches a discrete proper copy) | ⛔ owes the **coherence chain** (§6e.4g item 4a) and the **instantiation** (4b); `hd` (the copy's restriction is injective) is a hypothesis, discharged by `lb` + the copy's own discreteness |
 | `AtomAugment` | ★★★ **`adequateFor_augment_iff`** — augmenting the atoms costs **exactly** `Refines (pull b) extra` (an `iff`; it works because `Adequate.blocks` is **start-colouring-free**) · `merge_of_tuple_merge_aug` (the augmented consumer, with the cost visible as `hex`) · ★ **`adequateFor_augment_self`** = the ceiling | — |
 
-⛔ **NOT in the Lean layer, and each is a real gap:** the **collapse** (§6e.4 — ⚠⚠ and as of
-2026-08-15 it has **no proof route at all**, §6e.4c; do not start Lean work on it before the washout
-question is settled on paper) · **CFI's WL-blindness** (literature; ✅ now quotable in its *standard*
+⛔ **NOT in the Lean layer, and each is a real gap:** ★★ **(A)'s coherence chain and instantiation**
+(§6e.4g items 4a/4b — the two things standing between `RulerLemma`+`CopyRestrict`+`CopyProbe` and (A);
+4a is bookkeeping, 4b needs `Ensemble.lean` moved to unordered proper slots) · the **collapse**
+(§6e.4 — ⚠⚠ and as of 2026-08-15 it has **no proof route at all**, §6e.4c; do not start Lean work on
+it before the washout question is settled on paper) · **CFI's WL-blindness** (literature; ✅ now quotable in its *standard*
 `k`-WL form thanks to `TupleCov`) · **T2⁺** (`Aut_{m(base)}` is *exactly* the label group; needs
 `Aut(T(n)) = Sym n`) · **T3** (the frame's cells are the position classes) · the **triangle frame**
 `TF(E)` (§6g, queued — ★ **and it is the natural object if the reader's washout reading is right**,
 since it is poly-size where the ensemble is exponential).
 
-▶ **The mechanical Lean items still owed, cheapest first:** `FrameTransfer.refinesAtoms` ·
-`TupleCov`'s two side conditions · `CaoCollapse.FrameClassComplete` · **T2⁺** · `TF(E)`.
-⚠ `PublicTheoremIndex.md` has **no rows for any of the eleven** — regen is
+▶ **The mechanical Lean items still owed, cheapest first:** ★ §6e.4g **4a** (the coherence chain) ·
+`FrameTransfer.refinesAtoms` · `TupleCov`'s two side conditions · `CaoCollapse.FrameClassComplete` ·
+§6e.4g **4b** (unordered-slot `Ensemble`, then the instantiation) · **T2⁺** · `TF(E)`.
+⚠ `PublicTheoremIndex.md` has **no rows for any of the fourteen** — regen is
 `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`, ⚠⚠ it recomputes the **Notes**
 column and can resurrect **phantom rows**, so verify *unmatched deletions = 0*. Deliberately not run.
 

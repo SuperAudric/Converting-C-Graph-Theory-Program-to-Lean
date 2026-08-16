@@ -163,6 +163,9 @@ MODULES=(
   ChainDescent.DisjointUnion          # 2-WL on A ⊔ B: the block lemma, cross-component merge (§6f.3)
   ChainDescent.TupleCov               # roundTS = standard k-WL on a closure: the (α) bridge (§6f.5a)
   ChainDescent.AtomAugment            # the price of augmenting the atoms: R3's (ii)-cost (§6f.5a β)
+  ChainDescent.RulerLemma             # ★ §6e.4g item 1: the RULER LEMMA, carrier-generic (Φ ⟹ orbit)
+  ChainDescent.CopyRestrict           # ★ §6e.4g item 2: (LB) — stability restricts to a copy; §6b at the object
+  ChainDescent.CopyProbe              # ★ §6e.4g item 3: (P1)/(P2) — a discrete copy is a ruler
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object

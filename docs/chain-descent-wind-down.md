@@ -1112,10 +1112,18 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > > looked decisive was forced.
 > > ⚠⚠ An 08-15 stamp said *"(i) is OPEN WITH NO PLAN"* and a later revision of the carrier doc said
 > > *"Construction C is dead at 2-WL"*. **Both are withdrawn**: there is now a plan, and it is a
-> > decision procedure of four verifiable items (carrier doc §6e.4g), the cheapest being to formalize
-> > the three-line **Ruler Lemma**.
+> > decision procedure of verifiable items (carrier doc §6e.4g).
+> > ✅✅ **2026-08-16b — items 1, 2 and 3 of that procedure are DISCHARGED IN LEAN.** `RulerLemma.lean`
+> > (the Ruler Lemma, carrier-generic, with a non-vacuity witness), `CopyRestrict.lean` (**(LB) as a
+> > theorem at every `L` at the real object**, carrying §6b's encoded-edge readout), `CopyProbe.lean`
+> > ((P1)/(P2), plus ★ *no mixed cell can be witnessed with a refinement-discrete proper copy*).
+> > ⛔⛔ **The disjunction is STILL UNDECIDED**, and the doc's old claim *"1+2+3 ⟹ (A)"* was too
+> > strong: what remains is the **instantiation** — the coherence chain (§6e.4d.3's arrows), moving
+> > `Ensemble.lean` to unordered proper slots so the ruler's reading is injective, and the existence of
+> > a discrete copy. ★ The disagreement is now localized to one writable chain of steps rather than to
+> > the soundness of the argument.
 > > ✅ **The 1-WL results below are unaffected**; every rung-2 negative is about rung 2 only.
-> > ✅ Gate **132 modules**; eleven CAO modules, all axiom-clean.
+> > ✅ Gate **135 modules, ~309 s**; fourteen CAO modules, all axiom-clean.
 
 One-screen version of the 08-13 picture:
 > * a `Q₄` carrier is a **designed 1-WL counterexample** (`n = 352`), and the gauge ensemble is a
