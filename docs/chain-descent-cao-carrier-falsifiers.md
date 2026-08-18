@@ -80,42 +80,59 @@
 > argument sound"* to *"does one identified, writable chain of coherence steps go through at the real
 > object"*. ⛔ Do not read the three green items as (A).
 >
-> ### ✅⛔ 2026-08-16c — **ITEM 4a IS DONE; 4b IS HALF DONE AND TURNED UP A MODEL DEFECT**
-> Two more gate-listed modules, axiom-clean:
+> ### ✅✅✅ 2026-08-16c — **4a AND 4b ARE DONE. (A) IS NOW A THEOREM AT THE OBJECT, GIVEN ONE DISCRETE COPY.**
 > * **4a ✅** `ChainDescent/Coherence.lean` — ★★★ **`phi_determined`: two payload vertices with the same
->   closure diagonal colour have the same `RulerLemma.Phi`.** Unconditional, every `L`, real object. So
->   the observable the Ruler Lemma consumes **is** delivered by 2-WL here; §6e.4d.3's arrows 1–2 are no
->   longer prose. ⚠ One thing in it was not bookkeeping: **`eRoot` is not a symmetric function**
->   (`eInit` records the two sorts in order), so the chain needs `Transposable` — *each of `col(u,v)`,
->   `col(v,u)` determines the other* — which is proved and preserved by the round.
-> * **4b, the unconditional half ✅** `ChainDescent/RulerAtEnsemble.lean` — `bE_equivariant`,
->   `yE_invariant`: **the ensemble is a bona fide instance of the abstract setup**, straight off
->   `Ensemble.invG_eRoot`. `RulerLemma.ruler'` weakens hypothesis (ii) from *"`b ω₀` injective"* to
->   *"`b ω₀` refines the reading being decoded"*, as planned. ⟹ **`readings_translate` is (A) reduced
->   to exactly two named hypotheses**: `TagIsolates` (i) and `RulerRefines` **(R)**.
+>   closure diagonal colour have the same `RulerLemma.Phi`.** Unconditional, every `L`. ⚠ Not pure
+>   bookkeeping: **`eRoot` is not a symmetric function** (`eInit` records the two sorts in order), so
+>   the chain needs `Transposable` — each of `col(u,v)`, `col(v,u)` determines the other.
+> * **4b1 ✅ THE MODEL IS NOW ALIGNED WITH §3.** `Ensemble.EColr` was `ESlot L → Bool` — *all* slot
+>   colourings, i.e. also **directed** copies and self-loop slots, neither of which §3 has ("every
+>   **graph** on the label set"; the gadget is "symmetric in `i,j` by construction"). Arithmetic check:
+>   every probe in this record builds `2^C(L,2)` copies (`L=4`: 64 copies, `N = 332`); the old Lean
+>   object had `2^{L²}` (`L=4`: 65,536 copies, `N ≈ 327,712`). **`EColr` is now a symmetric irreflexive
+>   colouring — a graph.** ⚠ The directed variant is a *different, larger design* (it needs a 6-vertex
+>   gauge structure carrying the two directions independently); it is not this one.
+>   ★ **Nothing the construction has was dropped, and this was checked, not assumed:** all `2^C(L,2)`
+>   graphs remain; the gauge is still transitive on them; and the label transposition is still an
+>   automorphism fixing `m(base)` (`Ensemble.eAdj_eact`, `esort_eact`, `eact_base` all still compile —
+>   that is §3.2a's actual design obligation, and it is the one that would have broken).
+> * **4b2 ✅ BOTH HYPOTHESES DISCHARGED** — `ChainDescent/RulerAtEnsemble.lean`.
+>   `bE_equivariant`/`yE_invariant` (unconditional, off `invG_eRoot`) make the ensemble a bona fide
+>   instance of `RulerLemma`. Then, **because a copy is a graph**, the two frame symmetries a reading
+>   cannot see are automorphisms: `twin_blind` (from **symmetry** — the slot transposition) and
+>   `deg_blind` (from **irreflexivity** — the self-loop slots). Those are exactly the fibres a ruler is
+>   allowed to have, so ★★★ **`rulerRefines_of_discrete` = (R)** and ★★★ **`tagIsolates_of_discrete`
+>   = (i)** are theorems.
 >
-> ⛔⛔ **AND THEN (R) FAILED — `not_rulerRefines` is a theorem.** The slot transposition `(i,j) ↦ (j,i)`
-> is an **automorphism of `Ensemble`** (`invG_tswap`). Hence a **symmetric** copy's payload vertex is
-> blind to the twin frame vertices `f(k,t)`/`f(swap k,t)` (`twin_blind`), while a **non-symmetric**
-> copy's vertex sees them — and `Ensemble.EColr` is *all* slot-colourings, so both are present.
-> ⟹ **no symmetric copy can serve as the ruler**, i.e. none of the copies Construction C actually uses.
-> `readings_translate` is therefore **vacuous at the current Lean model**.
-> ★★★ **This is a defect of the MODEL, not of the argument, and it is NOT a point for (B).** The same
-> defect blocks (i): `sameLabelOrbit_of_tag` needs *every* copy `SymCopy` + `Proper`, and this copy set
-> is larger than that. ▶ **One change fixes both: make a slot a NON-DEGENERATE UNORDERED pair, so a
-> copy IS a graph and the twins do not exist.** Then (R) follows from `twin_blind` + (P2), and (i) from
-> `sameLabelOrbit_of_tag`. Everything else survives unchanged.
+> > ### ★★★★ **`RulerAtEnsemble.readings_translate_of_wl2G_discrete`**
+> > **If ONE copy of `E(L)` has a discrete 2-WL closure of its own, then any two payload vertices
+> > sharing a closure colour read the shared frame identically up to a relabelling of the labels.**
+> > Every `L`, at the real object, `[propext, Classical.choice, Quot.sound]`.
 >
-> ⚠⚠ **A THIRD OPEN INPUT SURFACED, and §6e.4g's item list never named it:** `readings_translate`
-> concludes the two **readings** are `S_L`-translates. Getting from there to *"the two payload vertices
-> are in one label orbit"* — which is what `Ensemble.MixedCell` is about — needs §6e.4a's
-> ***"`a` determines `c`"***, which is **argued + measured, not proved**.
+> ⚠⚠ **This is not yet *"no mixed cell"*, and exactly two inputs are missing — both are about INPUTS,
+> not about the cross-copy channel:**
+> * **4b3** §6e.4a's ***"`a` determines `c`"*** — the theorem gives translate **readings**;
+>   `Ensemble.MixedCell` is about **vertices**. Argued + measured, **not proved**. ⚠ The profile's
+>   *atomic* part only reveals `c` on slots incident to the marked vertex, so this is a real claim.
+> * **4c** that a refinement-discrete copy **exists** in `E(L)` — Babai–Erdős–Selkow, measured
+>   (5760/32768 at `L=6`), not formalized. ⛔ **This is also the theorem's non-vacuity**: below `L = 6`
+>   no graph is rigid, so the hypothesis is empty there and the statement says nothing.
+>
+> ⟹ ★★★ **The disjunction has moved.** (B)'s washout claim — *the cross-copy channel supplies nothing*
+> — is now **refuted at the object**, conditionally on 4b3 + 4c. To keep (B) alive one must deny one of
+> those two, or find an error in the chain; *"the family's closure under relabelling washes the
+> alignment out"* is no longer available, because the Ruler Lemma consumes that closure rather than
+> being defeated by it. ⛔ Still **not** "Construction C is dead": 4b3 and 4c are real and unproved.
+>
+> ⛔ **A withdrawn claim from earlier the same day.** A `not_rulerRefines` theorem said *"no symmetric
+> copy can be the ruler"*. It was **true of the unaligned model only** — it needed directed copies to
+> exist — and is deleted. It was never evidence for (B).
 >
 > ### ▶▶ NEXT STEPS — verifiable only. Do not add prose to this file.
-> **§6e.4g is the decision procedure**, items 1, 2, 3 and 4a done. What remains:
-> 4. **For (A), in order:** **(b1)** move `Ensemble.lean` to non-degenerate unordered slots — this is
->    the whole of the current blockage and it is mechanical; **(b2)** then discharge (R) and (i);
->    **(b3)** prove §6e.4a's *"`a` determines `c`"*; **(c)** existence of a refinement-discrete copy.
+> **§6e.4g is the decision procedure**; items 1, 2, 3, 4a, 4b1 and 4b2 are **done**. What remains:
+> 4. **For (A), what is left:** **(4b3)** prove §6e.4a's *"`a` determines `c`"* — the one step between
+>    translate readings and *"no mixed cell"*; **(4c)** exhibit or prove existence of a
+>    refinement-discrete copy, which is also the headline theorem's non-vacuity.
 > 5. **For (B): prove §6d.8's lemma**, or exhibit an object with a ruler *and* a surviving mixed cell.
 >    The falsification search (§6e.4f) is the harness; it found 0 in 1491 objects, with a thin margin.
 >    ★ (B) is now the *cheaper* side to attack: one object refutes (A) with no large-`L` argument, and
@@ -1823,11 +1840,11 @@ other and each is a **theorem or an experiment**.
 | **2** | ★★ **Formalize (LB)** — the ensemble's colouring restricted to a copy refines that copy's own 2-WL closure | (A)'s **single load-bearing structural claim** | ✅ **DONE 2026-08-16b** — `CopyRestrict.lb`, every `L`, real object; carries `restrict_sig_eq` and **§6b** (`encoded_edge_eq`) |
 | **3** | **Formalize (P1)/(P2)** for the ensemble from (LB) + refinement-discreteness of a chosen copy | ~~1+2+3 ⟹ (A)~~ ⛔ **that claim was too strong** | ✅ **DONE 2026-08-16b** — `CopyProbe.tag_isolates`, `profile_injective`, `transfer`; ★ corollary `sameLabelOrbit_of_tag` |
 | **4a** | ▶▶ **The coherence chain** (§6e.4d.3's arrows 1–2): *diagonal colour ⟹ `Φ_E`* | pure bookkeeping | ✅ **DONE 2026-08-16c** — `Coherence.phi_determined`, unconditional. ⚠ needed `Transposable` (`eRoot` is **not** a symmetric function) |
-| **4b** | ▶▶ **Instantiate `RulerLemma` at the ensemble.** | **(A) directly**, given 4a, 4b3, 4c | ⚠ **HALF DONE 2026-08-16c** — `RulerAtEnsemble.bE_equivariant`/`yE_invariant` are unconditional, `RulerLemma.ruler'` weakens (ii) to *"refines"*, and `readings_translate` reduces (A) to `TagIsolates` + `RulerRefines`. ⛔ **Both fail at the current model** |
-| **4b1** | ⛔⛔ **THE BLOCKAGE, and it is mechanical.** `Ensemble`'s slots are ordered and its copies are *all* slot-colourings. The slot transposition is an **automorphism** (`RulerAtEnsemble.invG_tswap`), so a symmetric copy is twin-blind and a non-symmetric one is not ⟹ `not_rulerRefines`: **no symmetric copy can be the ruler.** The same gap blocks `TagIsolates`. ★ **Fix: make a slot a non-degenerate UNORDERED pair, so a copy is a graph** | unblocks 4b entirely | ▶ **NOT WRITTEN** — the single highest-value Lean item |
-| **4b2** | Discharge `RulerRefines` (from `twin_blind` + (P2)) and `TagIsolates` (from `sameLabelOrbit_of_tag`), once 4b1 lands | (A) modulo 4b3/4c | ▶ blocked on 4b1 |
-| **4b3** | ⚠⚠ **NEW, and §6e.4g never named it:** §6e.4a's ***"`a` determines `c`"***. `readings_translate` gives translate **readings**; `MixedCell` is about **vertices** | the last arrow of §6e.4d.3 | ▶ argued + measured, **not proved** |
-| **4c** | **Existence of a refinement-discrete copy** in `E(L)` (Babai–Erdős–Selkow + §6e.4d.2) | (A)'s remaining input | ▶ measured only (5760/32768 at `L=6`) |
+| **4b** | ▶▶ **Instantiate `RulerLemma` at the ensemble.** | **(A) directly**, given 4b3 + 4c | ✅ **DONE 2026-08-16c** — `RulerAtEnsemble`: `bE_equivariant`/`yE_invariant`, `rulerRefines_of_discrete` **(R)**, `tagIsolates_of_discrete` **(i)**, ★★★★ **`readings_translate_of_wl2G_discrete`** |
+| **4b1** | ✅ **THE MODEL ALIGNED WITH §3.** `EColr` was *all* slot colourings (directed copies + self-loop slots, `2^{L²}` of them); §3 has **graphs** (`2^C(L,2)`, and `L=4 ⟹ N=332`, which is what every probe builds). `EColr` is now a symmetric irreflexive colouring | unblocked 4b | ✅ **DONE**. ★ Checked, not assumed: all `2^C(L,2)` graphs kept, gauge still transitive, **label transposition still an automorphism fixing `m(base)`** (§3.2a's real obligation) |
+| **4b2** | Discharge `RulerRefines` and `TagIsolates` | (A) modulo 4b3/4c | ✅ **DONE** — via `twin_blind` (copy **symmetry**) and `deg_blind` (copy **irreflexivity**), both automorphisms of the aligned object |
+| **4b3** | ⚠⚠ **§6e.4a's *"`a` determines `c`"***. The theorem gives translate **readings**; `MixedCell` is about **vertices**. ⚠ The profile's atomic part only reveals `c` on slots incident to the marked vertex | **the last step to *"no mixed cell"*** | ▶ argued + measured, **NOT PROVED** — now the single most valuable item |
+| **4c** | **Existence of a refinement-discrete copy** in `E(L)` (Babai–Erdős–Selkow + §6e.4d.2) | (A)'s remaining input, **and the headline theorem's non-vacuity** — below `L=6` no graph is rigid, so the hypothesis is empty there | ▶ measured only (5760/32768 at `L=6`) |
 | **5** | **For (B):** either prove §6d.8's lemma (the cross-copy aggregate is `M`-determined at the fixpoint), or **exhibit an object with a ruler AND a surviving mixed cell**. The harness exists (`probe_cao_ruler_falsify.py`); extend it to `L=5`, more rounds, and to carriers that are not the frame encoding | **(B) directly.** One such object refutes (A) without any large-`L` argument | ▶ open. ★ `sameLabelOrbit_of_tag` narrows the search: **both** members of the mixed pair must be non-discrete |
 
 > ### ⚠ WHAT WOULD *NOT* SETTLE IT — each of these has already been tried this session
@@ -2498,6 +2515,9 @@ caveat and outstanding item 6.
 ### 8a. ▶▶ THE LEAN LAYER — all **sixteen** modules, and exactly what each one owes
 
 **All are gate-listed in `scripts/build.sh`; the gate is 137 modules, ~255–360 s, and passes.**
+⚠⚠ **2026-08-16c: `Ensemble.EColr` is now a GRAPH** (symmetric + irreflexive), not an arbitrary slot
+colouring. Every statement below that mentions a copy inherits that; `CopyRestrict.symCopy_all` and
+`CopyProbe.proper_all` discharge the old `SymCopy`/`Proper` hypotheses once and for all.
 ⚠ **Count modules with `grep -c '✔ ChainDescent'`, not `grep -c '✔'`** — the latter also matches the
 *"serial build complete"* line, which is why earlier numbers in this doc's history ran one high. Every
 declaration is `[propext, Classical.choice, Quot.sound]` or a subset — no `sorry`, no custom axiom, no
@@ -2520,12 +2540,12 @@ declaration is `[propext, Classical.choice, Quot.sound]` or a subset — no `sor
 | ★★★ `CopyRestrict` (item 2) | ★★★ **`restrict_sig_eq`** (stability restricts to a colour-definable sub-carrier — carrier-generic), `sig_restrict`/`sig_singleton`, `exists_copy_pred`, `centre_readout`, `frame_type_eq`, ★ **`encoded_edge_eq` = §6b at the object**, `eCopy_stable`, ★★★ **`lb` = (LB)**, `eCopy_injective_of_discrete` | ⚠ `SymCopy` is carried wherever the encoded edge is pinned — an ordered-slot artifact |
 | ★★ `CopyProbe` (item 3) | `sig_singleton_snd`, `frame_type_eq'`, `frame_partner`, ★★★ **`transfer`** (a discrete copy is a coordinate system), ★ **`profile_injective` = (P2)**, ★★ **`tag_isolates` = (P1)**, ★ **`sameLabelOrbit_of_tag`** (no mixed cell touches a discrete proper copy) | ⛔ owes the **coherence chain** (§6e.4g item 4a) and the **instantiation** (4b); `hd` (the copy's restriction is injective) is a hypothesis, discharged by `lb` + the copy's own discreteness |
 | ★★ `Coherence` (item 4a) | `exists_factor'` (factor at any codomain) · ★ **`Transposable`** + `transposable_wl2G` + `eRoot_transposable` (⚠ `eRoot` is **not** symmetric) · `diag_readout` · ★ `align_readout` · ★ `payload_readout` · `bE`/`yE` · ★★★ **`phi_determined`** | — |
-| ⚠ `RulerAtEnsemble` (item 4b) | the two `MulAction`s, ★ **`bE_equivariant`**, **`yE_invariant`**, `phi_seam` · `RulerRefines` **(R)** + `TagIsolates` (i) · **`readings_translate`** = (A) reduced to those two · `rulerRefines_within` · ★ **`tswap`/`invG_tswap`/`twin_blind`** · ⛔ **`not_rulerRefines`** | ⛔⛔ `readings_translate` is **VACUOUS at this model** — (R) fails at every symmetric copy. Owes **4b1** (unordered non-degenerate slots), then 4b2 |
+| ★★★ `RulerAtEnsemble` (item 4b) | the two `MulAction`s, ★ **`bE_equivariant`**/**`yE_invariant`**, `phi_seam` · ★ **`tswap`/`twin_blind`** (copy symmetry) and **`degSwap`/`deg_blind`** (copy irreflexivity) · ★★★ **`rulerRefines_of_discrete` = (R)** · ★★★ **`tagIsolates_of_discrete` = (i)** · ★★★★ **`readings_translate_of_wl2G_discrete`** | ⛔ owes nothing itself; (A) still needs **4b3** (*"`a` determines `c`"*) and **4c** (a discrete copy exists — also the non-vacuity) |
 | `AtomAugment` | ★★★ **`adequateFor_augment_iff`** — augmenting the atoms costs **exactly** `Refines (pull b) extra` (an `iff`; it works because `Adequate.blocks` is **start-colouring-free**) · `merge_of_tuple_merge_aug` (the augmented consumer, with the cost visible as `hex`) · ★ **`adequateFor_augment_self`** = the ceiling | — |
 
-⛔ **NOT in the Lean layer, and each is a real gap:** ★★ **§6e.4g 4b1** — `Ensemble.lean` on
-non-degenerate **unordered** slots; every other (A)-side obligation is blocked behind it · **4b3**
-(*"`a` determines `c`"*) · **4c** (a discrete copy exists) · the **collapse**
+⛔ **NOT in the Lean layer, and each is a real gap:** ★★ **§6e.4g 4b3** (*"`a` determines `c`"* — the
+one step between translate readings and *"no mixed cell"*) · **4c** (a discrete copy exists) ·
+the **collapse**
 (§6e.4 — ⚠⚠ and as of 2026-08-15 it has **no proof route at all**, §6e.4c; do not start Lean work on
 it before the washout question is settled on paper) · **CFI's WL-blindness** (literature; ✅ now quotable in its *standard*
 `k`-WL form thanks to `TupleCov`) · **T2⁺** (`Aut_{m(base)}` is *exactly* the label group; needs
@@ -2533,8 +2553,8 @@ it before the washout question is settled on paper) · **CFI's WL-blindness** (l
 `TF(E)` (§6g, queued — ★ **and it is the natural object if the reader's washout reading is right**,
 since it is poly-size where the ensemble is exponential).
 
-▶ **The mechanical Lean items still owed, cheapest first:** ★★ §6e.4g **4b1** (unordered-slot
-`Ensemble`) then **4b2** · `FrameTransfer.refinesAtoms` · `TupleCov`'s two side conditions ·
+▶ **The mechanical Lean items still owed, cheapest first:** ★★ §6e.4g **4b3** ·
+`FrameTransfer.refinesAtoms` · `TupleCov`'s two side conditions ·
 `CaoCollapse.FrameClassComplete` · **T2⁺** · `TF(E)`.
 ⚠ `PublicTheoremIndex.md` has **no rows for any of the sixteen** — regen is
 `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`, ⚠⚠ it recomputes the **Notes**

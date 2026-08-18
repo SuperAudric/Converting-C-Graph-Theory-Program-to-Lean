@@ -220,12 +220,17 @@ meet that one corner, its contribution sits in the pair's triangle-type multiset
 type — which *is* the encoded edge. -/
 
 /-- The copy `c`'s own graph on `Fin L`: the encoded adjacency, no self-loops. -/
-def hAdj (c : EColr L) (i j : Fin L) : Bool := decide (i ≠ j) && c (i, j)
+def hAdj (c : EColr L) (i j : Fin L) : Bool := decide (i ≠ j) && c.val (i, j)
 
 /-- ⚠ Slots are **ordered** in this model (`Ensemble`'s note 1), so the two corners joining `i` and
 `j` sit on the slots `(i,j)` and `(j,i)`. Pinning *the* encoded edge therefore needs the copy to agree
 on the two, which is the faithful reading of the doc's unordered slots. -/
-def SymCopy (c : EColr L) : Prop := ∀ a b : Fin L, c (a, b) = c (b, a)
+def SymCopy (c : EColr L) : Prop := ∀ a b : Fin L, c.val (a, b) = c.val (b, a)
+
+/-- ✅ **Now automatic** — a copy *is* a graph (`Ensemble.EColr`), so the hypothesis every theorem
+below carries is discharged once and for all. ⚠ The hypotheses are kept in the signatures so the
+statements still say what they depend on. -/
+theorem symCopy_all (c : EColr L) : SymCopy c := c.2.1
 
 theorem esort_eq_one_iff (z : EVert L) : esort z = 1 ↔ ∃ k t, z = efrm k t := by
   rcases z with ⟨c, i⟩ | ⟨k, t⟩ | g
@@ -239,8 +244,8 @@ edge — not merely the payload clique's edge, which is constant. This is what m
 theorem encoded_edge_eq {c c' : EColr L} (hsym : SymCopy c') {i j i' j' : Fin L}
     (hij : i ≠ j) (hij' : i' ≠ j')
     (h : eRoot L (epay c i, epay c j) = eRoot L (epay c' i', epay c' j')) :
-    c (i, j) = c' (i', j') := by
-  set z₀ : EVert L := efrm (i, j) (c (i, j)) with hz₀
+    c.val (i, j) = c'.val (i', j') := by
+  set z₀ : EVert L := efrm (i, j) (c.val (i, j)) with hz₀
   -- the corner both endpoints meet
   have hadj1 : eAdj (epay c i) z₀ = true := by
     simp [hz₀, eAdj, inSlot, hij]
@@ -266,16 +271,16 @@ theorem encoded_edge_eq {c c' : EColr L} (hsym : SymCopy c') {i j i' j' : Fin L}
   have ha2 : eAdj (efrm k t) (epay c' j') = true := by
     have := eAdj_eq_of_eRoot_eq (p := (efrm k t, epay c' j')) (q := (z₀, epay c j)) hz2
     simpa [hadj2] using this
-  have hki' : (k.1 ≠ k.2 ∧ (i' = k.1 ∨ i' = k.2)) ∧ c' k = t := by
+  have hki' : (k.1 ≠ k.2 ∧ (i' = k.1 ∨ i' = k.2)) ∧ c'.val k = t := by
     simpa [eAdj, inSlot, Bool.and_eq_true, decide_eq_true_iff] using ha1
   have hkj' : (k.1 ≠ k.2 ∧ (j' = k.1 ∨ j' = k.2)) := by
     have := ha2
     simp only [eAdj, Bool.and_eq_true, decide_eq_true_iff] at this
     simpa [inSlot, decide_eq_true_iff] using this.1
   -- §2 reads its type, which is the encoded edge of the first copy
-  have ht : t = c (i, j) := frame_type_eq (v := epay c' j') (v' := epay c j) hz2
+  have ht : t = c.val (i, j) := frame_type_eq (v := epay c' j') (v' := epay c j) hz2
   -- ordered slots: the corner sits on `(i',j')` or on `(j',i')`, and `SymCopy` closes the gap
-  have hk : c' k = c' (i', j') := by
+  have hk : c'.val k = c'.val (i', j') := by
     obtain ⟨⟨-, hi1⟩, -⟩ := hki'
     obtain ⟨-, hj1⟩ := hkj'
     rcases hi1 with hi1 | hi1 <;> rcases hj1 with hj1 | hj1

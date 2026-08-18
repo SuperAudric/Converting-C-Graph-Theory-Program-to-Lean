@@ -119,8 +119,29 @@ variable {L : Nat}
 /-- A slot: an ordered pair of labels (modelling note 1). -/
 abbrev ESlot (L : Nat) : Type := Fin L × Fin L
 
-/-- A copy, equally a gauge choice: a type assignment to every slot. -/
-abbrev EColr (L : Nat) : Type := ESlot L → Bool
+/-- **A copy is a GRAPH on the labels** — a symmetric, irreflexive type assignment to the slots; a
+gauge choice is the same thing.
+
+⚠⚠ **This condition is the model, not a restriction on it** (§3.1: *"every **graph** on the label set
+is carried simultaneously"*; §3.2a: the gadget is *"symmetric in `i, j` by construction"*). Slots are
+**ordered** pairs here (modelling note 1), so a bare `ESlot L → Bool` would also carry *directed*
+copies and self-loop slots, which the construction does not have — and their presence made the label
+transposition separate what a graph copy cannot. ⚠ The directed variant is a **different, larger
+design** (it needs a 6-vertex gauge structure carrying the two directions independently); it is not
+this one. ★ Nothing the construction contains is dropped: all `2^C(L,2)` graphs remain, the gauge is
+still transitive on them, and the label transposition is still an automorphism fixing `m(base)`. -/
+abbrev EColr (L : Nat) : Type :=
+  {c : ESlot L → Bool // (∀ a b : Fin L, c (a, b) = c (b, a)) ∧ (∀ a : Fin L, c (a, a) = false)}
+
+instance : DecidableEq (EColr L) := fun a b => decidable_of_iff _ Subtype.ext_iff.symm
+
+instance : Fintype (EColr L) := Subtype.fintype _
+
+/-- A copy is symmetric — it is a graph. -/
+theorem EColr.symm (c : EColr L) (a b : Fin L) : c.val (a, b) = c.val (b, a) := c.2.1 a b
+
+/-- A copy is irreflexive — it is a graph. -/
+theorem EColr.irrefl (c : EColr L) (a : Fin L) : c.val (a, a) = false := c.2.2 a
 
 /-- The ensemble's vertices: payload copies, the shared frame, and the central gauge vertices. -/
 abbrev EVert (L : Nat) : Type :=
@@ -134,7 +155,7 @@ abbrev efrm (k : ESlot L) (t : Bool) : EVert L := Sum.inr (Sum.inl (k, t))
 abbrev ecen (g : EColr L) : EVert L := Sum.inr (Sum.inr g)
 
 /-- The base gauge — the central vertex that gets individualized. -/
-def ebase (L : Nat) : EColr L := fun _ => false
+def ebase (L : Nat) : EColr L := ⟨fun _ => false, ⟨fun _ _ => rfl, fun _ => rfl⟩⟩
 
 /-- `i` is an endpoint of the (non-degenerate) slot `k`. -/
 def inSlot (k : ESlot L) (i : Fin L) : Bool := decide (k.1 ≠ k.2 ∧ (i = k.1 ∨ i = k.2))
@@ -145,11 +166,11 @@ meets the corner its gauge selects. -/
 def eAdj (x y : EVert L) : Bool :=
   match x, y with
   | Sum.inl (c, i), Sum.inl (c', j) => decide (c = c' ∧ i ≠ j)
-  | Sum.inl (c, i), Sum.inr (Sum.inl (k, t)) => inSlot k i && decide (c k = t)
-  | Sum.inr (Sum.inl (k, t)), Sum.inl (c, i) => inSlot k i && decide (c k = t)
+  | Sum.inl (c, i), Sum.inr (Sum.inl (k, t)) => inSlot k i && decide (c.val k = t)
+  | Sum.inr (Sum.inl (k, t)), Sum.inl (c, i) => inSlot k i && decide (c.val k = t)
   | Sum.inr (Sum.inl (k, t)), Sum.inr (Sum.inl (k', t')) => decide (k = k' ∧ t ≠ t')
-  | Sum.inr (Sum.inl (k, t)), Sum.inr (Sum.inr g) => decide (g k = t)
-  | Sum.inr (Sum.inr g), Sum.inr (Sum.inl (k, t)) => decide (g k = t)
+  | Sum.inr (Sum.inl (k, t)), Sum.inr (Sum.inr g) => decide (g.val k = t)
+  | Sum.inr (Sum.inr g), Sum.inr (Sum.inl (k, t)) => decide (g.val k = t)
   | _, _ => false
 
 /-- The sort of a vertex: payload, frame, central, and — separately — **the individualized central**.
@@ -173,16 +194,33 @@ def eRoot (L : Nat) : Col (EVert L × EVert L) := wl2G (eInit L)
 /-- A label permutation acting on slots. -/
 def sact (σ : Equiv.Perm (Fin L)) : Equiv.Perm (ESlot L) := σ.prodCongr σ
 
-/-- A label permutation acting on copies and gauges: reindex by the inverse slot action. -/
+theorem sact_symm_apply (σ : Equiv.Perm (Fin L)) (k : ESlot L) :
+    (sact σ).symm k = (σ.symm k.1, σ.symm k.2) := rfl
+
+/-- A label permutation acting on copies and gauges: reindex by the inverse slot action.
+⚠ It must land back in `EColr` — reindexing a graph by a permutation is a graph, which is the check
+that the model change costs. -/
 def cact (σ : Equiv.Perm (Fin L)) : EColr L ≃ EColr L :=
-  Equiv.arrowCongr (sact σ) (Equiv.refl Bool)
+  (Equiv.arrowCongr (sact σ) (Equiv.refl Bool)).subtypeEquiv (by
+    intro c
+    constructor
+    · rintro ⟨hs, hi⟩
+      exact ⟨fun a b => hs _ _, fun a => hi _⟩
+    · rintro ⟨hs, hi⟩
+      refine ⟨fun a b => ?_, fun a => ?_⟩
+      · have := hs (σ a) (σ b)
+        simpa only [Equiv.arrowCongr_apply, Equiv.refl_symm, Equiv.coe_refl, Function.comp_apply,
+          sact_symm_apply, Equiv.symm_apply_apply, id_eq] using this
+      · have := hi (σ a)
+        simpa only [Equiv.arrowCongr_apply, Equiv.refl_symm, Equiv.coe_refl, Function.comp_apply,
+          sact_symm_apply, Equiv.symm_apply_apply, id_eq] using this)
 
 theorem cact_apply (σ : Equiv.Perm (Fin L)) (c : EColr L) (k : ESlot L) :
-    cact σ c k = c ((sact σ).symm k) := rfl
+    (cact σ c).val k = c.val ((sact σ).symm k) := rfl
 
 /-- **The gauge base is fixed by every label permutation.** This is `CaoEnsemble.lact_base` at the
 graph, and it is what survives individualizing `m(base)`. -/
-theorem cact_base (σ : Equiv.Perm (Fin L)) : cact σ (ebase L) = ebase L := rfl
+theorem cact_base (σ : Equiv.Perm (Fin L)) : cact σ (ebase L) = ebase L := Subtype.ext rfl
 
 /-- **The label action on vertices, as a bijection.** Assembled from `Equiv` combinators, so both
 inverse laws are free — the direct definition needs `Prod.map` bookkeeping that does not discharge by
@@ -213,7 +251,7 @@ theorem inSlot_sact (σ : Equiv.Perm (Fin L)) (k : ESlot L) (i : Fin L) :
     Equiv.apply_eq_iff_eq]
 
 theorem cact_sact (σ : Equiv.Perm (Fin L)) (c : EColr L) (k : ESlot L) :
-    cact σ c (sact σ k) = c k := by
+    (cact σ c).val (sact σ k) = c.val k := by
   rw [cact_apply, Equiv.symm_apply_apply]
 
 theorem cact_eq_base_iff (σ : Equiv.Perm (Fin L)) (g : EColr L) :

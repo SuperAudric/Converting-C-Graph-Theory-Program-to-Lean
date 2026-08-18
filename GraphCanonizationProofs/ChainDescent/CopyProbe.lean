@@ -117,17 +117,21 @@ theorem frame_partner {u u' : EVert L} {k k' : ESlot L} {t t' : Bool}
     · rintro ⟨hs, ha⟩
       obtain ⟨k₂, t₂, rfl⟩ := (esort_eq_one_iff z).mp hs
       have ha' : eAdj (efrm k₂ t₂) (efrm kk tt) = true := by
-        by_cases hb : eAdj (efrm k₂ t₂) (efrm kk tt) = true
-        · exact hb
-        · rw [Bool.eq_false_iff.mpr hb] at ha; simp at ha
+        by_contra hb
+        rw [Bool.not_eq_true] at hb
+        rw [hb] at ha
+        exact absurd ha (by decide)
       simp only [eAdj, decide_eq_true_iff] at ha'
       obtain ⟨rfl, hne⟩ := ha'
-      cases t₂ <;> cases tt <;> simp_all
+      have htt : t₂ = !tt := by
+        cases t₂ <;> cases tt <;> first | rfl | exact absurd rfl hne
+      rw [htt]
     · rintro rfl
       refine ⟨rfl, ?_⟩
-      have : eAdj (efrm kk (!tt)) (efrm kk tt) = true := by
+      have hadj : eAdj (efrm kk (!tt)) (efrm kk tt) = true := by
         cases tt <;> simp [eAdj]
-      simp [this]
+      rw [hadj]
+      rfl
   have h1 := sig_singleton_snd (eRoot L) P u (efrm k t) (efrm k (!t)) (hP k t)
   have h2 := sig_singleton_snd (eRoot L) P u' (efrm k' t') (efrm k' (!t')) (hP k' t')
   have hsig : Multiset.filter (fun t => P t.2 = true) (pairSigG (eRoot L) (u, efrm k t))
@@ -166,12 +170,12 @@ theorem transfer {c : EColr L} (hd : Function.Injective (eCopy L c)) {i : Fin L}
 
 /-- The case where the copy carries the corner's type on both sides. -/
 theorem slot_eq_of_own {c : EColr L} (hd : Function.Injective (eCopy L c)) {i : Fin L}
-    {k k' : ESlot L} {t : Bool} (hk : k.1 ≠ k.2) (hk' : k'.1 ≠ k'.2) (hck : c k = t)
+    {k k' : ESlot L} {t : Bool} (hk : k.1 ≠ k.2) (hck : c.val k = t)
     (h : eRoot L (epay c i, efrm k t) = eRoot L (epay c i, efrm k' t)) :
     k = k' ∨ k = (k'.2, k'.1) := by
   have hadj : ∀ y : Fin L, eAdj (epay c y) (efrm k t) = eAdj (epay c y) (efrm k' t) := fun y =>
     eAdj_eq_of_eRoot_eq (p := (epay c y, efrm k t)) (q := (epay c y, efrm k' t)) (transfer hd h y)
-  have hkc' : c k' = t := by
+  have hkc' : c.val k' = t := by
     have hone : eAdj (epay c k.1) (efrm k t) = true := by simp [eAdj, inSlot, hk, hck]
     have h2 : eAdj (epay c k.1) (efrm k' t) = true := by rw [← hadj k.1]; exact hone
     simp only [eAdj, Bool.and_eq_true, decide_eq_true_iff] at h2
@@ -180,12 +184,13 @@ theorem slot_eq_of_own {c : EColr L} (hd : Function.Injective (eCopy L c)) {i : 
     intro y
     have := hadj y
     simpa [eAdj, hck, hkc'] using this
-  have m1 : k.1 = k'.1 ∨ k.1 = k'.2 := by
-    have h1 : inSlot k' k.1 = true := by rw [← hins k.1]; simp [inSlot, hk]
-    simpa [inSlot, hk'] using h1
-  have m2 : k.2 = k'.1 ∨ k.2 = k'.2 := by
-    have h1 : inSlot k' k.2 = true := by rw [← hins k.2]; simp [inSlot, hk]
-    simpa [inSlot, hk'] using h1
+  have hend : ∀ y : Fin L, inSlot k' y = true → (y = k'.1 ∨ y = k'.2) := by
+    intro y hy
+    exact (by simpa only [inSlot, decide_eq_true_iff] using hy : k'.1 ≠ k'.2 ∧ _).2
+  have m1 : k.1 = k'.1 ∨ k.1 = k'.2 :=
+    hend k.1 (by rw [← hins k.1]; simp [inSlot, hk])
+  have m2 : k.2 = k'.1 ∨ k.2 = k'.2 :=
+    hend k.2 (by rw [← hins k.2]; simp [inSlot, hk])
   rcases m1 with m1 | m1 <;> rcases m2 with m2 | m2
   · exact absurd (m1.trans m2.symm) hk
   · exact Or.inl (Prod.ext m1 m2)
@@ -199,17 +204,18 @@ with the same profile entry carry the same type and the same *unordered* slot.
 ⚠ *Unordered* is forced by the model, not a weakness of the argument — `f(k,t)` and `f(swap k, t)`
 are genuine twins of the ensemble (`Ensemble`'s note 1) and no invariant can tell them apart. -/
 theorem profile_injective {c : EColr L} (hd : Function.Injective (eCopy L c)) {i : Fin L}
-    {k k' : ESlot L} {t t' : Bool} (hk : k.1 ≠ k.2) (hk' : k'.1 ≠ k'.2)
+    {k k' : ESlot L} {t t' : Bool} (hk : k.1 ≠ k.2)
     (h : eRoot L (epay c i, efrm k t) = eRoot L (epay c i, efrm k' t')) :
     t = t' ∧ (k = k' ∨ k = (k'.2, k'.1)) := by
   have ht : t = t' := frame_type_eq' h
   subst ht
   refine ⟨rfl, ?_⟩
-  by_cases hck : c k = t
-  · exact slot_eq_of_own hd hk hk' hck h
+  by_cases hck : c.val k = t
+  · exact slot_eq_of_own hd hk hck h
   · -- the copy does not carry this corner's type; go through the frame partner
-    have hck' : c k = !t := by cases hb : c k <;> cases t <;> simp_all
-    exact slot_eq_of_own hd hk hk' hck' (frame_partner h)
+    have hck' : c.val k = !t := by
+      cases hb : c.val k <;> cases t <;> simp_all
+    exact slot_eq_of_own hd hk hck' (frame_partner h)
 
 /-! ## 3. (P1) — a discrete copy is named by its colour -/
 
@@ -225,7 +231,7 @@ is arbitrary. -/
 theorem tag_isolates {c c' : EColr L} (hsym' : SymCopy c')
     (hd : Function.Injective (eCopy L c)) {i i' : Fin L}
     (h : eRoot L (epay c i, epay c i) = eRoot L (epay c' i', epay c' i')) :
-    ∃ π : Equiv.Perm (Fin L), π i = i' ∧ ∀ a b : Fin L, a ≠ b → c (a, b) = c' (π a, π b) := by
+    ∃ π : Equiv.Perm (Fin L), π i = i' ∧ ∀ a b : Fin L, a ≠ b → c.val (a, b) = c'.val (π a, π b) := by
   obtain ⟨P, hP⟩ := exists_copy_pred L
   have hs := restrict_sig_eq eRoot_stable P (epay_injective c) (epay_injective c')
     (u := epay c i) (v := epay c i) (u' := epay c' i') (v' := epay c' i') (hP c i) (hP c' i') h
@@ -288,15 +294,18 @@ copy, which it is once degenerate slots are pinned. -/
 requires two distinct labels), so this is a normalisation, not a restriction on the construction —
 but it is needed, because the label action moves `(a,a)` to `(πa,πa)` and the encoded-edge readout
 says nothing there. -/
-def Proper (c : EColr L) : Prop := ∀ a : Fin L, c (a, a) = false
+def Proper (c : EColr L) : Prop := ∀ a : Fin L, c.val (a, a) = false
+
+/-- ✅ **Now automatic** — a copy *is* a graph, so it is irreflexive by construction. -/
+theorem proper_all (c : EColr L) : Proper c := c.2.2
 
 theorem sact_symm (σ : Equiv.Perm (Fin L)) (k : ESlot L) :
     (sact σ).symm k = (σ.symm k.1, σ.symm k.2) := rfl
 
 theorem cact_eq_of_relabel {c c' : EColr L} (hpc : Proper c) (hpc' : Proper c')
-    {π : Equiv.Perm (Fin L)} (hπ : ∀ a b : Fin L, a ≠ b → c (a, b) = c' (π a, π b)) :
+    {π : Equiv.Perm (Fin L)} (hπ : ∀ a b : Fin L, a ≠ b → c.val (a, b) = c'.val (π a, π b)) :
     cact π c = c' := by
-  funext k
+  refine Subtype.ext (funext (fun k => ?_))
   obtain ⟨a, b⟩ := k
   rw [cact_apply, sact_symm]
   by_cases hab : a = b

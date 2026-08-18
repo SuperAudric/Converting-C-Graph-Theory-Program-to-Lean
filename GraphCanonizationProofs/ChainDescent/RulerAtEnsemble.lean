@@ -55,11 +55,7 @@ open ChainDescent.Coherence
 
 variable {L : Nat}
 
-/-! ## 1. The label group acts on the two index sets
-
-⚠ Written out componentwise rather than through `sact`/`cact` so that both `MulAction` laws and the
-compatibility with `Ensemble.eact` close by `rfl` — the project's standing trap about building actions
-from `Equiv` combinators is about the *inverse* laws, which is exactly what is free here. -/
+/-! ## 1. The label group acts on the two index sets -/
 
 instance : SMul (Equiv.Perm (Fin L)) (SlotIdx L) :=
   ⟨fun σ s => ((σ s.1.1, σ s.1.2), s.2)⟩
@@ -68,12 +64,11 @@ instance : MulAction (Equiv.Perm (Fin L)) (SlotIdx L) where
   one_smul _ := rfl
   mul_smul _ _ _ := rfl
 
-instance : SMul (Equiv.Perm (Fin L)) (PayIdx L) :=
-  ⟨fun σ w => (fun k => w.1 (σ.symm k.1, σ.symm k.2), σ w.2)⟩
+instance : SMul (Equiv.Perm (Fin L)) (PayIdx L) := ⟨fun σ w => (cact σ w.1, σ w.2)⟩
 
 instance : MulAction (Equiv.Perm (Fin L)) (PayIdx L) where
-  one_smul _ := rfl
-  mul_smul _ _ _ := rfl
+  one_smul _ := Prod.ext (Subtype.ext (funext fun _ => rfl)) rfl
+  mul_smul _ _ _ := Prod.ext (Subtype.ext (funext fun _ => rfl)) rfl
 
 /-- The slot action agrees with the ensemble's vertex action. -/
 @[simp] theorem efrmI_smul (σ : Equiv.Perm (Fin L)) (s : SlotIdx L) :
@@ -83,10 +78,9 @@ instance : MulAction (Equiv.Perm (Fin L)) (PayIdx L) where
 @[simp] theorem epayI_smul (σ : Equiv.Perm (Fin L)) (w : PayIdx L) :
     epayI (σ • w) = eact σ (epayI w) := rfl
 
-/-! ## 2. ✅ The ensemble **is** an instance of the abstract setup — unconditionally -/
+/-! ## 2. ✅ The ensemble **is** an instance of the abstract setup -/
 
-/-- ★ **The slot profiles are equivariant.** Straight off `Ensemble.invG_eRoot`: the closure inherits
-every symmetry of the atoms, and the label action is one. -/
+/-- ★ **The slot profiles are equivariant.** Straight off `Ensemble.invG_eRoot`. -/
 theorem bE_equivariant : RulerLemma.Equivariant (Equiv.Perm (Fin L)) (bE L) := by
   intro σ w s
   show eRoot L (epayI (σ • w), efrmI s) = eRoot L (epayI w, efrmI (σ⁻¹ • s))
@@ -106,77 +100,15 @@ theorem phi_seam (w : PayIdx L) :
       = (Finset.univ : Finset (PayIdx L)).val.map
           (fun z => (yE L z, RulerLemma.Align (bE L w) (bE L z))) := rfl
 
-/-! ## 3. ▶ (A), reduced to two named hypotheses -/
+/-! ## 3. ★★★ THE TWO FRAME SYMMETRIES A GRAPH COPY CANNOT SEE
 
-/-- **(R)** — *the ruler's view is at least as fine as every reading*. Two frame vertices that `w₀`'s
-payload vertex cannot separate are separated by **no** payload vertex.
-
-★ `CopyProbe.transfer` proves this for `w` inside `w₀`'s own copy, from `(LB)` alone. Across copies it
-is exactly what (B) must deny, and it is **finite and measurable** at small `L`. -/
-def RulerRefines (L : Nat) (w₀ : PayIdx L) : Prop :=
-  ∀ (w : PayIdx L) (s s' : SlotIdx L), bE L w₀ s = bE L w₀ s' → bE L w s = bE L w s'
-
-/-- **(i)** — *the tag names the ruler's orbit*. `CopyProbe.sameLabelOrbit_of_tag` gives this against
-any `SymCopy`+`Proper` copy; ⛔ `Ensemble`'s copy set is larger than that, so it is not discharged. -/
-def TagIsolates (L : Nat) (w₀ : PayIdx L) : Prop :=
-  ∀ w : PayIdx L, yE L w = yE L w₀ → ∃ σ : Equiv.Perm (Fin L), w = σ • w₀
-
-/-- ### ▶▶ (A), AS A REDUCTION.
-If the ensemble contains a **ruler** — a payload vertex whose tag names its orbit and whose view of the
-frame is at least as fine as every other payload vertex's — then any two payload vertices sharing a
-closure colour have `S_L`-translate readings of the frame.
-
-⚠⚠ **This is not (A)**, on two counts, both flagged in the header: the hypotheses are not known to hold
-at this model, and *"translate readings"* becomes *"same label orbit"* only via §6e.4a's unproved
-*"the reading determines the copy"*. It is (A) with every remaining obligation named and finite. -/
-theorem readings_translate {w₀ : PayIdx L} (hiso : TagIsolates L w₀)
-    {w₁ w₂ : PayIdx L} (href : RulerRefines L w₀)
-    (h : yE L w₁ = yE L w₂) :
-    ∃ σ : Equiv.Perm (Fin L), ∀ s, bE L w₂ s = bE L w₁ (σ • s) :=
-  RulerLemma.ruler' bE_equivariant w₀ hiso (href w₂) (phi_determined h)
-
-/-- ▶ The half of `(R)` that is already a theorem: within the ruler's **own** copy it follows from
-`(LB)`, with no extra hypothesis beyond the copy being refinement-discrete. ★ So `(R)`'s content is
-entirely *cross-copy* — which is precisely the channel the whole disjunction is about. -/
-theorem rulerRefines_within {c : EColr L} (hd : Function.Injective (eCopy L c)) (i : Fin L)
-    (y : Fin L) (s s' : SlotIdx L)
-    (h : bE L ((c, i) : PayIdx L) s = bE L ((c, i) : PayIdx L) s') :
-    bE L ((c, y) : PayIdx L) s = bE L ((c, y) : PayIdx L) s' :=
-  transfer hd h y
-
-/-! ## 4. ⛔⛔ AND NOW THE BAD NEWS — `(R)` IS **UNATTAINABLE IN THIS MODEL**, and why
-
-The slot-transposition `(i,j) ↦ (j,i)` is an **automorphism** of `Ensemble`: it swaps each pair of
-twin frame vertices and reindexes every copy by the same transposition. Consequently
-
-* a payload vertex of a **symmetric** copy is *blind* to the twins (the automorphism fixes it), but
-* a payload vertex of a **non-symmetric** copy *sees* them (it attaches to `f(k,t)` and not to
-  `f(swap k, t)`),
-
-and `Ensemble.EColr` is **all** slot-colourings, so both kinds are present. `not_rulerRefines` is that,
-as a theorem: **no symmetric copy can serve as the ruler.** ⚠ The doc's Construction C has only
-symmetric copies, so *"take the ruler from the construction"* is exactly what this blocks.
-
-★ This is a defect of the **model**, not of the argument, and it is the same defect that stops
-`CopyProbe.sameLabelOrbit_of_tag` from discharging `TagIsolates` (which needs *every* copy to be
-`SymCopy` and `Proper`). ▶ The fix is one model change — make a slot a **non-degenerate unordered**
-pair, so `EColr` is a graph and the twins do not exist — and then `(R)` becomes a theorem via
-`twin_blind` and `TagIsolates` via `sameLabelOrbit_of_tag`. Everything above this section survives it
-unchanged; §3's two definitions and `readings_translate` are what it makes non-vacuous. -/
+Both are automorphisms of the ensemble **because a copy is a graph** — the first uses symmetry, the
+second irreflexivity. They are what makes the ruler's fibres exactly the forced ones, i.e. `(R)`. -/
 
 /-- The slot transposition. -/
 def swapSlot (k : ESlot L) : ESlot L := (k.2, k.1)
 
 theorem swapSlot_involutive : Function.Involutive (swapSlot (L := L)) := fun _ => rfl
-
-/-- Reindexing a copy by the slot transposition. -/
-def swapColr (c : EColr L) : EColr L := fun k => c (swapSlot k)
-
-theorem swapColr_involutive : Function.Involutive (swapColr (L := L)) := fun c => by funext k; rfl
-
-theorem swapColr_swapSlot (c : EColr L) (k : ESlot L) : swapColr c (swapSlot k) = c k := rfl
-
-@[simp] theorem swapColr_swapColr (c : EColr L) : swapColr (swapColr c) = c := swapColr_involutive c
 
 @[simp] theorem swapSlot_swapSlot (k : ESlot L) : swapSlot (swapSlot k) = k := rfl
 
@@ -186,95 +118,217 @@ theorem inSlot_swapSlot (k : ESlot L) (i : Fin L) : inSlot (swapSlot k) i = inSl
   · rintro ⟨h1, h2⟩; exact ⟨fun hh => h1 hh.symm, h2.symm⟩
   · rintro ⟨h1, h2⟩; exact ⟨fun hh => h1 hh.symm, h2.symm⟩
 
-/-- The slot transposition, as a map of the ensemble's vertices. -/
+theorem colr_swapSlot (c : EColr L) (k : ESlot L) : c.val (swapSlot k) = c.val k :=
+  EColr.symm c k.2 k.1
+
+/-- The twin swap: exchange the two frame vertices of each unordered slot, fix everything else.
+★ An automorphism **because every copy is symmetric**. -/
 def tswapFun : EVert L → EVert L
-  | Sum.inl (c, i) => Sum.inl (swapColr c, i)
   | Sum.inr (Sum.inl (k, t)) => Sum.inr (Sum.inl (swapSlot k, t))
-  | Sum.inr (Sum.inr g) => Sum.inr (Sum.inr (swapColr g))
+  | x => x
 
 theorem tswapFun_involutive : Function.Involutive (tswapFun (L := L)) := by
-  rintro (⟨c, i⟩ | ⟨k, t⟩ | g) <;>
-    simp only [tswapFun, swapColr_involutive _, swapSlot_involutive _]
+  rintro (⟨c, i⟩ | ⟨k, t⟩ | g) <;> rfl
 
-/-- ★ **The slot transposition is a symmetry of the ensemble.** -/
 def tswap : EVert L ≃ EVert L := Function.Involutive.toPerm _ (tswapFun_involutive (L := L))
 
 @[simp] theorem tswap_apply (x : EVert L) : tswap x = tswapFun x := rfl
 
+@[simp] theorem tswap_epay (c : EColr L) (i : Fin L) : tswap (epay c i) = epay c i := rfl
+
 theorem esort_tswap (x : EVert L) : esort (tswap x) = esort x := by
-  rcases x with ⟨c, i⟩ | ⟨k, t⟩ | g
-  · rfl
-  · rfl
-  · show (if swapColr g = ebase L then 3 else 2) = (if g = ebase L then 3 else 2)
-    by_cases hg : g = ebase L
-    · rw [hg]; rfl
-    · rw [if_neg hg, if_neg (fun hh => hg (by
-        have := congrArg (swapColr (L := L)) hh
-        rwa [swapColr_involutive g] at this))]
+  rcases x with ⟨c, i⟩ | ⟨k, t⟩ | g <;> rfl
 
 theorem eAdj_tswap (x y : EVert L) : eAdj (tswap x) (tswap y) = eAdj x y := by
   rcases x with ⟨c, i⟩ | ⟨k, t⟩ | g <;> rcases y with ⟨c', j⟩ | ⟨k', t'⟩ | g' <;>
-    simp only [tswap_apply, tswapFun, eAdj, inSlot_swapSlot, swapColr_swapSlot,
-      swapColr_involutive.eq_iff, swapSlot_involutive.injective.eq_iff, swapColr_swapColr,
-      swapSlot_swapSlot] <;>
-    try rfl
+    simp only [tswap_apply, tswapFun, eAdj, inSlot_swapSlot, colr_swapSlot,
+      swapSlot_involutive.injective.eq_iff]
 
-theorem invG_tswap_eInit : InvG (tswap (L := L)) (eInit L) := by
-  intro p
-  simp only [eInit, esort_tswap, eAdj_tswap, Equiv.apply_eq_iff_eq]
+theorem invG_tswap : InvG (tswap (L := L)) (eRoot L) :=
+  invG_wl2G (by intro p; simp only [eInit, esort_tswap, eAdj_tswap, Equiv.apply_eq_iff_eq])
 
-theorem invG_tswap : InvG (tswap (L := L)) (eRoot L) := invG_wl2G invG_tswap_eInit
+/-- ★★ **Nobody can see the twins.** -/
+theorem twin_blind (c : EColr L) (i : Fin L) (k : ESlot L) (t : Bool) :
+    eRoot L (epay c i, efrm k t) = eRoot L (epay c i, efrm (swapSlot k) t) :=
+  (invG_tswap (L := L) (epay c i, efrm k t)).symm
 
-/-- ★ **A symmetric copy is blind to the twins.** -/
-theorem twin_blind {c : EColr L} (hs : SymCopy c) (i : Fin L) (k : ESlot L) (t : Bool) :
-    eRoot L (epay c i, efrm k t) = eRoot L (epay c i, efrm (swapSlot k) t) := by
-  have hc : swapColr c = c := by funext s; exact hs s.2 s.1
-  have h := invG_tswap (L := L) (epay c i, efrm k t)
-  simp only [tswap_apply, tswapFun, hc] at h
-  exact h.symm
+/-- The degenerate-slot swap: exchange the frame vertices of the self-loop slots `(a,a)` and `(b,b)`.
+★ An automorphism **because every copy is irreflexive** — no copy attaches to either, and every gauge
+assigns both the same type. -/
+def degSlot (a b : Fin L) (k : ESlot L) : ESlot L :=
+  if k = (a, a) then (b, b) else if k = (b, b) then (a, a) else k
 
-/-- ### ⛔⛔ NO SYMMETRIC COPY CAN BE THE RULER, in this model.
-A symmetric copy's payload vertex cannot separate the twin frame vertices `f(k,t)` and
-`f(swap k, t)`; a non-symmetric copy's can, and this model contains non-symmetric copies. So `(R)`
-fails at every symmetric `w₀` — including every copy the doc's construction actually uses.
+theorem degSlot_involutive (a b : Fin L) : Function.Involutive (degSlot a b) := by
+  intro k
+  by_cases h1 : k = (a, a)
+  · by_cases hab : (b, b) = ((a, a) : ESlot L)
+    · simp [degSlot, h1, hab]
+    · simp [degSlot, h1, hab]
+  · by_cases h2 : k = (b, b)
+    · simp [degSlot, h1, h2]
+    · simp [degSlot, h1, h2]
 
-★ Read this as *"the Lean rendering of the ensemble is coarser than the construction it models"*, not
-as evidence about (A) or (B). ⛔ In particular it is **not** a point for (B). -/
-private theorem ruler_sees {L : Nat} {a b : Fin L} (hab : a ≠ b) :
-    eRoot L (epay (fun s => decide (s = ((a, b) : ESlot L))) a, efrm (a, b) true)
-      ≠ eRoot L (epay (fun s => decide (s = ((a, b) : ESlot L))) a,
-          efrm (swapSlot ((a, b) : ESlot L)) true) := by
-  intro hsee
-  have hadj := eAdj_eq_of_eRoot_eq
-    (p := (epay (fun s => decide (s = ((a, b) : ESlot L))) a, efrm (a, b) true))
-    (q := (epay (fun s => decide (s = ((a, b) : ESlot L))) a,
-      efrm (swapSlot ((a, b) : ESlot L)) true)) hsee
-  have e1 : eAdj (epay (fun s => decide (s = ((a, b) : ESlot L))) a) (efrm (a, b) true) = true := by
-    simp [eAdj, inSlot, hab]
-  have e2 : eAdj (epay (fun s => decide (s = ((a, b) : ESlot L))) a)
-      (efrm (swapSlot ((a, b) : ESlot L)) true) = false := by
-    simp [eAdj, inSlot, swapSlot, Prod.mk.injEq, hab, Ne.symm hab]
-  rw [e1, e2] at hadj
-  exact absurd hadj (by decide)
+theorem degSlot_fix (a b : Fin L) (k : ESlot L) (hk : k.1 ≠ k.2) : degSlot a b k = k := by
+  have h1 : k ≠ (a, a) := fun hh => hk (by rw [hh])
+  have h2 : k ≠ (b, b) := fun hh => hk (by rw [hh])
+  simp [degSlot, h1, h2]
 
-/-- ### ⛔⛔ NO SYMMETRIC COPY CAN BE THE RULER, in this model.
-A symmetric copy's payload vertex cannot separate the twin frame vertices `f(k,t)` and
-`f(swap k, t)`; a non-symmetric copy's can, and this model contains non-symmetric copies. So `(R)`
-fails at every symmetric `w₀` — including every copy the doc's construction actually uses.
+theorem degSlot_deg (a b : Fin L) (k : ESlot L) (hk : k.1 = k.2) :
+    (degSlot a b k).1 = (degSlot a b k).2 := by
+  unfold degSlot
+  split
+  · rfl
+  · split
+    · rfl
+    · exact hk
 
-★ Read this as *"the Lean rendering of the ensemble is coarser than the construction it models"*, not
-as evidence about (A) or (B). ⛔ In particular it is **not** a point for (B). -/
-theorem not_rulerRefines {L : Nat} (hL : 2 ≤ L) {w₀ : PayIdx L} (hsym : SymCopy w₀.1) :
-    ¬ RulerRefines L w₀ := by
-  intro hR
-  have h0 : (0 : Nat) < L := by omega
-  have h1 : (1 : Nat) < L := by omega
-  have hab : (⟨0, h0⟩ : Fin L) ≠ ⟨1, h1⟩ := by simp [Fin.ext_iff]
-  exact ruler_sees hab
-    (hR (⟨fun s => decide (s = ((⟨0, h0⟩, ⟨1, h1⟩) : ESlot L)), ⟨0, h0⟩⟩)
-      (((⟨0, h0⟩, ⟨1, h1⟩) : ESlot L), true)
-      (swapSlot ((⟨0, h0⟩, ⟨1, h1⟩) : ESlot L), true)
-      (twin_blind hsym w₀.2 _ true))
+/-- A copy gives every self-loop slot type `false` — it is irreflexive. -/
+theorem colr_diag (g : EColr L) (k : ESlot L) (hk : k.1 = k.2) : g.val k = false := by
+  rw [show k = (k.1, k.1) from Prod.ext rfl hk.symm]
+  exact EColr.irrefl g k.1
+
+def degFun (a b : Fin L) : EVert L → EVert L
+  | Sum.inr (Sum.inl (k, t)) => Sum.inr (Sum.inl (degSlot a b k, t))
+  | x => x
+
+theorem degFun_involutive (a b : Fin L) : Function.Involutive (degFun (L := L) a b) := by
+  rintro (⟨c, i⟩ | ⟨k, t⟩ | g)
+  · rfl
+  · show Sum.inr (Sum.inl (degSlot a b (degSlot a b k), t)) = _
+    rw [degSlot_involutive a b k]
+  · rfl
+
+def degSwap (a b : Fin L) : EVert L ≃ EVert L :=
+  Function.Involutive.toPerm _ (degFun_involutive (L := L) a b)
+
+@[simp] theorem degSwap_apply (a b : Fin L) (x : EVert L) : degSwap a b x = degFun a b x := rfl
+
+@[simp] theorem degSwap_epay (a b : Fin L) (c : EColr L) (i : Fin L) :
+    degSwap a b (epay c i) = epay c i := rfl
+
+theorem esort_degSwap (a b : Fin L) (x : EVert L) : esort (degSwap a b x) = esort x := by
+  rcases x with ⟨c, i⟩ | ⟨k, t⟩ | g <;> rfl
+
+/-- A degenerate slot carries no payload edge, and every copy gives it type `false`. -/
+theorem inSlot_deg (x i : Fin L) : inSlot ((x, x) : ESlot L) i = false := by simp [inSlot]
+
+theorem eAdj_degSwap (a b : Fin L) (x y : EVert L) :
+    eAdj (degSwap a b x) (degSwap a b y) = eAdj x y := by
+  have key : ∀ (c : EColr L) (i : Fin L) (k : ESlot L) (t : Bool),
+      (inSlot (degSlot a b k) i && decide (c.val (degSlot a b k) = t))
+        = (inSlot k i && decide (c.val k = t)) := by
+    intro c i k t
+    by_cases hk : k.1 = k.2
+    · have hd : (degSlot a b k).1 = (degSlot a b k).2 := degSlot_deg a b k hk
+      have h1 : inSlot (degSlot a b k) i = false := by
+        simp only [inSlot, decide_eq_false_iff_not, not_and]; intro hne; exact absurd hd hne
+      have h2 : inSlot k i = false := by
+        simp only [inSlot, decide_eq_false_iff_not, not_and]; intro hne; exact absurd hk hne
+      rw [h1, h2]; rfl
+    · rw [degSlot_fix a b k hk]
+  rcases x with ⟨c, i⟩ | ⟨k, t⟩ | g <;> rcases y with ⟨c', j⟩ | ⟨k', t'⟩ | g'
+  · rfl
+  · exact key c i k' t'
+  · rfl
+  · exact key c' j k t
+  · show decide (degSlot a b k = degSlot a b k' ∧ t ≠ t') = decide (k = k' ∧ t ≠ t')
+    exact decide_eq_decide.2 (and_congr_left' (degSlot_involutive a b).injective.eq_iff)
+  · show decide (g'.val (degSlot a b k) = t) = decide (g'.val k = t)
+    by_cases hk : k.1 = k.2
+    · rw [colr_diag g' (degSlot a b k) (degSlot_deg a b k hk), colr_diag g' k hk]
+    · rw [degSlot_fix a b k hk]
+  · rfl
+  · show decide (g.val (degSlot a b k') = t') = decide (g.val k' = t')
+    by_cases hk : k'.1 = k'.2
+    · rw [colr_diag g (degSlot a b k') (degSlot_deg a b k' hk), colr_diag g k' hk]
+    · rw [degSlot_fix a b k' hk]
+  · rfl
+
+theorem invG_degSwap (a b : Fin L) : InvG (degSwap (L := L) a b) (eRoot L) :=
+  invG_wl2G (by intro p; simp only [eInit, esort_degSwap, eAdj_degSwap, Equiv.apply_eq_iff_eq])
+
+/-- ★★ **Nobody can see which self-loop slot is which.** -/
+theorem deg_blind (c : EColr L) (i : Fin L) (a b : Fin L) (t : Bool) :
+    eRoot L (epay c i, efrm (a, a) t) = eRoot L (epay c i, efrm (b, b) t) := by
+  have h := (invG_degSwap (L := L) a b (epay c i, efrm (a, a) t)).symm
+  simpa only [degSwap_apply, degSwap_epay, degFun, degSlot, if_pos rfl] using h
+
+
+/-! ## 4. ★★★ (A) AT THE OBJECT — both hypotheses discharged
+
+With a copy being a graph, the two frame symmetries of §3 are exactly the fibres a ruler is *allowed*
+to have, so `(R)` becomes a theorem; and `CopyProbe.sameLabelOrbit_of_tag` now applies to every copy,
+so `(i)` does too. ⟹ `readings_translate` fires with **no hypothesis but discreteness of one copy**. -/
+
+/-- **(R)** — *the ruler's view is at least as fine as every reading*. -/
+def RulerRefines (L : Nat) (w₀ : PayIdx L) : Prop :=
+  ∀ (w : PayIdx L) (s s' : SlotIdx L), bE L w₀ s = bE L w₀ s' → bE L w s = bE L w s'
+
+/-- **(i)** — *the tag names the ruler's orbit*. -/
+def TagIsolates (L : Nat) (w₀ : PayIdx L) : Prop :=
+  ∀ w : PayIdx L, yE L w = yE L w₀ → ∃ σ : Equiv.Perm (Fin L), w = σ • w₀
+
+/-- (A) as a reduction to the two hypotheses — both are discharged below. -/
+theorem readings_translate {w₀ : PayIdx L} (hiso : TagIsolates L w₀)
+    {w₁ w₂ : PayIdx L} (href : RulerRefines L w₀) (h : yE L w₁ = yE L w₂) :
+    ∃ σ : Equiv.Perm (Fin L), ∀ s, bE L w₂ s = bE L w₁ (σ • s) :=
+  RulerLemma.ruler' (y := yE L) bE_equivariant w₀ hiso (href w₂) (phi_determined h)
+
+/-- ### ★★★ (R) IS A THEOREM.
+A refinement-discrete copy's payload vertex sees everything about the frame that any payload vertex
+sees. Its fibres are exactly the two forced ones — twin slots (§3, from **symmetry** of a copy) and
+self-loop slots (§3, from **irreflexivity**) — and every payload vertex has those same fibres. -/
+theorem rulerRefines_of_discrete {c : EColr L} (hd : Function.Injective (eCopy L c)) (i : Fin L) :
+    RulerRefines L ((c, i) : PayIdx L) := by
+  rintro w ⟨k, t⟩ ⟨k', t'⟩ h
+  have ht : t = t' := frame_type_eq' h
+  subst ht
+  show eRoot L (epayI w, efrm k t) = eRoot L (epayI w, efrm k' t)
+  by_cases hk : k.1 = k.2
+  · -- both slots are self-loops: nobody can tell them apart
+    have hk' : k'.1 = k'.2 := by
+      by_contra hk'
+      rcases (profile_injective hd hk' h.symm).2 with hh | hh
+      · exact hk' (by rw [hh]; exact hk)
+      · exact hk' (by rw [hh]; exact hk.symm)
+    rw [show k = (k.1, k.1) from Prod.ext rfl hk.symm,
+        show k' = (k'.1, k'.1) from Prod.ext rfl hk'.symm]
+    exact deg_blind w.1 w.2 k.1 k'.1 t
+  · -- otherwise the ruler pins the unordered slot, and the twins are invisible to everyone
+    rcases (profile_injective hd hk h).2 with rfl | hkk
+    · rfl
+    · rw [show k = swapSlot k' from hkk]
+      exact (twin_blind w.1 w.2 k' t).symm
+
+/-- ### ★★★ (i) IS A THEOREM. -/
+theorem tagIsolates_of_discrete {c : EColr L} (hd : Function.Injective (eCopy L c)) (i : Fin L) :
+    TagIsolates L ((c, i) : PayIdx L) := by
+  intro w hw
+  obtain ⟨σ, hσ⟩ :=
+    sameLabelOrbit_of_tag (symCopy_all w.1) (proper_all c) (proper_all w.1) hd hw.symm
+  exact ⟨σ, (epayI_injective (by rw [epayI_smul]; exact hσ)).symm⟩
+
+/-- ### ★★★★ (A), AT THE REAL OBJECT.
+**If one copy of the ensemble is refinement-discrete, then any two payload vertices sharing a 2-WL
+colour read the shared frame the same way up to a relabelling of the labels.**
+
+⚠⚠ Two inputs remain between this and *"no mixed cell"* (§6e.4g items 4b3, 4c), and neither is
+supplied here: **(4b3)** §6e.4a's *"the reading determines the copy"* — this gives translate
+**readings**, `Ensemble.MixedCell` is about **vertices**; and **(4c)** that a refinement-discrete copy
+exists in `E(L)`, which is a Babai–Erdős–Selkow statement about the payload family, measured
+(5760/32768 at `L = 6`) and not formalized. ⛔ Do not quote this as *"Construction C is dead"*. -/
+theorem readings_translate_of_discrete {c : EColr L} (hd : Function.Injective (eCopy L c))
+    (i : Fin L) {w₁ w₂ : PayIdx L} (h : yE L w₁ = yE L w₂) :
+    ∃ σ : Equiv.Perm (Fin L), ∀ s, bE L w₂ s = bE L w₁ (σ • s) :=
+  readings_translate (tagIsolates_of_discrete hd i) (rulerRefines_of_discrete hd i) h
+
+/-- ▶ The same statement from the *copy-side* hypothesis the caller can actually check: the copy's own
+2-WL closure is discrete. `(LB)` converts it. -/
+theorem readings_translate_of_wl2G_discrete {c : EColr L}
+    (hdisc : ∀ p q : Fin L × Fin L, wl2G (hInit c) p = wl2G (hInit c) q → p = q) (i : Fin L)
+    {w₁ w₂ : PayIdx L} (h : yE L w₁ = yE L w₂) :
+    ∃ σ : Equiv.Perm (Fin L), ∀ s, bE L w₂ s = bE L w₁ (σ • s) :=
+  readings_translate_of_discrete (eCopy_injective_of_discrete c (symCopy_all c) hdisc) i h
 
 end RulerAtEnsemble
 end ChainDescent

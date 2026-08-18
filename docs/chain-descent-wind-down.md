@@ -1117,21 +1117,25 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > > (the Ruler Lemma, carrier-generic, with a non-vacuity witness), `CopyRestrict.lean` (**(LB) as a
 > > theorem at every `L` at the real object**, carrying §6b's encoded-edge readout), `CopyProbe.lean`
 > > ((P1)/(P2), plus ★ *no mixed cell can be witnessed with a refinement-discrete proper copy*).
-> > ✅⛔ **2026-08-16c — item 4a done, 4b half done, and 4b turned up a MODEL DEFECT.**
-> > `Coherence.phi_determined` (**`Φ_E` is 2-WL-available**, unconditional) and
-> > `RulerAtEnsemble.bE_equivariant`/`yE_invariant` (**the ensemble is an instance of the abstract
-> > setup**) ⟹ `readings_translate` reduces (A) to two named hypotheses. ⛔⛔ **Then one of them,
-> > `RulerRefines`, was PROVED FALSE at the model** (`not_rulerRefines`): the slot transposition is an
-> > automorphism, so symmetric copies are blind to the twin frame vertices and non-symmetric ones are
-> > not, and `Ensemble.EColr` contains both. ★★★ **This is a defect of the Lean rendering, not evidence
-> > for (B)** — one change fixes it and everything else survives: **make a slot a non-degenerate
-> > UNORDERED pair, so a copy is a graph.** ⚠⚠ A third open input also surfaced that the item list never
-> > named: §6e.4a's *"`a` determines `c`"*, needed to get from translate **readings** to same-orbit
-> > **vertices**.
-> > ⛔⛔ **The disjunction is STILL UNDECIDED.** ★ But (R) is now a *finite, measurable* target once the
-> > model is unordered — the first thing either side has that a probe at `L = 4,5` can decide.
+> > ✅✅✅ **2026-08-16c — 4a AND 4b DONE. (A) IS A THEOREM AT THE OBJECT, GIVEN ONE DISCRETE COPY.**
+> > `Coherence.phi_determined` (**`Φ_E` is 2-WL-available**, unconditional; ⚠ needed `Transposable` —
+> > `eRoot` is not a symmetric function). Then the Lean model was **aligned with §3**: `Ensemble.EColr`
+> > carried *all* slot colourings (`2^{L²}` — directed copies and self-loop slots), where §3 has
+> > **graphs** (`2^C(L,2)`, which is what every probe builds: `L=4 ⟹ N=332`). ★ Checked rather than
+> > assumed that nothing was lost: all graphs kept, gauge still transitive, and the **label
+> > transposition still an automorphism fixing `m(base)`** (§3.2a's real obligation). With a copy a
+> > graph, the two frame symmetries are automorphisms — `twin_blind` (symmetry) and `deg_blind`
+> > (irreflexivity) — so **(R) `rulerRefines_of_discrete` and (i) `tagIsolates_of_discrete` are
+> > theorems**, giving ★★★★ **`readings_translate_of_wl2G_discrete`: if one copy of `E(L)` has a
+> > discrete 2-WL closure, any two payload vertices sharing a closure colour read the frame identically
+> > up to a relabelling.**
+> > ⚠⚠ **Two inputs remain, and both are inputs rather than the cross-copy channel:** §6e.4a's
+> > *"`a` determines `c`"* (translate **readings** vs same-orbit **vertices**), and existence of a
+> > refinement-discrete copy (also the theorem's non-vacuity — below `L=6` no graph is rigid).
+> > ⟹ ★★★ **(B)'s washout claim is now refuted at the object, conditionally on those two.** ⛔ Still
+> > **not** *"Construction C is dead"*.
 > > ✅ **The 1-WL results below are unaffected**; every rung-2 negative is about rung 2 only.
-> > ✅ Gate **137 modules, ~255–309 s**; sixteen CAO modules, all axiom-clean.
+> > ✅ Gate **137 modules, ~261 s**; sixteen CAO modules, all axiom-clean.
 
 One-screen version of the 08-13 picture:
 > * a `Q₄` carrier is a **designed 1-WL counterexample** (`n = 352`), and the gauge ensemble is a
