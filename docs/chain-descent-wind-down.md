@@ -1117,13 +1117,21 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > > (the Ruler Lemma, carrier-generic, with a non-vacuity witness), `CopyRestrict.lean` (**(LB) as a
 > > theorem at every `L` at the real object**, carrying §6b's encoded-edge readout), `CopyProbe.lean`
 > > ((P1)/(P2), plus ★ *no mixed cell can be witnessed with a refinement-discrete proper copy*).
-> > ⛔⛔ **The disjunction is STILL UNDECIDED**, and the doc's old claim *"1+2+3 ⟹ (A)"* was too
-> > strong: what remains is the **instantiation** — the coherence chain (§6e.4d.3's arrows), moving
-> > `Ensemble.lean` to unordered proper slots so the ruler's reading is injective, and the existence of
-> > a discrete copy. ★ The disagreement is now localized to one writable chain of steps rather than to
-> > the soundness of the argument.
+> > ✅⛔ **2026-08-16c — item 4a done, 4b half done, and 4b turned up a MODEL DEFECT.**
+> > `Coherence.phi_determined` (**`Φ_E` is 2-WL-available**, unconditional) and
+> > `RulerAtEnsemble.bE_equivariant`/`yE_invariant` (**the ensemble is an instance of the abstract
+> > setup**) ⟹ `readings_translate` reduces (A) to two named hypotheses. ⛔⛔ **Then one of them,
+> > `RulerRefines`, was PROVED FALSE at the model** (`not_rulerRefines`): the slot transposition is an
+> > automorphism, so symmetric copies are blind to the twin frame vertices and non-symmetric ones are
+> > not, and `Ensemble.EColr` contains both. ★★★ **This is a defect of the Lean rendering, not evidence
+> > for (B)** — one change fixes it and everything else survives: **make a slot a non-degenerate
+> > UNORDERED pair, so a copy is a graph.** ⚠⚠ A third open input also surfaced that the item list never
+> > named: §6e.4a's *"`a` determines `c`"*, needed to get from translate **readings** to same-orbit
+> > **vertices**.
+> > ⛔⛔ **The disjunction is STILL UNDECIDED.** ★ But (R) is now a *finite, measurable* target once the
+> > model is unordered — the first thing either side has that a probe at `L = 4,5` can decide.
 > > ✅ **The 1-WL results below are unaffected**; every rung-2 negative is about rung 2 only.
-> > ✅ Gate **135 modules, ~309 s**; fourteen CAO modules, all axiom-clean.
+> > ✅ Gate **137 modules, ~255–309 s**; sixteen CAO modules, all axiom-clean.
 
 One-screen version of the 08-13 picture:
 > * a `Q₄` carrier is a **designed 1-WL counterexample** (`n = 352`), and the gauge ensemble is a

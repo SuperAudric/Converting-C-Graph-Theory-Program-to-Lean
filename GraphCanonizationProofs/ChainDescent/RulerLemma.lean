@@ -111,18 +111,28 @@ theorem map_univ_smul {A : Type*} [Fintype A] [MulAction Γ A] (γ : Γ) :
         rw [Finset.map_val]; rfl
     _ = (Finset.univ : Finset A).val := by rw [h]
 
-/-- ★ **The decode.** Against an injective ruler the contingency table *is* the graph of the function:
-the ruler's marks are pairwise distinct, so each pair names the slot it came from. -/
-theorem eq_of_align_eq {u u' v : X → C} (hv : Function.Injective v)
+/-- ★★ **The decode, at the weakest hypothesis that works.** The ruler does not have to be *injective*
+— it only has to be **at least as fine as the reading being decoded**. Then the contingency table still
+pins that reading pointwise.
+
+⚠ This is the version the ensemble needs: `Ensemble`'s slots are ordered, so every reading is constant
+on twin slots and no reading is injective, while *"the ruler refines it"* is exactly right. -/
+theorem eq_of_align_eq' {u u' v : X → C} (hv : ∀ x x' : X, v x = v x' → u' x = u' x')
     (h : Align u v = Align u' v) : u = u' := by
   funext x
   have hx : (u x, v x) ∈ Align u v :=
     Multiset.mem_map_of_mem _ ((Finset.mem_univ x))
   rw [h] at hx
   obtain ⟨x', -, hx'⟩ := Multiset.mem_map.1 hx
-  have hxx : x' = x := hv (congrArg Prod.snd hx')
-  subst hxx
+  have hxx : u' x' = u' x := hv x' x (congrArg Prod.snd hx')
+  rw [← hxx]
   exact (congrArg Prod.fst hx').symm
+
+/-- ★ **The decode.** Against an injective ruler the contingency table *is* the graph of the function:
+the ruler's marks are pairwise distinct, so each pair names the slot it came from. -/
+theorem eq_of_align_eq {u u' v : X → C} (hv : Function.Injective v)
+    (h : Align u v = Align u' v) : u = u' :=
+  eq_of_align_eq' (fun _ _ hxx => by rw [hv hxx]) h
 
 /-- Equivariance moves a translation from the right argument of `Align` to the left. This is the step
 that turns *"compare `ω` with every member of `ω₀`'s orbit"* into *"compare every translate of `ω`
@@ -166,6 +176,31 @@ theorem ruler [MulAction Γ X] [MulAction Γ Ω] {b : Ω → X → C} {y : Ω �
   have halign : Align (b (γ⁻¹ • ω₁)) (b ω₀) = Align (b ω₂) (b ω₀) := by
     rw [← align_smul hb]; exact congrArg Prod.snd hω'
   have hfun : b (γ⁻¹ • ω₁) = b ω₂ := eq_of_align_eq hinj halign
+  refine ⟨γ, fun x => ?_⟩
+  rw [← hfun, hb γ⁻¹ ω₁ x, inv_inv]
+
+/-- ### ★★★ THE RULER LEMMA, at the hypothesis the real object can meet.
+`ruler` with *"`b ω₀` injective"* weakened to **`RefinedBy`: the ruler's reading is at least as fine as
+the reading being decoded.** Everything else is unchanged.
+
+▶ At the ensemble this is the difference between a theorem and a dead end: ordered slots make every
+reading constant on twins, so no reading is injective, but *"the ruler separates whatever any reading
+separates"* is the honest and usable statement. -/
+theorem ruler' [MulAction Γ X] [MulAction Γ Ω] {b : Ω → X → C} {y : Ω → Y}
+    (hb : Equivariant Γ b) (ω₀ : Ω)
+    (hiso : ∀ ω', y ω' = y ω₀ → ∃ γ : Γ, ω' = γ • ω₀)
+    {ω₁ ω₂ : Ω}
+    (href : ∀ x x' : X, b ω₀ x = b ω₀ x' → b ω₂ x = b ω₂ x')
+    (h : Phi b y ω₁ = Phi b y ω₂) :
+    ∃ γ : Γ, ∀ x, b ω₂ x = b ω₁ (γ • x) := by
+  have hmem : (y ω₀, Align (b ω₂) (b ω₀)) ∈ Phi b y ω₂ :=
+    Multiset.mem_map_of_mem _ ((Finset.mem_univ ω₀))
+  rw [← h] at hmem
+  obtain ⟨ω', -, hω'⟩ := Multiset.mem_map.1 hmem
+  obtain ⟨γ, rfl⟩ := hiso ω' (congrArg Prod.fst hω')
+  have halign : Align (b (γ⁻¹ • ω₁)) (b ω₀) = Align (b ω₂) (b ω₀) := by
+    rw [← align_smul hb]; exact congrArg Prod.snd hω'
+  have hfun : b (γ⁻¹ • ω₁) = b ω₂ := eq_of_align_eq' href halign
   refine ⟨γ, fun x => ?_⟩
   rw [← hfun, hb γ⁻¹ ω₁ x, inv_inv]
 
