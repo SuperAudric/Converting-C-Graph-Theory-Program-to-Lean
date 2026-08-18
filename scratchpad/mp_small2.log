@@ -1,0 +1,24 @@
+=== smallest multipede with SMALL MIXED foot cells (rank + asymmetric design) ===
+
+-- m=8  (c_max=8, need c>=8)
+   c=8: 840 PS systems -> 0 full-rank AND asymmetric
+
+-- m=9  (c_max=12, need c>=9)
+   c=9: 120001 PS systems -> 0 full-rank AND asymmetric
+   c=10: 120001 PS systems -> 0 full-rank AND asymmetric
+   c=11: 10080 PS systems -> 0 full-rank AND asymmetric
+   c=12: 840 PS systems -> 0 full-rank AND asymmetric
+
+-- m=10  (c_max=13, need c>=10)
+   c=10: 120001 PS systems -> 23014 full-rank AND asymmetric
+      n= 60 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480
+      n= 60 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480
+      n= 60 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480
+   c=11: 120001 PS systems -> 51277 full-rank AND asymmetric
+      n= 64 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480
+      n= 64 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480
+      n= 64 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480
+   c=12: 120001 PS systems -> 60114 full-rank AND asymmetric
+      n= 68 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480
+      n= 68 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480
+      n= 68 |Aut|=1 cells=[4, 4, 4, 4, 4, 4, 4, 4, 4, 4] FOOT=[2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  mixed_foot_cells=10  copies=1024 ruler_verts=20480

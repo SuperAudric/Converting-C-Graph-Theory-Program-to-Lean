@@ -1,0 +1,9 @@
+=== is the ruler threshold real?  m=10, 1 bases, 3 rulers x 3 subsets per (base, s) ===
+  a row reads:  s -> (#split / #trials)   [SPLIT is sound; merged re-checked over 3 WL seeds]
+
+  base 0: n=60 c=10 pairs=10
+     s=1  n=   74  copies=   2   split 0/9
+     s=2  n=   88  copies=   4   split 0/9
+     s=3  n=  116  copies=   8   split 6/9
+     s=4  n=  188  copies=  16   split 9/9
+     s=5  n=  380  copies=  32   split 9/9

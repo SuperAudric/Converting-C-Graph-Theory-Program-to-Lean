@@ -1,0 +1,4 @@
+=== NULL controls, base n=60 ===
+  s   matching (no cross-pair link)   path (linked, symmetric)   cycle   rigid
+  4   0/4                            4/4                       4/4     4/4
+  5   0/4                            4/4                       4/4     4/4

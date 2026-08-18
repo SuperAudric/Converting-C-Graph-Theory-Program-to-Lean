@@ -1,0 +1,15 @@
+=== HONEST ruler-closure curve, multipede base m=10 ===
+  base n=60, c=10, 10 mixed foot pairs (Aut=1 so every pair is 2 orbits)
+  cons=[(1, 4, 5), (2, 6, 9), (0, 7, 8), (1, 6, 8), (3, 4, 9), (0, 5, 6), (4, 6, 7), (2, 5, 7), (2, 4, 8), (0, 1, 3)]
+  pairs=[(0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11), (12, 13), (14, 15), (16, 17), (18, 19)]
+  rulers: a fresh 1-WL-discrete graph per mark-count k (>= 7 vertices, so k=2 is a real ruler)
+
+  s  copies      n   attached-pair cell sizes   #non-singleton cells (whole graph)
+  CONTROL (1 copy, NOT closed): n=67  pair0 cells=[1, 1]  non-singleton=none (discrete)
+   1       2     74   [2]   27 cells, sizes [4, 4, 4, 4, 4, 4, 4, 4]...   merged
+   2       4     88   [2, 2]   27 cells, sizes [4, 4, 4, 4, 4, 4, 4, 4]...   merged
+   3       8    116   [2, 2, 2]   27 cells, sizes [8, 8, 8, 8, 8, 8, 8, 4]...   merged
+   4      16    188   [2, 2, 2, 2]   36 cells, sizes [8, 8, 8, 8, 8, 8, 8, 8]...   merged
+   5      32    380   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]   0 cells, sizes []   SPLIT
+   6      64    828   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]   0 cells, sizes []   SPLIT
+   7     128   1852   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]   0 cells, sizes []   SPLIT
