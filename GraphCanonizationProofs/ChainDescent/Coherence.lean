@@ -35,15 +35,18 @@ frame vertices), so they cost almost nothing. Two supporting facts did have to b
   frame filter delivers `{{(col(u,z), col(z,v))}}` while `Align` wants `{{(col(u,z), col(v,z))}}`, and
   the chain does not close.
 
-## ⚠⚠ What is still missing for (A) — unchanged by this file
+## ✅ What happened next (item 4b), and what is still missing for (A)
 
-**§6e.4g item 4b, the instantiation proper.** `RulerLemma.ruler` additionally needs, of one chosen
-`ω₀`: (i) its tag isolates its orbit — `CopyProbe.sameLabelOrbit_of_tag`, available — and (ii) its
-reading injective, which **fails in this model**: `Ensemble`'s slots are ordered, so `f(k,t)` and
-`f(swap k, t)` are twins and every reading is 2-to-1. The identified fix (weaken `eq_of_align_eq` to
-*"`v` refines `u'`"*, and cut `Ω` down to proper symmetric copies) is a model refactor of
-`Ensemble.lean`, not mathematics. ⛔ **So this file does not prove (A), and nothing here says anything
-about whether a mixed cell exists.** It removes one of the three named gaps.
+When this file landed, `RulerLemma.ruler`'s hypothesis (ii) *"`b ω₀` injective"* failed at the model —
+`Ensemble.EColr` was then **all** slot colourings, so it carried directed copies and self-loop slots
+that §3's construction does not have. **Both were fixed:** (ii) was weakened to *"`b ω₀` refines the
+reading being decoded"* (`RulerLemma.ruler'`), and `EColr` became a **graph** (symmetric, irreflexive).
+⟹ `RulerAtEnsemble.rulerRefines_of_discrete` **(R)** and `tagIsolates_of_discrete` **(i)** are now
+theorems, and `readings_translate_of_wl2G_discrete` is (A) at the object given one discrete copy.
+
+⛔ **Two inputs still stand between that and *"no mixed cell"*, and this file supplies neither:**
+§6e.4g **4b3** (§6e.4a's *"`a` determines `c`"* — translate **readings** vs same-orbit **vertices**)
+and **4c** (a refinement-discrete copy exists, which is also the headline theorem's non-vacuity).
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`,
 no `native_decide`.

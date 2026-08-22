@@ -22,9 +22,13 @@ The CAO carrier track is stuck on a two-way disjunction (that doc's top box):
 compared pairwise by a contingency table, against one member that is (i) named by its own invariant
 tag and (ii) reads the slots injectively. §6e.4g item 1 asks for exactly this to be machine-checked,
 because it is the one part of (A) that is pure algebra — no graphs, no WL, no ensemble — and so can be
-removed from dispute at low cost. **It is now checked.** ⚠ That does *not* decide the disjunction:
-items 2 and 3 (the hypotheses `(LB)`, `(P1)`, `(P2)`, which are about the ensemble) remain open, and
-`ruler` is useless without them.
+removed from dispute at low cost. **It is now checked**, and so is everything downstream of it:
+`(LB)` = `CopyRestrict.lb`, `(P1)`/`(P2)` = `CopyProbe.tag_isolates`/`profile_injective`, the
+coherence chain = `Coherence.phi_determined`, and the instantiation = `RulerAtEnsemble`.
+⚠ **The consumer at the ensemble is `ruler'`, not `ruler`** — the ordered-slot model makes every
+reading 2-to-1 on twin slots, so hypothesis (ii) had to be weakened from *"`b ω₀` injective"* to
+*"`b ω₀` refines the reading being decoded"*. ⚠ That still does **not** decide the (A)/(B)
+disjunction: see `RulerAtEnsemble`'s header for the two inputs that remain.
 
 ## The statement
 

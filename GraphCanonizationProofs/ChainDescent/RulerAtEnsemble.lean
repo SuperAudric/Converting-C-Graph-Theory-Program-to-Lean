@@ -9,35 +9,47 @@ import ChainDescent.Coherence
 
 | | |
 |---|---|
-| the engine | ✅ `RulerLemma.ruler'` — a theorem |
+| the engine | ✅ `RulerLemma.ruler'` |
 | `(LB)`, `(P1)`, `(P2)` | ✅ `CopyRestrict.lb`, `CopyProbe.tag_isolates`, `CopyProbe.profile_injective` |
 | `Φ_E` is 2-WL-available | ✅ `Coherence.phi_determined` |
-| **the ensemble is an instance of the abstract setup** | ✅ **this file**: `bE_equivariant`, `yE_invariant` — unconditional, straight off `Ensemble.invG_eRoot` |
-| ⛔ **(i) the tag isolates a ruler's orbit** | **hypothesis.** `CopyProbe.sameLabelOrbit_of_tag` discharges it *pairwise*, but only against copies that are `SymCopy` and `Proper` — and `Ensemble`'s copy set is **all** slot-colourings, so it is not discharged as stated |
-| ⛔ **(R) the ruler's view refines every reading** | **hypothesis**, and it is new. `CopyProbe.transfer` gives it *within the ruler's own copy*; across copies it is open |
+| the ensemble is an instance of the abstract setup | ✅ §2 here: `bE_equivariant`, `yE_invariant`, unconditional, off `Ensemble.invG_eRoot` |
+| ✅ **(i) the tag isolates a ruler's orbit** | **`tagIsolates_of_discrete`** — from `CopyProbe.sameLabelOrbit_of_tag`, which now applies to **every** copy because a copy is a graph |
+| ✅ **(R) the ruler's view refines every reading** | **`rulerRefines_of_discrete`** — from §3's two frame symmetries plus `(P2)` |
 
-`readings_translate` is (A) reduced to exactly those two. ⚠⚠ Read it as a **reduction**, not as (A): it
-is a conditional whose hypotheses are not known to hold at this object, and per §7's standing filter a
-conditional on an unchecked hypothesis can be vacuous. What is *not* conditional is everything in the
-rows above it.
+⟹ ★★★★ **`readings_translate_of_wl2G_discrete`: if ONE copy of `E(L)` has a discrete 2-WL closure of
+its own, then any two payload vertices sharing a closure colour read the shared frame identically up
+to a relabelling of the labels.** Every `L`, at the real object.
 
-## ★ Why this is progress even though (A) is still open
+## ⚠ What made both hypotheses reachable — read this before touching `Ensemble.lean`
 
-(B) is the claim that the cross-copy channel adds nothing. After this file, (B) has to deny **(R)** —
-*"two frame vertices that the ruler's payload vertex cannot tell apart are told apart by some other
-payload vertex"*. That is a concrete, finite, **measurable** statement about a small ensemble, not an
-argument about washout. ⟹ the disagreement is now something `L = 4,5` can be pointed at.
+`Ensemble.EColr` used to be `ESlot L → Bool`, i.e. **all** slot colourings: `2^{L²}` of them, carrying
+*directed* copies and self-loop slots that §3's construction does not have (§3.1: "every **graph** on
+the label set"; §3.2a: the gadget is "symmetric in `i,j` by construction"). Every probe in the record
+builds `2^C(L,2)` copies (`L=4`: 64 copies, `N=332`); the old Lean object had 65,536 and `N ≈ 327,712`.
+**A copy is now a graph** — symmetric and irreflexive — and that is what turns §3's two frame
+symmetries into automorphisms (`twin_blind` from symmetry, `deg_blind` from irreflexivity) and lets
+`sameLabelOrbit_of_tag` apply uniformly.
 
-## ⚠ The two things (A) still needs beyond (i) and (R)
+★ **Checked, not assumed, that the alignment removes nothing the construction has:** all `2^C(L,2)`
+graphs remain, the gauge is still transitive on them, and the label transposition is still an
+automorphism fixing `m(base)` (`Ensemble.eAdj_eact`, `esort_eact`, `eact_base` still compile — §3.2a's
+actual design obligation, and the one that would have broken had this been a design change).
+⚠ The **directed** variant is a separate, larger design (it needs a 6-vertex gauge structure carrying
+the two directions independently); it is not this one.
 
-1. **`Ensemble`'s copies are all slot-colourings**, including non-symmetric and non-proper ones; the
-   doc's construction uses graphs, i.e. proper symmetric colourings. Cutting the model down is what
-   would let `sameLabelOrbit_of_tag` discharge (i) uniformly.
-2. **"the reading determines the copy"** (§6e.4a's *"`a` determines `c`"*, argued + measured, **not**
-   proved). `readings_translate` concludes that two readings are `S_L`-translates; turning that into
-   *"the two payload vertices are in one label orbit"* — which is what `Ensemble.MixedCell` is about —
-   needs that step. ⛔ The doc lists it under *"pinned, inherited"*; it is a third open input, and the
-   item list in §6e.4g did not name it.
+⛔ **A theorem that lived here for one day and is withdrawn:** `not_rulerRefines` ("no symmetric copy
+can be the ruler"). It was true of the **unaligned** model only — it needed directed copies to exist —
+and is deleted. It was never evidence for (B).
+
+## ⛔⛔ The two inputs that still stand between this and *"no mixed cell"*
+
+1. **§6e.4g 4b3 — §6e.4a's *"`a` determines `c`"***. `readings_translate_of_wl2G_discrete` concludes
+   the two **readings** are `S_L`-translates; `Ensemble.MixedCell` is about **vertices**. ⚠ A real
+   claim, not bookkeeping: the profile's *atomic* part only reveals `c` on slots incident to the
+   marked vertex. Argued + measured, **not proved**.
+2. **§6e.4g 4c — a refinement-discrete copy exists** in `E(L)`. Babai–Erdős–Selkow; measured
+   (5760/32768 at `L=6`), not formalized. ⛔ This is also **this file's non-vacuity**: below `L = 6` no
+   graph is rigid, so the hypothesis is empty there and the headline theorem says nothing.
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`,
 no `native_decide`.

@@ -224,7 +224,8 @@ def hAdj (c : EColr L) (i j : Fin L) : Bool := decide (i ≠ j) && c.val (i, j)
 
 /-- ⚠ Slots are **ordered** in this model (`Ensemble`'s note 1), so the two corners joining `i` and
 `j` sit on the slots `(i,j)` and `(j,i)`. Pinning *the* encoded edge therefore needs the copy to agree
-on the two, which is the faithful reading of the doc's unordered slots. -/
+on the two. ✅ Since 2026-08-16c an `Ensemble.EColr` **is** a graph, so this holds of every copy
+(`symCopy_all`); the hypothesis is kept in signatures so they still state what they use. -/
 def SymCopy (c : EColr L) : Prop := ∀ a b : Fin L, c.val (a, b) = c.val (b, a)
 
 /-- ✅ **Now automatic** — a copy *is* a graph (`Ensemble.EColr`), so the hypothesis every theorem

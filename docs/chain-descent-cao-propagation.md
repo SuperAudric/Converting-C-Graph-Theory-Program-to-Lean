@@ -1,12 +1,18 @@
 # CAO propagation — does refinement preserve `CellsAreOrbits` under individualization?
 
-> ## ▶ STATE STAMP, 2026-08-15 — this doc owns the QUESTION; the attack's state lives elsewhere
-> **The designed-counterexample track's current state is
-> [`chain-descent-cao-carrier-falsifiers.md`](./chain-descent-cao-carrier-falsifiers.md)'s
-> `▶▶▶ FRESH PICKUP` block.** One line: **1-WL is refuted (two designed counterexamples); 2-WL has no
-> counterexample**, the transfer (ii) is machine-checked and (iii) is quotable, and the one open
-> obligation (i) reduces to a single analytic question that is **untestable by computation** because
-> `M`-2-WL is complete at every reachable `L`. ⛔ Do not restart R1, R3, Phase 0, or the payload search.
+> ## ▶ STATE STAMP, 2026-08-17 — this doc owns the QUESTION; the attack's state lives elsewhere
+> **The designed-counterexample track's current state is the box at the TOP of
+> [`chain-descent-cao-carrier-falsifiers.md`](./chain-descent-cao-carrier-falsifiers.md)** — ⚠ not its
+> `▶▶▶ FRESH PICKUP` block, which is 2026-08-15d framing and is now marked superseded in place.
+> One line: **1-WL is refuted (two designed counterexamples); 2-WL still has no counterexample**, the
+> transfer (ii) is machine-checked and (iii) is quotable, and the open obligation (i) has **moved from
+> analytic to nearly closed**: (A) is a theorem at the real object given one refinement-discrete copy
+> (`RulerAtEnsemble.readings_translate_of_wl2G_discrete`), leaving two unproved *inputs* — that doc's
+> §6e.4g **4b3** (*"`a` determines `c`"*) and **4c** (a discrete copy exists).
+> ⚠⚠ **An earlier stamp said the question is "untestable by computation".** That is true of the
+> *ensemble* and **false of the mechanism**: the `∏|cell|!` ruler test has now been run on a multipede
+> carrier and it **splits** (that doc's §8 row 11).
+> ⛔ Do not restart R1, R3, Phase 0, or the payload search.
 
 > ## ⛔⛔ 2026-08-11 — THE 2-WL LEG OF THE 2026-08-01 CLOSURE IS **RETRACTED**. Read §0.0a.
 > The closure below rested on identifying this doc's target with *"a one-point extension of a schurian

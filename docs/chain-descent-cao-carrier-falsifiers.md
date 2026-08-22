@@ -155,14 +155,17 @@
 >    ★ (B) is now the *cheaper* side to attack: one object refutes (A) with no large-`L` argument, and
 >    `sameLabelOrbit_of_tag` tells you exactly where it cannot live (any copy the search uses as the
 >    ruler is off the table, so the mixed pair must be two non-discrete copies).
->    ★★ **And (R) is now a finite, measurable target**: once the model is unordered, *"two frame
->    vertices a ruler cannot separate are separated by some other payload vertex"* is checkable at
->    `L = 4,5` on the real 332-vertex object. That is the first thing either side has that a probe can
->    actually decide.
+>    ⚠ **(R) is no longer a target** — it is a theorem (`RulerAtEnsemble.rulerRefines_of_discrete`).
+> 6. ▶ **The one experimental lead still open** (§8 row 11's residual): a mixed cell with **non-trivial
+>    `Aut`**, so that the *symmetry* form of the washout objection can be tested and not just the
+>    *leak* form. Everything measured so far uses `Aut = 1` carriers, where "preserving symmetry" is
+>    vacuous. ⛔ The cheapest known such carrier is still rook ⊔ Shrikhande at `∏|cell|! = 32!`, so
+>    this needs a **new family**, not a bigger run.
 >
 > ⚠ **Everything below §6e.4d is the RECORD, including several retractions.** It is kept so that
 > withdrawn claims are not silently re-inherited (§9 lists them), not because it is a reading path.
-> A fresh reader needs: this box → §0 → §7 (the filters) → §6e.4d–g → §8a. Nothing else is required.
+> A fresh reader needs: this box → §0 → §7 (the filters) → §6e.4d–g → **§8 row 11** (the `∏|cell|!`
+> ruler test, run) → §8a (the Lean layer). Nothing else is required.
 >
 > ⚠ Companion, not replacement: [`chain-descent-cao-propagation.md`](./chain-descent-cao-propagation.md)
 > owns the *question*. Read its §1 (the hypothesis), §3 (the coupling principle) and §14 (the anatomy
@@ -195,15 +198,23 @@ counterexample (§2, `n = 352`, 4 mixed cells), and the gauge-ensemble Construct
 at rung 1 (§6, `n = 229,406`, 100 mixed cells) — so at 1-WL the design programme **works**. At 2-WL
 no mixed cell has ever been observed, and §6b says why the obvious hiding fails: **an edge encoded as
 a typed common neighbour is exactly what 2-WL counts.** Whether the construction is *dead* at 2-WL or
-merely *unmeasurable* there turns on one undecided disjunction — does the **cross-copy** channel
-supply the orbit (A), or nothing the copy lacks (B)? — stated in the box at the top of this file.
-Both sides have an argument, neither has a proof, and **no measurement at any reachable size can
-discriminate them** (§6e.4a), which is why §6e.4g lists only theorems and experiments as next steps.
+merely *unmeasurable* there turned on one disjunction — does the **cross-copy** channel supply the
+orbit (A), or nothing the copy lacks (B)? — and **as of 2026-08-16c that disjunction has moved**: (A)
+is a **theorem at the real object given one refinement-discrete copy**
+(`RulerAtEnsemble.readings_translate_of_wl2G_discrete`), leaving exactly two unproved *inputs*,
+§6e.4g **4b3** and **4c**. Separately, the reader's `∏|cell|!` ruler test has now been **run** and it
+**splits** (§8 row 11), which closes the specific gap §6e.4e named — so the *leak* form of the
+washout objection is refuted by measurement, while the *symmetry* form remains untested.
 
-**Reading order — minimal path for a fresh reader.** The top box → §0 (the hypothesis + N1/N2) →
-§7 (the filters — cheapest thing in the doc) → **§6e.4d** (the case for (A)) → **§6e.4e** (the case
-for (B), and why the two cannot be told apart by measurement) → **§6e.4f** (this session's
-experiments) → **§6e.4g** (the decision procedure) → **§8a** (the Lean layer + the trap list).
+**Reading order — minimal path for a fresh reader.** The top box (it carries the current state and
+supersedes the dated boxes) → §0 (the hypothesis + N1/N2) → §7 (the filters — cheapest thing in the
+doc) → **§6e.4d** (the case for (A)) → **§6e.4e** (the case for (B); ⚠ its *"only tested against the
+automorphism mode"* caveat is now **closed** by §8 row 11) → **§6e.4f** (the 2026-08-16 experiments)
+→ **§6e.4g** (the decision procedure, items 1–4b done) → **§8 row 11** (the `∏|cell|!` ruler test,
+run) → **§8a** (the Lean layer + the trap list).
+▶ **In Lean, read in dependency order:** `RulerLemma` → `CopyRestrict` → `CopyProbe` → `Coherence` →
+`RulerAtEnsemble`. Each module's header states what it owes; `RulerAtEnsemble`'s is the one that
+carries the current state of (A) and the two remaining inputs.
 
 **Everything else is the record.** §2/§3 (how the constructions are built), §4/§5 (the payload bar —
 ⚠ now known unreachable by measurement, §6e.4a), §6/§6a–c (the rung-1 result and its audits), §6d/§6e
@@ -211,7 +222,18 @@ experiments) → **§6e.4g** (the decision procedure) → **§8a** (the Lean lay
 side route), §8 (files), §9 (proved vs measured vs argued, and the retraction list). Read them when
 you need provenance for a specific claim, not as a path.
 
-> ### ▶▶▶ FRESH PICKUP — 2026-08-15**d**. THIS BLOCK SUPERSEDES EVERY DATED BOX BELOW IT.
+> ### ▶▶▶ FRESH PICKUP — ⚠ **THE STATE HERE IS 2026-08-15d AND IS SUPERSEDED BY THE TOP BOX.**
+> **Read the top box for the current state; this block is kept because its *framing* (what the
+> question is, what the Ruler Lemma is, what (LB) is) is still the right orientation.** Three of its
+> claims have since been overtaken and are corrected here so they cannot be re-inherited:
+> * *"Formalizing the Ruler Lemma is next step 1"* — ✅ **done**, and so are (LB), (P1)/(P2), the
+>   coherence chain and the instantiation; see the top box's 2026-08-16b/c blocks.
+> * *"(LB) … not machine-checked. Attack it first if (A) is wrong"* — ✅ **`CopyRestrict.lb`**, every
+>   `L`, at the real object. The place to attack (A) now is §6e.4g **4b3**.
+> * *"no measurement at any reachable size can discriminate them"* — ⚠ **too strong.** It is true of
+>   the *ensemble*; it is **false of the mechanism**, which §8 row 11 measured on a different carrier.
+>
+> ### ▶▶▶ FRESH PICKUP — 2026-08-15**d** (superseded above; kept as framing).
 > **Goal of the track:** exhibit a *designed* counterexample to **CAO propagation at 2-WL** (§0 for the
 > hypothesis — start from the exact orbit partition, individualize **one vertex**, take the `k`-WL
 > closure, ask whether cells are still `Aut_v`-orbits).
@@ -1836,6 +1858,15 @@ which is what (P1)/(P2) use and what `probe_cao_ruler_exists.py` measures.
 > but **empirically the ruler has only ever been seen to defeat the symmetry mode.** ⟹ *"it beats
 > automorphisms, therefore it beats WL-blindness"* is an extrapolation, and it is (A)'s weakest joint
 > alongside (LB). ⛔ Do not quote §6e.4f's `P6` result as evidence about CFI.
+>
+> ### ✅✅ **THIS BOX IS NOW CLOSED — 2026-08-17, §8 row 11.** The `∏|cell|!` ruler test was run on a
+> **rigid** `m=10` multipede: `Aut = 1`, so it fails by **WL-blindness with no automorphism to blame**,
+> which is exactly the mode this box says had never been reached. A leak-free `∏Sym(cell)`-closed
+> family **splits it** (`s=4` 9/9, `s=5` 9/9, whole graph discrete from `s≥5`).
+> ⚠⚠ **What survives of this box:** `Aut = 1` there, so *"preserving symmetry"* is **vacuous** on that
+> carrier. The **leak** form of (B)'s objection is refuted by measurement; the **symmetry** form is
+> still untested, and is now the one open experimental lead (top box, next step 6).
+> ⚠ (LB) is no longer a weak joint either — it is `CopyRestrict.lb`.
 
 ### 6e.4f ▶ 2026-08-16 — THE SESSION'S EXPERIMENTS, and exactly what each does and does not show
 
@@ -2538,6 +2569,37 @@ caveat and outstanding item 6.
 >   ★ The central layer was worth checking on its own: `m(g)` touches only the frame, so the clique
 >   mechanism does not run inside a copy and central–central pairs see only `#{k : g_k = h_k}`, whose
 >   distribution over all `h` is `g`-independent. It is nonetheless complete — via the same ruler.
+
+> ### ▶ 2026-08-17 PROBES — the `∏|cell|!` ruler test, run (§8 row 11)
+> ⚠ **Run them in this order; each imports the previous.** All in `scratchpad/`.
+> * `probe_cao_multipede_small.py` — the systematic partial-Steiner search that killed *"smallest is
+>   `m=12`"*. Enumerates partial-Steiner triple systems in **lex order (not random)**, filters by
+>   `GF(2)` column rank, builds the multipede, reports 2-WL cells + `|Aut|`. Args: the list of `m`.
+>   ⚠ It also **failed usefully**: `m=8,9` come out full-rank but with `|Aut|>3` and giant foot
+>   cells, which is what exposed the missing condition. ~2 min for `m=7,8,9`.
+> * `probe_cao_multipede_small2.py` — the same with the missing filter: **the constraint hypergraph
+>   must be ASYMMETRIC** (full `GF(2)` rank kills only the *flip* automorphisms). ★ This is the probe
+>   that found **`m=10`, `n=60`, ten size-2 mixed foot pairs**. ⚠ its enumeration is capped at 120k
+>   systems per `(m,c)`, so the `m=9` zero is *"none in the first 120k"*, not exhaustive; `m=7,8` and
+>   `m=9,c=11,12` **are** exhaustive. ~20 min for `m=8,9,10`.
+> * `probe_cao_ruler_curve.py` — ⛔ **the version that does NOT work**, kept because the failure is
+>   the trap: holding the unclosed pairs *fixed* individualizes them, and the multipede cliff then
+>   discretizes everything. Its `find_base`, `partial_steiner`, `hypergraph_rigid` and `rigid_ruler`
+>   are imported by the working version.
+> * `probe_cao_ruler_curve2.py` — ★★★ **the honest curve**: attach to a **subset** `S`, close over
+>   exactly `S`, so every row is leak-free. Args `<smax> <m> <seed>`. ⚠ it carries a **paid-for
+>   harness bug in its docstring**: slicing a big ruler's top-left `k×k` block is *not* a ruler (for
+>   `k=2` it is one edge), which silently turned the control into a non-test — fixed by taking a
+>   fresh 1-WL-discrete graph per mark-count.
+> * `probe_cao_ruler_threshold.py` — is the threshold real? 3 bases × 3 rulers × 3 subsets × 3 WL
+>   seeds. Also holds `cycle_ruler` and `control_main()` (the injectivity control).
+> * `null_control.py` — ★★★ **the control that identified the mechanism**: matching / path / cycle /
+>   rigid at `s=4,5`. **matching 0/4, the other three 4/4.**
+> ⚠ **Read the direction of the hashing error before quoting any row.** `wl2_diag` hashes the round's
+> multiset, so collisions only **merge**: the computed colouring is *coarser* than true 2-WL. Hence a
+> **SPLIT is sound**, and only a `merged` row could be an artefact — which is why every `merged` row
+> was re-run over three seeds.
+> ▶ **Logs kept:** `mp_small2.log`, `curve2_m10b.log`, `thresh.log`, `control2.log`, `null.log`.
 
 ### 8a. ▶▶ THE LEAN LAYER — all **sixteen** modules, and exactly what each one owes
 

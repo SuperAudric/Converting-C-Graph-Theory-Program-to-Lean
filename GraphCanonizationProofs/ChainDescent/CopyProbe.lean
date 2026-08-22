@@ -24,9 +24,9 @@ carries out that derivation, so all three of §6e.4g's (A)-side items are now th
 
 ## ⚠⚠ What this does and does **not** settle
 
-It discharges the last of the three (A)-side items in §6e.4g. It does **not** by itself prove (A):
-the doc's §6e.4d.3 chain also needs the coherence steps (*"the pair colour pins the fibre, so the
-`Align` channel is available"*), which are bookkeeping at the level of `Φ` and are **not** in Lean.
+It discharges the last of the three (A)-side items in §6e.4g. It does **not** by itself prove (A) —
+the doc's §6e.4d.3 chain also needs the coherence steps, which are now `Coherence.phi_determined`, and
+the instantiation, which is now `RulerAtEnsemble`; what remains open is §6e.4g **4b3** and **4c**.
 ⛔ And nothing here says a discrete copy **exists** in a given `E(L)` — that is the counting statement
 of §6e.4d.2 (measured: 5760/32768 at `L = 6`), which is a Babai–Erdős–Selkow fact about the payload
 family and is not formalized. Both hypotheses are carried in the open, as `hd` and as the caller's
@@ -41,8 +41,10 @@ assumed to separate the copies the disjunction is about.
 ## ⚠ Modelling note inherited from `Ensemble`
 
 Slots are **ordered**, so `f(k,t)` and `f(swap k, t)` are twins and no invariant can separate them.
-(P2) therefore concludes *"same type and same unordered slot"*, which is the faithful statement; (P1)
-needs `SymCopy` on the copy being compared against, for the same reason.
+(P2) therefore concludes *"same type and same unordered slot"*, which is the faithful statement.
+✅ The `SymCopy` / `Proper` hypotheses that (P1) and `sameLabelOrbit_of_tag` carry are **discharged
+once and for all** by `CopyRestrict.symCopy_all` / `proper_all`, because an `Ensemble.EColr` *is* a
+graph. They are kept in the signatures so each statement still says what it depends on.
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`,
 no `native_decide`.

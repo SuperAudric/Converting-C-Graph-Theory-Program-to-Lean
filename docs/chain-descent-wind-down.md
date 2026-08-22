@@ -1134,6 +1134,14 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > > refinement-discrete copy (also the theorem's non-vacuity — below `L=6` no graph is rigid).
 > > ⟹ ★★★ **(B)'s washout claim is now refuted at the object, conditionally on those two.** ⛔ Still
 > > **not** *"Construction C is dead"*.
+> > ✅✅ **2026-08-17 — the reader's `∏|cell|!` RULER TEST has been RUN, and it SPLITS** (carrier doc
+> > §8 row 11). A rigid `m=10` multipede (`n=60`, ten size-2 **mixed** foot pairs) with a leak-free
+> > `∏Sym(cell)`-closed family: `s=4` **9/9**, `s=5` **9/9**, whole graph discrete from `s≥5`.
+> > ★★★ That **closes the gap §6e.4e named** — the base is rigid, so it fails by **WL-blindness** with
+> > no automorphism to blame. ★★★ **The mechanism is NOT the ruler**: null control gives matching
+> > **0/4** vs path/cycle/rigid **4/4**, so what does the work is **cross-pair connectivity** — each
+> > copy reading several cells jointly. ⚠⚠ `Aut=1` there, so *"preserving symmetry"* is **vacuous**:
+> > the **leak** form of the washout objection is refuted by measurement, the **symmetry** form is not.
 > > ✅ **The 1-WL results below are unaffected**; every rung-2 negative is about rung 2 only.
 > > ✅ Gate **137 modules, ~261 s**; sixteen CAO modules, all axiom-clean.
 
