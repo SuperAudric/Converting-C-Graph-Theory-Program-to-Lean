@@ -1117,33 +1117,23 @@ Freeze the repo, final README pass, presentability pass on secondary documents.
 > > (the Ruler Lemma, carrier-generic, with a non-vacuity witness), `CopyRestrict.lean` (**(LB) as a
 > > theorem at every `L` at the real object**, carrying §6b's encoded-edge readout), `CopyProbe.lean`
 > > ((P1)/(P2), plus ★ *no mixed cell can be witnessed with a refinement-discrete proper copy*).
-> > ✅✅✅ **2026-08-16c — 4a AND 4b DONE. (A) IS A THEOREM AT THE OBJECT, GIVEN ONE DISCRETE COPY.**
-> > `Coherence.phi_determined` (**`Φ_E` is 2-WL-available**, unconditional; ⚠ needed `Transposable` —
-> > `eRoot` is not a symmetric function). Then the Lean model was **aligned with §3**: `Ensemble.EColr`
-> > carried *all* slot colourings (`2^{L²}` — directed copies and self-loop slots), where §3 has
-> > **graphs** (`2^C(L,2)`, which is what every probe builds: `L=4 ⟹ N=332`). ★ Checked rather than
-> > assumed that nothing was lost: all graphs kept, gauge still transitive, and the **label
-> > transposition still an automorphism fixing `m(base)`** (§3.2a's real obligation). With a copy a
-> > graph, the two frame symmetries are automorphisms — `twin_blind` (symmetry) and `deg_blind`
-> > (irreflexivity) — so **(R) `rulerRefines_of_discrete` and (i) `tagIsolates_of_discrete` are
-> > theorems**, giving ★★★★ **`readings_translate_of_wl2G_discrete`: if one copy of `E(L)` has a
-> > discrete 2-WL closure, any two payload vertices sharing a closure colour read the frame identically
-> > up to a relabelling.**
-> > ⚠⚠ **Two inputs remain, and both are inputs rather than the cross-copy channel:** §6e.4a's
-> > *"`a` determines `c`"* (translate **readings** vs same-orbit **vertices**), and existence of a
-> > refinement-discrete copy (also the theorem's non-vacuity — below `L=6` no graph is rigid).
-> > ⟹ ★★★ **(B)'s washout claim is now refuted at the object, conditionally on those two.** ⛔ Still
-> > **not** *"Construction C is dead"*.
-> > ✅✅ **2026-08-17 — the reader's `∏|cell|!` RULER TEST has been RUN, and it SPLITS** (carrier doc
-> > §8 row 11). A rigid `m=10` multipede (`n=60`, ten size-2 **mixed** foot pairs) with a leak-free
-> > `∏Sym(cell)`-closed family: `s=4` **9/9**, `s=5` **9/9**, whole graph discrete from `s≥5`.
-> > ★★★ That **closes the gap §6e.4e named** — the base is rigid, so it fails by **WL-blindness** with
-> > no automorphism to blame. ★★★ **The mechanism is NOT the ruler**: null control gives matching
-> > **0/4** vs path/cycle/rigid **4/4**, so what does the work is **cross-pair connectivity** — each
-> > copy reading several cells jointly. ⚠⚠ `Aut=1` there, so *"preserving symmetry"* is **vacuous**:
-> > the **leak** form of the washout objection is refuted by measurement, the **symmetry** form is not.
+> > ★★★★★ **2026-08-17 — THE ENSEMBLE HAS NO MIXED CELL. (A) HOLDS; (B) IS REFUTED.**
+> > The chain is complete in Lean, axiom-clean: `Coherence.phi_determined` (`Φ_E` is 2-WL-available;
+> > ⚠ needed `Transposable` — `eRoot` is not symmetric) → the model **aligned with §3** (`EColr` is a
+> > **graph**, not an arbitrary slot colouring; ★ checked that all `2^C(L,2)` graphs stay, the gauge
+> > stays transitive, and the label transposition stays an automorphism fixing `m(base)`) →
+> > `RulerAtEnsemble.rulerRefines_of_discrete` **(R)** and `tagIsolates_of_discrete` **(i)**, from the
+> > two frame symmetries a graph copy cannot see (`twin_blind`, `deg_blind`) →
+> > `ProfileCopy.profile_determines` = §6e.4a's ***"`a` determines `c`"***, whose content is the
+> > **clique mechanism** (`type_transfer`) →
+> > > ★★★★ **`ProfileCopy.not_mixedCell`: if `E(L)` (`L ≥ 3`) contains ONE copy whose own 2-WL closure
+> > > is discrete, `E(L)`'s 2-WL closure has NO mixed cell.**
+> > ⛔ **One input remains: 4c**, that such a copy exists (Babai–Erdős–Selkow; measured 5760/32768 at
+> > `L=6`; not formalized) — which is also the theorem's **non-vacuity**, since the smallest rigid graph
+> > has 6 vertices. ★ **T2⁺ is NOT needed** (the label-orbit `MixedCell` is the weaker shape, so
+> > refuting it refutes the real one).
 > > ✅ **The 1-WL results below are unaffected**; every rung-2 negative is about rung 2 only.
-> > ✅ Gate **137 modules, ~261 s**; sixteen CAO modules, all axiom-clean.
+> > ✅ Gate **138 modules, ~267 s**; seventeen CAO modules, all axiom-clean.
 
 One-screen version of the 08-13 picture:
 > * a `Q₄` carrier is a **designed 1-WL counterexample** (`n = 352`), and the gauge ensemble is a

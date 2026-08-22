@@ -167,7 +167,8 @@ MODULES=(
   ChainDescent.CopyRestrict           # ★ §6e.4g item 2: (LB) — stability restricts to a copy; §6b at the object
   ChainDescent.CopyProbe              # ★ §6e.4g item 3: (P1)/(P2) — a discrete copy is a ruler
   ChainDescent.Coherence              # ★ §6e.4g item 4a: the coherence chain — Phi_E is 2-WL-available
-  ChainDescent.RulerAtEnsemble        # ★ §6e.4g item 4b: the instantiation; (A) reduced to (i) + (R)
+  ChainDescent.RulerAtEnsemble        # ★ §6e.4g item 4b: the instantiation; (R) and (i) DISCHARGED
+  ChainDescent.ProfileCopy            # ★★★★ §6e.4g item 4b3: the reading determines the copy ⟹ NO MIXED CELL
   ChainDescent.DeepenExact            # C3b: orbKey exact ⟹ consume failure MAKES FORCE FIRE
   ChainDescent.DeepenGuard            # C3b: POLY relabelling-invariant guard (orbKeyG, equivariant supply)
   ChainDescent.DeepenGuardComplete    # ★ Tinhofer ↔ CertifiedG deepenSupply: guard COMPLETE ⟹ transports, no SupplyEquivariant; ① at a COMPUTABLE object

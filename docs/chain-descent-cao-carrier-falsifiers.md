@@ -145,11 +145,44 @@
 > closure buys is that no orbit **information** leaks. ⟹ the **leak** form of the washout objection is
 > refuted by measurement; the **symmetry** form is untested and still out of reach.
 >
+> ### ★★★★★ 2026-08-17 — **4b3 IS CLOSED. THERE IS NO MIXED CELL.**
+> `ChainDescent/ProfileCopy.lean`, axiom-clean, every `L ≥ 3`, at the real object:
+>
+> > **`not_mixedCell` — if `E(L)` contains ONE copy whose own 2-WL closure is discrete, then `E(L)`'s
+> > 2-WL closure has NO mixed cell.**
+>
+> The missing arrow was §6e.4a's *"`a` determines `c`"*. Two things made it fall:
+> * ★ By equivariance, *"`b ω₂` is the `σ`-translate of `b ω₁`"* is literally `b ω₂ = b (σ⁻¹ • ω₁)`,
+>   so the arrow **is** injectivity of the reading map — `profile_determines`.
+> * ★★★ **The clique mechanism, as a theorem** (`type_transfer`). The atomic colour of `(p(c,i), f(k,t))`
+>   only reveals `c` on slots **incident to `i`**, which is why this was a real claim. But `p(c,i)`'s
+>   payload neighbours are exactly the rest of *its own copy*, and `f(k,t)`'s are the endpoints of `k`
+>   in copies of type `t`, so the two have a **common payload neighbour iff `c k = t`** — for every
+>   slot, with no reference to `i`. The payload-filtered signature hands that over.
+>   ⚠ It does **not** say one pair colour determines `c` — only the boolean `c k = t`. Recovering `c`
+>   needs the reading as a **function on slots**, which is exactly what the ruler supplies. ★ That is
+>   where the ruler does its work, and why the argument does not collapse without it.
+>
+> ⟹ ★★★ **(B) IS REFUTED AT THE OBJECT and (A) HOLDS**, on one remaining input:
+> * **4c** — that a refinement-discrete copy **exists** in `E(L)`. Babai–Erdős–Selkow (almost all
+>   graphs are refinement-discrete) plus §6e.4d.2's closure argument; measured **5760/32768 at `L=6`**;
+>   **not formalized**. ⛔ It is also the theorem's **non-vacuity**: the smallest rigid graph has 6
+>   vertices, so for `L ≤ 5` the hypothesis is empty and the statement says nothing.
+>
+> ★ **Two scope notes, both in the safe direction.** (a) **T2⁺ is NOT needed**: `MixedCell` is stated
+> against the *label* orbits, and a label orbit is contained in the `Aut_{m(base)}`-orbit, so
+> *"different `Aut`-orbit"* implies *"different label orbit"* — refuting the label version refutes the
+> real one. (b) The theorem covers the **payload** kind, which is where the construction's content is;
+> frame and central cells are not covered by it (measured `= orbits` at `L = 4`, §6e.4d.4).
+>
+> ⛔ **What this does NOT say.** It says nothing about 1-WL (Constructions B and C-at-rung-1 stand), and
+> nothing about *other* carriers — the Ruler Lemma needs members that read a **shared frame pinned by
+> an individualization**, and §6e.4f #5 shows a bolt-on ruler is not that.
+>
 > ### ▶▶ NEXT STEPS — verifiable only. Do not add prose to this file.
 > **§6e.4g is the decision procedure**; items 1, 2, 3, 4a, 4b1 and 4b2 are **done**. What remains:
-> 4. **For (A), what is left:** **(4b3)** prove §6e.4a's *"`a` determines `c`"* — the one step between
->    translate readings and *"no mixed cell"*; **(4c)** exhibit or prove existence of a
->    refinement-discrete copy, which is also the headline theorem's non-vacuity.
+> 4. **For (A), what is left: only 4c** — exhibit or prove existence of a refinement-discrete copy,
+>    which is also the headline theorem's non-vacuity. Everything else is a theorem.
 > 5. **For (B): prove §6d.8's lemma**, or exhibit an object with a ruler *and* a surviving mixed cell.
 >    The falsification search (§6e.4f) is the harness; it found 0 in 1491 objects, with a thin margin.
 >    ★ (B) is now the *cheaper* side to attack: one object refutes (A) with no large-`L` argument, and
@@ -1879,7 +1912,7 @@ point of the table.
 | 2 | **Ruler ablation** on that object, from the plain colouring. `probe_cao_c6_ablate.py` | shared frame **+ ruler** → **6** payload cells; ruler deleted → 3; private frames → 3; private frames + ruler → 3. The ruler supplied *which end of its own path a vertex sits at* — invisible to any within-copy refinement | that the channel survives **WL-blindness** — see §6e.4e's box |
 | 3 | **Mirrored-ruler repair** (reader): close the ruler set under `D₆` instead of `Z₆` | `\|Aut\|` 6 → 12, cells **6 → 3** = orbits, positions `[0,5][1,4][2,3]`. Symmetrising **merges orbits**; it does not hide information | that symmetrising can *create* a mixed cell — it moves the target |
 | 4 | **Full `S_L` closure** — every relabelling of every base graph present. `probe_cao_fullclosure.py` | `P5` 3=3 · chair 4=4 · `P5`+chair+`C5` **8=8** · `C6`+`2C3` 2=2 · prism+`K₃,₃` 2=2, all mixed = 0 | ⚠ **"preserves all symmetries ⟹ detects none" is false as stated** — closure kills *labellings*, and `S_L` is not transitive on marked graphs. But none of these objects has a 2-WL-hard pair |
-| 5 | **Is a ruler a bolt-on device?** (reader) `X` = rook(4,4) ⊔ Shrikhande — 32 vertices, 2 orbits, **1 cell**, a genuine 2-WL mixed cell with no CFI needed. `probe_cao_ruler_bolt_on.py` | ⛔ **NO** for **single-vertex** attachment: private ruler on every vertex → still 1 cell; one shared ruler → 1; rulers + hub → 1. Only attaching to **one** vertex resolves it, and that is individualization | ⚠⚠ **NARROWED 2026-08-16d — see #8/#9.** Every attachment tried here joins the ruler at **one** vertex, so its reading of `X` is not injective and it is **hypothesis (ii)** that fails, not (i). A **bijective** attachment was never tried, and on small bases both hypotheses hold |
+| 5 | **Is a ruler a bolt-on device?** (reader) `X` = rook(4,4) ⊔ Shrikhande — 32 vertices, 2 orbits, **1 cell**, a genuine 2-WL mixed cell with no CFI needed. `probe_cao_ruler_bolt_on.py` | ⛔ **NO** for **single-vertex** attachment: private ruler on every vertex → still 1 cell; one shared ruler → 1; rulers + hub → 1. Only attaching to **one** vertex resolves it, and that is individualization | ⚠⚠ **NARROWED 2026-08-16d — see #8/#9.** Every attachment tried here joins the ruler at **one** vertex, so its reading of `X` is not injective and it is **hypothesis (ii)** that fails, not (i). A **bijective** attachment was never tried, and on small bases both hypotheses hold. User note, the method used was effectively bolting on a 1 vertex 'ruler' and the result claimed is likely overextrapolated.|
 | 6 | **Falsification search** for the conditional *ruler ⟹ no mixed cell*. Exhaustive over `S_4`-closed families, round by round. `probe_cao_ruler_falsify.py` | 1491 objects; **1487 have a mixed cell at some round** (the search had teeth); mixed at `r=0`: 1487, `r=1`: 1450, `r=2`: 0. **0 falsifiers** | ⚠ **thin margin**: rulers first appear at `r=2` and mixed cells vanish at `r=2`, so the two coincide. *"Both happen once the colouring is fine enough"* is **not excluded** |
 | 7 | **(LB) measured**, real ensemble `L=4`. `probe_cao_lowerbound.py` | all **64/64** copies: the ensemble's within-copy vertex colouring refines the copy's bare 1-WL and 2-WL, and its within-copy **pair** colouring refines the copy's bare 2-WL | that (LB) holds at large `L` — it is proved on paper, measured only here |
 | 8 | **2026-08-16d — how cheap can a 2-WL MIXED CELL be?** ⚠ superseded by #10 for the *carrier* question — multipedes beat every graph found here The reader's `∏\|cell\|!` test costs a factorial in the cell sizes, so it needs a *small* mixed cell — i.e. a nearly-rigid graph 2-WL cannot resolve. `probe_cao_mixed_search.py`, `probe_cao_mixed_hunt.py` | ⛔ **THERE ISN'T ONE.** Exhaustive over all connected graphs on `≤ 7` vertices: **0**. 28,000 random graphs `n = 8..14`: **0**. Random regular graphs to `n = 16`: **0**. Cheapest carrier is still rook ⊔ Shrikhande, one cell of **32** ⟹ `∏\|cell\|! = 32! ≈ 2.6·10³⁵` | ⚠ that no *smaller* carrier exists — it is a search, not a proof. ★ But the shape is structural: a mixed cell needs a **non-schurian** coherent configuration, and those live inside large homogeneous cells |
@@ -1901,8 +1934,8 @@ other and each is a **theorem or an experiment**.
 | **4b** | ▶▶ **Instantiate `RulerLemma` at the ensemble.** | **(A) directly**, given 4b3 + 4c | ✅ **DONE 2026-08-16c** — `RulerAtEnsemble`: `bE_equivariant`/`yE_invariant`, `rulerRefines_of_discrete` **(R)**, `tagIsolates_of_discrete` **(i)**, ★★★★ **`readings_translate_of_wl2G_discrete`** |
 | **4b1** | ✅ **THE MODEL ALIGNED WITH §3.** `EColr` was *all* slot colourings (directed copies + self-loop slots, `2^{L²}` of them); §3 has **graphs** (`2^C(L,2)`, and `L=4 ⟹ N=332`, which is what every probe builds). `EColr` is now a symmetric irreflexive colouring | unblocked 4b | ✅ **DONE**. ★ Checked, not assumed: all `2^C(L,2)` graphs kept, gauge still transitive, **label transposition still an automorphism fixing `m(base)`** (§3.2a's real obligation) |
 | **4b2** | Discharge `RulerRefines` and `TagIsolates` | (A) modulo 4b3/4c | ✅ **DONE** — via `twin_blind` (copy **symmetry**) and `deg_blind` (copy **irreflexivity**), both automorphisms of the aligned object |
-| **4b3** | ⚠⚠ **§6e.4a's *"`a` determines `c`"***. The theorem gives translate **readings**; `MixedCell` is about **vertices**. ⚠ The profile's atomic part only reveals `c` on slots incident to the marked vertex | **the last step to *"no mixed cell"*** | ▶ argued + measured, **NOT PROVED** — now the single most valuable item |
-| **4c** | **Existence of a refinement-discrete copy** in `E(L)` (Babai–Erdős–Selkow + §6e.4d.2) | (A)'s remaining input, **and the headline theorem's non-vacuity** — below `L=6` no graph is rigid, so the hypothesis is empty there | ▶ measured only (5760/32768 at `L=6`) |
+| **4b3** | ⚠⚠ **§6e.4a's *"`a` determines `c`"***. ★ By equivariance it **is** injectivity of the reading map; the content is the **clique mechanism** — `p(c,i)` and `f(k,t)` have a common payload neighbour iff `c k = t`, at every slot and with no reference to `i` | **the last step to *"no mixed cell"*** | ✅ **DONE 2026-08-17** — `ProfileCopy.type_transfer`, `profile_determines`, ★★★★ **`not_mixedCell`** |
+| **4c** | **Existence of a refinement-discrete copy** in `E(L)` (Babai–Erdős–Selkow + §6e.4d.2) | ★★★ **(A)'s ONLY remaining input**, and the headline theorem's non-vacuity — below `L=6` no graph is rigid, so the hypothesis is empty there | ▶ measured only (5760/32768 at `L=6`) — **the last open item** |
 | **5** | **For (B):** either prove §6d.8's lemma (the cross-copy aggregate is `M`-determined at the fixpoint), or **exhibit an object with a ruler AND a surviving mixed cell**. The harness exists (`probe_cao_ruler_falsify.py`); extend it to `L=5`, more rounds, and to carriers that are not the frame encoding | **(B) directly.** One such object refutes (A) without any large-`L` argument | ▶ open. ★ `sameLabelOrbit_of_tag` narrows the search: **both** members of the mixed pair must be non-discrete |
 
 > ### ⚠ WHAT WOULD *NOT* SETTLE IT — each of these has already been tried this session
@@ -2601,9 +2634,9 @@ caveat and outstanding item 6.
 > was re-run over three seeds.
 > ▶ **Logs kept:** `mp_small2.log`, `curve2_m10b.log`, `thresh.log`, `control2.log`, `null.log`.
 
-### 8a. ▶▶ THE LEAN LAYER — all **sixteen** modules, and exactly what each one owes
+### 8a. ▶▶ THE LEAN LAYER — all **seventeen** modules, and exactly what each one owes
 
-**All are gate-listed in `scripts/build.sh`; the gate is 137 modules, ~255–360 s, and passes.**
+**All are gate-listed in `scripts/build.sh`; the gate is 138 modules, ~255–360 s, and passes.**
 ⚠⚠ **2026-08-16c: `Ensemble.EColr` is now a GRAPH** (symmetric + irreflexive), not an arbitrary slot
 colouring. Every statement below that mentions a copy inherits that; `CopyRestrict.symCopy_all` and
 `CopyProbe.proper_all` discharge the old `SymCopy`/`Proper` hypotheses once and for all.
@@ -2630,10 +2663,11 @@ declaration is `[propext, Classical.choice, Quot.sound]` or a subset — no `sor
 | ★★ `CopyProbe` (item 3) | `sig_singleton_snd`, `frame_type_eq'`, `frame_partner`, ★★★ **`transfer`** (a discrete copy is a coordinate system), ★ **`profile_injective` = (P2)**, ★★ **`tag_isolates` = (P1)**, ★ **`sameLabelOrbit_of_tag`** (no mixed cell touches a discrete proper copy) | ⛔ owes the **coherence chain** (§6e.4g item 4a) and the **instantiation** (4b); `hd` (the copy's restriction is injective) is a hypothesis, discharged by `lb` + the copy's own discreteness |
 | ★★ `Coherence` (item 4a) | `exists_factor'` (factor at any codomain) · ★ **`Transposable`** + `transposable_wl2G` + `eRoot_transposable` (⚠ `eRoot` is **not** symmetric) · `diag_readout` · ★ `align_readout` · ★ `payload_readout` · `bE`/`yE` · ★★★ **`phi_determined`** | — |
 | ★★★ `RulerAtEnsemble` (item 4b) | the two `MulAction`s, ★ **`bE_equivariant`**/**`yE_invariant`**, `phi_seam` · ★ **`tswap`/`twin_blind`** (copy symmetry) and **`degSwap`/`deg_blind`** (copy irreflexivity) · ★★★ **`rulerRefines_of_discrete` = (R)** · ★★★ **`tagIsolates_of_discrete` = (i)** · ★★★★ **`readings_translate_of_wl2G_discrete`** | ⛔ owes nothing itself; (A) still needs **4b3** (*"`a` determines `c`"*) and **4c** (a discrete copy exists — also the non-vacuity) |
+| ★★★★ `ProfileCopy` (item 4b3) | ★★★ **`type_transfer`** (the clique mechanism: a common payload neighbour exists iff the copy carries the type) · ★★★★ **`profile_determines`** (= *"`a` determines `c`"*, i.e. the reading map is injective) · `sameLabelOrbit_of_diag` · `labelPropagates_of_discrete` · ⛔★★★★ **`not_mixedCell`** | ⛔ owes only **4c** (a discrete copy exists — also its non-vacuity). ⚠ `3 ≤ L` pins the mark; at `L=2` a copy's two payload vertices are genuine twins |
 | `AtomAugment` | ★★★ **`adequateFor_augment_iff`** — augmenting the atoms costs **exactly** `Refines (pull b) extra` (an `iff`; it works because `Adequate.blocks` is **start-colouring-free**) · `merge_of_tuple_merge_aug` (the augmented consumer, with the cost visible as `hex`) · ★ **`adequateFor_augment_self`** = the ceiling | — |
 
-⛔ **NOT in the Lean layer, and each is a real gap:** ★★ **§6e.4g 4b3** (*"`a` determines `c`"* — the
-one step between translate readings and *"no mixed cell"*) · **4c** (a discrete copy exists) ·
+⛔ **NOT in the Lean layer, and each is a real gap:** ★★★ **§6e.4g 4c** (a refinement-discrete copy
+exists — the **only** thing between the Lean layer and (A), and the non-vacuity of `not_mixedCell`) ·
 the **collapse**
 (§6e.4 — ⚠⚠ and as of 2026-08-15 it has **no proof route at all**, §6e.4c; do not start Lean work on
 it before the washout question is settled on paper) · **CFI's WL-blindness** (literature; ✅ now quotable in its *standard*
@@ -2642,10 +2676,10 @@ it before the washout question is settled on paper) · **CFI's WL-blindness** (l
 `TF(E)` (§6g, queued — ★ **and it is the natural object if the reader's washout reading is right**,
 since it is poly-size where the ensemble is exponential).
 
-▶ **The mechanical Lean items still owed, cheapest first:** ★★ §6e.4g **4b3** ·
+▶ **The mechanical Lean items still owed, cheapest first:** ★★★ §6e.4g **4c** ·
 `FrameTransfer.refinesAtoms` · `TupleCov`'s two side conditions ·
 `CaoCollapse.FrameClassComplete` · **T2⁺** · `TF(E)`.
-⚠ `PublicTheoremIndex.md` has **no rows for any of the sixteen** — regen is
+⚠ `PublicTheoremIndex.md` has **no rows for any of the seventeen** — regen is
 `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`, ⚠⚠ it recomputes the **Notes**
 column and can resurrect **phantom rows**, so verify *unmatched deletions = 0*. Deliberately not run.
 
