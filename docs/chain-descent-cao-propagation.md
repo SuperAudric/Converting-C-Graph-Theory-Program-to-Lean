@@ -2264,3 +2264,89 @@ with no theorem behind it.
 
 ⛔ **Not in the box:** any attempt at `hsep` itself (R1f); the refiner swap (§13, still suspended —
 it is a cost question, not a footing one); any per-family certificate (§12.4 R2/R3).
+
+---
+
+## 16. ⛔★★ **CAN THE RULER LEMMA DRIVE PROPAGATION?** — asked and answered 2026-08-23
+
+`ChainDescent/RulerCao.lean` (gate **140 modules / 264 s**, axiom-clean). The question (user): the
+falsifier track's `RulerLemma` runs on a **discrete** ruler with many automorphic copies; CAO hands out
+**equal-orbit** copies instead, and the tag half of the lemma's hypothesis is exactly the CAO
+hypothesis — so does a **larger logical rework** of the lemma reach `CaoTarget.Separates`?
+
+**Answer: the rework exists, is strictly stronger than `RulerLemma.ruler'`, and is seed-starved.**
+This is not `RulerOrbit` repeated — that file refuted the *narrow* substitution (known orbits for
+discreteness) and the repair it found (`ruler_gauge`) is **also dead here**, for a new reason.
+
+### 16.1 What changes: the slots **are** the members
+
+Every earlier consumer has `X ≠ Ω` (payload indices read *frame* slots). CAO propagation is the
+degenerate case `X = Ω = V`: a vertex reads the vertex set, `b u x = X_v(u,x)`. One hypothesis carries
+the whole file — **`DiagClosed`**, *a pair coloured like a diagonal pair is diagonal* — which is the
+coherent-configuration axiom (`CaoRound.DiagSep`'s content) and is **free at the real object**
+(`RulerCao.diagClosed_ext`: `ext (rootPair adj) v` refines `initCol2`, which carries the diagonal
+flag). Three consequences:
+
+| | |
+|---|---|
+| ⛔ | **`ruler_gauge` collapses.** `gauge_trivial`: a gauge of a `DiagClosed` family is the **trivial group** — every member's own diagonal pins every slot — so `injective_of_separatesModGauge` sends the hypothesis straight back to *"the ruler's row is injective"*. The one proved escape from discreteness does not exist here. |
+| ✅ | **The ensemble's 4b3 gap closes for free.** *"The reading determines the vertex"* **is** `DiagClosed`, so the conclusion is an equation between **members**, not between readings. |
+| ★★★ | **The decode weakens to a valency-1 condition.** See 16.2. |
+
+### 16.2 ★★★ The rework — `ruler_diag`
+
+`RulerLemma.ruler'`'s `href` (*the ruler refines the decoded reading*) is replaced by **`Isolates`**
+(*the ruler's row singles the decoded member out*), and the proof reads **one entry** of the
+contingency table — the one sitting over the decoded member's own diagonal — instead of reconstructing
+the whole reading.
+
+* `isolates_of_refines` — `href ⟹ Isolates`, so this is a weakening;
+* `Strict.strictly_stronger` — a machine-checked instance where **`href` fails**, `Isolates` holds, and
+  `ruler_diag` still resolves the target cell ⟹ **strictly** weaker;
+* `cellIsOrbit_transport` — the rule a propagation calculus would use: *`ω₀`'s cell is one orbit* +
+  *`ω₀`'s row isolates `ω₂`* ⟹ **`ω₂`'s whole cell is one orbit**.
+
+★ This also explains the 2026-08-22b measurement (112 carriers, **0** sections with `href` and a
+non-discrete row) as a **theorem**: `injective_of_isolates_all` — asking one ruler to decode *every*
+member is asking its row to be injective. There is no intermediate regime; only per-member thinness
+survives.
+
+### 16.3 ⛔ Why it still does not reach the target — **seed starvation**
+
+`Isolates` is a **valency-1** condition, and a thin class is a contraction: from a cell of size `k` it
+reaches only cells of size `≤ k`.
+
+* `Counterexample.no_ruler_at_valency_two` — the threshold is **sharp**. `Γ` trivial (the abstract
+  shape of a rigid carrier with a non-discrete closure — the `m=10` multipede), `|V| = 3`: a
+  **singleton** ruler cell, `DiagClosed`, the tag determining `Φ` outright, `Φ ω₁ = Φ ω₂` — and the
+  conclusion **false**, with `Isolates` the one broken hypothesis. At valency ≥ 2 the table only places
+  the decoded member *somewhere in the ruler's fibre*, which is free.
+* `singleton_transports_to_singleton` — ⛔ **THE OBSTRUCTION.** A singleton cell transports only to a
+  singleton cell. The only cells a one-point extension hands over as *known* orbits are the singletons
+  (`{v}` itself), so the calculus seeded with everything CAO actually gives produces nothing but the
+  singletons it started with.
+
+⟹ what kills the route is **not** an unavailable decode — §16.2 makes the decode nearly free — but
+that the rule can only *move* resolution already held by a cell of at least the same size.
+
+### 16.4 ⛔⛔ The arity-3 escape is **worse**, not merely open
+
+The obvious repair is to let several rulers read the slots **jointly**: two rulers pin a member neither
+pins alone. `ruler_pair` is that lemma, and it is the wrong door twice:
+
+1. its observable `Phi₂` is a multiset of **triples** — a triple count. 2-WL supplies `Align`
+   (`CaoTarget.pairSig`) and nothing of arity 3 ⟹ this is the **same arity-3 wall**
+   `CaoRound.round3_separates_iff_triCount_ne` already pins, reached from a new direction (a fourth
+   independent arity-3 sighting, after §12.5a, §14.4, §14.5e);
+2. worse, its `hiso₂` is *"the pair class of `(ω₀,ω₀')` is a `Γ`-orbital"* = **schurity**, not CAO —
+   and schurity is **measurably false at CAO nodes** (Shrikhande: 3 pair classes vs 4 orbitals; the 22
+   S-failures of §12.5b). ⟹ dead on a named counterexample, not open.
+
+### 16.5 Scope, and what is NOT claimed
+
+§16.1–§16.4 are carrier-generic algebra; `diagClosed_ext` anchors the running hypothesis at the real
+object. The **positive** theorem additionally needs *"the tag determines `Phi`"* (coherence — this
+setting's `Coherence.phi_determined`), carried as an explicit hypothesis `hφ` and **not discharged**;
+the **negative** results do not use it, so no wiring can rescue them.
+⛔ **This does not refute CAO propagation** — it refutes *this route to it*. `CaoTarget.Separates`
+remains OPEN with no counterexample, exactly as the STATUS table says.
