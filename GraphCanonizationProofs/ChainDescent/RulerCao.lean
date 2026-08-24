@@ -199,10 +199,26 @@ theorem cellIsOrbit_transport {b : V → V → C} {y : V → Y}
 /-! ## 4. ⛔ SEED STARVATION — the rework cannot bootstrap
 
 The rule of §3 moves resolution from `ω₀`'s cell to `ω₂`'s cell **along a thin class**, and a thin
-class is a contraction: from a cell of size `k` it can only reach cells of size `≤ k`. The only cells
-a one-point extension hands over as *known* orbits are the **singletons** (`{v}` itself), and this
-section shows the rule maps singletons to singletons. So the calculus, seeded with everything CAO
-actually gives at the extension, produces nothing but the singleton cells it started with. -/
+class is a contraction: from a cell of size `k` it can only reach cells of size `≤ k`
+(`cell_card_le`). The only cells a one-point extension hands over as *known* orbits are the
+**singletons** (`{v}` itself), and `singleton_transports_to_singleton` is the `k = 1` case. So the
+calculus, seeded with everything CAO actually gives at the extension, produces nothing but the
+singleton cells it started with.
+
+★ **This is also the answer to *"how small can the ruler be?"*** — two independent bounds, and both
+say *small rulers are the useless ones*:
+
+| | |
+|---|---|
+| `isolated_card_le` | a ruler whose row shows `k` distinct **marks** isolates at most `k` members. A "length-2 ruler on a 16-vertex carrier" decodes at most two of them. |
+| `cell_card_le` | ★★ a ruler resolves **no cell larger than its own**. |
+
+⚠ And in this setting the ruler's row `b ω₀ = X_v(ω₀, ·)` **is** a 2-WL pair colour, and `Φ` is
+determined by the tag (`hφ`), so the ruler contributes **no separation at all** — it is a converter
+from *"same colour"* to *"same orbit"*, never a source of colour. That is why a short ruler "resembles
+the pairwise path calculations 2-WL already applies": it does not resemble them, it **is** them.
+⚠⚠ A ruler *attached* to the carrier as a gadget is a different object — there `X ≠ Ω` and the bounds
+below do not apply; see the doc's §6e.4f rows 9/11. -/
 
 omit [Fintype V] in
 /-- The stabiliser of the ruler fixes everything the ruler's row isolates. -/
@@ -229,6 +245,61 @@ theorem singleton_transports_to_singleton {b : V → V → C} {y : V → Y}
   calc u = γ⁻¹ • γ • u := (inv_smul_smul γ u).symm
     _ = γ⁻¹ • ω₂ := by rw [hγ]
     _ = ω₂ := stab_fixes_isolated hb hIso hinv
+
+/-! ### ★ How small can a ruler be? Two bounds -/
+
+omit [MulAction Γ V] in
+open scoped Classical in
+/-- ★ **A `k`-mark ruler isolates at most `k` members.** The isolated members inject into the row's
+image, so a ruler that shows few distinct colours decodes correspondingly few members — whatever else
+it does. (`Isolates` is *necessary* for §3's decode by `isolates_of_refines`, so this bounds the
+rework's reach directly.) -/
+theorem isolated_card_le (b₀ : V → C) :
+    (Finset.univ.filter (fun u : V => Isolates b₀ u)).card ≤ (Finset.univ.image b₀).card :=
+  Finset.card_le_card_of_injOn b₀ (fun u _ => Finset.mem_image_of_mem _ (Finset.mem_univ u))
+    (fun _ hu _ _ h => ((Finset.mem_filter.mp hu).2 _ h.symm).symm)
+
+variable [DecidableEq Y]
+
+/-- The cell of `u` — the tag class, as a `Finset`. -/
+def cell (y : V → Y) (u : V) : Finset V := Finset.univ.filter (fun z => y z = y u)
+
+theorem mem_cell {y : V → Y} {u z : V} : z ∈ cell y u ↔ y z = y u := by
+  simp [cell]
+
+/-- ### ★★ **A RULER RESOLVES NO CELL LARGER THAN ITS OWN.**
+The thin class out of `ω₀` is a **contraction**: `ω₀`'s cell surjects onto `ω₂`'s.
+
+⟹ this is the quantitative form of §4's obstruction, and the honest answer to *"how small can the
+ruler be?"* — a small ruler cell resolves only small cells, and the free seeds (singletons) are the
+smallest there are. `singleton_transports_to_singleton` is the case `card = 1`. -/
+theorem cell_card_le {b : V → V → C} {y : V → Y}
+    (hb : Equivariant Γ b) (hd : DiagClosed b) (hy : Invariant Γ y)
+    (hφ : ∀ u u' : V, y u = y u' → Phi b y u = Phi b y u')
+    {ω₀ ω₂ : V} (hiso : CellIsOrbit Γ y ω₀) (hIso : Isolates (b ω₀) ω₂) :
+    (cell y ω₂).card ≤ (cell y ω₀).card := by
+  classical
+  -- the transport map: `γ • ω₀ ↦ γ • ω₂`, well defined because `Stab ω₀` fixes `ω₂`
+  set f : V → V := fun a =>
+    if h : ∃ γ : Γ, a = γ • ω₀ then (Classical.choose h) • ω₂ else ω₂ with hf
+  -- ★ well-definedness: any two group elements carrying `ω₀` to the same place agree on `ω₂`
+  have key : ∀ (δ γ : Γ), δ • ω₀ = γ • ω₀ → γ • ω₂ = δ • ω₂ := by
+    intro δ γ hγ
+    have hstab : (γ⁻¹ * δ) • ω₀ = ω₀ := by rw [mul_smul, hγ, inv_smul_smul]
+    have h2 : γ⁻¹ • δ • ω₂ = ω₂ := by
+      rw [← mul_smul]; exact stab_fixes_isolated hb hIso hstab
+    calc γ • ω₂ = γ • (γ⁻¹ • δ • ω₂) := by rw [h2]
+      _ = δ • ω₂ := smul_inv_smul γ _
+  have hsub : cell y ω₂ ⊆ (cell y ω₀).image f := by
+    intro u hu
+    obtain ⟨δ, rfl⟩ := cellIsOrbit_transport hb hd hφ hiso hIso u (mem_cell.mp hu)
+    refine Finset.mem_image.mpr ⟨δ • ω₀, mem_cell.mpr (hy δ ω₀), ?_⟩
+    have hex : ∃ γ : Γ, δ • ω₀ = γ • ω₀ := ⟨δ, rfl⟩
+    rw [hf]
+    simp only [dif_pos hex]
+    exact key δ _ (Classical.choose_spec hex)
+  calc (cell y ω₂).card ≤ ((cell y ω₀).image f).card := Finset.card_le_card hsub
+    _ ≤ (cell y ω₀).card := Finset.card_image_le
 
 end Rework
 

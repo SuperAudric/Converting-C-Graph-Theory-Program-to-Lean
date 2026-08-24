@@ -1719,6 +1719,71 @@ graphs** — measured: **5760 of the 32768** copies at `L=6`, and 35 %–78 % of
 `L = 7,8,9` (rising, as Babai–Erdős–Selkow predicts). ⟹ *every* instance of Construction C carries
 its own rulers, at every `L` where the construction is interesting.
 
+> ### ⚠⚠⚠ 2026-08-23 — **THE ARGUMENT ABOVE IS OVER-STATED AND ITS CONCLUSION IS FALSE AS WRITTEN** (reader-raised)
+> It says *"the only thing acting transitively on copies is the gauge `(Z₂)^d`"*. That ignores the
+> other factor of `Aut = gauge ⋊ S_L` (§3.3): **`S_L` can carry the relabelling half of transitivity**,
+> so the copy set need only be a single `⟨gauge, S_L⟩`-orbit and the gauge may be a **proper** subgroup.
+> The correct constraint is weaker and sharper:
+>
+> > **The gauge must be an `S_L`-INVARIANT `GF(2)` subspace of the edge space of `K_L`** — else
+> > `gauge ⋊ S_L` is not a group of automorphisms.
+>
+> **That lattice is tiny, and is now computed exactly** (`scratchpad/probe_cao_gauge_lattice.py`, RREF
+> canonical forms so distinct entries are distinct subspaces):
+>
+> | `L` | edge dim | dims of the `S_L`-invariant subspaces | cut-space dim |
+> |---|---|---|---|
+> | 5 | 10 | 0, 1, 4, 5, 5, 6, 9, 10 | 4 |
+> | 6 | 15 | 0, 1, 4, 5, 5, 5, 6, 9, 10, 10, 10, 11, 14, 15 | 5 |
+> | 7 | 21 | 0, 1, 6, 7, 14, 15, 20, 21 | 6 |
+>
+> ⟹ apart from `⟨all-ones⟩` (global complementation, size 2) the **only** gauge below the cycle space
+> is the **cut space, size `2^{L−1}` — Seidel switching**. That is exactly the reader's *"`n!` to
+> obscure gauge order, `2^n` to obscure gauge parity"*, and it is realizable by moving the gauge from
+> the slots to the **labels**: a `Z₂` per label with slot type `g_i ⊕ g_j`, i.e. a CFI-style gadget.
+>
+> **And such an ensemble IS ruler-free.** Measured at **2-WL** — `wl2G` discrete on ordered pairs, the
+> Lean hypothesis; ⚠⚠ 1-WL discreteness is only a **lower bound** on rulers and must not be used for
+> this question — `scratchpad/probe_cao_switching_rulers.py`:
+> `K8 · C8 · K4,4 · Q3` → **0/128** each · `Petersen · K5,5 · K10` → **0/512** · at `L = 16`
+> **`rook(4,4)` → 0/32768 EXHAUSTIVE** (`probe_cao_rook_switching_exhaustive.py`, 116 s) ·
+> `Shrikhande · Clebsch · K16` → 0/400 sampled. ⚠ Not automatic: `C10` → 240/512, `Q4` → 72/400.
+> ⟹ ⛔ **"every instance of Construction C carries its own rulers" is FALSE** — a *designed* copy set
+> can carry none, at every `L` tested. (Closure under `S_L` costs nothing: discreteness is an
+> isomorphism invariant, so the `S_L`-orbit of a ruler-free class is ruler-free.)
+>
+> ★★ **The ruler-free class can even contain the canonical 2-WL-blind pair:** Shrikhande **is** a
+> Seidel switching of `rook(4,4)` — measured, **60 of the 32768** switchings are isomorphic to it.
+>
+> #### ▶ WHAT SURVIVES — and it is the real price
+> The copy set is now **one switching class**, so the fusable pair must differ by a **cut vector**.
+> Measured (`scratchpad/probe_cao_gauge_needed.py`): the smallest `S_L`-invariant gauge *containing* a
+> given difference — i.e. the cheapest ensemble that can carry both members of the pair —
+>
+> | difference `E(G) △ E(G')` | `L=6` | `L=7` | `L=8` |
+> |---|---|---|---|
+> | one edge (**a CFI twist**) | `2^15` = **everything** | `2^21` = **everything** | `2^28` = **everything** |
+> | two edges (a swap) | `2^14` | `2^20` | `2^27` |
+> | a triangle | `2^10` | `2^15` | `2^21` |
+> | a 4-cycle | `2^9` | `2^14` | `2^20` |
+> | a star `δ({v})` — **switching** | `2^5` | `2^6` | `2^7` |
+>
+> ⟹ ★★★ **the gauge is cheap if and only if the pair is Seidel-switching-equivalent.** Any *sparse,
+> local* difference — which is exactly what a CFI twist is — prices the ensemble back at
+> `2^{C(L,2)}`. There is no middle regime, and that is the same shape as §3.2d's non-saturation.
+>
+> ⟹ ⛔ **the escape route is not closed, it is RE-AIMED**, and the obligation is now crisp:
+> **find a ruler-free switching class containing a non-isomorphic pair the ENCODING cannot separate.**
+> The obvious candidate is already refuted — `rook`/`Shrikhande` are switching-equivalent *and*
+> ruler-free, and §4.2 measures the frame encoding **separating** them in all six model rows (`K₄`
+> count 8 vs 0, through §4.3's 4-payload-vertex window). Switching classes of **regular two-graphs**
+> are the natural supply of same-parameter SRG pairs (always 2-WL-equivalent) — and §4.3's window is
+> precisely what kills SRG pairs, while the pairs that survive the encoding (CFI at a higher rung,
+> §6f) are the ones the table above prices at `2^{C(L,2)}`.
+> ⚠ What is **untouched**: (A)'s theorems. They are conditional on a ruler *existing*; this shows the
+> hypothesis can be designed away, which makes (A) **inapplicable** to such a design — it does not make
+> (A) wrong. And §4/§6f still stand between that design and a mixed cell.
+
 #### 6e.4d.3 ▶▶ WHAT (A) WOULD FORCE — ⚠ conditional on (LB), (P1), (P2), none machine-checked
 
 ```

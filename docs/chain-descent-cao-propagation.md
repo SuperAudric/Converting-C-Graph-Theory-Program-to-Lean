@@ -2350,3 +2350,34 @@ setting's `Coherence.phi_determined`), carried as an explicit hypothesis `hφ` a
 the **negative** results do not use it, so no wiring can rescue them.
 ⛔ **This does not refute CAO propagation** — it refutes *this route to it*. `CaoTarget.Separates`
 remains OPEN with no counterexample, exactly as the STATUS table says.
+
+### 16.6 ★ **HOW SMALL CAN A RULER BE?** — two bounds, added 2026-08-23
+
+Asked (user): a directed path is a ruler at any length, and a pendant with a unique individualization
+is a length-1 ruler — so does a *small* ruler supply §16.2's hypothesis cheaply? ⚠ **The question has
+two different answers depending on which setting is meant**, and conflating them is the trap:
+
+**(a) In the bare CAO carrier (`X = Ω`, the setting of §16) — small rulers are exactly the useless
+ones.** Two machine-checked bounds in `RulerCao.lean`:
+
+* `isolated_card_le` — a ruler whose row shows `k` distinct **marks** isolates at most `k` members. A
+  length-2 ruler on a 16-vertex carrier decodes at most two of them.
+* ★★ `cell_card_le` — **a ruler resolves no cell larger than its own.** `ω₀`'s cell surjects onto
+  `ω₂`'s along the thin class, so the transport is a **contraction**;
+  `singleton_transports_to_singleton` is the `card = 1` case. A pendant with a unique
+  individualization is a *singleton* cell, and it resolves only singleton cells.
+
+★ And the user's own reading is exactly right, with one sharpening: the ruler's row
+`b ω₀ = X_v(ω₀, ·)` **is** a 2-WL pair colour, and `Φ` is determined by the tag (`hφ`) — so the ruler
+supplies **no separation whatever**. It is a converter from *"same colour"* to *"same orbit"*, never a
+source of colour. A short ruler does not *resemble* the pairwise path calculations 2-WL already does;
+it **is** them.
+
+**(b) In the attachment setting (`X ≠ Ω` — a ruler bolted onto a carrier) — smallness is not the
+constraint at all**, and the two bounds above do not apply, because the slots are no longer the
+members. The record already measures this: `chain-descent-cao-carrier-falsifiers.md` §6e.4f row 11's
+null control gives **rigid ruler 4/4, cycle 4/4, path 4/4, matching 0/4** — a *symmetric* small ruler
+works as well as a rigid one, and a matching fails. ⟹ the operative property is **cross-pair
+connectivity — each copy reading several cells jointly** — not the ruler's length, rigidity, or the
+injectivity of its reading. That is also the only known way to supply `RulerOrbit.ruler_gauge`'s
+hypothesis on a carrier that lacks it (the `∏Sym(cell)`-closed attachment manufactures a gauge).
